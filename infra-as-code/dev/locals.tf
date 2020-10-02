@@ -1,4 +1,7 @@
 locals {
+  // Project common attributes
+  project_name = "mettel-automation"
+
   // common vars for dev project
   log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   nats_server1 = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:4222"

@@ -50,6 +50,9 @@
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER=${VELOCLOUD_HOST_3_FILTER}
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=${VELOCLOUD_HOST_4}
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=${VELOCLOUD_HOST_4_FILTER}
+    - export TF_VAR_DOCDB_CLUSTER_MASTER_USERNAME=${DOCDB_CLUSTER_MASTER_USERNAME}
+    - export TF_VAR_DOCDB_CLUSTER_MASTER_PASSWORD=${DOCDB_CLUSTER_MASTER_PASSWORD}
+    - apk add zip
     - pip3 install -r ci-utils/ecr/requirements.txt
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -g True -a True -e ${TF_VAR_ENVIRONMENT} -p True
     - envsubst < infra-as-code/dev/init.tf > temp.tf
@@ -58,8 +61,23 @@
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
-    - terraform init infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]; then
+        /bin/bash ci-utils/lambda/lambda-python-package.sh infra-as-code/data-collector/lambdas/rest-api-data-collector/ rest-api-data-collector main.py
+        export TF_VAR_REST_API_DATA_COLLECTOR_AUTH_TOKEN=${REST_API_DATA_COLLECTOR_AUTH_TOKEN}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_COLLECTION=${REST_API_DATA_COLLECTOR_MONGODB_COLLECTION}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_DATABASE=${REST_API_DATA_COLLECTOR_MONGODB_DATABASE}
+        envsubst < infra-as-code/data-collector/init.tf > temp_dc.tf
+        envsubst < infra-as-code/data-collector/variables.tf > temp_vars_dc.tf
+        envsubst < infra-as-code/data-collector/references.tf > temp_references_dc.tf
+        mv temp_dc.tf infra-as-code/data-collector/init.tf
+        mv temp_vars_dc.tf infra-as-code/data-collector/variables.tf
+        mv temp_references_dc.tf infra-as-code/data-collector/references.tf
+        terraform init infra-as-code/data-collector
+        terraform apply -auto-approve infra-as-code/data-collector
+      fi
+#    - terraform init infra-as-code/dev
+#    - terraform apply -auto-approve infra-as-code/dev
   tags:
     - kubernetes
 

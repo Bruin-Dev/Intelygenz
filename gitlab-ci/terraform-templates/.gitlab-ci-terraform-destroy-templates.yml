@@ -30,6 +30,22 @@
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]; then
+        /bin/bash ci-utils/lambda/lambda-python-package.sh infra-as-code/data-collector/lambdas/rest-api-data-collector/ rest-api-data-collector main.py
+        export TF_VAR_REST_API_DATA_COLLECTOR_AUTH_TOKEN=${REST_API_DATA_COLLECTOR_AUTH_TOKEN}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_COLLECTION=${REST_API_DATA_COLLECTOR_MONGODB_COLLECTION}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_DATABASE=${REST_API_DATA_COLLECTOR_MONGODB_DATABASE}
+        envsubst < infra-as-code/data-collector/init.tf > temp_dc.tf
+        envsubst < infra-as-code/data-collector/variables.tf > temp_vars_dc.tf
+        envsubst < infra-as-code/data-collector/references.tf > temp_references_dc.tf
+        mv temp_dc.tf infra-as-code/data-collector/init.tf
+        mv temp_vars_dc.tf infra-as-code/data-collector/variables.tf
+        mv temp_references_dc.tf infra-as-code/data-collector/references.tf
+        terraform init infra-as-code/data-collector
+        terraform refresh infra-as-code/data-collector
+        terraform destroy -auto-approve infra-as-code/data-collector
+      fi
     - python3 ci-utils/delete-environments-aws-resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
     - pip3 install -r ci-utils/ecr/requirements.txt
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -e ${TF_VAR_ENVIRONMENT} -a True -p True
