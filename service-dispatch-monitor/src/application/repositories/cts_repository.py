@@ -1,6 +1,7 @@
 import phonenumbers
 import iso8601
 import pytz
+import re
 from phonenumbers import NumberParseException
 from shortuuid import uuid
 from datetime import datetime
@@ -873,53 +874,53 @@ class CtsRepository:
         return location.strip().replace(f'{field_name}: ', '')
 
     def get_onsite_time_needed(self, dispatch):
-        return self._find_field_in_dispatch_description(dispatch, 'Onsite Time Needed')
+        onsite_time_needed = self._find_field_in_dispatch_description(dispatch, 'Onsite Time Needed')
+
+        current_hour = re.search(" (.*?)\\.", onsite_time_needed).group(1)
+        if 'PM' in onsite_time_needed:
+            if int(current_hour) < 12:
+                new_hour = str(int(current_hour) + 12)
+                onsite_time_needed = onsite_time_needed.replace(f"{current_hour}.", f"{new_hour}.")
+            onsite_time_needed = onsite_time_needed.replace('.', ':').replace('PM', '')
+        elif 'AM' in onsite_time_needed:
+            if int(current_hour) == 12:
+                onsite_time_needed = onsite_time_needed.replace(f"{current_hour}.", "00.")
+            onsite_time_needed = onsite_time_needed.replace('.', ':').replace('AM', '')
+
+        time_stamp_string = f'{onsite_time_needed}:00.00'
+        final_timestamp = datetime.strptime(time_stamp_string, '%Y-%m-%d %H:%M:%S.%f')
+        return final_timestamp
 
     def get_onsite_timezone(self, dispatch):
-        return self._find_field_in_dispatch_description(dispatch, 'Onsite Timezone')
+        onsite_timezone = self._find_field_in_dispatch_description(dispatch, 'Onsite Timezone')
+        time_zone_of_dispatch = onsite_timezone.replace('Time', '').replace(' ', '')
+        final_timezone = timezone(f'US/{time_zone_of_dispatch}')
+        return final_timezone
 
     def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
-        # Convert date to UTC
-        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                          f"- Converting: {dispatch.get('Local_Site_Time__c')} to UTC")
 
         # https://intelygenz.atlassian.net/browse/MET-559
 
-        # format: 2020-09-23 5.00PM
         onsite_time_needed = self.get_onsite_time_needed(dispatch)
-        # format: Pacific Time
         onsite_timezone = self.get_onsite_timezone(dispatch)
+
+        if onsite_time_needed is None or onsite_timezone is None:
+            return None
+
         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                           f"- Time and timezone from description: {onsite_time_needed} - {onsite_timezone}")
-        METHOD_A = False
-        METHOD_B = True
 
-        # Method A
-        if METHOD_A:
-            date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
-            if onsite_timezone != 'Eastern Time':
-                # Convert Local_Site_Time__c to EST
-                final_timezone = timezone(f'US/Eastern')
-                # Remove EST from the timestamp and replace with the onsite_timezone
-                # Convert new timestamp to UTC
-                # TODO: ...
-                pass
-            else:
-                date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-                datetime_formatted_str = date_time_of_dispatch_localized.strftime(self.DATETIME_FORMAT)
+        # Convert date to UTC
+        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                          f"- Converting: {onsite_time_needed} to UTC")
 
-        # Method B
-        if METHOD_B:
-            date_time_of_dispatch_localized = datetime.strptime(onsite_time_needed, "%Y-%m-%d %H:%M")
-            time_zone_of_dispatch = onsite_timezone.replace('Time', '').replace(' ', '')
-            final_timezone = timezone(f'US/{time_zone_of_dispatch}')
-            date_time_of_dispatch_localized = final_timezone.localize(date_time_of_dispatch_localized)
-            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch_localized, pytz.utc)
-            datetime_formatted_str = date_time_of_dispatch_localized.strftime(self.DATETIME_FORMAT)
+        date_time_of_dispatch_localized = onsite_timezone.localize(onsite_time_needed)
+        date_time_of_dispatch_localized = date_time_of_dispatch_localized.astimezone(pytz.utc)
+        datetime_formatted_str = date_time_of_dispatch_localized.strftime(self.DATETIME_FORMAT)
 
         response = {
             'date_time_of_dispatch_localized': date_time_of_dispatch_localized,
-            'timezone': final_timezone,
+            'timezone': onsite_timezone,
             'datetime_formatted_str': datetime_formatted_str
         }
 

@@ -201,14 +201,12 @@ class CtsDispatchMonitor:
                                   f"with IGZ id: {igz_dispatch_number} and status: {dispatch_status}")
                 return
 
-            date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
-            if date_time_of_dispatch is None:
+            datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
+                dispatch, dispatch_number, ticket_id)
+            if datetime_tz_response is None:
                 self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                    f"Could not determine date time of dispatch: {dispatch}")
                 return
-
-            datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
-                dispatch, dispatch_number, ticket_id)
             date_time_of_dispatch_localized = datetime_tz_response['date_time_of_dispatch_localized']
             datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
 
@@ -698,14 +696,14 @@ class CtsDispatchMonitor:
                                   f"with IGZ id: {igz_dispatch_number} and status: {dispatch_status}")
                 return
 
-            date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
-            if date_time_of_dispatch is None:
-                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                  f"Could not determine date time of dispatch: {dispatch}")
-                return
-
             datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
                 dispatch, dispatch_number, ticket_id)
+
+            if datetime_tz_response is None:
+                self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                   f"Could not determine date time of dispatch: {dispatch}")
+                return
+
             datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
 
             self._logger.info(f"Getting details for ticket [{ticket_id}]")
