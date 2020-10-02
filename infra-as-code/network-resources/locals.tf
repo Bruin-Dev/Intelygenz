@@ -16,4 +16,12 @@ locals {
   automation-public-route_table-1b-tag-Name = "mettel-automation-public-route-table-1b-${var.CURRENT_ENVIRONMENT}"
   automation-default-security-group-name = "mettel-automation-default-sg-${var.CURRENT_ENVIRONMENT}"
   automation-default-security_group-tag-Name = "mettel-automation-default-${var.CURRENT_ENVIRONMENT}"
+
+  eks_tags = var.CURRENT_ENVIRONMENT == "dev" ? {
+    format("kubernetes.io/cluster/%s-dev", var.EKS_KRE_BASE_NAME) = "",
+    format("kubernetes.io/cluster/%s-dev", var.EKS_PROJECT_BASE_NAME) = ""
+  }: {
+    format("kubernetes.io/cluster/%s", var.EKS_KRE_BASE_NAME) = "",
+    format("kubernetes.io/cluster/%s", var.EKS_PROJECT_BASE_NAME) = ""
+  }
 }

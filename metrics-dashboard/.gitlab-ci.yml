@@ -16,11 +16,11 @@ grafana-build:
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - metrics-dashboard/grafana/**/*
         - metrics-dashboard/.gitlab-ci.yml
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
 
 prometheus-build:
@@ -35,11 +35,11 @@ prometheus-build:
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - metrics-dashboard/prometheus/**/*
         - metrics-dashboard/.gitlab-ci.yml
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
 
 thanos-sidecar-build:
@@ -51,11 +51,11 @@ thanos-sidecar-build:
     GRPC_PORT: 10091
     HTTP_PORT: 10902
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - metrics-dashboard/thanos/**/*
         - metrics-dashboard/.gitlab-ci.yml
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_thanos_with_config_bucket
 
 thanos-store-gateway-build:

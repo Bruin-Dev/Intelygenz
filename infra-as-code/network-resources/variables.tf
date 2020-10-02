@@ -43,3 +43,23 @@ variable "CURRENT_ENVIRONMENT" {
   description = "Name of the environment to identify the network resources to be used"
   type = "string"
 }
+
+variable "EKS_CLUSTER_NAMES" {
+  description = "Name of the EKS cluster to allow deploy its ELB in the public subnets"
+  default = {
+    "dev" = ["mettel-automation-kre-dev", "mettel-automation-dev"]
+    "production" = ["mettel-automation-kre", "mettel-automation"]
+  }
+}
+
+variable "EKS_KRE_BASE_NAME" {
+  type = string
+  default = "mettel-automation-kre"
+  description = "aa"
+}
+
+variable "EKS_PROJECT_BASE_NAME" {
+  type = string
+  default = "mettel-automation"
+  description = "aa"
+}

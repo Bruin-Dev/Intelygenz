@@ -11,9 +11,5 @@
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
     - pycodestyle --max-line-length=120 ${MODULE}
-  rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes

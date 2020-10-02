@@ -66,9 +66,10 @@ resource "aws_subnet" "automation-public_subnet-1a" {
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = true
 
-  tags = {
+  tags = merge(local.eks_tags, {
     Name = local.automation-public_subnet-1a-tag-Name
-  }
+    "kubernetes.io/role/elb" = ""
+  })
 }
 
 resource "aws_subnet" "automation-public_subnet-1b" {
@@ -77,9 +78,10 @@ resource "aws_subnet" "automation-public_subnet-1b" {
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = true
 
-  tags = {
+  tags = merge(local.eks_tags, {
     Name = local.automation-public_subnet-1b-tag-Name
-  }
+    "kubernetes.io/role/elb" = ""
+  })
 }
 
 /* Private subnet */
