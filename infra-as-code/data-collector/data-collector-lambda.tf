@@ -11,8 +11,6 @@ resource "aws_iam_role_policy" "rest-api-data-collector-role-policy" {
 }
 
 resource "aws_security_group" "data_collector_lambda_sg" {
-  count =   local.count-resources-rest-api-data-collector
-
   name        = local.rest-api-data-collector-lambda-security_group-name
   vpc_id      = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
 
@@ -33,7 +31,7 @@ resource "aws_security_group" "data_collector_lambda_sg" {
 resource "aws_lambda_permission" "data_collector_permission" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.data_collector[0].arn
+  function_name = aws_lambda_function.data_collector.arn
   principal     = "apigateway.amazonaws.com"
 
   # The /*/*/* part allows invocation from any stage, method and resource path
@@ -41,9 +39,18 @@ resource "aws_lambda_permission" "data_collector_permission" {
   source_arn =  "${aws_apigatewayv2_api.data-collector-api-gateway.execution_arn}/*/*/csv"
 }
 
-resource "aws_lambda_function" "data_collector" {
-  count =   local.count-resources-rest-api-data-collector
+resource "aws_lambda_permission" "data_collector_permission_api" {
+  statement_id  = "AllowAPIGatewayInvoke-api"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.data_collector.arn
+  principal     = "apigateway.amazonaws.com"
 
+  # The /*/*/* part allows invocation from any stage, method and resource path
+  # within API Gateway REST API.
+  source_arn =  "${aws_apigatewayv2_api.data-collector-api-gateway.execution_arn}/*/*/api/{proxy+}"
+}
+
+resource "aws_lambda_function" "data_collector" {
   filename      = "${path.module}/lambdas/rest-api-data-collector/rest-api-data-collector.zip"
   function_name = local.rest-api-data-collector-lambda-function_name
   role          = aws_iam_role.rest-api-data-collector-role.arn
@@ -57,22 +64,22 @@ resource "aws_lambda_function" "data_collector" {
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id
     ]
-    security_group_ids = [aws_security_group.data_collector_lambda_sg[0].id]
+    security_group_ids = [aws_security_group.data_collector_lambda_sg.id]
   }
 
   environment {
     variables = {
       AUTH_TOKEN         = var.REST_API_DATA_COLLECTOR_AUTH_TOKEN
       MONGODB_COLLECTION = var.REST_API_DATA_COLLECTOR_MONGODB_COLLECTION
-      MONGODB_DB         = var.REST_API_DATA_COLLECTOR_MONGODB_DATABASE
-      MONGODB_HOST       = aws_docdb_cluster.data_collector_docdb_cluster[0].endpoint
+      MONGODB_DATABASE   = var.REST_API_DATA_COLLECTOR_MONGODB_DATABASE
+      MONGODB_HOST       = aws_docdb_cluster.data_collector_docdb_cluster.endpoint
       MONGODB_USERNAME   = var.DOCDB_CLUSTER_MASTER_USERNAME
       MONGODB_PASSWORD   = var.DOCDB_CLUSTER_MASTER_PASSWORD
       MONGODB_QUERYSTRING = var.REST_API_DATA_COLLECTOR_MONGODB_QUERYSTRING
     }
   }
 
-  depends_on = [null_resource.add_docdb_pem_to_zip_data_collector_lambda[0],
-                aws_docdb_cluster.data_collector_docdb_cluster[0],
-                aws_docdb_cluster_instance.data_collector_docdb_instance[0]]
+  depends_on = [null_resource.add_docdb_pem_to_zip_data_collector_lambda,
+                aws_docdb_cluster.data_collector_docdb_cluster,
+                aws_docdb_cluster_instance.data_collector_docdb_instance]
 }

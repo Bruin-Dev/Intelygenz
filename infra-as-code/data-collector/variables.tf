@@ -11,12 +11,12 @@ variable "docdb_instance_class_data-collector" {
 }
 
 variable "DOCDB_CLUSTER_MASTER_USERNAME" {
-  default = ""
+  default = "mast"
   description = "Username for the master DB user"
 }
 
 variable "DOCDB_CLUSTER_MASTER_PASSWORD" {
-  default = ""
+  default = "test"
   description = "Password for the master DB user"
 }
 
@@ -36,6 +36,6 @@ variable "REST_API_DATA_COLLECTOR_AUTH_TOKEN" {
 }
 
 variable "REST_API_DATA_COLLECTOR_MONGODB_QUERYSTRING" {
-  default = "?ssl=true&ssl_ca_certs=rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
+  default = "ssl=true&ssl_ca_certs=rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
   description = "MongoDB's querystring"
 }

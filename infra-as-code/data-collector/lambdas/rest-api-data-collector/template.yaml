@@ -1,0 +1,27 @@
+Resources:
+  RestApiDataCollector:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rest-api-data-collector
+      Handler: main.handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          AUTH_TOKEN: A1B2C3D4E5F6
+          MONGODB_HOST: host.docker.internal
+          MONGODB_DATABASE: db
+          MONGODB_COLLECTION: data
+          MONGODB_QUERYSTRING:
+          MONGODB_USERNAME: admin
+          MONGODB_PASSWORD: admin
+      Events:
+        Data:
+          Type: Api
+          Properties:
+            Path: /api/{proxy+}
+            Method: ANY
+        CSV:
+          Type: Api
+          Properties:
+            Path: /csv
+            Method: GET

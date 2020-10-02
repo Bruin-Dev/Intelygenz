@@ -9,9 +9,6 @@ locals {
   rest-api-data-collector-lambda-security_group-name = "data-collector-${var.CURRENT_ENVIRONMENT}"
   rest-api-data-collector-lambda-function_name = "data-collector-${var.CURRENT_ENVIRONMENT}"
 
-  // data-collector number of resources
-  count-resources-rest-api-data-collector = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0
-
   // DocumentDB data-collector local vars
   docdb-data-collector-security_group-name = "docdb-data-collector-${var.CURRENT_ENVIRONMENT}"
   docdb-data-collector-subnet_group-name = "docdb-data-collector-${var.CURRENT_ENVIRONMENT}"
