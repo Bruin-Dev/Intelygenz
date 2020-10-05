@@ -299,11 +299,11 @@ class TestCtsRepository:
         assert CtsRepository.get_location(updated_dispatch) == expected_phone
 
     def get_location_from_note_with_address_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+        note = "#*Automation Engine*# IGZ_0001\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
-               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "[S-12345|https://master.mettel-automation.net/dispatch_portal/dispatch/S-12345] \n" \
                "Date of Dispatch: 2020-08-07\n" \
                "Time of Dispatch (Local): 10.00AM\n" \
                "Time Zone (Local): Eastern Time\n\n" \
@@ -327,12 +327,12 @@ class TestCtsRepository:
         expected = None
         assert CtsRepository.get_location_from_note(note) == expected
 
-    def get_location_from_note_with_address_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+    def get_location_from_note_with_no_address_test(self):
+        note = "#*Automation Engine*# IGZ_0001\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
-               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "[S-12345|https://master.mettel-automation.net/dispatch_portal/dispatch/S-12345] \n" \
                "Date of Dispatch: 2020-08-07\n" \
                "Time of Dispatch (Local): 10.00AM\n" \
                "Time Zone (Local): Eastern Time\n\n" \
@@ -350,6 +350,23 @@ class TestCtsRepository:
                "Department: Holmdel Network Engineering"
         expected = None
         assert CtsRepository.get_location_from_note(note) == expected
+
+    def find_field_in_dispatch_description_test(self, cts_repository, cts_dispatch_confirmed):
+        expected = '2020-06-23 03.00PM'
+        expected_2 = 'Pacific Time'
+        assert cts_repository._find_field_in_dispatch_description(cts_dispatch_confirmed,
+                                                                  'Onsite Time Needed') == expected
+        assert cts_repository._find_field_in_dispatch_description(cts_dispatch_confirmed,
+                                                                  'Onsite Timezone') == expected_2
+
+    def find_field_in_dispatch_description_none_description_test(self, cts_repository,
+                                                                 cts_dispatch_confirmed_none_description):
+        expected = None
+        expected_2 = None
+        assert cts_repository._find_field_in_dispatch_description(cts_dispatch_confirmed_none_description,
+                                                                  'Onsite Time Needed') == expected
+        assert cts_repository._find_field_in_dispatch_description(cts_dispatch_confirmed_none_description,
+                                                                  'Onsite Timezone') == expected_2
 
     def get_sms_to_tech_test(self, cts_dispatch_confirmed):
         updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
@@ -1294,10 +1311,10 @@ class TestCtsRepository:
         result = cts_dispatch_monitor._cts_repository.get_igz_dispatch_number(cts_dispatch)
         assert dispatch_number == result
 
-    def get_igz_dispatch_number_not_id_test(self, cts_dispatch_monitor, cts_dispatch):
+    def get_igz_dispatch_number_not_id_test(self, cts_dispatch_monitor, cts_dispatch_no_igz_dispatch_number):
         dispatch_number = None
 
-        result = cts_dispatch_monitor._cts_repository.get_igz_dispatch_number(cts_dispatch)
+        result = cts_dispatch_monitor._cts_repository.get_igz_dispatch_number(cts_dispatch_no_igz_dispatch_number)
         assert dispatch_number == result
 
     @pytest.mark.asyncio

@@ -1245,7 +1245,8 @@ def cts_dispatch():
         'City__c': 'Washington',
         'Confirmed__c': False,
         'Country__c': 'United States',
-        'Description__c': "Onsite Time Needed: Jun 22, 2020 03:00 PM\r\n\r\nReference: 4694961\r\n\r\n"
+        'Description__c': "Onsite Time Needed: 2020-06-23 03.00PM\r\n\r\n"
+                          "Onsite Timezone: Pacific Time\r\n\r\nTime Reference: 4694961\r\n\r\n"
                           "SLA Level: 4-Hour\r\n\r\nLocation Country: United States\r\n\r\n"
                           "Location - US: 1501 K St NW\r\nWashington, DC 20005\r\n\r\n"
                           "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\r\n\r\n"
@@ -1266,7 +1267,8 @@ def cts_dispatch():
                           "TeamViewer installed, other IW tools (CAT5e, punch down, wall jacks, "
                           "telecom standard toolkit)\r\n\r\n"
                           "Service Category: Troubleshoot\r\n\r\nName: Brad Gunnell\r\n\r\n"
-                          "Phone: (877) 515-0911\r\n\r\nEmail: t1repair@mettel.net",
+                          "Phone: (877) 515-0911\r\n\r\nEmail: t1repair@mettel.net\r\n\r\n"
+                          "IGZ Dispatch Number: IGZ_0001",
         'Duration_Onsite__c': 0.6,
         'Early_Start__c': None,
         'Ext_Ref_Num__c': '4694961',
@@ -1298,6 +1300,14 @@ def cts_dispatch():
         'Service_Type__c': 'a251C000005Ics1QAC',
         'Zip__c': '20005'
     }
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_no_igz_dispatch_number(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('IGZ Dispatch Number: IGZ_0001',
+                                                                                    'NO IGZ ID')
+    return updated_dispatch
 
 
 @pytest.fixture(scope='function')
@@ -1353,6 +1363,15 @@ def cts_dispatch_confirmed_skipped(cts_dispatch_monitor, cts_dispatch):
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_confirmed_none_description(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['Description__c'] = None
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_confirmed_skipped_datetime(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
@@ -1362,6 +1381,9 @@ def cts_dispatch_confirmed_skipped_datetime(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
     updated_dispatch['Local_Site_Time__c'] = None
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Onsite Time Needed: 2020-06-23 03.00PM', 'Onsite Time Needed: BAD'
+    )
 
     return updated_dispatch
 
@@ -1457,7 +1479,37 @@ def cts_dispatch_confirmed_2(cts_dispatch_monitor, cts_dispatch_confirmed):
     updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['Name'] = 'S-12346'
     updated_dispatch['Ext_Ref_Num__c'] = '123456'
-
+    updated_dispatch['Description__c'] = "Onsite Time Needed: 2020-06-23 03.00AM\r\n\r\n" \
+                                         "Onsite Timezone: Pacific\r\n\r\nTime Reference: 4694961\r\n\r\n" \
+                                         "SLA Level: 4-Hour\r\n\r\nLocation Country: United States\r\n\r\n" \
+                                         "Location - US: 1501 K St NW\r\nWashington, DC 20005\r\n\r\n" \
+                                         "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\r\n\r\n" \
+                                         "Location Owner: Premier Financial Bancorp\r\n\r\n" \
+                                         "Onsite Contact: Manager On Duty\r\n\r\n" \
+                                         "Contact #: (202) 772-3610\r\n\r\n" \
+                                         "Failure Experienced: Comcast cable internet circuit is down. " \
+                                         "Comcast shows the modem offline without cause.\r\n" \
+                                         "Basic troubleshooting already done including" \
+                                         " power cycling of the VCE and modem. " \
+                                         "Client added it's showing red led on the VCE cloud.\r\n" \
+                                         "Need to check the cabling and check out " \
+                                         "the Velo device and see if it needs replaced." \
+                                         "\r\n\r\nStatic IP Address 50.211.140.109\r\n" \
+                                         "Static IP Block 50.211.140.108/30\r\n" \
+                                         "Gateway IP 50.211.140.110\r\nSubnet Mask 255.255.255.252\r\n" \
+                                         "Primary DNS 75.75.75.75\r\n" \
+                                         "Secondary DNS 75.75.76.76\r\n\r\n\r\n" \
+                                         "Onsite SOW: phone # 877-515-0911 and email address for" \
+                                         " pictures to be sent to " \
+                                         "T1repair@mettel.net\r\n\r\nLCON: Mgr on Duty\r\n" \
+                                         "Phone: (202) 772-3610\r\nAcccess: M-F 9AM-5PM\r\n\r\n" \
+                                         "Materials Needed: Laptop, Ethernet cable, console cable, " \
+                                         "Jetpack/Mobile Hotspot, " \
+                                         "TeamViewer installed, other IW tools (CAT5e, punch down, wall jacks, " \
+                                         "telecom standard toolkit)\r\n\r\n" \
+                                         "Service Category: Troubleshoot\r\n\r\nName: Brad Gunnell\r\n\r\n" \
+                                         "Phone: (877) 515-0911\r\n\r\nEmail: t1repair@mettel.net\r\n\r\n" \
+                                         "IGZ Dispatch Number: IGZ_0002"
     updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #: (202) 772-3610',
                                                                                     'Contact #: (202) 772-3611')
 
@@ -1524,6 +1576,9 @@ def cts_dispatch_cts_dispatch_cancelled_bad_datetime(cts_dispatch_monitor, cts_d
     updated_dispatch = copy.deepcopy(cts_dispatch_cancelled)
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
     updated_dispatch['Local_Site_Time__c'] = None
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Onsite Time Needed: 2020-06-23 03.00PM', 'Onsite Time Needed: BAD'
+    )
     return updated_dispatch
 
 
@@ -1533,6 +1588,9 @@ def cts_dispatch_tech_on_site_bad_datetime(cts_dispatch_monitor, cts_dispatch_co
     updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
     updated_dispatch['Local_Site_Time__c'] = None
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Onsite Time Needed: 2020-06-23 03.00PM', 'Onsite Time Needed: BAD'
+    )
     return updated_dispatch
 
 

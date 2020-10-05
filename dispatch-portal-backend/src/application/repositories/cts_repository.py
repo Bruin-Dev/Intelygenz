@@ -12,9 +12,10 @@ class CtsRepository:
         self._event_bus = event_bus
         self._notifications_repository = notifications_repository
         self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+        self.DISPATCH_CONFIRMED = 'Scheduled'
 
     def _find_field_in_dispatch_description(self, dispatch, field_name):
-        description = dispatch.get('Description__c')
+        description = '' if not dispatch.get('Description__c') else dispatch.get('Description__c')
         description_lines = description.splitlines()
         field = None
         for line in description_lines:
@@ -27,7 +28,8 @@ class CtsRepository:
 
     def get_onsite_time_needed(self, dispatch):
         onsite_time_needed = self._find_field_in_dispatch_description(dispatch, 'Onsite Time Needed')
-
+        if not onsite_time_needed:
+            return None
         # onsite time needed format: '2020-06-21 4.00PM', check the '.' and not ':'
         regex_result = re.search(" (.*?)\\.", onsite_time_needed)
         if regex_result:
@@ -51,17 +53,23 @@ class CtsRepository:
 
     def get_onsite_timezone(self, dispatch):
         onsite_timezone = self._find_field_in_dispatch_description(dispatch, 'Onsite Timezone')
+        if not onsite_timezone:
+            return None
         time_zone_of_dispatch = onsite_timezone.replace('Time', '').replace(' ', '')
         final_timezone = timezone(f'US/{time_zone_of_dispatch}')
         return final_timezone
 
     def get_dispatch_confirmed_date_time_localized(self, dispatch):
         # https://intelygenz.atlassian.net/browse/MET-559
+        dispatch_number = dispatch.get('Name', None)
+        ticket_id = dispatch.get('Ext_Ref_Num__c', None)
 
         onsite_time_needed = self.get_onsite_time_needed(dispatch)
         onsite_timezone = self.get_onsite_timezone(dispatch)
 
         if onsite_time_needed is None or onsite_timezone is None:
+            self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                              f"- Error: Time and timezone from description: {onsite_time_needed} - {onsite_timezone}")
             return None
 
         self._logger.info(f"- Time and timezone from description: {onsite_time_needed} - {onsite_timezone}")

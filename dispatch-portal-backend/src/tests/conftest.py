@@ -359,6 +359,76 @@ def cts_dispatch_mapped():
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_confirmed(cts_repository, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch['records'][0])
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_2(cts_repository, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch['records'][0])
+    updated_dispatch['Name'] = 'S-147735'
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Onsite Time Needed: 2020-06-21 4.00PM', 'Onsite Time Needed: 2020-06-21 4.00AM'
+    )
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_3(cts_repository, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch['records'][0])
+    updated_dispatch['Name'] = 'S-147735'
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Onsite Time Needed: 2020-06-21 4.00PM', 'Onsite Time Needed: 2020-06-21 12.00AM'
+    )
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_none_description(cts_repository, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Status__c'] = cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['Description__c'] = None
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_bad_date(cts_repository, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Status__c'] = cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['Description__c'] = 'No Date'
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_empty_address(cts_repository, cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch['Status__c'] = cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Onsite Time Needed: 2020-06-21 4.00PM', 'Onsite Time Needed: '
+    )
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_mapped_without_record(cts_dispatch_mapped):
     updated_cts_dispatch_mapped = copy.deepcopy(cts_dispatch_mapped)
     del updated_cts_dispatch_mapped['records']

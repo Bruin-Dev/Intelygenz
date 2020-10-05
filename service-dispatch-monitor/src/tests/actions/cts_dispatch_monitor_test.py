@@ -408,7 +408,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
                                                 cts_dispatch_not_confirmed,
-                                                cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
+                                                cts_dispatch_confirmed_2,
                                                 cts_ticket_details_1,
                                                 append_note_response, append_note_response_2,
                                                 sms_success_response, sms_success_response_2):
@@ -428,66 +428,27 @@ class TestCtsDispatchMonitor:
             'status': 200
         }
 
-        response_sms_note_1 = {
-            'request_id': uuid_,
-            'body': sms_success_response,
-            'status': 200
-        }
-        response_sms_note_2 = {
-            'request_id': uuid_,
-            'body': sms_success_response_2,
-            'status': 200
-        }
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
         sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = f'#*Automation Engine*# \n' \
-                     f'Dispatch confirmation SMS sent to +12027723611\n'
         sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
-                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = f'#*Automation Engine*# \n' \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
-        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
-        dispatch_number_3 = cts_dispatch_confirmed_no_main_watermark.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        ticket_id_3 = cts_dispatch_confirmed_no_main_watermark.get('Ext_Ref_Num__c')
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
-        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-        time_3 = cts_dispatch_confirmed_no_main_watermark.get('Local_Site_Time__c')
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = f'#*Automation Engine*# \n' \
-                           'Dispatch Management - Dispatch Confirmed\n' \
-                           f'Dispatch scheduled for {time_2}\n\n' \
-                           'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
 
         sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-        sms_to_3 = '+12027723611'
-
         sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-        sms_to_3_tech = '+12123595129'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
-        # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        sms_data = ''
-
-        responses_details_mock = [
-            cts_ticket_details_1,
-        ]
         responses_append_notes_mock = [
             response_append_note_1,
             response_append_note_2,
@@ -520,20 +481,12 @@ class TestCtsDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
-        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
-                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
                            f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
         slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
                                 f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
                                 f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
-        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
-                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
-        slack_msg_tech_note_2 = f"[service-dispatch-monitor] [CTS] " \
-                                f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                                f"Confirmed SMS tech note not appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
@@ -594,16 +547,6 @@ class TestCtsDispatchMonitor:
             'status': 200
         }
 
-        response_sms_note_1 = {
-            'request_id': uuid_,
-            'body': sms_success_response,
-            'status': 200
-        }
-        response_sms_note_2 = {
-            'request_id': uuid_,
-            'body': sms_success_response_2,
-            'status': 200
-        }
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
         sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
@@ -626,8 +569,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -803,8 +746,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -1003,7 +946,7 @@ class TestCtsDispatchMonitor:
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1121,7 +1064,7 @@ class TestCtsDispatchMonitor:
 
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1
@@ -1218,8 +1161,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1
@@ -1308,8 +1251,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 PM UTC'
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -1402,7 +1345,7 @@ class TestCtsDispatchMonitor:
         tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1522,8 +1465,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         sms_to = '+12027723610'
 
@@ -1679,8 +1622,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1,
@@ -1826,8 +1769,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1964,7 +1907,7 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_and_outdated_tech_note,
@@ -2114,14 +2057,14 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
         cts_dispatch_confirmed_2['Name'] = 'IGZ_0002'
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
         tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         tech_phone_2 = cts_dispatch_confirmed_2.get('Resource_Phone_Number__c')
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_and_outdated_tech_note,
@@ -2311,7 +2254,7 @@ class TestCtsDispatchMonitor:
         sms_to = '+12027723610'
         sms_to_tech = '+12123595129'
         # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -2368,7 +2311,7 @@ class TestCtsDispatchMonitor:
         sms_data_payload_client = {
             'sms_to': '12027723610',
             'sms_data': 'This is an automated message from MetTel.\n\n'
-                        'A field engineer will arrive in 12 hours, Jun 23, 2020 @ 01:00 PM UTC, at your location.\n\n'
+                        'A field engineer will arrive in 12 hours, Jun 23, 2020 @ 10:00 PM UTC, at your location.\n\n'
                         'You will receive a text message at this number when they have arrived.\n'
         }
         sms_payload_tech = {
@@ -2381,7 +2324,7 @@ class TestCtsDispatchMonitor:
         sms_data_payload_tech = {
             'sms_to': '12027723610',
             'sms_data': 'This is an automated message from MetTel.\n\n'
-                        'You have a dispatch coming up in 12 hours, Jun 23, 2020 @ 01:00 PM UTC.\n'
+                        'You have a dispatch coming up in 12 hours, Jun 23, 2020 @ 10:00 PM UTC.\n'
                         'For Premier Financial Bancorp at 1501 K St NW\n'
         }
         sms_note = f'#*Automation Engine*# IGZ_0001\nDispatch 12h prior reminder SMS sent to +12027723610\n'
@@ -3874,7 +3817,7 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_1 = 'IGZ_0001'
         dispatch_number_1 = cts_dispatch_cancelled.get('Name')
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
-        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         responses_append_dispatch_cancelled_note_mock = [
             True
@@ -3889,8 +3832,7 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         for canceled_dispatch in cancelled_dispatches:
-            await cts_dispatch_monitor._process_canceled_dispatch(
-                canceled_dispatch, 'IGZ_0001', ticket_notes_1)
+            await cts_dispatch_monitor._process_canceled_dispatch(canceled_dispatch, 'IGZ_0001', ticket_notes_1)
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
@@ -3963,7 +3905,7 @@ class TestCtsDispatchMonitor:
         ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
         ticket_notes_2 = []
 
-        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 10:00 PM UTC'
 
         responses_append_dispatch_cancelled_note_mock = [
             True
@@ -4042,7 +3984,7 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_1 = 'IGZ_0001'
         dispatch_number_1 = cts_dispatch_cancelled.get('Name')
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
-        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 10:00 PM UTC'
         ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
 
         responses_append_dispatch_cancelled_note_mock = [

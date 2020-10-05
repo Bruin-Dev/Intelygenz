@@ -194,6 +194,7 @@ class CtsDispatchMonitor:
 
             datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
                 dispatch, dispatch_number, ticket_id)
+
             if datetime_tz_response is None:
                 self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                    f"Could not determine date time of dispatch: {dispatch}")
