@@ -509,9 +509,7 @@ class DispatchServer:
         dispatch = response['body']['records'][0]
 
         datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(dispatch)
-        datetime_formatted_str = ''
-        if datetime_tz_response is not None:
-            datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
+        datetime_formatted_str = datetime_tz_response['datetime_formatted_str'] if datetime_tz_response else ''
 
         response_dispatch['id'] = dispatch.get('Name') if dispatch.get('Name') else dispatch_number
         response_dispatch['vendor'] = 'cts'
@@ -554,9 +552,7 @@ class DispatchServer:
         response_dispatch['list_dispatch'] = []
         for d in all_dispatches:
             datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(d)
-            datetime_formatted_str = ''
-            if datetime_tz_response is not None:
-                datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
+            datetime_formatted_str = datetime_tz_response['datetime_formatted_str'] if datetime_tz_response else ''
             response_dispatch['list_dispatch'].append(cts_mapper.map_get_dispatch(d, datetime_formatted_str))
 
         return jsonify(response_dispatch), response["status"], None
@@ -705,8 +701,7 @@ class DispatchServer:
                               f"already has a requested cancel dispatch note")
         else:
 
-            datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
-                dispatch, dispatch_number, ticket_id)
+            datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(dispatch)
             datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
 
             body = {

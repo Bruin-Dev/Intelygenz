@@ -16,19 +16,25 @@ class CtsRepository:
     def _find_field_in_dispatch_description(self, dispatch, field_name):
         description = dispatch.get('Description__c')
         description_lines = description.splitlines()
-        location = None
+        field = None
         for line in description_lines:
             if line and len(line) > 0 and field_name in line:
-                location = ''.join(ch for ch in line)
+                field = ''.join(ch for ch in line)
                 break
-        if location is None or location.strip() == '':
+        if field is None or field.strip() == '':
             return None
-        return location.strip().replace(f'{field_name}: ', '')
+        return field.strip().replace(f'{field_name}: ', '')
 
     def get_onsite_time_needed(self, dispatch):
         onsite_time_needed = self._find_field_in_dispatch_description(dispatch, 'Onsite Time Needed')
 
-        current_hour = re.search(" (.*?)\\.", onsite_time_needed).group(1)
+        # onsite time needed format: '2020-06-21 4.00PM', check the '.' and not ':'
+        regex_result = re.search(" (.*?)\\.", onsite_time_needed)
+        if regex_result:
+            current_hour = regex_result.group(1)
+        else:
+            return None
+
         if 'PM' in onsite_time_needed:
             if int(current_hour) < 12:
                 new_hour = str(int(current_hour) + 12)

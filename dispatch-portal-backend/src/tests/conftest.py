@@ -206,7 +206,7 @@ def cts_dispatch():
             'City__c': 'San Francisco',
             'Confirmed__c': False,
             'Country__c': None,
-            'Description__c': 'Onsite Time Needed: 2020-06-21 4:00PM\r\nOnsite Timezone: Pacific Time\r\n'
+            'Description__c': 'Onsite Time Needed: 2020-06-21 4.00PM\r\nOnsite Timezone: Pacific Time\r\n'
                               'Reference: 4680743\r\nSLA Level: 4-hour\r\nLocation Country: United States\r\n'
                               'Location: Hayes Valley Inn, San Francisco, CA, 94102\r\n\r\n'
                               'Location ID: Test Location\r\nLocation Owner: Hayes Valley Inn\r\n'
@@ -215,7 +215,7 @@ def cts_dispatch():
                               'Onsite SOW: This is a TEST\r\n'
                               'Materials Needed: Laptop, cable, tuner, ladder, internet hotspot\r\n'
                               'Service Category: Part Replacement\r\nName: Karen Doe\r\nPhone: +1 666 666 6666\r\n'
-                              'Email: karen.doe@mettel.net',
+                              'Email: karen.doe@mettel.net\r\nIGZ Dispatch Number: IGZ_0001',
             'Duration_Onsite__c': None,
             'Early_Start__c': '2020-06-21T23:00:00.000+0000',
             'Ext_Ref_Num__c': '4680743',
@@ -279,7 +279,7 @@ def cts_dispatch_mapped():
             "city__c": "San Francisco",
             "confirmed__c": False,
             "country__c": None,
-            "description__c": "Onsite Time Needed: 2020-06-21 4:00PM\r\n"
+            "description__c": "Onsite Time Needed: 2020-06-21 4.00PM\r\n"
                               "Onsite Timezone: Pacific Time\r\nReference: 4680743\r\n"
                               "SLA Level: 4-hour\r\nLocation Country: United States\r\n"
                               "Location: Hayes Valley Inn, San Francisco, CA, 94102\r\n\r\n"
@@ -289,7 +289,8 @@ def cts_dispatch_mapped():
                               "Onsite SOW: This is a TEST\r\n"
                               "Materials Needed: Laptop, cable, tuner, ladder, internet hotspot\r\n"
                               "Service Category: Part Replacement\r\nName: Karen Doe\r\n"
-                              "Phone: +1 666 666 6666\r\nEmail: karen.doe@mettel.net",
+                              "Phone: +1 666 666 6666\r\nEmail: karen.doe@mettel.net\r\n"
+                              "IGZ Dispatch Number: IGZ_0001",
             "duration_onsite__c": None,
             "early_start__c": "2020-06-21T23:00:00.000+0000",
             "ext_ref_num__c": "4680743",
@@ -352,7 +353,7 @@ def cts_dispatch_mapped():
             "resource_trained__c": False,
             "service_type__c": "a250n000000PMQ2AAO",
             "zip__c": "94102",
-            'date_of_dispatch': 'Jun 21, 2020 @ 08:00 PM UTC'
+            'date_of_dispatch': 'Jun 21, 2020 @ 11:00 PM UTC'
         }]
     }
 
