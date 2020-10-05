@@ -4,7 +4,6 @@ import time
 
 from datetime import datetime
 from datetime import timedelta
-from typing import NoReturn
 from typing import Set
 
 from apscheduler.util import undefined
@@ -71,24 +70,28 @@ class Triage:
         self._logger.info(
             f'Got all {len(open_tickets)} open tickets for all customers. '
             f'Filtering them to get only the ones under the device list')
-        relevant_open_tickets = self._filter_tickets_related_to_edges_under_monitoring(open_tickets)
-        self._logger.info(f'Got all {len(relevant_open_tickets)} relevant tickets for all customers.')
+        relevant_open_tickets = self._filter_tickets_and_details_related_to_edges_under_monitoring(open_tickets)
+        self._logger.info(
+            f'Got {len(relevant_open_tickets)} relevant tickets for all customers. '
+            f'Cleaning them up to exclude all invalid notes...'
+        )
+        relevant_open_tickets = self._filter_irrelevant_notes_in_tickets(relevant_open_tickets)
 
         self._logger.info(f'Splitting relevant tickets in tickets with and without triage...')
-        tickets_with_triage, tickets_without_triage = self._distinguish_tickets_with_and_without_triage(
+        details_with_triage, details_without_triage = self._get_ticket_details_with_and_without_triage(
             relevant_open_tickets)
 
-        self._logger.info(f'Tickets split successfully. '
-                          f'Tickets with triage: {len(tickets_with_triage)}. '
-                          f'Tickets without triage: {len(tickets_without_triage)}. '
-                          'Processing both ticket sets...')
+        self._logger.info(f'Ticket details split successfully. '
+                          f'Ticket details with triage: {len(details_with_triage)}. '
+                          f'Ticket details without triage: {len(details_without_triage)}. '
+                          'Processing both sets...')
         edges_data_by_serial: dict = {
             elem['serial_number']: {'edge_id': elem['edge']}
             for elem in self._customer_cache
         }
         await asyncio.gather(
-            self._process_tickets_with_triage(tickets_with_triage, edges_data_by_serial),
-            self._process_tickets_without_triage(tickets_without_triage, edges_data_by_serial),
+            self._process_ticket_details_with_triage(details_with_triage, edges_data_by_serial),
+            self._process_ticket_details_without_triage(details_without_triage, edges_data_by_serial),
         )
         self._logger.info(f'Triage process finished! took {time.time() - total_start_time} seconds')
 
@@ -140,7 +143,7 @@ class Triage:
 
                     result.append({
                         'ticket_id': ticket_id,
-                        'ticket_detail': ticket_details_list[0],
+                        'ticket_details': ticket_details_list,
                         'ticket_notes': ticket_details_response_body['ticketNotes'],
                     })
 
@@ -155,99 +158,163 @@ class Triage:
                 f"An error occurred while trying to get open tickets with details for Bruin client {client_id} -> {e}"
             )
 
-    def _filter_tickets_related_to_edges_under_monitoring(self, tickets):
+    def _filter_tickets_and_details_related_to_edges_under_monitoring(self, tickets):
         serials_under_monitoring: Set[str] = set(elem['serial_number'] for elem in self._customer_cache)
 
-        return [
-            ticket
-            for ticket in tickets
-            if ticket['ticket_detail']['detailValue'] in serials_under_monitoring
-        ]
-
-    def _distinguish_tickets_with_and_without_triage(self, tickets) -> tuple:
-        tickets_with_triage = []
+        relevant_tickets = []
         for ticket in tickets:
-            self._logger.info(f'Checking if ticket {ticket["ticket_id"]} has a triage note already...')
-            for note in ticket['ticket_notes']:
-                try:
-                    if type(note['noteValue']) != str:
-                        self._logger.info(f'Type of note value is {type(note["noteValue"])} and the content is'
-                                          f' {note["noteValue"]}')
-                        continue
-                    if self.__triage_note_regex.match(note['noteValue']):
-                        self._logger.info(f'Ticket {ticket["ticket_id"]} has a triage already!')
-                        tickets_with_triage.append(ticket)
-                        break
-                except Exception as ex:
-                    self._logger.error("An error occurred while distinguishing tickets with and without triage. Note"
-                                       f"causing trouble was {note}")
-                    self._logger.error(ex)
-        tickets_without_triage = [
-            ticket
-            for ticket in tickets
-            if ticket not in tickets_with_triage
-        ]
+            ticket_details = ticket['ticket_details']
 
-        return tickets_with_triage, tickets_without_triage
+            relevant_details = [
+                detail
+                for detail in ticket_details
+                if detail['detailValue'] in serials_under_monitoring
+            ]
 
-    async def _process_tickets_with_triage(self, tickets, edges_data_by_serial):
-        self._logger.info('Processing tickets with triage...')
+            if not relevant_details:
+                # Having no relevant details means the ticket is not relevant either
+                continue
 
-        self._discard_non_triage_notes(tickets)
+            relevant_tickets.append({
+                'ticket_id': ticket['ticket_id'],
+                'ticket_details': relevant_details,
+                'ticket_notes': ticket['ticket_notes'],
+            })
+
+        return relevant_tickets
+
+    def _filter_irrelevant_notes_in_tickets(self, tickets):
+        serials_under_monitoring: Set[str] = set(elem['serial_number'] for elem in self._customer_cache)
+
+        sanitized_tickets = []
 
         for ticket in tickets:
-            self._logger.info(f'Checking if events need to be appended to ticket with triage {ticket["ticket_id"]}...')
-            newest_triage_note = self._get_most_recent_ticket_note(ticket)
+            relevant_notes = [
+                note
+                for note in ticket['ticket_notes']
+                if note['noteValue'] is not None
+                if bool(self.__triage_note_regex.match(note['noteValue']))
+            ]
+
+            for index, note in enumerate(relevant_notes):
+                service_numbers_in_note = set(note['serviceNumber'])
+                relevant_service_numbers = serials_under_monitoring & service_numbers_in_note
+
+                if not relevant_service_numbers:
+                    del relevant_notes[index]
+                else:
+                    relevant_notes[index]['serviceNumber'] = list(relevant_service_numbers)
+
+            sanitized_tickets.append({
+                'ticket_id': ticket['ticket_id'],
+                'ticket_details': ticket['ticket_details'],
+                'ticket_notes': relevant_notes,
+            })
+
+        return sanitized_tickets
+
+    def _get_ticket_details_with_and_without_triage(self, tickets) -> tuple:
+        ticket_details_with_triage = []
+        ticket_details_without_triage = []
+
+        for ticket in tickets:
+            ticket_id = ticket['ticket_id']
+            ticket_details = ticket['ticket_details']
+            ticket_notes = ticket['ticket_notes']
+
+            if not ticket_notes:
+                ticket_details_without_triage += [
+                    {'ticket_id': ticket_id, 'ticket_detail': detail}
+                    for detail in ticket_details
+                ]
+                continue
+
+            ticket_details_by_service_number = {
+                detail['detailValue']: detail
+                for detail in ticket_details
+            }
+
+            ticket_details_with_triage_by_serial = {}
+            for triage_note in ticket_notes:
+                service_numbers_in_triage_note: list = triage_note['serviceNumber']
+
+                for service_number in service_numbers_in_triage_note:
+                    ticket_detail_associated = ticket_details_by_service_number[service_number]
+
+                    ticket_details_with_triage_by_serial.setdefault(
+                        service_number,
+                        {'ticket_id': ticket_id, 'ticket_detail': ticket_detail_associated, 'ticket_notes': []}
+                    )
+
+                    ticket_details_with_triage_by_serial[service_number]['ticket_notes'].append(triage_note)
+
+            ticket_details_with_triage += list(ticket_details_with_triage_by_serial.values())
+
+            all_service_numbers_in_ticket = set(ticket_details_by_service_number.keys())
+            service_numbers_with_triage = set(ticket_details_with_triage_by_serial.keys())
+            service_numbers_without_triage = all_service_numbers_in_ticket - service_numbers_with_triage
+            if service_numbers_without_triage:
+                ticket_details_without_triage += [
+                    {'ticket_id': ticket_id, 'ticket_detail': ticket_details_by_service_number[service_number]}
+                    for service_number in service_numbers_without_triage
+                ]
+
+        return ticket_details_with_triage, ticket_details_without_triage
+
+    async def _process_ticket_details_with_triage(self, ticket_details, edges_data_by_serial):
+        self._logger.info('Processing ticket details with triage...')
+
+        for detail in ticket_details:
+            ticket_id = detail['ticket_id']
+            ticket_detail_id = detail['ticket_detail']['detailID']
+            serial_number = detail['ticket_detail']['detailValue']
+
+            self._logger.info(f'Processing detail {ticket_detail_id} with triage of ticket {ticket_id}...')
+
+            self._logger.info(
+                f'Checking if events need to be appended to detail {ticket_detail_id} of ticket {ticket_id}...'
+            )
+            newest_triage_note = self._get_most_recent_ticket_note(detail)
 
             if self._was_ticket_note_appended_recently(newest_triage_note):
-                self._logger.info(f'The last triage note was appended to ticket {ticket["ticket_id"]} not long ago so '
-                                  'no new triage note will be appended for now')
+                self._logger.info(
+                    f'The last triage note was appended to detail {ticket_detail_id} of ticket '
+                    f'{ticket_id} not long ago so no new triage note will be appended for now'
+                )
                 continue
-            self._logger.info(f'Appending events to ticket {ticket["ticket_id"]}...')
 
-            ticket_id = ticket['ticket_id']
-            serial_number = ticket['ticket_detail']['detailValue']
+            self._logger.info(f'Appending events to detail {ticket_detail_id} of ticket {ticket_id}...')
+
             newest_triage_note_timestamp = newest_triage_note['createdDate']
             edge_data = edges_data_by_serial[serial_number]
 
-            await self._append_new_triage_notes_based_on_recent_events(
-                ticket_id, newest_triage_note_timestamp, edge_data
-            )
-            self._logger.info(f'Events appended to ticket {ticket["ticket_id"]}!')
+            await self._append_new_triage_notes_based_on_recent_events(detail, newest_triage_note_timestamp, edge_data)
+            self._logger.info(f'Events appended to detail {ticket_detail_id} of ticket {ticket_id}!')
             self._metrics_repository.increment_tickets_with_triage_processed()
 
-        self._logger.info('Finished processing tickets with triage!')
+            self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
 
-    def _discard_non_triage_notes(self, tickets) -> NoReturn:
-        for ticket in tickets:
-            ticket_notes = ticket['ticket_notes']
+        self._logger.info('Finished processing ticket details with triage!')
 
-            for index, note in enumerate(ticket['ticket_notes']):
-                try:
-                    if type(note['noteValue']) != str:
-                        self._logger.info(f'Type of note value is {type(note["noteValue"])} '
-                                          f'and the content is {note["noteValue"]}')
-                        continue
-                    is_triage_note = bool(self.__triage_note_regex.match(note['noteValue']))
-                    if not is_triage_note:
-                        del ticket_notes[index]
-                except Exception as ex:
-                    self._logger.error("An error occurred while discarding notes not matching triage format. Note "
-                                       f"causing troubles was {note}")
-                    self._logger.error(ex)
-
-    def _get_most_recent_ticket_note(self, ticket):
-        sorted_notes = sorted(ticket['ticket_notes'], key=lambda note: note['createdDate'])
+    @staticmethod
+    def _get_most_recent_ticket_note(ticket_detail):
+        sorted_notes = sorted(ticket_detail['ticket_notes'], key=lambda note: note['createdDate'])
         return sorted_notes[-1]
 
-    def _was_ticket_note_appended_recently(self, ticket_note):
+    @staticmethod
+    def _was_ticket_note_appended_recently(ticket_note):
         current_datetime = datetime.now(utc)
         ticket_note_creation_datetime = parse(ticket_note['createdDate']).astimezone(utc)
 
         return (current_datetime - ticket_note_creation_datetime) <= timedelta(minutes=30)
 
-    async def _append_new_triage_notes_based_on_recent_events(self, ticket_id, last_triage_timestamp: str, edge_data):
-        self._logger.info(f'Appending new triage note to ticket {ticket_id}...')
+    async def _append_new_triage_notes_based_on_recent_events(self, ticket_detail, last_triage_timestamp: str,
+                                                              edge_data):
+        ticket_id = ticket_detail['ticket_id']
+        ticket_detail_id = ticket_detail['ticket_detail']['detailID']
+        service_number = ticket_detail['ticket_detail']['detailValue']
+
+        self._logger.info(f'Appending new triage note to detail {ticket_detail_id} of ticket {ticket_id}...')
 
         working_environment = self._config.TRIAGE_CONFIG['environment']
 
@@ -255,7 +322,10 @@ class Triage:
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         last_triage_datetime = parse(last_triage_timestamp).astimezone(utc)
-        self._logger.info(f'Getting events for edge related to ticket {ticket_id} before applying triage...')
+        self._logger.info(
+            f'Getting events for serial {service_number} (detail {ticket_detail_id}) in ticket '
+            f'{ticket_id} before applying triage...'
+        )
 
         recent_events_response = await self._velocloud_repository.get_last_edge_events(
             edge_full_id, since=last_triage_datetime
@@ -268,8 +338,9 @@ class Triage:
 
         if not recent_events_response_body:
             self._logger.info(
-                f'No events were found for edge {edge_identifier} starting from {last_triage_timestamp}. '
-                f'Not appending any new triage notes to ticket {ticket_id}.'
+                f'No events were found for edge {edge_identifier} (serial: {service_number}) starting from '
+                f'{last_triage_timestamp}. Not appending any new triage notes to detail {ticket_detail_id} of '
+                f'ticket {ticket_id}.'
             )
             return
 
@@ -280,24 +351,27 @@ class Triage:
             triage_note_contents = self._triage_repository.build_events_note(chunk)
 
             if working_environment == 'production':
-                response = await self._bruin_repository.append_note_to_ticket(ticket_id, triage_note_contents)
+                response = await self._bruin_repository.append_note_to_ticket(
+                    ticket_id, triage_note_contents, service_numbers=[service_number]
+                )
                 if response['status'] == 503:
                     self._metrics_repository.increment_note_append_errors()
 
                 if response['status'] not in range(200, 300):
                     continue
 
-                self._logger.info(f'Triage appended to ticket {ticket_id}!')
+                self._logger.info(f'Triage appended to detail {ticket_detail_id} of ticket {ticket_id}!')
                 self._metrics_repository.increment_notes_appended()
             else:
-                self._logger.info(f'Not going to append a new triage note to ticket {ticket_id} '
-                                  f'as current environment '
-                                  f'is {working_environment.upper()}. Triage note: {triage_note_contents}')
+                self._logger.info(
+                    f'Not going to append a new triage note to detail {ticket_detail_id} of ticket '
+                    f'{ticket_id} as current environment is {working_environment.upper()}. '
+                    f'Triage note: {triage_note_contents}')
 
             notes_were_appended = True
 
         if notes_were_appended:
-            await self._notify_triage_note_was_appended_to_ticket(ticket_id)
+            await self._notify_triage_note_was_appended_to_ticket(ticket_detail)
 
     def _get_events_chunked(self, events):
         events_per_chunk: int = self._config.TRIAGE_CONFIG['event_limit']
@@ -310,64 +384,71 @@ class Triage:
         for chunk in chunks:
             yield chunk
 
-    async def _notify_triage_note_was_appended_to_ticket(self, ticket_id):
-        message = f'Triage appended to ticket {ticket_id}. Details at https://app.bruin.com/t/{ticket_id}'
+    async def _notify_triage_note_was_appended_to_ticket(self, ticket_detail: dict):
+        ticket_id = ticket_detail['ticket_id']
+        ticket_detail_id = ticket_detail['ticket_detail']['detailID']
+        service_number = ticket_detail['ticket_detail']['detailValue']
+
+        message = (
+            f'Triage appended to detail {ticket_detail_id} (serial: {service_number}) of ticket {ticket_id}. '
+            f'Details at https://app.bruin.com/t/{ticket_id}'
+        )
 
         self._logger.info(message)
         await self._notifications_repository.send_slack_message(message)
 
-    async def _process_tickets_without_triage(self, tickets, edges_data_by_serial):
-        self._logger.info('Processing tickets without triage...')
+    async def _process_ticket_details_without_triage(self, ticket_details, edges_data_by_serial):
+        self._logger.info('Processing ticket details without triage...')
 
-        for ticket in tickets:
-            serial_number = ticket['ticket_detail']['detailValue']
+        for detail in ticket_details:
+            ticket_id = detail['ticket_id']
+            ticket_detail_id = detail['ticket_detail']['detailID']
+            serial_number = detail['ticket_detail']['detailValue']
+
+            self._logger.info(f'Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...')
+
             edge_data = edges_data_by_serial[serial_number]
 
-            await self._process_single_ticket_without_triage(ticket, edge_data)
+            edge_full_id = edge_data['edge_id']
+            edge_identifier = EdgeIdentifier(**edge_full_id)
 
-        self._logger.info('Finished processing tickets without triage!')
+            past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
 
-    async def _process_single_ticket_without_triage(self, ticket, edge_data):
-        ticket_id = ticket['ticket_id']
-        self._logger.info(f'Processing ticket without triage {ticket_id}...')
-
-        edge_full_id = edge_data['edge_id']
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-
-        past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-
-        recent_events_response = await self._velocloud_repository.get_last_edge_events(
-            edge_full_id, since=past_moment_for_events_lookup
-        )
-        recent_events_response_body = recent_events_response['body']
-        recent_events_response_status = recent_events_response['status']
-
-        if recent_events_response_status not in range(200, 300):
-            return
-
-        if not recent_events_response_body:
-            self._logger.info(
-                f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
-                f'Not appending the first triage note to ticket {ticket_id}.'
+            recent_events_response = await self._velocloud_repository.get_last_edge_events(
+                edge_full_id, since=past_moment_for_events_lookup
             )
-            return
+            recent_events_response_body = recent_events_response['body']
+            recent_events_response_status = recent_events_response['status']
 
-        edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
-        edge_status_response_status = edge_status_response['status']
-        if edge_status_response_status not in range(200, 300):
-            return
+            if recent_events_response_status not in range(200, 300):
+                continue
 
-        edge_status = edge_status_response['body']['edge_info']
+            if not recent_events_response_body:
+                self._logger.info(
+                    f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
+                    f'Not appending the first triage note to ticket {ticket_id}.'
+                )
+                continue
 
-        recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
+            edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
+            edge_status_response_status = edge_status_response['status']
+            if edge_status_response_status not in range(200, 300):
+                continue
 
-        ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status, recent_events_response_body)
+            edge_status = edge_status_response['body']['edge_info']
 
-        note_appended = await self._bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+            recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
-        if note_appended == 200:
-            self._metrics_repository.increment_tickets_without_triage_processed()
-        if note_appended == 503:
-            self._metrics_repository.increment_note_append_errors()
+            ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status,
+                                                                    recent_events_response_body)
 
-        self._logger.info(f'Finished processing ticket without triage {ticket_id}!')
+            note_appended = await self._bruin_repository.append_triage_note(detail, ticket_note)
+
+            if note_appended == 200:
+                self._metrics_repository.increment_tickets_without_triage_processed()
+            if note_appended == 503:
+                self._metrics_repository.increment_note_append_errors()
+
+            self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
+
+        self._logger.info('Finished processing ticket details without triage!')
