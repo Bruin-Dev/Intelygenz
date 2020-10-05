@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 from shortuuid import uuid
 
 import pytest
@@ -14,6 +15,10 @@ from application.repositories import EdgeIdentifier
 
 from application.actions import edge_monitoring as edge_monitoring_module
 from config import testconfig as config
+
+
+uuid_ = uuid()
+uuid_mock = patch.object(edge_monitoring_module, 'uuid', return_value=uuid_)
 
 
 class TestEdgeMonitoring:
@@ -39,359 +44,206 @@ class TestEdgeMonitoring:
         instance_server._prometheus_repository.start_prometheus_metrics_server.assert_called_once()
 
     @pytest.mark.asyncio
-    async def process_all_edges_test(self, instance_server, edge_full_id, edge_response_status):
-        request_id = 'random-uuid'
-
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id_1, edge_full_id_2],
-            'status': 200
+    async def process_all_edges_test(self, instance_server, links_host_1_response, links_host_2_response,
+                                     links_host_3_response, links_host_4_response, edge_1_host_1,
+                                     edge_2_host_1, edge_identifier_1_host_1, edge_identifier_2_host_1,
+                                     edge_identifier_1_host_2, edge_1_host_2, edge_identifier_1_host_3,
+                                     edge_1_host_3, edge_identifier_1_host_4, edge_1_host_4
+                                     ):
+        all_links = links_host_1_response['body'] + links_host_2_response['body'] + \
+                    links_host_3_response['body'] + links_host_4_response['body']
+        response = {
+            'request_id': uuid_,
+            'status': 200,
+            'body': all_links
         }
 
-        instance_server._event_bus.rpc_request = CoroutineMock(
-            return_value={'request_id': request_id, 'body': [edge_full_id_1, edge_full_id_2]})
-
-        instance_server._velocloud_repository.get_edges = CoroutineMock(return_value=edge_list_response)
-        instance_server._velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"],
-            edge_response_status["edge_status_1"],
-        ])
-
+        instance_server._velocloud_repository.get_all_links_with_edge_info = CoroutineMock(side_effect=[response])
+        instance_server._prometheus_repository.set_cycle_total_edges = Mock()
         instance_server._process_edge = CoroutineMock()
+        with uuid_mock:
+            await instance_server._process_all_edges()
 
-        await instance_server._process_all_edges()
-
-        assert instance_server._process_edge.await_count == 2
+        instance_server._velocloud_repository.get_all_links_with_edge_info.assert_awaited_once()
+        instance_server._prometheus_repository.set_cycle_total_edges.assert_called_once_with(5)
+        instance_server._process_edge.assert_has_awaits([
+            call(edge_identifier_1_host_1, edge_1_host_1),
+            call(edge_identifier_2_host_1, edge_2_host_1),
+            call(edge_identifier_1_host_2, edge_1_host_2),
+            call(edge_identifier_1_host_3, edge_1_host_3),
+            call(edge_identifier_1_host_4, edge_1_host_4),
+        ], any_order=True)
 
     @pytest.mark.asyncio
-    async def process_all_edges_bad_status_test(self, instance_server, edge_full_id,
-                                                edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id_1, edge_full_id_2],
-            'status': 500
+    async def process_all_edges_with_error_test(self, instance_server, links_host_1_response, links_host_2_response,
+                                                links_host_3_response, links_host_4_response):
+        all_links = links_host_1_response['body'] + links_host_2_response['body'] + \
+                    links_host_3_response['body'] + links_host_4_response['body']
+        response = {
+            'request_id': uuid_,
+            'status': 400,
+            'body': []
         }
 
-        instance_server._event_bus.rpc_request = CoroutineMock(
-            return_value={'request_id': 'random-uuid', 'body': [edge_full_id_1, edge_full_id_2]})
+        instance_server._velocloud_repository.get_all_links_with_edge_info = CoroutineMock(side_effect=[response])
+        instance_server._prometheus_repository.set_cycle_total_edges = Mock()
+        with uuid_mock:
+            await instance_server._process_all_edges()
 
-        instance_server._velocloud_repository.get_edges = CoroutineMock(return_value=edge_list_response)
-        instance_server._velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"],
-            edge_response_status["edge_status_2"],
-        ])
-
-        instance_server._process_edge = CoroutineMock()
-
-        await instance_server._process_all_edges()
-
-        assert instance_server._process_edge.await_count == 0
+        instance_server._velocloud_repository.get_all_links_with_edge_info.assert_awaited_once()
+        instance_server._prometheus_repository.set_cycle_total_edges.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_all_edges_wrong_id_test(self, instance_server, edge_full_id,
-                                              edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-
-        instance_server._event_bus.rpc_request = CoroutineMock(
-            return_value={'reques_id': 'random-uuid', 'body': [edge_full_id_1, edge_full_id_2]})
-
-        edge_list_response = {
-            'reques_id': uuid(),
-            'body': [edge_full_id_1, edge_full_id_2],
-            'status': 200
+    async def process_all_edges_with_exception_test(self, instance_server, links_host_1_response,
+                                                    links_host_2_response, links_host_3_response,
+                                                    links_host_4_response, edge_1_host_1, edge_2_host_1,
+                                                    edge_identifier_1_host_1, edge_identifier_2_host_1,
+                                                    edge_identifier_1_host_2, edge_1_host_2, edge_identifier_1_host_3,
+                                                    edge_1_host_3, edge_identifier_1_host_4, edge_1_host_4):
+        all_links = links_host_1_response['body'] + links_host_2_response['body'] + \
+                    links_host_3_response['body'] + links_host_4_response['body']
+        response = {
+            'request_id': uuid_,
+            'status': 200,
+            'body': all_links
         }
 
-        instance_server._velocloud_repository.get_edges = CoroutineMock(return_value=edge_list_response)
-        instance_server._velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"],
-            edge_response_status["edge_status_2"],
-        ])
-
+        instance_server._velocloud_repository.get_all_links_with_edge_info = CoroutineMock(side_effect=[
+            Exception('Failed!')])
+        instance_server._prometheus_repository.set_cycle_total_edges = Mock()
+        instance_server._process_edge = CoroutineMock()
         instance_server._logger.error = Mock()
-        instance_server._process_edge = CoroutineMock()
+        with uuid_mock:
+            await instance_server._process_all_edges()
 
-        await instance_server._process_all_edges()
-
-        instance_server._logger.error.assert_called_once()
-        assert instance_server._process_edge.await_count == 0
-
-    @pytest.mark.asyncio
-    async def process_all_edges_without_cache_data_test(self, instance_server, edge_full_id,
-                                                        edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id_1, edge_full_id_2],
-            'status': 200
-        }
-
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            {'request_id': 'random-uuid', 'body': [edge_full_id_1, edge_full_id_2]},
-        ])
-
-        instance_server._velocloud_repository.get_edges = CoroutineMock(return_value=edge_list_response)
-        instance_server._velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"],
-            edge_response_status["edge_status_2"],
-        ])
-
-        instance_server._process_edge = CoroutineMock()
-
-        await instance_server._process_all_edges()
-
-        instance_server._prometheus_repository.dec.assert_not_called()
+        instance_server._velocloud_repository.get_all_links_with_edge_info.assert_awaited_once()
+        instance_server._prometheus_repository.set_cycle_total_edges.assert_not_called()
+        instance_server._process_edge.assert_not_called()
+        instance_server._logger.error.assert_called_once_with("Error: Exception in process all edges: Failed!")
 
     @pytest.mark.asyncio
-    async def process_all_edges_with_cache_data_and_no_differences_in_edge_list_test(self, instance_server,
-                                                                                     edge_full_id,
-                                                                                     edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-        request_id = uuid()
-
-        edge_list_response = {
-            'request_id': request_id,
-            'body': [edge_full_id_1, edge_full_id_2],
-            'status': 200
+    async def process_all_edges_with_cache_test(self, instance_server, links_host_1_response, links_host_2_response,
+                                                links_host_3_response, links_host_4_response, edge_1_host_1,
+                                                edge_2_host_1, edge_identifier_1_host_1, edge_identifier_2_host_1,
+                                                edge_identifier_1_host_2, edge_1_host_2, edge_identifier_1_host_3,
+                                                edge_1_host_3, edge_identifier_1_host_4, edge_1_host_4):
+        # removed links_host_4_response for testing
+        all_links = links_host_1_response['body'] + links_host_2_response['body'] + \
+                    links_host_3_response['body']
+        response = {
+            'request_id': uuid_,
+            'status': 200,
+            'body': all_links
         }
-        instance_server._event_bus.rpc_request = CoroutineMock(return_value={
-            'request_id': 'random-uuid', 'body': [edge_full_id_1, edge_full_id_2]
-        })
-
-        instance_server._velocloud_repository.get_edges = CoroutineMock(return_value=edge_list_response)
-        instance_server._velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"],
-            edge_response_status["edge_status_2"],
-        ])
-
-        instance_server._edges_cache = [
-            edge_full_id_1, edge_full_id_2
-        ]
-
+        cache_some_edge_identifiers: Dict[EdgeIdentifier, dict] = {
+            edge_identifier_1_host_1: edge_1_host_1,
+            edge_identifier_2_host_1: edge_2_host_1,
+            edge_identifier_1_host_2: edge_1_host_2,
+            edge_identifier_1_host_3: edge_1_host_3,
+            edge_identifier_1_host_4: edge_1_host_4
+        }
+        instance_server._edges_cache = set(cache_some_edge_identifiers)
         instance_server._status_cache = {
-            EdgeIdentifier(**edge_full_id_1): {'request_id': request_id,
-                                               'cache_edge': edge_response_status["edge_status_1"]['body'][
-                                                   'edge_info']},
-            EdgeIdentifier(**edge_full_id_2): {'request_id': request_id,
-                                               'cache_edge': edge_response_status["edge_status_2"]['body'][
-                                                   'edge_info']}
+            edge_identifier_1_host_1: {
+                'cache_edge': edge_1_host_1
+            },
+            edge_identifier_2_host_1: {
+                'cache_edge': edge_2_host_1
+            },
+            edge_identifier_1_host_2: {
+                'cache_edge': edge_1_host_2
+            },
+            edge_identifier_1_host_3: {
+                'cache_edge': edge_1_host_3
+            },
+            edge_identifier_1_host_4: {
+                'cache_edge': edge_1_host_4
+            }
         }
+        instance_server._velocloud_repository.get_all_links_with_edge_info = CoroutineMock(side_effect=[response])
+        instance_server._prometheus_repository.set_cycle_total_edges = Mock()
+        instance_server._prometheus_repository.dec = Mock()
         instance_server._process_edge = CoroutineMock()
+        with uuid_mock:
+            await instance_server._process_all_edges()
 
-        await instance_server._process_all_edges()
-
-        instance_server._prometheus_repository.dec.assert_not_called()
+        instance_server._velocloud_repository.get_all_links_with_edge_info.assert_awaited_once()
+        instance_server._prometheus_repository.set_cycle_total_edges.assert_called_once_with(4)
+        instance_server._prometheus_repository.dec.assert_called_once_with(edge_1_host_4)
+        instance_server._process_edge.assert_has_awaits([
+            call(edge_identifier_1_host_3, edge_1_host_3)
+        ], any_order=True)
 
     @pytest.mark.asyncio
-    async def process_all_edges_with_cache_data_and_differences_in_edge_list_test(self, instance_server,
-                                                                                  edge_full_id,
-                                                                                  edge_response_status):
-        uuid_1 = uuid()
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-        edge_full_id_3 = edge_full_id['edge_3']
-
-        edge_list_response = {
-            'request_id': uuid_1,
-            'body': [edge_full_id_1, edge_full_id_3, edge_full_id_3],
-            'status': 200
+    async def process_edge_without_cache_test(self, instance_server, edge_identifier_1_host_1, edge_1_host_1):
+        expected_cache = {
+            edge_identifier_1_host_1: {'cache_edge': edge_1_host_1}
         }
+        instance_server._prometheus_repository.inc = Mock()
+        await instance_server._process_edge(edge_identifier_1_host_1, edge_1_host_1)
+        instance_server._prometheus_repository.inc.assert_called_once_with(edge_1_host_1)
+        assert instance_server._status_cache == expected_cache
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value={
-            'request_id': 'random-uuid', 'body': [edge_full_id_1, edge_full_id_3, edge_full_id_3]
-        })
+    @pytest.mark.asyncio
+    async def process_edge_with_exception_test(self, instance_server, edge_identifier_1_host_1, edge_1_host_1):
+        expected_cache = {}
+        instance_server._prometheus_repository.inc = Mock(side_effect=Exception("Failed!"))
+        instance_server._logger.error = Mock()
+        await instance_server._process_edge(edge_identifier_1_host_1, edge_1_host_1)
+        instance_server._prometheus_repository.inc.assert_called_once_with(edge_1_host_1)
+        assert instance_server._status_cache == expected_cache
+        instance_server._logger.error.assert_called_once_with('Error: Exception in process one edge link: Failed!')
 
-        instance_server._velocloud_repository.get_edges = CoroutineMock(
-            return_value=edge_list_response)
-        instance_server._velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"],
-            edge_response_status["edge_status_2"],
-            edge_response_status["edge_status_3"],
-        ])
-
-        instance_server._edges_cache = {
-            EdgeIdentifier(**edge_full_id_1),
-            EdgeIdentifier(**edge_full_id_2),
-            EdgeIdentifier(**edge_full_id_3)
-        }
-
+    @pytest.mark.asyncio
+    async def process_edge_with_cache_test(self, instance_server, edge_identifier_1_host_1, edge_1_host_1):
         instance_server._status_cache = {
-            EdgeIdentifier(**edge_full_id_1): {'request_id': 'random-uuid',
-                                               'cache_edge': edge_response_status["edge_status_1"]['body'][
-                                                   'edge_info']},
-            EdgeIdentifier(**edge_full_id_2): {'request_id': 'random-uuid',
-                                               'cache_edge': edge_response_status["edge_status_2"]['body'][
-                                                   'edge_info']}
+            edge_identifier_1_host_1: {'cache_edge': edge_1_host_1}
         }
-        instance_server._process_edge = CoroutineMock()
-
-        await instance_server._process_all_edges()
-
-        instance_server._prometheus_repository.dec.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def process_edge_test(self, instance_server, edge_response_status):
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"]
-        ])
-
-        await instance_server._process_edge(edge_response_status["edge_status_1"])
-
-        instance_server._prometheus_repository.inc.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def process_edge_corrupted_body_test(self, instance_server, edge_response_status):
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_5"]
-        ])
-
-        await instance_server._process_edge(edge_response_status["edge_status_5"])
-
-        instance_server._logger.error.assert_called_once()
-        assert instance_server._logger.error.called
-
-    @pytest.mark.asyncio
-    async def process_edge_wrong_status_test(self, instance_server, edge_response_status):
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_4"]
-        ])
-
-        await instance_server._process_edge(edge_response_status["edge_status_4"])
-
-        instance_server._prometheus_repository.dec.assert_not_called()
+        instance_server._prometheus_repository.inc = Mock()
+        await instance_server._process_edge(edge_identifier_1_host_1, edge_1_host_1)
         instance_server._prometheus_repository.inc.assert_not_called()
-        instance_server._prometheus_repository.update_edge.assert_not_called()
-        instance_server._prometheus_repository.update_link.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_edge_without_cache_data_test(self, instance_server, edge_response_status):
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_2"]
-        ])
-
-        await instance_server._process_edge(edge_response_status["edge_status_2"])
-
-        instance_server._prometheus_repository.inc.assert_called_once_with(
-            edge_response_status["edge_status_2"]["body"]["edge_info"])
-
-    @pytest.mark.asyncio
-    async def process_edge_with_cache_data_and_edge_state_changed_test(self, instance_server, edge_full_id,
-                                                                       edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"]
-        ])
-
-        instance_server._edges_cache = [
-            edge_full_id_1
-        ]
-
+    async def process_edge_without_cache_edge_no_links_test(self, instance_server, edge_identifier_1_host_1,
+                                                            edge_4_host_1):
         instance_server._status_cache = {
-            EdgeIdentifier(**edge_full_id_1): {'request_id': 'random-uuid',
-                                               'cache_edge':
-                                                   edge_response_status["edge_status_1_state_change"]['body'][
-                                                       'edge_info']},
-            EdgeIdentifier(**edge_full_id_2): {'request_id': 'random-uuid',
-                                               'cache_edge': edge_response_status["edge_status_2"]['body'][
-                                                   'edge_info']}
+            edge_identifier_1_host_1: {'cache_edge': edge_4_host_1}
         }
-
-        await instance_server._process_edge(edge_response_status["edge_status_1"])
-
-        instance_server._prometheus_repository.update_edge.assert_called_once_with(
-            edge_response_status["edge_status_1"]['body']['edge_info'],
-            edge_response_status["edge_status_1_state_change"]['body']['edge_info']
-        )
+        instance_server._prometheus_repository.inc = Mock()
+        await instance_server._process_edge(edge_identifier_1_host_1, edge_4_host_1)
+        instance_server._prometheus_repository.inc.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_data_and_edge_state_no_changed_test(self, instance_server, edge_full_id,
-                                                                          edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"]
-        ])
-
-        instance_server._edges_cache = [
-            edge_full_id_1
-        ]
-
+    async def process_edge_with_cache_and_edge_offline_status_test(self, instance_server, edge_identifier_1_host_1,
+                                                                   edge_1_host_1, edge_1_host_1_offline):
         instance_server._status_cache = {
-            EdgeIdentifier(**edge_full_id_1): {'request_id': 'random-uuid',
-                                               'cache_edge':
-                                                   edge_response_status["edge_status_1"]['body'][
-                                                       'edge_info']},
-            EdgeIdentifier(**edge_full_id_2): {'request_id': 'random-uuid',
-                                               'cache_edge': edge_response_status["edge_status_2"]['body'][
-                                                   'edge_info']}
+            edge_identifier_1_host_1: {'cache_edge': edge_1_host_1_offline}
         }
+        instance_server._prometheus_repository.inc = Mock()
+        instance_server._prometheus_repository.update_edge = Mock()
 
-        await instance_server._process_edge(edge_response_status["edge_status_1"])
+        await instance_server._process_edge(edge_identifier_1_host_1, edge_1_host_1)
 
-        instance_server._prometheus_repository.update_edge.assert_not_called()
+        instance_server._prometheus_repository.inc.assert_not_called()
+        instance_server._prometheus_repository.update_edge.assert_called_once_with(edge_1_host_1,
+                                                                                   edge_1_host_1_offline)
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_data_and_link_state_changed_test(self, instance_server, edge_full_id,
-                                                                       edge_response_status):
-        edge_full_id_1 = edge_full_id['edge_1']
-        edge_full_id_2 = edge_full_id['edge_2']
-
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_2"]
-        ])
-
-        instance_server._edges_cache = [
-            edge_full_id_2
-        ]
-
+    async def process_edge_with_cache_and_link_offline_status_test(self, instance_server, edge_identifier_1_host_1,
+                                                                   edge_1_host_1, edge_1_host_1_offline_link):
         instance_server._status_cache = {
-            EdgeIdentifier(**edge_full_id_1): {'request_id': 'random-uuid',
-                                               'cache_edge':
-                                                   edge_response_status["edge_status_2_link_change"]['body'][
-                                                       'edge_info']},
-            EdgeIdentifier(**edge_full_id_2): {'request_id': 'random-uuid',
-                                               'cache_edge': edge_response_status["edge_status_1"]['body'][
-                                                   'edge_info']}
+            edge_identifier_1_host_1: {'cache_edge': edge_1_host_1_offline_link}
         }
+        instance_server._prometheus_repository.inc = Mock()
+        instance_server._prometheus_repository.update_link = Mock()
+        link_offline = edge_1_host_1_offline_link['links'][0]
+        cache_link = edge_1_host_1['links'][0]
 
-        await instance_server._process_edge(edge_response_status["edge_status_2"])
+        await instance_server._process_edge(edge_identifier_1_host_1, edge_1_host_1)
 
-        instance_server._prometheus_repository.update_link.assert_called()
-
-    @pytest.mark.asyncio
-    async def process_edge_with_no_remaining_edges_test(self, instance_server, edge_response_status):
-        instance_server._event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_response_status["edge_status_1"]
-        ])
-
-        instance_server._edge_monitoring_process = CoroutineMock()
-
-        next_run_time = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-
-        with patch.object(edge_monitoring_module, 'datetime', new=datetime_mock) as _:
-            with patch.object(edge_monitoring_module, 'timezone', new=Mock()) as _:
-                await instance_server.start_edge_monitor_job(exec_on_start=True)
-
-        instance_server._scheduler.add_job.assert_called_once_with(
-            instance_server._edge_monitoring_process, 'interval',
-            seconds=config.SITES_MONITOR_CONFIG['jobs_intervals']['edge_monitor'],
-            next_run_time=next_run_time,
-            replace_existing=False,
-            id='_edge_monitoring_process',
+        instance_server._prometheus_repository.inc.assert_not_called()
+        instance_server._prometheus_repository.update_link.assert_called_once_with(
+            edge_1_host_1, cache_link, edge_1_host_1_offline_link, link_offline
         )
 
     @pytest.mark.asyncio

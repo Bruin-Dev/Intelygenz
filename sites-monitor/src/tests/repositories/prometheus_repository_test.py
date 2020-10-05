@@ -31,21 +31,15 @@ class TestPrometheusRepository:
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_edge_name = 'Test Edge Name'
-        test_link_status = [{"link": {"state": "OK"}}]
+        test_link_status = [{"linkState": "OK"}]
         test_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": test_edge_state,
-                    "name": test_edge_name
-                },
-                "enterprise_name": test_enterprise_name,
-                "links": test_link_status
-            }
+            "edgeState": test_edge_state,
+            "edgeName": test_edge_name,
+            "enterpriseName": test_enterprise_name,
+            "links": test_link_status
         }
-        self.test_pro_repo.inc(test_edge["edge_info"])
-        self.test_pro_repo.inc(test_edge["edge_info"])
+        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge)
         assert REGISTRY.get_sample_value(
             'edge_state_gauge',
             labels={
@@ -66,23 +60,17 @@ class TestPrometheusRepository:
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_edge_name = 'Test Edge Name'
-        test_link_status = [{"link": {"state": "OK"}}]
+        test_link_status = [{"linkState": "OK"}]
         test_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": test_edge_state,
-                    "name": test_edge_name
-                },
-                "enterprise_name": test_enterprise_name,
-                "links": test_link_status
-            }
+            "edgeState": test_edge_state,
+            "edgeName": test_edge_name,
+            "enterpriseName": test_enterprise_name,
+            "links": test_link_status
         }
         self.test_pro_repo.reset_counter()
-        self.test_pro_repo.inc(test_edge["edge_info"])
-        self.test_pro_repo.inc(test_edge["edge_info"])
-        self.test_pro_repo.dec(test_edge["edge_info"])
+        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.dec(test_edge)
         assert REGISTRY.get_sample_value(
             'edge_state_gauge',
             labels={
@@ -103,40 +91,28 @@ class TestPrometheusRepository:
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_edge_name = 'Test Edge Name'
-        test_link_status = [{"link": {"state": "OK"}}]
+        test_link_status = [{"linkState": "OK"}]
         test_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": test_edge_state,
-                    "name": test_edge_name
-                },
-                "enterprise_name": test_enterprise_name,
-                "links": test_link_status
-            }
+            "edgeState": test_edge_state,
+            "edgeName": test_edge_name,
+            "enterpriseName": test_enterprise_name,
+            "links": test_link_status
         }
         cache_test_enterprise_name = 'Test'
         cache_edge_state = 'Edge_KO'
         cache_edge_name = 'Cached Test Edge Name'
-        cache_link_status = [{"link": {"state": "KO"}}]
+        cache_link_status = [{"linkState": "KO"}]
         cache_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": cache_edge_state,
-                    "name": cache_edge_name
-                },
-                "enterprise_name": cache_test_enterprise_name,
-                "links": cache_link_status
-            }
+            "edgeState": cache_edge_state,
+            "edgeName": cache_edge_name,
+            "enterpriseName": cache_test_enterprise_name,
+            "links": cache_link_status
         }
         self.test_pro_repo.reset_counter()
-        self.test_pro_repo.inc(cache_edge["edge_info"])
+        self.test_pro_repo.inc(cache_edge)
         self.test_pro_repo.update_edge(
-            test_edge["edge_info"],
-            cache_edge["edge_info"]
+            test_edge,
+            cache_edge
         )
 
         assert REGISTRY.get_sample_value(
@@ -160,41 +136,29 @@ class TestPrometheusRepository:
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_edge_name = 'Test Edge Name'
-        test_link_status = [{"link": {"state": "OK"}}]
+        test_link_status = [{"linkState": "OK"}]
         test_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": test_edge_state,
-                    "name": test_edge_name
-                },
-                "enterprise_name": test_enterprise_name,
-                "links": test_link_status
-            }
+            "edgeState": test_edge_state,
+            "edgeName": test_edge_name,
+            "enterpriseName": test_enterprise_name,
+            "links": test_link_status
         }
         cache_test_enterprise_name = 'Test'
         cache_edge_state = 'Edge_OK'
         cache_edge_name = 'Cached Test Edge Name'
-        cache_link_status = [{"link": {"state": "KO"}}]
+        cache_link_status = [{"linkState": "KO"}]
         cache_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": cache_edge_state,
-                    "name": cache_edge_name
-                },
-                "enterprise_name": cache_test_enterprise_name,
-                "links": cache_link_status
-            }
+            "edgeState": cache_edge_state,
+            "edgeName": cache_edge_name,
+            "enterpriseName": cache_test_enterprise_name,
+            "links": cache_link_status
         }
         self.test_pro_repo.reset_counter()
-        self.test_pro_repo.inc(cache_edge["edge_info"])
+        self.test_pro_repo.inc(cache_edge)
         self.test_pro_repo.update_link(
-            test_edge["edge_info"],
+            test_edge,
             test_link_status[0],
-            cache_edge["edge_info"],
+            cache_edge,
             cache_link_status[0]
         )
         assert REGISTRY.get_sample_value(
@@ -216,21 +180,15 @@ class TestPrometheusRepository:
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_edge_name = 'Test Edge Name'
-        test_link_status = [{"link": {"state": "OK"}}]
+        test_link_status = [{"linkState": "OK"}]
         test_edge = {
-            "edge_info":
-            {
-                "edges":
-                {
-                    "edgeState": test_edge_state,
-                    "name": test_edge_name
-                },
-                "enterprise_name": test_enterprise_name,
-                "links": test_link_status
-            }
+            "edgeState": test_edge_state,
+            "edgeName": test_edge_name,
+            "enterpriseName": test_enterprise_name,
+            "links": test_link_status
         }
-        self.test_pro_repo.inc(test_edge["edge_info"])
-        self.test_pro_repo.inc(test_edge["edge_info"])
+        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge)
         self.test_pro_repo.reset_counter()
         assert REGISTRY.get_sample_value(
             'edge_state_gauge',

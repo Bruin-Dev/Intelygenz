@@ -1,7 +1,8 @@
 from collections import namedtuple
 
-
-EdgeIdentifier = namedtuple(typename='EdgeIdentifier', field_names=['host', 'enterprise_id', 'edge_id'])
+EdgeIdentifier = namedtuple(typename='EdgeIdentifier',
+                            field_names=['host', 'enterprise_id', 'edge_id']
+                            )
 
 
 class EdgeIdentifier(EdgeIdentifier):

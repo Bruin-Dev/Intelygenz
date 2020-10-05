@@ -1,7 +1,9 @@
+from typing import Dict
 from datetime import datetime
 from datetime import timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
+from unittest.mock import call
 
 import pytest
 
@@ -10,6 +12,7 @@ from shortuuid import uuid
 
 from application.repositories import velocloud_repository as velocloud_repository_module
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories import EdgeIdentifier
 from config import testconfig
 
 
@@ -34,269 +37,193 @@ class TestVelocloudRepository:
         assert velocloud_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
-    async def get_edges_with_default_rpc_timeout_test(self):
-        filter_ = {'mettel.velocloud.net': []}
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
-            },
-        }
-        response = {
-            'request_id': uuid_,
+    async def get_edges_links_by_host_test(self, instance_server, link_1_host_1, link_1_host_2, link_1_host_3,
+                                           link_1_host_4):
+        expected = {
             'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
+                link_1_host_1,
+                link_1_host_2,
+                link_1_host_3,
+                link_1_host_4
             ],
-            'status': 200,
+            'status': 200
         }
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await velocloud_repository.get_edges(filter_)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.list.request", request, timeout=300)
-        assert result == response
-
-    @pytest.mark.asyncio
-    async def get_edges_with_custom_rpc_timeout_test(self):
-        filter_ = {'mettel.velocloud.net': []}
-        rpc_timeout = 1000
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
-            },
-        }
-        response = {
-            'request_id': uuid_,
+        host = 'mettel.host'
+        rpc_response_mock = {
             'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
+                link_1_host_1,
+                link_1_host_2,
+                link_1_host_3,
+                link_1_host_4
             ],
+            'status': 200
+        }
+        rpc_responses_mock = [
+            rpc_response_mock
+        ]
+        rpc_request = {
+            "request_id": uuid_,
+            "body": {
+                'host': host
+            },
+        }
+        instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=rpc_responses_mock)
+
+        with uuid_mock:
+            result = await instance_server._velocloud_repository.get_edges_links_by_host(host)
+
+        assert expected == result
+        instance_server._velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "get.links.with.edge.info", rpc_request, timeout=300)
+
+    @pytest.mark.asyncio
+    async def get_edges_links_by_host_with_exception_test(self, instance_server):
+        expected = {
+            'body': None,
+            'status': 503
+        }
+        host = 'mettel.host'
+
+        rpc_responses_mock = [
+            Exception('Failed!'),
+            None
+        ]
+        rpc_request = {
+            "request_id": uuid_,
+            "body": {
+                'host': host
+            },
+        }
+        err_msg = 'An error occurred when requesting edge list from Velocloud -> Failed!'
+        rpc_request_error = {
+            "request_id": uuid_,
+            "message": err_msg
+        }
+        instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=rpc_responses_mock)
+
+        with uuid_mock:
+            result = await instance_server._velocloud_repository.get_edges_links_by_host(host)
+
+        assert expected == result
+        instance_server._velocloud_repository._event_bus.rpc_request.assert_has_awaits([
+            call("get.links.with.edge.info", rpc_request, timeout=300),
+            call("notification.slack.request", rpc_request_error, timeout=10)
+        ])
+
+    @pytest.mark.asyncio
+    async def get_edges_links_by_host_with_nats_error_test(self, instance_server):
+        expected = {
+            'body': None,
+            'status': 503
+        }
+        host = 'mettel.host'
+
+        rpc_responses_mock = [
+            nats_error_response,
+            None
+        ]
+        rpc_request = {
+            "request_id": uuid_,
+            "body": {
+                'host': host
+            },
+        }
+        err_msg = 'Error while retrieving edges links in DEV environment: Error 503 - None'
+        rpc_request_error = {
+            "request_id": uuid_,
+            "message": err_msg
+        }
+        instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=rpc_responses_mock)
+
+        with uuid_mock:
+            result = await instance_server._velocloud_repository.get_edges_links_by_host(host)
+
+        assert expected == result
+        instance_server._velocloud_repository._event_bus.rpc_request.assert_has_awaits([
+            call("get.links.with.edge.info", rpc_request, timeout=300),
+            call("notification.slack.request", rpc_request_error, timeout=10)
+        ])
+
+    @pytest.mark.asyncio
+    async def get_all_links_with_edge_info_test(self, instance_server, links_host_1_response,
+                                                links_host_2_response, links_host_3_response,
+                                                links_host_4_response):
+        all_links = links_host_1_response['body'] + links_host_2_response['body'] + \
+                    links_host_3_response['body'] + links_host_4_response['body']
+        expected = {
+            'request_id': uuid_,
             'status': 200,
+            'body': all_links
         }
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        links_by_host_mock = [
+            links_host_1_response,
+            links_host_2_response,
+            links_host_3_response,
+            links_host_4_response
+        ]
+        instance_server._velocloud_repository.get_edges_links_by_host = CoroutineMock(side_effect=links_by_host_mock)
 
         with uuid_mock:
-            result = await velocloud_repository.get_edges(filter_, rpc_timeout=rpc_timeout)
+            result = await instance_server._velocloud_repository.get_all_links_with_edge_info()
 
-        event_bus.rpc_request.assert_awaited_once_with("edge.list.request", request, timeout=rpc_timeout)
-        assert result == response
+        assert expected == result
+        instance_server._velocloud_repository.get_edges_links_by_host.assert_has_awaits([
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][0]),
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][1]),
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][2]),
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][3])
+        ])
 
     @pytest.mark.asyncio
-    async def get_edges_with_no_filter_specified_test(self):
-        filter_ = {}
-
-        request = {
+    async def get_all_links_with_edge_info_with_one_error_test(self, instance_server, links_host_1_response,
+                                                               links_host_2_response, links_host_3_response,
+                                                               links_host_4_response_error):
+        all_links = links_host_1_response['body'] + links_host_2_response['body'] + \
+                    links_host_3_response['body']
+        expected = {
             'request_id': uuid_,
-            'body': {
-                'filter': filter_,
-            },
-        }
-        response = {
-            'request_id': uuid_,
-            'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
-            ],
             'status': 200,
+            'body': all_links
         }
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        links_by_host_mock = [
+            links_host_1_response,
+            links_host_2_response,
+            links_host_3_response,
+            links_host_4_response_error
+        ]
+        instance_server._velocloud_repository.get_edges_links_by_host = CoroutineMock(side_effect=links_by_host_mock)
 
         with uuid_mock:
-            result = await velocloud_repository.get_edges()
+            result = await instance_server._velocloud_repository.get_all_links_with_edge_info()
 
-        event_bus.rpc_request.assert_awaited_once_with("edge.list.request", request, timeout=300)
-        assert result == response
+        assert expected == result
+        instance_server._velocloud_repository.get_edges_links_by_host.assert_has_awaits([
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][0]),
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][1]),
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][2]),
+            call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][3])
+        ])
+
+    def group_links_by_edge_test(self, instance_server, list_all_links_with_edge_info, edge_1_host_1, edge_2_host_1,
+                                 edge_identifier_1_host_1, edge_identifier_2_host_1, edge_identifier_1_host_2,
+                                 edge_1_host_2, edge_identifier_1_host_3, edge_1_host_3, edge_identifier_1_host_4,
+                                 edge_1_host_4):
+        expected: Dict[EdgeIdentifier, dict] = {
+            edge_identifier_1_host_1: edge_1_host_1,
+            edge_identifier_2_host_1: edge_2_host_1,
+            edge_identifier_1_host_2: edge_1_host_2,
+            edge_identifier_1_host_3: edge_1_host_3,
+            edge_identifier_1_host_4: edge_1_host_4
+        }
+        result = instance_server._velocloud_repository.group_links_by_edge(list_all_links_with_edge_info['body'])
+        assert expected == result
 
     @pytest.mark.asyncio
-    async def get_edges_with_rpc_request_failing_test(self):
-        filter_ = {'mettel.velocloud.net': []}
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
-            },
-        }
-
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
+    async def notify_error_test(self, instance_server):
+        instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock()
+        error_dict = {'request_id': uuid_,
+                      'message': 'Failed'}
         with uuid_mock:
-            result = await velocloud_repository.get_edges(filter_)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.list.request", request, timeout=300)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
-        assert result == nats_error_response
-
-    @pytest.mark.asyncio
-    async def get_edges_with_rpc_request_returning_non_2xx_status_test(self):
-        filter_ = {'mettel.velocloud.net': []}
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
-            },
-        }
-        response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
-        }
-
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await velocloud_repository.get_edges(filter_)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.list.request", request, timeout=300)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
-        assert result == response
-
-    @pytest.mark.asyncio
-    async def get_edge_status_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-
-        request = {
-            'request_id': uuid_,
-            'body': edge_full_id,
-        }
-        response = {
-            'request_id': uuid_,
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': {
-                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-                    'links': [
-                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-                    ],
-                    'enterprise_name': 'EVIL-CORP|12345|',
-                }
-            },
-            'status': 200,
-        }
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await velocloud_repository.get_edge_status(edge_full_id)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.status.request", request, timeout=120)
-        assert result == response
-
-    @pytest.mark.asyncio
-    async def get_edge_status_with_rpc_request_failing_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-
-        request = {
-            'request_id': uuid_,
-            'body': edge_full_id,
-        }
-
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await velocloud_repository.get_edge_status(edge_full_id)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.status.request", request, timeout=120)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
-        assert result == nats_error_response
-
-    @pytest.mark.asyncio
-    async def get_edge_status_with_rpc_request_returning_non_2xx_status_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-
-        request = {
-            'request_id': uuid_,
-            'body': edge_full_id,
-        }
-        response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
-        }
-
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await velocloud_repository.get_edge_status(edge_full_id)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.status.request", request, timeout=120)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
-        assert result == response
+            await instance_server._velocloud_repository._notify_error('Failed')
+        instance_server._velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "notification.slack.request", error_dict, timeout=10)

@@ -1,3 +1,4 @@
+from typing import Dict
 from shortuuid import uuid
 
 from application.repositories import EdgeIdentifier
@@ -12,23 +13,20 @@ class VelocloudRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_edges(self, filter_: dict = None, *, rpc_timeout=300):
+    async def get_edges_links_by_host(self, host, rpc_timeout=300):
         err_msg = None
-
-        if not filter_:
-            filter_ = {}
 
         request = {
             "request_id": uuid(),
             "body": {
-                'filter': filter_,
+                'host': host
             },
         }
 
         try:
-            self._logger.info("Getting list of edges from Velocloud...")
-            response = await self._event_bus.rpc_request("edge.list.request", request, timeout=rpc_timeout)
-            self._logger.info("Got list of edges from Velocloud!")
+            self._logger.info(f"Getting edges links from Velocloud for host {host}...")
+            response = await self._event_bus.rpc_request("get.links.with.edge.info", request, timeout=rpc_timeout)
+            self._logger.info("Got edges links from Velocloud!")
         except Exception as e:
             err_msg = f'An error occurred when requesting edge list from Velocloud -> {e}'
             response = nats_error_response
@@ -38,45 +36,89 @@ class VelocloudRepository:
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving edge list in {self._config.ENVIRONMENT_NAME.upper()} '
+                    f'Error while retrieving edges links in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
+            await self._notify_error(err_msg)
 
         return response
 
-    async def get_edge_status(self, edge_full_id: dict):
-        err_msg = None
-        edge_identifier = EdgeIdentifier(**edge_full_id)
+    async def get_all_links_with_edge_info(self):
+        all_edges = []
+        for host in self._config.SITES_MONITOR_CONFIG['velo_servers']:
+            response = await self.get_edges_links_by_host(host=host)
+            if response['status'] not in range(200, 300):
+                self._logger.info(f"Error: could not retrieve edges links by host: {host}")
+                continue
+            all_edges += response['body']
 
-        request = {
+        return_response = {
             "request_id": uuid(),
-            "body": edge_full_id,
+            'status': 200,
+            'body': all_edges
         }
+        return return_response
 
-        try:
-            self._logger.info(f"Getting status of edge {edge_identifier} from Velocloud...")
-            response = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
-            self._logger.info(f"Got status of edge {edge_identifier} from Velocloud!")
-        except Exception as e:
-            err_msg = f'An error occurred when requesting status of edge {edge_identifier} from Velocloud -> {e}'
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
+    def group_links_by_edge(self, edge_links_list) -> Dict[EdgeIdentifier, dict]:
+        result = {}
+        for edge_link in edge_links_list:
+            edge_info = {
+                'host': edge_link['host'],
+                'enterprise_id': edge_link['enterpriseId'],
+                'edge_id': edge_link['edgeId']
+            }
+            edge_identifier = EdgeIdentifier(**edge_info)
+            if not edge_link['edgeId']:
+                self._logger.info(f"Edge {edge_identifier} without edgeId")
+                continue
 
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving status of edge {edge_identifier} '
-                    f'in {self._config.ENVIRONMENT_NAME.upper()}'
-                    f'environment: Error {response_status} - {response_body}'
-                )
+            result.setdefault(
+                edge_identifier,
+                {
+                    'enterpriseName': edge_link['enterpriseName'],
+                    'enterpriseId': edge_link['enterpriseId'],
+                    'enterpriseProxyId': edge_link['enterpriseProxyId'],
+                    'enterpriseProxyName': edge_link['enterpriseProxyName'],
+                    'edgeName': edge_link['edgeName'],
+                    'edgeState': edge_link['edgeState'],
+                    'edgeSystemUpSince': edge_link['edgeSystemUpSince'],
+                    'edgeServiceUpSince': edge_link['edgeServiceUpSince'],
+                    'edgeLastContact': edge_link['edgeLastContact'],
+                    'edgeId': edge_link['edgeId'],
+                    'edgeSerialNumber': edge_link['edgeSerialNumber'],
+                    'edgeHASerialNumber': edge_link['edgeHASerialNumber'],
+                    'edgeModelNumber': edge_link['edgeModelNumber'],
+                    'edgeLatitude': edge_link['edgeLatitude'],
+                    'edgeLongitude': edge_link['edgeLongitude'],
+                    'host': edge_link['host'],
+                    "links": []
+                }
+            )
 
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
+            if not edge_link['linkState']:
+                self._logger.info(f"Edge [{edge_identifier}] with link interface {edge_link['interface']} "
+                                  f"without state")
+                continue
 
-        return response
+            edge_link_info = {
+                'interface': edge_link['interface'],
+                'internalId': edge_link['internalId'],
+                'linkState': edge_link['linkState'],
+                'linkLastActive': edge_link['linkLastActive'],
+                'linkVpnState': edge_link['linkVpnState'],
+                'linkId': edge_link['linkId'],
+                'linkIpAddress': edge_link['linkIpAddress'],
+                'displayName': edge_link['displayName'],
+                'isp': edge_link['isp'],
+            }
+
+            result[edge_identifier]["links"].append(edge_link_info)
+
+        return result
+
+    async def _notify_error(self, err_msg):
+        self._logger.error(err_msg)
+        slack_message = {'request_id': uuid(), 'message': err_msg}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)

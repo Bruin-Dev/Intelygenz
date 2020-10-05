@@ -13,48 +13,48 @@ class PrometheusRepository:
 
     def inc(self, edge_info):
         self._edge_status_gauge.labels(
-            state=edge_info["edges"]["edgeState"],
-            enterprise_name=edge_info["enterprise_name"],
-            name=edge_info["edges"]["name"]
+            state=edge_info["edgeState"],
+            enterprise_name=edge_info["enterpriseName"],
+            name=edge_info["edgeName"]
         ).inc()
-        for links in edge_info["links"]:
+        for link in edge_info["links"]:
             self._link_status_gauge.labels(
-                state=links["link"]["state"],
-                enterprise_name=edge_info["enterprise_name"]
+                state=link["linkState"],
+                enterprise_name=edge_info["enterpriseName"]
             ).inc()
 
     def dec(self, edge_info):
         self._edge_status_gauge.labels(
-            state=edge_info["edges"]["edgeState"],
-            enterprise_name=edge_info["enterprise_name"],
-            name=edge_info["edges"]["name"]
+            state=edge_info["edgeState"],
+            enterprise_name=edge_info["enterpriseName"],
+            name=edge_info["edgeName"]
         ).dec()
-        for links in edge_info["links"]:
+        for link in edge_info["links"]:
             self._link_status_gauge.labels(
-                state=links["link"]["state"],
-                enterprise_name=edge_info["enterprise_name"]
+                state=link["linkState"],
+                enterprise_name=edge_info["enterpriseName"]
             ).dec()
 
     def update_edge(self, edge_info, cache_data):
         self._edge_status_gauge.labels(
-            state=edge_info["edges"]["edgeState"],
-            enterprise_name=edge_info["enterprise_name"],
-            name=edge_info["edges"]["name"]
+            state=edge_info["edgeState"],
+            enterprise_name=edge_info["enterpriseName"],
+            name=edge_info["edgeName"]
         ).inc()
         self._edge_status_gauge.labels(
-            state=cache_data["edges"]["edgeState"],
-            enterprise_name=cache_data["enterprise_name"],
-            name=cache_data["edges"]["name"]
+            state=cache_data["edgeState"],
+            enterprise_name=cache_data["enterpriseName"],
+            name=cache_data["edgeName"]
         ).dec()
 
     def update_link(self, edge_info, link_info, cache_edge, cache_link):
         self._link_status_gauge.labels(
-            state=link_info["link"]["state"],
-            enterprise_name=edge_info["enterprise_name"]
+            state=link_info["linkState"],
+            enterprise_name=edge_info["enterpriseName"]
         ).inc()
         self._link_status_gauge.labels(
-            state=cache_link["link"]["state"],
-            enterprise_name=cache_edge["enterprise_name"]
+            state=cache_link["linkState"],
+            enterprise_name=cache_edge["enterpriseName"]
         ).dec()
 
     def set_cycle_total_edges(self, total):

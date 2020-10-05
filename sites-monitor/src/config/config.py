@@ -19,7 +19,13 @@ NATS_CONFIG = {
 SITES_MONITOR_CONFIG = {
     'monitoring_seconds': int(os.environ["MONITORING_SECONDS"]),
     'timezone': 'US/Eastern',
-    'semaphore': 3
+    'semaphore': 3,
+    'velo_servers': [
+        "mettel.velocloud.net",
+        "metvco02.mettel.net",
+        "metvco03.mettel.net",
+        "metvco04.mettel.net"
+    ],
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

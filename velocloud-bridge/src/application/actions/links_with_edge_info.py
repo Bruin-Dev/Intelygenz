@@ -42,4 +42,3 @@ class LinksWithEdgeInfo:
         }
         await self._event_bus.publish_message(response_topic, response)
         self._logger.info(f'Published links with edge info in the event bus for request {request}')
-

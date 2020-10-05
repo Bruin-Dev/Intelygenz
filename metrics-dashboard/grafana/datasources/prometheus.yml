@@ -19,6 +19,8 @@ datasources:
   orgId: 1
   # <string> url
   url: http://thanos-querier:19091
+  # for local development with docker-compose
+  # url: http://prometheus:9090
   # <string> database password, if used
   password:
   # <string> database user, if used

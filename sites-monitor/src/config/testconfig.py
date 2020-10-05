@@ -32,6 +32,12 @@ SITES_MONITOR_CONFIG = {
     'jobs_intervals': {
         'edge_monitor': 0.01,
     },
+    'velo_servers': [
+        "mettel.velocloud.net",
+        "metvco02.mettel.net",
+        "metvco03.mettel.net",
+        "metvco04.mettel.net"
+    ],
 }
 
 QUART_CONFIG = {
