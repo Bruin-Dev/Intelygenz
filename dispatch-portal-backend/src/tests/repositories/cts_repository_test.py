@@ -67,8 +67,8 @@ class TestCtsRepository:
         assert cts_repository.get_onsite_time_needed(cts_dispatch_confirmed_3) == expected_6
 
     def get_onsite_timezone_test(self, cts_repository, cts_dispatch_confirmed,
-                                    cts_dispatch_confirmed_none_description,
-                                    cts_dispatch_confirmed_bad_date):
+                                 cts_dispatch_confirmed_none_description,
+                                 cts_dispatch_confirmed_bad_date):
         from pytz import timezone
         expected = timezone(f'US/Pacific')
 

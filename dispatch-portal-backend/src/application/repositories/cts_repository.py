@@ -28,28 +28,13 @@ class CtsRepository:
 
     def get_onsite_time_needed(self, dispatch):
         onsite_time_needed = self._find_field_in_dispatch_description(dispatch, 'Onsite Time Needed')
-        if not onsite_time_needed:
+        try:
+            onsite_time_needed_time_stamp = datetime.strptime(onsite_time_needed, "%Y-%m-%d %I.%M%p")
+            refactored_timestamp = datetime.strftime(onsite_time_needed_time_stamp, '%Y-%m-%d %H:%M:%S.%f')
+            final_timestamp = datetime.strptime(refactored_timestamp, '%Y-%m-%d %H:%M:%S.%f')
+            return final_timestamp
+        except Exception as ex:
             return None
-        # onsite time needed format: '2020-06-21 4.00PM', check the '.' and not ':'
-        regex_result = re.search(" (.*?)\\.", onsite_time_needed)
-        if regex_result:
-            current_hour = regex_result.group(1)
-        else:
-            return None
-
-        if 'PM' in onsite_time_needed:
-            if int(current_hour) < 12:
-                new_hour = str(int(current_hour) + 12)
-                onsite_time_needed = onsite_time_needed.replace(f"{current_hour}.", f"{new_hour}.")
-            onsite_time_needed = onsite_time_needed.replace('.', ':').replace('PM', '')
-        elif 'AM' in onsite_time_needed:
-            if int(current_hour) == 12:
-                onsite_time_needed = onsite_time_needed.replace(f"{current_hour}.", "00.")
-            onsite_time_needed = onsite_time_needed.replace('.', ':').replace('AM', '')
-
-        time_stamp_string = f'{onsite_time_needed}:00.00'
-        final_timestamp = datetime.strptime(time_stamp_string, '%Y-%m-%d %H:%M:%S.%f')
-        return final_timestamp
 
     def get_onsite_timezone(self, dispatch):
         onsite_timezone = self._find_field_in_dispatch_description(dispatch, 'Onsite Timezone')
