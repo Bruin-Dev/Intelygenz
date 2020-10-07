@@ -40,7 +40,7 @@ class VelocloudRepository:
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving edge list in {self._config.MONITOR_MAP_CONFIG["environment"].upper()} '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -73,7 +73,7 @@ class VelocloudRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving status of edge {edge_identifier} in '
-                    f'{self._config.MONITOR_MAP_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -131,7 +131,7 @@ class VelocloudRepository:
         return response
 
     async def get_edges_for_triage(self):
-        monitoring_filter = self._config.MONITOR_MAP_CONFIG['velo_filter']
+        monitoring_filter = self._config.MONITOR_MAP_CONFIG["velo_filter"]
 
         return await self.get_edges(filter_=monitoring_filter)
 
