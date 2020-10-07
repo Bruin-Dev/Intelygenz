@@ -16,6 +16,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+
 ALERTS_CONFIG = {
     'last_contact': {
         'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
@@ -23,7 +25,12 @@ ALERTS_CONFIG = {
     'timezone': 'US/Eastern'
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+VELOCLOUD_HOST = [
+    "mettel.velocloud.net",
+    "metvco02.mettel.net",
+    "metvco03.mettel.net",
+    "metvco04.mettel.net",
+]
 
 LOG_CONFIG = {
     'name': 'last-contact-report',

@@ -1,29 +1,31 @@
-import json
-from collections import OrderedDict
 from datetime import datetime
-
-from apscheduler.util import undefined
-from dateutil import relativedelta
-from pytz import timezone
 from shortuuid import uuid
+
+from dateutil import relativedelta
+from collections import OrderedDict
+from apscheduler.util import undefined
+from pytz import timezone
+from application import EdgeIdentifier
+
 
 from igz.packages.eventbus.eventbus import EventBus
 
 
 class Alert:
 
-    def __init__(self, event_bus: EventBus, scheduler, logger, config, template_renderer):
+    def __init__(self, event_bus: EventBus, scheduler, logger, config, velocloud_repository, template_renderer):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
         self._config = config
+        self._velocloud_repository = velocloud_repository
         self._template_renderer = template_renderer
 
     async def start_alert_job(self, exec_on_start=False):
         self._logger.info("Scheduled task: alert report process configured to run first day of each month")
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config['timezone']))
+            next_run_time = datetime.now(timezone(self._config.ALERTS_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._alert_process, 'cron', day=1, misfire_grace_time=86400, replace_existing=True,
                                 next_run_time=next_run_time,
@@ -31,23 +33,21 @@ class Alert:
 
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
-        list_request = {
-            "request_id": uuid(),
-            "body": {"filter": {}}
-        }
-        edge_list = await self._event_bus.rpc_request("edge.list.request", list_request, timeout=200)
-        self._logger.info(f'Edge list received from event bus')
-        edge_status_requests = [
-            {"request_id": edge_list["request_id"], "body": edge} for edge in edge_list["body"]]
-        self._logger.info("Processing all edges with details for alert report")
+        list_edges = await self._velocloud_repository.get_edges()
+        if len(list_edges) == 0:
+            return
         edges_to_report = []
-        for request in edge_status_requests:
-            edge_info = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
-            self._logger.info(f"Processing edge: {edge_info['body']['edge_id']}")
-            raw_last_contact = edge_info["body"]["edge_info"]["edges"]["lastContact"]
+        for edge in list_edges:
+            edge_full_id = {
+                'host': edge['host'],
+                'enterprise_id': edge['enterpriseId'],
+                'edge_id': edge['edgeId']
+            }
+            edge_identifier = EdgeIdentifier(**edge_full_id)
+            raw_last_contact = edge["edgeLastContact"]
 
             if '0000-00-00 00:00:00' in raw_last_contact:
-                self._logger.info(f'Missing last contact timestamp for edge {request["body"]}. Skipping...')
+                self._logger.info(f'Missing last contact timestamp for edge {edge_identifier}. Skipping...')
                 continue
 
             last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -56,21 +56,20 @@ class Alert:
             total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
 
             if time_elapsed.days < 30:
-                self._logger.info('Time elapsed is less than 30 days')
+                self._logger.info(f'Time elapsed is less than 30 days for {edge_identifier}')
                 continue
 
             edge_for_alert = OrderedDict()
-            edge_for_alert['edge_name'] = edge_info["body"]["edge_info"]["edges"]['name']
-            edge_for_alert['enterprise'] = edge_info["body"]["edge_info"]["enterprise_name"]
-            edge_for_alert['serial_number'] = edge_info["body"]["edge_info"]["edges"]["serialNumber"]
-            edge_for_alert['model number'] = edge_info["body"]["edge_info"]["edges"]['modelNumber']
-            edge_for_alert['last_contact'] = edge_info["body"]["edge_info"]["edges"]["lastContact"]
+            edge_for_alert['edge_name'] = edge['edgeName']
+            edge_for_alert['enterprise'] = edge["enterpriseName"]
+            edge_for_alert['serial_number'] = edge["edgeSerialNumber"]
+            edge_for_alert['model number'] = edge['edgeModelNumber']
+            edge_for_alert['last_contact'] = edge["edgeLastContact"]
             edge_for_alert['months in SVC'] = total_months_elapsed
             edge_for_alert['balance of the 36 months'] = 36 - total_months_elapsed
-            edge_for_alert['url'] = f'https://{edge_info["body"]["edge_id"]["host"]}/#!/operator/customer/' \
-                f'{edge_info["body"]["edge_id"]["enterprise_id"]}' \
-                f'/monitor/edge/{edge_info["body"]["edge_id"]["edge_id"]}/'
-
+            edge_for_alert['url'] = f'https://{edge["host"]}/#!/operator/customer/' \
+                                    f'{edge["enterpriseId"]}' \
+                                    f'/monitor/edge/{edge["edgeId"]}/'
             edges_to_report.append(edge_for_alert)
         email_obj = self._template_renderer.compose_email_object(edges_to_report)
         await self._event_bus.publish_message("notification.email.request", email_obj)

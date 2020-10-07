@@ -28,6 +28,14 @@ ALERTS_CONFIG = {
     'timezone': 'US/Eastern'
 }
 
+ENVIRONMENT_NAME = 'dev'
+
+VELOCLOUD_HOST = [
+    "mettel.velocloud.net",
+    "metvco02.mettel.net",
+    "metvco03.mettel.net",
+    "metvco04.mettel.net",
+]
 
 QUART_CONFIG = {
     'title': 'last-contact-report',

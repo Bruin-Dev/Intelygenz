@@ -1,18 +1,21 @@
-from datetime import datetime
-import json
+import pytest
+from shortuuid import uuid
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
+from asynctest import CoroutineMock
 
-import pytest
 from application.actions import alert as alert_module
 from application.actions.alert import Alert
 from apscheduler.util import undefined
-from asynctest import CoroutineMock
-from unittest.mock import call
 
 from config import testconfig
 
 from application.repositories.template_management import TemplateRenderer
+from unittest.mock import call
+
+uuid_ = uuid()
+uuid_mock = patch.object(alert_module, 'uuid', return_value=uuid_)
 
 
 class TestAlert:
@@ -22,9 +25,10 @@ class TestAlert:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        velocloud_repository = Mock()
         template_renderer = TemplateRenderer(config.ALERTS_CONFIG)
 
-        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
+        alert = Alert(event_bus, scheduler, logger, config, velocloud_repository, template_renderer)
         assert alert._event_bus is event_bus
         assert alert._scheduler is scheduler
         assert alert._logger is logger
@@ -37,9 +41,9 @@ class TestAlert:
         scheduler = Mock()
         scheduler.add_job = Mock()
         template_renderer = Mock()
-        config = testconfig.ALERTS_CONFIG
+        velocloud_repository = Mock()
 
-        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
+        alert = Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -62,10 +66,10 @@ class TestAlert:
         logger = Mock()
         scheduler = Mock()
         scheduler.add_job = Mock()
-        config = Mock()
         template_renderer = Mock()
+        velocloud_repository = Mock()
 
-        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
+        alert = Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer)
         await alert.start_alert_job(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
@@ -77,315 +81,71 @@ class TestAlert:
         )
 
     @pytest.mark.asyncio
-    async def alert_process_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
-        config = Mock()
-        template_renderer = Mock()
-
-        test_uuid = 'random-uuid'
-
-        edge_1 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "123"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-06-24T20:27:44.000Z",
-                            "modelNumber": "edge123",
-                            "name": "Saturos",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_2 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "456"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-09-24T20:27:44.000Z",
-                            "modelNumber": "edge456",
-                            "name": "Menardi",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    },
-                }
-        }
-        edge_3 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "789"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-10-24T20:27:44.000Z",
-                            "modelNumber": "edge789",
-                            "name": "Isaac",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_request = {"request_id": 123, "body": ['Edge1', 'Edge2', 'Edge3']}
-        email_contents = {'email': "<div>Some email</div>"}
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
-        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
-
-        with patch.object(alert_module, 'uuid', return_value=test_uuid):
-            await alert._alert_process()
-
-        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
-        assert len(reported_edges) == 3
-        alert._event_bus.rpc_request.assert_has_awaits([
-            call('edge.list.request',
-                 {'request_id': test_uuid, 'body': {'filter': {}}},
-                 timeout=200),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge1'},
-                 timeout=120
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge2'},
-                 timeout=120
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge3'},
-                 timeout=120
-                 ),
-        ])
-        alert._event_bus.publish_message.assert_awaited_once_with(
-            'notification.email.request',
-            email_contents,
-        )
-
-    @pytest.mark.asyncio
-    async def alert_process_with_invalid_last_contact_dates_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
-        config = Mock()
-        template_renderer = Mock()
-
-        test_uuid = 'random-uuid'
-
-        edge_1 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "123"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "0000-00-00 00:00:00.000Z",
-                            "modelNumber": "edge123",
-                            "name": "Saturos",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_2 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "456"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "0000-00-00 00:00:00.000Z",
-                            "modelNumber": "edge456",
-                            "name": "Menardi",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_3 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "789"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-10-24T20:27:44.000Z",
-                            "modelNumber": "edge789",
-                            "name": "Isaac",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_request = {"request_id": 123, "body": ['Edge1', 'Edge2', 'Edge3']}
-        email_contents = {'email': "<div>Some email</div>"}
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
-        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer.compose_email_object = Mock(return_value="<div>Some email</div>")
-
-        with patch.object(alert_module, 'uuid', return_value=test_uuid):
-            await alert._alert_process()
-
-        assert event_bus.publish_message.called
-        assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
-        assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
-
-        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
-        assert len(reported_edges) == 1
-        alert._event_bus.rpc_request.assert_has_awaits([
-            call('edge.list.request',
-                 {'request_id': test_uuid, 'body': {'filter': {}}},
-                 timeout=200
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge1'},
-                 timeout=120
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge2'},
-                 timeout=120
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge3'},
-                 timeout=120
-                 ),
-        ])
-        alert._event_bus.publish_message.assert_awaited_once_with(
-            'notification.email.request',
-            email_contents["email"],
-        )
-
-    @pytest.mark.asyncio
-    async def alert_process_with_less_than_30_days_elapsed_since_last_contact_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig.ALERTS_CONFIG
-        template_renderer = TemplateRenderer(config)
-        test_uuid = 'random-uuid'
-
-        edge_1 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "123"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-06-20T20:27:44.000Z",
-                            "modelNumber": "edge123",
-                            "name": "Saturos",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_2 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "456"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-06-25T20:27:44.000Z",
-                            "modelNumber": "edge456",
-                            "name": "Menardi",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_3 = {
-            "body":
-                {
-                    "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": "123",
-                        "edge_id": "789"
-                    },
-                    'edge_info': {
-                        "edges": {
-                            "serialNumber": "some serial",
-                            "lastContact": "2018-06-30T20:27:44.000Z",
-                            "modelNumber": "edge789",
-                            "name": "Isaac",
-                        },
-                        "enterprise_name": "Fake Corp"
-                    }
-                }
-        }
-        edge_request = {"request_id": 123, "body": ['Edge1', 'Edge2', 'Edge3']}
-        email_contents = {'email': "<div>Some email</div>"}
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
-
-        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
-
-        current_timestamp = "2018-07-27T20:27:44.000Z"
-        current_datetime = datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
-        datetime_mock = Mock(wraps=datetime)
-        datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(alert_module, 'datetime', new=datetime_mock):
-            with patch.object(alert_module, 'uuid', return_value=test_uuid):
+    async def alert_process_test(self, alert, edge_link_list, email_obj, list_edge_alert):
+        alert._velocloud_repository.get_edges = CoroutineMock(return_value=edge_link_list)
+        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        datetime_mock = Mock()
+        datetime_now = datetime.now()
+        datetime_mock.now = Mock(return_value=datetime_now)
+        datetime_mock.strptime = Mock(return_value=datetime_now - timedelta(days=40))
+        alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
+        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+            with uuid_mock:
                 await alert._alert_process()
+        alert._event_bus.publish_message.assert_awaited()
 
-        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
-        assert len(reported_edges) == 2
-        alert._event_bus.rpc_request.assert_has_awaits([
-            call('edge.list.request',
-                 {'request_id': test_uuid, 'body': {'filter': {}}},
-                 timeout=200
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge1'},
-                 timeout=120
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge2'},
-                 timeout=120
-                 ),
-            call("edge.status.request",
-                 {'request_id': 123, 'body': 'Edge3'},
-                 timeout=120
-                 ),
-        ])
-        alert._event_bus.publish_message.assert_awaited_once_with(
-            'notification.email.request',
-            email_contents,
-        )
+        alert._template_renderer.compose_email_object.assert_called_once_with(list_edge_alert)
+        alert._event_bus.publish_message.assert_awaited_once_with('notification.email.request', email_obj)
+
+    @pytest.mark.asyncio
+    async def alert_process_empty_test(self, alert, email_obj, list_edge_alert):
+        alert._velocloud_repository.get_edges = CoroutineMock(return_value=[])
+        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        datetime_mock = Mock()
+        datetime_now = datetime.now()
+        datetime_mock.now = Mock(return_value=datetime_now)
+        datetime_mock.strptime = Mock(return_value=datetime_now - timedelta(days=40))
+        alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
+        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+            with uuid_mock:
+                await alert._alert_process()
+        alert._event_bus.publish_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def alert_process_not_elapsed_last_contact_test(self, alert, edge_link_list, email_obj, list_edge_alert):
+        alert._velocloud_repository.get_edges = CoroutineMock(return_value=edge_link_list)
+        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        datetime_mock = Mock()
+        datetime_now = datetime.now()
+        datetime_mock.now = Mock(return_value=datetime_now)
+        late_date = datetime_now - timedelta(days=40)
+        datetime_mock.strptime = Mock(side_effect=[datetime_now, late_date, late_date, late_date])
+        alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
+        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+            with uuid_mock:
+                await alert._alert_process()
+        alert._event_bus.publish_message.assert_awaited()
+
+        alert._template_renderer.compose_email_object.assert_called_once_with(
+            [list_edge_alert[1], list_edge_alert[2], list_edge_alert[3]])
+        alert._event_bus.publish_message.assert_awaited_once_with('notification.email.request', email_obj)
+
+    @pytest.mark.asyncio
+    async def alert_process_bad_last_contact_test(self, alert, edge_link_list, email_obj, list_edge_alert):
+        edge_link_list[3]['edgeLastContact'] = '0000-00-00 00:00:00'
+        alert._velocloud_repository.get_edges = CoroutineMock(return_value=edge_link_list)
+        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        datetime_mock = Mock()
+        datetime_now = datetime.now()
+        datetime_mock.now = Mock(return_value=datetime_now)
+        late_date = datetime_now - timedelta(days=40)
+        datetime_mock.strptime = Mock(side_effect=[datetime_now, late_date, late_date, late_date])
+        alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
+        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+            with uuid_mock:
+                await alert._alert_process()
+        alert._event_bus.publish_message.assert_awaited()
+
+        alert._template_renderer.compose_email_object.assert_called_once_with(
+            [list_edge_alert[1], list_edge_alert[2]])
+        alert._event_bus.publish_message.assert_awaited_once_with('notification.email.request', email_obj)
