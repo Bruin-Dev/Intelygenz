@@ -1,72 +1,72 @@
 # ===========================================================
 # Linter validation jobs for dispatch-portal-frontend module
 # ===========================================================
-#dispatch-portal-frontend-linter:
-#  stage: validation
-#  image: node:10
-#  variables:
-#    MODULE_NAME: dispatch-portal-frontend
-#  before_script:
-#    - npm install --prefix dispatch-portal-frontend
-#  script:
-#    - npm run lint --prefix dispatch-portal-frontend
-#  cache:
-#    policy: push
-#    key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
-#    paths:
-#      - dispatch-portal-frontend/node_modules
-#  rules:
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - dispatch-portal-frontend/**/*
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-#  tags:
-#    - kubernetes
+dispatch-portal-frontend-linter:
+  stage: validation
+  image: node:10
+  variables:
+    MODULE_NAME: dispatch-portal-frontend
+  before_script:
+    - npm install --prefix dispatch-portal-frontend
+  script:
+    - npm run lint --prefix dispatch-portal-frontend
+  cache:
+    policy: push
+    key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - dispatch-portal-frontend/node_modules
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event")'
+  tags:
+    - kubernetes
 
 # ===================================================
 # Unit tests jobs for dispatch-portal-frontend module
 # ===================================================
-#dispatch-portal-frontend-test:
-#  stage: unit_test
-#  image: node:10
-#  variables:
-#    MODULE_NAME: dispatch-portal-frontend
-#  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-#  script:
-#    - npm run test --prefix dispatch-portal-frontend
-#  cache:
-#    policy: pull
-#    key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
-#    paths:
-#      - dispatch-portal-frontend/node_modules
-#  rules:
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - dispatch-portal-frontend/**/*
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-#  dependencies:
-#    - dispatch-portal-frontend-linter
-#  tags:
-#    - kubernetes
-#
-#dispatch-portal-frontend-test-e2e:
-#  stage: unit_test
-#  image: cypress/base:10
-#  variables:
-#    CI: 1
-#    MODULE_NAME: dispatch-portal-frontend
-#  before_script:
-#    - npm install --prefix dispatch-portal-frontend
-#    - npm run build --prefix dispatch-portal-frontend
-#  script:
-#    - npm run ci:test --prefix dispatch-portal-frontend
-#  rules:
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - dispatch-portal-frontend/**/*
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-#  tags:
-#    - kubernetes
+dispatch-portal-frontend-test:
+  stage: unit_test
+  image: node:10
+  variables:
+    MODULE_NAME: dispatch-portal-frontend
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  script:
+    - npm run test --prefix dispatch-portal-frontend
+  cache:
+    policy: pull
+    key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - dispatch-portal-frontend/node_modules
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event")'
+  dependencies:
+    - dispatch-portal-frontend-linter
+  tags:
+    - kubernetes
+
+dispatch-portal-frontend-test-e2e:
+  stage: unit_test
+  image: cypress/base:10
+  variables:
+    CI: 1
+    MODULE_NAME: dispatch-portal-frontend
+  before_script:
+    - npm install --prefix dispatch-portal-frontend
+    - npm run build --prefix dispatch-portal-frontend
+  script:
+    - npm run ci:test --prefix dispatch-portal-frontend
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event")'
+  tags:
+    - kubernetes
 
 # =================================================================
 # Images builds jobs for dispatch-portal-frontend module components
