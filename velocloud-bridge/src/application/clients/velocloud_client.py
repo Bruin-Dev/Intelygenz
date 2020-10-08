@@ -40,18 +40,22 @@ class VelocloudClient:
         except ConflictingIdError as conflict:
             self._logger.info(f'Skipping start of relogin job for host {host}. Reason: {conflict}')
 
-    async def _relogin_client(self, host):
-        self._logger.info(f"Relogging in host: {host} to velocloud")
-        for client in self._clients:
-            if host == client['host']:
-                self._clients.remove(client)
-
+    def _get_cred_block(self, host):
         for cred_block in self._config['servers']:
             if host == cred_block['url']:
-                connected_client = await self._create_and_connect_client(host,
-                                                                         cred_block['username'],
-                                                                         cred_block['password'])
-                self._clients.append(connected_client)
+                return cred_block
+
+    async def _relogin_client(self, host):
+        self._logger.info(f"Relogging in host: {host} to velocloud")
+
+        creds = self._get_cred_block(host)
+
+        for client in self._clients:
+            if host == client['host']:
+                client['headers'] = {}
+                connected_client = await self._create_and_connect_client(host, creds['username'], creds['password'])
+                client['headers'] = connected_client['headers']
+                break
 
     async def _create_and_connect_client(self, host, user, password):
         self._logger.info(f'Logging in host: {host} to velocloud')
@@ -62,11 +66,11 @@ class VelocloudClient:
         if headers["status"] in range(200, 300):
             self._logger.info("Connection successful")
             client['headers'] = headers["body"]
-            return client
         else:
             self._logger.info(f'Connection wasn\'t possible, error {headers["status"]}')
             self._logger.info(headers['body'])
-            return
+            client['headers'] = {}
+        return client
 
     async def _create_headers_by_host(self, host, user, password):
         try:

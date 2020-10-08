@@ -81,13 +81,18 @@ class TestVelocloudClient:
             "status": 500
         }
 
+        expected_client = {
+            'headers': {},
+            'host': 'Some url'
+        }
+
         velocloud_client = VelocloudClient(configs, logger, scheduler)
         velocloud_client._create_headers_by_host = CoroutineMock(return_value=headers)
 
         client = await velocloud_client._create_and_connect_client(host, username, password)
 
         velocloud_client._create_headers_by_host.assert_called_once_with(host, username, password)
-        assert client is None
+        assert client == expected_client
 
     @pytest.mark.asyncio
     async def create_headers_by_host_test(self):
@@ -204,25 +209,6 @@ class TestVelocloudClient:
         client = {'host': 'someurl', 'headers': 'new header'}
         initial_clients = [{'host': 'some_host2', 'headers': 'some header dict'},
                            {'host': 'someurl', 'headers': 'some header dict'}]
-        final_clients = [{'host': 'some_host2', 'headers': 'some header dict'},
-                         client]
-        velocloud_client = VelocloudClient(configs, logger, scheduler)
-        velocloud_client._create_and_connect_client = CoroutineMock(return_value=client)
-        velocloud_client._clients = initial_clients
-
-        await velocloud_client._relogin_client(host)
-
-        assert velocloud_client._clients == final_clients
-
-    @pytest.mark.asyncio
-    async def relogin_client_host_not_in_initial_clients_list_test(self):
-        configs = testconfig
-        logger = Mock()
-        scheduler = Mock()
-
-        host = 'someurl'
-        client = {'host': 'someurl', 'headers': 'new header'}
-        initial_clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         final_clients = [{'host': 'some_host2', 'headers': 'some header dict'},
                          client]
         velocloud_client = VelocloudClient(configs, logger, scheduler)

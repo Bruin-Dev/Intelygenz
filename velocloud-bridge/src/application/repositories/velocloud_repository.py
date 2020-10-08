@@ -33,7 +33,7 @@ class VelocloudRepository:
         response_link_service_group = await self._velocloud_client.get_link_service_groups_information(edge, interval)
 
         if response_link_service_group["status"] not in range(200, 300):
-            self._logger.error(f"Error {response_link_service_group['status'], response['body']}")
+            self._logger.error(f"Error {response_link_service_group['status'], response_link_service_group['body']}")
             return {"body": response_link_service_group["body"], "status": response_link_service_group["status"]}
 
         link_service_group = response_link_service_group["body"]
