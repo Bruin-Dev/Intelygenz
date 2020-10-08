@@ -158,6 +158,16 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND "
                              f"\"ERROR:\"",
                     "search_name": f"[velocloud-bridge] - ERROR messages"
+                },
+                {
+                    "query": f"bruin-bridge AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[bruin-bridge] - ERROR messages"
+                },
+                {
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[service-outage-monitor] - ERROR messages"
                 }
             ]
         }
