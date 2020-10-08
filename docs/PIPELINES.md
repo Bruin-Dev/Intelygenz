@@ -11,7 +11,9 @@ Human error can and does occur when carrying out these boring and repetitive tas
 All of the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
 We separate the automatation in two parts, [continuous integration](#continuous-integration-ci) and [continuous delivery](#continuous-delivery-cd), that are explained in the next sections.
 
-To improve the speed and optimization of the pipelines, **only the jobs and stages will be executed on those modules that change in each commit**. 
+To improve the speed and optimization of the pipelines, **only the jobs and stages will be executed on those modules that change in each commit**.
+
+## How to launch all jobs in a pipeline
 
 **Exceptionally, it is possible to launch a pipeline with all the jobs and stages on a branch using the web interface, as shown in the following image**. To do so, the following steps must be followed:
 
@@ -23,6 +25,8 @@ To improve the speed and optimization of the pipelines, **only the jobs and stag
    
    3. Indicate the branch where you want to run the pipeline in the `Run for` box and then click on `Run pipeline`. It's possible see an example in the following image, where the box `Run for` is shown in green and `Run pipeline` is shown in red.
    ![IMAGE: select_run_pipeline_branch](./img/pipelines/select_run_pipeline_branch.png)
+
+   > It is important to note that due to the extra time added by the tests of the `dispacth-portal-frontend` microservice, the tests of this one will only be executed when any of the files within it change or a pipeline with the Gitlab variable `TEST_DISPATCH_PORTAL_FRONTEND` with value `true` is executed.
 
 # Environments
 
@@ -80,129 +84,213 @@ This area will cover all build steps of all necessary modules to deploy the app 
 
 ## Deploy steps
 
-In these works  *MetTel Automation* modules in the monorepo will be deployed to the selected environment, as well as all the resources associated to that environment in AWS.
+In this stage there are two jobs:
 
-In these jobs services in the monorepo will be deployed to the selected environment. The deploy steps will deploy the following in AWS:
+* **One executed automatically**, whose name is `deploy-branches` for ephemeral environments and `deploy-master` for the production environment. In which *MetTel Automation* modules in the monorepo will be deployed to the selected environment, as well as all the resources associated to that environment in AWS. The deploy steps will deploy the following in AWS:
 
-* An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html) will be created for the environment with a set of resources
+  * An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html) will be created for the environment with a set of resources
 
-  * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new Docker image uploaded for each service of the project, being these services the specified below:
+    * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new Docker image uploaded for each service of the project, being these services the specified below:
 
-    * [bruin-bridge](../bruin-bridge)
+      * [bruin-bridge](../bruin-bridge)
     
-    * [cts-bridge](../cts-bridge)
+      * [cts-bridge](../cts-bridge)
     
-    * [dispatch-portal-backend](../dispatch-portal-backend)
+      * [dispatch-portal-backend](../dispatch-portal-backend)
     
-    * [dispatch-portal-frontend](../dispatch-portal-frontend)
+      * [dispatch-portal-frontend](../dispatch-portal-frontend)
 
-    * [last-contact-report](../last-contact-report)
+      * [last-contact-report](../last-contact-report)
     
-    * [lit-bridge](../lit-bridge)
+      * [lit-bridge](../lit-bridge)
     
-    * [lumin-billing-report](../lumin-billing-report)
+      * [lumin-billing-report](../lumin-billing-report)
 
-    * [metrics-prometheus](../metrics-dashboard/grafana)
+      * [metrics-prometheus](../metrics-dashboard/grafana)
 
-    * [nats-server, nats-server-1, nats-server-2](../nats-server)
+      * [nats-server, nats-server-1, nats-server-2](../nats-server)
 
-    * [notifier](../notifier)
+      * [notifier](../notifier)
 
-    * [service-affecting-monitor](../service-affecting-monitor)
+      * [service-affecting-monitor](../service-affecting-monitor)
     
-    * [service-dispatch-monitor](../service-dispatch-monitor)
+      * [service-dispatch-monitor](../service-dispatch-monitor)
 
-    * [service-outage-monitor-1, service-outage-monitor-2, service-outage-monitor-3, service-outage-monitor-4, service-outage-monitor-triage](../service-outage-monitor)
+      * [service-outage-monitor-1, service-outage-monitor-2, service-outage-monitor-3, service-outage-monitor-4, service-outage-monitor-triage](../service-outage-monitor)
     
-    * [sites-monitor](../sites-monitor)
+      * [sites-monitor](../sites-monitor)
 
-    * [t7-bridge](../t7-bridge)
+      * [t7-bridge](../t7-bridge)
 
-    * [tnba-monitor](../tnba-monitor)
+      * [tnba-feedback](../tnba-feedback)
 
-    * [velocloud-bridge](../velocloud-bridge)
+      * [tnba-monitor](../tnba-monitor)
 
-  * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each of the above *ECS Services*
+      * [velocloud-bridge](../velocloud-bridge)
 
-In this process, a series of resources will also be created in AWS for the selected environment, as follows:
+    * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each of the above *ECS Services*
 
-* An [ElastiCache Redis Cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html)
+  In this process, a series of resources will also be created in AWS for the selected environment, as follows:
 
-* An [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html)
+  * Three [ElastiCache Redis Clusters](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html), which are detailed below:
 
-* A [record](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html) in [Route53](https://aws.amazon.com/route53/features/)
+    - `<environment>`: used to save some data about dispatches, as well as to skip the limitation of messages of more than 1MB when passing them to NATS.
 
-* A [CloudWatch Log Group](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
+    - `<environment>-customer-cache-redis`: used to save the mappings between Bruin clients and Velocloud edges, being able to use them between restarts if any occurs.
 
-* An [Service Discovery Service](https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/) for each ECS Service of the ECS Cluster created for this environment and a [Service Discovery Namespace](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) to logically group these *Service Discovery Services*.
+    - `<environment>-tnba-feedback-cache-redis`: 
 
-* A set of resources related to the metrics of the environment:
+  * An [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html)
 
-  * [CloudWatch Alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html)
+  * A [record](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html) in [Route53](https://aws.amazon.com/route53/features/)
 
-  * [CloudWatch Dashboard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html)
+  * A [CloudWatch Log Group](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
 
-  * [CloudWatch Log Filters](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
+  * An [Service Discovery Service](https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/) for each ECS Service of the ECS Cluster created for this environment and a [Service Discovery Namespace](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) to logically group these *Service Discovery Services*.
 
-* A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
+  * A set of resources related to the metrics of the environment:
 
-* A [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/GetStartedWithS3.html) to store the content of the metrics obtained by [Thanos](https://thanos.io/) and displayed through [Grafana](https://grafana.com/).
+    * [CloudWatch Alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html)
 
-Also, resources of type [null_resource](https://www.terraform.io/docs/providers/null/resource.html) are created to execute some Python scripts:
+    * [CloudWatch Dashboard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html)
 
-1. The creation of [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) starts only if a Python script launched as a `null_resource` finishes with success. 
+    * [CloudWatch Log Filters](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
+
+  * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
+
+  * A [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/GetStartedWithS3.html) to store the content of the metrics obtained by [Thanos](https://thanos.io/) and displayed through [Grafana](https://grafana.com/).
+
+  Also, resources of type [null_resource](https://www.terraform.io/docs/providers/null/resource.html) are created to execute some Python scripts:
+
+  1. The creation of [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) starts only if a Python script launched as a `null_resource` finishes with success. 
 
     This script checks that the last ECS service created for NATS is running in `HEALTHY` state.
 
-2. If the previous step succeeded then ECS services related to capabilities microservices are created, with these being the following:
+  2. If the previous step succeeded then ECS services related to capabilities microservices are created, with these being the following:
 
-    - `bruin-bridge`
-    - `cts-bridge`
-    - `lit-bridge`
-    - `notifier`
-    - `prometheus`
-    - `t7-bridge`
-    - `velocloud-bridge` 
+     - `bruin-bridge`
+     - `cts-bridge`
+     - `lit-bridge`
+     - `notifier`
+     - `prometheus`
+     - `t7-bridge`
+     - `velocloud-bridge` 
 
-    Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
+     Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
 
-3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created, with these being the following:
+  3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created, with these being the following:
     
-    - `dispatch-portal-backend`
-	- `last-contact-report`
-	- `lumin-billing-report`
-	- `service-affecting-monitor`
-	- `service-dispatch-monitor`
-	- `service-outage-monitor-1`
-	- `service-outage-monitor-2`
-	- `service-outage-monitor-3`
-	- `service-outage-monitor-4`
-	- `service-outage-monitor-triage`
-	- `sites-monitor`
-	- `tnba-monitor`
+     - `dispatch-portal-backend`
+     - `last-contact-report`
+     - `lumin-billing-report`
+     - `service-affecting-monitor`
+     - `service-dispatch-monitor`
+     - `service-outage-monitor-1`
+     - `service-outage-monitor-2`
+     - `service-outage-monitor-3`
+     - `service-outage-monitor-4`
+     - `service-outage-monitor-triage`
+     - `sites-monitor`
+     - `tnba-feedback`
+     - `tnba-monitor`
 
-   This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
+     This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
 
-   The following is an example of a definition for the use-case microservice `service-affecting-monitor` using [*Terraform*](https://www.terraform.io/). Here, the dependency between the corresponding `null_resource` type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.
+     The following is an example of a definition for the use-case microservice `service-affecting-monitor` using [*Terraform*](https://www.terraform.io/). Here, the dependency between the corresponding `null_resource` type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.
 
-   ```terraform
-   resource "aws_ecs_service" "automation-service-affecting-monitor" {
+     ```terraform
+     resource "aws_ecs_service" "automation-service-affecting-monitor" {
 
-      . . .
+        . . .
 
-        depends_on = [ null_resource.bruin-bridge-healthcheck,
-                       null_resource.cts-bridge-healthcheck,
-                       null_resource.lit-bridge-healthcheck,
-                       null_resource.velocloud-bridge-healthcheck,
-                       null_resource.t7-bridge-healthcheck,
-                       null_resource.notifier-healthcheck,
-                       null_resource.metrics-prometheus-healthcheck ]
-      . . .
-   }
-   ```
+          depends_on = [ null_resource.bruin-bridge-healthcheck,
+                         null_resource.cts-bridge-healthcheck,
+                         null_resource.lit-bridge-healthcheck,
+                         null_resource.velocloud-bridge-healthcheck,
+                         null_resource.t7-bridge-healthcheck,
+                         null_resource.notifier-healthcheck,
+                         null_resource.metrics-prometheus-healthcheck ]
+        . . .
+     }
+     ```
 
-   >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
+     >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
 
-4. The provisioning of the different groups and the searches included in each one of them is done through a [python utility](../ci-utils/papertrail-provisioning), this makes calls to the util [go-papertrail-cli](https://github.com/xoanmm/go-papertrail-cli) who is in charge of the provisioning of the elements mentioned in [Papertrail](https://papertrailapp.com/).
+  4. Following the same procedure as in the previous step, a dependency is established between the microservice `dispatch-portal-frontend` and `dispatch-portal-backend`. 
+
+     The reason for this is that the `dispatch-portal-frontend` microservice needs to know the corresponding IP with the DNS entry in Route53 for the `dispatch-portal-backend` microservice, since if the previous deployment is saved, the new IP corresponding to the DNS entry is not updated.
+
+     The following is the configuration in the terraform code of the service in ECS for the `dispatch-portal-frontend` microservice, where the necessary configuration to comply with this restriction can be seen.
+
+     ```terraform
+     resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
+
+        . . .
+       
+          depends_on = [ null_resource.bruin-bridge-healthcheck,
+                         null_resource.cts-bridge-healthcheck,
+                         null_resource.lit-bridge-healthcheck,
+                         null_resource.velocloud-bridge-healthcheck,
+                         null_resource.t7-bridge-healthcheck,
+                         null_resource.notifier-healthcheck,
+                         null_resource.metrics-prometheus-healthcheck,
+                         null_resource.dispatch-portal-backend-healthcheck,
+                         aws_lb.automation-alb ]
+     }
+     ```
+
+  5. The provisioning of the different groups and the searches included in each one of them is done through a [python utility](../ci-utils/papertrail-provisioning), this makes calls to the util [go-papertrail-cli](https://github.com/xoanmm/go-papertrail-cli) who is in charge of the provisioning of the elements mentioned in [Papertrail](https://papertrailapp.com/).
+
+* **Another one that can optionally be executed manually**, whose name is `deploy-KRE-dev` for ephemeral environments and `deploy-KRE-production` for the production environment.
+
+  This Gitlab job will deploy the infrastructure and components needed to provide the [KRE](https://github.com/konstellation-io/KRE) component of [konstellation](https://konstellation-io.github.io/website/). For the installation of this component, the [EKS installation guide](https://konstellation-io.github.io/website/docs/KRE/installation/cloud/eks/) provided by the component's provider has been followed.
+
+  The process followed in this job is as follows:
+
+  1. The necessary infrastructure is created in AWS for KRE, creating for them the following components:
+
+     - An S3 bucket for each environment and save information about the cluster, such as the SSH key to connect to the nodes.
+
+     - An [EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html) to be able to deploy the different KRE components designed for Kubernetes
+
+     - An [AutoScaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) to have the desired number of Kubernetes worker nodes
+
+     - A hosted zone on [Route53](https://aws.amazon.com/route53/faqs/?nc1=h_ls) for the corresponding KRE environment
+
+     - A SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it
+
+  2. Once the necessary infrastructure is created, a series component are installaded using [helm charts](https://github.com/helm/charts) in the EKS cluster:
+
+     - **nginx ingress controller**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
+
+       A series of configurations are provided so that the IP of clients in Kubernetes services can be known, since by default it will always use the internal IP in EKS of the load balancer for requests made from the Internet.
+
+       A list of allowed IPs is also provided in the chart configuration through a specific configuration key, thus restricting access to the cluster's microservices.
+
+       This component will create a [Classic Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/introduction.html) in AWS to expose nginx ingress component.
+
+       After the installation of this helm chart a [custom script](../ci-utils/route53/update_route53_elb_alias.sh) is used to create and update a record set in the hosted created for KRE, as [recommended in the KRE installation guide](https://konstellation-io.github.io/website/docs/KRE/installation/cloud/eks/#create-wildcard-entry-in-your-hosted-zone).
+
+     - **hostpath provisioner**, using the helm chart from [rimusz repository](https://charts.rimusz.net)
+
+     - **kube2iam**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
+
+       This component provides IAM credentials to containers running inside a kubernetes cluster based on annotations.
+
+     - **cert-mananger**, using the helm chart from [jetstack repository](https://charts.jetstack.io).
+
+       This component automate the management lifecycle of all required certificates used by the KRE component in each environment.
+
+     - **KRE**, using the helm chart from [KRE repository](https://charts.konstellation.io). This component will install the KRE application.
+
+## Destroy steps
+
+In this stage a series of manual jobs are available to destroy what was created in the previous stage, both for [KRE](https://github.com/konstellation-io/kre) and for the microservices of the repository in AWS. These are detailed below:
+
+- `destroy-branches` for ephemeral environments or `destroy-master` for the production environment: This job will destroy everything created by Terraform in the previous stage by the job `deploy-branches` or `deploy-master` depending on the environment.
+
+- `destroy-branches-aws-nuke`: This job is only available for ephemeral environments, it generates a `yml` file using a [specific script](../ci-utils/aws-nuke/aws_nuke_conf_generator.py) to be used by [aws-nuke](https://github.com/rebuy-de/aws-nuke) to destroy all the infrastructure created for an ephemeral environment in AWS. This job should only be used when the `destroy-branches' job fails.
+
+- `destroy-kre-dev` for ephemeral environments or `destroy-kre-production` for the production environment: This job will destroy everything created by Terraform in the previous stage by the job `deploy-kre-dev` or `deploy-kre-production` depending on the environment.
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

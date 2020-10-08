@@ -15,7 +15,7 @@ variables:
   IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
   IGZ_PACKAGES_VERSION: 2.0.0
   DOCKER_BASE_IMAGE_VERSION: 2.0.0
-  DOCKER_IMAGE_UTILS_VERSION: 1.3.0
+  DOCKER_IMAGE_UTILS_VERSION: 1.4.0
   bruin_bridge_desired_tasks: 2
   cts_bridge_desired_tasks: 1
   customer_cache_desired_tasks: 1

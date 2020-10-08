@@ -1,9 +1,10 @@
 module "mettel-automation-eks-cluster" {
-  source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = local.cluster_name
-  cluster_version = local.k8s_version
-  subnets         = local.subnets
-  vpc_id          = local.vpc_id
+  source            = "terraform-aws-modules/eks/aws"
+  cluster_name      = local.cluster_name
+  cluster_version   = local.k8s_version
+  subnets           = local.subnets
+  vpc_id            = local.vpc_id
+  write_kubeconfig  = false
 
   worker_groups = [
     {

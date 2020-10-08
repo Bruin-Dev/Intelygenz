@@ -13,9 +13,7 @@
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| aws | =3.4.0 |
+No provider.
 
 ## Inputs
 
@@ -23,11 +21,6 @@
 |------|-------------|------|---------|:--------:|
 | CURRENT\_ENVIRONMENT | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
 | common\_info | Global Tags # kre infrastructure for mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation-kre",<br>  "provisioning": "Terraform"<br>}</pre> | no |
-| enable\_spf\_record | n/a | `bool` | `true` | no |
-| extra\_ses\_records | n/a | `list(string)` | `[]` | no |
-| igz\_users\_email | IGZ user for create email accounts | `list` | <pre>[<br>  "mettel@intelygenz.com",<br>  "francisco.capllonch@intelygenz.com",<br>  "xoan.mallon@intelygenz.com"<br>]</pre> | no |
-| region | n/a | `string` | `"us-east-1"` | no |
-| subdomain\_name\_prefix | n/a | `string` | `"intelygenz"` | no |
 
 ## Outputs
 

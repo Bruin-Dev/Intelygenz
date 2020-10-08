@@ -109,6 +109,7 @@
 | notifier-task-definition-json | Task definition arn output in rendered json for notifier | `string` | `"/tmp/notifier-task-definition.json"` | no |
 | notifier\_desired\_tasks | Number of desired tasks of microservice notifier | `number` | `1` | no |
 | redis\_node\_type | n/a | `map` | <pre>{<br>  "dev": "cache.t2.micro",<br>  "production": "cache.m4.large"<br>}</pre> | no |
+| redis\_node\_type\_cache\_for\_microservices | n/a | `map` | <pre>{<br>  "dev": "cache.t2.micro",<br>  "production": "cache.t2.small"<br>}</pre> | no |
 | service\_affecting\_monitor\_desired\_tasks | Number of desired tasks of microservice service-affecting-monitor | `number` | `1` | no |
 | service\_dispatch\_monitor\_desired\_tasks | Number of desired tasks of microservice service-dispatch-monitor | `number` | `1` | no |
 | service\_outage\_monitor\_1\_desired\_tasks | Number of desired tasks of microservice service-outage-monitor # 1 | `number` | `0` | no |

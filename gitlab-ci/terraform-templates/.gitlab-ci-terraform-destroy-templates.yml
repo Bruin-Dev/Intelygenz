@@ -81,7 +81,8 @@
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # DELETE KRE RECORD FOR NGINX INGRESS ELB
-    - /bin/bash ci-utils/route53/update_route53_elb_alias.sh ${KRE_RECORD_ALIAS_NAME} ${HOSTED_ZONE_NAME} -d
+    - pip3 install -r ci-utils/route53/requirements.txt
+    - python3 ci-utils/route53/nginx_ingress_route53_util.py -a ${KRE_RECORD_ALIAS_NAME} -n ${HOSTED_ZONE_NAME} -d True
     # UNINSTALL INGRESS CONTROLLER
     - helm uninstall nginx-ingress -n kube-system
     - cd ${MODULE} || exit 1
@@ -93,9 +94,9 @@
           terraform init -backend=true -get=true -input=false
           if [ "$i" != "2-smtp/" ]; then
             terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+            terraform refresh
+            terraform destroy -auto-approve
           fi
-          terraform refresh
-          terraform destroy -auto-approve
           cd ..
         )
       done

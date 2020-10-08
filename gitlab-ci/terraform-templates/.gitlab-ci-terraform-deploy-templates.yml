@@ -138,7 +138,8 @@
     # INSTALL INGRESS CONTROLLER
     - helm upgrade --install --set controller.service.loadBalancerSourceRanges="{$LOAD_BALANCER_WHITELIST}" --namespace kube-system --version ${NGINX_INGRESS_CHART_V} nginx-ingress
         stable/nginx-ingress --values helm/kre/ingress-values.yaml
-    - /bin/bash ci-utils/route53/update_route53_elb_alias.sh ${KRE_RECORD_ALIAS_NAME} ${HOSTED_ZONE_NAME} -u
+    - pip3 install -r ci-utils/route53/requirements.txt --use-feature=2020-resolver
+    - python3 ci-utils/route53/nginx_ingress_route53_util.py -a ${KRE_RECORD_ALIAS_NAME} -n ${HOSTED_ZONE_NAME} -u True
     # HOSTPATH PROVISIONER
     - helm upgrade --install --version ${HOSTPATH_CHART_V} --set NodeHostPath="/mnt/efs/${EKS_CLUSTER_NAME}" hostpath-provisioner --namespace kube-system rimusz/hostpath-provisioner
     # INSTALL KUBE2IAM
@@ -150,11 +151,6 @@
     - kubectl create namespace kre --dry-run -o yaml | kubectl apply -f -
     - export HOSTED_ZONE_ID=$(aws route53 list-hosted-zones  | jq --arg HOSTED_ZONE_NAME $HOSTED_ZONE_NAME -r '.HostedZones | .[] | select(.Name==$HOSTED_ZONE_NAME) | .Id' |  cut -d "/" -f3)
     - envsubst < helm/kre/values.yaml.tpl > values.yaml
-    - >
-      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]; then
-        helm upgrade --install kre --set certManager.acme.server="https://acme-staging-v02.api.letsencrypt.org/directory" --namespace kre --values values.yaml --version ${KRE_CHART_V} konstellation-io/kre
-      else
-        helm upgrade --install kre --namespace kre --values values.yaml --version ${KRE_CHART_V} konstellation-io/kre
-      fi
+    - helm upgrade --install kre --namespace kre --values values.yaml --version ${KRE_CHART_V} konstellation-io/kre
   tags:
     - kubernetes

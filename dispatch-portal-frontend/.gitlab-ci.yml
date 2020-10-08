@@ -19,7 +19,7 @@ dispatch-portal-frontend-linter:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - dispatch-portal-frontend/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event")'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   tags:
     - kubernetes
 
@@ -43,7 +43,7 @@ dispatch-portal-frontend-test:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - dispatch-portal-frontend/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event")'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   dependencies:
     - dispatch-portal-frontend-linter
   tags:
@@ -64,7 +64,7 @@ dispatch-portal-frontend-test-e2e:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - dispatch-portal-frontend/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event")'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   tags:
     - kubernetes
 

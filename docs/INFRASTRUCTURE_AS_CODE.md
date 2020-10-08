@@ -30,7 +30,9 @@ the infrastructure.
 ````bash
 infra-as-code/
 ├── basic-infra             # basic infrastructure in AWS
+└── data-collector          # data-collector infrastructre in AWS
 └── dev                     # AWS resources for each environment (ECS Cluster, ElastiCache Cluster, etc.)
+└── kre                     # kre infrastructure
 └── network-resources       # network resources infrastructure in AWS
 ````
 
@@ -38,11 +40,15 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
 1. `basic-infra`: there are the necessary terraform files to create the Docker images repositories in ECS, and the roles and policies necessary for use these.
 
-2. `dev`: there are the necessary terraform files for create the resources used for each environment in AWS, these are as follows
+2. `data-collector`: there are the necessary terraform files to create a Lambda, a DocumentDB Cluster, as well as an API Gateway to call the necessary and all the necessary resources to perform the conexion between these elements.
+
+    > These resources will only be created for production environment
+
+3. `dev`: there are the necessary terraform files for create the resources used for each environment in AWS, these are as follows
 
     * An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html), the [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) and its [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for all the microservices present in the project
 
-    * An [ElastiCache Redis Cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html)
+    * Three [ElastiCache Redis Clusters](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html)
 
     * An [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html)
 
@@ -66,7 +72,25 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
     * A set of [null_resource](https://www.terraform.io/docs/providers/null/resource.html) *Terraform* type resources to execute the [python script in charge of health checking the task instances](../ci-utils/ecs/task_healthcheck.py) created in the deployment of capabilities microservices.
 
-3. `network-resources`: there are the necessary files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
+4. `kre`: there are the necessary terraform files for create the infrastructure for the [kre](https://github.com/konstellation-io/kre) component of [konstellation](https://konstellation-io.github.io/website/), as well as all the components it needs at AWS.
+
+    There is a series of folders with terraform code that have a number in their names, these will be used to deploy the components in a certain order and are detailed below:
+
+    - `0-create-bucket`: In this folder the terraform code is available to create a bucket for each environment and save information about the cluster, such as the SSH key to connect to the worker nodes of the EKS cluster that is going to be created.
+
+    - `1-create-eks-cluster`: In this folder the terraform code is available to create the following resources
+    
+        - An [EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html) to be able to deploy the different kre components designed for Kubernetes
+
+        - An [AutoScaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) to have the desired number of Kubernetes worker nodes
+
+        - A hosted zone on [Route53](https://aws.amazon.com/route53/faqs/?nc1=h_ls) for the corresponding kre environment
+
+        - A SSH key to connect to worker nodes of EKS
+
+    - `2-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it.
+
+5. `network-resources`: there are the necessary terraform files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 
     * [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
 

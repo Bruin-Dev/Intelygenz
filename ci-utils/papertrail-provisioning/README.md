@@ -12,7 +12,7 @@ It is possible to add and/or remove papertrail groups, as well as the searches o
 
 - In this element a group arrays dictionary is defined, where the name of the group must be defined in each case, as well as the searches to be carried out in this one by means of another dictionary, indicating for these last ones the name and the query of the same ones.
 
-- Certain environment variables are used to make available the logs of the last deployment of each microservice, using these to update the queries of the previously existing searches of each microservice.
+  **In the case of adding the search on logs of a microservice, the ECR repository must be added where the images of the microservice are stored, using the `repository` key in the dictionary.**
 
 - It is also possible to define groups with searches that will be used to send notifications and/or alarms, these will be distinguished from the others since it will not be necessary to update them to obtain the latest deployments of each microservice.
 
@@ -23,8 +23,7 @@ It is possible to add and/or remove papertrail groups, as well as the searches o
 Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in the previous section, defining a group with a search for each of the microservices, as well as one for all the microservices.
 
 ```
-{
-    "groups": [
+"groups": [
         {
             "wildcard": f"{SYSTEM_IPS}",
             "destination_port": f"{PAPERTRAIL_PORT}",
@@ -32,85 +31,118 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
             "group_name": f"[{ENVIRONMENT_NAME}] - {BRANCH_NAME} logs",
             "searches": [
                 {
-                    "query": f"bruin-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[bruin-bridge] - logs"
+                    "query": f"bruin-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[bruin-bridge] - logs",
+                    "repository": "automation-bruin-bridge"
                 },
                 {
-                    "query": f"cts-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[cts-bridge] - logs"
+                    "query": f"cts-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[cts-bridge] - logs",
+                    "repository": "automation-cts-bridge"
+                },
+                {
+                    "query": f"customer-cache AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[customer-cache] - logs",
+                    "repository": "automation-customer-cache"
+                },
+                {
+                    "query": f"dispatch-portal-backend AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[dispatch-portal-backend] - logs",
+                    "repository": "automation-dispatch-portal-frontend"
                 },
                 {
                     "query": f"dispatch-portal-backend AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
                     "search_name": f"[dispatch-portal-backend] - logs"
                 },
                 {
-                    "query": f"grafana AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[grafana] - logs"
+                    "query": f"last-contact-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[last-contact-report] - logs",
+                    "repository": "automation-last-contact-report"
                 },
                 {
-                    "query": f"last-contact-report AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[last-contact-report] - logs"
+                    "query": f"lit-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[lit-bridge] - logs",
+                    "repository": "automation-lit-bridge"
                 },
                 {
-                    "query": f"lit-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[lit-bridge] - logs"
+                    "query": f"lumin-billing-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[lumin-billing-report] - logs",
+                    "repository": "automation-lumin-billing-report"
                 },
                 {
-                    "query": f"lumin-billing-report AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[lumin-billing-report] - logs"
+                    "query": f"NGINX AND <BUILD_NUMBER> AND {ENVIRONMENT_ID}",
+                    "search_name": f"[nginx] - logs",
+                    "repository": "automation-dispatch-portal-frontend/nginx"
                 },
                 {
-                    "query": f"service-affecting-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-affecting-monitor] - logs"
+                    "query": f"service-affecting-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-affecting-monitor] - logs",
+                    "repository": "automation-service-affecting-monitor"
                 },
                 {
-                    "query": f"service-dispatch-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-dispatch-monitor] - logs"
+                    "query": f"service-dispatch-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-dispatch-monitor] - logs",
+                    "repository": "automation-service-dispatch-monitor"
                 },
                 {
-                    "query": f"service-outage-monitor-1 AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-outage-monitor-1] - logs"
+                    "query": f"service-outage-monitor-1 AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-outage-monitor-1] - logs",
+                    "repository": "automation-service-outage-monitor"
                 },
                 {
-                    "query": f"service-outage-monitor-2 AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-outage-monitor-2] - logs"
+                    "query": f"service-outage-monitor-2 AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-outage-monitor-2] - logs",
+                    "repository": "automation-service-outage-monitor"
                 },
                 {
-                    "query": f"service-outage-monitor-3 AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-outage-monitor-3] - logs"
+                    "query": f"service-outage-monitor-3 AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-outage-monitor-3] - logs",
+                    "repository": "automation-service-outage-monitor"
                 },
                 {
-                    "query": f"service-outage-monitor-4 AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-outage-monitor-4] - logs"
+                    "query": f"service-outage-monitor-4 AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-outage-monitor-4] - logs",
+                    "repository": "automation-service-outage-monitor"
                 },
                 {
-                    "query": f"service-outage-monitor-triage AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[service-outage-monitor-triage] - logs"
+                    "query": f"service-outage-monitor-triage AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-outage-monitor-triage] - logs",
+                    "repository": "automation-service-outage-monitor"
                 },
                 {
-                    "query": f"sites-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[sites-monitor] - logs"
+                    "query": f"sites-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[sites-monitor] - logs",
+                    "repository": "automation-sites-monitor"
                 },
                 {
-                    "query": f"t7-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[t7-bridge] - logs"
+                    "query": f"t7-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[t7-bridge] - logs",
+                    "repository": "automation-t7-bridge"
                 },
                 {
-                    "query": f"tnba-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[tnba-monitor] - logs"
+                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-monitor] - logs",
+                    "repository": "automation-tnba-monitor"
                 },
                 {
-                    "query": f"velocloud-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
-                    "search_name": f"[velocloud-bridge] - logs"
+                    "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-feedback] - logs",
+                    "repository": "automation-tnba-feedback"
                 },
                 {
-                    "query": f"{ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[velocloud-bridge] - logs",
+                    "repository": "automation-velocloud-bridge"
+                },
+                {
+                    "query": f"{ENVIRONMENT_ID}",
                     "search_name": f"[all modules] - logs",
                 }
             ]
-        }
+}
 ```
 
+> The word `<BUILD_NUMBER>` in the `query` key for each `search` will be replaced for the corresponding value in the deployment process, using the `repository` key and the file with the last docker images updated to the ECR repositories.
 ### Group with searches for alarms and notifications
 
 Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in the previous section, defining groups for notifications and alarms, with specific searches for each one.
@@ -125,17 +157,17 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
             "notifications": True,
             "searches": [
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
                              f"\"Successfully created outage ticket for edge\"",
                     "search_name": f"[service-outage-monitor] - ticket creation"
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
                              f"\"Ticket linked to edge was autoresolved!\"",
                     "search_name": f"[service-outage-monitor] - ticked autoresolved"
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
                              f"\"Triage appended to detail\"",
                     "search_name": f"[service-outage-monitor] - triage appended"
                 }
@@ -149,9 +181,24 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
             "alarms": True,
             "searches": [
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
                              f"\"Successfully created outage ticket for edge\"",
                     "search_name": f"[service-outage-monitor] - ticket creation"
+                },
+                {
+                    "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[velocloud-bridge] - ERROR messages"
+                },
+                {
+                    "query": f"bruin-bridge AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[bruin-bridge] - ERROR messages"
+                },
+                {
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[service-outage-monitor] - ERROR messages"
                 }
             ]
         }

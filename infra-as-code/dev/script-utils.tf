@@ -30,7 +30,7 @@ resource "null_resource" "papertrail_provisioning" {
   ]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/papertrail-provisioning/app.py"
+    command = "python3 ci-utils/papertrail-provisioning/app.py -f /tmp/latest_images_for_ecr_repositories.json"
   }
 
   triggers = {

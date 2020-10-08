@@ -44,4 +44,8 @@ locals  {
 
   // kre hosted zone name
   kre_record_hosted_zone_name = "kre-${var.CURRENT_ENVIRONMENT}.mettel-automation.net."
+
+  // ELB nginx ingress locals variables
+  elb_nginx_ingress_name_1a = "kre-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-nginx-1a"
+  elb_nginx_ingress_name_1b = "kre-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-nginx-1b"
 }
