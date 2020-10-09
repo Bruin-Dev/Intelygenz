@@ -93,7 +93,7 @@ TRIAGE_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,
-    'velo_filter': {},
+    'velo_filter': ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,

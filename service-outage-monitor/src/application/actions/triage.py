@@ -35,6 +35,7 @@ class Triage:
         self._triage_repository = triage_repository
         self._metrics_repository = metrics_repository
 
+        self._edge_list = []
         self.__reset_customer_cache()
         self._semaphore = asyncio.BoundedSemaphore(self._config.TRIAGE_CONFIG['semaphore'])
 
@@ -55,6 +56,7 @@ class Triage:
 
     async def _run_tickets_polling(self):
         self.__reset_customer_cache()
+        self._edge_list = await self._velocloud_repository.get_links_with_edge_info_for_triage()
 
         total_start_time = time.time()
         self._logger.info(f'Starting triage process...')
@@ -430,12 +432,13 @@ class Triage:
                 )
                 continue
 
-            edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
-            edge_status_response_status = edge_status_response['status']
-            if edge_status_response_status not in range(200, 300):
-                continue
+            edge_status = [edge for edge in self._edge_list
+                           if edge["host"] == edge_full_id["host"]
+                           if edge["enterpriseId"] == edge_full_id["enterprise_id"]
+                           if edge["edgeId"] == edge_full_id["edge_id"]]
 
-            edge_status = edge_status_response['body']['edge_info']
+            if len(edge_status) == 0:
+                continue
 
             recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 

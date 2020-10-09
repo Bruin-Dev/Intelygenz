@@ -50,6 +50,53 @@ class VelocloudRepository:
 
         return response
 
+    async def get_links_with_edge_info(self, host, rpc_timeout=300):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                'host': host,
+            },
+        }
+
+        try:
+            self._logger.info("Getting list of link with edge info from Velocloud...")
+            response = await self._event_bus.rpc_request("get.links.with.edge.info", request, timeout=rpc_timeout)
+            self._logger.info("Got list of link with edge info from Velocloud!")
+        except Exception as e:
+            err_msg = f'An error occurred when requesting list of link with edge info from Velocloud -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving list of link with edge info in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} '
+                    f'environment: Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def get_links_with_edge_info_for_triage(self):
+        all_links_with_edge_info_list = []
+        for host in self._config.TRIAGE_CONFIG['velo_filter']:
+            links_with_edge_info_for_host = await self.get_links_with_edge_info(host)
+            links_with_edge_info_for_host_body = links_with_edge_info_for_host["body"]
+            links_with_edge_info_for_host_status = links_with_edge_info_for_host["status"]
+
+            if links_with_edge_info_for_host_status not in range(200, 300):
+                continue
+            all_links_with_edge_info_list = all_links_with_edge_info_list + links_with_edge_info_for_host_body
+
+        return all_links_with_edge_info_list
+
     async def get_edge_status(self, edge_full_id: dict):
         err_msg = None
         edge_identifier = EdgeIdentifier(**edge_full_id)
