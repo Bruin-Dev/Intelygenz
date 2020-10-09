@@ -34,6 +34,8 @@ class CtsRepository:
             final_timestamp = datetime.strptime(refactored_timestamp, '%Y-%m-%d %H:%M:%S.%f')
             return final_timestamp
         except Exception as ex:
+            dispatch_number = dispatch.get('Name', None) if dispatch else 'no dispatch number'
+            self._logger.info(f"Error: getting get_onsite_time_needed for dispatch: {dispatch_number} -> {ex}")
             return None
 
     def get_onsite_timezone(self, dispatch):

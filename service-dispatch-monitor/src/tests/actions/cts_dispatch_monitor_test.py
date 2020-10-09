@@ -176,13 +176,11 @@ class TestCtsDispatchMonitor:
             Mock(side_effect=[igz_dispatch_number_1, igz_dispatch_number_2, None, None])
 
         ticket_notes_1 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
-                           # noqa
+                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
         ticket_notes_2 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
-                           # noqa
+                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]  # noqa
 
@@ -270,12 +268,39 @@ class TestCtsDispatchMonitor:
             Mock(side_effect=[igz_dispatch_number_1, None, igz_dispatch_number_2])
 
         ticket_notes_1 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
+                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n'
+                                        'Please see the summary below.\n--\n'
+                                        'Dispatch Number:  [IGZ_0001|'
+                                        'https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \n'
+                                        'Date of Dispatch: 2019-11-14\n'
+                                        'Time of Dispatch (Local): 6PM-8PM\n'
+                                        'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
+                                        'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
+                                        'Phone: +1 666 6666 666\n\n'
+                                        'Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n'
+                                        'Arrival Instructions: When arriving to the site call'
+                                        ' HOLMDEL NOC for telematic assistance\n'
+                                        'Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n'
+                                        'Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n'
+                                        'Email: karen.doe@mettel.net\nDepartment: Customer Care',
                            # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
         ticket_notes_2 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
+                           'noteValue':
+                               '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n'
+                               'Please see the summary below.\n--\nDispatch Number:  '
+                               '[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \n'
+                               'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
+                               'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
+                               'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
+                               'Phone: +1 666 6666 666\n\n'
+                               'Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n'
+                               'Arrival Instructions: When arriving to the '
+                               'site call HOLMDEL NOC for telematic assistance\n'
+                               'Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n'
+                               'Requester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\n'
+                               'Department: Customer Care',
                            # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
