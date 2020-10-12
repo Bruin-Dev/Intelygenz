@@ -1,4 +1,8 @@
-devices_by_id = [
+from config import oreilly_contact_info
+
+oreilly_devices = oreilly_contact_info.devices_by_id
+
+contact_info = [
     # Titan America edges
     {
         "serial": "VC05200033383",
@@ -9797,24 +9801,6 @@ devices_by_id = [
         }
     },
     {
-        "serial": "VC05200083820",
-        "host": "metvco03.mettel.net",
-        "edge_id": 2714,
-        "enterprise_id": 124,
-        "contacts": {
-            "ticket": {
-                "email": "DLITCoreNetwork@republicservices.com",
-                "phone": "No Contact Phone Available",
-                "name": "Dlit CoreNetwork"
-            },
-            "site": {
-                "email": "AQuinn3@republicservices.com",
-                "phone": "7409694487",
-                "name": "Alison Quinn"
-            }
-        }
-    },
-    {
         "serial": "VC05200083569",
         "host": "metvco03.mettel.net",
         "edge_id": 2464,
@@ -11669,24 +11655,6 @@ devices_by_id = [
         }
     },
     {
-        "serial": "VC05200083820",
-        "host": "metvco03.mettel.net",
-        "edge_id": 2714,
-        "enterprise_id": 124,
-        "contacts": {
-            "ticket": {
-                "email": "DLITCoreNetwork@republicservices.com",
-                "phone": "No Contact Phone Available",
-                "name": "Dlit CoreNetwork"
-            },
-            "site": {
-                "email": "DSilva2@republicservices.com",
-                "phone": "2106614104",
-                "name": "David Silva"
-            }
-        }
-    },
-    {
         "serial": "VC05200086363",
         "host": "metvco03.mettel.net",
         "edge_id": 2113,
@@ -11903,24 +11871,6 @@ devices_by_id = [
         }
     },
     {
-        "serial": "VC05200091411",
-        "host": "metvco03.mettel.net",
-        "edge_id": 2270,
-        "enterprise_id": 124,
-        "contacts": {
-            "ticket": {
-                "email": "DLITCoreNetwork@republicservices.com",
-                "phone": "No Contact Phone Available",
-                "name": "Dlit CoreNetwork"
-            },
-            "site": {
-                "email": "DBoyd@republicservices.com",
-                "phone": "9129635616",
-                "name": "Denise Boyd"
-            }
-        }
-    },
-    {
         "serial": "VC05200083537",
         "host": "metvco03.mettel.net",
         "edge_id": 2407,
@@ -11975,3 +11925,5 @@ devices_by_id = [
         }
     }
 ]
+
+devices_by_id = contact_info + oreilly_devices
