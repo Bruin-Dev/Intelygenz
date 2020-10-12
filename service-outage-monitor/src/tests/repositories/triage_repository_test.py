@@ -15,20 +15,55 @@ from config import testconfig
 class TestTriageRepository:
     @pytest.mark.asyncio
     async def build_triage_note_with_no_missing_data_test(self):
+        edge_serial = 'VC1234567'
+        host = 'some-host'
+        enterprise_id = 100
+        edge_id = 200
         edge_full_id = {'host': 'some-host', 'enterprise_id': 100, 'edge_id': 200}
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Travis Touchdown'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1', 'displayName': 'Solid Snake'}},
-                {'linkId': 9012, 'link': {'state': 'STABLE', 'interface': 'GE7', 'displayName': 'Big Boss'}},
-                {'linkId': 3456, 'link': {'state': 'STABLE', 'interface': 'INTERNET3', 'displayName': 'Otacon'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-            'bruin_client_info': {
-                'client_id': 12345,
-                'client_name': 'METTEL/NEW YORK',
-            },
+
+        edge_status_1 = {
+            'edgeState': 'OFFLINE',
+            'edgeName': 'Travis Touchdown',
+            'edgeSerialNumber': edge_serial,
+            'linkId': 1234,
+            'linkState': 'DISCONNECTED',
+            'interface': 'GE1',
+            'displayName': 'Solid Snake',
+            'enterpriseName': 'EVIL-CORP|12345|',
+            'host': host,
+            'enterpriseId': enterprise_id,
+            'edgeId': edge_id
         }
+
+        edge_status_2 = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': edge_serial,
+            'edgeName': 'Travis Touchdown',
+            'linkId': 9012,
+            'linkState': 'STABLE',
+            'interface': 'GE7',
+            'displayName': 'Big Boss',
+            'enterpriseName': 'EVIL-CORP|12345|',
+            'host': 'fake_host',
+            'enterpriseId': enterprise_id,
+            'edgeId': edge_id
+        }
+
+        edge_status_3 = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': edge_serial,
+            'edgeName': 'Travis Touchdown',
+            'linkId': 5678,
+            'linkState': 'STABLE',
+            'interface': 'INTERNET3',
+            'displayName': 'Otacon',
+            'enterpriseName': 'EVIL-CORP|12345|',
+            'host': host,
+            'enterpriseId': enterprise_id,
+            'edgeId': edge_id
+        }
+
+        edge_status = [edge_status_1, edge_status_2, edge_status_3]
 
         event_1 = {
             'event': 'LINK_DEAD',

@@ -1302,8 +1302,42 @@ class TestBruinRepository:
             'ticket_detail': {
                 'detailID': 67890,
                 'detailValue': service_number,
-            },
+            }
         }
+        edge_status_1 = {
+            'edgeState': 'OFFLINE',
+            'edgeName': 'Travis Touchdown',
+            'edgeSerialNumber': service_number,
+            'linkId': 1234,
+            'linkState': 'DISCONNECTED',
+            'interface': 'GE1',
+            'displayName': 'Solid Snake',
+            'enterpriseName': 'EVIL-CORP|12345|',
+        }
+
+        edge_status_2 = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': service_number,
+            'edgeName': 'Travis Touchdown',
+            'linkId': 9012,
+            'linkState': 'STABLE',
+            'interface': 'GE7',
+            'displayName': 'Big Boss',
+            'enterpriseName': 'EVIL-CORP|12345|',
+        }
+
+        edge_status_3 = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': service_number,
+            'edgeName': 'Travis Touchdown',
+            'linkId': 5678,
+            'linkState': 'STABLE',
+            'interface': 'INTERNET3',
+            'displayName': 'Otacon',
+            'enterpriseName': 'EVIL-CORP|12345|',
+        }
+
+        edge_status = [edge_status_1, edge_status_2, edge_status_3]
 
         ticket_note = 'This is the first ticket note'
 
@@ -1334,6 +1368,40 @@ class TestBruinRepository:
                 'detailValue': service_number,
             },
         }
+        edge_status_1 = {
+            'edgeState': 'OFFLINE',
+            'edgeName': 'Travis Touchdown',
+            'edgeSerialNumber': service_number,
+            'linkId': 1234,
+            'linkState': 'DISCONNECTED',
+            'interface': 'GE1',
+            'displayName': 'Solid Snake',
+            'enterpriseName': 'EVIL-CORP|12345|',
+        }
+
+        edge_status_2 = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': service_number,
+            'edgeName': 'Travis Touchdown',
+            'linkId': 9012,
+            'linkState': 'STABLE',
+            'interface': 'GE7',
+            'displayName': 'Big Boss',
+            'enterpriseName': 'EVIL-CORP|12345|',
+        }
+
+        edge_status_3 = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': edge_serial,
+            'edgeName': 'Travis Touchdown',
+            'linkId': 5678,
+            'linkState': 'STABLE',
+            'interface': 'INTERNET3',
+            'displayName': 'Otacon',
+            'enterpriseName': 'EVIL-CORP|12345|',
+        }
+
+        edge_status = [edge_status_1, edge_status_2, edge_status_3]
 
         ticket_note = 'This is the first ticket note'
 

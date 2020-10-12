@@ -86,7 +86,7 @@ class VelocloudRepository:
 
     async def get_links_with_edge_info_for_triage(self):
         all_links_with_edge_info_list = []
-        for host in self._config.TRIAGE_CONFIG['velo_filter']:
+        for host in self._config.TRIAGE_CONFIG['velo_hosts']:
             links_with_edge_info_for_host = await self.get_links_with_edge_info(host)
             links_with_edge_info_for_host_body = links_with_edge_info_for_host["body"]
             links_with_edge_info_for_host_status = links_with_edge_info_for_host["status"]
