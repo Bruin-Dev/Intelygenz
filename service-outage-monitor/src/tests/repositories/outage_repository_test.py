@@ -9,35 +9,131 @@ class TestOutageRepository:
         edge_1_state = 'CONNECTED'
         edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
         edge_status_1 = {
-            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567'},
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC1234567',
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
             'links': [
-                {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
+                {
+                    'interface': 'REX',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': edge_1_link_ge1_state,
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'interface': 'RAY',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': edge_1_link_ge2_state,
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
             ],
-            'enterprise_name': 'EVIL-CORP|12345|',
         }
 
         edge_2_state = 'OFFLINE'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'DISCONNECTED'
         edge_status_2 = {
-            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321'},
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_2_state,
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC1234567',
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
             'links': [
-                {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
+                {
+                    'interface': 'REX',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': edge_2_link_ge1_state,
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'interface': 'RAY',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': edge_2_link_ge2_state,
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
             ],
-            'enterprise_name': 'EVIL-CORP|12345|',
         }
 
         edge_3_state = 'OFFLINE'
         edge_3_link_ge1_state = 'STABLE'
         edge_3_link_ge2_state = 'DISCONNECTED'
         edge_status_3 = {
-            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223'},
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_3_state,
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC1234567',
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
             'links': [
-                {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
+                {
+                    'interface': 'REX',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': edge_3_link_ge1_state,
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'interface': 'RAY',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': edge_3_link_ge2_state,
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
             ],
-            'enterprise_name': 'EVIL-CORP|12345|',
         }
 
         logger = Mock()
@@ -83,7 +179,7 @@ class TestOutageRepository:
 
     def is_outage_ticket_auto_resolvable_test(self):
         text_identifier = ("#*Automation Engine*#\n"
-                           "Auto-resolving detail for serial\n")
+                           "Auto-resolving ticket for serial\n")
 
         note_value1 = f"{text_identifier}TimeStamp: 2021-01-02 10:18:16-05:00"
         note_value2 = f"{text_identifier}TimeStamp: 2020-01-02 10:18:16-05:00"

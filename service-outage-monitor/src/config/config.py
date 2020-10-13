@@ -51,9 +51,7 @@ MONITOR_CONFIG = {
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
     'autoresolve_ticket_creation_seconds': 60 * 60,
-    'semaphore': 5,
-    'process_semaphore': 5,
-    'process_errors_semaphore': 1
+    'semaphore': 10,
 }
 
 # TODO: remove at some point
