@@ -21,6 +21,13 @@ SCHEDULER_CONFIG = {
 }
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
+VELOCLOUD_HOST = [
+    "mettel.velocloud.net",
+    "metvco02.mettel.net",
+    "metvco03.mettel.net",
+    "metvco04.mettel.net",
+]
+
 REFRESH_CONFIG = {
     'timezone': 'US/Eastern',
     'multiplier': 5,

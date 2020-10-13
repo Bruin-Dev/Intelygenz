@@ -21,6 +21,13 @@ SCHEDULER_CONFIG = {
 }
 ENVIRONMENT_NAME = 'dev'
 
+VELOCLOUD_HOST = [
+        "mettel.velocloud.net",
+        "metvco02.mettel.net",
+        "metvco03.mettel.net",
+        "metvco04.mettel.net",
+]
+
 REFRESH_CONFIG = {
     'timezone': 'US/Eastern',
     'multiplier': 1,
@@ -28,8 +35,8 @@ REFRESH_CONFIG = {
     'stop_delay': 0,
     'refresh_map_minutes': 60 * 4,
     'blacklisted_edges': [
-        # Federal edge that is inside a non-federal Velocloud instance
-        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
+        # Simulate a federal edge that is inside a non-federal Velocloud instance
+        {'host': 'mettel.velocloud.net', 'enterprise_id': 11888, 'edge_id': 12345}
     ],
     'semaphore': 10,
     'velo_servers': [

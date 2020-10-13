@@ -47,11 +47,12 @@ class RefreshCache:
                 err_msg = "Couldn't find any edge to refresh the cache"
                 raise Exception(err_msg)
 
-            self._logger.info("Distinguishing edges per Velocloud host...")
+            self._logger.info(f"Distinguishing {len(edge_list)} edges per Velocloud host...")
             split_host_dict = {}
             for edge_with_serial in edge_list:
-                split_host_dict.setdefault(edge_with_serial['edge']['host'], [])
-                split_host_dict[edge_with_serial['edge']['host']].append(edge_with_serial)
+                host_ = edge_with_serial['edge']['host']
+                split_host_dict.setdefault(host_, [])
+                split_host_dict[host_].append(edge_with_serial)
 
             self._logger.info("Refreshing cache for each of the hosts...")
             tasks = [

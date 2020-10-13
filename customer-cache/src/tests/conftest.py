@@ -110,14 +110,19 @@ def instance_cache_edges():
         'edge': {'host': 'some host', 'enterprise_id': 123, 'edge_id': 321},
         'last_contact': str(datetime.now()),
         'serial_number': "VC01",
-        'bruin_client_info': 'some client info'
+        'bruin_client_info': {'client_id': 'some client info'}
     },
         {
             'edge': {'host': 'some host', 'enterprise_id': 1, 'edge_id': 321},
             'last_contact': str(datetime.now()),
             'serial_number': "VC02",
-            'bruin_client_info': 'some client info'
+            'bruin_client_info': {'client_id': 'some client info'}
         }]
+
+
+@pytest.fixture(scope='function')
+def example_response_velo_host():
+    return {'host': 'metvco02.mettel.net', 'enterpriseId': 123, 'edgeId': 321}
 
 
 @pytest.fixture(scope='function')
@@ -148,7 +153,7 @@ def instance_velocloud_request():
     return {
         'request_id': '2222',
         'body': {
-            'filter': {'mettel.velocloud.net': []},
+            'host': 'mettel.velocloud.net',
         }
     }
 
@@ -158,8 +163,10 @@ def instance_velocloud_response():
     return {
         'request_id': '2222',
         'body': [
-            {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-            {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
+            {'host': 'some-host', 'enterpriseId': 1, 'edgeId': 1, 'edgeSerialNumber': 1,
+             'edgeLastContact': str(datetime.now() - timedelta(days=31))},
+            {'host': 'some-host', 'enterpriseId': 1, 'edgeId': 2, 'edgeSerialNumber': 1,
+             'edgeLastContact': str(datetime.now() - timedelta(days=30))},
         ],
         'status': 200,
     }
@@ -192,3 +199,179 @@ def instance_get_customer_with_empty_cache(instance_storage_repository, mock_log
     mock_event_bus.publish_message = CoroutineMock()
     instance_storage_repository.get_cache = Mock(return_value=[])
     return GetCustomers(config, mock_logger, instance_storage_repository, mock_event_bus)
+
+
+@pytest.fixture(scope='function')
+def instance_velocloud_response():
+    return {
+        'request_id': '2222',
+        'body': [
+            {
+                'enterpriseName': 'Fake name|86937|',
+                'enterpriseId': 1,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'FakeEdgeName',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': "2018-06-24T20:27:44.000Z",
+                'edgeId': 1,
+                'edgeSerialNumber': 'FK05200048223',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None, 'interface': 'GE1',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '0.0.0.0',
+                'host': 'mettel.velocloud.net'
+            },
+            {
+                'enterpriseName': 'Fake name|86937|',
+                'enterpriseId': 1,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'FakeEdgeName',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': "2018-06-24T20:27:44.000Z",
+                'edgeId': 2,
+                'edgeSerialNumber': 'FK05200048223',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None, 'interface': 'GE1',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '0.0.0.0',
+                'host': 'mettel.velocloud.net'
+            },
+        ],
+        'status': 200,
+    }
+
+
+@pytest.fixture(scope='function')
+def instance_special_velocloud_response():
+    return {
+        'request_id': '2222',
+        'body': [
+            {
+                'enterpriseName': 'Fake name|86937|',
+                'enterpriseId': 1,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'FakeEdgeName',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': "0000-00-00 00:00:00",
+                'edgeId': 1,
+                'edgeSerialNumber': 'FK05200048223',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None, 'interface': 'GE1',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '0.0.0.0',
+                'host': 'mettel.velocloud.net'
+            },
+            {
+                'enterpriseName': 'Fake name|86937|',
+                'enterpriseId': 1,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'FakeEdgeName',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': "2018-06-24T20:27:44.000Z",
+                'edgeId': 2,
+                'edgeSerialNumber': None,
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None, 'interface': 'GE1',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '0.0.0.0',
+                'host': 'mettel.velocloud.net'
+            },
+            {
+                'enterpriseName': 'Fake name|86937|',
+                'enterpriseId': 1,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'FakeEdgeName',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': "2018-06-24T20:27:44.000Z",
+                'edgeId': None,
+                'edgeSerialNumber': None,
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None, 'interface': 'GE1',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '0.0.0.0',
+                'host': 'mettel.velocloud.net'
+            },
+            {
+                'enterpriseName': 'Fake name|86937|',
+                'enterpriseId': 11888,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'FakeEdgeName',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': "2018-06-24T20:27:44.000Z",
+                'edgeId': 12345,
+                'edgeSerialNumber': None,
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None, 'interface': 'GE1',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '0.0.0.0',
+                'host': 'mettel.velocloud.net'
+            },
+        ],
+        'status': 200,
+    }

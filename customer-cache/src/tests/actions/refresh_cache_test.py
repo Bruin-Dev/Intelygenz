@@ -82,15 +82,25 @@ class TestRefreshCache:
             )
 
     @pytest.mark.asyncio
-    async def refresh_cache_ok_test(self, instance_refresh_cache, instance_edges_refresh_cache):
+    async def refresh_cache_edge_test(self, instance_refresh_cache, instance_cache_edges):
+
+        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
+        next_run_time = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+        instance_refresh_cache._logger.error = Mock()
         instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(
-            return_value=instance_edges_refresh_cache)
+            return_value=instance_cache_edges)
 
         instance_refresh_cache._partial_refresh_cache = CoroutineMock()
 
-        await instance_refresh_cache._refresh_cache()
+        tenacity_retry_mock = patch.object(refresh_cache_module, 'retry', side_effect=retry_mock(attempts=1))
+        with patch.object(refresh_cache_module, 'datetime', new=datetime_mock):
+            with uuid_mock, tenacity_retry_mock:
+                await instance_refresh_cache._refresh_cache()
 
-        assert instance_refresh_cache._partial_refresh_cache.await_count == 2
+        instance_refresh_cache._partial_refresh_cache.assert_awaited_once_with('some host',
+                                                                               instance_cache_edges)
 
     @pytest.mark.asyncio
     async def refresh_cache_edge_list_failed_test(self, instance_refresh_cache, instance_err_msg_refresh_cache):

@@ -15,8 +15,6 @@ class TestStorageRepository:
         config = testconfig
         logger = Mock()
         redis = Mock()
-        bruin_repository = Mock()
-
         storage_repo = StorageRepository(config, logger, redis)
 
         assert storage_repo._config == config
@@ -72,14 +70,14 @@ class TestStorageRepository:
             instance_cache_edges[0]])
 
     @pytest.mark.asyncio
-    async def filter_edge_list_ok_test(self, instance_refresh_cache, instance_edges_refresh_cache,
-                                       instance_cache_edges):
+    async def filter_edge_list_ok_test(self, instance_refresh_cache,
+                                       instance_cache_edges, instance_edges_refresh_cache):
         last_contact = str(datetime.now())
         bruin_client_info = {'client_id': 'some client info'}
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
-        instance_cache_edges[0]['bruin_client_info'] = bruin_client_info
         instance_edges_refresh_cache[0]['bruin_client_info'] = bruin_client_info
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
@@ -103,6 +101,8 @@ class TestStorageRepository:
     async def filter_edge_list_exception_test(self, instance_refresh_cache, instance_edges_refresh_cache):
         last_contact = str(datetime.now())
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': None, 'status': 200})
@@ -127,6 +127,8 @@ class TestStorageRepository:
         last_contact = str(datetime.now())
 
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': {}, 'status': 200})
@@ -150,6 +152,8 @@ class TestStorageRepository:
         last_contact = str(datetime.now())
 
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': {'client_id': 'some client info'}, 'status': 400})
@@ -172,6 +176,8 @@ class TestStorageRepository:
         last_contact = str(datetime.now())
 
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': {'client_id': 'some client info'}, 'status': 200})
@@ -195,6 +201,8 @@ class TestStorageRepository:
         last_contact = str(datetime.now())
 
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': {'client_id': 'some client info'}, 'status': 200})
