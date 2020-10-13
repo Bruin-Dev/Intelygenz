@@ -11926,4 +11926,7 @@ contact_info = [
     }
 ]
 
-devices_by_id = contact_info + oreilly_devices
+# When customers wants to reenable O'Reilly monitoring, use this line instead
+# devices_by_id = contact_info + oreilly_devices
+
+devices_by_id = contact_info
