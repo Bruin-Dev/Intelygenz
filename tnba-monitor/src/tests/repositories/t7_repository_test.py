@@ -70,7 +70,11 @@ class TestT7Repository:
                     ]
                 }
             ],
-            'status': 200
+            'status': 200,
+            'kre_response': {
+                "body": "No kre content",
+                "status_code": "SUCCESS"
+            }
         }
 
         logger = Mock()
@@ -158,7 +162,6 @@ class TestT7Repository:
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == nats_error_response
-
 
     @pytest.mark.asyncio
     async def get_tickets_with_rpc_request_returning_non_2xx_status_test(self):

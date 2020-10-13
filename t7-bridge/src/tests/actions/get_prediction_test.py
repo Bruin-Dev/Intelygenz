@@ -1,4 +1,3 @@
-import json
 from unittest.mock import Mock
 
 import pytest
@@ -94,11 +93,32 @@ class TestGetPrediction:
 
         request_id = 123
         ticket_id = 321
+        ticket_rows = [
+            {
+                "Asset": "asset1",
+                "CallTicketID": ticket_id,
+                "Initial Note @ Ticket Creation": "9/22/2020 11:45:08 AM",
+                "EnteredDate_N": "2020-09-22T11:44:54.85-04:00",
+                "Notes": "note 1",
+                "Task Result": None,
+                "Ticket Status": "Closed",
+            },
+            {
+                "Asset": None,
+                "CallTicketID": ticket_id,
+                "Initial Note @ Ticket Creation": "9/22/2020 11:45:08 AM",
+                "EnteredDate_N": "2020-09-22T11:44:54.85-04:00",
+                "Notes": "note 2",
+                "Task Result": None,
+                "Ticket Status": "Closed",
+            }
+        ]
         response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         msg_published_in_topic = {
             'request_id': request_id,
             'body': {
-                'ticket_id': ticket_id
+                'ticket_id': ticket_id,
+                'ticket_rows': ticket_rows
             },
             'response_topic': response_topic,
         }
@@ -115,7 +135,12 @@ class TestGetPrediction:
                         ]
                     }
                 ],
-            "status": 200
+            "status": 200,
+            "kre_response":
+                {
+                    "body": "No kre content",
+                    "status_code": "SUCCESS",
+                }
         }
 
         event_bus = Mock()
@@ -127,7 +152,7 @@ class TestGetPrediction:
         prediction_action = GetPrediction(logger, config, event_bus, t7_repository)
         await prediction_action.get_prediction(msg_published_in_topic)
 
-        prediction_action._t7_repository.get_prediction.assert_called_once_with(ticket_id)
+        prediction_action._t7_repository.get_prediction.assert_called_once_with(ticket_id, ticket_rows)
         prediction_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {

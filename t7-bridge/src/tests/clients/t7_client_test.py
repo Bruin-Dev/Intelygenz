@@ -1,13 +1,38 @@
-from application.clients import t7_client as t7_client_module
+from application.clients import t7_client as t7_client_module, public_input_pb2 as pb2, \
+    public_input_pb2_grpc as pb2_grpc
 from application.clients.t7_client import T7Client
 
 from unittest.mock import patch
 from unittest.mock import Mock
 from config import testconfig
-from pytest import raises
 
 
 class TestT7Client:
+    valid_ticket_id = 123
+    valid_ticket_rows = [
+        {
+            "asset": "asset1",
+            "call_ticket_id": valid_ticket_id,
+            "initial_note_ticket_creation": "9/22/2020 11:45:08 AM",
+            "entered_date_n": "2020-09-22T11:44:54.85-04:00",
+            "notes": "note 1",
+            "task_result": None,
+            "ticket_status": "Closed",
+            "address1": "address 1",
+            "sla": 1,
+        },
+        {
+            "asset": None,
+            "call_ticket_id": valid_ticket_id,
+            "initial_note_ticket_creation": "9/22/2020 11:45:08 AM",
+            "entered_date_n": "2020-09-22T11:44:54.85-04:00",
+            "notes": "note 2",
+            "task_result": None,
+            "ticket_status": "Closed",
+            "address1": "address 2",
+            "sla": 1,
+        }
+    ]
 
     def instance_test(self):
         logger = Mock()
@@ -53,15 +78,27 @@ class TestT7Client:
         response_mock.json = Mock(return_value=get_response)
         response_mock.status_code = 200
 
+        response_mock_1 = Mock()
+        prediction_value = pb2.PredictionResponse
+        prediction_value.message = 'test1'
+        response_mock_1.Prediction = Mock(return_value=prediction_value)
+
         t7_client = T7Client(logger, config)
         t7_client._get_request_headers = Mock()
-        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get:
-            prediction_list = t7_client.get_prediction(ticket_id=123)
+        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get, \
+                patch.object(pb2_grpc, 'EntrypointStub', return_value=response_mock_1):
+
+            prediction_list = t7_client.get_prediction(ticket_id=self.valid_ticket_id,
+                                                       ticket_rows=self.valid_ticket_rows)
 
             assert logger.info.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": get_response, "status": 200}
+            assert prediction_list == {
+                "body": get_response,
+                "status": 200,
+                "kre_response": {"body": "test1", "status_code": "SUCCESS"}
+            }
 
     def get_prediction_400_test(self):
         config = testconfig
@@ -77,15 +114,27 @@ class TestT7Client:
         response_mock.json = Mock(return_value=get_response)
         response_mock.status_code = 400
 
+        response_mock_1 = Mock()
+        prediction_value = pb2.PredictionResponse
+        prediction_value.message = 'test1'
+        response_mock_1.Prediction = Mock(return_value=prediction_value)
+
         t7_client = T7Client(logger, config)
         t7_client._get_request_headers = Mock()
-        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get:
-            prediction_list = t7_client.get_prediction(ticket_id=123)
+        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get, \
+                patch.object(pb2_grpc, 'EntrypointStub', return_value=response_mock_1):
+
+            prediction_list = t7_client.get_prediction(ticket_id=self.valid_ticket_id,
+                                                       ticket_rows=self.valid_ticket_rows)
 
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": get_response, "status": 400}
+            assert prediction_list == {
+                "body": get_response,
+                "status": 400,
+                "kre_response": {"body": "test1", "status_code": "SUCCESS"}
+            }
 
     def get_prediction_401_test(self):
         config = testconfig
@@ -101,15 +150,26 @@ class TestT7Client:
         response_mock.json = Mock(return_value=get_response)
         response_mock.status_code = 401
 
+        response_mock_1 = Mock()
+        prediction_value = pb2.PredictionResponse
+        prediction_value.message = 'test1'
+        response_mock_1.Prediction = Mock(return_value=prediction_value)
+
         t7_client = T7Client(logger, config)
         t7_client._get_request_headers = Mock()
-        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get:
-            prediction_list = t7_client.get_prediction(ticket_id=123)
+        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get, \
+                patch.object(pb2_grpc, 'EntrypointStub', return_value=response_mock_1):
+            prediction_list = t7_client.get_prediction(ticket_id=self.valid_ticket_id,
+                                                       ticket_rows=self.valid_ticket_rows)
 
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": get_response, "status": 401}
+            assert prediction_list == {
+                "body": get_response,
+                "status": 401,
+                "kre_response": {"body": "test1", "status_code": "SUCCESS"}
+            }
 
     def get_prediction_403_test(self):
         config = testconfig
@@ -120,15 +180,26 @@ class TestT7Client:
         response_mock = Mock()
         response_mock.status_code = 403
 
+        response_mock_1 = Mock()
+        prediction_value = pb2.PredictionResponse
+        prediction_value.message = 'test1'
+        response_mock_1.Prediction = Mock(return_value=prediction_value)
+
         t7_client = T7Client(logger, config)
         t7_client._get_request_headers = Mock()
-        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get:
-            prediction_list = t7_client.get_prediction(ticket_id=123)
+        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get, \
+                patch.object(pb2_grpc, 'EntrypointStub', return_value=response_mock_1):
+            prediction_list = t7_client.get_prediction(ticket_id=self.valid_ticket_id,
+                                                       ticket_rows=self.valid_ticket_rows)
 
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": "Got 403 Forbidden from TNBA API", "status": 403}
+            assert prediction_list == {
+                "body": "Got 403 Forbidden from TNBA API",
+                "status": 403,
+                "kre_response": {"body": "test1", "status_code": "SUCCESS"}
+            }
 
     def get_prediction_404_as_500_test(self):
         config = testconfig
@@ -142,16 +213,26 @@ class TestT7Client:
         response_mock.json = Mock(return_value=get_response)
         response_mock.status_code = 500
 
+        response_mock_1 = Mock()
+        prediction_value = pb2.PredictionResponse
+        prediction_value.message = 'test1'
+        response_mock_1.Prediction = Mock(return_value=prediction_value)
+
         t7_client = T7Client(logger, config)
         t7_client._get_request_headers = Mock()
-        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get:
-            prediction_list = t7_client.get_prediction(ticket_id=123)
+        with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get, \
+                patch.object(pb2_grpc, 'EntrypointStub', return_value=response_mock_1):
+            prediction_list = t7_client.get_prediction(ticket_id=self.valid_ticket_id,
+                                                       ticket_rows=self.valid_ticket_rows)
 
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": f'Got possible 404 as 500 from TNBA API: {get_response}',
-                                       "status": 500}
+            assert prediction_list == {
+                "body": f'Got possible 404 as 500 from TNBA API: {get_response}',
+                "status": 500,
+                "kre_response": {"body": "test1", "status_code": "SUCCESS"}
+            }
 
     def get_prediction_500_test(self):
         config = testconfig
@@ -168,7 +249,8 @@ class TestT7Client:
         t7_client = T7Client(logger, config)
         t7_client._get_request_headers = Mock()
         with patch.object(t7_client_module.requests, 'get', return_value=response_mock) as mock_get:
-            prediction_list = t7_client.get_prediction(ticket_id=123)
+            prediction_list = t7_client.get_prediction(ticket_id=self.valid_ticket_id,
+                                                       ticket_rows=self.valid_ticket_rows)
 
             assert logger.error.called
             mock_get.assert_called()
@@ -195,7 +277,14 @@ class TestT7Client:
             assert logger.info.called
             mock_post.assert_called_once()
             assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
-            assert automation_metrics_response == {"body": post_response, "status": 204}
+            assert automation_metrics_response == {
+                "body": post_response,
+                "status": 204,
+                "kre_response": {
+                    "body": "Error: camel_ticket_rows",
+                    "status_code": "UNKNOWN_ERROR",
+                }
+            }
 
     def post_automation_metrics_400_test(self):
         config = testconfig
@@ -217,7 +306,14 @@ class TestT7Client:
             assert logger.info.called
             mock_post.assert_called_once()
             assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
-            assert automation_metrics_response == {"body": post_response, "status": 400}
+            assert automation_metrics_response == {
+                "body": post_response,
+                "status": 400,
+                "kre_response": {
+                    "body": "Error: camel_ticket_rows",
+                    "status_code": "UNKNOWN_ERROR",
+                }
+            }
 
     def post_automation_metrics_401_test(self):
         config = testconfig
@@ -239,7 +335,14 @@ class TestT7Client:
             assert logger.info.called
             mock_post.assert_called_once()
             assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
-            assert automation_metrics_response == {"body": post_response, "status": 401}
+            assert automation_metrics_response == {
+                "body": post_response,
+                "status": 401,
+                "kre_response": {
+                    "body": "Error: camel_ticket_rows",
+                    "status_code": "UNKNOWN_ERROR",
+                }
+            }
 
     def post_automation_metrics_403_test(self):
         config = testconfig
@@ -261,7 +364,14 @@ class TestT7Client:
             assert logger.info.called
             mock_post.assert_called_once()
             assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
-            assert automation_metrics_response == {"body": 'Got 403 Forbidden from TNBA API', "status": 403}
+            assert automation_metrics_response == {
+                "body": 'Got 403 Forbidden from TNBA API',
+                "status": 403,
+                "kre_response": {
+                    "body": "Error: camel_ticket_rows",
+                    "status_code": "UNKNOWN_ERROR",
+                }
+            }
 
     def post_automation_metrics_404_as_500_test(self):
         config = testconfig
@@ -284,15 +394,21 @@ class TestT7Client:
             assert logger.info.called
             mock_post.assert_called_once()
             assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
-            assert automation_metrics_response == {"body": f"Got possible 404 as 500 from TNBA API: {post_response}",
-                                                   "status": 500}
+            assert automation_metrics_response == {
+                "body": f"Got possible 404 as 500 from TNBA API: {post_response}",
+                "status": 500,
+                "kre_response": {
+                    "body": "Error: camel_ticket_rows",
+                    "status_code": "UNKNOWN_ERROR",
+                }
+            }
 
     def post_automation_metrics_500_test(self):
         config = testconfig
         post_response = {
-                          "error": "unexpected error",
-                          "message": "Unexpected error"
-                        }
+            "error": "unexpected error",
+            "message": "Unexpected error"
+        }
 
         logger = Mock()
         logger.info = Mock()

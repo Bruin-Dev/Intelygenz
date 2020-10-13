@@ -38,7 +38,8 @@ class PostAutomationMetrics:
         response = {
             'request_id': msg['request_id'],
             'body': post_metrics_response["body"],
-            'status': post_metrics_response["status"]
+            'status': post_metrics_response["status"],
+            'kre_response': post_metrics_response["kre_response"]
         }
 
         await self._event_bus.publish_message(msg['response_topic'], response)

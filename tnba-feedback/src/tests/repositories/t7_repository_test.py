@@ -55,11 +55,16 @@ class TestT7Repository:
             'request_id': uuid_,
             'body': 'Success',
             'status': 200,
+            "kre_response": {
+                "body": "Error: camel_ticket_rows",
+                "status_code": "UNKNOWN_ERROR",
+            }
         }
 
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
@@ -70,6 +75,7 @@ class TestT7Repository:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
         event_bus.rpc_request.assert_awaited_once_with("t7.automation.metrics", request, timeout=60)
+        notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
 
     @pytest.mark.asyncio

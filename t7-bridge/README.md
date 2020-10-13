@@ -9,12 +9,34 @@
 
 
 # T7 API
-### Description
+## Description
 
 T7 Bridge is used to make calls to the T7 API.
 
 For now, it allows to get a prediction about the next best action that can be taken
 to move forward on the resolution of a ticket.
+
+# KRE Migration
+## Description
+
+In addition to making the current calls to T7. The Konstellation services are going to be used in parallel
+with the purpose of doing corresponding shadow testing and eventually migrating it.
+
+## GRPC generated code
+
+In the code necessary to implement the gRPC calls, we import two files generated
+([public_input_pb2.py](./src/application/clients/public_input_pb2.py),
+[public_input_pb2_grpc.py](./src/application/clients/public_input_pb2_grpc.py)) from the definition of the [protocol
+buffer](https://gitlab.intelygenz.com/t7-team/met002-t7p-us/kre-runtime/-/blob/master/tnba/public_input.proto) of
+the [project kre-runtime](https://gitlab.intelygenz.com/t7-team/met002-t7p-us/kre-runtime) compiling the protocol
+buffer like:
+
+```shell script
+python -m grpc_tools.protoc -I../../protos --python_out=. --grpc_python_out=. ../../protos/route_guide.proto
+```
+
+
+
 
 # Get Prediction
 ## Description

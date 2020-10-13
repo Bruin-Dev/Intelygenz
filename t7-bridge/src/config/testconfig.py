@@ -24,6 +24,9 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
+KRE_CONFIG = {
+    'base_url': 'http://test-url.com'
+}
 
 T7CONFIG = {
     'base_url': 'http://test-url.com',

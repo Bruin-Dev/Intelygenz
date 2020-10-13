@@ -31,6 +31,10 @@ LOG_CONFIG = {
     },
 }
 
+KRE_CONFIG = {
+    'base_url': os.environ['KRE_BASE_URL']
+}
+
 T7CONFIG = {
     'base_url': os.environ['T7_BASE_URL'],
     'client_name': 'mettel-automation',

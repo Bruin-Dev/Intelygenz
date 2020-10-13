@@ -60,4 +60,13 @@ class T7Repository:
             self._logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
+        elif response['kre_response']['status_code'] != 'SUCCESS':
+            err_msg = (
+                f'Error: Shadow testing KRE error getting predictions for ticket {ticket_id} to KRE in '
+                f'{self._config.TNBA_FEEDBACK_CONFIG["environment"].upper()} '
+                f'environment. Error: Error {response["kre_response"]["body"]}'
+            )
+
+            await self._notifications_repository.send_slack_message(err_msg)
+
         return response

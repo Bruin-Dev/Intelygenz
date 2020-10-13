@@ -138,7 +138,14 @@ class TestPostAutomationMetrics:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        return_value = {"body": "No content", "status": 204}
+        return_value = {
+            "body": "No content",
+            "status": 204,
+            "kre_response": {
+                "body": "No kre content",
+                "status_code": "SUCCESS",
+            }
+        }
 
         t7_repository = Mock()
         t7_repository.post_automation_metrics = Mock(return_value=return_value)
@@ -153,5 +160,6 @@ class TestPostAutomationMetrics:
                 'request_id': request_id,
                 'body': return_value['body'],
                 'status': return_value['status'],
+                'kre_response': return_value['kre_response'],
             }
         )

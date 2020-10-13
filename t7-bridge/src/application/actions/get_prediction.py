@@ -34,11 +34,16 @@ class GetPrediction:
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        prediction = self._t7_repository.get_prediction(ticket_id)
+        ticket_rows = msg_body.get('ticket_rows')
+        if not ticket_rows:
+            self._logger.error(f'Cannot get KRE prediction using {json.dumps(msg_body)}. Need parameter "ticket_rows"')
+
+        prediction = self._t7_repository.get_prediction(ticket_id, ticket_rows)
         response = {
             'request_id': msg['request_id'],
             'body': prediction["body"],
-            'status': prediction["status"]
+            'status': prediction["status"],
+            'kre_response': prediction["kre_response"]
         }
 
         await self._event_bus.publish_message(msg['response_topic'], response)
