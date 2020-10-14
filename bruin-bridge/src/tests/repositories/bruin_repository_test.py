@@ -750,33 +750,6 @@ class TestBruinRepository:
         assert post_response == expected_post_response
 
     @pytest.mark.asyncio
-    async def post_ticket_note_with_optional_service_numbers_list_test(self):
-        ticket_id = 123
-        service_numbers = ['VC1234567']
-        note_contents = 'TicketNote'
-
-        payload = {
-            'note': note_contents,
-            'serviceNumbers': service_numbers
-        }
-
-        expected_post_response = 'Ticket Appended'
-
-        logger = Mock()
-
-        bruin_client = Mock()
-        bruin_client.post_ticket_note = CoroutineMock(return_value=expected_post_response)
-
-        bruin_repository = BruinRepository(logger, bruin_client)
-
-        post_response = await bruin_repository.post_ticket_note(
-            ticket_id, note_contents, service_numbers=service_numbers
-        )
-
-        bruin_client.post_ticket_note.assert_awaited_once_with(ticket_id, payload)
-        assert post_response == expected_post_response
-
-    @pytest.mark.asyncio
     async def post_ticket_test(self):
         logger = Mock()
         payload = dict(client_id=321, category='Some Category', notes=['List of Notes'],

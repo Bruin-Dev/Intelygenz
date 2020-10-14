@@ -45,8 +45,7 @@ class PostNote:
 
         self._logger.info(f'Putting note in: {ticket_id}...')
 
-        service_numbers: list = msg['body'].get('service_numbers')
-        result = await self._bruin_repository.post_ticket_note(ticket_id, note, service_numbers=service_numbers)
+        result = await self._bruin_repository.post_ticket_note(ticket_id, note)
 
         response["body"] = result['body']
         response["status"] = result['status']

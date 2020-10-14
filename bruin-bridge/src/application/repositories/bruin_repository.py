@@ -124,14 +124,8 @@ class BruinRepository:
 
         return ticket_details_list
 
-    async def post_ticket_note(self, ticket_id, note, *, service_numbers: list = None):
-        payload = {
-            "note": note
-        }
-
-        if service_numbers:
-            payload['serviceNumbers'] = service_numbers
-
+    async def post_ticket_note(self, ticket_id, note):
+        payload = {"note": note}
         return await self._bruin_client.post_ticket_note(ticket_id, payload)
 
     async def post_multiple_ticket_notes(self, ticket_id: int, notes: List[dict]) -> dict:
