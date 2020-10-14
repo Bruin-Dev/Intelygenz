@@ -413,7 +413,7 @@ class BruinRepository:
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
             '#*Automation Engine*#',
-            f'Auto-resolving ticket for serial: {serial_number}',
+            f'Auto-resolving detail for serial: {serial_number}',
             f'TimeStamp: {current_datetime_tz_aware}',
         ])
 

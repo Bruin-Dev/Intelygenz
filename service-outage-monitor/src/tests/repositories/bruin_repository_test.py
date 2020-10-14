@@ -1138,7 +1138,7 @@ class TestBruinRepository:
         ticket_id = 11111
         ticket_note = (
             '#*Automation Engine*#\n'
-            f'Auto-resolving ticket for serial: {serial_number}\n'
+            f'Auto-resolving detail for serial: {serial_number}\n'
             f'TimeStamp: {current_datetime}'
         )
 
