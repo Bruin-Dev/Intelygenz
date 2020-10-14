@@ -343,43 +343,6 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def append_note_to_ticket_with_optional_service_numbers_param_test(self):
-        ticket_id = 11111
-        ticket_note = 'This is a ticket note'
-        service_number = 'VC1234567'
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'note': ticket_note,
-                'service_numbers': [service_number],
-            },
-        }
-        response = {
-            'request_id': uuid_,
-            'body': 'Note appended with success',
-            'status': 200,
-        }
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await bruin_repository.append_note_to_ticket(
-                ticket_id, ticket_note, service_numbers=[service_number]
-            )
-
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=15)
-        assert result == response
-
-    @pytest.mark.asyncio
     async def append_note_to_ticket_with_rpc_request_failing_test(self):
         ticket_id = 11111
         ticket_note = 'This is a ticket note'
@@ -1293,19 +1256,24 @@ class TestBruinRepository:
         assert result is False
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_dev_environment_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_dev_environment_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
 
         ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
 
         event_bus = Mock()
         logger = Mock()
@@ -1317,25 +1285,30 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
-        await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+        await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
         notifications_repository.send_slack_message.assert_awaited_once()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_production_environment_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_production_environment_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
 
         ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
 
         append_note_to_ticket_response = {
             'body': 'Note appended with success',
@@ -1355,26 +1328,29 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
-            ticket_id, ticket_note, service_numbers=[service_number]
-        )
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_unknown_environment_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_unknown_environment_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
 
         ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
 
         event_bus = Mock()
         logger = Mock()
@@ -1389,23 +1365,29 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'unknown'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
         bruin_repository.append_note_to_ticket.assert_not_awaited()
         notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_triage_note_greater_than_1500_char_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_triage_note_greater_than_1500_char_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
+
+        ticket_id = 12345
 
         ticket_note = "#Automation Engine#\n" \
                       "Triage\n" \
@@ -1462,24 +1444,29 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
         assert len(bruin_repository.append_note_to_ticket.call_args_list) == 2
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_append_note_request_not_having_2xx_status_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_append_note_request_not_having_2xx_status_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
 
         ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
 
         append_note_to_ticket_response = {
             'body': 'Failed',
@@ -1499,27 +1486,30 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            note_appended = await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
-            ticket_id, ticket_note, service_numbers=[service_number]
-        )
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
         assert note_appended is None
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_append_note_request_having_503_status_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_append_note_request_having_503_status_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
 
         ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
 
         append_note_to_ticket_response = {
             'body': 'Failed',
@@ -1539,25 +1529,29 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            note_appended = await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
-            ticket_id, ticket_note, service_numbers=[service_number]
-        )
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
         assert note_appended == 503
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_triage_note_greater_than_1500_char_return_non_2xx_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_triage_note_greater_than_1500_char_return_non_2xx_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
+
+        ticket_id = 12345
 
         ticket_note = "#Automation Engine#\n" \
                       "Triage\n" \
@@ -1614,22 +1608,28 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            note_appended = await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
         assert note_appended is None
 
     @pytest.mark.asyncio
-    async def append_triage_note_with_triage_note_greater_than_1500_char_return_503_test(self):
-        ticket_id = 12345
-        service_number = 'VC1234567'
+    async def process_single_ticket_without_triage_with_triage_note_greater_than_1500_char_return_503_test(self):
+        edge_serial = 'VC1234567'
 
-        ticket_detail = {
-            'ticket_id': ticket_id,
-            'ticket_detail': {
-                'detailID': 67890,
-                'detailValue': service_number,
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
             },
         }
+
+        ticket_id = 12345
 
         ticket_note = "#Automation Engine#\n" \
                       "Triage\n" \
@@ -1686,6 +1686,6 @@ class TestBruinRepository:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
+            note_appended = await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
         assert note_appended == 503
