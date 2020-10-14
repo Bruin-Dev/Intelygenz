@@ -2125,13 +2125,11 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        bruin_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
@@ -2151,7 +2149,6 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        bruin_repository.get_ticket_details.assert_not_awaited()
         triage_repository.build_triage_note.assert_not_called()
 
     @pytest.mark.asyncio
@@ -2183,13 +2180,11 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        bruin_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
@@ -2209,18 +2204,16 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        bruin_repository.get_ticket_details.assert_not_awaited()
         triage_repository.build_triage_note.assert_not_called()
 
     @pytest.mark.asyncio
     async def append_triage_note_with_events_sorted_before_building_triage_note_test(self):
         ticket_id = 12345
-        service_number = 'VC1234567'
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         client_id = 11111
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': service_number},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -2258,25 +2251,6 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
-        ticket_detail_1 = {
-            'detailID': 12345,
-            'detailValue': service_number,
-        }
-        ticket_details_response = {
-            'body': {
-                'ticketDetails': [
-                    ticket_detail_1,
-                ],
-                'ticketNotes': [],
-            },
-            'status': 200,
-        }
-
-        ticket_detail_object = {
-            'ticket_id': ticket_id,
-            'ticket_detail': ticket_detail_1,
-        }
-
         triage_note = 'This is a triage note'
 
         event_bus = Mock()
@@ -2294,7 +2268,6 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.append_triage_note = CoroutineMock()
 
         notifications_repository = Mock()
@@ -2319,21 +2292,19 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
             edge_full_id, edge_status, events_sorted_by_event_time
         )
-        bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
+        bruin_repository.append_triage_note.assert_awaited_with(ticket_id, triage_note, edge_status)
 
     @pytest.mark.asyncio
     async def append_triage_note_with_events_error_appending_triage_note_test(self):
         ticket_id = 12345
-        service_number = 'VC1234567'
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         client_id = 11111
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': service_number},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -2371,25 +2342,6 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
-        ticket_detail_1 = {
-            'detailID': 12345,
-            'detailValue': service_number,
-        }
-        ticket_details_response = {
-            'body': {
-                'ticketDetails': [
-                    ticket_detail_1,
-                ],
-                'ticketNotes': [],
-            },
-            'status': 200,
-        }
-
-        ticket_detail_object = {
-            'ticket_id': ticket_id,
-            'ticket_detail': ticket_detail_1,
-        }
-
         triage_note = 'This is a triage note'
 
         event_bus = Mock()
@@ -2409,7 +2361,6 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.append_triage_note = CoroutineMock(return_value=503)
 
         notifications_repository = Mock()
@@ -2434,11 +2385,10 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
             edge_full_id, edge_status, events_sorted_by_event_time
         )
-        bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
+        bruin_repository.append_triage_note.assert_awaited_with(ticket_id, triage_note, edge_status)
         metrics_repository.increment_first_triage_errors.assert_called_once()
 
     @pytest.mark.asyncio
