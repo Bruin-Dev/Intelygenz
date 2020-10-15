@@ -137,7 +137,7 @@ PAPERTRAIL_PROVISIONING = {
                 },
                 {
                     "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
-                             f"\"Triage appended to ticket\"",
+                             f"\"Triage appended to detail\"",
                     "search_name": f"[service-outage-monitor] - triage appended"
                 }
             ]

@@ -136,7 +136,7 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
                 },
                 {
                     "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
-                             f"\"Triage appended to ticket\"",
+                             f"\"Triage appended to detail\"",
                     "search_name": f"[service-outage-monitor] - triage appended"
                 }
             ]
