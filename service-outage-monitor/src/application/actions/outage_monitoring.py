@@ -406,8 +406,6 @@ class OutageMonitor:
             await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
 
     async def _append_triage_note(self, ticket_id, edge_full_id, edge_status):
-        self._logger.info(f'Appending triage note to recently created ticket {ticket_id}...')
-
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
@@ -430,9 +428,25 @@ class OutageMonitor:
 
         recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        if ticket_details_response['status'] not in range(200, 300):
+            return
+
+        ticket_detail: dict = ticket_details_response['body']['ticketDetails'][0]
+        ticket_detail_id = ticket_detail['detailID']
+        service_number = ticket_detail['detailValue']
+
         ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status, recent_events_response_body)
 
-        note_appended = await self._bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+        self._logger.info(
+            f'Appending triage note to detail {ticket_detail_id} (serial {service_number}) of recently created '
+            f'ticket {ticket_id}...'
+        )
+        detail_object = {
+            'ticket_id': ticket_id,
+            'ticket_detail': ticket_detail,
+        }
+        note_appended = await self._bruin_repository.append_triage_note(detail_object, ticket_note)
 
         if note_appended == 503:
             self._metrics_repository.increment_first_triage_errors()
