@@ -135,7 +135,7 @@ class BruinRepository:
 
         return response
 
-    async def append_note_to_ticket(self, ticket_id: int, note: str):
+    async def append_note_to_ticket(self, ticket_id: int, note: str, *, service_numbers: list = None):
         err_msg = None
 
         request = {
@@ -146,10 +146,18 @@ class BruinRepository:
             },
         }
 
+        if service_numbers:
+            request['body']['service_numbers'] = service_numbers
+
         try:
-            self._logger.info(f'Appending note to ticket {ticket_id}... Note contents: {note}')
+            if service_numbers:
+                self._logger.info(
+                    f'Appending note for service number(s) {", ".join(service_numbers)} in ticket {ticket_id}...'
+                )
+            else:
+                self._logger.info(f'Appending note for all service number(s) in ticket {ticket_id}...')
+
             response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=15)
-            self._logger.info(f'Note appended to ticket {ticket_id}!')
         except Exception as e:
             err_msg = (
                 f'An error occurred when appending a ticket note to ticket {ticket_id}. '
@@ -445,12 +453,15 @@ class BruinRepository:
     def is_management_status_active(management_status: str):
         return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}
 
-    async def append_triage_note(self, ticket_id, ticket_note, edge_status):
+    async def append_triage_note(self, ticket_detail, ticket_note):
+        ticket_id = ticket_detail['ticket_id']
+        ticket_detail_id = ticket_detail['ticket_detail']['detailID']
+        service_number = ticket_detail['ticket_detail']['detailValue']
+
         if self._config.TRIAGE_CONFIG['environment'] == 'dev':
-            serial_number = edge_status['edges']['serialNumber']
             triage_message = (
-                f'Triage note would have been appended to ticket {ticket_id} (serial: {serial_number}).'
-                f'Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}'
+                f'Triage note would have been appended to detail {ticket_detail_id} of ticket {ticket_id}'
+                f'(serial: {service_number}). Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}'
             )
             self._logger.info(triage_message)
             await self._notifications_repository.send_slack_message(triage_message)
@@ -458,7 +469,9 @@ class BruinRepository:
         elif self._config.TRIAGE_CONFIG['environment'] == 'production':
             if len(ticket_note) < 1500:
 
-                append_note_response = await self.append_note_to_ticket(ticket_id, ticket_note)
+                append_note_response = await self.append_note_to_ticket(
+                    ticket_id, ticket_note, service_numbers=[service_number]
+                )
 
                 if append_note_response['status'] == 503:
                     return 503
@@ -478,7 +491,9 @@ class BruinRepository:
 
                         note_page = f'Triage note: {counter}/{total_notes}'
                         accumulator = accumulator + note_page
-                        append_note_response = await self.append_note_to_ticket(ticket_id, accumulator)
+                        append_note_response = await self.append_note_to_ticket(
+                            ticket_id, accumulator, service_numbers=[service_number]
+                        )
                         if append_note_response['status'] == 503:
                             return 503
 
