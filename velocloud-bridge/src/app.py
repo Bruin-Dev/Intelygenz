@@ -5,6 +5,7 @@ from application.actions.edge_list_response import ReportEdgeList
 from application.actions.edge_status_response import ReportEdgeStatus
 from application.actions.enterprise_name_list_response import EnterpriseNameList
 from application.actions.links_with_edge_info import LinksWithEdgeInfo
+from application.actions.links_metric_info import LinksMetricInfo
 from application.clients.ids_by_serial_client import IDsBySerialClient
 from application.clients.velocloud_client import VelocloudClient
 from application.repositories.ids_by_serial_repository import IDsBySerialRepository
@@ -52,6 +53,7 @@ class Container:
         self._subscriber_event_alert = NATSClient(config, logger=self._logger)
         self._subscriber_enterprise_name_list = NATSClient(config, logger=self._logger)
         self._subscriber_links_with_edge_info = NATSClient(config, logger=self._logger)
+        self._subscriber_links_metric_info = NATSClient(config, logger=self._logger)
         self._subscriber_id_by_serial = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
@@ -61,6 +63,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_event_alert, consumer_name="event_alert")
         self._event_bus.add_consumer(self._subscriber_enterprise_name_list, consumer_name="enterprise_name_list")
         self._event_bus.add_consumer(self._subscriber_links_with_edge_info, consumer_name="links_with_edge_info")
+        self._event_bus.add_consumer(self._subscriber_links_metric_info, consumer_name="links_metric_info")
         self._event_bus.add_consumer(self._subscriber_id_by_serial, consumer_name="id_by_serial")
         self._event_bus.set_producer(self._publisher)
 
@@ -69,6 +72,7 @@ class Container:
         self._edge_events_for_alert = EventEdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
         self._enterprise_name_list = EnterpriseNameList(self._event_bus, self._velocloud_repository, self._logger)
         self._links_with_edge_info_action = LinksWithEdgeInfo(self._event_bus, self._logger, self._velocloud_repository)
+        self._links_metric_info_action = LinksMetricInfo(self._event_bus, self._logger, self._velocloud_repository)
         self._edge_ids_by_serial = SearchForIDsBySerial(config, self._event_bus, self._logger,
                                                         self._ids_by_serial_repository)
 
@@ -82,6 +86,8 @@ class Container:
                                                    is_async=True, logger=self._logger)
         self._links_with_edge_info = ActionWrapper(self._links_with_edge_info_action, "get_links_with_edge_info",
                                                    is_async=True, logger=self._logger)
+        self._links_metric_info = ActionWrapper(self._links_metric_info_action, "get_links_metric_info",
+                                                is_async=True, logger=self._logger)
         self._search_for_edge_id = ActionWrapper(self._edge_ids_by_serial, "search_for_edge_id",
                                                  is_async=True, logger=self._logger)
         self._server = QuartServer(config)
@@ -107,6 +113,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="links_with_edge_info",
                                                  topic="get.links.with.edge.info",
                                                  action_wrapper=self._links_with_edge_info,
+                                                 queue="velocloud_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="links_metric_info",
+                                                 topic="get.links.metric.info",
+                                                 action_wrapper=self._links_metric_info,
                                                  queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="id_by_serial",
                                                  topic="edge.ids.by.serial",

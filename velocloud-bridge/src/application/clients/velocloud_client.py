@@ -540,6 +540,55 @@ class VelocloudClient:
 
         return result
 
+    async def get_links_metric_info(self, velocloud_host: str):
+        result = dict.fromkeys(["body", "status"])
+
+        request_body = {}
+        target_host_client = self._get_header_by_host(velocloud_host)
+
+        if target_host_client is None:
+            await self._start_relogin_job(velocloud_host)
+
+            result["body"] = f'Cannot find a client to connect to host {velocloud_host}'
+            result["status"] = 404
+            self.__log_result(result)
+
+            return result
+
+        try:
+            self._logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
+
+            response = await self._session.post(
+                f"https://{velocloud_host}/portal/rest/monitoring/getAggregateEdgeLinkMetrics",
+                json=request_body,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = 'Error while connecting to Velocloud API'
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        if response.status in range(500, 513):
+            result["body"] = "Got internal error from Velocloud"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+
+        self._logger.info(
+            f'Got HTTP {response.status} from Velocloud after claiming links metric info for host {velocloud_host}'
+        )
+
+        result['body'] = await response.json()
+        result['status'] = response.status
+
+        self.__log_result(result)
+
+        return result
+
     async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
         if self.__token_expired(response):
             self._logger.info(f'Auth token expired for host {velocloud_host}. Scheduling re-login job...')

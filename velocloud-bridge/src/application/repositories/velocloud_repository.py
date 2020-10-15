@@ -107,3 +107,14 @@ class VelocloudRepository:
             elem['host'] = velocloud_host
 
         return links_with_edge_info_response
+
+    async def get_links_metric_info(self, velocloud_host: str):
+        links_metric_info_response = await self._velocloud_client.get_links_metric_info(velocloud_host)
+
+        if links_metric_info_response['status'] not in range(200, 300):
+            return links_metric_info_response
+
+        for elem in links_metric_info_response['body']:
+            elem['link']['host'] = velocloud_host
+
+        return links_metric_info_response
