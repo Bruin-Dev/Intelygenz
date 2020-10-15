@@ -207,7 +207,6 @@ class TestTriageRepository:
 
         assert events_note == os.linesep.join([
             '#*Automation Engine*#',
-            '',
             'Triage',
             '',
             'New event: EDGE_NEW_DEVICE',

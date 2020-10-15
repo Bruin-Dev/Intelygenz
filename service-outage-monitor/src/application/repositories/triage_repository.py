@@ -139,6 +139,7 @@ class TriageRepository:
         triage_note_fragments = [
             '#*Automation Engine*#',
             'Triage',
+            '',
         ]
 
         for event in events:
@@ -160,6 +161,7 @@ class TriageRepository:
 
             event_time_timezone_aware = parse(event_time).astimezone(tz_object)
             fragment_lines.append(f'Event time: {event_time_timezone_aware}')
+            fragment_lines.append('')
 
             fragment = os.linesep.join(fragment_lines)
             triage_note_fragments.append(fragment)
@@ -167,4 +169,4 @@ class TriageRepository:
         last_event_datetime = parse(events[len(events) - 1]["eventTime"]).astimezone(tz_object)
         triage_note_fragments.append(f'Timestamp: {last_event_datetime}')
 
-        return f'{os.linesep * 2}'.join(triage_note_fragments)
+        return f'{os.linesep}'.join(triage_note_fragments)
