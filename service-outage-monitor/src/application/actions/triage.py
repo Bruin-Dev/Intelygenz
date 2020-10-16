@@ -56,7 +56,7 @@ class Triage:
 
     async def _run_tickets_polling(self):
         self.__reset_customer_cache()
-        self._edge_list = await self._velocloud_repository.get_links_with_edge_info_for_triage()
+        self._edge_list = await self._velocloud_repository.get_edges_for_triage()
 
         total_start_time = time.time()
         self._logger.info(f'Starting triage process...')
@@ -432,13 +432,13 @@ class Triage:
                 )
                 continue
 
-            edge_status = [edge for edge in self._edge_list
-                           if edge["host"] == edge_full_id["host"]
-                           if edge["enterpriseId"] == edge_full_id["enterprise_id"]
-                           if edge["edgeId"] == edge_full_id["edge_id"]]
+            edge_status = next((edge for edge in self._edge_list
+                                if edge["host"] == edge_full_id["host"]
+                                if edge["enterpriseId"] == edge_full_id["enterprise_id"]
+                                if edge["edgeId"] == edge_full_id["edge_id"]), None)
 
-            if len(edge_status) == 0:
-                continue
+            if edge_status is None:
+                return
 
             recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 

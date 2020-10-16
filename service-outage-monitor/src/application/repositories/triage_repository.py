@@ -32,9 +32,11 @@ class TriageRepository:
         enterprise_id = edge_full_id['enterprise_id']
         edge_id = edge_full_id['edge_id']
 
-        edge_name = edge_status[0]['edgeName']
-        edge_state = edge_status[0]['edgeState']
-        edge_serial = edge_status[0]['edgeSerialNumber']
+        edge_name = edge_status['edgeName']
+        edge_state = edge_status['edgeState']
+        edge_serial = edge_status['edgeSerialNumber']
+
+        edge_links = edge_status['links']
 
         velocloud_base_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor'
         velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_id}'
@@ -54,7 +56,10 @@ class TriageRepository:
         relevant_data["Serial"] = edge_serial
 
         links_interface_names = []
-        for link in edge_status:
+        for link in edge_links:
+            if not link:
+                continue
+
             interface_name = link['interface']
             link_state = link['linkState']
             link_label = link['displayName']
