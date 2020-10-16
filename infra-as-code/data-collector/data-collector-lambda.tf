@@ -57,7 +57,7 @@ resource "aws_lambda_function" "data_collector" {
   handler       = "main.handler"
   source_code_hash = filebase64sha256("${path.module}/lambdas/rest-api-data-collector/main.py")
 
-  runtime = "python3.6"
+  runtime = "python3.8"
 
   vpc_config {
     subnet_ids         = [
