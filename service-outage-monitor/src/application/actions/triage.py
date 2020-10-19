@@ -34,8 +34,8 @@ class Triage:
         self._notifications_repository = notifications_repository
         self._triage_repository = triage_repository
         self._metrics_repository = metrics_repository
-
-        self._edge_list = []
+        self._edges_data_by_serial = {}
+        self._edges_status_by_serial = {}
         self.__reset_customer_cache()
         self._semaphore = asyncio.BoundedSemaphore(self._config.TRIAGE_CONFIG['semaphore'])
 
@@ -56,7 +56,6 @@ class Triage:
 
     async def _run_tickets_polling(self):
         self.__reset_customer_cache()
-        self._edge_list = await self._velocloud_repository.get_edges_for_triage()
 
         total_start_time = time.time()
         self._logger.info(f'Starting triage process...')
@@ -87,15 +86,24 @@ class Triage:
                           f'Ticket details with triage: {len(details_with_triage)}. '
                           f'Ticket details without triage: {len(details_without_triage)}. '
                           'Processing both sets...')
-        edges_data_by_serial: dict = {
+        self._edges_data_by_serial: dict = {
             elem['serial_number']: {'edge_id': elem['edge']}
             for elem in self._customer_cache
         }
+        await self._build_edges_status_by_serial()
         await asyncio.gather(
-            self._process_ticket_details_with_triage(details_with_triage, edges_data_by_serial),
-            self._process_ticket_details_without_triage(details_without_triage, edges_data_by_serial),
+            self._process_ticket_details_with_triage(details_with_triage),
+            self._process_ticket_details_without_triage(details_without_triage),
         )
         self._logger.info(f'Triage process finished! took {time.time() - total_start_time} seconds')
+
+    async def _build_edges_status_by_serial(self):
+        edge_list = await self._velocloud_repository.get_edges_for_triage()
+        for edge in edge_list:
+            serial_number = edge["edgeSerialNumber"]
+            if serial_number in self._edges_data_by_serial.keys():
+                self._edges_status_by_serial[serial_number] = edge
+                continue
 
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []
@@ -263,7 +271,7 @@ class Triage:
 
         return ticket_details_with_triage, ticket_details_without_triage
 
-    async def _process_ticket_details_with_triage(self, ticket_details, edges_data_by_serial):
+    async def _process_ticket_details_with_triage(self, ticket_details):
         self._logger.info('Processing ticket details with triage...')
 
         for detail in ticket_details:
@@ -288,7 +296,7 @@ class Triage:
             self._logger.info(f'Appending events to detail {ticket_detail_id} of ticket {ticket_id}...')
 
             newest_triage_note_timestamp = newest_triage_note['createdDate']
-            edge_data = edges_data_by_serial[serial_number]
+            edge_data = self._edges_data_by_serial[serial_number]
 
             await self._append_new_triage_notes_based_on_recent_events(detail, newest_triage_note_timestamp, edge_data)
             self._logger.info(f'Events appended to detail {ticket_detail_id} of ticket {ticket_id}!')
@@ -399,7 +407,7 @@ class Triage:
         self._logger.info(message)
         await self._notifications_repository.send_slack_message(message)
 
-    async def _process_ticket_details_without_triage(self, ticket_details, edges_data_by_serial):
+    async def _process_ticket_details_without_triage(self, ticket_details):
         self._logger.info('Processing ticket details without triage...')
 
         for detail in ticket_details:
@@ -409,7 +417,7 @@ class Triage:
 
             self._logger.info(f'Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...')
 
-            edge_data = edges_data_by_serial[serial_number]
+            edge_data = self._edges_data_by_serial[serial_number]
 
             edge_full_id = edge_data['edge_id']
             edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -432,13 +440,10 @@ class Triage:
                 )
                 continue
 
-            edge_status = next((edge for edge in self._edge_list
-                                if edge["host"] == edge_full_id["host"]
-                                if edge["enterpriseId"] == edge_full_id["enterprise_id"]
-                                if edge["edgeId"] == edge_full_id["edge_id"]), None)
+            edge_status = self._edges_status_by_serial.get(serial_number)
 
             if edge_status is None:
-                return
+                continue
 
             recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
