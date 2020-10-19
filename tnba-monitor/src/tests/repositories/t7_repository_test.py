@@ -72,11 +72,7 @@ class TestT7Repository:
                     ]
                 }
             ],
-            'status': 200,
-            'kre_response': {
-                "body": "No kre content",
-                "status_code": "SUCCESS"
-            }
+            'status': 200
         }
 
         logger = Mock()

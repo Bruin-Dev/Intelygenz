@@ -1,10 +1,5 @@
 import requests
-import json
 from tenacity import retry, wait_exponential, stop_after_delay
-import grpc
-from google.protobuf.json_format import Parse
-from application.clients import public_input_pb2 as pb2
-from application.clients import public_input_pb2_grpc as pb2_grpc
 
 
 class T7Client:
@@ -21,7 +16,7 @@ class T7Client:
         }
         return headers
 
-    def get_prediction(self, ticket_id, ticket_rows):
+    def get_prediction(self, ticket_id):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']), reraise=True)
@@ -70,50 +65,8 @@ class T7Client:
                     raise Exception(return_response)
             return return_response
 
-        def get_kre_prediction():
-            try:
-                credentials = grpc.ssl_channel_credentials()
-                c = grpc.secure_channel(f"{self._config.KRE_CONFIG['base_url']}", credentials=credentials)
-
-                stub = pb2_grpc.EntrypointStub(c)
-
-                request = pb2.PredictionRequest()
-                request.ticket_id = ticket_id
-                for row in ticket_rows:
-                    ticket_row = Parse(json.dumps(row), pb2.TicketRow())
-                    request.ticket_rows.append(ticket_row)
-
-                save_prediction_response = stub.Prediction(request)
-                kre_response = {
-                    "body": save_prediction_response.message,
-                    "status_code": "SUCCESS"
-                }
-
-                self._logger.info(f'Got response getting predictions from KRE: {kre_response["body"]}')
-
-            except grpc.RpcError as kre_e:
-                kre_response = {
-                    "body": f"Error details for {kre_e.code()}: {kre_e.details}",
-                    "status_code": f"{kre_e.code()}"
-                }
-                self._logger.error(f'Got error getting predictions from KRE: {kre_response["body"]}')
-                pass
-
-            except Exception as kre_e:
-                kre_response = {
-                    "body": f"Error: {kre_e.args[0]}",
-                    "status_code": "UNKNOWN_ERROR"
-                }
-                self._logger.error(f'Got error getting predictions from KRE: {kre_response["body"]}')
-                pass
-
-            return kre_response
-
         try:
-            t7_response = get_prediction()
-            kre_response = get_kre_prediction()
-            t7_response["kre_response"] = kre_response
-            return t7_response
+            return get_prediction()
         except Exception as e:
             return e.args[0]
 
@@ -167,50 +120,7 @@ class T7Client:
                     raise Exception(return_response)
             return return_response
 
-        def post_kre_automation_metrics():
-
-            try:
-                credentials = grpc.ssl_channel_credentials()
-                c = grpc.secure_channel(f"{self._config.KRE_CONFIG['base_url']}", credentials=credentials)
-
-                stub = pb2_grpc.EntrypointStub(c)
-
-                request = pb2.SaveMetricsRequest()
-                request.ticket_id = params['ticket_id']
-                for row in params['camel_ticket_rows']:
-                    ticket_row = Parse(json.dumps(row), pb2.TicketRow())
-                    request.ticket_rows.append(ticket_row)
-
-                save_metrics_response = stub.SaveMetrics(request)
-                kre_response = {
-                    "body": save_metrics_response.message,
-                    "status_code": "SUCCESS"
-                }
-
-                self._logger.info(f'Got response saving metrics from KRE: {kre_response["body"]}')
-
-            except grpc.RpcError as kre_e:
-                kre_response = {
-                    "body": f"Error details for {kre_e.code()}: {kre_e.details}",
-                    "status_code": f"{kre_e.code()}"
-                }
-                self._logger.error(f'Got error saving metrics from KRE: {kre_response["body"]}')
-                pass
-
-            except Exception as kre_e:
-                kre_response = {
-                    "body": f"Error: {kre_e.args[0]}",
-                    "status_code": "UNKNOWN_ERROR"
-                }
-                self._logger.error(f'Got error saving metrics from KRE: {kre_response["body"]}')
-                pass
-
-            return kre_response
-
         try:
-            t7_response = post_automation_metrics()
-            kre_response = post_kre_automation_metrics()
-            t7_response["kre_response"] = kre_response
-            return t7_response
+            return post_automation_metrics()
         except Exception as e:
             return e.args[0]

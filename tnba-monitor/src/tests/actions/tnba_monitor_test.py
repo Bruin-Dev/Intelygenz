@@ -1808,7 +1808,19 @@ class TestTNBAMonitor:
         ]
 
         task_history_response = {
-            'body': [],
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
             'status': 200
         }
 
@@ -2505,6 +2517,133 @@ class TestTNBAMonitor:
                                                                                      ticket_2_detail_1_serial_number)
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_tickets_without_tnba_with_get_ticket_task_history_returning_all_assets_none_test(self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': [
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": (
+                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                    ),
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+            ],
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': [],
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        task_history_response_1 = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": None,
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": None,
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
+        task_history_response_2 = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": None,
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": None,
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
+
+        prediction_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(side_effect=[
+            task_history_response_1,
+            task_history_response_2,
+        ]
+
+        )
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        await tnba_monitor._process_tickets_without_tnba(tickets)
+
+        t7_repository.get_prediction.assert_not_awaited()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
 
     @pytest.mark.asyncio
     async def process_tickets_without_tnba_with_no_predictions_after_filtering_with_next_results_test(self):
@@ -4048,6 +4187,133 @@ class TestTNBAMonitor:
         prediction_repository.filter_predictions_in_next_results.assert_not_called()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+        @pytest.mark.asyncio
+        async def process_tickets_with_tnba_with_get_ticket_task_history_returning_all_assets_none_test(self):
+            ticket_1_id = 12345
+            ticket_1_detail_1_id = 2746930
+            ticket_1_detail_1_serial_number = 'VC1234567'
+            ticket_1_detail_2_id = 2746931
+            ticket_1_detail_2_serial_number = 'VC9999999'
+            ticket_1 = {
+                'ticket_id': ticket_1_id,
+                'ticket_details': [
+                    {
+                        "detailID": ticket_1_detail_1_id,
+                        "detailValue": ticket_1_detail_1_serial_number,
+                    },
+                    {
+                        "detailID": ticket_1_detail_2_id,
+                        "detailValue": ticket_1_detail_2_serial_number,
+                    },
+                ],
+                'ticket_notes': [
+                    {
+                        "noteId": 41894040,
+                        "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "createdDate": "2020-02-24T10:07:13.503-05:00",
+                    },
+                    {
+                        "noteId": 41894040,
+                        "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "createdDate": "2020-02-24T10:07:13.503-05:00",
+                    },
+                    {
+                        "noteId": 41894040,
+                        "noteValue": (
+                            f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        ),
+                        "createdDate": "2020-02-24T10:07:13.503-05:00",
+                    },
+                ],
+            }
+
+            ticket_2_id = 67890
+            ticket_2_detail_1_id = 2746930
+            ticket_2_detail_1_serial_number = 'VC1111222'
+            ticket_2 = {
+                'ticket_id': ticket_2_id,
+                'ticket_details': [
+                    {
+                        "detailID": ticket_2_detail_1_id,
+                        "detailValue": ticket_2_detail_1_serial_number,
+                    },
+                ],
+                'ticket_notes': [],
+            }
+
+            tickets = [
+                ticket_1,
+                ticket_2,
+            ]
+
+            task_history_response_1 = {
+                'body': [
+                    {
+                        "Asset": None,
+                        "Ticket Status": "To do"
+                    },
+                    {
+                        "Asset": None,
+                        "Ticket Status": "In Progress"
+                    },
+                    {
+                        "Asset": None,
+                        "Ticket Status": "Done"
+                    }],
+                'status': 200
+            }
+
+            task_history_response_2 = {
+                'body': [
+                    {
+                        "Asset": None,
+                        "Ticket Status": "To do"
+                    },
+                    {
+                        "Asset": None,
+                        "Ticket Status": "In Progress"
+                    },
+                    {
+                        "Asset": None,
+                        "Ticket Status": "Done"
+                    }],
+                'status': 200
+            }
+
+            event_bus = Mock()
+            logger = Mock()
+            scheduler = Mock()
+            config = testconfig
+            velocloud_repository = Mock()
+            customer_cache_repository = Mock()
+            notifications_repository = Mock()
+
+            ticket_repository = Mock()
+            ticket_repository.build_tnba_note_from_prediction = Mock()
+
+            prediction_repository = Mock()
+
+            bruin_repository = Mock()
+            bruin_repository.get_ticket_task_history = CoroutineMock(side_effect=[
+                task_history_response_1,
+                task_history_response_2,
+            ]
+
+            )
+            bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
+
+            t7_repository = Mock()
+            t7_repository.get_prediction = CoroutineMock()
+
+            tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                       customer_cache_repository, bruin_repository, velocloud_repository,
+                                       prediction_repository, notifications_repository)
+
+            await tnba_monitor._process_tickets_with_tnba(tickets)
+
+            t7_repository.get_prediction.assert_not_awaited()
+            ticket_repository.build_tnba_note_from_prediction.assert_not_called()
 
     @pytest.mark.asyncio
     async def process_tickets_with_tnba_with_tnba_note_too_recent_for_a_new_append_test(self):

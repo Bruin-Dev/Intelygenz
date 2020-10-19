@@ -107,6 +107,7 @@ REDIS_TNBA_FEEDBACK_HOSTNAME = 'redis-tnba-feedback'
 SLACK_URL = var_dict["SLACK_URL_DEV"]
 
 # T7 variables
+KRE_BASE_URL = var_dict["KRE_BASE_URL_DEV"]
 T7_BASE_URL = var_dict["T7_BASE_URL_DEV"]
 T7_TOKEN = var_dict["T7_TOKEN_DEV"]
 
@@ -364,6 +365,7 @@ env_dict = {
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'KRE_BASE_URL={KRE_BASE_URL}\n'
         f'T7_BASE_URL={T7_BASE_URL}\n'
         f'T7_TOKEN={T7_TOKEN}\n'
         f'PAPERTRAIL_ACTIVE=False\n'

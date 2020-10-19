@@ -2,7 +2,9 @@ import redis
 
 from config import config
 from application.clients.t7_client import T7Client
+from application.clients.t7_kre_client import T7KREClient
 from application.repositories.t7_repository import T7Repository
+from application.repositories.t7_kre_repository import T7KRERepository
 from application.actions.get_prediction import GetPrediction
 from application.actions.post_automation_metrics import PostAutomationMetrics
 from igz.packages.nats.clients import NATSClient
@@ -27,6 +29,9 @@ class Container:
         self._t7_client = T7Client(self._logger, config)
         self._t7_repository = T7Repository(self._logger, self._t7_client)
 
+        self._t7_kre_client = T7KREClient(self._logger, config)
+        self._t7_kre_repository = T7KRERepository(self._logger, self._t7_kre_client)
+
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         self._publisher = NATSClient(config, logger=self._logger)
@@ -38,10 +43,21 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_automation_metrics, consumer_name="automation_metrics")
         self._event_bus.set_producer(self._publisher)
 
-        self._get_prediction = GetPrediction(self._logger, config, self._event_bus,
-                                             self._t7_repository)
-        self._post_automation_metrics = PostAutomationMetrics(self._logger, config, self._event_bus,
-                                                              self._t7_repository)
+        self._get_prediction = GetPrediction(
+            self._logger,
+            config,
+            self._event_bus,
+            self._t7_repository,
+            self._t7_kre_repository,
+        )
+
+        self._post_automation_metrics = PostAutomationMetrics(
+            self._logger,
+            config,
+            self._event_bus,
+            self._t7_repository,
+            self._t7_kre_repository,
+        )
 
         self._action_get_prediction = ActionWrapper(self._get_prediction, "get_prediction",
                                                     is_async=True, logger=self._logger)

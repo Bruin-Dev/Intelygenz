@@ -21,6 +21,7 @@ data "template_file" "automation-t7-bridge" {
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
     REDIS_HOSTNAME = local.redis-hostname
+    KRE_BASE_URL = var.KRE_BASE_URL
     T7_BASE_URL = var.T7_BASE_URL
     T7_TOKEN = var.T7_TOKEN
     PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false

@@ -45,6 +45,10 @@
         "value": "${REDIS_HOSTNAME}"
       },
       {
+        "name": "KRE_BASE_URL",
+        "value": "${KRE_BASE_URL}"
+      },
+      {
         "name": "T7_BASE_URL",
         "value": "${T7_BASE_URL}"
       },

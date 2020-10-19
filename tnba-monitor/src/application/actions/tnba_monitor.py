@@ -11,7 +11,6 @@ from apscheduler.util import undefined
 from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
-
 TNBA_NOTE_APPENDED_SUCCESS_MSG = (
     'TNBA note appended to ticket {ticket_id} and detail {detail_id} (serial: {serial_number}) '
     'with prediction: {prediction}. Details at app.bruin.com/t/{ticket_id}'
@@ -233,6 +232,16 @@ class TNBAMonitor:
             task_history_response_body = task_history_response['body']
             task_history_response_status = task_history_response['status']
             if task_history_response_status not in range(200, 300):
+                self._logger.error(
+                    f'Error on _process_tickets_without_tnba getting ticket_task_history for ticket_id[{ticket_id}]'
+                )
+                continue
+
+            ticket_rows_with_asset = [tr for tr in task_history_response_body if
+                                      tr.get('Asset') and tr['Asset'] is not None]
+
+            if len(ticket_rows_with_asset) == 0:
+                self._logger.info(f'Skipped get_prediction for ticket_id[{ticket_id}] without assets...')
                 continue
 
             t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history_response_body)
@@ -365,6 +374,16 @@ class TNBAMonitor:
             task_history_response_body = task_history_response['body']
             task_history_response_status = task_history_response['status']
             if task_history_response_status not in range(200, 300):
+                self._logger.error(
+                    f'Error on _process_tickets_with_tnba getting ticket_task_history for ticket_id[{ticket_id}]'
+                )
+                continue
+
+            ticket_rows_with_asset = [tr for tr in task_history_response_body if
+                                      tr.get('Asset') and tr['Asset'] is not None]
+
+            if len(ticket_rows_with_asset) == 0:
+                self._logger.info(f'Skipped get_prediction for ticket_id[{ticket_id}] without assets...')
                 continue
 
             t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history_response_body)
