@@ -92,6 +92,40 @@ class BruinRepository:
 
         return response
 
+    async def get_ticket_task_history(self, ticket_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting task history of ticket {ticket_id} from Bruin...')
+            response = await self._event_bus.rpc_request("bruin.ticket.get.task.history", request, timeout=15)
+            self._logger.info(f'Got task history of ticket {ticket_id} from Bruin!')
+        except Exception as e:
+            err_msg = f'An error occurred when requesting task history from Bruin API for ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving task history of ticket {ticket_id} in '
+                    f'{self._config.ENVIRONMENT.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_client_info(self, service_number: str):
         err_msg = None
 

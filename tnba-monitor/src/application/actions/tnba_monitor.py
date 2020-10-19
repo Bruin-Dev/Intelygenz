@@ -229,7 +229,13 @@ class TNBAMonitor:
             ticket_id = ticket["ticket_id"]
             self._logger.info(f'Processing ticket {ticket_id} without TNBA notes...')
 
-            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id)
+            task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
+            task_history_response_body = task_history_response['body']
+            task_history_response_status = task_history_response['status']
+            if task_history_response_status not in range(200, 300):
+                continue
+
+            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history_response_body)
             t7_prediction_response_body = t7_prediction_response['body']
             t7_prediction_response_status = t7_prediction_response['status']
             if t7_prediction_response_status not in range(200, 300):
@@ -355,7 +361,13 @@ class TNBAMonitor:
             ticket_id = ticket["ticket_id"]
             self._logger.info(f'Processing ticket {ticket_id} with TNBA notes...')
 
-            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id)
+            task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
+            task_history_response_body = task_history_response['body']
+            task_history_response_status = task_history_response['status']
+            if task_history_response_status not in range(200, 300):
+                continue
+
+            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history_response_body)
             t7_prediction_response_body = t7_prediction_response['body']
             t7_prediction_response_status = t7_prediction_response['status']
             if t7_prediction_response_status not in range(200, 300):

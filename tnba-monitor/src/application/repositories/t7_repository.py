@@ -1,5 +1,7 @@
 from shortuuid import uuid
 
+from typing import List
+
 from application.repositories import nats_error_response
 
 
@@ -10,38 +12,20 @@ class T7Repository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_prediction(self, ticket_id: int):
+    async def get_prediction(self, ticket_id: int, ticket_rows: List[dict]):
         err_msg = None
 
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'ticket_rows': ticket_rows,
+            },
+        }
+
         try:
-            request = {
-                'request_id': uuid(),
-                'body': {
-                    'ticket_id': ticket_id,
-                },
-            }
-            self._logger.info(f'Getting bruin task history for ticket {ticket_id}...')
-            task_history_res = await self._event_bus.rpc_request("bruin.ticket.get.task.history", request, timeout=60)
-            task_history_res_status = task_history_res['status']
-            task_history_res_body = task_history_res['body']
-
-            if task_history_res_status not in range(200, 300):
-                err_msg = (
-                    f'Error getting bruin task history for ticket {ticket_id} in {self._config.ENVIRONMENT.upper()} '
-                    f'environment. Error: Error {task_history_res_status} - {task_history_res_body}'
-                )
-
             self._logger.info(f'Claiming T7 prediction for ticket {ticket_id}...')
-
-            prediction_request = {
-                'request_id': uuid(),
-                'body': {
-                    'ticket_id': ticket_id,
-                    'ticket_rows': task_history_res_body,
-                },
-            }
-
-            response = await self._event_bus.rpc_request("t7.prediction.request", prediction_request, timeout=60)
+            response = await self._event_bus.rpc_request("t7.prediction.request", request, timeout=60)
             self._logger.info(f'Got T7 prediction for ticket {ticket_id}!')
         except Exception as e:
             err_msg = f'An error occurred when claiming T7 prediction for ticket {ticket_id}. Error: {e}'

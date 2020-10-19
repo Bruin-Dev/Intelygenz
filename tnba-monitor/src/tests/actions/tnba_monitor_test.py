@@ -1807,6 +1807,11 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response = {
+            'body': [],
+            'status': 200
+        }
+
         t7_prediction_response = {
             'body': 'Got internal error from T7',
             'status': 500
@@ -1824,6 +1829,7 @@ class TestTNBAMonitor:
         ticket_repository.build_tnba_note_from_prediction = Mock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -1837,8 +1843,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
@@ -1903,6 +1909,23 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         t7_prediction_response_for_ticket_1 = {
             'body': [
                 {
@@ -1954,6 +1977,7 @@ class TestTNBAMonitor:
         prediction_repository.find_prediction_object_by_serial = Mock(return_value=None)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -1970,8 +1994,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
@@ -2054,6 +2078,24 @@ class TestTNBAMonitor:
                            "in the \"Task Result\" labels map."
             },
         }
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         t7_prediction_response_for_ticket_1 = {
             'body': [
                 prediction_for_ticket_1_detail_1,
@@ -2094,6 +2136,7 @@ class TestTNBAMonitor:
         ])
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -2113,8 +2156,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         assert notifications_repository.send_slack_message.await_count == 3
         bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
@@ -2204,6 +2247,24 @@ class TestTNBAMonitor:
             'name': 'Holmdel NOC Investigate',
             'probability': 0.1234567890123456
         }
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         t7_prediction_response_for_ticket_1_detail_2_predictions = [
             t7_prediction_response_for_ticket_1_detail_2_predictions_item_1,
             t7_prediction_response_for_ticket_1_detail_2_predictions_item_2,
@@ -2266,6 +2327,7 @@ class TestTNBAMonitor:
         ])
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(return_value=next_results_response)
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -2282,14 +2344,165 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
             call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
             call(ticket_1_id, ticket_1_detail_2_id, ticket_1_detail_2_serial_number),
             call(ticket_2_id, ticket_2_detail_1_id, ticket_2_detail_1_serial_number),
         ])
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_tickets_without_tnba_with_get_ticket_task_history_returning_non_2xx_status_test(self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': [
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": (
+                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                    ),
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+            ],
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': [],
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        task_history_response_1 = {
+            'body': 'Got internal error from Bruin',
+            'status': 500
+        }
+
+        task_history_response_2 = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
+        t7_prediction_response_for_ticket_2_detail_1_predictions_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        t7_prediction_response_for_ticket_2_detail_1_predictions_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        t7_prediction_response_for_ticket_2_detail_1_predictions = [
+            t7_prediction_response_for_ticket_2_detail_1_predictions_item_1,
+            t7_prediction_response_for_ticket_2_detail_1_predictions_item_2,
+        ]
+        t7_prediction_response_for_ticket_2_detail_1_prediction_object = {
+            'assetId': ticket_2_detail_1_serial_number,
+            'predictions': t7_prediction_response_for_ticket_2_detail_1_predictions,
+        }
+        t7_prediction_response_for_ticket_2 = {
+            'body': [
+                t7_prediction_response_for_ticket_2_detail_1_prediction_object,
+            ],
+            'status': 200
+        }
+
+        next_results_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(
+            return_value=t7_prediction_response_for_ticket_2_detail_1_prediction_object)
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(side_effect=[
+            task_history_response_1,
+            task_history_response_2,
+        ]
+
+        )
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(return_value=next_results_response)
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(side_effect=[
+            t7_prediction_response_for_ticket_2,
+        ])
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        await tnba_monitor._process_tickets_without_tnba(tickets)
+
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_2_id, task_history_response_2['body'])
+        bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(ticket_2_id, ticket_2_detail_1_id,
+                                                                                     ticket_2_detail_1_serial_number)
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
@@ -2351,6 +2564,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         t7_prediction_response_for_ticket_1_detail_1_predictions_item_1 = {
             'name': 'Repair Completed',
@@ -2503,6 +2733,7 @@ class TestTNBAMonitor:
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_for_ticket_1_detail_1_response,
             next_results_for_ticket_1_detail_2_response,
@@ -2526,8 +2757,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
             call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
@@ -2620,6 +2851,24 @@ class TestTNBAMonitor:
             'name': 'Holmdel NOC Investigate',
             'probability': 0.1234567890123456
         }
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         t7_prediction_response_for_ticket_1_detail_2_predictions = [
             t7_prediction_response_for_ticket_1_detail_2_predictions_item_1,
             t7_prediction_response_for_ticket_1_detail_2_predictions_item_2,
@@ -2764,6 +3013,7 @@ class TestTNBAMonitor:
         ])
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_for_ticket_1_detail_1_response,
             next_results_for_ticket_1_detail_2_response,
@@ -2788,8 +3038,8 @@ class TestTNBAMonitor:
             await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
             call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
@@ -2887,6 +3137,24 @@ class TestTNBAMonitor:
             'name': 'Holmdel NOC Investigate',
             'probability': 0.1234567890123456
         }
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         t7_prediction_response_for_ticket_1_detail_2_predictions = [
             t7_prediction_response_for_ticket_1_detail_2_predictions_item_1,
             t7_prediction_response_for_ticket_1_detail_2_predictions_item_2,
@@ -3046,6 +3314,7 @@ class TestTNBAMonitor:
         ])
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_for_ticket_1_detail_1_response,
             next_results_for_ticket_1_detail_2_response,
@@ -3070,8 +3339,8 @@ class TestTNBAMonitor:
             await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
             call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
@@ -3170,6 +3439,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         t7_prediction_response_for_ticket_1_detail_1_predictions_item_1 = {
             'name': 'Repair Completed',
@@ -3354,6 +3640,7 @@ class TestTNBAMonitor:
         ])
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_for_ticket_1_detail_1_response,
             next_results_for_ticket_1_detail_2_response,
@@ -3378,8 +3665,8 @@ class TestTNBAMonitor:
             await tnba_monitor._process_tickets_without_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
             call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
@@ -3533,6 +3820,40 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response_1 = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
+        task_history_response_2 = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset42",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset72",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         t7_prediction_response = {
             'body': 'Got internal error from T7',
             'status': 500
@@ -3556,6 +3877,12 @@ class TestTNBAMonitor:
         prediction_repository.get_best_prediction = Mock()
 
         bruin_repository = Mock()
+
+        bruin_repository.get_ticket_task_history = CoroutineMock(side_effect=[
+            task_history_response_1,
+            task_history_response_2,
+        ])
+
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -3569,9 +3896,151 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response_1['body']),
+            call(ticket_2_id, task_history_response_2['body']),
         ])
+        ticket_repository.find_newest_tnba_note_by_service_number.assert_not_called()
+        ticket_repository.is_tnba_note_old_enough.assert_not_called()
+        prediction_repository.find_prediction_object_by_serial.assert_not_called()
+        bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
+        prediction_repository.filter_predictions_in_next_results.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_tickets_with_tnba_with_get_ticket_task_history_returning_non_2xx_status_test(self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_1_note_2 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_1_note_3 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_1_notes = [
+            ticket_1_note_1,
+            ticket_1_note_2,
+            ticket_1_note_3,
+        ]
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': ticket_1_notes,
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_2_notes = [
+            ticket_2_note_1,
+        ]
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': ticket_2_notes,
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        task_history_response_1 = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
+        task_history_response_2 = {
+            'body': 'Got internal error from T7',
+            'status': 500
+        }
+
+        t7_prediction_response = {
+            'body': 'Got internal error from T7',
+            'status': 500
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.find_newest_tnba_note_by_service_number = Mock()
+        ticket_repository.is_tnba_note_old_enough = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock()
+        prediction_repository.filter_predictions_in_next_results = Mock()
+        prediction_repository.get_best_prediction = Mock()
+
+        bruin_repository = Mock()
+
+        bruin_repository.get_ticket_task_history = CoroutineMock(side_effect=[
+            task_history_response_1,
+            task_history_response_2,
+        ])
+
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(return_value=t7_prediction_response)
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        await tnba_monitor._process_tickets_with_tnba(tickets)
+
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_1_id, task_history_response_1['body'])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_not_called()
         ticket_repository.is_tnba_note_old_enough.assert_not_called()
         prediction_repository.find_prediction_object_by_serial.assert_not_called()
@@ -3661,6 +4130,23 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         predictions_for_ticket_1 = [
             {
                 'assetId': 'VC8888888',
@@ -3723,6 +4209,7 @@ class TestTNBAMonitor:
         prediction_repository.get_best_prediction = Mock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -3739,8 +4226,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -3837,6 +4324,23 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         predictions_for_ticket_1 = [
             {
                 'assetId': 'VC8888888',
@@ -3899,6 +4403,7 @@ class TestTNBAMonitor:
         prediction_repository.get_best_prediction = Mock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -3915,8 +4420,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -4018,6 +4523,23 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         prediction_for_ticket_1_detail_1 = {
             'assetId': ticket_1_detail_1_serial_number,
             'error': {
@@ -4085,6 +4607,7 @@ class TestTNBAMonitor:
         prediction_repository.get_best_prediction = Mock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -4104,8 +4627,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -4207,6 +4730,23 @@ class TestTNBAMonitor:
             ticket_2,
         ]
 
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
+
         prediction_object_for_ticket_1_detail_1 = {
             'assetId': ticket_1_detail_1_serial_number,
             'predictions': [
@@ -4294,6 +4834,7 @@ class TestTNBAMonitor:
         prediction_repository.get_best_prediction = Mock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(return_value=next_results_response)
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
 
@@ -4310,8 +4851,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -4415,6 +4956,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         prediction_object_for_ticket_1_detail_1_predictions_list = [
             {
@@ -4578,6 +5136,7 @@ class TestTNBAMonitor:
         prediction_repository.get_best_prediction = Mock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_response_for_ticket_1_detail_1,
             next_results_response_for_ticket_1_detail_2,
@@ -4598,8 +5157,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -4707,6 +5266,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         prediction_object_for_ticket_1_detail_1_predictions_list_item_1 = {
             'name': 'Repair Completed',
@@ -4893,6 +5469,7 @@ class TestTNBAMonitor:
         prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=False)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_response_for_ticket_1_detail_1,
             next_results_response_for_ticket_1_detail_2,
@@ -4913,8 +5490,8 @@ class TestTNBAMonitor:
         await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -5026,6 +5603,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         prediction_object_for_ticket_1_detail_1_predictions_list_item_1 = {
             'name': 'Repair Completed',
@@ -5211,6 +5805,7 @@ class TestTNBAMonitor:
         prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=True)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_response_for_ticket_1_detail_1,
             next_results_response_for_ticket_1_detail_2,
@@ -5235,8 +5830,8 @@ class TestTNBAMonitor:
             await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -5353,6 +5948,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         prediction_object_for_ticket_1_detail_1_predictions_list_item_1 = {
             'name': 'Repair Completed',
@@ -5551,6 +6163,7 @@ class TestTNBAMonitor:
         prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=True)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_response_for_ticket_1_detail_1,
             next_results_response_for_ticket_1_detail_2,
@@ -5575,8 +6188,8 @@ class TestTNBAMonitor:
             await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
@@ -5719,6 +6332,23 @@ class TestTNBAMonitor:
             ticket_1,
             ticket_2,
         ]
+
+        task_history_response = {
+            'body': [
+                {
+                    "Asset": None,
+                    "Ticket Status": "To do"
+                },
+                {
+                    "Asset": "asset4",
+                    "Ticket Status": "In Progress"
+                },
+                {
+                    "Asset": "asset7",
+                    "Ticket Status": "Done"
+                }],
+            'status': 200
+        }
 
         prediction_object_for_ticket_1_detail_1_predictions_list_item_1 = {
             'name': 'Repair Completed',
@@ -5917,6 +6547,7 @@ class TestTNBAMonitor:
         prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=True)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
         bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
             next_results_response_for_ticket_1_detail_1,
             next_results_response_for_ticket_1_detail_2,
@@ -5941,8 +6572,8 @@ class TestTNBAMonitor:
             await tnba_monitor._process_tickets_with_tnba(tickets)
 
         t7_repository.get_prediction.assert_has_awaits([
-            call(ticket_1_id),
-            call(ticket_2_id),
+            call(ticket_1_id, task_history_response['body']),
+            call(ticket_2_id, task_history_response['body']),
         ])
         ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
             call(ticket_1_notes, ticket_1_detail_1_serial_number),
