@@ -62,6 +62,8 @@ QUART_CONFIG = {
     'port': 5000
 }
 
+ENVIRONMENT_NAME = "dev"
+
 TRIAGE_CONFIG = {
     'environment': "dev",
     'polling_minutes': 10,
@@ -71,6 +73,7 @@ TRIAGE_CONFIG = {
     'monitoring_seconds': 120,
     'event_limit': 15,
     'velo_filter': {"mettel.velocloud.net": []},
+    'velo_hosts': ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],
     'multiplier': 1,
     'min': 1,
     'stop_delay': 0,

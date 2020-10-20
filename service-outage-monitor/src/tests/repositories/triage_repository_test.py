@@ -25,45 +25,32 @@ class TestTriageRepository:
             'edgeState': 'OFFLINE',
             'edgeName': 'Travis Touchdown',
             'edgeSerialNumber': edge_serial,
-            'linkId': 1234,
-            'linkState': 'DISCONNECTED',
-            'interface': 'GE1',
-            'displayName': 'Solid Snake',
             'enterpriseName': 'EVIL-CORP|12345|',
             'host': host,
             'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
+            'edgeId': edge_id,
+            "links": [
+                {
+                        'linkId': 1234,
+                        'linkState': 'DISCONNECTED',
+                        'interface': 'GE1',
+                        'displayName': 'Solid Snake',
 
-        edge_status_2 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_serial,
-            'edgeName': 'Travis Touchdown',
-            'linkId': 9012,
-            'linkState': 'STABLE',
-            'interface': 'GE7',
-            'displayName': 'Big Boss',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': 'fake_host',
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
+                },
+                {
+                    'linkId': 9012,
+                    'linkState': 'STABLE',
+                    'interface': 'GE7',
+                    'displayName': 'Big Boss',
+                },
+                {
+                    'linkId': 5678,
+                    'linkState': 'STABLE',
+                    'interface': 'INTERNET3',
+                    'displayName': 'Otacon',
+                }
+            ]
         }
-
-        edge_status_3 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_serial,
-            'edgeName': 'Travis Touchdown',
-            'linkId': 5678,
-            'linkState': 'STABLE',
-            'interface': 'INTERNET3',
-            'displayName': 'Otacon',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': host,
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-
-        edge_status = [edge_status_1, edge_status_2, edge_status_3]
 
         event_1 = {
             'event': 'LINK_DEAD',
@@ -152,7 +139,7 @@ class TestTriageRepository:
         custom_triage_config['timezone'] = 'UTC'
 
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            triage_note = triage_repository.build_triage_note(edge_full_id, edge_status, events)
+            triage_note = triage_repository.build_triage_note(edge_full_id, edge_status_1, events)
 
         assert triage_note == os.linesep.join([
             '#*Automation Engine*#',

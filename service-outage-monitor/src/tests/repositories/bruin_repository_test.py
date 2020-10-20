@@ -1392,7 +1392,7 @@ class TestBruinRepository:
 
         edge_status_3 = {
             'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_serial,
+            'edgeSerialNumber': service_number,
             'edgeName': 'Travis Touchdown',
             'linkId': 5678,
             'linkState': 'STABLE',

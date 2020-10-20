@@ -125,9 +125,7 @@ class TestTriage:
         outage_repository = Mock()
         bruin_repository = Mock()
 
-        edges = {"body": ["edge_list"], "status": 200}
         velocloud_repository = Mock()
-        velocloud_repository.get_links_with_edge_info_for_triage = CoroutineMock(return_value=edges)
 
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -139,6 +137,7 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._build_edges_status_by_serial = CoroutineMock()
         triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
         triage._process_ticket_details_with_triage = CoroutineMock()
         triage._process_ticket_details_without_triage = CoroutineMock()
@@ -146,7 +145,7 @@ class TestTriage:
         await triage._run_tickets_polling()
 
         customer_cache_repository.get_cache_for_triage_monitoring.assert_awaited_once()
-        velocloud_repository.get_links_with_edge_info_for_triage.assert_awaited()
+        triage._build_edges_status_by_serial.assert_not_awaited()
         triage._get_all_open_tickets_with_details_for_monitored_companies.assert_not_awaited()
         triage._process_ticket_details_with_triage.assert_not_awaited()
         triage._process_ticket_details_without_triage.assert_not_awaited()
@@ -165,9 +164,7 @@ class TestTriage:
         outage_repository = Mock()
         bruin_repository = Mock()
 
-        edges = {"body": ["edge_list"], "status": 200}
         velocloud_repository = Mock()
-        velocloud_repository.get_links_with_edge_info_for_triage = CoroutineMock(return_value=edges)
 
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -179,6 +176,7 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._build_edges_status_by_serial = CoroutineMock()
         triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
         triage._process_ticket_details_with_triage = CoroutineMock()
         triage._process_ticket_details_without_triage = CoroutineMock()
@@ -186,7 +184,7 @@ class TestTriage:
         await triage._run_tickets_polling()
 
         customer_cache_repository.get_cache_for_triage_monitoring.assert_awaited_once()
-        velocloud_repository.get_links_with_edge_info_for_triage.assert_awaited()
+        triage._build_edges_status_by_serial.assert_not_awaited()
         triage._get_all_open_tickets_with_details_for_monitored_companies.assert_not_awaited()
         triage._process_ticket_details_with_triage.assert_not_awaited()
         triage._process_ticket_details_without_triage.assert_not_awaited()
@@ -238,12 +236,6 @@ class TestTriage:
         get_cache_response = {
             'body': customer_cache,
             'status': 200,
-        }
-
-        edges_data_by_serial = {
-            edge_1_serial: {'edge_id': edge_1_full_id},
-            edge_2_serial: {'edge_id': edge_2_full_id},
-            edge_3_serial: {'edge_id': edge_3_full_id},
         }
 
         ticket_1_id = 12345
@@ -399,9 +391,7 @@ class TestTriage:
         outage_repository = Mock()
         bruin_repository = Mock()
 
-        edges = {"body": ["edge_list"], "status": 200}
         velocloud_repository = Mock()
-        velocloud_repository.get_links_with_edge_info_for_triage = CoroutineMock(return_value=edges)
 
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -413,6 +403,7 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._build_edges_status_by_serial = CoroutineMock()
         triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(return_value=open_tickets)
         triage._filter_tickets_and_details_related_to_edges_under_monitoring = Mock(return_value=relevant_tickets)
         triage._filter_irrelevant_notes_in_tickets = Mock(return_value=relevant_tickets_with_notes_filtered)
@@ -425,7 +416,7 @@ class TestTriage:
         await triage._run_tickets_polling()
 
         customer_cache_repository.get_cache_for_triage_monitoring.assert_awaited_once()
-        velocloud_repository.get_links_with_edge_info_for_triage.assert_awaited()
+        triage._build_edges_status_by_serial.assert_awaited_once()
         triage._get_all_open_tickets_with_details_for_monitored_companies.assert_awaited_once()
         triage._filter_tickets_and_details_related_to_edges_under_monitoring.assert_called_once_with(open_tickets)
         triage._filter_irrelevant_notes_in_tickets.assert_called_once_with(relevant_tickets)
@@ -433,11 +424,103 @@ class TestTriage:
             relevant_tickets_with_notes_filtered
         )
         triage._process_ticket_details_with_triage.assert_awaited_once_with(
-            ticket_details_with_triage, edges_data_by_serial
-        )
+            ticket_details_with_triage)
         triage._process_ticket_details_without_triage.assert_awaited_once_with(
-            ticket_details_without_triage, edges_data_by_serial
-        )
+            ticket_details_without_triage)
+
+    @pytest.mark.asyncio
+    async def build_edges_status_by_serial_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        outage_repository = Mock()
+        customer_cache_repository = Mock()
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+
+        bruin_client_1 = 12345
+        bruin_client_2 = 67890
+
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC7654321'
+        edge_3_serial = 'VC1111111'
+        edge_4_serial = 'VC2222222'
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+
+        customer_cache = [
+            {
+                'edge': edge_1_full_id,
+                'last_contact': '2020-09-17T02:23:59',
+                'serial_number': edge_1_serial,
+                'bruin_client_info': {
+                    'client_id': bruin_client_1,
+                    'client_name': 'EVIL-CORP'
+                },
+            },
+
+            {
+                'edge': edge_3_full_id,
+                'last_contact': '2020-09-17T02:23:59',
+                'serial_number': edge_3_serial,
+                'bruin_client_info': {
+                    'client_id': bruin_client_2,
+                    'client_name': 'EVIL-CORP'
+                },
+            },
+        ]
+
+        edge_1_status = {
+            'edgeState': 'OFFLINE',
+            'edgeSerialNumber': edge_1_serial,
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+
+        }
+        edge_2_status = {
+            'edgeState': 'CONNECTED',
+            'edgeSerialNumber': edge_2_serial,
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|67890|',
+
+        }
+
+        edge_3_status = {
+            'edgeState': 'CONNECTED',
+            'edgeSerialNumber': edge_3_serial,
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|67890|',
+
+        }
+        velocloud_repository = Mock()
+        velocloud_repository.get_edges_for_triage = CoroutineMock(return_value=[edge_1_status, edge_2_status,
+                                                                                edge_3_status])
+
+        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
+                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
+                        triage_repository, metrics_repository)
+        triage._edges_data_by_serial = {
+            elem['serial_number']: {'edge_id': elem['edge']}
+            for elem in customer_cache
+        }
+
+        await triage._build_edges_status_by_serial()
+
+        assert triage._edges_status_by_serial == {edge_1_serial: edge_1_status, edge_3_serial: edge_3_status}
 
     @pytest.mark.asyncio
     async def get_all_open_tickets_with_details_for_monitored_companies_test(self):
@@ -1665,11 +1748,12 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._edges_data_by_serial = edges_data_by_serial
         triage._get_most_recent_ticket_note = Mock(side_effect=[ticket_detail_1_note_1, ticket_detail_2_note_3])
         triage._was_ticket_note_appended_recently = Mock(side_effect=[False, True])
         triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
 
-        await triage._process_ticket_details_with_triage(ticket_details, edges_data_by_serial)
+        await triage._process_ticket_details_with_triage(ticket_details)
 
         triage._get_most_recent_ticket_note.assert_has_calls([
             call(ticket_detail_1),
@@ -2618,61 +2702,39 @@ class TestTriage:
             'status': 200,
         }
 
-        edge_status_1 = {
+        edge_1_status = {
             'edgeState': 'OFFLINE',
             'edgeSerialNumber': edge_1_serial,
-            'linkId': 1234,
-            'linkState': 'DISCONNECTED',
-            'interface': 'GE1',
             'enterpriseName': 'EVIL-CORP|12345|',
             'host': host,
             'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-        edge_status_2 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_1_serial,
-            'linkId': 5678,
-            'linkState': 'STABLE',
-            'interface': 'GE2',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': host,
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-        edge_status_3 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_1_serial,
-            'linkId': 5678,
-            'linkState': 'STABLE',
-            'interface': 'GE2',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': 'fake_host',
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-        edge_list = [edge_status_1, edge_status_2, edge_status_3]
+            'edgeId': edge_id,
+            "links": [
+                {
+                    'linkId': 1234,
+                    'linkState': 'DISCONNECTED',
+                    'interface': 'GE1'},
+                {
+                    'linkId': 5678,
+                    'linkState': 'STABLE',
+                    'interface': 'GE2',
+                }
 
-        edge_status = [edge_status_1, edge_status_2]
+            ]
+        }
+
         edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'edgeState': 'CONNECTED',
+            'serialNumber': edge_3_serial,
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
-            'bruin_client_info': {
-                'client_id': 67890,
-                'client_name': 'METTEL/NEW YORK',
-            },
+
         }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
+
+        edge_list = {edge_1_serial: edge_1_status, edge_3_serial: edge_3_status}
 
         triage_note = 'This is a triage note'
 
@@ -2685,7 +2747,8 @@ class TestTriage:
 
         velocloud_repository = Mock()
 
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_1_last_events_response)
+        velocloud_repository.get_last_edge_events = CoroutineMock(side_effect=[edge_1_last_events_response,
+                                                                  edge_3_last_events_response])
 
         bruin_repository = Mock()
         bruin_repository.append_triage_note = CoroutineMock(return_value=200)
@@ -2702,9 +2765,8 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
-        triage._edge_list = edge_list
-
-        triage_repository.build_triage_note = Mock()
+        triage._edges_data_by_serial = edges_data_by_serial
+        triage._edges_status_by_serial = edge_list
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -2717,16 +2779,13 @@ class TestTriage:
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
                 with patch.object(triage_module, 'utc', new=Mock()):
-                    await triage._process_ticket_details_without_triage(tickets, edges_data_by_serial)
+                    await triage._process_ticket_details_without_triage(tickets)
 
         velocloud_repository.get_last_edge_events.assert_has_awaits([
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_3_full_id, since=past_moment_for_events_lookup),
         ])
-        velocloud_repository.get_edge_status.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_3_full_id),
-        ])
+
         triage_repository.build_triage_note.assert_has_calls([
             call(edge_1_full_id, edge_1_status, edge_1_events_sorted_by_event_time),
             call(edge_3_full_id, edge_3_status, edge_3_events_sorted_by_event_time),
@@ -2746,44 +2805,17 @@ class TestTriage:
         host = 'some-host'
         enterprise_id = 1
         edge_id = 1
-        edge_full_id = {'host': host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
 
-        edge_status_1 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_1_serial,
-            'linkId': 1234,
-            'linkState': 'DISCONNECTED',
-            'interface': 'GE1',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': host,
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-        edge_status_2 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_1_serial,
-            'linkId': 5678,
-            'linkState': 'STABLE',
-            'interface': 'GE2',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': host,
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-        edge_status_3 = {
-            'edgeState': 'OFFLINE',
-            'edgeSerialNumber': edge_1_serial,
-            'linkId': 5678,
-            'linkState': 'STABLE',
-            'interface': 'GE2',
-            'enterpriseName': 'EVIL-CORP|12345|',
-            'host': 'fake_host',
-            'enterpriseId': enterprise_id,
-            'edgeId': edge_id
-        }
-        edge_list = [edge_status_1, edge_status_2, edge_status_3]
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
 
-        edge_status = [edge_status_1, edge_status_2]
+        edge_1_data = {'edge_id': edge_1_full_id}
+        edge_3_data = {'edge_id': edge_3_full_id}
+
+        edges_data_by_serial = {
+            edge_1_serial: edge_1_data,
+            edge_3_serial: edge_3_data,
+        }
 
         ticket_detail_1_ticket_id = 12345
         ticket_detail_1_detail = {
@@ -2826,10 +2858,6 @@ class TestTriage:
             'body': 'Got internal error from Velocloud',
             'status': 500,
         }
-        edge_3_last_events_response = {
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
-        }
 
         event_bus = Mock()
         logger = Mock()
@@ -2856,7 +2884,7 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
-        triage._edge_list = edge_list
+        triage._edges_data_by_serial = edges_data_by_serial
         triage_repository.build_triage_note = Mock()
 
         current_datetime = datetime.now()
@@ -2870,13 +2898,12 @@ class TestTriage:
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
                 with patch.object(triage_module, 'utc', new=Mock()):
-                    await triage._process_ticket_details_without_triage(tickets, edges_data_by_serial)
+                    await triage._process_ticket_details_without_triage(tickets)
 
         velocloud_repository.get_last_edge_events.assert_has_awaits([
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_3_full_id, since=past_moment_for_events_lookup),
         ])
-        velocloud_repository.get_edge_status.assert_not_awaited()
         triage_repository.build_triage_note.assert_not_called()
         bruin_repository.append_triage_note.assert_not_awaited()
 
@@ -2976,6 +3003,7 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._edges_data_by_serial = edges_data_by_serial
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -2988,7 +3016,7 @@ class TestTriage:
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
                 with patch.object(triage_module, 'utc', new=Mock()):
-                    await triage._process_ticket_details_without_triage(tickets, edges_data_by_serial)
+                    await triage._process_ticket_details_without_triage(tickets)
 
         velocloud_repository.get_last_edge_events.assert_has_awaits([
             call(edge_1_full_id, since=past_moment_for_events_lookup),
@@ -3101,10 +3129,7 @@ class TestTriage:
         customer_cache_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_edge_status = CoroutineMock(side_effect=[
-            edge_1_status_response,
-            edge_3_status_response,
-        ])
+
         velocloud_repository.get_last_edge_events = CoroutineMock(side_effect=[
             edge_1_last_events_response,
             edge_3_last_events_response,
@@ -3125,6 +3150,7 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._edges_data_by_serial = edges_data_by_serial
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3137,16 +3163,13 @@ class TestTriage:
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
                 with patch.object(triage_module, 'utc', new=Mock()):
-                    await triage._process_ticket_details_without_triage(tickets, edges_data_by_serial)
+                    await triage._process_ticket_details_without_triage(tickets)
 
         velocloud_repository.get_last_edge_events.assert_has_awaits([
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_3_full_id, since=past_moment_for_events_lookup),
         ])
-        velocloud_repository.get_edge_status.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_3_full_id),
-        ])
+
         triage_repository.build_triage_note.assert_not_called()
         bruin_repository.append_triage_note.assert_not_awaited()
 
@@ -3239,44 +3262,27 @@ class TestTriage:
         }
 
         edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'edgeState': 'OFFLINE',
+            'serialNumber': edge_1_serial,
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
-            'bruin_client_info': {
-                'client_id': 12345,
-                'client_name': 'METTEL/NEW YORK',
-            },
-        }
-        edge_1_status_response = {
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
 
+        }
         edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'edgeState': 'CONNECTED',
+            'serialNumber': edge_3_serial,
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
-            'bruin_client_info': {
-                'client_id': 67890,
-                'client_name': 'METTEL/NEW YORK',
-            },
+
         }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
+
+        edge_list = {edge_1_serial: edge_1_status, edge_3_serial: edge_3_status}
 
         triage_note = 'This is a triage note'
 
@@ -3309,6 +3315,8 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository)
+        triage._edges_data_by_serial = edges_data_by_serial
+        triage._edges_status_by_serial = edge_list
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3321,16 +3329,13 @@ class TestTriage:
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
                 with patch.object(triage_module, 'utc', new=Mock()):
-                    await triage._process_ticket_details_without_triage(tickets, edges_data_by_serial)
+                    await triage._process_ticket_details_without_triage(tickets)
 
         velocloud_repository.get_last_edge_events.assert_has_awaits([
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_3_full_id, since=past_moment_for_events_lookup),
         ])
-        velocloud_repository.get_edge_status.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_3_full_id),
-        ])
+
         triage_repository.build_triage_note.assert_has_calls([
             call(edge_1_full_id, edge_1_status, edge_1_events_sorted_by_event_time),
             call(edge_3_full_id, edge_3_status, edge_3_events_sorted_by_event_time),
