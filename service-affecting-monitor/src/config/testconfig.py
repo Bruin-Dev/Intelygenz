@@ -19,17 +19,15 @@ MONITOR_CONFIG = {
     'environment': "dev",
     'timezone': 'US/Eastern',
     'monitoring_seconds': 600,
-    "latency_wireless": 120,
-    "latency_wired": 50,
-    "packet_loss_wireless": 8,
-    "packet_loss_wired": 5,
+    "latency": 120,
+    "packet_loss": 5,
     "jitter": 30,
-    'monitoring_minutes': 10,
-    "management_status_filter": {
-        "Pending",
-        "Active – Gold Monitoring",
-        "Active – Platinum Monitoring"
-    }
+    'monitoring_minutes_interval': 10,
+    "monitoring_minutes_per_trouble": {
+        "latency": 10,
+        "packet_loss": 10,
+        "jitter": 10,
+    },
 }
 
 LOG_CONFIG = {

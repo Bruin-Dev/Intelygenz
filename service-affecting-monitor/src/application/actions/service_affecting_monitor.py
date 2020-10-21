@@ -1,12 +1,11 @@
-import json
 import re
 import time
 
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from apscheduler.util import undefined
-from pytz import timezone, utc
+from pytz import timezone
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
@@ -18,220 +17,354 @@ from application.repositories.bruin_repository import BruinRepository
 class ServiceAffectingMonitor:
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, metrics_repository,
-                 bruin_repository):
+                 bruin_repository, velocloud_repository, customer_cache_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
-        self._monitoring_minutes = config.MONITOR_CONFIG["monitoring_minutes"]
         self._template_renderer = template_renderer
         self._metrics_repository = metrics_repository
         self._bruin_repository = bruin_repository
+        self._velocloud_repository = velocloud_repository
+        self._customer_cache_repository = customer_cache_repository
+
+        self.__reset_state()
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting')
         next_run_time = undefined
+
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._monitor_each_edge, 'interval', minutes=self._monitoring_minutes,
-                                next_run_time=next_run_time, replace_existing=True,
+
+        self._scheduler.add_job(self._service_affecting_monitor_process, 'interval',
+                                minutes=self._config.MONITOR_CONFIG["monitoring_minutes_interval"],
+                                next_run_time=next_run_time,
+                                replace_existing=True,
                                 id='_monitor_each_edge')
-
-    async def _monitor_each_edge(self):
-        start_time = time.time()
-        self._logger.info(f"[service-affecting-monitor] Processing "
-                          f"{len(self._config.MONITOR_CONFIG['device_by_id'])} edges")
-        monitored_edges = [await self._service_affecting_monitor_process(device) for device in
-                           self._config.MONITOR_CONFIG['device_by_id']]
-        self._logger.info(f"[service-affecting-monitor] Processing "
-                          f"{len(self._config.MONITOR_CONFIG['device_by_id'])} edges. Took "
-                          f"{time.time() - start_time} seconds")
-
-    async def _get_management_status(self, enterprise_id, serial_number):
-        management_request = {
-            "request_id": uuid(),
-            "body": {
-                "client_id": enterprise_id,
-                "status": "A",
-                "service_number": serial_number
-            }
-        }
-        management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
-                                                              management_request, timeout=30)
-        return management_status
-
-    async def _get_bruin_client_info_by_serial(self, serial_number):
-        client_info_request = {
-            "request_id": uuid(),
-            "body": {
-                "service_number": serial_number,
-            },
-        }
-
-        client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
-        return client_info
-
-    def _is_management_status_active(self, management_status) -> bool:
-        return management_status in self._config.MONITOR_CONFIG["management_status_filter"]
 
     def _is_ticket_resolved(self, ticket_detail: dict) -> bool:
         return ticket_detail['detailStatus'] == 'R'
 
-    async def _service_affecting_monitor_process(self, device):
-        edge_id = {"host": device['host'], "enterprise_id": device['enterprise_id'], "edge_id": device['edge_id']}
-        edge_identifier = device['edge_id']
-        interval = {
-            "end": datetime.now(utc),
-            "start": (datetime.now(utc) - timedelta(minutes=self._monitoring_minutes))}
-        edge_status_request = {'request_id': uuid(),
-                               'body': {**edge_id, "interval": interval}
-                               }
-        edge_status = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=60)
-        self._logger.info(f'Edge received from event bus')
-        self._logger.info(f'{edge_status}')
+    def __reset_state(self):
+        self._customer_cache = []
 
-        if edge_status is None or 'edge_info' not in edge_status['body'].keys() \
-                or 'links' not in edge_status['body']['edge_info'].keys() \
-                or 'edges' not in edge_status['body']['edge_info'].keys() \
-                or 'serialNumber' not in edge_status['body']['edge_info']['edges'].keys():
-            self._logger.error(f'Data received from Velocloud is incomplete')
-            self._logger.error(f'{json.dumps(edge_status, indent=2)}')
-            slack_message = {'request_id': uuid(),
-                             'message': f'Error while monitoring edge for service affecting trouble, seems like data '
-                                        f'is corrupted: \n {json.dumps(edge_status, indent=2)} \n'
-                                        f'The environment is {self._config.MONITOR_CONFIG["environment"]}'}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+    async def _service_affecting_monitor_process(self):
+        self.__reset_state()
+
+        self._logger.info(f"Processing all links of {len(self._config.MONITOR_CONFIG['device_by_id'])} edges...")
+        start_time = time.time()
+
+        customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
+        if customer_cache_response['status'] not in range(200, 300):
             return
 
-        serial_number = edge_status['body']['edge_info']['edges']['serialNumber']
-
-        self._logger.info(f'[service-affecting-monitoring] Claiming Bruin client info for serial {serial_number}...')
-        bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
-        self._logger.info(f'[service-affecting-monitoring] Got Bruin client info for serial {serial_number} -> '
-                          f'{bruin_client_info_response}')
-        bruin_client_info_response_body = bruin_client_info_response['body']
-        bruin_client_info_response_status = bruin_client_info_response['status']
-        if bruin_client_info_response_status not in range(200, 300):
-            err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
-                       f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
-            self._logger.error(err_msg)
-
-            slack_message = {'request_id': uuid(), 'message': err_msg}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+        self._customer_cache: list = customer_cache_response['body']
+        if not self._customer_cache:
+            self._logger.info('Got an empty customer cache. Process cannot keep going.')
             return
 
-        if not bruin_client_info_response_body.get('client_id'):
-            self._logger.info(
-                f"[service-affecting-monitoring] Edge {device} doesn't have any Bruin client ID associated. "
-                'Skipping...')
-            return
+        await self._latency_check()
+        await self._packet_loss_check()
+        await self._jitter_check()
 
-        self._logger.info(f'[service-affecting-monitoring] Getting management status for edge {edge_identifier}...')
-        management_status_response = await self._get_management_status(
-            bruin_client_info_response_body.get('client_id'), serial_number)
-        self._logger.info(f'[service-affecting-monitoring] Got management status for edge {edge_identifier} -> '
-                          f'{management_status_response}')
+        self._logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
 
-        management_status_response_body = management_status_response['body']
-        management_status_response_status = management_status_response['status']
-        if management_status_response_status not in range(200, 300):
-            self._logger.error(f"Management status is unknown for {edge_identifier}")
-            message = (
-                f"[service-affecting-monitoring] Management status is unknown for {edge_identifier}. "
-                f"Cause: {management_status_response_body}"
+    def _structure_links_metrics(self, links_metrics: list) -> list:
+        result = []
+
+        for link_info in links_metrics:
+            edge_identifier = EdgeIdentifier(
+                host=link_info['link']['host'],
+                enterprise_id=link_info['link']['enterpriseId'],
+                edge_id=link_info['link']['edgeId'],
             )
-            slack_message = {'request_id': uuid(),
-                             'message': message}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+
+            if not link_info['link']['edgeId']:
+                self._logger.info(f"Edge {edge_identifier} doesn't have any ID. Skipping...")
+                continue
+
+            result.append({
+                'edge_status': {
+                    'enterpriseName': link_info['link']['enterpriseName'],
+                    'enterpriseId': link_info['link']['enterpriseId'],
+                    'enterpriseProxyId': link_info['link']['enterpriseProxyId'],
+                    'enterpriseProxyName': link_info['link']['enterpriseProxyName'],
+                    'edgeName': link_info['link']['edgeName'],
+                    'edgeState': link_info['link']['edgeState'],
+                    'edgeSystemUpSince': link_info['link']['edgeSystemUpSince'],
+                    'edgeServiceUpSince': link_info['link']['edgeServiceUpSince'],
+                    'edgeLastContact': link_info['link']['edgeLastContact'],
+                    'edgeId': link_info['link']['edgeId'],
+                    'edgeSerialNumber': link_info['link']['edgeSerialNumber'],
+                    'edgeHASerialNumber': link_info['link']['edgeHASerialNumber'],
+                    'edgeModelNumber': link_info['link']['edgeModelNumber'],
+                    'edgeLatitude': link_info['link']['edgeLatitude'],
+                    'edgeLongitude': link_info['link']['edgeLongitude'],
+                    'host': link_info['link']['host'],
+                },
+                'link_status': {
+                    'interface': link_info['link']['interface'],
+                    'internalId': link_info['link']['internalId'],
+                    'linkState': link_info['link']['linkState'],
+                    'linkLastActive': link_info['link']['linkLastActive'],
+                    'linkVpnState': link_info['link']['linkVpnState'],
+                    'linkId': link_info['link']['linkId'],
+                    'linkIpAddress': link_info['link']['linkIpAddress'],
+                    'displayName': link_info['link']['displayName'],
+                    'isp': link_info['link']['isp'],
+                },
+                'link_metrics': {
+                    'bytesTx': link_info['bytesTx'],
+                    'bytesRx': link_info['bytesRx'],
+                    'packetsTx': link_info['packetsTx'],
+                    'packetsRx': link_info['packetsRx'],
+                    'totalBytes': link_info['totalBytes'],
+                    'totalPackets': link_info['totalPackets'],
+                    'p1BytesRx': link_info['p1BytesRx'],
+                    'p1BytesTx': link_info['p1BytesTx'],
+                    'p1PacketsRx': link_info['p1PacketsRx'],
+                    'p1PacketsTx': link_info['p1PacketsTx'],
+                    'p2BytesRx': link_info['p2BytesRx'],
+                    'p2BytesTx': link_info['p2BytesTx'],
+                    'p2PacketsRx': link_info['p2PacketsRx'],
+                    'p2PacketsTx': link_info['p2PacketsTx'],
+                    'p3BytesRx': link_info['p3BytesRx'],
+                    'p3BytesTx': link_info['p3BytesTx'],
+                    'p3PacketsRx': link_info['p3PacketsRx'],
+                    'p3PacketsTx': link_info['p3PacketsTx'],
+                    'controlBytesRx': link_info['controlBytesRx'],
+                    'controlBytesTx': link_info['controlBytesTx'],
+                    'controlPacketsRx': link_info['controlPacketsRx'],
+                    'controlPacketsTx': link_info['controlPacketsTx'],
+                    'bpsOfBestPathRx': link_info['bpsOfBestPathRx'],
+                    'bpsOfBestPathTx': link_info['bpsOfBestPathTx'],
+                    'bestJitterMsRx': link_info['bestJitterMsRx'],
+                    'bestJitterMsTx': link_info['bestJitterMsTx'],
+                    'bestLatencyMsRx': link_info['bestLatencyMsRx'],
+                    'bestLatencyMsTx': link_info['bestLatencyMsTx'],
+                    'bestLossPctRx': link_info['bestLossPctRx'],
+                    'bestLossPctTx': link_info['bestLossPctTx'],
+                    'scoreTx': link_info['scoreTx'],
+                    'scoreRx': link_info['scoreRx'],
+                    'signalStrength': link_info['signalStrength'],
+                    'state': link_info['state'],
+                }
+            })
+
+        return result
+
+    def _map_cached_edges_with_links_metrics_and_contact_info(self, links_metrics: list) -> list:
+        result = []
+
+        cached_edges_by_edge_identifier = {
+            EdgeIdentifier(**elem['edge']): elem
+            for elem in self._customer_cache
+        }
+
+        links_metrics_by_edge_identifier = {}
+        for elem in links_metrics:
+            edge_identifier = EdgeIdentifier(
+                host=elem['edge_status']['host'],
+                enterprise_id=elem['edge_status']['enterpriseId'],
+                edge_id=elem['edge_status']['edgeId']
+            )
+
+            links_metrics_by_edge_identifier.setdefault(edge_identifier, [])
+            links_metrics_by_edge_identifier[edge_identifier].append(elem)
+
+        for contact_info in self._config.MONITOR_CONFIG['device_by_id']:
+            edge_identifier = EdgeIdentifier(
+                host=contact_info['host'],
+                enterprise_id=contact_info['enterprise_id'],
+                edge_id=contact_info['edge_id']
+            )
+
+            cached_edge = cached_edges_by_edge_identifier.get(edge_identifier)
+            if not cached_edge:
+                self._logger.info(f'No cached info was found for edge {edge_identifier}. Skipping...')
+                continue
+
+            links_metrics_for_current_edge = links_metrics_by_edge_identifier.get(edge_identifier)
+            if not links_metrics_for_current_edge:
+                self._logger.info(f'No links metrics were found for edge {edge_identifier}. Skipping...')
+                continue
+
+            for metric in links_metrics_for_current_edge:
+                result.append({
+                    'cached_info': cached_edge,
+                    'contact_info': contact_info['contacts'],
+                    **metric,
+                })
+
+        return result
+
+    async def _latency_check(self):
+        self._logger.info('Looking for latency issues...')
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_latency_checks()
+        links_metrics: list = links_metrics_response['body']
+
+        if not links_metrics:
+            self._logger.info("List of links arrived empty while checking latency issues. Skipping...")
             return
 
-        if not self._is_management_status_active(management_status_response_body):
-            self._logger.info(
-                f'Management status is not active for {edge_identifier}. Skipping process...')
+        links_metrics = self._structure_links_metrics(links_metrics)
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+
+        for elem in metrics_with_cache_and_contact_info:
+            cached_info = elem['cached_info']
+            link_status = elem['link_status']
+            metrics = elem['link_metrics']
+
+            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+
+            is_rx_latency_below_threshold = metrics['bestLatencyMsRx'] < self._config.MONITOR_CONFIG["latency"]
+            is_tx_latency_below_threshold = metrics['bestLatencyMsTx'] < self._config.MONITOR_CONFIG["latency"]
+
+            if is_rx_latency_below_threshold and is_tx_latency_below_threshold:
+                self._logger.info(
+                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed latency thresholds"
+                )
+                continue
+
+            ticket_dict = self._compose_ticket_dict(
+                link_info=elem,
+                input=metrics['bestLatencyMsRx'],
+                output=metrics['bestLatencyMsTx'],
+                trouble='Latency',
+                threshold=self._config.MONITOR_CONFIG["latency"]
+            )
+            await self._notify_trouble(link_info=elem, trouble='Latency', ticket_dict=ticket_dict)
+
+        self._logger.info("Finished looking for latency issues!")
+
+    async def _packet_loss_check(self):
+        self._logger.info('Looking for packet loss issues...')
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_packet_loss_checks()
+        links_metrics: list = links_metrics_response['body']
+
+        if not links_metrics:
+            self._logger.info("List of links arrived empty while checking packet loss issues. Skipping...")
             return
-        else:
-            self._logger.info(f'Management status for {edge_identifier} seems active.')
 
-        for link in edge_status['body']['edge_info']['links']:
-            if 'serviceGroups' in link.keys():
-                await self._latency_check(device, edge_status['body'], link)
-                await self._packet_loss_check(device, edge_status['body'], link)
-                await self._jitter_check(device, edge_status['body'], link)
-        self._logger.info("End of service affecting monitor job")
+        links_metrics = self._structure_links_metrics(links_metrics)
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
-    async def _latency_check(self, device, edge_status, link):
-        if 'PUBLIC_WIRELESS' in link['serviceGroups']:
-            if link['bestLatencyMsRx'] > self._config.MONITOR_CONFIG["latency_wireless"] or \
-               link['bestLatencyMsTx'] > self._config.MONITOR_CONFIG["latency_wireless"]:
-                await self._notify_trouble(device, edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
-                                           'Latency', self._config.MONITOR_CONFIG["latency_wireless"])
-        elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
-            if link['bestLatencyMsRx'] > self._config.MONITOR_CONFIG["latency_wired"] or \
-               link['bestLatencyMsTx'] > self._config.MONITOR_CONFIG["latency_wired"]:
-                await self._notify_trouble(device, edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
-                                           'Latency', self._config.MONITOR_CONFIG["latency_wired"])
+        for elem in metrics_with_cache_and_contact_info:
+            cached_info = elem['cached_info']
+            link_status = elem['link_status']
+            metrics = elem['link_metrics']
 
-    async def _packet_loss_check(self, device, edge_status, link):
-        if 'PUBLIC_WIRELESS' in link['serviceGroups']:
-            if link['bestLossPctRx'] > self._config.MONITOR_CONFIG["packet_loss_wireless"] or \
-               link['bestLossPctTx'] > self._config.MONITOR_CONFIG["packet_loss_wireless"]:
-                await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
-                                           'Packet Loss', self._config.MONITOR_CONFIG["packet_loss_wireless"])
-        elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
-            if link['bestLossPctRx'] > self._config.MONITOR_CONFIG["packet_loss_wired"] or \
-               link['bestLossPctTx'] > self._config.MONITOR_CONFIG["packet_loss_wired"]:
-                await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
-                                           'Packet Loss', self._config.MONITOR_CONFIG["packet_loss_wired"])
+            edge_identifier = EdgeIdentifier(**cached_info['edge'])
 
-    async def _jitter_check(self, device, edge_status, link):
-        if link['bestJitterMsRx'] > self._config.MONITOR_CONFIG["jitter"] or \
-           link['bestJitterMsTx'] > self._config.MONITOR_CONFIG["jitter"]:
-            await self._notify_trouble(device, edge_status, link, link['bestJitterMsRx'], link['bestJitterMsTx'],
-                                       'Jitter', 30)
+            is_rx_packet_loss_below_threshold = metrics['bestLossPctRx'] < self._config.MONITOR_CONFIG["packet_loss"]
+            is_tx_packet_loss_below_threshold = metrics['bestLossPctTx'] < self._config.MONITOR_CONFIG["packet_loss"]
 
-    async def _notify_trouble(self, device, edge_status, link, input, output, trouble, threshold):
-        self._logger.info(f'Service affecting trouble {trouble} detected in edge with data {edge_status}')
+            if is_rx_packet_loss_below_threshold and is_tx_packet_loss_below_threshold:
+                self._logger.info(
+                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed packet loss thresholds"
+                )
+                continue
+
+            ticket_dict = self._compose_ticket_dict(
+                link_info=elem,
+                input=metrics['bestLossPctRx'],
+                output=metrics['bestLossPctTx'],
+                trouble='Packet Loss',
+                threshold=self._config.MONITOR_CONFIG["packet_loss"]
+            )
+            await self._notify_trouble(link_info=elem, trouble='Packet Loss', ticket_dict=ticket_dict)
+
+        self._logger.info("Finished looking for packet loss issues!")
+
+    async def _jitter_check(self):
+        self._logger.info('Looking for jitter issues...')
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_jitter_checks()
+        links_metrics: list = links_metrics_response['body']
+
+        if not links_metrics:
+            self._logger.info("List of links arrived empty while checking jitter issues. Skipping...")
+            return
+
+        links_metrics = self._structure_links_metrics(links_metrics)
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+
+        for elem in metrics_with_cache_and_contact_info:
+            cached_info = elem['cached_info']
+            link_status = elem['link_status']
+            metrics = elem['link_metrics']
+
+            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+
+            is_rx_jitter_below_threshold = metrics['bestJitterMsRx'] < self._config.MONITOR_CONFIG["jitter"]
+            is_tx_jitter_below_threshold = metrics['bestJitterMsTx'] < self._config.MONITOR_CONFIG["jitter"]
+
+            if is_rx_jitter_below_threshold and is_tx_jitter_below_threshold:
+                self._logger.info(
+                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed jitter thresholds"
+                )
+                continue
+
+            ticket_dict = self._compose_ticket_dict(
+                link_info=elem,
+                input=metrics['bestJitterMsRx'],
+                output=metrics['bestJitterMsTx'],
+                trouble='Jitter',
+                threshold=self._config.MONITOR_CONFIG["jitter"]
+            )
+            await self._notify_trouble(link_info=elem, trouble='Jitter', ticket_dict=ticket_dict)
+
+        self._logger.info("Finished looking for jitter issues!")
+
+    async def _notify_trouble(self, link_info, trouble, ticket_dict):
+        cached_info = link_info['cached_info']
+        contact_info = link_info['contact_info']
+        edge_identifier = EdgeIdentifier(**cached_info['edge'])
+
+        self._logger.info(f'Service affecting trouble {trouble} detected in edge {edge_identifier}')
         if self._config.MONITOR_CONFIG['environment'] == 'production':
-            client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
+            client_id = cached_info['bruin_client_info']['client_id']
 
-            edge_serial_number = edge_status['edge_info']['edges']['serialNumber']
+            edge_serial_number = cached_info['serial_number']
             ticket = await self._get_affecting_ticket_by_trouble(client_id, edge_serial_number, trouble)
 
             if not ticket:
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
-                ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
                     "body": {
-                                "clientId": client_id,
-                                "category": "VAS",
-                                "services": [
-                                    {
-                                        "serviceNumber": edge_status['edge_info']['edges']['serialNumber']
-                                    }
-                                ],
-                                "contacts": [
-                                    {
-                                        "email": device['contacts']['site']['email'],
-                                        "phone": device['contacts']['site']['phone'],
-                                        "name": device['contacts']['site']['name'],
-                                        "type": "site"
-                                    },
-                                    {
-                                        "email": device['contacts']['ticket']['email'],
-                                        "phone": device['contacts']['ticket']['phone'],
-                                        "name": device['contacts']['ticket']['name'],
-                                        "type": "ticket"
-                                    }
-                                ]
+                        "clientId": client_id,
+                        "category": "VAS",
+                        "services": [
+                            {
+                                "serviceNumber": edge_serial_number
                             }
+                        ],
+                        "contacts": [
+                            {
+                                "email": contact_info['site']['email'],
+                                "phone": contact_info['site']['phone'],
+                                "name": contact_info['site']['name'],
+                                "type": "site"
+                            },
+                            {
+                                "email": contact_info['ticket']['email'],
+                                "phone": contact_info['ticket']['phone'],
+                                "name": contact_info['ticket']['name'],
+                                "type": "ticket"
+                            }
+                        ]
+                    }
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               ticket_details, timeout=30)
                 if ticket_id["status"] not in range(200, 300):
-                    err_msg = (f'Outage ticket creation failed for edge {edge_status["edge_id"]}. Reason: '
+                    err_msg = (f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
                                f'Error {ticket_id["status"]} - {ticket_id["body"]}')
 
                     self._logger.error(err_msg)
@@ -244,10 +377,13 @@ class ServiceAffectingMonitor:
 
                 self._metrics_repository.increment_tickets_created()
 
-                ticket_append_note_msg = {'request_id': uuid(),
-                                          'body': {
-                                          'ticket_id': ticket_id["body"]["ticketIds"][0],
-                                          'note': ticket_note}}
+                ticket_append_note_msg = {
+                    'request_id': uuid(),
+                    'body': {
+                        'ticket_id': ticket_id["body"]["ticketIds"][0],
+                        'note': ticket_note
+                    }
+                }
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                   ticket_append_note_msg,
                                                   timeout=15)
@@ -264,7 +400,6 @@ class ServiceAffectingMonitor:
             else:
                 ticket_details = BruinRepository.find_detail_by_serial(ticket, edge_serial_number)
                 if ticket_details and self._is_ticket_resolved(ticket_details):
-                    edge_identifier = EdgeIdentifier(**edge_status['edge_id'])
                     self._logger.info(f'[service-affecting-monitor] ticket with trouble {trouble} '
                                       f'detected in edge with data {edge_identifier}. '
                                       f'Ticket: {ticket}. Re-opening ticket..')
@@ -277,11 +412,9 @@ class ServiceAffectingMonitor:
                         await self._bruin_repository._notifications_repository.send_slack_message(err_msg)
                         return
 
-                    ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
                     ticket_note = self._ticket_object_to_string_without_watermark(ticket_dict)
                     slack_message = (
-                        f'Affecting ticket {ticket_id} reopened. Ticket details at '
-                        f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId={ticket_id}.'
+                        f'Affecting ticket {ticket_id} reopened. Details at https://app.bruin.com/t/{ticket_id}'
                     )
                     await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note)
@@ -311,29 +444,30 @@ class ServiceAffectingMonitor:
                     return ticket
         return None
 
-    def _compose_ticket_dict(self, edges_status_to_report, link, input, output, trouble, threshold):
+    def _compose_ticket_dict(self, link_info, input, output, trouble, threshold):
         edge_overview = OrderedDict()
-        edge_overview["Edge Name"] = edges_status_to_report["edge_info"]["edges"]["name"]
+        edge_overview["Edge Name"] = link_info["edge_status"]["edgeName"]
         edge_overview["Trouble"] = trouble
-        edge_overview["Interface"] = link['link']['interface']
-        edge_overview["Name"] = link['link']['displayName']
+        edge_overview["Interface"] = link_info['link_status']['interface']
+        edge_overview["Name"] = link_info['link_status']['displayName']
         edge_overview["Threshold"] = threshold
-        edge_overview['Interval for Scan'] = f'{self._monitoring_minutes} Minutes'
+        edge_overview['Interval for Scan'] = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][
+            trouble.lower().replace(' ', '_')]
         edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         if input > threshold:
             edge_overview["Receive"] = input
         if output > threshold:
             edge_overview["Transfer"] = output
         edge_overview["Links"] = \
-            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/] - ' \
-            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/] - ' \
-            f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
+            f'[Edge|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
+            f'{link_info["edge_status"]["enterpriseId"]}' \
+            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/] - ' \
+            f'[QoE|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
+            f'{link_info["edge_status"]["enterpriseId"]}' \
+            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/qoe/] - ' \
+            f'[Transport|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
+            f'{link_info["edge_status"]["enterpriseId"]}' \
+            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/links/] \n'
 
         return edge_overview
 

@@ -5,7 +5,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 
 from application.repositories.bruin_repository import BruinRepository
+from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.velocloud_repository import VelocloudRepository
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
@@ -40,10 +42,20 @@ class Container:
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
         self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                  notifications_repository=self._notifications_repository)
+        self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                         notifications_repository=self._notifications_repository)
+        self._customer_cache_repository = CustomerCacheRepository(
+            event_bus=self._event_bus,
+            logger=self._logger,
+            config=config,
+            notifications_repository=self._notifications_repository
+        )
 
         self._service_affecting_monitor = ServiceAffectingMonitor(self._event_bus, self._logger, self._scheduler,
                                                                   config, self._template_renderer,
-                                                                  self._metrics_repository, self._bruin_repository)
+                                                                  self._metrics_repository, self._bruin_repository,
+                                                                  self._velocloud_repository,
+                                                                  self._customer_cache_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()

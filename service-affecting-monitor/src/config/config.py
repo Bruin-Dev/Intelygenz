@@ -22,17 +22,15 @@ MONITOR_CONFIG = {
     'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
-    "latency_wireless": 120,
-    "latency_wired": 120,
-    "packet_loss_wireless": 8,
-    "packet_loss_wired": 8,
+    "latency": 120,
+    "packet_loss": 8,
     "jitter": 30,
-    'monitoring_minutes': 10,
-    "management_status_filter": {
-        "Pending",
-        "Active – Gold Monitoring",
-        "Active – Platinum Monitoring"
-    }
+    'monitoring_minutes_interval': 10,
+    "monitoring_minutes_per_trouble": {
+        "latency": 10,
+        "packet_loss": 10,
+        "jitter": 10,
+    },
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
