@@ -1477,6 +1477,11 @@ class TestVelocloudClient:
     @pytest.mark.asyncio
     async def get_links_metric_info_ok_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         velocloud_headers = {
             'some': 'header',
         }
@@ -1569,13 +1574,18 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_links_metric_info(velocloud_host)
+            result = await velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         assert result == expected_result
 
     @pytest.mark.asyncio
     async def get_links_metric_info_with_response_having_status_400_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         velocloud_headers = {
             'some': 'header',
         }
@@ -1608,13 +1618,18 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_links_metric_info(velocloud_host)
+            result = await velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         assert result == expected_result
 
     @pytest.mark.asyncio
     async def get_links_metric_info_with_response_having_status_5xx_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         velocloud_headers = {
             'some': 'header',
         }
@@ -1647,13 +1662,18 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_links_metric_info(velocloud_host)
+            result = await velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         assert result == expected_result
 
     @pytest.mark.asyncio
     async def get_links_metric_info_with_response_having_status_200_and_pointing_out_token_expiration_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         velocloud_headers = {
             'some': 'header',
         }
@@ -1691,7 +1711,7 @@ class TestVelocloudClient:
         velocloud_client._start_relogin_job = CoroutineMock()
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_links_metric_info(velocloud_host)
+            result = await velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         velocloud_client._start_relogin_job.assert_awaited_once_with(velocloud_host)
         assert result == expected_result
@@ -1699,6 +1719,11 @@ class TestVelocloudClient:
     @pytest.mark.asyncio
     async def get_links_metric_info_with_headers_missing_for_target_host_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         velocloud_headers = {
             'some': 'header',
         }
@@ -1720,7 +1745,7 @@ class TestVelocloudClient:
         velocloud_client._start_relogin_job = CoroutineMock()
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
-            result = await velocloud_client.get_links_metric_info(velocloud_host)
+            result = await velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         velocloud_client._start_relogin_job.assert_awaited_once_with(velocloud_host)
         assert result == expected_result
@@ -1728,6 +1753,11 @@ class TestVelocloudClient:
     @pytest.mark.asyncio
     async def get_links_metric_info_with_connection_raising_exception_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         velocloud_headers = {
             'some': 'header',
         }
@@ -1748,6 +1778,6 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
-            result = await velocloud_client.get_links_metric_info(velocloud_host)
+            result = await velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         assert result == expected_result

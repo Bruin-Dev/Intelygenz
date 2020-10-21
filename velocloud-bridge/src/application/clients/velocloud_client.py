@@ -540,10 +540,12 @@ class VelocloudClient:
 
         return result
 
-    async def get_links_metric_info(self, velocloud_host: str):
+    async def get_links_metric_info(self, velocloud_host: str, interval: dict):
         result = dict.fromkeys(["body", "status"])
 
-        request_body = {}
+        request_body = {
+            'interval': interval,
+        }
         target_host_client = self._get_header_by_host(velocloud_host)
 
         if target_host_client is None:

@@ -433,6 +433,10 @@ class TestVelocloudRepository:
     @pytest.mark.asyncio
     async def get_links_metric_info_ok_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
 
         link_1 = {
                 'linkId': 12,
@@ -523,14 +527,18 @@ class TestVelocloudRepository:
 
         velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
 
-        result = await velocloud_repository.get_links_metric_info(velocloud_host)
+        result = await velocloud_repository.get_links_metric_info(velocloud_host, interval)
 
-        velocloud_client.get_links_metric_info.assert_awaited_once_with(velocloud_host)
+        velocloud_client.get_links_metric_info.assert_awaited_once_with(velocloud_host, interval)
         assert result == expected_result
 
     @pytest.mark.asyncio
-    async def get_links_metric_info_ok_with_response_having_non_2xx_status_test(self):
+    async def get_links_metric_info_with_response_having_non_2xx_status_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
 
         client_result = {
             'body': 'Got internal error from Velocloud',
@@ -544,7 +552,7 @@ class TestVelocloudRepository:
 
         velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
 
-        result = await velocloud_repository.get_links_metric_info(velocloud_host)
+        result = await velocloud_repository.get_links_metric_info(velocloud_host, interval)
 
-        velocloud_client.get_links_metric_info.assert_awaited_once_with(velocloud_host)
+        velocloud_client.get_links_metric_info.assert_awaited_once_with(velocloud_host, interval)
         assert result == client_result

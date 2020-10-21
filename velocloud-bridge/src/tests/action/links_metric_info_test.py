@@ -26,12 +26,18 @@ class TestLinksMetricInfo:
     @pytest.mark.asyncio
     async def get_links_metric_info_ok_test(self):
         velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': '2020-10-19T15:22:03.345Z',
+            'end': '2020-10-19T16:22:03.345Z',
+        }
+
         response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         request = {
             'request_id': uuid_,
             'response_topic': response_topic,
             'body': {
                 'host': velocloud_host,
+                'interval': interval,
             },
         }
 
@@ -122,7 +128,7 @@ class TestLinksMetricInfo:
 
         await action.get_links_metric_info(request)
 
-        velocloud_repository.get_links_metric_info.assert_awaited_once_with(velocloud_host)
+        velocloud_repository.get_links_metric_info.assert_awaited_once_with(velocloud_host, interval)
         event_bus.publish_message.assert_awaited_once_with(response_topic, response)
 
     @pytest.mark.asyncio
@@ -160,12 +166,49 @@ class TestLinksMetricInfo:
         request = {
             'request_id': uuid_,
             'response_topic': response_topic,
-            'body': {},
+            'body': {
+                'interval': {
+                    'start': '2020-10-19T15:22:03.345Z',
+                    'end': '2020-10-19T16:22:03.345Z',
+                }
+            },
         }
 
         response = {
             'request_id': uuid_,
-            'body': 'Must include "host" in the body of the request',
+            'body': 'Must include "host" and "interval" in the body of the request',
+            'status': 400,
+        }
+
+        logger = Mock()
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metric_info = CoroutineMock()
+
+        action = LinksMetricInfo(event_bus, logger, velocloud_repository)
+
+        await action.get_links_metric_info(request)
+
+        velocloud_repository.get_links_metric_info.assert_not_awaited()
+        event_bus.publish_message.assert_awaited_once_with(response_topic, response)
+
+    @pytest.mark.asyncio
+    async def get_links_metric_info_with_missing_interval_in_body_test(self):
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        request = {
+            'request_id': uuid_,
+            'response_topic': response_topic,
+            'body': {
+                'host': 'mettel.velocloud.net'
+            },
+        }
+
+        response = {
+            'request_id': uuid_,
+            'body': 'Must include "host" and "interval" in the body of the request',
             'status': 400,
         }
 

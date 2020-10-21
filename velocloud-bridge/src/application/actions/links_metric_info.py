@@ -28,13 +28,23 @@ class LinksMetricInfo:
         velocloud_host: str = request_body.get('host', missing)
         if velocloud_host is missing:
             self._logger.error(f'Cannot get links metric info: "host" is missing in the body of the request')
-            response['body'] = 'Must include "host" in the body of the request'
+            response['body'] = 'Must include "host" and "interval" in the body of the request'
+            response['status'] = 400
+            await self._event_bus.publish_message(response_topic, response)
+            return
+
+        interval: str = request_body.get('interval', missing)
+        if interval is missing:
+            self._logger.error(f'Cannot get links metric info: "interval" is missing in the body of the request')
+            response['body'] = 'Must include "host" and "interval" in the body of the request'
             response['status'] = 400
             await self._event_bus.publish_message(response_topic, response)
             return
 
         self._logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
-        links_metric_info_response: dict = await self._velocloud_repository.get_links_metric_info(velocloud_host)
+        links_metric_info_response: dict = await self._velocloud_repository.get_links_metric_info(
+            velocloud_host, interval
+        )
 
         response = {
             'request_id': request_id,

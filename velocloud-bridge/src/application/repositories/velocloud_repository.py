@@ -108,8 +108,8 @@ class VelocloudRepository:
 
         return links_with_edge_info_response
 
-    async def get_links_metric_info(self, velocloud_host: str):
-        links_metric_info_response = await self._velocloud_client.get_links_metric_info(velocloud_host)
+    async def get_links_metric_info(self, velocloud_host: str, interval: dict):
+        links_metric_info_response = await self._velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         if links_metric_info_response['status'] not in range(200, 300):
             return links_metric_info_response
