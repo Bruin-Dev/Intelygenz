@@ -57,7 +57,7 @@ class ServiceAffectingMonitor:
         start_time = time.time()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
-        if customer_cache_response['status'] not in range(200, 300):
+        if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
             return
 
         self._customer_cache: list = customer_cache_response['body']
@@ -76,12 +76,12 @@ class ServiceAffectingMonitor:
 
         for link_info in links_metrics:
             edge_identifier = EdgeIdentifier(
-                host=link_info['link']['host'],
-                enterprise_id=link_info['link']['enterpriseId'],
-                edge_id=link_info['link']['edgeId'],
+                host=link_info['link'].get('host'),
+                enterprise_id=link_info['link'].get('enterpriseId'),
+                edge_id=link_info['link'].get('edgeId'),
             )
 
-            if not link_info['link']['edgeId']:
+            if not link_info['link'].get('edgeId'):
                 self._logger.info(f"Edge {edge_identifier} doesn't have any ID. Skipping...")
                 continue
 
