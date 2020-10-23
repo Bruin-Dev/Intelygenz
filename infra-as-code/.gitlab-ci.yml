@@ -51,12 +51,13 @@ terraform-validate-kre:
   extends: .terraform_basic_template_kre
   variables:
     MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-    - envsubst < infra-as-code/kre/1-create-eks-cluster/data.tf > temp_data.tf
-    - mv temp_data.tf infra-as-code/kre/1-create-eks-cluster/data.tf
+    - envsubst < infra-as-code/kre/${MODULE_EKS}/data.tf > temp_data.tf
+    - mv temp_data.tf infra-as-code/kre/${MODULE_EKS}/data.tf
     - cd ${MODULE} || exit 1
     - >
       for i in $(ls -d */ | cut -d " " -f10); do
@@ -240,6 +241,7 @@ deploy-kre-dev:
   extends: .terraform_template_deploy_kre
   variables:
     MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
     EKS_CLUSTER_NAME: mettel-automation-kre-dev
     KRE_RECORD_ALIAS_NAME: "*.kre-dev.mettel-automation.net."
     BASE_DOMAIN_URL: "kre-dev.mettel-automation.net"
@@ -326,6 +328,7 @@ destroy-kre-dev:
   extends: .terraform_template_destroy_kre
   variables:
     MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
     EKS_CLUSTER_NAME: mettel-automation-kre-dev
     KRE_RECORD_ALIAS_NAME: "*.kre-dev.mettel-automation.net."
     BASE_DOMAIN_URL: "kre-dev.mettel-automation.net"

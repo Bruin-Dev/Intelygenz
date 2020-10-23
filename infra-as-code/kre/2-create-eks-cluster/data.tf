@@ -15,7 +15,7 @@ data "terraform_remote_state" "tfstate-s3-bucket-eks" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "env:/${terraform.workspace}/mettel-automation-k8s-bucket.tfstate"
+    key = "env:/${terraform.workspace}/mettel-automation-eks-kre-bucket.tfstate"
   }
 }
 

@@ -108,8 +108,8 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - envsubst < ${MODULE}/1-create-eks-cluster/data.tf > temp_data.tf
-    - mv temp_data.tf ${MODULE}/1-create-eks-cluster/data.tf
+    - envsubst < ${MODULE}/${MODULE_EKS}/data.tf > temp_data.tf
+    - mv temp_data.tf ${MODULE}/${MODULE_EKS}/data.tf
     - cd ${MODULE} || exit 1
     - >
       for i in $(ls -d */ | cut -d " " -f10); do
@@ -117,7 +117,7 @@
           echo "The current Workdir is $i"
           cd "${i}" || exit
           terraform init -backend=true -get=true -input=false
-          if [ "$i" != "2-smtp/" ]; then
+          if [[ "$i" != "1-eks-roles/" && "$i" != "3-smtp/" ]]; then
             terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
           fi
           terraform plan && terraform apply -auto-approve

@@ -76,8 +76,8 @@
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
     - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
-    - envsubst < ${MODULE}/1-create-eks-cluster/data.tf > temp_data.tf
-    - mv temp_data.tf ${MODULE}/1-create-eks-cluster/data.tf
+    - envsubst < ${MODULE}/${MODULE_EKS}/data.tf > temp_data.tf
+    - mv temp_data.tf ${MODULE}/${MODULE_EKS}/data.tf
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # DELETE KRE RECORD FOR NGINX INGRESS ELB
@@ -92,7 +92,7 @@
           echo "The current Workdir is $i"
           cd "${i}" || exit
           terraform init -backend=true -get=true -input=false
-          if [ "$i" != "2-smtp/" ]; then
+          if [[ "$i" != "1-eks-roles/" && "$i" != "3-smtp/" ]]; then
             terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
             terraform refresh
             terraform destroy -auto-approve
