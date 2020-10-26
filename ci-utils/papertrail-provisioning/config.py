@@ -45,7 +45,7 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"dispatch-portal-backend AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[dispatch-portal-backend] - logs",
-                    "repository": "automation-dispatch-portal-frontend"
+                    "repository": "automation-dispatch-portal-backend"
                 },
                 {
                     "query": f"grafana AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",

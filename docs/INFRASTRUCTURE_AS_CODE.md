@@ -33,6 +33,9 @@ infra-as-code/
 └── data-collector          # data-collector infrastructre in AWS
 └── dev                     # AWS resources for each environment (ECS Cluster, ElastiCache Cluster, etc.)
 └── kre                     # kre infrastructure
+  └── 0-create-bucket       # bucket to store EKS information
+  └── 1-eks-roles           # IAM roles infrastructure for EKS cluster
+  └── 2-smtp                # SES infrastructure folder
 └── network-resources       # network resources infrastructure in AWS
 ````
 
@@ -78,7 +81,9 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
     - `0-create-bucket`: In this folder the terraform code is available to create a bucket for each environment and save information about the cluster, such as the SSH key to connect to the worker nodes of the EKS cluster that is going to be created.
 
-    - `1-create-eks-cluster`: In this folder the terraform code is available to create the following resources
+    - `1-eks-roles`: In this folder the terraform code is available to create different IAM roles to map with EKS users and assign specific permissions for each one, for this purpose, a [cli](../ci-utils/eks/iam-to-eks-roles/README.md) will be used later.
+
+    - `2-create-eks-cluster`: In this folder the terraform code is available to create the following resources
     
         - An [EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html) to be able to deploy the different kre components designed for Kubernetes
 
@@ -88,7 +93,7 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
         - A SSH key to connect to worker nodes of EKS
 
-    - `2-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it.
+    - `3-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it.
 
 5. `network-resources`: there are the necessary terraform files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 

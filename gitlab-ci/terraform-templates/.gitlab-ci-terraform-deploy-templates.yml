@@ -127,18 +127,24 @@
     - cd ${CI_PROJECT_DIR}
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INSTALL NECESSARY PYTHON LIBRARIES
+    - pip3 install -r ci-utils/eks/iam-to-eks-roles/requirements.txt --use-feature=2020-resolver
+    - pip3 install -r ci-utils/route53/requirements.txt --use-feature=2020-resolver
+    # ASSIGN RBAC PERMISSION IN EKS FROM IAM ROLES
+    - >
+      for i in $(echo $IAM_TO_EKS_ROLES | tr ", " "\n"); do
+        (
+          python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation-kre --project-role-tag ${i}
+        )
+      done
     # INSTALL EFS CONFIG
     - kubectl apply -f helm/kre/rbac-helm-tiller.yaml
     # INITIALIZE HELM
-    - helm repo add stable https://kubernetes-charts.storage.googleapis.com
-    - helm repo add rimusz https://charts.rimusz.net
-    - helm repo add jetstack https://charts.jetstack.io
-    - helm repo add konstellation-io https://charts.konstellation.io
+    - python3 ci-utils/helm/add_helm_repositories.py
     - helm repo update
     # INSTALL INGRESS CONTROLLER
     - helm upgrade --install --set controller.service.loadBalancerSourceRanges="{$LOAD_BALANCER_WHITELIST}" --namespace kube-system --version ${NGINX_INGRESS_CHART_V} nginx-ingress
         stable/nginx-ingress --values helm/kre/ingress-values.yaml
-    - pip3 install -r ci-utils/route53/requirements.txt --use-feature=2020-resolver
     - python3 ci-utils/route53/nginx_ingress_route53_util.py -a ${KRE_RECORD_ALIAS_NAME} -n ${HOSTED_ZONE_NAME} -u True
     # HOSTPATH PROVISIONER
     - helm upgrade --install --version ${HOSTPATH_CHART_V} --set NodeHostPath="/mnt/efs/${EKS_CLUSTER_NAME}" hostpath-provisioner --namespace kube-system rimusz/hostpath-provisioner

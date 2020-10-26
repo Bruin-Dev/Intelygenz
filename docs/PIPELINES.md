@@ -259,9 +259,35 @@ In this stage there are two jobs:
 
      - A SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it
 
-  2. Once the necessary infrastructure is created, a series component are installaded using [helm charts](https://github.com/helm/charts) in the EKS cluster:
+     - A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform [output values](https://www.terraform.io/docs/configuration/outputs.html), saving the list of user roles belonging to each role in their corresponding variable.
+     
+       Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:
 
-     - **nginx ingress controller**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
+       ```sh
+       Outputs:
+        eks_developer_ops_privileged_roles = [
+          "arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch",
+          "arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xoan.mallon.developer",
+        ]
+        eks_developer_roles = [
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-sancho.munoz",
+        ]
+        eks_devops_roles = [
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias",
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales",
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero",
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-xoan.mallon.devops",
+        ]
+       ```
+
+  2. Using a *Python* [cli](../ci-utils/eks/iam-to-eks-roles/README.md), permissions are assigned in Kubernetes Cluster created for KRE for each of the IAM roles created in the previous step. 
+
+  3. Once the necessary infrastructure is created and configured, a set of components are installed and configured using [helm charts](https://github.com/helm/charts) in the EKS cluster:
+
+     1. **nginx ingress controller**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
 
        A series of configurations are provided so that the IP of clients in Kubernetes services can be known, since by default it will always use the internal IP in EKS of the load balancer for requests made from the Internet.
 
@@ -271,17 +297,17 @@ In this stage there are two jobs:
 
        After the installation of this helm chart a [custom script](../ci-utils/route53/update_route53_elb_alias.sh) is used to create and update a record set in the hosted created for KRE, as [recommended in the KRE installation guide](https://konstellation-io.github.io/website/docs/KRE/installation/cloud/eks/#create-wildcard-entry-in-your-hosted-zone).
 
-     - **hostpath provisioner**, using the helm chart from [rimusz repository](https://charts.rimusz.net)
+     2. **hostpath provisioner**, using the helm chart from [rimusz repository](https://charts.rimusz.net)
 
-     - **kube2iam**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
+     3. **kube2iam**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
 
        This component provides IAM credentials to containers running inside a kubernetes cluster based on annotations.
 
-     - **cert-mananger**, using the helm chart from [jetstack repository](https://charts.jetstack.io).
+     4. **cert-mananger**, using the helm chart from [jetstack repository](https://charts.jetstack.io).
 
        This component automate the management lifecycle of all required certificates used by the KRE component in each environment.
 
-     - **KRE**, using the helm chart from [KRE repository](https://charts.konstellation.io). This component will install the KRE application.
+     5. **KRE**, using the helm chart from [KRE repository](https://charts.konstellation.io). This component will install the [KRE](https://github.com/konstellation-io/kre) application.
 
 ## Destroy steps
 

@@ -97,6 +97,8 @@ network-resources-infra-branches:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
 
 network-resources-infra-master:
   stage: basic_infra
@@ -106,6 +108,8 @@ network-resources-infra-master:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
 
 check-ecs-resources-branches:
   extends: .check_ecs_resources_template
@@ -253,6 +257,8 @@ deploy-kre-dev:
     CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_DEV}
     KRE_CHART_V: ${KRE_CHART_V_DEV}
     LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
+    IAM_TO_EKS_ROLES: developer, developer-ops-privileged, devops
+    HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, rimusz https://charts.rimusz.net, jetstack https://charts.jetstack.io, konstellation-io https://charts.konstellation.io"
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
   rules:
@@ -299,8 +305,6 @@ destroy-branches-aws-nuke:
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
       when: manual
       allow_failure: true
-  needs:
-    - deploy-branches
 
 destroy-master:
   stage: destroy

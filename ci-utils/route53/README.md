@@ -1,6 +1,6 @@
 # Route53 utils
 
-A number of scripts developed in python for working with [Route53](https://aws.amazon.com/route53/) Service of AWS are stored in this folder.
+A number of scripts developed in *Python* for working with [Route53](https://aws.amazon.com/route53/) Service of AWS are stored in this folder.
 
 **Table of contents**:
 - [nginx_ingress_route53_util](#nginx_ingress_route53_util-cli)

@@ -45,6 +45,14 @@
   - [Docker custom images and python libraries](#docker-custom-images-and-python-libraries)
   - [Env files](#env-files)
   - [Finish up](#finish-up)
+- [KRE](#KRE)
+  - [Deployed Environments](#deployed-environments)
+  - [Access Control](#access-control)
+    - [Roles](#roles)
+    - [Roles assigned to users](#roles-assigned-to-users)
+  - [Access Configuration](#access-configuration)
+    - [Prerequisites](#prerequisites)
+    - [Setup](#setup)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
   - [Packages](#packages)
   - [Microservices](#microservices)
@@ -357,6 +365,108 @@ Run:
 
 `$ docker-compose up --build`
 
+# KRE
+
+In this project [KRE](https://konstellation-io.github.io/website/) is used, it has been deployed in an [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments, as well as all the parts needed for this in AWS.
+
+## Deployed Environments
+
+[KRE](https://konstellation-io.github.io/website/) has been deployed for the usage in the project creating the following environments for it:
+
+- `dev` environment: This will be used for the various tests and calls made from the **ephemeral environments** of the project, ie from the microservices deployed in the ECS cluster with name `automation-<environment_id>`.
+
+* `production` environment: This will be used for the different calls made from the project's **production environment**, that is, from the microservices deployed in the ECS cluster with the name `automation-master`.
+
+## Access Control
+
+In the process of deploying the EKS clusters used for the environments, an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
+
+### Roles
+
+IAM roles are created for each of the users, although these are distinguished into three categories according to the tag `Project-Role` of them, this tag will also be used to associate them to a `ClusterRole` of the EKS cluster and allow access to certain resources of the same. The mentioned tags are the following:
+
+- **developer**: This tag identify users that will only have access to the [pods](https://kubernetes.io/docs/concepts/workloads/pods/) of any namespace to perform `get`, `list` and `watch` on them.
+
+- **developer-ops-privileged**: This tag identiy users that will have access to any resource in the `core` and `apps` API groups of any namespace.
+
+- **devops**: This tag identify users that will access to any resource in any namespace.
+
+### Roles assigned to Users
+
+Below are the roles created for each of the users, as well as the category to which they belong from those explained above:
+
+| IAM User Name | Role in Project | IAM role created |
+|---------------|-----------------|------------------|
+| alberto.iglesias | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
+| angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
+| angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
+| angel.luis.piquero | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
+| brandon.samudio | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
+| daniel.fernandez | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
+| joseluis.vega | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
+| sancho.munoz | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
+| xisco.capllonch | developer-ops-privileged | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-xisco.capllonch |
+
+## Access Configuration
+
+### Prerequisites
+
+The following tools are required to access to the EKS clusters created for each environment:
+
+- **kubectl**: It is necessary to have the command-line tool for Kubernetes in version `1.17.0` to interact with the cluster. It can be installed by following the commands shown below:
+
+  ```sh
+  $ curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/linux/amd64/kubectl
+  $ chmod +x ./kubectl
+  $ sudo mv ./kubectl /usr/local/bin/kubectl
+  ```
+
+- **awscli**: It is necessary to have the command line tool for AWS in version `1.18.98` or higher. It can be installed with `pip` with the following command show below:
+
+  ```sh
+  $ pip3 install awscli==1.18.98
+  ```
+
+### Setup
+
+The following steps must be followed to set up the configuration to access any of the EKS clusters of KRE:
+
+1. Setting up a profile to use `awscli` in the project, this will require two steps:
+
+   - Configure the credentials for the profile, adding the following to file `~/.aws/config`:
+   
+     ```sh
+     [mettel-automation]
+     aws_access_key_id     = <aws_access_key_id>
+     aws_secret_access_key = <aws_secret_access_key>
+     ```
+  
+   - Create the settings for the profile created in the previous step, adding the following to file `~/.aws/config`:
+    
+     ```sh
+     [profile mettel-automation]
+     region=us-east-1
+     output=json
+     ```
+
+2. Add the configuration of the IAM role created for the user in the awscli config file. The role IAM arn created for each user uses the following format `arn:aws:iam::374050862540:role/eks-<role_tag>-mettel-automation-kre-<iam_user_name>`, where the `role_tag` value will be one of those explained in the [previous section](#roles).
+
+   The following is an example of the configuration of this role through the modification of the `~/.aws/config` file:
+
+   ```
+   [profile devops-role-kre]
+   role_arn = arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-xoan.mallon.devops
+   source_profile = mettel-automation
+   region=us-east-1
+   output=json
+   ```
+
+3. Add to the Kubernetes kubeconfig file the EKS cluster to which the user wants to connect. This can be done through the following `awscli` command:
+
+    ```sh
+    $ aws eks update-kubeconfig --name <kre_eks_cluster_name> -p 
+    ```
+
 # Lists of projects READMEs
 
 ## Microservices
@@ -438,4 +548,3 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
   - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
     area for the [local docker-compose](docker-compose.yml). Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
     grafana dashboard.
-
