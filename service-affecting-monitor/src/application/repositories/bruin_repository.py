@@ -99,6 +99,46 @@ class BruinRepository:
 
         return await self.append_note_to_ticket(ticket_id, reopening_note)
 
+    async def get_affecting_ticket(self, client_id, serial):
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved']
+        ticket_request_msg = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'service_number': serial,
+                'ticket_status': ticket_statuses
+            }
+        }
+        self._logger.info(f"Retrieving affecting tickets for serial: {serial}")
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
+                                                        ticket_request_msg,
+                                                        timeout=90)
+        if all_tickets['status'] not in range(200, 300):
+            self._logger.error(f"Error: an error occurred retrieving affecting tickets by serial")
+            return None
+
+        if len(all_tickets['body']) > 0:
+            ticket_id = all_tickets['body'][0]['ticketID']
+            ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
+            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
+                                                               ticket_details_request,
+                                                               timeout=15)
+
+            if ticket_details['status'] not in range(200, 300):
+                self._logger.error(f"Error: an error occurred retrieving ticket details for ticket: {ticket_id}")
+                return None
+
+            ticket_details_body = ticket_details['body']
+            self._logger.info(f'Returning ticket details of ticket: {ticket_id}')
+            return {
+                    'ticketID': ticket_id,
+                    **ticket_details_body,
+                  }
+        self._logger.info(f'No service affecting tickets found for serial: {serial}')
+        return None
+
     @staticmethod
     def find_detail_by_serial(ticket, edge_serial_number):
         ticket_details = None

@@ -330,7 +330,7 @@ class ServiceAffectingMonitor:
             client_id = cached_info['bruin_client_info']['client_id']
 
             edge_serial_number = cached_info['serial_number']
-            ticket = await self._get_affecting_ticket_by_trouble(client_id, edge_serial_number, trouble)
+            ticket = await self._bruin_repository.get_affecting_ticket(client_id, edge_serial_number)
 
             if not ticket:
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
@@ -399,7 +399,10 @@ class ServiceAffectingMonitor:
                 return
             else:
                 ticket_details = BruinRepository.find_detail_by_serial(ticket, edge_serial_number)
-                if ticket_details and self._is_ticket_resolved(ticket_details):
+                if not ticket_details:
+                    self._logger.error(f"No ticket details matching the serial number {edge_serial_number}")
+                    return
+                if self._is_ticket_resolved(ticket_details):
                     self._logger.info(f'[service-affecting-monitor] ticket with trouble {trouble} '
                                       f'detected in edge with data {edge_identifier}. '
                                       f'Ticket: {ticket}. Re-opening ticket..')
@@ -419,46 +422,18 @@ class ServiceAffectingMonitor:
                     await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note)
                     self._metrics_repository.increment_tickets_reopened()
+                else:
+                    for ticket_note in ticket['ticketNotes']:
+                        if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:
+                            return
+                    ticket_id = ticket["ticketID"]
+                    note = self._ticket_object_to_string(ticket_dict)
+                    await self._bruin_repository.append_note_to_ticket(ticket_id, note)
 
-    async def _get_affecting_ticket_by_trouble(self, client_id, serial, trouble):
-        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved']
-        ticket_request_msg = {
-            'request_id': uuid(),
-            'body': {
-                'client_id': client_id,
-                'category': 'SD-WAN',
-                'ticket_topic': 'VAS',
-                'service_number': serial,
-                'ticket_status': ticket_statuses
-            }
-        }
-        self._logger.info(f"Retrieving affecting tickets by serial with trouble {trouble}: {ticket_request_msg}")
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                        ticket_request_msg,
-                                                        timeout=90)
-        if all_tickets['status'] not in range(200, 300):
-            self._logger.error(f"Error: an error ocurred retrieving affecting tickets by serial")
-            return None
-
-        for ticket in all_tickets['body']:
-            ticket_id = ticket['ticketID']
-            ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
-            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
-                                                               ticket_details_request,
-                                                               timeout=15)
-
-            if ticket_details['status'] not in range(200, 300):
-                self._logger.error(f"Error: an error ocurred retrieving ticket details for ticket {ticket_id}")
-                return None
-
-            ticket_details_body = ticket_details['body']
-            for ticket_note in ticket_details_body['ticketNotes']:
-                if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:
-                    return {
-                        'ticketID': ticket['ticketID'],
-                        **ticket_details_body,
-                    }
-        return None
+                    slack_message = f'Posting {trouble} note to ticket id: {ticket_id}\n'\
+                                    f'https://app.bruin.com/t/{ticket_id}'\
+                                    f'{self._config.MONITOR_CONFIG["environment"]}'
+                    await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
 
     def _compose_ticket_dict(self, link_info, input, output, trouble, threshold):
         edge_overview = OrderedDict()
@@ -470,9 +445,9 @@ class ServiceAffectingMonitor:
         edge_overview['Interval for Scan'] = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][
             trouble.lower().replace(' ', '_')]
         edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-        if input > threshold:
+        if input >= threshold:
             edge_overview["Receive"] = input
-        if output > threshold:
+        if output >= threshold:
             edge_overview["Transfer"] = output
         edge_overview["Links"] = \
             f'[Edge|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \

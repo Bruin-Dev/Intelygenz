@@ -306,3 +306,98 @@ class TestBruinRepository:
         }
         response = BruinRepository.find_detail_by_serial(ticket_mock, edge_serial_number)
         assert response is None
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_by_trouble_ok_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        affecting_ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026138'}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        ticket_list = {
+                        'body': [{'ticketID': 3521039}],
+                        'status': 200
+        }
+        ticket_details = {
+            'body': affecting_ticket_mock,
+            'status': 200
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_list, ticket_details])
+
+        affecting_ticket = await bruin_repository.get_affecting_ticket(85940, 'VC05200026138')
+        assert affecting_ticket == ticket_details['body']
+        assert event_bus.rpc_request.called
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_by_trouble_error_get_tickets_details_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        ticket_list = {
+                        'body': [{'ticketID': 3521039}],
+                        'status': 200
+        }
+        ticket_details = {
+            'body': 'ERROR',
+            'status': 400
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_list, ticket_details])
+
+        affecting_ticket = await bruin_repository.get_affecting_ticket(85940, 'VC05200026138')
+        assert affecting_ticket is None
+        assert event_bus.rpc_request.called
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_by_trouble_error_get_tickets_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        ticket_list = {
+            'body': None,
+            'status': 400
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_list])
+
+        affecting_ticket = await bruin_repository.get_affecting_ticket(85940, 'VC05200026138')
+        assert affecting_ticket is None
+        assert event_bus.rpc_request.called
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_by_trouble_no_tickets_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        ticket_list = {
+            'body': [],
+            'status': 200
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_list])
+
+        affecting_ticket = await bruin_repository.get_affecting_ticket(85940, 'VC05200026138')
+
+        assert affecting_ticket is None
+        assert event_bus.rpc_request.called

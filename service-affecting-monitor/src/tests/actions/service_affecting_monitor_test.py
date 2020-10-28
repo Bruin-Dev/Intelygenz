@@ -1362,7 +1362,7 @@ class TestServiceAffectingMonitor:
             f'Affecting ticket {ticket_mock["ticketID"]} reopened. Details at '
             f'https://app.bruin.com/t/{ticket_mock["ticketID"]}'
         )
-        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
         service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
         service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
@@ -1380,7 +1380,94 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_called_once()
 
     @pytest.mark.asyncio
-    async def notify_trouble_with_open_ticket_already_existing_test(self):
+    async def notify_trouble_with_ticket_already_existing_no_details_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        link_info = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bestLatencyMsRx': 14,
+                'bestLatencyMsTx': 20,
+            },
+            'cached_info': {'edge': {"host": "mettel.velocloud.net",
+                                     "enterprise_id": 137,
+                                     "edge_id": 1651},
+                            'bruin_client_info': {'client_id': 85940},
+                            'serial_number': 'VC05200028729'
+                            },
+            'contact_info': {
+                                "ticket": {
+                                    "email": "fake@gmail.com",
+                                    "phone": "111-111-1111",
+                                    "name": "Fake Guy",
+                                },
+                                "site": {
+                                    "email": "fake@gmail.com",
+                                    "phone": "111-111-1111",
+                                    "name": "Fake Guy",
+                                }
+            }
+        }
+
+        ticket_dict = {'ticket': 'some ticket details'}
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'production'
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": '', "detailStatus": "R"}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        open_ticket_response_mock = {
+            'status': 200,
+            'body': {}
+        }
+
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
+        service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
+        service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        service_affecting_monitor._metrics_repository.increment_tickets_reopened = Mock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._notify_trouble(link_info, 'LATENCY', ticket_dict)
+
+        service_affecting_monitor._ticket_object_to_string_without_watermark.assert_not_called()
+        service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message.\
+            assert_not_awaited()
+        service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def notify_trouble_with_open_different_trouble_ticket_already_existing_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -1449,12 +1536,102 @@ class TestServiceAffectingMonitor:
             'status': 200,
             'body': {}
         }
-        client_id = 85940
-        slack_message_mock = (
-            f'Affecting ticket {ticket_mock["ticketID"]} reopened. Details at '
-            f'https://app.bruin.com/t/{ticket_mock["ticketID"]}'
-        )
-        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        slack_message = f'Posting JITTER note to ticket id: 3521039\n' \
+                        f'https://app.bruin.com/helpdesk?clientId=85940&'\
+                        f'ticketId=3521039 , in '\
+                        f'production'
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
+        service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        service_affecting_monitor._metrics_repository.increment_tickets_reopened = Mock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._notify_trouble(link_info, 'JITTER', ticket_dict)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once()
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        service_affecting_monitor._ticket_object_to_string_without_watermark.assert_not_called()
+        service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
+        service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def notify_trouble_with_open_same_trouble_ticket_already_existing_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        link_info = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bestLatencyMsRx': 14,
+                'bestLatencyMsTx': 20,
+            },
+            'cached_info': {'edge': {"host": "mettel.velocloud.net",
+                                     "enterprise_id": 137,
+                                     "edge_id": 1651},
+                            'bruin_client_info': {'client_id': 85940},
+                            'serial_number': 'VC05200028729'
+                            },
+            'contact_info': {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
+        }
+
+        ticket_dict = {'ticket': 'some ticket details'}
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'production'
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "O"}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        open_ticket_response_mock = {
+            'status': 200,
+            'body': {}
+        }
+
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
         service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
         service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
         service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
@@ -1464,10 +1641,10 @@ class TestServiceAffectingMonitor:
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._notify_trouble(link_info, 'LATENCY', ticket_dict)
 
+        bruin_repository.append_note_to_ticket.assert_not_awaited()
+        bruin_repository._notifications_repository.send_slack_message.assert_not_awaited()
         service_affecting_monitor._ticket_object_to_string_without_watermark.assert_not_called()
         service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message. \
-            assert_not_awaited()
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_not_called()
 
     @pytest.mark.asyncio
@@ -1544,7 +1721,7 @@ class TestServiceAffectingMonitor:
         err_message_mock = (
             f'[service-affecting-monitor] Error: Could not reopen ticket: {ticket_mock}'
         )
-        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string = Mock()
         service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
         service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
@@ -1613,7 +1790,7 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
         ticket_mock = None
-        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string = Mock()
 
         await service_affecting_monitor._notify_trouble(link_info, 'LATENCY', ticket_dict)
@@ -1692,15 +1869,15 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
         ticket_mock = None
-        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
         with patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_):
             await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
 
-        service_affecting_monitor._get_affecting_ticket_by_trouble.assert_awaited_once_with(
-            client_id, "VC05200028729", trouble)
+        bruin_repository.get_affecting_ticket.assert_awaited_once_with(
+            client_id, "VC05200028729")
 
         service_affecting_monitor._ticket_object_to_string.assert_called_once()
         event_bus.rpc_request.assert_awaited_with(
@@ -1772,14 +1949,14 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
         ticket_mock = None
-        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
         await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
 
-        service_affecting_monitor._get_affecting_ticket_by_trouble.assert_awaited_once_with(
-            client_id, 'VC05200028729', trouble)
+        bruin_repository.get_affecting_ticket.assert_awaited_once_with(
+            client_id, 'VC05200028729')
 
         service_affecting_monitor._ticket_object_to_string.assert_called_with(ticket_dict)
 
@@ -1849,512 +2026,6 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._template_renderer.compose_email_object.assert_not_called()
         event_bus.rpc_request.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def get_affecting_ticket_by_trouble_ok_test(self):
-        client_id = 85940
-        serial_number = 'VC05200026138'
-        trouble = 'LATENCY'
-
-        ticket_1_id = 12345
-        ticket_1 = {
-            "clientID": client_id,
-            "clientName": "Aperture Science",
-            "ticketID": ticket_1_id,
-            "category": "SD-WAN",
-            "topic": "Service Affecting Trouble",
-            "ticketStatus": "New",
-            "createDate": "9/25/2020 6:31:54 AM",
-        }
-        affecting_tickets_response = {
-            'body': [
-                ticket_1,
-            ],
-            'status': 200,
-        }
-
-        ticket_1_details = {
-            "ticketDetails": [
-                {
-                    "detailID": 5217537,
-                    "detailValue": serial_number,
-                },
-            ],
-            "ticketNotes": [
-                {
-                    "noteValue": '#*Automation Engine*#\nTrouble: LATENCY\nTimeStamp: 2019-09-10 10:34:00-04:00 ',
-                    'createdDate': '2020-09-25 06:31:54-00:00',
-                }
-            ]
-        }
-        ticket_1_details_response = {
-            'body': ticket_1_details,
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        customer_cache_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            affecting_tickets_response,
-            ticket_1_details_response,
-        ])
-
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
-
-        with uuid_mock:
-            affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
-                client_id, serial_number, trouble
-            )
-
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "bruin.ticket.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'client_id': client_id,
-                        'category': 'SD-WAN',
-                        'ticket_topic': 'VAS',
-                        'service_number': serial_number,
-                        'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved'],
-                    }
-                },
-                timeout=90,
-            ),
-            call(
-                "bruin.ticket.details.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'ticket_id': ticket_1_id,
-                    }
-                },
-                timeout=15,
-            ),
-        ])
-        assert affecting_ticket == {
-            'ticketID': ticket_1_id,
-            **ticket_1_details,
-        }
-
-    @pytest.mark.asyncio
-    async def get_affecting_ticket_by_trouble_with_retrieval_of_affecting_tickets_returning_non_2xx_status_test(self):
-        client_id = 85940
-        serial_number = 'VC05200026138'
-        trouble = 'LATENCY'
-
-        affecting_tickets_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        customer_cache_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=affecting_tickets_response)
-
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
-
-        with uuid_mock:
-            affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
-                client_id, serial_number, trouble
-            )
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.request",
-            {
-                'request_id': uuid_,
-                'body': {
-                    'client_id': client_id,
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VAS',
-                    'service_number': serial_number,
-                    'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved'],
-                }
-            },
-            timeout=90,
-        )
-        assert affecting_ticket is None
-
-    @pytest.mark.asyncio
-    async def get_affecting_ticket_by_trouble_with_retrieval_of_ticket_details_returning_non_2xx_status_test(self):
-        client_id = 85940
-        serial_number = 'VC05200026138'
-        trouble = 'LATENCY'
-
-        ticket_1_id = 12345
-        ticket_1 = {
-            "clientID": client_id,
-            "clientName": "Aperture Science",
-            "ticketID": ticket_1_id,
-            "category": "SD-WAN",
-            "topic": "Service Affecting Trouble",
-            "ticketStatus": "New",
-            "createDate": "9/25/2020 6:31:54 AM",
-        }
-        affecting_tickets_response = {
-            'body': [
-                ticket_1,
-            ],
-            'status': 200,
-        }
-
-        ticket_1_details_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        customer_cache_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            affecting_tickets_response,
-            ticket_1_details_response,
-        ])
-
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
-
-        with uuid_mock:
-            affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
-                client_id, serial_number, trouble
-            )
-
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "bruin.ticket.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'client_id': client_id,
-                        'category': 'SD-WAN',
-                        'ticket_topic': 'VAS',
-                        'service_number': serial_number,
-                        'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved'],
-                    }
-                },
-                timeout=90,
-            ),
-            call(
-                "bruin.ticket.details.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'ticket_id': ticket_1_id,
-                    }
-                },
-                timeout=15,
-            ),
-        ])
-        assert affecting_ticket is None
-
-    @pytest.mark.asyncio
-    async def get_affecting_ticket_by_trouble_with_ticket_not_having_any_note_test(self):
-        client_id = 85940
-        serial_number = 'VC05200026138'
-        trouble = 'LATENCY'
-
-        ticket_1_id = 12345
-        ticket_1 = {
-            "clientID": client_id,
-            "clientName": "Aperture Science",
-            "ticketID": ticket_1_id,
-            "category": "SD-WAN",
-            "topic": "Service Affecting Trouble",
-            "ticketStatus": "New",
-            "createDate": "9/25/2020 6:31:54 AM",
-        }
-        affecting_tickets_response = {
-            'body': [
-                ticket_1,
-            ],
-            'status': 200,
-        }
-
-        ticket_1_details = {
-            "ticketDetails": [
-                {
-                    "detailID": 5217537,
-                    "detailValue": serial_number,
-                },
-            ],
-            "ticketNotes": []
-        }
-        ticket_1_details_response = {
-            'body': ticket_1_details,
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        customer_cache_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            affecting_tickets_response,
-            ticket_1_details_response,
-        ])
-
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
-
-        with uuid_mock:
-            affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
-                client_id, serial_number, trouble
-            )
-
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "bruin.ticket.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'client_id': client_id,
-                        'category': 'SD-WAN',
-                        'ticket_topic': 'VAS',
-                        'service_number': serial_number,
-                        'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved'],
-                    }
-                },
-                timeout=90,
-            ),
-            call(
-                "bruin.ticket.details.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'ticket_id': ticket_1_id,
-                    }
-                },
-                timeout=15,
-            ),
-        ])
-        assert affecting_ticket is None
-
-    @pytest.mark.asyncio
-    async def get_affecting_ticket_by_trouble_with_ticket_notes_having_invalid_values_test(self):
-        client_id = 85940
-        serial_number = 'VC05200026138'
-        trouble = 'LATENCY'
-
-        ticket_1_id = 12345
-        ticket_1 = {
-            "clientID": client_id,
-            "clientName": "Aperture Science",
-            "ticketID": ticket_1_id,
-            "category": "SD-WAN",
-            "topic": "Service Affecting Trouble",
-            "ticketStatus": "New",
-            "createDate": "9/25/2020 6:31:54 AM",
-        }
-        affecting_tickets_response = {
-            'body': [
-                ticket_1,
-            ],
-            'status': 200,
-        }
-
-        ticket_1_details = {
-            "ticketDetails": [
-                {
-                    "detailID": 5217537,
-                    "detailValue": serial_number,
-                },
-            ],
-            "ticketNotes": [
-                {
-                    "noteValue": None,
-                    'createdDate': '2020-09-25 06:31:54-00:00',
-                }
-            ]
-        }
-        ticket_1_details_response = {
-            'body': ticket_1_details,
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        customer_cache_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            affecting_tickets_response,
-            ticket_1_details_response,
-        ])
-
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
-
-        with uuid_mock:
-            affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
-                client_id, serial_number, trouble
-            )
-
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "bruin.ticket.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'client_id': client_id,
-                        'category': 'SD-WAN',
-                        'ticket_topic': 'VAS',
-                        'service_number': serial_number,
-                        'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved'],
-                    }
-                },
-                timeout=90,
-            ),
-            call(
-                "bruin.ticket.details.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'ticket_id': ticket_1_id,
-                    }
-                },
-                timeout=15,
-            ),
-        ])
-        assert affecting_ticket is None
-
-    @pytest.mark.asyncio
-    async def get_affecting_ticket_by_trouble_with_trouble_not_found_in_notes_test(self):
-        client_id = 85940
-        serial_number = 'VC05200026138'
-        trouble = 'LATENCY'
-
-        ticket_1_id = 12345
-        ticket_1 = {
-            "clientID": client_id,
-            "clientName": "Aperture Science",
-            "ticketID": ticket_1_id,
-            "category": "SD-WAN",
-            "topic": "Service Affecting Trouble",
-            "ticketStatus": "New",
-            "createDate": "9/25/2020 6:31:54 AM",
-        }
-        affecting_tickets_response = {
-            'body': [
-                ticket_1,
-            ],
-            'status': 200,
-        }
-
-        ticket_1_details = {
-            "ticketDetails": [
-                {
-                    "detailID": 5217537,
-                    "detailValue": serial_number,
-                },
-            ],
-            "ticketNotes": [
-                {
-                    "noteValue": '#*Automation Engine*#\nTrouble: JITTER\nTimeStamp: 2019-09-10 10:34:00-04:00 ',
-                    'createdDate': '2020-09-25 06:31:54-00:00',
-                },
-                {
-                    "noteValue": '#*Automation Engine*#\nTrouble: PACKET LOSS\nTimeStamp: 2019-09-10 10:34:00-04:00 ',
-                    'createdDate': '2020-09-25 06:31:54-00:00',
-                }
-            ]
-        }
-        ticket_1_details_response = {
-            'body': ticket_1_details,
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        customer_cache_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            affecting_tickets_response,
-            ticket_1_details_response,
-        ])
-
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
-
-        with uuid_mock:
-            affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
-                client_id, serial_number, trouble
-            )
-
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "bruin.ticket.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'client_id': client_id,
-                        'category': 'SD-WAN',
-                        'ticket_topic': 'VAS',
-                        'service_number': serial_number,
-                        'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved'],
-                    }
-                },
-                timeout=90,
-            ),
-            call(
-                "bruin.ticket.details.request",
-                {
-                    'request_id': uuid_,
-                    'body': {
-                        'ticket_id': ticket_1_id,
-                    }
-                },
-                timeout=15,
-            ),
-        ])
-        assert affecting_ticket is None
 
     def compose_ticket_dict_test(self):
         event_bus = Mock()
