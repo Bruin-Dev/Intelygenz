@@ -51,18 +51,24 @@ class Route53Util:
             print("There isn't a pod with the specified name")
             exit(1)
 
+    @retry(wait=wait_exponential(multiplier=5,
+                                 min=5),
+           stop=stop_after_delay(900))
     def _get_load_balancer_hostname_nginx_ingress(self):
         ret = self._v1.list_namespaced_service(namespace=self._nginx_ingress_namespace,
                                                label_selector=self._nginx_ingress_labels)
         print("Obtaining hostname of nginx ingress ELB")
-        if ret.items:
+        if ret.items and ret.items[0].status.load_balancer.ingress:
             elb_ingress_hostname = ret.items[0].status.load_balancer.ingress[0].hostname
             print(f"The hostname of nginx ingress ELB is {elb_ingress_hostname}")
             return elb_ingress_hostname
         else:
-            print("No service present for nginx-ingress")
-            exit(1)
+            print(f"No load balancer ingress present yet")
+            raise Exception
 
+    @retry(wait=wait_exponential(multiplier=5,
+                                 min=5),
+           stop=stop_after_delay(900))
     def _get_elb_hosted_zone_id(self, elb_dns_name_arg):
         elbs = self._elb_client.describe_load_balancers()
 
@@ -75,8 +81,8 @@ class Route53Util:
                     f"CanonicalHostedZoneNameID for ELB with DNS Name {elb_dns_name_arg} is {canonical_hosted_zone_id}")
                 return canonical_hosted_zone_id
 
-        print("No CanonicalHostedZoneNameID found for ELB with DNS Name")
-        exit(1)
+        print("No CanonicalHostedZoneNameID found for ELB with DNS Name yet ")
+        raise Exception
 
     def _get_hosted_zone_to_change_id(self):
         hosted_zone_name = parser.parse_args().hosted_zone_name

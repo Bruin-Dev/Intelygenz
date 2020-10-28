@@ -9,13 +9,19 @@ resource "aws_security_group" "security_group_efs" {
     protocol  = "TCP"
     security_groups = [module.mettel-automation-eks-cluster.worker_security_group_id]
   }
+
+  tags = {
+    Environment  = terraform.workspace
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+  }
 }
 
 resource "aws_efs_file_system" "efs_file_system" {
   tags = map(
      "Name", local.cluster_name,
      "kubernetes.io/cluster/${local.cluster_name}", "owned",
-    )
+  )
 }
 
 resource "aws_efs_mount_target" "efs_mount_target" {

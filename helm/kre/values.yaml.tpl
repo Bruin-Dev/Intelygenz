@@ -28,17 +28,17 @@ config:
     mongodb:
       persistentVolume:
         enabled: true
-        storageClass: hostPath
+        storageClass: hostpath
         # Uncomment this if you need more space for mongoDB
         # size: 5Gi
     chronograf:
       persistentVolume:
         enabled: true
-        storageClass: hostPath
+        storageClass: hostpath
     influxdb:
       persistentVolume:
         enabled: true
-        storageClass: hostPath
+        storageClass: hostpath
         # Uncomment this if you need more space for metrics and measurements on InfluxDB
         # size: 10Gi
   auth:

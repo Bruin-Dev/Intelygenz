@@ -2,10 +2,6 @@
 <img src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&v=beta&t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"  width="200" height="200">
 </div>
 
-| Environment   | Status        |
-|:-------------:|:-------------:|
-| master        | [![pipeline status](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/pipeline.svg)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
-
 | Module      | Coverage |
 |:-----------:|:--------:|
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -46,7 +42,6 @@
   - [Env files](#env-files)
   - [Finish up](#finish-up)
 - [KRE](#KRE)
-  - [Deployed Environments](#deployed-environments)
   - [Access Control](#access-control)
     - [Roles](#roles)
     - [Roles assigned to users](#roles-assigned-to-users)
@@ -369,17 +364,9 @@ Run:
 
 In this project [KRE](https://konstellation-io.github.io/website/) is used, it has been deployed in an [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments, as well as all the parts needed for this in AWS.
 
-## Deployed Environments
-
-[KRE](https://konstellation-io.github.io/website/) has been deployed for the usage in the project creating the following environments for it:
-
-- `dev` environment: This will be used for the various tests and calls made from the **ephemeral environments** of the project, ie from the microservices deployed in the ECS cluster with name `automation-<environment_id>`.
-
-* `production` environment: This will be used for the different calls made from the project's **production environment**, that is, from the microservices deployed in the ECS cluster with the name `automation-master`.
-
 ## Access Control
 
-In the process of deploying the EKS clusters used for the environments, an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
+In the creation and possible updates in the EKS clusters used for the KRE [environments](./docs/SYSTEM_OVERVIEW#kre-environments), an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
 
 ### Roles
 
@@ -393,7 +380,7 @@ IAM roles are created for each of the users, although these are distinguished in
 
 ### Roles assigned to Users
 
-Below are the roles created for each of the users, as well as the category to which they belong from those explained above:
+Below are the roles created for each of the users actually, as well as the category to which they belong from those explained above:
 
 | IAM User Name | Role in Project | IAM role created |
 |---------------|-----------------|------------------|
@@ -406,6 +393,8 @@ Below are the roles created for each of the users, as well as the category to wh
 | joseluis.vega | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
 | sancho.munoz | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
 | xisco.capllonch | developer-ops-privileged | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-xisco.capllonch |
+
+> The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
 
 ## Access Configuration
 
@@ -464,7 +453,7 @@ The following steps must be followed to set up the configuration to access any o
 3. Add to the Kubernetes kubeconfig file the EKS cluster to which the user wants to connect. This can be done through the following `awscli` command:
 
     ```sh
-    $ aws eks update-kubeconfig --name <kre_eks_cluster_name> -p 
+    $ aws eks update-kubeconfig --name <kre_eks_cluster_name> -p <aws_role_profile_name>
     ```
 
 # Lists of projects READMEs

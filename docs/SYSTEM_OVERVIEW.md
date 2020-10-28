@@ -62,7 +62,7 @@ There are two types of microservices showed in the diagram above depending on th
 
     * *tnba-monitor*
 
-> All microservices that communicate with NATS can also communicate with the Redis cluster. This is needed
+  > All microservices that communicate with NATS can also communicate with the Redis cluster. This is needed
   to bypass the limit size that NATS enforces for all the messages it receives (1MB).
 
 * Microservices that doesn't communicate with NATS
@@ -241,23 +241,31 @@ The following [diagram](https://www.draw.io/#G1Yu4rtLV6WvOWr7FxE1l-sclOL4SA5r2z)
 
 ## Infrastructure
 
-### Environment infrastructure
+### Microservices Infrastructure
 
-MetTel Automation uses ECS to deploy a container for each microservice for all [environments](PIPELINES.md#environments) deployed, as each one has its own repository in the ECR registry used in the project.
+For the microservices ECS is used to deploy a container for each microservice for all [environments](PIPELINES.md#microservices-environments) deployed, as each one has its own repository in the ECR registry used in the project.
 
 In the following [diagram](https://www.draw.io/#G1eET1FDYMJ7bf2xpZVXfEaEnz1DA-V6M2) it's possible see how the microservices of the project are deployed, using the different images available in the registry created for the project in ECR.
 
 ![IMAGE: ecs_infrastructure](./img/system_overview/infrastructure/ECS_infrastructure.png)
 
+### KRE Infrastructure
+
+In this project [KRE](https://konstellation-io.github.io/website/) is used, it has been deployed in an [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary [environments](PIPELINES.md#KRE-Environments), as well as all the parts needed for this in AWS.
+
+In the following [diagram](https://app.diagrams.net/#G1Mcg9-Z0AOkA_R8juMD6UuQQGIJX57b2f) it's possible see how is configured the KRE infrastructure in the project.
+
+![IMAGE: kre_infrastructure](./img/system_overview/infrastructure/kre_infrastructure.png)
+
 ### Network infrastructure
 
-For the infrastructure of the network resources there is a distinction according to the [environment](PIPELINES.md#environments) to deploy belongs to dev or production.
+For the infrastructure of the network resources there is a distinction according to the [microservice environments](PIPELINES.md#microservices-environments) and also the [kre-environmetns](PIPELINES.md#kre-environments) to deploy belongs to `dev` or `production`.
 
 In the following [diagram](https://www.draw.io/#G1s8eD7_XNplcVC6b-Aqtjd1p_Vf2quPnn) it's possible see the infrastructure relative to the existing network resources in AWS created for the two type of environments.
 
 ![IMAGE: network_infrastructure](./img/system_overview/infrastructure/network_infrastructure.png)
 
-When deploying an environment it will use the resources belonging to the environment type. This approach has been implemented so that regardless of the number of ECS clusters being used, the same public IPs are always used to make requests outward from the different environments.
+When deploying an environment it will use the resources belonging to the environment type. This approach has been implemented so that regardless of the number of ECS clusters being used, the same public IPs are always used to make requests outward from the different environments. KRE's clusters will also use the VPCs corresponding to each environment, i.e., `dev` or `production`.
 
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

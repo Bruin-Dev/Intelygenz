@@ -1,11 +1,13 @@
 locals  {
   // EKS cluster local variables
-  cluster_name = "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}"
+  cluster_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
   k8s_version = "1.17"
-  worker_nodes_instance_type = "t3.medium"
+  worker_nodes_instance_type = "m5.large"
+  min_worker_nodes = 4
+  max_worker_nodes = 5
 
   // EKS cluster access key local variables
-  ssh_key_name = "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks-key"
+  ssh_key_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks-key" : "${var.common_info.project}-eks-key"
 
   // EKS node userdata to install EFS
   eks-node-userdata = <<USERDATA
@@ -19,7 +21,7 @@ locals  {
   USERDATA
 
   // S3 bucket with EKS cluster info local variables
-  bucket_name = "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks"
+  bucket_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks" : "${var.common_info.project}-eks"
 
   // public subnets used in cluster
   subnets         = [
@@ -33,19 +35,6 @@ locals  {
   // default region used in AWS
   aws_default_region = "us-east-1"
 
-  // kubeconfig local store
-  kubeconfig_dir = "/tmp/kubeconfig"
-
-  // ALB from nginx ingress deployed output
-  alb_from_nginx_ingress = "/tmp/alb_from_nginx_ingress"
-
-  // kre record alias name
-  kre_record_alias_name = "*.kre-${var.CURRENT_ENVIRONMENT}.mettel-automation.net."
-
   // kre hosted zone name
-  kre_record_hosted_zone_name = "kre-${var.CURRENT_ENVIRONMENT}.mettel-automation.net."
-
-  // ELB nginx ingress locals variables
-  elb_nginx_ingress_name_1a = "kre-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-nginx-1a"
-  elb_nginx_ingress_name_1b = "kre-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-nginx-1b"
+  kre_record_hosted_zone_name = var.CURRENT_ENVIRONMENT == "dev" ? "kre-${var.CURRENT_ENVIRONMENT}.mettel-automation.net." : "kre.mettel-automation.net."
 }

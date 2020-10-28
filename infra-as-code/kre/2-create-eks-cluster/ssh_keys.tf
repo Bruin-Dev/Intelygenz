@@ -6,6 +6,12 @@ resource "tls_private_key" "tls_private_key_eks" {
 resource "aws_key_pair" "aws_key_pair" {
   key_name   = local.ssh_key_name
   public_key = tls_private_key.tls_private_key_eks.public_key_openssh
+
+  tags = {
+    Environment  = terraform.workspace
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+  }
 }
 
 resource "aws_s3_bucket_object" "pem_file" {
@@ -14,9 +20,9 @@ resource "aws_s3_bucket_object" "pem_file" {
   content = tls_private_key.tls_private_key_eks.private_key_pem
 
   tags = {
-    Name    = "${local.cluster_name}.pem"
-    Environment  = terraform.workspace
-    Project      = var.common_info.project
-    Provisioning = var.common_info.provisioning
+    Name          = "${local.cluster_name}.pem"
+    Environment   = terraform.workspace
+    Project       = var.common_info.project
+    Provisioning  = var.common_info.provisioning
   }
 }

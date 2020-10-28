@@ -30,13 +30,23 @@ To improve the speed and optimization of the pipelines, **only the jobs and stag
 
 # Environments
 
-In the project there are two types of environments in the project:
+## Microservices Environments
+
+For the microservices there are the following environments
 
 * **Production**: The environment is related to everything currently running in AWS related to the latest version of the `master` branch of the repository.
 
 * **Ephemerals**: These environments are created from branches that start with name `dev/feature` or `dev/fix`.
 
 >The name of any environment, regardless of the type, will identify all the resources created in the deployment process. The names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment. These names will identify all the resources created in AWS during the [continuous delivery](#continuous-delivery-cd) process, explained in the following sections.
+
+## KRE Environments
+
+For [KRE](https://konstellation-io.github.io/website/) component there are the following environments: 
+
+- **dev**: This will be used for the various tests and calls made from the project's microservices in any **ephemeral environment**, ie from the microservices deployed in the ECS cluster with name `automation-<environment_id>`.
+
+* **production**: This will be used for the different calls made from the project's microservices in the **production environment**, that is, from the microservices deployed in the ECS cluster with the name `automation-master`.
 
 # Continuous integration (CI)
 
@@ -75,6 +85,8 @@ In cases in which a module does not reach the minimum coverage mentioned above, 
 ## Basic_infra steps
 
 This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in [ECR Docker Container Registry](https://aws.amazon.com/ecr), as well as the roles necessary in AWS to be able to display these images in [ECS Container Orchestrator](https://aws.amazon.com/ecs/).
+
+In this stage there is also a job that must be executed manually if necessary, this is responsible for checking and creating if necessary network resources for the production environment or ephemeral environments.
 
 In this stage is also checked whether there are enough free resources in ECS to carry out the deployment with success or not.
 
@@ -164,7 +176,7 @@ In this stage there are two jobs:
 
   1. The creation of [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) starts only if a Python script launched as a `null_resource` finishes with success. 
 
-    This script checks that the last ECS service created for NATS is running in `HEALTHY` state.
+     This script checks that the last ECS service created for NATS is running in `HEALTHY` state.
 
   2. If the previous step succeeded then ECS services related to capabilities microservices are created, with these being the following:
 
