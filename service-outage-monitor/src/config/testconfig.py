@@ -15,18 +15,6 @@ NATS_CONFIG = {
 
 quarantine_time = 5
 
-MONITOR_MAP_CONFIG = {
-    'timezone': 'US/Eastern',
-    'multiplier': 2,
-    'min': 2,
-    'stop_delay': 2,
-    'refresh_map_time': 60 * 1,
-    'semaphore': 1,
-    'blacklisted_edges': [],
-    'velo_filter': {},
-    'environment': os.environ.get("CURRENT_ENVIRONMENT", "dev"),
-}
-
 MONITOR_CONFIG = {
     'multiplier': 1,
     'min': 1,
