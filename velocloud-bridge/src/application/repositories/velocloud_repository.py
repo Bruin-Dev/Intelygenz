@@ -13,53 +13,6 @@ class VelocloudRepository:
         self._logger.info('Instantiating and connecting clients in velocloud bridge')
         await self._velocloud_client.instantiate_and_connect_clients()
 
-    async def get_all_enterprises_edges_with_host(self, msg):
-        self._logger.info('Getting all enterprises edges with host')
-        return await self._velocloud_client.get_all_enterprises_edges_with_host(msg["filter"])
-
-    async def get_edge_information(self, edge):
-        return await self._velocloud_client.get_edge_information(edge)
-
-    async def get_link_information(self, edge, interval):
-        self._logger.info(f'Getting link information from edge:{edge["edge_id"]} in '
-                          f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
-        link_status = []
-        response = await self._velocloud_client.get_link_information(edge, interval)
-
-        if response["status"] not in range(200, 300):
-            return response
-
-        links = response["body"]
-        response_link_service_group = await self._velocloud_client.get_link_service_groups_information(edge, interval)
-
-        if response_link_service_group["status"] not in range(200, 300):
-            self._logger.error(f"Error {response_link_service_group['status'], response_link_service_group['body']}")
-            return {"body": response_link_service_group["body"], "status": response_link_service_group["status"]}
-
-        link_service_group = response_link_service_group["body"]
-
-        if links is not None:
-            for link in links:
-                for link_service in link_service_group:
-                    if link['linkId'] == link_service['linkId']:
-                        link['serviceGroups'] = link_service['serviceGroups']
-                        break
-                if link['link']['backupState'] in ('UNCONFIGURED', 'ACTIVE'):
-                    link_status.append(link)
-
-        elif links is None:
-            return {"body": link_status, "status": response["status"]}
-
-        return {"body": link_status, "status": response["status"]}
-
-    async def get_enterprise_information(self, edge):
-        enterprise_info = await self._velocloud_client.get_enterprise_information(edge)
-        if enterprise_info["status"] not in range(200, 300):
-            return enterprise_info
-
-        enterprise_info["body"] = enterprise_info["body"]["name"]
-        return enterprise_info
-
     async def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
 

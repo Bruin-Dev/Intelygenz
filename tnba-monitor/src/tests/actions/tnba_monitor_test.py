@@ -25,12 +25,11 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         customer_cache_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         assert tnba_monitor._event_bus is event_bus
@@ -41,7 +40,6 @@ class TestTNBAMonitor:
         assert tnba_monitor._ticket_repository is ticket_repository
         assert tnba_monitor._customer_cache_repository is customer_cache_repository
         assert tnba_monitor._bruin_repository is bruin_repository
-        assert tnba_monitor._velocloud_repository is velocloud_repository
         assert tnba_monitor._prediction_repository is prediction_repository
         assert tnba_monitor._notifications_repository is notifications_repository
 
@@ -57,12 +55,11 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         customer_cache_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         next_run_time = datetime.now()
@@ -90,12 +87,11 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         customer_cache_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
@@ -122,7 +118,6 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
@@ -130,7 +125,7 @@ class TestTNBAMonitor:
         customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(return_value=get_cache_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
         tnba_monitor._process_tickets_with_tnba = CoroutineMock()
         tnba_monitor._process_tickets_without_tnba = CoroutineMock()
@@ -156,7 +151,6 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
@@ -164,7 +158,7 @@ class TestTNBAMonitor:
         customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(return_value=get_cache_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
         tnba_monitor._process_tickets_with_tnba = CoroutineMock()
         tnba_monitor._process_tickets_without_tnba = CoroutineMock()
@@ -346,7 +340,6 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
@@ -354,7 +347,7 @@ class TestTNBAMonitor:
         customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(return_value=get_cache_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
         tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(
             return_value=open_tickets_with_details)
@@ -384,12 +377,11 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         customer_cache_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
@@ -509,13 +501,12 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
         tnba_monitor._customer_cache = customer_cache
         tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
@@ -617,13 +608,12 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
         tnba_monitor._customer_cache = customer_cache
         tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
@@ -750,7 +740,6 @@ class TestTNBAMonitor:
         config = testconfig
         t7_repository = Mock()
         ticket_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -765,7 +754,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         result = []
@@ -875,7 +864,6 @@ class TestTNBAMonitor:
         config = testconfig
         t7_repository = Mock()
         ticket_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -889,7 +877,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         result = []
@@ -995,7 +983,6 @@ class TestTNBAMonitor:
         config = testconfig
         t7_repository = Mock()
         ticket_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -1009,7 +996,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         result = []
@@ -1125,7 +1112,6 @@ class TestTNBAMonitor:
         config = testconfig
         t7_repository = Mock()
         ticket_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -1140,7 +1126,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         result = []
@@ -1262,7 +1248,6 @@ class TestTNBAMonitor:
         config = testconfig
         t7_repository = Mock()
         ticket_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -1277,7 +1262,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         result = []
@@ -1475,13 +1460,12 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
         tnba_monitor._customer_cache = customer_cache
 
@@ -1599,13 +1583,12 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         bruin_repository = Mock()
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         result = tnba_monitor._filter_invalid_notes_in_tickets(tickets)
@@ -1709,7 +1692,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -1725,7 +1707,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         tickets_with_tnba, tickets_without_tnba = tnba_monitor._distinguish_tickets_with_and_without_tnba(tickets)
@@ -1741,7 +1723,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -1757,7 +1738,7 @@ class TestTNBAMonitor:
         t7_repository.get_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_without_tnba(tickets)
@@ -1835,7 +1816,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
@@ -1851,7 +1831,7 @@ class TestTNBAMonitor:
         t7_repository.get_prediction = CoroutineMock(return_value=t7_prediction_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_without_tnba(tickets)
@@ -1964,7 +1944,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -1985,7 +1964,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_without_tnba(tickets)
@@ -2102,7 +2081,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -2129,7 +2107,7 @@ class TestTNBAMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_without_tnba(tickets)
@@ -2274,7 +2252,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -2299,7 +2276,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_without_tnba(tickets)
@@ -2514,7 +2491,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         ticket_repository = Mock()
 
@@ -2544,7 +2520,7 @@ class TestTNBAMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_without_tnba(tickets)
@@ -2767,7 +2743,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         ticket_repository = Mock()
 
@@ -2806,7 +2781,7 @@ class TestTNBAMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         with patch.object(config, 'ENVIRONMENT', "dev"):
@@ -3044,7 +3019,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -3089,7 +3063,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         with patch.object(config, 'ENVIRONMENT', "production"):
@@ -3353,7 +3327,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -3398,7 +3371,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         with patch.object(config, 'ENVIRONMENT', "production"):
@@ -3455,7 +3428,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -3477,7 +3449,7 @@ class TestTNBAMonitor:
         t7_repository.get_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -3570,7 +3542,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -3592,7 +3563,7 @@ class TestTNBAMonitor:
         t7_repository.get_prediction = CoroutineMock(return_value=t7_prediction_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -3734,7 +3705,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -3763,7 +3733,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -3911,7 +3881,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -3940,7 +3909,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -4095,7 +4064,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -4130,7 +4098,7 @@ class TestTNBAMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -4304,7 +4272,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -4337,7 +4304,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -4589,7 +4556,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -4626,7 +4592,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -4896,7 +4862,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
@@ -4942,7 +4907,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         await tnba_monitor._process_tickets_with_tnba(tickets)
@@ -5216,7 +5181,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -5264,7 +5228,7 @@ class TestTNBAMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         with patch.object(config, 'ENVIRONMENT', "dev"):
@@ -5553,7 +5517,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -5605,7 +5568,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         with patch.object(config, 'ENVIRONMENT', "production"):
@@ -5920,7 +5883,6 @@ class TestTNBAMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        velocloud_repository = Mock()
         customer_cache_repository = Mock()
 
         ticket_repository = Mock()
@@ -5972,7 +5934,7 @@ class TestTNBAMonitor:
         ])
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
+                                   customer_cache_repository, bruin_repository,
                                    prediction_repository, notifications_repository)
 
         with patch.object(config, 'ENVIRONMENT', "production"):

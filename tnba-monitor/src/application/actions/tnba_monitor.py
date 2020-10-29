@@ -20,7 +20,7 @@ TNBA_NOTE_APPENDED_SUCCESS_MSG = (
 
 class TNBAMonitor:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                 customer_cache_repository, bruin_repository, velocloud_repository, prediction_repository,
+                 customer_cache_repository, bruin_repository, prediction_repository,
                  notifications_repository):
         self._event_bus = event_bus
         self._logger = logger
@@ -30,7 +30,6 @@ class TNBAMonitor:
         self._ticket_repository = ticket_repository
         self._customer_cache_repository = customer_cache_repository
         self._bruin_repository = bruin_repository
-        self._velocloud_repository = velocloud_repository
         self._prediction_repository = prediction_repository
         self._notifications_repository = notifications_repository
 
