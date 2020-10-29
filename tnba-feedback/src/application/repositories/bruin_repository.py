@@ -18,7 +18,7 @@ class BruinRepository:
     async def get_closed_tickets(self, client_id, ticket_topic):
         err_msg = None
 
-        start_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
         end_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
         self._logger.info(

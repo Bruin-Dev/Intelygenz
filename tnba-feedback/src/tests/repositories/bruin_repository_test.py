@@ -45,7 +45,7 @@ class TestBruinRepository:
                 'ticket_status': ['Closed'],
                 'category': 'SD-WAN',
                 'ticket_topic': ticket_topic,
-                "start_date": (next_run_time - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
             },
         }
@@ -90,7 +90,7 @@ class TestBruinRepository:
                 'ticket_status': ['Closed'],
                 'category': 'SD-WAN',
                 'ticket_topic': ticket_topic,
-                "start_date": (next_run_time - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
             },
         }
@@ -131,7 +131,7 @@ class TestBruinRepository:
                 'ticket_status': ['Closed'],
                 'category': 'SD-WAN',
                 'ticket_topic': ticket_topic,
-                "start_date": (next_run_time - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
             },
         }
