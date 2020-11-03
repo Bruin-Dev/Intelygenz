@@ -107,6 +107,8 @@ In this stage there are two jobs:
       * [bruin-bridge](../bruin-bridge)
     
       * [cts-bridge](../cts-bridge)
+
+      * [customer-cache](../customer-cache)
     
       * [dispatch-portal-backend](../dispatch-portal-backend)
     
@@ -150,7 +152,7 @@ In this stage there are two jobs:
 
     - `<environment>-customer-cache-redis`: used to save the mappings between Bruin clients and Velocloud edges, being able to use them between restarts if any occurs.
 
-    - `<environment>-tnba-feedback-cache-redis`: 
+    - `<environment>-tnba-feedback-cache-redis`: used to save ticket metrics sent to T7, so `tnba-feedback` can avoid sending them again afterwards.
 
   * An [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html)
 
@@ -192,6 +194,7 @@ In this stage there are two jobs:
 
   3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created, with these being the following:
     
+     - `customer-cache`
      - `dispatch-portal-backend`
      - `last-contact-report`
      - `lumin-billing-report`

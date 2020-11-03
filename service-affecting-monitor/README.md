@@ -6,44 +6,102 @@
   * [Running in docker-compose](#running-in-docker-compose)
 
 # Description
-The service affecting monitor is currently used to monitor an edge's behaviour, in order to detect if its latency,
-packet loss, jitter, utilization exceeds a given threshold. If it does then a ticket is created.
+The service affecting monitor is currently used to monitor a subset of edges (located at `config/contact_info.py`)
+in order to detect if its latency, packet loss or jitter utilization exceeds a given threshold.
+
+If it does, then a ticket is created or reopened, in case it exists and it"s resolved.
+
+> Bear in mind that the whole affecting monitoring process runs every 10 minutes.
+
 # Work Flow
-Every minute the apscheduler calls service-affecting-monitor's `_service_affecting_monitor_process` function. In this 
-function, An rpc call is made to the velocloud bridge to get the edge status, link status (within an interval of 10 minutes),
-and enterprise name. 
+This is the algorithm implemented to carry out the monitoring of edges:
 
-We then loop through all the links returned from the rpc request. Each iteration we call the function `_latency_check`,
-`_packet_loss_check`, and `_jitter_check`. 
-
-__latency_check__
-
-Here we check the type of link whether its wireless with `serviceGroups` value of `PUBLIC_WIRELESS`, or wired with
- with `serviceGroups` value of `PUBLIC_WIRED` or `PRIVATE_WIRED`. Then we check if either `bestLatencyMsRx` or 
- `bestLatencyMsTx` exceeds the threshold for wireless (120) or wired (50).
+1. Get the cache of customers for the Velocloud host(s) specified in `config/contact_info.py
+2. Run three different processes, one for each kind of trouble: latency, packet loss and jitter.
+3. Get the metrics collected during the last `10 minutes` for all links in the Velocloud host(s) specified in `config/contact_info.py
+4. Filter links metrics to get metrics of those links under edges that exist in the cache of customers and also in `config/contact_info.py`
+5. Map link metrics with contact info (extracted from `config/contact_info.py`) and Bruin customer info (extracted from customer cache).
  
-__packet_loss_check__
+   This mapping leads to a structure very similar to this (may contain more fields, but they are not used throughout the process):
+   ```json
+    [
+        {
+            "edge_status": {
+                "host": "mettel.velocloud.net",
+                "enterpriseId": 12345,
+                "edgeId": 67890,
+                "edgeName": "TEST",
+                "edgeState": "OFFLINE",
+                "edgeSerialNumber": "VC1234567",
+                "enterprise_name": "Mettel|9994|"
+            },
+            "link_status": {
+                "interface": "GE1",
+                "displayName": "Test"
+            },
+            "link_metrics": {
+                "bestLatencyMsRx": 121,
+                "bestLatencyMsTx": 119,
+                "bestLossPctRx": 9,
+                "bestLossPctTx": 7,
+                "bestJitterMsRx": 31,
+                "bestJitterMsTx": 29
+            },
+            "cached_info": {
+                "edge": {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 12345,
+                    "edge_id": 67890
+                },
+                "bruin_client_info": {
+                    "client_id": 9994,
+                    "client_name": "METTEL/NEW YORK"
+                },
+                "serial_number": "VC1234567"
+            },
+            "contact_info": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy"
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy"
+                }
+            }
+        }
+    ]
+   ```
 
-Here we check the type of link whether its wireless with `serviceGroups` value of `PUBLIC_WIRELESS`, or wired with
- with `serviceGroups` value of `PUBLIC_WIRED` or `PRIVATE_WIRED`. Then we check if either `bestLossPctRx` or 
- `bestLossPctTx` exceeds the threshold for wireless (8) or wired (5).
+6. For every link in the mapping above:
+   1. Check if any of the metrics exceeds the thresholds defined for the trouble check (latency, packet loss or jitter)
+      1. If so, and if the current environment is `PRODUCTION`:
+         1. Look for an affecting ticket associated to the serial number of the edge this link belongs to
+            1. If there is no affecting ticket, create a new one and append a note with the details of the trouble found
+            2. If there is a ticket and it's resolved, unresolve it
+            3. Otherwise, don't take any further action
+      2. Otherwise, don't take any further action
 
+## Thesholds
+### Latency
+A link can have a latency of up to `120 milliseconds` when transmiting or receiving info. If this threshold is
+exceeded, the process will report this issue.
 
-__jitter_check__
+### Packet loss
+A link can lose up to `8 packets` when transmiting or receiving info. If this threshold is
+exceeded, the process will report this issue. 
 
-Here the type of link doesn't matter as the threshold is the same for both wireless and wired. So we check if `bestJitterMsRx`
-or `bestJitterMsTx` exceeds 30.
-
-
- If any do exceed then we make a call to `_notify_trouble` which should determine whether we're in development or 
- production. Based on the environment it should either create a ticket if in production or do nothing if in
- dev. 
- 
-# Behaviour in development and in production
-Currently we only want to create tickets. So `_notify_trouble` will only send a request to the `notifier` if in production.
+### Jitter
+A link can stay in jitter state up to `30 milliseconds` when transmiting or receiving info. If this threshold is
+exceeded, the process will report this issue. 
 
 # Capabilities used
+- [Customer cache](../customer-cache/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+
 # Running in docker-compose
-`docker-compose up --build redis nats-server velocloud-bridge notifier service-affecting-monitor`
+`docker-compose up --build redis nats-server velocloud-bridge notifier customer-cache service-affecting-monitor`

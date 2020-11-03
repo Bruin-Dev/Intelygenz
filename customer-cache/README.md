@@ -5,7 +5,7 @@
       * [Request message](#request-message)
       * [Response message](#response-message)
 # Service logic
-This service will ask all velocloud-bridge for all the edges across all the velocloud instances.
+This service will ask velocloud-bridge for all the edges across all the velocloud instances.
 
 Once it has all velocloud devices it will discard any device with no serial.
 
@@ -28,42 +28,63 @@ When the customer cache receives a request from topic customer.cache.get it make
 If the request message is in the correct format then it should grab the caches from the storage_repository of the hosts in the `filter` key in the `body` key of the request message. And if there are anything in `enterprise_id` list then it will filter the cache even more to only include those enterprises. If the `filter` is an empty list (i.e. no filter), it will grab all the caches by default.
 Another filter that can be requested to be applied through the rpc_request is the `last_contact`. This filter, if the value is not `None`, essentially would check the `last_contact` value of each edge in the cache and filter out any edges with a `last_contact` time before the `last_contact` time specified in the RPC's payload.
 
-If the cache is empty then the `body` for the response message will send a message indicating that the cache is still
-being built for the requested Velocloud hosts.
+If the cache is empty then the `body` for the response message will send a message indicating that no edges were found for
+the specified filters. In case that some of the caches is still being built for the requested Velocloud hosts, a message containing the
+list of affected hosts will be sent.
 
 And with that cache, we format it into a response message and publish it to the response topic that 
 was built by NATS under the hood.
+
 ### Request message
-```
+```json
 {
-    "request_id" : uuid(), 
-    "body": {"filter": {"mettel.velocloud.com":[]} # host: [list of enterprise_ids],
-             "last_contact_filter": "2020-07-15T15:25:42.000Z"} #Only get edges that were last contacted after this time
-            }
+    "request_id" : "some-uuid", 
+    "body": {
+        "filter": {
+            "mettel.velocloud.com": [] // Format -> host: <list of enterprise_ids>
+        },
+        "last_contact_filter": "2020-07-15T15:25:42.000Z" // Only get edges that were last contacted after this time
+    }
 }
 ```
 ### Response message
-Non empty cache response
-```
+Non empty response
+```json
 {
-    "request_id" : uuid(), 
-    "body" :{
-              customer_devices:[{
-                                  'edge': edge_ids(velocloud),
-                                  'last_contact': last_contact,
-                                  'serial_number': serial_number,
-                                  'bruin_client_info': bruin_client_info
-                                 }
-                               ]
-             }, 
+    "request_id" : "some-uuid", 
+    "body": [
+        {
+            "edge": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 123,
+                "edge_id": 9999
+            },
+            "last_contact": "2020-08-27T02:23:59",
+            "serial_number": "VC1234567",
+            "bruin_client_info": {
+                "client_id": 9994,
+                "client_name": "METTEL/NEW YORK"
+            }
+        }
+    ],
     "status": 200
 }
 ```
-Empty cache response
-```
+
+Response when cache is still being built
+```json
 {
-  'request_id': msg['request_id'],
-   "body": "Cache is still being built for host(s): <insert_list_of_velos_here>",
-   "status": 202
+    "request_id": "some-uuid",
+    "body": "Cache is still being built for host(s): mettel.velocloud.net",
+    "status": 202
+}
+```
+
+Response when no edges satisfy specified filters
+```json
+{
+    "request_id": "some-uuid",
+    "body": "No edges were found for the specified filters",
+    "status": 404
 }
 ```

@@ -6,6 +6,7 @@
 |:-----------:|:--------:|
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | cts-bridge |[![cts-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=cts-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -179,6 +180,8 @@ The following example shows how to configure `<service_name>_desired_tasks` vari
 variables:
   . . .
   bruin_bridge_desired_tasks: 0
+  cts_bridge_desired_tasks: 0
+  customer_cache_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
@@ -461,11 +464,23 @@ The following steps must be followed to set up the configuration to access any o
 ## Microservices
 
 - [Base microservice](base-microservice/README.md)
-- [Sites monitor](sites-monitor/README.md)
-- [TNBA monitor](tnba-monitor/README.md)
-- [TNBA feedback](tnba-feedback/README.md)
-- [Velocloud bridge](velocloud-bridge/README.md)
+- [Bruin bridge](bruin-bridge/README.md)
+- [CTS bridge](cts-bridge/README.md)
+- [Customer cache](customer-cache/README.md)
+- [Dispatch portal frontend](dispatch-portal-frontend/README.md)
+- [Dispatch portal backend](dispatch-portal-backend/README.md)
+- [Last contact report](last-contact-report/README.md)
+- [LIT bridge](lit-bridge/README.md)
+- [Lumin billing report](lumin-billing-report/README.md)
 - [Notifier](notifier/README.md)
+- [Service affecting monitor](service-affecting-monitor/README.md)
+- [Service dispatch monitor](service-dispatch-monitor/README.md)
+- [Service outage monitor](service-outage-monitor/README.md)
+- [Sites monitor](sites-monitor/README.md)
+- [T7 bridge](t7-bridge/README.md)
+- [TNBA feedback](tnba-feedback/README.md)
+- [TNBA monitor](tnba-monitor/README.md)
+- [Velocloud bridge](velocloud-bridge/README.md)
 
 ## Acceptance Tests
 

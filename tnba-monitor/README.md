@@ -12,20 +12,10 @@ indicating what is **T**he **N**ext **B**est **A**ction a member from the suppor
 move forward on the resolution of the ticket.
 
 # Work Flow
-The algorithm consists of two steps: build a cache of relevant edges grouped by Bruin client (if needed) and
-run the monitoring process for tickets.
+First of all, the process claims the cache of customers for the Velocloud host(s) specified in the config file
+of this service.
 
-## Building the cache
-The cache is built so that it only includes edges belonging to the Velocloud hosts specified in the
-corresponding filter. Blacklisted edges, edges without a proper serial number and edges without any
-related Bruin client info, are all automatically discarded from the process.
-The result of this process is a mapping of Bruin client IDs to all the edges they own
-at that moment.
-
-This cache is refreshed every 4 hours.
-
-## Monitoring tickets
-First of all, the process claims all open tickets belonging to clients included in the cache, along with their
+After that, the process claims all open tickets belonging to clients included in the cache, along with their
 details and notes, from Bruin. Before moving on, the process discards irrelevant tickets, details and notes.
 
 After claiming the set of tickets, the process splits this set into two: tickets with one or more TNBA notes and
