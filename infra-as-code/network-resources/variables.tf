@@ -1,4 +1,5 @@
 variable "cidr_base" {
+  description = "CIDR base for the environment"
   type = "map"
   default = {
     "production"  = "10.1.0.0/16"
@@ -7,6 +8,7 @@ variable "cidr_base" {
 }
 
 variable "cdir_public_1" {
+  description = "CIDR base for public subnet 1"
   type = "map"
   default = {
     "production"  = "10.1.1.0/24"
@@ -15,6 +17,7 @@ variable "cdir_public_1" {
 }
 
 variable "cdir_public_2" {
+  description = "CIDR base for public subnet 2"
   type = "map"
   default = {
     "production"  = "10.1.2.0/24"
@@ -23,6 +26,7 @@ variable "cdir_public_2" {
 }
 
 variable "cdir_private_1" {
+  description = "CIDR base for private subnet 1"
   type = "map"
   default = {
     "production"  = "10.1.11.0/24"
@@ -31,6 +35,7 @@ variable "cdir_private_1" {
 }
 
 variable "cdir_private_2" {
+  description = "CIDR base for private subnet 2"
   type = "map"
   default = {
     "production"  = "10.1.12.0/24"
@@ -55,11 +60,11 @@ variable "EKS_CLUSTER_NAMES" {
 variable "EKS_KRE_BASE_NAME" {
   type = string
   default = "mettel-automation-kre"
-  description = "aa"
+  description = "Base name used for EKS cluster used to deploy kre component"
 }
 
 variable "EKS_PROJECT_BASE_NAME" {
   type = string
   default = "mettel-automation"
-  description = "aa"
+  description = "Base name used for EKS cluster used to deploy project components"
 }

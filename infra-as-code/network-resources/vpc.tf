@@ -20,7 +20,8 @@ resource "aws_internet_gateway" "automation-igw" {
   vpc_id = aws_vpc.automation-vpc.id
 
   tags = {
-    Name = local.automation-internet_gateway-tag-Name
+    Name        = local.automation-internet_gateway-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -30,6 +31,7 @@ resource "aws_eip" "automation-nat_eip-1a" {
   vpc = true
   tags = {
     Name = local.automation-nat_eip-1a-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -37,6 +39,7 @@ resource "aws_eip" "automation-nat_eip-1b" {
   vpc = true
   tags = {
     Name = local.automation-nat_eip-1b-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -47,6 +50,7 @@ resource "aws_nat_gateway" "automation-nat-1a" {
 
   tags = {
     Name = local.automation-nat_gateway-1a-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -56,6 +60,7 @@ resource "aws_nat_gateway" "automation-nat-1b" {
 
   tags = {
     Name = local.automation-nat_gateway-1b-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -69,6 +74,7 @@ resource "aws_subnet" "automation-public_subnet-1a" {
   tags = merge(local.eks_tags, {
     Name = local.automation-public_subnet-1a-tag-Name
     "kubernetes.io/role/elb" = ""
+    Environment = var.CURRENT_ENVIRONMENT
   })
 }
 
@@ -81,6 +87,7 @@ resource "aws_subnet" "automation-public_subnet-1b" {
   tags = merge(local.eks_tags, {
     Name = local.automation-public_subnet-1b-tag-Name
     "kubernetes.io/role/elb" = ""
+    Environment = var.CURRENT_ENVIRONMENT
   })
 }
 
@@ -93,6 +100,7 @@ resource "aws_subnet" "automation-private_subnet-1a" {
 
   tags = {
     Name = local.automation-private_subnet-1a-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -104,6 +112,7 @@ resource "aws_subnet" "automation-private_subnet-1b" {
 
   tags ={
     Name = local.automation-private_subnet-1b-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -113,6 +122,7 @@ resource "aws_route_table" "automation-private-1a" {
 
   tags = {
     Name = local.automation-private-route_table-1a-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -121,6 +131,7 @@ resource "aws_route_table" "automation-private-1b" {
 
   tags = {
     Name = local.automation-private-route_table-1b-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -130,6 +141,7 @@ resource "aws_route_table" "automation-public-1a" {
 
   tags = {
     Name = local.automation-public-route_table-1a-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 
@@ -138,6 +150,7 @@ resource "aws_route_table" "automation-public-1b" {
 
   tags = {
     Name = local.automation-public-route_table-1b-tag-Name
+    Environment = var.CURRENT_ENVIRONMENT
   }
 }
 

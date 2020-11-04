@@ -91,7 +91,7 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
         - A hosted zone on [Route53](https://aws.amazon.com/route53/faqs/?nc1=h_ls) for the corresponding kre environment
 
-        - A SSH key to connect to worker nodes of EKS
+        - A SSH key to connect to any worker node of EKS
 
     - `3-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it.
 

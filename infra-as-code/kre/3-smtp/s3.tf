@@ -30,10 +30,9 @@ resource "aws_s3_bucket" "temp_bucket" {
   force_destroy = true
   policy        = data.aws_iam_policy_document.s3_allow_ses_puts.json
 
-  logging {
-    target_bucket = module.s3_logs.aws_logs_bucket
-    target_prefix = "s3/${local.ses_bucket_name}/"
-
+  tags = {
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
   }
 }
 
@@ -51,16 +50,4 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
 
   # Retroactivley block public and cross-account access if bucket has public policies
   restrict_public_buckets = true
-}
-
-module "s3_logs" {
-  source  = "trussworks/logs/aws"
-
-  s3_bucket_name = "${local.ses_bucket_name}-logs"
-
-  default_allow = false
-
-  version = "10.0.0"
-
-  force_destroy = true
 }

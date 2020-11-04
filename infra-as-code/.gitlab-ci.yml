@@ -268,6 +268,32 @@ deploy-kre-dev:
       when: manual
       allow_failure: true
 
+deploy-kre-production:
+  stage: deploy
+  extends: .terraform_template_deploy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    KRE_RECORD_ALIAS_NAME: "*.kre.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre.mettel-automation.net."
+    NGINX_INGRESS_CHART_V: ${NGINX_INGRESS_CHART_V_PROD}
+    EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_PROD}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PROD}
+    KUBE2IAM_CHART_V: ${KUBE2IAM_CHART_V_PROD}
+    CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_PROD}
+    KRE_CHART_V: ${KRE_CHART_V_PROD}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PROD}
+    IAM_TO_EKS_ROLES: developer, developer-ops-privileged, devops
+    HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, rimusz https://charts.rimusz.net, jetstack https://charts.jetstack.io, konstellation-io https://charts.konstellation.io"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
 # ===============================================
 # Terraform destroy jobs for infra-as-code module
 # ===============================================
@@ -343,5 +369,22 @@ destroy-kre-dev:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+destroy-kre-production:
+  stage: destroy
+  extends: .terraform_template_destroy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    KRE_RECORD_ALIAS_NAME: "*.kre.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre.mettel-automation.net."
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
       when: manual
       allow_failure: true
