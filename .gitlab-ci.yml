@@ -21,6 +21,7 @@ variables:
   customer_cache_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
+  hawkeye_bridge_desired_tasks: 1
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
   lumin_billing_report_desired_tasks: 1
@@ -60,6 +61,7 @@ include:
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'
   - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
   - local: 'infra-as-code/.gitlab-ci.yml'
+  - local: 'hawkeye-bridge/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'lit-bridge/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'

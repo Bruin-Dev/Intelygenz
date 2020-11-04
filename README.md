@@ -9,6 +9,7 @@
 | customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -185,6 +186,7 @@ variables:
   dispatch_portal_backend_desired_tasks: 1
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
+  hawkeye_bridge_desired_tasks: 0
   metrics_prometheus_desired_tasks: 0
   nats_server_desired_tasks: 0
   nats_server_1_desired_tasks: 1
@@ -548,6 +550,7 @@ The following steps must be followed to set up the configuration to access any o
 - [Customer cache](customer-cache/README.md)
 - [Dispatch portal frontend](dispatch-portal-frontend/README.md)
 - [Dispatch portal backend](dispatch-portal-backend/README.md)
+- [Hawkeye bridge](hawkeye-bridge/README.md)
 - [Last contact report](last-contact-report/README.md)
 - [LIT bridge](lit-bridge/README.md)
 - [Lumin billing report](lumin-billing-report/README.md)

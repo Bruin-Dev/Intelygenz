@@ -93,3 +93,7 @@ resource "aws_ecr_repository" "automation-customer-cache" {
 resource "aws_ecr_repository" "automation-lumin-billing-report" {
   name = "automation-lumin-billing-report"
 }
+
+resource "aws_ecr_repository" "automation-hawkeye-bridge" {
+  name = "automation-hawkeye-bridge"
+}

@@ -22,6 +22,7 @@ class CheckECSResources:
                            os.environ['TF_VAR_last_contact_report_desired_tasks'],
                            os.environ['TF_VAR_lit_bridge_desired_tasks'],
                            os.environ['TF_VAR_lumin_billing_report_desired_tasks'],
+                           os.environ['TF_VAR_hawkeye_bridge_desired_tasks'],
                            os.environ['TF_VAR_metrics_prometheus_desired_tasks'],
                            os.environ['TF_VAR_nats_server_desired_tasks'],
                            os.environ['TF_VAR_nats_server_1_desired_tasks'],

@@ -1,0 +1,3 @@
+aiohttp==3.6.2
+-f https://s3pypi.mettel-automation.net/igzpackages/index.html
+igzpackages==2.0.0

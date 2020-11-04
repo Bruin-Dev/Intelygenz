@@ -93,6 +93,16 @@ locals {
   automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
   automation-dispatch-portal-frontend-nginx-run-mode = "aws"
 
+  // automation-hawkeye-brige local vars
+  automation-hawkeye-bridge-image = "${data.aws_ecr_repository.automation-hawkeye-bridge.repository_url}:${data.external.hawkeye-bridge-build_number.result["image_tag"]}"
+  automation-hawkeye-bridge-papertrail_prefix = "hawkeye-bridge-${element(split("-", data.external.hawkeye-bridge-build_number.result["image_tag"]),2)}"
+  automation-hawkeye-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge_service-security_group-name = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge-resource-name = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge-task_definition = "${aws_ecs_task_definition.automation-hawkeye-bridge.family}:${aws_ecs_task_definition.automation-hawkeye-bridge.revision}"
+  automation-hawkeye-bridge-service_discovery_service-name = "hawkeye-bridge-${var.ENVIRONMENT}"
+
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${data.external.dispatch-portal-backend-build_number.result["image_tag"]}"
@@ -376,6 +386,10 @@ locals {
   // alarm running_task_count_bruin-bridge local variables
   running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_bruin-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_bruin-bridge"
+
+  // alarm running_task_count_hawkeye-bridge local variables
+  running_task_count_hawkeye-bridge_alarm-name = "Running tasks count of hawkeye-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_hawkeye-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_hawkeye-bridge"
 
   // alarm running_task_count_service-affecting-monitor local variables
   running_task_count_service-affecting-monitor_alarm-name = "Running tasks count of service-affecting-monitor service in ECS cluster with name ${var.ENVIRONMENT}"

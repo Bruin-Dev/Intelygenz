@@ -68,6 +68,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-lumin-billing-report"
                 },
                 {
+                    "query": f"hawkeye-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[hawkeye-bridge] - logs",
+                    "repository": "automation-hawkeye-bridge"
+                },
+                {
                     "query": f"NGINX AND <BUILD_NUMBER> AND {ENVIRONMENT_ID}",
                     "search_name": f"[nginx] - logs",
                     "repository": "automation-dispatch-portal-frontend/nginx"

@@ -133,6 +133,20 @@ variable "DISPATCH_PORTAL_SERVER_PORT" {
   default = ""
 }
 
+// hawkeye-bridge environment variables
+
+variable "HAWKEYE_CLIENT_USERNAME" {
+  default = ""
+}
+
+variable "HAWKEYE_CLIENT_PASSWORD" {
+  default = ""
+}
+
+variable "HAWKEYE_BASE_URL" {
+  default = ""
+}
+
 // last-contact-report environment variables
 
 variable "LAST_CONTACT_RECIPIENT" {
@@ -389,6 +403,12 @@ variable "dispatch_portal_backend_desired_tasks" {
   description = "Number of desired tasks of microservice dispatch-portal-backend"
 }
 
+variable "hawkeye_bridge_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice hawkeye-bridge"
+}
+
 variable "last_contact_report_desired_tasks" {
   default = 1
   type = number
@@ -539,6 +559,12 @@ variable "dispatch-portal-backend-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for CTS-bridge"
   default = "/tmp/dispatch-portal-backend-task-definition.json"
+}
+
+variable "hawkeye-bridge-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for hawkeye-bridge"
+  default = "/tmp/hawkeye-bridge-task-definition.json"
 }
 
 variable "lit-bridge-task-definition-json" {
