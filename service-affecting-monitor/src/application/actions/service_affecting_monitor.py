@@ -431,7 +431,7 @@ class ServiceAffectingMonitor:
                     await self._bruin_repository.append_note_to_ticket(ticket_id, note)
 
                     slack_message = f'Posting {trouble} note to ticket id: {ticket_id}\n'\
-                                    f'https://app.bruin.com/t/{ticket_id}'\
+                                    f'https://app.bruin.com/t/{ticket_id} , in '\
                                     f'{self._config.MONITOR_CONFIG["environment"]}'
                     await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
 
