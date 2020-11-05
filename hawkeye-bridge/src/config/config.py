@@ -17,6 +17,7 @@ NATS_CONFIG = {
 }
 
 HAWKEYE_CONFIG = {
+    'retries': 5,
     'base_url': os.environ["HAWKEYE_BASE_URL"],
     'client_username': os.environ["HAWKEYE_CLIENT_USERNAME"],
     'client_password': os.environ["HAWKEYE_CLIENT_PASSWORD"],

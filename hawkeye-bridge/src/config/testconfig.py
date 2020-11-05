@@ -18,6 +18,7 @@ NATS_CONFIG = {
 }
 
 HAWKEYE_CONFIG = {
+    'retries': 5,
     'base_url': "some.hawkeye.url",
     'client_username': "client_username",
     'client_password': "client_password",
