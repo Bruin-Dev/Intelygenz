@@ -11,6 +11,7 @@
 | dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-customer-cache |[![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -187,6 +188,7 @@ variables:
   dispatch_portal_backend_desired_tasks: 1
   hawkeye_bridge_desired_tasks: 0
   hawkeye_customer_cache_desired_tasks: 0
+  hawkeye_outage_monitor_desired_tasks: 0
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
   metrics_prometheus_desired_tasks: 0
@@ -554,6 +556,7 @@ The following steps must be followed to set up the configuration to access any o
 - [Dispatch portal backend](dispatch-portal-backend/README.md)
 - [Hawkeye bridge](hawkeye-bridge/README.md)
 - [Hawkeye customer cache](hawkeye-customer-cache/README.md)
+- [Hawkeye outage monitor](hawkeye-outage-monitor/README.md)
 - [Last contact report](last-contact-report/README.md)
 - [LIT bridge](lit-bridge/README.md)
 - [Lumin billing report](lumin-billing-report/README.md)

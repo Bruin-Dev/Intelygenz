@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='service-outage-monitor',
+    name='hawkeye-outage-monitor',
     version='1.0.0',
-    description='MetTel\'s automation service outage monitor for Velocloud',
+    description='MetTel\'s automation service outage monitor for Hawkeye',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

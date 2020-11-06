@@ -353,6 +353,16 @@ locals {
   automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
 
+  // automation-hawkeye-outage-monitor local vars
+  automation-hawkeye-outage-monitor-image = "${data.aws_ecr_repository.automation-hawkeye-outage-monitor.repository_url}:${data.external.hawkeye-outage-monitor-build_number.result["image_tag"]}"
+  automation-hawkeye-outage-monitor-papertrail_prefix = "hawkeye-outage-monitor-${element(split("-", data.external.hawkeye-outage-monitor-build_number.result["image_tag"]),2)}"
+  automation-hawkeye-outage-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-hawkeye-outage-monitor"
+  automation-hawkeye-outage-monitor_service-security_group-name = "${var.ENVIRONMENT}-hawkeye-outage-monitor"
+  automation-hawkeye-outage-monitor-resource-name = "${var.ENVIRONMENT}-hawkeye-outage-monitor"
+  automation-hawkeye-outage-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-hawkeye-outage-monitor"
+  automation-hawkeye-outage-monitor-task_definition = "${aws_ecs_task_definition.automation-hawkeye-outage-monitor.family}:${aws_ecs_task_definition.automation-hawkeye-outage-monitor.revision}"
+  automation-hawkeye-outage-monitor-service_discovery_service-name = "hawkeye-outage-monitor-${var.ENVIRONMENT}"
+
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
   errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices-${var.ENVIRONMENT}"
@@ -488,6 +498,10 @@ locals {
   // alarm running_task_count_hawkeye_customer-cache local variables
   running_task_count_hawkeye-customer-cache_alarm-name = "Running tasks count of hawkeye-customer-cache service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_hawkeye-customer-cache_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_hawkeye-customer-cache"
+
+  // alarm running_task_count_hawkeye-outage-monitor local variables
+  running_task_count_hawkeye-outage-monitor_alarm-name = "Running tasks count of hawkeye-outage-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_hawkeye-outage-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_hawkeye-outage-monitor"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"

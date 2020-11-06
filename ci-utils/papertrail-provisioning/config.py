@@ -58,6 +58,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-hawkeye-customer-cache"
                 },
                 {
+                    "query": f"hawkeye-outage-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[hawkeye-outage-monitor] - logs",
+                    "repository": "automation-hawkeye-outage-monitor"
+                },
+                {
                     "query": f"last-contact-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[last-contact-report] - logs",
                     "repository": "automation-last-contact-report"

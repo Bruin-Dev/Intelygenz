@@ -415,6 +415,12 @@ variable "hawkeye_customer_cache_desired_tasks" {
   description = "Number of desired tasks of microservice hawkeye-customer-cache"
 }
 
+variable "hawkeye_outage_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice hawkeye-outage-monitor"
+}
+
 variable "last_contact_report_desired_tasks" {
   default = 1
   type = number
@@ -577,6 +583,12 @@ variable "hawkeye-customer-cache-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for hawkeye-customer-cache"
   default = "/tmp/hawkeye-customer-cache-task-definition.json"
+}
+
+variable "hawkeye-outage-monitor-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for hawkeye-outage-monitor"
+  default = "/tmp/hawkeye-outage-monitor-task-definition.json"
 }
 
 variable "lit-bridge-task-definition-json" {
