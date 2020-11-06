@@ -242,6 +242,14 @@ env_dict = {
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
+    os.path.join('hawkeye-affecting-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('hawkeye-outage-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'

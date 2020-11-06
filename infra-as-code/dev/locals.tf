@@ -363,6 +363,16 @@ locals {
   automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
 
+  // automation-hawkeye-affecting-monitor local vars
+  automation-hawkeye-affecting-monitor-image = "${data.aws_ecr_repository.automation-hawkeye-affecting-monitor.repository_url}:${data.external.hawkeye-affecting-monitor-build_number.result["image_tag"]}"
+  automation-hawkeye-affecting-monitor-papertrail_prefix = "hawkeye-affecting-monitor-${element(split("-", data.external.hawkeye-affecting-monitor-build_number.result["image_tag"]),2)}"
+  automation-hawkeye-affecting-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor_service-security_group-name = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor-resource-name = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor-task_definition = "${aws_ecs_task_definition.automation-hawkeye-affecting-monitor.family}:${aws_ecs_task_definition.automation-hawkeye-affecting-monitor.revision}"
+  automation-hawkeye-affecting-monitor-service_discovery_service-name = "hawkeye-affecting-monitor-${var.ENVIRONMENT}"
+
   // automation-hawkeye-outage-monitor local vars
   automation-hawkeye-outage-monitor-image = "${data.aws_ecr_repository.automation-hawkeye-outage-monitor.repository_url}:${data.external.hawkeye-outage-monitor-build_number.result["image_tag"]}"
   automation-hawkeye-outage-monitor-papertrail_prefix = "hawkeye-outage-monitor-${element(split("-", data.external.hawkeye-outage-monitor-build_number.result["image_tag"]),2)}"
@@ -504,6 +514,10 @@ locals {
   // alarm running_task_count_customer-cache local variables
   running_task_count_customer-cache_alarm-name = "Running tasks count of customer-cache service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_customer-cache_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_customer-cache"
+
+  // alarm running_task_count_hawkeye-affecting-monitor local variables
+  running_task_count_hawkeye-affecting-monitor_alarm-name = "Running tasks count of hawkeye-affecting-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_hawkeye-affecting-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_hawkeye-affecting-monitor"
 
   // alarm running_task_count_hawkeye_customer-cache local variables
   running_task_count_hawkeye-customer-cache_alarm-name = "Running tasks count of hawkeye-customer-cache service in ECS cluster with name ${var.ENVIRONMENT}"

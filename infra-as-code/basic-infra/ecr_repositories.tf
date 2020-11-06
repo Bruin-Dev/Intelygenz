@@ -94,6 +94,10 @@ resource "aws_ecr_repository" "automation-lumin-billing-report" {
   name = "automation-lumin-billing-report"
 }
 
+resource "aws_ecr_repository" "automation-hawkeye-affecting-monitor" {
+  name = "automation-hawkeye-affecting-monitor"
+}
+
 resource "aws_ecr_repository" "automation-hawkeye-bridge" {
   name = "automation-hawkeye-bridge"
 }

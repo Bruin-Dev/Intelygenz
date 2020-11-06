@@ -8,6 +8,7 @@ resource "null_resource" "papertrail_provisioning" {
       aws_ecs_service.automation-customer-cache[0],
       aws_ecs_service.automation-dispatch-portal-backend,
       aws_ecs_service.automation-dispatch-portal-frontend,
+      aws_ecs_service.automation-hawkeye-affecting-monitor,
       aws_ecs_service.automation-hawkeye-bridge,
       aws_ecs_service.automation-hawkeye-customer-cache,
       aws_ecs_service.automation-hawkeye-outage-monitor,

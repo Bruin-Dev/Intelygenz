@@ -20,6 +20,7 @@ class CheckECSResources:
                            os.environ['TF_VAR_digi_bridge_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_backend_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_frontend_desired_tasks'],
+                           os.environ['TF_VAR_hawkeye_affecting_monitor_desired_tasks'],
                            os.environ['TF_VAR_hawkeye_bridge_desired_tasks'],
                            os.environ['TF_VAR_hawkeye_customer_cache_desired_tasks'],
                            os.environ['TF_VAR_hawkeye_outage_monitor_desired_tasks'],

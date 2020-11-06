@@ -439,6 +439,12 @@ variable "dispatch_portal_backend_desired_tasks" {
   description = "Number of desired tasks of microservice dispatch-portal-backend"
 }
 
+variable "hawkeye_affecting_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice hawkeye-affecting-monitor"
+}
+
 variable "hawkeye_bridge_desired_tasks" {
   default = 1
   type = number
@@ -613,6 +619,12 @@ variable "dispatch-portal-backend-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for CTS-bridge"
   default = "/tmp/dispatch-portal-backend-task-definition.json"
+}
+
+variable "hawkeye-affecting-monitor-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for hawkeye-affecting-monitor"
+  default = "/tmp/hawkeye-affecting-monitor-task-definition.json"
 }
 
 variable "hawkeye-bridge-task-definition-json" {

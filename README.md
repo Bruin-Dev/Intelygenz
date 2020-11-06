@@ -9,6 +9,7 @@
 | customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| hawkeye-affecting-monitor |[![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-customer-cache |[![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -186,6 +187,7 @@ variables:
   cts_bridge_desired_tasks: 0
   customer_cache_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
+  hawkeye_affecting_monitor_desired_tasks: 0
   hawkeye_bridge_desired_tasks: 0
   hawkeye_customer_cache_desired_tasks: 0
   hawkeye_outage_monitor_desired_tasks: 0
@@ -554,6 +556,7 @@ The following steps must be followed to set up the configuration to access any o
 - [Customer cache](customer-cache/README.md)
 - [Dispatch portal frontend](dispatch-portal-frontend/README.md)
 - [Dispatch portal backend](dispatch-portal-backend/README.md)
+- [Hawkeye affecting monitor](hawkeye-affecting-monitor/README.md)
 - [Hawkeye bridge](hawkeye-bridge/README.md)
 - [Hawkeye customer cache](hawkeye-customer-cache/README.md)
 - [Hawkeye outage monitor](hawkeye-outage-monitor/README.md)

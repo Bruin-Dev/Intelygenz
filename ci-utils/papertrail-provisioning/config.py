@@ -53,6 +53,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-metrics-dashboard/grafana"
                 },
                 {
+                    "query": f"hawkeye-affecting-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[hawkeye-affecting-monitor] - logs",
+                    "repository": "automation-hawkeye-affecting-monitor"
+                },
+                {
                     "query": f"hawkeye-customer-cache AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-customer-cache] - logs",
                     "repository": "automation-hawkeye-customer-cache"
