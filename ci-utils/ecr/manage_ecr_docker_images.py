@@ -276,7 +276,7 @@ class EcrUtil:
             return images_of_environment[-1]
         else:
             logging.error(f"There is no image in production environment for the repository {ecr_repository}")
-            exit(1)
+            return None
 
     def _obtain_latest_images_of_repositories_from_environment(self, environment, ecr_repositories):
         logging.info(f'Obtaining latest docker images of repositories {", ".join(ecr_repositories)} '
@@ -323,13 +323,14 @@ class EcrUtil:
                 logging.error(f"There isn't a newer image in the repository {repository} for the environment "
                               f"{environment}. Assigning latest from master")
                 latest_image_repository = self._get_latest_images_of_repository_production(repository)
-                latest_docker_images_in_repositories.append(
-                    {
-                        'repository': repository,
-                        'image_tag': latest_image_repository['imageTag'],
-                        'imagePushedAt': latest_image_repository['imagePushedAt']
-                    }
-                )
+                if latest_image_repository:
+                    latest_docker_images_in_repositories.append(
+                        {
+                            'repository': repository,
+                            'image_tag': latest_image_repository['imageTag'],
+                            'imagePushedAt': latest_image_repository['imagePushedAt']
+                        }
+                    )
         return ecr_repositories, latest_docker_images_in_repositories, environment
 
     def _print_results(self, latest_images_for_ecr_repositories, print_results, repositories, environment):

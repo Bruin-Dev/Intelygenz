@@ -18,7 +18,7 @@ module "mettel-automation-eks-cluster" {
     }
   ]
 
-   map_users     = var.map_users
+  map_users     = var.map_users
 
   tags = {
     Environment  = terraform.workspace

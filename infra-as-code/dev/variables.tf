@@ -57,7 +57,7 @@ variable "cidr_base" {
   type = "map"
   default = {
     "production"  = "10.1.0.0/16"
-    "dev"         = "10.2.0.0/16"
+    "dev"         = "172.31.84.0/22"
   }
 }
 
@@ -328,6 +328,10 @@ variable "SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER" {
 }
 
 // t7-bridge environment variables
+
+variable "KRE_BASE_URL"{
+  default = ""
+}
 
 variable "T7_BASE_URL"{
   default = ""

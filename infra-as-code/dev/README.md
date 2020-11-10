@@ -41,6 +41,7 @@
 | EMAIL\_ACC\_PWD | n/a | `string` | `""` | no |
 | ENVIRONMENT | Name of current environment | `any` | n/a | yes |
 | ENVIRONMENT\_NAME | Name of current environment without automation prefix | `any` | n/a | yes |
+| KRE\_BASE\_URL | n/a | `string` | `""` | no |
 | LAST\_CONTACT\_RECIPIENT | n/a | `string` | `""` | no |
 | LIT\_CLIENT\_ID | n/a | `string` | `""` | no |
 | LIT\_CLIENT\_PASSWORD | n/a | `string` | `""` | no |
@@ -86,7 +87,7 @@
 | VELOCLOUD\_VERIFY\_SSL | n/a | `string` | `"yes"` | no |
 | bruin-bridge-task-definition-json | Task definition arn output in rendered json for bruin-bridge | `string` | `"/tmp/bruin-bridge-task-definition.json"` | no |
 | bruin\_bridge\_desired\_tasks | Number of desired tasks of microservice bruin-bridge | `number` | `2` | no |
-| cidr\_base | n/a | `map` | <pre>{<br>  "dev": "10.2.0.0/16",<br>  "production": "10.1.0.0/16"<br>}</pre> | no |
+| cidr\_base | n/a | `map` | <pre>{<br>  "dev": "172.31.84.0/22",<br>  "production": "10.1.0.0/16"<br>}</pre> | no |
 | cts-bridge-task-definition-json | Task definition arn output in rendered json for CTS-bridge | `string` | `"/tmp/cts-bridge-task-definition.json"` | no |
 | cts\_bridge\_desired\_tasks | Number of desired tasks of microservice cts-bridge | `number` | `1` | no |
 | customer-cache-task-definition-json | Task definition arn output in rendered json for customer-cache | `string` | `"/tmp/customer-cache-task-definition.json"` | no |

@@ -170,7 +170,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
-    interval            = 30
+    interval            = 90
     port                = 3000
     matcher             = 200
     protocol            = "HTTP"

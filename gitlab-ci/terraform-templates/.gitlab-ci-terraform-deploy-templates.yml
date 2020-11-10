@@ -97,6 +97,7 @@
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
+    - terraform plan infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
   tags:
     - kubernetes
@@ -135,6 +136,8 @@
           python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation-kre --project-role-tag ${i}
         )
       done
+    # INSTALL KUBERNETES METRICS SERVER
+    - kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v${KUBERNETES_METRICS_SERVER_V}/components.yaml
     # INSTALL EFS CONFIG
     - kubectl apply -f helm/kre/rbac-helm-tiller.yaml
     # INITIALIZE HELM

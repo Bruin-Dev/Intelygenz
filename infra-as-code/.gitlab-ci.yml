@@ -93,6 +93,7 @@ network-resources-infra-branches:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - mkdir -p output
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
@@ -167,6 +168,7 @@ deploy-branches:
     - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
     - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
     - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_DEV}
+    - export TF_VAR_KRE_BASE_URL=${KRE_BASE_URL_DEV}
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
@@ -184,6 +186,7 @@ deploy-branches:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      allow_failure: true
 
 deploy-master:
   stage: deploy
@@ -224,6 +227,7 @@ deploy-master:
     - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
     - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
     - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_PROD}
+    - export TF_VAR_KRE_BASE_URL=${KRE_BASE_URL_PRO}
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_PRO}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
@@ -257,7 +261,8 @@ deploy-kre-dev:
     CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_DEV}
     KRE_CHART_V: ${KRE_CHART_V_DEV}
     LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
-    IAM_TO_EKS_ROLES: developer, developer-ops-privileged, devops
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+    IAM_TO_EKS_ROLES: developer, devops
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, rimusz https://charts.rimusz.net, jetstack https://charts.jetstack.io, konstellation-io https://charts.konstellation.io"
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
@@ -285,7 +290,8 @@ deploy-kre-production:
     CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_PROD}
     KRE_CHART_V: ${KRE_CHART_V_PROD}
     LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PROD}
-    IAM_TO_EKS_ROLES: developer, developer-ops-privileged, devops
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PROD}
+    IAM_TO_EKS_ROLES: developer, devops
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, rimusz https://charts.rimusz.net, jetstack https://charts.jetstack.io, konstellation-io https://charts.konstellation.io"
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
