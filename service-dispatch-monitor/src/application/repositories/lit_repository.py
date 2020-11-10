@@ -1,5 +1,6 @@
 from shortuuid import uuid
 import datetime
+import pytz
 from pytz import timezone
 import re
 
@@ -10,18 +11,10 @@ from application.repositories import nats_error_response
 
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms_tech
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
-from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms_tech
-from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hours_before_sms_tech
-from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hours_before_sms
-from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
 from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_tech_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_note
-from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_12_hours_before_sms_tech_note
-from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hours_before_sms_tech_note
-from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_12_hours_before_sms_note
-from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hours_before_sms_note
 from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 
 from application.repositories.utils_repository import UtilsRepository
@@ -30,6 +23,11 @@ from application.templates.lit.lit_dispatch_cancel import lit_get_dispatch_cance
 from application.templates.lit.lit_updated_tech import lit_get_updated_tech_note
 
 from application.templates.lit.sms.updated_tech import lit_get_updated_tech_sms, lit_get_updated_tech_sms_tech
+
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_x_hours_before_sms_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_x_hours_before_sms_tech_note
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_x_hours_before_sms_tech
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_x_hours_before_sms
 
 
 class LitRepository:
@@ -47,6 +45,11 @@ class LitRepository:
         self._compiled_am_pm = re.compile(self._reg_am_pm)
         self._reg_time = r"\d(\d)?([:,]\d\d)?((am)|(AM)|(Am)|(pm)|(PM)|(Pm))?"
         self._compiled_time = re.compile(self._reg_time)
+
+        self.HOURS_12 = 12.0
+        self.HOURS_6 = 6.0
+        self.HOURS_2 = 2.0
+
         # Dispatch Statuses
         self.DISPATCH_REQUESTED = 'New Dispatch'
         self.DISPATCH_CONFIRMED = 'Request Confirmed'
@@ -59,6 +62,46 @@ class LitRepository:
             self.DISPATCH_FIELD_ENGINEER_ON_SITE,
             self.DISPATCH_REPAIR_COMPLETED,
             self.DISPATCH_CANCELLED
+        ]
+
+        # Reminders
+        self.TECH_12_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 12h prior reminder SMS'
+        self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 12h prior reminder tech SMS'
+        self.TECH_6_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 6h prior reminder SMS'
+        self.TECH_6_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 6h prior reminder tech SMS'
+        self.TECH_2_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 2h prior reminder SMS'
+        self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 2h prior reminder tech SMS'
+        self._reminders = [
+            {
+                "hour": self.HOURS_12,
+                "type": "client",
+                "watermark": self.TECH_12_HOURS_BEFORE_SMS_WATERMARK
+            },
+            {
+                "hour": self.HOURS_12,
+                "type": "tech",
+                "watermark": self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK
+            },
+            {
+                "hour": self.HOURS_6,
+                "type": "client",
+                "watermark": self.TECH_6_HOURS_BEFORE_SMS_WATERMARK
+            },
+            {
+                "hour": self.HOURS_6,
+                "type": "tech",
+                "watermark": self.TECH_6_HOURS_BEFORE_SMS_TECH_WATERMARK
+            },
+            {
+                "hour": self.HOURS_2,
+                "type": "client",
+                "watermark": self.TECH_2_HOURS_BEFORE_SMS_WATERMARK
+            },
+            {
+                "hour": self.HOURS_2,
+                "type": "tech",
+                "watermark": self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK
+            }
         ]
 
     async def get_all_dispatches(self):
@@ -308,140 +351,22 @@ class LitRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def send_tech_12_sms(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
-        if sms_to is None:
-            return False
-
-        # Get SMS data
-        sms_data_payload = {
-            'date_of_dispatch': dispatch_datetime,
-            'phone_number': sms_to
-        }
-
-        sms_data = lit_get_tech_12_hours_before_sms(sms_data_payload)
-
-        sms_payload = {
-            'sms_to': sms_to.replace('+', ''),
-            'sms_data': sms_data
-        }
-        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
+    async def send_sms(self, dispatch_number, ticket_id, sms_to, current_hour, sms_payload):
+        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_payload['sms_data']}`")
         sms_response = await self._notifications_repository.send_sms(sms_payload)
         sms_response_status = sms_response['status']
         sms_response_body = sms_response['body']
         if sms_response_status not in range(200, 300):
-            self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
+            self._logger.info(f"SMS: `{sms_payload['sms_data']}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
             err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                      f'An error occurred when sending a tech 12 hours SMS with notifier client. ' \
+                      f'An error occurred when sending a tech {current_hour} hours SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_slack_message(err_msg)
             return False
         self._logger.info(
             f"SMS sent Response {sms_response_body}")
-        return True
-
-    async def send_tech_12_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
-        if sms_to is None:
-            return False
-
-        # Get SMS data
-        sms_data_payload = {
-            'date_of_dispatch': dispatch_datetime,
-            'phone_number': sms_to,
-            'site': dispatch.get('Job_Site'),
-            'street': dispatch.get('Job_Site_Street')
-        }
-
-        sms_data = lit_get_tech_12_hours_before_sms_tech(sms_data_payload)
-
-        sms_payload = {
-            'sms_to': sms_to.replace('+', ''),
-            'sms_data': sms_data
-        }
-        self._logger.info(f"Sending SMS tech to {sms_to} with data: `{sms_data}`")
-        sms_response = await self._notifications_repository.send_sms(sms_payload)
-        sms_response_status = sms_response['status']
-        sms_response_body = sms_response['body']
-        if sms_response_status not in range(200, 300):
-            self._logger.info(f"SMS tech: `{sms_data}` TO: {sms_to} "
-                              f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                      f'An error occurred when sending a tech 12 hours SMS tech with notifier client. ' \
-                      f'payload: {sms_payload}'
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(
-            f"SMS tech sent Response {sms_response_body}")
-        return True
-
-    async def send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
-        if sms_to is None:
-            return False
-
-        # Get SMS data
-        sms_data_payload = {
-            'date_of_dispatch': dispatch_datetime,
-            'phone_number': sms_to
-        }
-
-        sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
-
-        sms_payload = {
-            'sms_to': sms_to.replace('+', ''),
-            'sms_data': sms_data
-        }
-        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
-        sms_response = await self._notifications_repository.send_sms(sms_payload)
-        sms_response_status = sms_response['status']
-        sms_response_body = sms_response['body']
-        if sms_response_status not in range(200, 300):
-            self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
-                              f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                      f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
-                      f'payload: {sms_payload}'
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(
-            f"SMS sent Response {sms_response_body}")
-        return True
-
-    async def send_tech_2_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
-        if sms_to is None:
-            return False
-
-        # Get SMS data
-        sms_data_payload = {
-            'date_of_dispatch': dispatch_datetime,
-            'phone_number': sms_to,
-            'site': dispatch.get('Job_Site'),
-            'street': dispatch.get('Job_Site_Street')
-        }
-
-        sms_data = lit_get_tech_2_hours_before_sms_tech(sms_data_payload)
-
-        sms_payload = {
-            'sms_to': sms_to.replace('+', ''),
-            'sms_data': sms_data
-        }
-        self._logger.info(f"Sending SMS tech to {sms_to} with data: `{sms_data}`")
-        sms_response = await self._notifications_repository.send_sms(sms_payload)
-        sms_response_status = sms_response['status']
-        sms_response_body = sms_response['body']
-        if sms_response_status not in range(200, 300):
-            self._logger.info(f"SMS tech: `{sms_data}` TO: {sms_to} "
-                              f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                      f'An error occurred when sending a tech 2 hours SMS tech with notifier client. ' \
-                      f'payload: {sms_payload}'
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(
-            f"SMS tech sent Response {sms_response_body}")
         return True
 
     async def send_tech_on_site_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
@@ -544,6 +469,27 @@ class LitRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
+    async def append_note(self, dispatch_number, ticket_id, current_hour, sms_note):
+        append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
+            ticket_id, sms_note)
+        append_sms_note_response_status = append_sms_note_response['status']
+        append_sms_note_response_body = append_sms_note_response['body']
+        if append_sms_note_response_status not in range(200, 300):
+            self._logger.info(f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} "
+                              f"Note: `{sms_note}` "
+                              f"- SMS {current_hour} hours note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
+                      f"- SMS {current_hour} hours note not appended"
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"Note: `{sms_note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - SMS {current_hour}h note Appended")
+        self._logger.info(
+            f"SMS {current_hour}h Note appended. Response {append_sms_note_response_body}")
+        return True
+
     async def append_confirmed_note(self, dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                           f"- Adding confirm note")
@@ -627,106 +573,6 @@ class LitRepository:
             f"SMS Tech Confirmed note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_tech_12_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
-        sms_note_data = {
-            'dispatch_number': dispatch_number,
-            'phone_number': sms_to
-        }
-        sms_note = lit_get_tech_12_hours_before_sms_note(sms_note_data)
-        append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
-            ticket_id, sms_note)
-        append_sms_note_response_status = append_sms_note_response['status']
-        append_sms_note_response_body = append_sms_note_response['body']
-        if append_sms_note_response_status not in range(200, 300):
-            self._logger.info(f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} "
-                              f"Note: `{sms_note}` "
-                              f"- SMS tech 12 hours note not appended")
-            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
-                      f"- SMS 12 hours note not appended"
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(f"Note: `{sms_note}` "
-                          f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS 12h note Appended")
-        self._logger.info(
-            f"SMS 12h Note appended. Response {append_sms_note_response_body}")
-        return True
-
-    async def append_tech_12_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
-        sms_note_data = {
-            'dispatch_number': dispatch_number,
-            'phone_number': sms_to
-        }
-        sms_note = lit_get_tech_12_hours_before_sms_tech_note(sms_note_data)
-        append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
-            ticket_id, sms_note)
-        append_sms_note_response_status = append_sms_note_response['status']
-        append_sms_note_response_body = append_sms_note_response['body']
-        if append_sms_note_response_status not in range(200, 300):
-            self._logger.info(f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} "
-                              f"Note: `{sms_note}` "
-                              f"- SMS tech 12 hours note not appended")
-            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
-                      f"- SMS tech 12 hours note not appended"
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(f"Note: `{sms_note}` "
-                          f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS 12h note Appended")
-        self._logger.info(
-            f"SMS tech 12h Note appended. Response {append_sms_note_response_body}")
-        return True
-
-    async def append_tech_2_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
-        sms_note_data = {
-            'dispatch_number': dispatch_number,
-            'phone_number': sms_to
-        }
-        sms_note = lit_get_tech_2_hours_before_sms_note(sms_note_data)
-        append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
-            ticket_id, sms_note)
-        append_sms_note_response_status = append_sms_note_response['status']
-        append_sms_note_response_body = append_sms_note_response['body']
-        if append_sms_note_response_status not in range(200, 300):
-            self._logger.info(f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` "
-                              f"- SMS 2 hours note not appended")
-            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
-                      f"- SMS 2 hours note not appended"
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(f"Note: `{sms_note}` "
-                          f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS 2h note Appended")
-        self._logger.info(
-            f"SMS 2h Note appended. Response {append_sms_note_response_body}")
-        return True
-
-    async def append_tech_2_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
-        sms_note_data = {
-            'dispatch_number': dispatch_number,
-            'phone_number': sms_to
-        }
-        sms_note = lit_get_tech_2_hours_before_sms_tech_note(sms_note_data)
-        append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
-            ticket_id, sms_note)
-        append_sms_note_response_status = append_sms_note_response['status']
-        append_sms_note_response_body = append_sms_note_response['body']
-        if append_sms_note_response_status not in range(200, 300):
-            self._logger.info(f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` "
-                              f"- SMS tech 2 hours note not appended")
-            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
-                      f"- SMS tech 2 hours note not appended"
-            await self._notifications_repository.send_slack_message(err_msg)
-            return False
-        self._logger.info(f"Note: `{sms_note}` "
-                          f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS 2h note Appended")
-        self._logger.info(
-            f"SMS tech 2h Note appended. Response {append_sms_note_response_body}")
-        return True
-
     async def append_tech_on_site_sms_note(self, dispatch_number, ticket_id, sms_to, field_engineer_name) -> bool:
         sms_note_data = {
             'dispatch_number': dispatch_number,
@@ -806,3 +652,87 @@ class LitRepository:
         self._logger.info(
             f"Updated tech Note appended. Response {append_note_response_body}")
         return True
+
+    async def check_reminders(self, dispatch, filtered_ticket_notes,
+                              date_time_of_dispatch_localized, datetime_formatted_str, sms_to, sms_to_tech):
+        dispatch_number = dispatch.get("Dispatch_Number", None)
+        ticket_id = dispatch.get("MetTel_Bruin_TicketID", None)
+        self._logger.info("[service-dispatch-monitor] [LIT] Checking reminders")
+
+        for reminder in self._reminders:
+            try:
+                current_hour = reminder['hour']
+                pre_log = f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"Reminder {int(current_hour)} hours for {reminder['type']}"
+
+                self._logger.info(pre_log)
+                just_now = datetime.datetime.now(pytz.utc)
+                date_time_of_dispatch_localized_to_utc = date_time_of_dispatch_localized.astimezone(pytz.utc)
+                hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now,
+                                                                              date_time_of_dispatch_localized_to_utc)
+
+                should_send = UtilsRepository.in_range(hours_diff, current_hour - 1, current_hour)
+                self._logger.info(f"{pre_log} - UTC - dt: {date_time_of_dispatch_localized_to_utc} - "
+                                  f"now: {just_now} - diff: {hours_diff}")
+                if not should_send:
+                    self._logger.info(f"{pre_log} - SMS note not needed to send now")
+                    continue
+
+                reminder_note_found = UtilsRepository.find_note(filtered_ticket_notes, reminder['watermark'])
+                if reminder_note_found:
+                    self._logger.info(f"{pre_log} - Has already the reminder note")
+                    continue
+                self._logger.info(f"{pre_log} - Dispatch has no notes for this reminder, "
+                                  f"checking if it is needed to send sms and note")
+
+                self._logger.info(f"{pre_log} - Sending SMS and appending note")
+
+                if reminder['type'] == 'client':
+                    current_sms_to = sms_to
+                    sms_data_payload = {
+                        'date_of_dispatch': datetime_formatted_str,
+                        'phone_number': current_sms_to,
+                        'hours': int(current_hour)
+                    }
+                    sms_data = lit_get_tech_x_hours_before_sms(sms_data_payload)
+                else:
+                    current_sms_to = sms_to_tech
+                    sms_data_payload = {
+                        'date_of_dispatch': datetime_formatted_str,
+                        'phone_number': current_sms_to,
+                        'site': dispatch.get('Job_Site'),
+                        'street': dispatch.get('Job_Site_Street'),
+                        'hours': int(current_hour)
+                    }
+                    sms_data = lit_get_tech_x_hours_before_sms_tech(sms_data_payload)
+
+                sms_payload = {
+                    'sms_to': sms_to.replace('+', ''),
+                    'sms_data': sms_data
+                }
+                result_sms_sended = await self.send_sms(
+                    dispatch_number, ticket_id, current_sms_to, current_hour, sms_payload)
+                if not result_sms_sended:
+                    msg = f"[service-dispatch-monitor] [LIT] " \
+                          f"{pre_log} - SMS {current_hour}h not sent"
+                else:
+                    sms_note_data = {
+                        'dispatch_number': dispatch_number,
+                        'phone_number': current_sms_to,
+                        'hours': int(current_hour)
+                    }
+                    if reminder['type'] == 'client':
+                        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data)
+                    else:
+                        sms_note = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data)
+
+                    result_append_sms_note = await self.append_note(
+                        dispatch_number, ticket_id, current_hour, sms_note)
+                    if not result_append_sms_note:
+                        msg = f"[service-dispatch-monitor] [LIT] {pre_log} - A sms before note not appended"
+                    else:
+                        msg = f"[service-dispatch-monitor] [LIT] {pre_log} - A sms before note appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+            except Exception as ex:
+                self._logger.error(f"ERROR: {pre_log} --> {ex}")

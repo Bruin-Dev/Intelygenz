@@ -1,7 +1,6 @@
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms, \
-    lit_get_dispatch_confirmed_sms_tech, lit_get_tech_12_hours_before_sms_tech, lit_get_tech_2_hours_before_sms_tech
-from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hours_before_sms
-from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
+    lit_get_dispatch_confirmed_sms_tech, lit_get_tech_x_hours_before_sms_tech
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_x_hours_before_sms
 
 
 expected_dispatch_confirmed_sms = """This is an automated message from MetTel.
@@ -49,9 +48,10 @@ You will receive a text message at this number when they have arrived.
 
 def lit_get_tech_12_hours_before_sms_test():
     body = {
-        'date_of_dispatch': '2019-11-14 @ 6PM-8PM Pacific Time'
+        'date_of_dispatch': '2019-11-14 @ 6PM-8PM Pacific Time',
+        'hours': '12',
     }
-    tech_12_hours_before_sms = lit_get_tech_12_hours_before_sms(body)
+    tech_12_hours_before_sms = lit_get_tech_x_hours_before_sms(body)
 
     assert tech_12_hours_before_sms == expected_tech_12_hours_before_sms
 
@@ -75,9 +75,11 @@ def lit_get_tech_12_hours_before_sms_tech_test():
     body = {
         'date_of_dispatch': '2019-11-14 @ 6PM-8PM Pacific Time',
         'site': 'me test',
-        'street': '160 Broadway'
+        'street': '160 Broadway',
+        'hours': '12',
+
     }
-    tech_12_hours_before_sms_tech = lit_get_tech_12_hours_before_sms_tech(body)
+    tech_12_hours_before_sms_tech = lit_get_tech_x_hours_before_sms_tech(body)
 
     assert tech_12_hours_before_sms_tech == expected_tech_12_hours_before_sms_tech
 
@@ -92,9 +94,11 @@ You will receive a text message at this number when they have arrived.
 
 def lit_get_tech_2_hours_before_sms_test():
     body = {
-        'date_of_dispatch': '2019-11-14 @ 6PM-8PM Pacific Time'
+        'date_of_dispatch': '2019-11-14 @ 6PM-8PM Pacific Time',
+        'hours': '2',
+
     }
-    tech_2_hours_before_sms = lit_get_tech_2_hours_before_sms(body)
+    tech_2_hours_before_sms = lit_get_tech_x_hours_before_sms(body)
 
     assert tech_2_hours_before_sms == expected_tech_2_hours_before_sms
 
@@ -110,8 +114,9 @@ def lit_get_tech_2_hours_before_sms_tech_test():
     body = {
         'date_of_dispatch': '2019-11-14 @ 6PM-8PM Pacific Time',
         'site': 'me test',
-        'street': '160 Broadway'
+        'street': '160 Broadway',
+        'hours': '2',
     }
-    tech_2_hours_before_sms_tech = lit_get_tech_2_hours_before_sms_tech(body)
+    tech_2_hours_before_sms_tech = lit_get_tech_x_hours_before_sms_tech(body)
 
     assert tech_2_hours_before_sms_tech == expected_tech_2_hours_before_sms_tech

@@ -12,6 +12,11 @@ from asynctest import CoroutineMock
 from pytz import timezone
 from shortuuid import uuid
 
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_x_hours_before_sms_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_x_hours_before_sms_tech_note
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_x_hours_before_sms_tech
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_x_hours_before_sms
+
 from application.actions import lit_dispatch_monitor as lit_dispatch_monitor_module
 from config import testconfig
 
@@ -1504,10 +1509,10 @@ class TestLitDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 + 1
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 + 1
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1671,10 +1676,10 @@ class TestLitDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 + 1
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 + 1
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1698,16 +1703,19 @@ class TestLitDispatchMonitor:
             False
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
             True,
-            True
+            True,
+            True,
+            True,
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_append_note_mock = [
             True,
-            True
+            True,
+            True,
+            True,
         ]
-
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
         sms_to_2 = '+12123595126'
@@ -1751,14 +1759,10 @@ class TestLitDispatchMonitor:
             side_effect=response_send_updated_sms_mock)
         lit_dispatch_monitor._lit_repository.send_updated_tech_sms_tech = CoroutineMock(
             side_effect=response_send_tech_updated_sms_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_append_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -1812,10 +1816,12 @@ class TestLitDispatchMonitor:
                                   f"- A updated tech sms tech sent"
         sms_tech_12_note_1 = f"[service-dispatch-monitor] [LIT] " \
                              f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                             f"- A sms tech 12 hours before note appended"
+                             f"Reminder 12 hours for client " \
+                             f"- A sms before note appended"
         sms_tech_12_tech_note_1 = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                                  f"- A sms tech 12 hours before note tech appended"
+                                  f"Reminder 12 hours for tech " \
+                                  f"- A sms before note appended"
         updated_tech_note_2 = f"[service-dispatch-monitor] [LIT] " \
                               f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
                               f"- An updated tech note not appended"
@@ -1886,23 +1892,60 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 + 1
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 + 1
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
+            True,
             True
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_append_note_mock = [
+            True,
             True
         ]
 
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
 
+        current_hour = 12.0
+        sms_data = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload = {
+                            'sms_to': sms_to.replace('+', ''),
+                            'sms_data': lit_get_tech_x_hours_before_sms(sms_data)
+
+        }
+        sms_tech_data = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload = {
+                            'sms_to': sms_to_tech.replace('+', ''),
+                            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data)
+
+        }
+        sms_note_data = {
+                        'dispatch_number': dispatch_number_1,
+                        'phone_number': sms_to,
+                        'hours': int(current_hour)
+                    }
+        sms_note_data_tech = {
+                        'dispatch_number': dispatch_number_1,
+                        'phone_number': sms_to_tech,
+                        'hours': int(current_hour)
+                    }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech)
         responses_send_slack_message_mock = [
             {'status': 200},
             {'status': 200},
@@ -1913,10 +1956,12 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 12 hours before note appended"
+                      f"Reminder 12 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 12 hours before note tech appended"
+                           f"Reminder 12 hours for tech " \
+                           f"- A sms before note appended"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
@@ -1929,14 +1974,10 @@ class TestLitDispatchMonitor:
             side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_append_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -1955,16 +1996,17 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-            sms_to)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-            sms_to_tech)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to_tech)
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits(
+            [
+                call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload),
+                call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload)
+            ]
+        )
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
+        ])
+
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -2018,18 +2060,29 @@ class TestLitDispatchMonitor:
         ]
 
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
             True,
+            True,
+            False,
             False
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_append_sms_note_mock = [
+            False,
             False
         ]
 
@@ -2046,21 +2099,98 @@ class TestLitDispatchMonitor:
             {'status': 200},
             {'status': 200},
         ]
+
+        current_hour = 12.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
+
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 12 hours before note not appended"
+                      f"Reminder 12 hours for client " \
+                      f"- A sms before note not appended"
         slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- SMS 12h not sended"
+                      f"Reminder 12 hours for client " \
+                      f"- SMS 12.0h not sent"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 12 hours before note tech not appended"
+                           f"Reminder 12 hours for tech " \
+                           f"- A sms before note not appended"
         slack_msg_tech_note_1 = f"[service-dispatch-monitor] [LIT] " \
                                 f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                                f"- SMS 12h not sended"
+                                f"Reminder 12 hours for tech " \
+                                f"- SMS not sent"
         slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- SMS tech 12h not sended"
+                           f"Reminder 12 hours for tech " \
+                           f"- SMS 12.0h not sent"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
 
@@ -2073,14 +2203,10 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_append_sms_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -2099,22 +2225,17 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2)
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
+            call(dispatch_number_2, ticket_id_2, sms_to_2, current_hour, sms_data_payload_2),
+            call(dispatch_number_2, ticket_id_2, sms_to_2_tech, current_hour, sms_tech_data_payload_2),
         ])
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2_tech)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
         ])
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to_tech)
+
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -2170,25 +2291,108 @@ class TestLitDispatchMonitor:
         ]
 
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 2,
-            lit_dispatch_monitor.HOURS_12 * 1.0 - 2
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 2,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 2,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 2,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 2,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 2,
+            lit_dispatch_monitor._lit_repository.HOURS_12 * 1.0 - 2
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
             True,
+            True,
+            False,
             False
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_send_note_mock = [
+            False,
             False
+
         ]
 
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
         sms_to_2 = '+12123595126'
         sms_to_2_tech = '+12123595126'
+
+        current_hour = 12.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
 
         responses_send_slack_message_mock = [
             {'status': 200},
@@ -2200,19 +2404,14 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 12 hours before note not appended"
-        slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
-                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- SMS 12h not sended"
+                      f"Reminder 12 hours for client " \
+                      f"- A sms before note not appended"
+
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 12 hours before note tech not appended"
-        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [LIT] " \
-                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                                f"- SMS 12h not sended"
-        slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
-                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- SMS tech 12h not sended"
+                           f"Reminder 12 hours for tech " \
+                           f"- A sms before note not appended"
+
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
 
@@ -2225,14 +2424,10 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_send_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -2251,18 +2446,16 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to)
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
+
         ])
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+                call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+                call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
         ])
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to_tech)
+
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -2316,28 +2509,30 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 + 1
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
+            True,
+            True,
             True,
             True
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_send_note_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
             True,
             True
         ]
@@ -2346,6 +2541,77 @@ class TestLitDispatchMonitor:
         sms_to_2 = '+12123595126'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595126'
+
+        current_hour = 2.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
 
         responses_send_slack_message_mock = [
             {'status': 200},
@@ -2357,16 +2623,12 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 2 hours before note appended"
-        slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
-                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- A sms tech 2 hours before note not appended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 2 hours before note tech appended"
-        slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
-                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- A sms tech 2 hours before note tech not appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note appended"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
@@ -2379,22 +2641,10 @@ class TestLitDispatchMonitor:
             side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_send_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -2413,27 +2663,16 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
-
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to)
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
-        ])
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech)
-        ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -2487,36 +2726,109 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 + 2,
-            lit_dispatch_monitor.HOURS_2 * 1.0 + 2
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 2,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 2,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 2,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 2,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 2,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 2,
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
             True,
-            True
+            True,
+            True,
+            True,
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_send_note_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
             True,
-            True
+            True,
         ]
 
         sms_to = '+12123595129'
         sms_to_2 = '+12123595126'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595126'
+
+        current_hour = 2.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
 
         responses_send_slack_message_mock = [
             {'status': 200},
@@ -2528,16 +2840,12 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 2 hours before note appended"
-        slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
-                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- A sms tech 2 hours before note not appended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 2 hours before note tech appended"
-        slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
-                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- A sms tech 2 hours before note tech not appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note appended"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
@@ -2550,22 +2858,10 @@ class TestLitDispatchMonitor:
             side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_send_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -2584,27 +2880,17 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
-
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to)
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
-        ])
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
+
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech)
-        ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -2659,28 +2945,30 @@ class TestLitDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
+            True,
+            True,
             True,
             True
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_send_note_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
             True,
             False
         ]
@@ -2688,6 +2976,78 @@ class TestLitDispatchMonitor:
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
         sms_to_2 = '+12123595126'
+        sms_to_2_tech = '+12123595126'
+
+        current_hour = 2.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
 
         responses_send_slack_message_mock = [
             {'status': 200},
@@ -2699,16 +3059,20 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 2 hours before note appended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- A sms tech 2 hours before note not appended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 2 hours before note tech appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note appended"
         slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- A sms tech 2 hours before note tech not appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note not appended"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
@@ -2721,22 +3085,10 @@ class TestLitDispatchMonitor:
             side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_send_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -2755,30 +3107,19 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
+            call(dispatch_number_2, ticket_id_2, sms_to_2, current_hour, sms_data_payload_2),
+            call(dispatch_number_2, ticket_id_2, sms_to_2_tech, current_hour, sms_tech_data_payload_2),
 
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2)
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
         ])
 
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech)
-        ])
-
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech)
-        ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -2834,35 +3175,109 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_12_sms_note_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
             True,
             False
+
         ]
 
-        responses_send_tech_2_sms_note_mock = [
-            False
+        responses_send_note_mock = [
+            True,
+            False,
+            True
         ]
 
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
         sms_to_2 = '+12123595126'
         sms_to_2_tech = '+12123595126'
+
+        current_hour = 2.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
 
         responses_send_slack_message_mock = [
             {'status': 200},
@@ -2874,16 +3289,20 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 2 hours before note not appended"
-        slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
-                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- SMS 2h not sended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 2 hours before note tech not appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note not appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- SMS tech 2h not sended"
+                           f"Reminder 2 hours for tech " \
+                           f"- SMS 2.0h not sent"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
@@ -2896,21 +3315,10 @@ class TestLitDispatchMonitor:
             side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms = CoroutineMock(side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_send_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -2929,31 +3337,19 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
+            call(dispatch_number_2, ticket_id_2, sms_to_2, current_hour, sms_data_payload_2),
+            call(dispatch_number_2, ticket_id_2, sms_to_2_tech, current_hour, sms_tech_data_payload_2),
 
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2)
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
-        ])
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2_tech)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech)
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech)
-        ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -3010,36 +3406,110 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
         ]
 
-        responses_send_tech_12_sms_mock = [
+        responses_send_sms_mock = [
             True,
-            True
+            True,
+            True,
+            True,
         ]
 
-        responses_send_tech_12_sms_note_mock = [
+        responses_send_note_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
             True,
-            True
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
             True,
-            True
+            True,
         ]
 
         sms_to = '+12123595129'
         sms_to_2 = '+12123595126'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595126'
+
+        current_hour = 2.0
+        sms_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_1 = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_1)
+
+        }
+        sms_tech_data_1 = {
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
+            'phone_number': sms_to_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_1 = {
+            'sms_to': sms_to_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_1)
+
+        }
+        sms_note_data_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_1 = {
+            'dispatch_number': dispatch_number_1,
+            'phone_number': sms_to_tech,
+            'hours': int(current_hour)
+        }
+        sms_note = lit_get_tech_x_hours_before_sms_note(sms_note_data_1)
+        sms_note_tech = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_1)
+
+        sms_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_data_payload_2 = {
+            'sms_to': sms_to_2.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms(sms_data_2)
+
+        }
+        sms_tech_data_2 = {
+            'date_of_dispatch': datetime_return_2['datetime_formatted_str'],
+            'phone_number': sms_to_2_tech,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street'),
+            'hours': int(current_hour)
+        }
+        sms_tech_data_payload_2 = {
+            'sms_to': sms_to_2_tech.replace('+', ''),
+            'sms_data': lit_get_tech_x_hours_before_sms_tech(sms_tech_data_2)
+
+        }
+        sms_note_data_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2,
+            'hours': int(current_hour)
+        }
+        sms_note_data_tech_2 = {
+            'dispatch_number': dispatch_number_2,
+            'phone_number': sms_to_2_tech,
+            'hours': int(current_hour)
+        }
+        sms_note_2 = lit_get_tech_x_hours_before_sms_note(sms_note_data_2)
+        sms_note_tech_2 = lit_get_tech_x_hours_before_sms_tech_note(sms_note_data_tech_2)
+
         responses_send_slack_message_mock = [
             {'status': 200},
             {'status': 200},
@@ -3050,16 +3520,20 @@ class TestLitDispatchMonitor:
         ]
         slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                      f"- A sms tech 2 hours before note appended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_2 = f"[service-dispatch-monitor] [LIT] " \
                       f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                      f"- A sms tech 2 hours before note appended"
+                      f"Reminder 2 hours for client " \
+                      f"- A sms before note appended"
         slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                           f"- A sms tech 2 hours before note tech appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note appended"
         slack_msg_note_2 = f"[service-dispatch-monitor] [LIT] " \
                            f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
-                           f"- A sms tech 2 hours before note tech appended"
+                           f"Reminder 2 hours for tech " \
+                           f"- A sms before note appended"
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
 
@@ -3071,21 +3545,10 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_12_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms = CoroutineMock(side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_mock)
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note = CoroutineMock(
-            side_effect=responses_send_tech_2_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.send_sms = CoroutineMock(
+            side_effect=responses_send_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_note = CoroutineMock(
+            side_effect=responses_send_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
             await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
@@ -3104,33 +3567,21 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_not_awaited()
-        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
-
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2)
+        lit_dispatch_monitor._lit_repository.send_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, sms_to, current_hour, sms_data_payload_1),
+            call(dispatch_number_1, ticket_id_1, sms_to_tech, current_hour, sms_tech_data_payload_1),
+            call(dispatch_number_2, ticket_id_2, sms_to_2, current_hour, sms_data_payload_2),
+            call(dispatch_number_2, ticket_id_2, sms_to_2_tech, current_hour, sms_tech_data_payload_2),
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to),
-            call(dispatch_number_2, ticket_id_2, sms_to_2)
-        ])
-        lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
-                 sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
-                 sms_to_2_tech)
+        lit_dispatch_monitor._lit_repository.append_note.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note),
+            call(dispatch_number_1, ticket_id_1, current_hour, sms_note_tech),
+            call(dispatch_number_2, ticket_id_2, current_hour, sms_note_2),
+            call(dispatch_number_2, ticket_id_2, current_hour, sms_note_tech_2)
+
         ])
 
-        lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, sms_to_2_tech)
-        ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -3186,8 +3637,8 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 + 1
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -3329,8 +3780,8 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            lit_dispatch_monitor.HOURS_2 * 1.0 + 1
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor._lit_repository.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
