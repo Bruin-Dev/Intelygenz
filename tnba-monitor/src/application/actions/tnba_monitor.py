@@ -252,98 +252,24 @@ class TNBAMonitor:
 
             tnba_notes: List[dict] = []
             slack_messages: List[str] = []
+            available_options: List[dict] = []
+            suggested_notes: List[dict] = []
 
             for ticket_detail in ticket['ticket_details']:
-                ticket_detail_id = ticket_detail['detailID']
-                self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
-
-                serial_number = ticket_detail['detailValue']
-
-                self._logger.info(
-                    f'Seeking predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} '
-                    f'in the response received from T7 API...'
-                )
-                prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
-                    t7_prediction_response_body, serial_number
-                )
-                if not prediction_object_for_serial:
-                    self._logger.info(
-                        f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
-                        f"{serial_number}!"
-                    )
-                    continue
-                elif 'error' in prediction_object_for_serial.keys():
-                    msg = (
-                        f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
-                        f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
-                    )
-                    self._logger.info(msg)
-                    await self._notifications_repository.send_slack_message(msg)
-                    continue
-
-                self._logger.info(
-                    f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
-                    f'{prediction_object_for_serial}'
+                ticket_detail_response = await self._process_ticket_detail_without_tnba(
+                    ticket_id,
+                    ticket_detail,
+                    t7_prediction_response_body
                 )
 
-                next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
-                    ticket_id, ticket_detail_id, serial_number
-                )
-                next_results_response_body = next_results_response['body']
-                next_results_response_status = next_results_response['status']
-                if next_results_response_status not in range(200, 300):
-                    continue
+                if ticket_detail_response['tnba_note']:
+                    tnba_notes.append(ticket_detail_response['tnba_note'])
 
-                self._logger.info(
-                    f'Filtering predictions available in next results for ticket {ticket_id}, '
-                    f'detail {ticket_detail_id} and serial {serial_number}...'
-                )
-                predictions: list = prediction_object_for_serial['predictions']
-                next_results: list = next_results_response_body['nextResults']
-                relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
-                    predictions, next_results
-                )
+                if ticket_detail_response['slack_message']:
+                    slack_messages.append(ticket_detail_response['slack_message'])
 
-                if not relevant_predictions:
-                    self._logger.info(
-                        f"No predictions with name appearing in the next results were found for ticket {ticket_id}, "
-                        f"detail {ticket_detail_id} and serial {serial_number}!"
-                    )
-                    continue
-
-                self._logger.info(
-                    f'Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} '
-                    f'and serial {serial_number}: {relevant_predictions}'
-                )
-
-                self._logger.info(
-                    f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
-                    f"and serial {serial_number}..."
-                )
-                best_prediction: dict = self._prediction_repository.get_best_prediction(relevant_predictions)
-                tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
-
-                if self._config.ENVIRONMENT == 'production':
-                    tnba_notes.append({
-                        'text': tnba_note,
-                        'detail_id': ticket_detail_id,
-                        'service_number': serial_number,
-                    })
-                    slack_messages.append(
-                        TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
-                            ticket_id=ticket_id, detail_id=ticket_detail_id,
-                            serial_number=serial_number, prediction=best_prediction['name'],
-                        )
-                    )
-                elif self._config.ENVIRONMENT == 'dev':
-                    tnba_message = (
-                        f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
-                        f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
-                    )
-                    self._logger.info(tnba_message)
-                    await self._notifications_repository.send_slack_message(tnba_message)
-
-                self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
+                available_options.append(ticket_detail_response['available_options'])
+                suggested_notes.append(ticket_detail_response['suggested_notes'])
 
             if not tnba_notes:
                 self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
@@ -359,9 +285,143 @@ class TNBAMonitor:
                 slack_message = os.linesep.join(slack_messages)
                 await self._notifications_repository.send_slack_message(slack_message)
 
+            await self._t7_repository.save_prediction(
+                ticket_id,
+                task_history_response_body,
+                t7_prediction_response_body,
+                available_options,
+                suggested_notes
+            )
             self._logger.info(f'Finished processing ticket without TNBA notes. ID: {ticket_id}')
 
         self._logger.info('Finished processing tickets without TNBA notes!')
+
+    async def _process_ticket_detail_without_tnba(
+            self,
+            ticket_id,
+            ticket_detail,
+            t7_prediction_response_body
+    ):
+
+        ticket_detail_id = ticket_detail['detailID']
+        self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
+
+        serial_number = ticket_detail['detailValue']
+
+        response = {
+            'tnba_note': None,
+            'slack_message': None,
+            'available_options': {
+                'asset': serial_number,
+                'available_options': None,
+            },
+            'suggested_notes': {
+                'asset': serial_number,
+                'suggested_note': None,
+                'details': None,
+            }
+        }
+
+        self._logger.info(
+            f'Seeking predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} '
+            f'in the response received from T7 API...'
+        )
+
+        prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
+            t7_prediction_response_body, serial_number
+        )
+
+        if not prediction_object_for_serial:
+            msg = (
+                f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
+                f"{serial_number}!"
+            )
+            self._logger.info(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        elif 'error' in prediction_object_for_serial.keys():
+            msg = (
+                f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
+                f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
+            )
+            self._logger.info(msg)
+            await self._notifications_repository.send_slack_message(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
+            f'{prediction_object_for_serial}'
+        )
+
+        next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
+            ticket_id, ticket_detail_id, serial_number
+        )
+        next_results_response_body = next_results_response['body']
+        next_results_response_status = next_results_response['status']
+        if next_results_response_status not in range(200, 300):
+            msg = f'Error getting next results ticket[{ticket_id}] detail[{ticket_detail_id}] serial [{serial_number}]'
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Filtering predictions available in next results for ticket {ticket_id}, '
+            f'detail {ticket_detail_id} and serial {serial_number}...'
+        )
+        predictions: list = prediction_object_for_serial['predictions']
+        next_results: list = next_results_response_body['nextResults']
+        response['available_options']['available_options'] = [result['resultName'].strip() for result in next_results]
+
+        relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
+            predictions, next_results
+        )
+
+        if not relevant_predictions:
+            msg = (
+                f"No predictions with name appearing in the next results were found for ticket {ticket_id}, "
+                f"detail {ticket_detail_id} and serial {serial_number}!"
+            )
+            self._logger.info(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} '
+            f'and serial {serial_number}: {relevant_predictions}'
+        )
+
+        best_prediction: dict = self._prediction_repository.get_best_prediction(relevant_predictions)
+
+        self._logger.info(
+            f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
+            f"and serial {serial_number}..."
+        )
+        tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
+
+        if self._config.ENVIRONMENT == 'production':
+            response['tnba_note'] = {
+                'text': tnba_note,
+                'detail_id': ticket_detail_id,
+                'service_number': serial_number,
+            }
+            response['slack_message'] = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
+                ticket_id=ticket_id, detail_id=ticket_detail_id,
+                serial_number=serial_number, prediction=best_prediction['name'],
+            )
+            response['suggested_notes']['suggested_note'] = tnba_note
+            return response
+        elif self._config.ENVIRONMENT == 'dev':
+            tnba_message = (
+                f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
+                f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
+            )
+            response['suggested_notes']['suggested_note'] = tnba_note
+            self._logger.info(tnba_message)
+            await self._notifications_repository.send_slack_message(tnba_message)
+
+        self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
+        return response
 
     async def _process_tickets_with_tnba(self, tickets: List[dict]):
         self._logger.info('Processing tickets with TNBA notes...')
@@ -394,126 +454,25 @@ class TNBAMonitor:
 
             tnba_notes: List[dict] = []
             slack_messages: List[str] = []
+            available_options: List[dict] = []
+            suggested_notes: List[dict] = []
             ticket_notes = ticket['ticket_notes']
 
             for ticket_detail in ticket['ticket_details']:
-                ticket_detail_id = ticket_detail['detailID']
-                self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
-
-                serial_number = ticket_detail['detailValue']
-
-                self._logger.info(
-                    f'Looking for the last TNBA note appended to ticket {ticket_id} and detail {ticket_detail_id}...'
+                ticket_detail_response = await self._process_ticket_detail_with_tnba(
+                    ticket_id,
+                    ticket_detail,
+                    t7_prediction_response_body,
+                    ticket_notes
                 )
-                newest_tnba_note = self._ticket_repository.find_newest_tnba_note_by_service_number(
-                    ticket_notes, serial_number
-                )
+                if ticket_detail_response['tnba_note']:
+                    tnba_notes.append(ticket_detail_response['tnba_note'])
 
-                if not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
-                    self._logger.info(
-                        f'TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. '
-                        f'Skipping detail...'
-                    )
-                    continue
+                if ticket_detail_response['slack_message']:
+                    slack_messages.append(ticket_detail_response['slack_message'])
 
-                self._logger.info(
-                    f'Seeking predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} '
-                    f'in the response received from T7 API...'
-                )
-                prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
-                    t7_prediction_response_body, serial_number
-                )
-                if not prediction_object_for_serial:
-                    self._logger.info(
-                        f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
-                        f"{serial_number}!"
-                    )
-                    continue
-                elif 'error' in prediction_object_for_serial.keys():
-                    msg = (
-                        f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
-                        f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
-                    )
-                    self._logger.info(msg)
-                    await self._notifications_repository.send_slack_message(msg)
-                    continue
-
-                self._logger.info(
-                    f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
-                    f'{prediction_object_for_serial}'
-                )
-
-                next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
-                    ticket_id, ticket_detail_id, serial_number
-                )
-                next_results_response_body = next_results_response['body']
-                next_results_response_status = next_results_response['status']
-                if next_results_response_status not in range(200, 300):
-                    continue
-
-                self._logger.info(
-                    f'Filtering predictions available in next results for ticket {ticket_id}, '
-                    f'detail {ticket_detail_id} and serial {serial_number}...'
-                )
-                predictions: list = prediction_object_for_serial['predictions']
-                next_results: list = next_results_response_body['nextResults']
-                relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
-                    predictions, next_results
-                )
-
-                if not relevant_predictions:
-                    self._logger.info(
-                        f"No predictions with name appearing in the next results were found for ticket {ticket_id}, "
-                        f"detail {ticket_detail_id} and serial {serial_number}!"
-                    )
-                    continue
-
-                self._logger.info(
-                    f'Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} '
-                    f'and serial {serial_number}: {relevant_predictions}'
-                )
-
-                best_prediction: dict = self._prediction_repository.get_best_prediction(relevant_predictions)
-                if not self._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-                        newest_tnba_note, best_prediction):
-                    self._logger.info(
-                        f"Best prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} "
-                        f"didn't change since the last TNBA note was appended. Skipping detail..."
-                    )
-                    continue
-
-                self._logger.info(
-                    f"Best prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} "
-                    f"changed since the last TNBA note was appended. New best prediction: {best_prediction}"
-                )
-
-                self._logger.info(
-                    f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
-                    f"and serial {serial_number}..."
-                )
-                tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
-
-                if self._config.ENVIRONMENT == 'production':
-                    tnba_notes.append({
-                        'text': tnba_note,
-                        'detail_id': ticket_detail_id,
-                        'service_number': serial_number,
-                    })
-                    slack_messages.append(
-                        TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
-                            ticket_id=ticket_id, detail_id=ticket_detail_id,
-                            serial_number=serial_number, prediction=best_prediction['name'],
-                        )
-                    )
-                elif self._config.ENVIRONMENT == 'dev':
-                    tnba_message = (
-                        f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
-                        f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
-                    )
-                    self._logger.info(tnba_message)
-                    await self._notifications_repository.send_slack_message(tnba_message)
-
-                self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
+                available_options.append(ticket_detail_response['available_options'])
+                suggested_notes.append(ticket_detail_response['suggested_notes'])
 
             if not tnba_notes:
                 self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
@@ -529,6 +488,171 @@ class TNBAMonitor:
                 slack_message = os.linesep.join(slack_messages)
                 await self._notifications_repository.send_slack_message(slack_message)
 
+            await self._t7_repository.save_prediction(
+                ticket_id,
+                task_history_response_body,
+                t7_prediction_response_body,
+                available_options,
+                suggested_notes
+            )
             self._logger.info(f'Finished processing ticket with TNBA notes. ID: {ticket_id}')
 
         self._logger.info('Finished processing tickets with TNBA notes!')
+
+    async def _process_ticket_detail_with_tnba(
+            self,
+            ticket_id,
+            ticket_detail,
+            t7_prediction_response_body,
+            ticket_notes,
+    ):
+        ticket_detail_id = ticket_detail['detailID']
+        self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
+
+        serial_number = ticket_detail['detailValue']
+
+        response = {
+            'tnba_note': None,
+            'slack_message': None,
+            'available_options': {
+                'asset': serial_number,
+                'available_options': None,
+            },
+            'suggested_notes': {
+                'asset': serial_number,
+                'suggested_note': None,
+                'details': None,
+            }
+        }
+
+        self._logger.info(
+            f'Looking for the last TNBA note appended to ticket {ticket_id} and detail {ticket_detail_id}...'
+        )
+        newest_tnba_note = self._ticket_repository.find_newest_tnba_note_by_service_number(
+            ticket_notes, serial_number
+        )
+
+        if not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
+            msg = (
+                f'TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. '
+                f'Skipping detail...'
+            )
+            self._logger.info(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Seeking predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} '
+            f'in the response received from T7 API...'
+        )
+
+        prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
+            t7_prediction_response_body, serial_number
+        )
+
+        if not prediction_object_for_serial:
+            msg = (
+                f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
+                f"{serial_number}!"
+            )
+            self._logger.info(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        elif 'error' in prediction_object_for_serial.keys():
+            msg = (
+                f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
+                f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
+            )
+            self._logger.info(msg)
+            await self._notifications_repository.send_slack_message(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
+            f'{prediction_object_for_serial}'
+        )
+
+        next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
+            ticket_id, ticket_detail_id, serial_number
+        )
+        next_results_response_body = next_results_response['body']
+        next_results_response_status = next_results_response['status']
+        if next_results_response_status not in range(200, 300):
+            msg = f'Error getting next results ticket[{ticket_id}] detail[{ticket_detail_id}] serial [{serial_number}]'
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Filtering predictions available in next results for ticket {ticket_id}, '
+            f'detail {ticket_detail_id} and serial {serial_number}...'
+        )
+        predictions: list = prediction_object_for_serial['predictions']
+        next_results: list = next_results_response_body['nextResults']
+        response['available_options']['available_options'] = [result['resultName'].strip() for result in next_results]
+
+        relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
+            predictions, next_results
+        )
+
+        if not relevant_predictions:
+            msg = (
+                f"No predictions with name appearing in the next results were found for ticket {ticket_id}, "
+                f"detail {ticket_detail_id} and serial {serial_number}!"
+            )
+            self._logger.info(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f'Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} '
+            f'and serial {serial_number}: {relevant_predictions}'
+        )
+
+        best_prediction: dict = self._prediction_repository.get_best_prediction(relevant_predictions)
+
+        if not self._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
+                newest_tnba_note, best_prediction):
+            msg = (
+                f"Best prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} "
+                f"didn't change since the last TNBA note was appended. Skipping detail..."
+            )
+            self._logger.info(msg)
+            response['suggested_notes']['details'] = msg
+            return response
+
+        self._logger.info(
+            f"Best prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} "
+            f"changed since the last TNBA note was appended. New best prediction: {best_prediction}"
+        )
+
+        self._logger.info(
+            f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
+            f"and serial {serial_number}..."
+        )
+        tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
+
+        if self._config.ENVIRONMENT == 'production':
+            response['tnba_note'] = {
+                'text': tnba_note,
+                'detail_id': ticket_detail_id,
+                'service_number': serial_number,
+            }
+            response['slack_message'] = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
+                ticket_id=ticket_id, detail_id=ticket_detail_id,
+                serial_number=serial_number, prediction=best_prediction['name'],
+            )
+            response['suggested_notes']['suggested_note'] = tnba_note
+            return response
+        elif self._config.ENVIRONMENT == 'dev':
+            tnba_message = (
+                f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
+                f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
+            )
+            response['suggested_notes']['suggested_note'] = tnba_note
+            self._logger.info(tnba_message)
+            await self._notifications_repository.send_slack_message(tnba_message)
+
+        self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
+        return response

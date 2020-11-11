@@ -155,3 +155,71 @@ class TestT7Repository:
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == response
+
+    @pytest.mark.asyncio
+    async def save_prediction_test(self):
+        ticket_id = 12345
+        ticket_rows = [
+            {
+                "Asset": None,
+                "Ticket Status": "To do"
+            },
+            {
+                "Asset": "asset4",
+                "Ticket Status": "In Progress"
+            },
+            {
+                "Asset": "asset7",
+                "Ticket Status": "Done"
+            }
+        ]
+        predictions = [
+            {
+                'assetId': 'VC8888888',
+                'predictions': [
+                    {
+                        'name': 'Repair Completed',
+                        'probability': 0.9484384655952454
+                    },
+                    {
+                        'name': 'Holmdel NOC Investigate',
+                        'probability': 0.1234567890123456
+                    },
+                ]
+            },
+        ]
+
+        available_options = [
+            {'asset': 'VC1234567', 'available_options': ['Request Completed']},
+            {'asset': 'VC9999999', 'available_options': ['Request Completed']}
+        ]
+
+        suggested_notes = [
+            {'asset': 'VC1234567', 'suggested_note': 'This is TNBA note 1', 'details': None},
+            {'asset': 'VC9999999', 'suggested_note': 'This is TNBA note 2', 'details': None}
+        ]
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'ticket_rows': ticket_rows,
+                'predictions': predictions,
+                'available_options': available_options,
+                'suggested_notes': suggested_notes,
+            },
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            await t7_repository.save_prediction(ticket_id, ticket_rows, predictions, available_options, suggested_notes)
+
+        event_bus.rpc_request.assert_awaited_once_with("t7.save.prediction.request", request, timeout=60)
