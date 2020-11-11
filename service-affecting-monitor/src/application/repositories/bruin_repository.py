@@ -1,6 +1,7 @@
 import math
 import os
 from datetime import datetime
+from dateutil.parser import parse
 
 from pytz import timezone
 from shortuuid import uuid
@@ -120,7 +121,8 @@ class BruinRepository:
             return None
 
         if len(all_tickets['body']) > 0:
-            ticket_id = all_tickets['body'][0]['ticketID']
+            all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]), reverse=True)
+            ticket_id = all_tickets_sorted[0]['ticketID']
             ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
                                                                ticket_details_request,
@@ -137,7 +139,7 @@ class BruinRepository:
                     **ticket_details_body,
                   }
         self._logger.info(f'No service affecting tickets found for serial: {serial}')
-        return None
+        return {}
 
     @staticmethod
     def find_detail_by_serial(ticket, edge_serial_number):

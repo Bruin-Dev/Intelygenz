@@ -1798,7 +1798,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string.assert_not_called()
 
     @pytest.mark.asyncio
-    async def notify_trouble_with_no_existing_ticket_and_production_environment_failed_rpc_test(self):
+    async def notify_trouble_with_none_affecting_ticket_and_production_environment_test(self):
         logger = Mock()
         scheduler = Mock()
         template_renderer = Mock()
@@ -1879,6 +1879,92 @@ class TestServiceAffectingMonitor:
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(
             client_id, "VC05200028729")
 
+        service_affecting_monitor._ticket_object_to_string.assert_not_called()
+        event_bus.rpc_request.assert_not_awaited()
+        metrics_repository.increment_tickets_created.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def notify_trouble_with_no_existing_ticket_and_production_environment_failed_rpc_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        metrics_repository.increment_tickets_created = Mock()
+        bruin_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': 'Failed', 'status': 400},
+                                                           'Note Posted',
+                                                           'Slack Sent'])
+
+        link_info = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bestLatencyMsRx': 14,
+                'bestLatencyMsTx': 20,
+            },
+            'cached_info': {'edge': {"host": "mettel.velocloud.net",
+                                     "enterprise_id": 137,
+                                     "edge_id": 1651},
+                            'bruin_client_info': {'client_id': 85940},
+                            'serial_number': 'VC05200028729'
+                            },
+            'contact_info': {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
+        }
+
+        ticket_dict = {'ticket': 'some ticket details'}
+        config = testconfig
+        config.MONITOR_CONFIG["environment"] = 'production'
+
+        client_id = 85940
+        trouble = 'LATENCY'
+
+        err_msg = ("Outage ticket creation failed for edge host = mettel.velocloud.net, enterprise_id = 137, "
+                   "edge_id = 1651. Reason: "
+                   "Error 400 - Failed")
+        uuid_ = uuid()
+
+        slack_message = {
+            'request_id': uuid_,
+            'message': err_msg
+        }
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        ticket_mock = {}
+        bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
+        service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
+        service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
+
+        with patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_):
+            await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
+
+        bruin_repository.get_affecting_ticket.assert_awaited_once_with(
+            client_id, "VC05200028729")
+
         service_affecting_monitor._ticket_object_to_string.assert_called_once()
         event_bus.rpc_request.assert_awaited_with(
                                                    "notification.slack.request",
@@ -1948,7 +2034,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
-        ticket_mock = None
+        ticket_mock = {}
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')

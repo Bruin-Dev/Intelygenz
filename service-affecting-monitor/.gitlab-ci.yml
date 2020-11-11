@@ -22,7 +22,7 @@ service-affecting-monitor-test:
       changes:
         - service-affecting-monitor/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_alpine
+  extends: .unittest_module_python
 
 # =======================================================
 # Images builds jobs for service-affecting-monitor module

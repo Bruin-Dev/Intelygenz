@@ -331,8 +331,9 @@ class ServiceAffectingMonitor:
 
             edge_serial_number = cached_info['serial_number']
             ticket = await self._bruin_repository.get_affecting_ticket(client_id, edge_serial_number)
-
-            if not ticket:
+            if ticket is None:
+                return
+            if len(ticket) == 0:
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {

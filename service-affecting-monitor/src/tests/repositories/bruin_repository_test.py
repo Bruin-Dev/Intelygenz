@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import patch, call
+from dateutil.parser import parse
 
 import pytest
 
@@ -315,6 +316,21 @@ class TestBruinRepository:
         notifications_repository = Mock()
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved']
+        client_id = 85940
+        serial = 'VC05200026138'
+        ticket_request_msg = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': client_id,
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'service_number': serial,
+                'ticket_status': ticket_statuses
+            }
+        }
+        ticket_details_request = {'request_id': uuid_, 'body': {'ticket_id': 3521039}}
+
         affecting_ticket_mock = {
             "ticketID": 3521039,
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026138'}],
@@ -328,7 +344,8 @@ class TestBruinRepository:
             ]
         }
         ticket_list = {
-                        'body': [{'ticketID': 3521039}],
+                        'body': [{'ticketID': 3521038, "createDate": "11/9/2020 2:15:36 AM"},
+                                 {'ticketID': 3521039, "createDate": "11/9/2020 3:15:36 AM"}],
                         'status': 200
         }
         ticket_details = {
@@ -337,7 +354,13 @@ class TestBruinRepository:
         }
         event_bus.rpc_request = CoroutineMock(side_effect=[ticket_list, ticket_details])
 
-        affecting_ticket = await bruin_repository.get_affecting_ticket(85940, 'VC05200026138')
+        with uuid_mock:
+            affecting_ticket = await bruin_repository.get_affecting_ticket(client_id, serial)
+
+        event_bus.rpc_request.assert_has_awaits([
+            call("bruin.ticket.request", ticket_request_msg, timeout=90),
+            call("bruin.ticket.details.request", ticket_details_request, timeout=15)
+        ])
         assert affecting_ticket == ticket_details['body']
         assert event_bus.rpc_request.called
 
@@ -351,8 +374,9 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         ticket_list = {
-                        'body': [{'ticketID': 3521039}],
-                        'status': 200
+            'body': [{'ticketID': 3521038, "createDate": "11/9/2020 2:15:36 AM"},
+                     {'ticketID': 3521039, "createDate": "11/9/2020 3:15:36 AM"}],
+            'status': 200
         }
         ticket_details = {
             'body': 'ERROR',
@@ -399,5 +423,5 @@ class TestBruinRepository:
 
         affecting_ticket = await bruin_repository.get_affecting_ticket(85940, 'VC05200026138')
 
-        assert affecting_ticket is None
+        assert affecting_ticket == {}
         assert event_bus.rpc_request.called
