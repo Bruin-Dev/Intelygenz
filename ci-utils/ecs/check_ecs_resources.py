@@ -19,6 +19,7 @@ class CheckECSResources:
                            os.environ['TF_VAR_customer_cache_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_backend_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_frontend_desired_tasks'],
+                           os.environ['TF_VAR_hawkeye_customer_cache_desired_tasks'],
                            os.environ['TF_VAR_last_contact_report_desired_tasks'],
                            os.environ['TF_VAR_lit_bridge_desired_tasks'],
                            os.environ['TF_VAR_lumin_billing_report_desired_tasks'],

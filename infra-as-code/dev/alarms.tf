@@ -568,6 +568,30 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_customer-cache_alarm"
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "running_task_count_hawkeye-customer-cache_alarm" {
+  count = var.hawkeye_customer_cache_desired_tasks > 0 ? 1 : 0
+  alarm_name = local.running_task_count_hawkeye-customer-cache_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.hawkeye_customer_cache_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of hawkeye-customer-cache service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-hawkeye-customer-cache"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_hawkeye-customer-cache_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
 resource "aws_cloudwatch_metric_alarm" "running_task_count_tnba-feedback_alarm" {
   count = var.tnba_feedback_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_tnba-feedback_alarm-name

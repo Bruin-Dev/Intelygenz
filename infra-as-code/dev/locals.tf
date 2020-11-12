@@ -103,6 +103,16 @@ locals {
   automation-hawkeye-bridge-task_definition = "${aws_ecs_task_definition.automation-hawkeye-bridge.family}:${aws_ecs_task_definition.automation-hawkeye-bridge.revision}"
   automation-hawkeye-bridge-service_discovery_service-name = "hawkeye-bridge-${var.ENVIRONMENT}"
 
+  // hawkeye-customer-cache local vars
+  automation-hawkeye-customer-cache-image = "${data.aws_ecr_repository.automation-hawkeye-customer-cache.repository_url}:${data.external.hawkeye-customer-cache-build_number.result["image_tag"]}"
+  automation-hawkeye-customer-cache-papertrail_prefix = "hawkeye-customer-cache-${element(split("-", data.external.hawkeye-customer-cache-build_number.result["image_tag"]),2)}"
+  automation-hawkeye-customer-cache-ecs_task_definition-family = "${var.ENVIRONMENT}-hawkeye-customer-cache"
+  automation-hawkeye-customer-cache_service-security_group-name = "${var.ENVIRONMENT}-hawkeye-customer-cache"
+  automation-hawkeye-customer-cache-resource-name = "${var.ENVIRONMENT}-hawkeye-customer-cache"
+  automation-hawkeye-customer-cache-service-security_group-tag-Name = "${var.ENVIRONMENT}-hawkeye-customer-cache"
+  automation-hawkeye-customer-cache-task_definition = "${aws_ecs_task_definition.automation-hawkeye-customer-cache[0].family}:${aws_ecs_task_definition.automation-hawkeye-customer-cache[0].revision}"
+  automation-hawkeye-customer-cache-service_discovery_service-name = "hawkeye-customer-cache-${var.ENVIRONMENT}"
+
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${data.external.dispatch-portal-backend-build_number.result["image_tag"]}"
@@ -474,6 +484,10 @@ locals {
   // alarm running_task_count_customer-cache local variables
   running_task_count_customer-cache_alarm-name = "Running tasks count of customer-cache service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_customer-cache_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_customer-cache"
+
+  // alarm running_task_count_hawkeye_customer-cache local variables
+  running_task_count_hawkeye-customer-cache_alarm-name = "Running tasks count of hawkeye-customer-cache service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_hawkeye-customer-cache_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_hawkeye-customer-cache"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"

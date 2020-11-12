@@ -409,6 +409,12 @@ variable "hawkeye_bridge_desired_tasks" {
   description = "Number of desired tasks of microservice hawkeye-bridge"
 }
 
+variable "hawkeye_customer_cache_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice hawkeye-customer-cache"
+}
+
 variable "last_contact_report_desired_tasks" {
   default = 1
   type = number
@@ -565,6 +571,12 @@ variable "hawkeye-bridge-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for hawkeye-bridge"
   default = "/tmp/hawkeye-bridge-task-definition.json"
+}
+
+variable "hawkeye-customer-cache-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for hawkeye-customer-cache"
+  default = "/tmp/hawkeye-customer-cache-task-definition.json"
 }
 
 variable "lit-bridge-task-definition-json" {

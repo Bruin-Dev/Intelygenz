@@ -55,6 +55,10 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
                     "search_name": f"[dispatch-portal-backend] - logs"
                 },
                 {
+                    "query": f"hawkeye-customer-cache AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "search_name": f"[hawkeye-customer-cache] - logs"
+                },
+                {
                     "query": f"last-contact-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[last-contact-report] - logs",
                     "repository": "automation-last-contact-report"
