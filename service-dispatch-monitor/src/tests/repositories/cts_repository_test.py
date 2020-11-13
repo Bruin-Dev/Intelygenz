@@ -1305,7 +1305,7 @@ class TestCtsRepository:
         assert len(result) == 2
 
     def get_igz_dispatch_number_ok_test(self, cts_dispatch_monitor, cts_dispatch):
-        dispatch_number = 'IGZ 1234'
+        dispatch_number = 'IGZ1234'
         cts_dispatch['Description__c'] = (f"IGZ Dispatch Number: {dispatch_number}\n{cts_dispatch['Description__c']}")
 
         result = cts_dispatch_monitor._cts_repository.get_igz_dispatch_number(cts_dispatch)
@@ -1335,7 +1335,8 @@ class TestCtsRepository:
         date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             return_value=response_append_note_to_ticket_mock)
-        result = await cts_dispatch_monitor._cts_repository.append_note(dispatch_number, ticket_id, date_of_dispatch,
+        result = await cts_dispatch_monitor._cts_repository.append_note(dispatch_number, igz_dispatch_number,
+                                                                        ticket_id, date_of_dispatch,
                                                                         sms_note)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note
@@ -1358,13 +1359,19 @@ class TestCtsRepository:
         }
         sms_note = cts_get_dispatch_confirmed_sms_note(sms_note_data)
         date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
-        err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
+        err_msg = f"Dispatch: {dispatch_number} IGZ Dispatch Number: {igz_dispatch_number} " \
+                  f"Ticket_id: {ticket_id} Note: `{sms_note}` " \
                   f"- SMS {date_of_dispatch} hours note not appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             return_value=response_append_note_to_ticket_mock)
-        result = await cts_dispatch_monitor._cts_repository.append_note(dispatch_number, ticket_id, date_of_dispatch,
+        result = await cts_dispatch_monitor._cts_repository.append_note(dispatch_number,
+                                                                        igz_dispatch_number,
+                                                                        ticket_id, date_of_dispatch,
                                                                         sms_note)
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, sms_note
+        )
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         assert result is False
 
@@ -1431,5 +1438,6 @@ class TestCtsRepository:
         result = await cts_dispatch_monitor._cts_repository.send_sms(dispatch_number, ticket_id, sms_to,
                                                                      dispatch_datetime,
                                                                      '', sms_payload)
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         assert result is False

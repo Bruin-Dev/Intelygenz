@@ -2379,8 +2379,8 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, sms_to_tech, 12.0, sms_payload_tech, sms_data_payload_tech),
         ])
         cts_dispatch_monitor._cts_repository.append_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, 12.0, sms_note),
-            call(dispatch_number_1, ticket_id_1, 12.0, sms_note_tech),
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, 12.0, sms_note),
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, 12.0, sms_note_tech),
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([

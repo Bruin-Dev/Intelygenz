@@ -460,22 +460,25 @@ class CtsRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def append_note(self, dispatch_number, ticket_id, current_hour, sms_note):
+    async def append_note(self, dispatch_number, igz_dispatch_number, ticket_id, current_hour, sms_note):
         append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
             ticket_id, sms_note)
         append_sms_note_response_status = append_sms_note_response['status']
         append_sms_note_response_body = append_sms_note_response['body']
         if append_sms_note_response_status not in range(200, 300):
             self._logger.info(f"Dispatch: {dispatch_number} "
+                              f"IGZ Dispatch Number: {igz_dispatch_number}"
                               f"Ticket_id: {ticket_id} "
                               f"Note: `{sms_note}` "
                               f"- SMS {current_hour} hours note not appended")
-            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
+            err_msg = f"Dispatch: {dispatch_number} IGZ Dispatch Number: {igz_dispatch_number}" \
+                      f" Ticket_id: {ticket_id} Note: `{sms_note}` " \
                       f"- SMS {current_hour} hours note not appended"
             await self._notifications_repository.send_slack_message(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
+                          f"IGZ Dispatch Number: {igz_dispatch_number}"
                           f"Ticket_id: {ticket_id} - SMS {current_hour}h note Appended")
         self._logger.info(
             f"SMS {current_hour}h Note appended. Response {append_sms_note_response_body}")
@@ -840,7 +843,7 @@ class CtsRepository:
                         sms_note = cts_get_tech_x_hours_before_sms_tech_note(sms_note_data)
 
                     result_append_sms_note = await self.append_note(
-                        dispatch_number, ticket_id, current_hour, sms_note)
+                        dispatch_number, igz_dispatch_number, ticket_id, current_hour, sms_note)
                     if not result_append_sms_note:
                         msg = f"[service-dispatch-monitor] [CTS] {pre_log} - A sms before note not appended"
                     else:
