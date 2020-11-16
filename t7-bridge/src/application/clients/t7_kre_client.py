@@ -93,3 +93,35 @@ class T7KREClient:
             self._logger.error(f'Got error saving metrics from KRE: {response["body"]}')
 
         return response
+
+    def save_prediction(self, prediction_feedback):
+        try:
+            stub = self._create_stub()
+
+            save_predictions_response = stub.SavePrediction(Parse(
+                json.dumps(prediction_feedback).encode('utf8'),
+                pb2.SavePredictionRequest()
+            ), timeout=120)
+
+            response = {
+                "body": save_predictions_response.message,
+                "status": 200
+            }
+
+            self._logger.info(f'Got response saving predictions from KRE: {response["body"]}')
+
+        except grpc.RpcError as kre_e:
+            response = {
+                "body": f"Error details for {kre_e.code()}: {kre_e.details}",
+                "status": 500
+            }
+            self._logger.error(f'Got error saving predictions from KRE: {response["body"]}')
+
+        except Exception as kre_e:
+            response = {
+                "body": f"Error: {kre_e.args[0]}",
+                "status": 500
+            }
+            self._logger.error(f'Got error saving predictions from KRE: {response["body"]}')
+
+        return response

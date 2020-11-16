@@ -19,6 +19,11 @@ class EntrypointStub(object):
             request_serializer=public__input__pb2.PredictionRequest.SerializeToString,
             response_deserializer=public__input__pb2.PredictionResponse.FromString,
         )
+        self.SavePrediction = channel.unary_unary(
+            '/entrypoint.Entrypoint/SavePrediction',
+            request_serializer=public__input__pb2.SavePredictionRequest.SerializeToString,
+            response_deserializer=public__input__pb2.SavePredictionResponse.FromString,
+        )
         self.SaveMetrics = channel.unary_unary(
             '/entrypoint.Entrypoint/SaveMetrics',
             request_serializer=public__input__pb2.SaveMetricsRequest.SerializeToString,
@@ -30,6 +35,12 @@ class EntrypointServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Prediction(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SavePrediction(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -48,6 +59,11 @@ def add_EntrypointServicer_to_server(servicer, server):
             servicer.Prediction,
             request_deserializer=public__input__pb2.PredictionRequest.FromString,
             response_serializer=public__input__pb2.PredictionResponse.SerializeToString,
+        ),
+        'SavePrediction': grpc.unary_unary_rpc_method_handler(
+            servicer.SavePrediction,
+            request_deserializer=public__input__pb2.SavePredictionRequest.FromString,
+            response_serializer=public__input__pb2.SavePredictionResponse.SerializeToString,
         ),
         'SaveMetrics': grpc.unary_unary_rpc_method_handler(
             servicer.SaveMetrics,
@@ -78,6 +94,23 @@ class Entrypoint(object):
         return grpc.experimental.unary_unary(request, target, '/entrypoint.Entrypoint/Prediction',
                                              public__input__pb2.PredictionRequest.SerializeToString,
                                              public__input__pb2.PredictionResponse.FromString,
+                                             options, channel_credentials,
+                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SavePrediction(request,
+                       target,
+                       options=(),
+                       channel_credentials=None,
+                       call_credentials=None,
+                       insecure=False,
+                       compression=None,
+                       wait_for_ready=None,
+                       timeout=None,
+                       metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/entrypoint.Entrypoint/SavePrediction',
+                                             public__input__pb2.SavePredictionRequest.SerializeToString,
+                                             public__input__pb2.SavePredictionResponse.FromString,
                                              options, channel_credentials,
                                              insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

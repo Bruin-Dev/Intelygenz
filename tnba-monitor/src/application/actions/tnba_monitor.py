@@ -298,9 +298,9 @@ class TNBAMonitor:
 
     async def _process_ticket_detail_without_tnba(
             self,
-            ticket_id,
-            ticket_detail,
-            t7_prediction_response_body
+            ticket_id: int,
+            ticket_detail: dict,
+            ticket_predictions: list
     ):
 
         ticket_detail_id = ticket_detail['detailID']
@@ -328,7 +328,7 @@ class TNBAMonitor:
         )
 
         prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
-            t7_prediction_response_body, serial_number
+            ticket_predictions, serial_number
         )
 
         if not prediction_object_for_serial:
@@ -501,10 +501,10 @@ class TNBAMonitor:
 
     async def _process_ticket_detail_with_tnba(
             self,
-            ticket_id,
-            ticket_detail,
-            t7_prediction_response_body,
-            ticket_notes,
+            ticket_id: int,
+            ticket_detail: dict,
+            ticket_predictions: list,
+            ticket_notes: list,
     ):
         ticket_detail_id = ticket_detail['detailID']
         self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
@@ -547,7 +547,7 @@ class TNBAMonitor:
         )
 
         prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
-            t7_prediction_response_body, serial_number
+            ticket_predictions, serial_number
         )
 
         if not prediction_object_for_serial:
