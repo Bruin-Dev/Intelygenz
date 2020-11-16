@@ -143,7 +143,7 @@ class TestTriageRepository:
 
         assert triage_note == os.linesep.join([
             '#*Automation Engine*#',
-            'Triage',
+            'Triage (VeloCloud)',
             'Orchestrator Instance: some-host',
             'Edge Name: Travis Touchdown',
             'Links: [Edge|https://some-host/#!/operator/customer/100/monitor/edge/200/] - '
@@ -229,7 +229,7 @@ class TestTriageRepository:
 
         assert events_note == os.linesep.join([
             '#*Automation Engine*#',
-            'Triage',
+            'Triage (VeloCloud)',
             '',
             'New event: EDGE_NEW_DEVICE',
             'Device: Edge',

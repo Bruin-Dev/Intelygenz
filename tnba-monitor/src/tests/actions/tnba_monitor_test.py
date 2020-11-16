@@ -407,7 +407,7 @@ class TestTNBAMonitor:
             'ticket_notes': [
                 {
                     "noteId": 41894041,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 }
             ],
@@ -439,7 +439,7 @@ class TestTNBAMonitor:
             'ticket_notes': [
                 {
                     "noteId": 41894042,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 }
             ],
@@ -534,7 +534,7 @@ class TestTNBAMonitor:
                 'ticket_notes': [
                     {
                         "noteId": 41894041,
-                        "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
                     }
                 ],
@@ -552,7 +552,7 @@ class TestTNBAMonitor:
                 'ticket_notes': [
                     {
                         "noteId": 41894042,
-                        "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
                     }
                 ],
@@ -647,12 +647,12 @@ class TestTNBAMonitor:
         outage_ticket_1_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             }
         ]
@@ -669,12 +669,12 @@ class TestTNBAMonitor:
         outage_ticket_2_notes = [
             {
                 "noteId": 41894043,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894044,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             }
         ]
@@ -930,12 +930,12 @@ class TestTNBAMonitor:
         outage_ticket_1_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             }
         ]
@@ -952,12 +952,12 @@ class TestTNBAMonitor:
         outage_ticket_2_notes = [
             {
                 "noteId": 41894043,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894044,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             }
         ]
@@ -1041,12 +1041,12 @@ class TestTNBAMonitor:
         outage_ticket_1_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             }
         ]
@@ -1170,12 +1170,12 @@ class TestTNBAMonitor:
         outage_ticket_1_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             }
         ]
@@ -1363,7 +1363,7 @@ class TestTNBAMonitor:
         ticket_1_notes = [
             {
                 "noteId": 41894040,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
         ]
@@ -1392,7 +1392,7 @@ class TestTNBAMonitor:
         ticket_2_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
         ]
@@ -1434,7 +1434,7 @@ class TestTNBAMonitor:
         ticket_4_notes = [
             {
                 "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
         ]
@@ -1512,7 +1512,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894041,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
         }
         ticket_1_note_3 = {
@@ -1775,7 +1775,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -1889,7 +1889,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -2056,7 +2056,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -2238,7 +2238,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -2444,7 +2444,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -2610,7 +2610,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -2737,7 +2737,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -3042,7 +3042,7 @@ class TestTNBAMonitor:
                 },
                 {
                     "noteId": 41894040,
-                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
                 {
@@ -4214,7 +4214,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
         }
         ticket_1_note_3 = {
@@ -4642,7 +4642,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -4879,7 +4879,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -5112,7 +5112,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -5368,7 +5368,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -5629,7 +5629,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -5982,7 +5982,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -6363,7 +6363,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -6734,7 +6734,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',
@@ -7118,7 +7118,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
             "serviceNumber": [
                 'VC0000000',

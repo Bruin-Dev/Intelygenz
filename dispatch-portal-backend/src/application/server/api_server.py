@@ -787,7 +787,7 @@ class DispatchServer:
 
                     counter = counter + 1
                     accumulator = "#*Automation Engine*#\n" \
-                                  "Triage\n"
+                                  "Triage (VeloCloud)\n"
 
     async def _process_note(self, dispatch_number, body):
         try:

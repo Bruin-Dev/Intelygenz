@@ -210,12 +210,12 @@ class TestBruinRepository:
                 'ticketNotes': [
                     {
                         "noteId": 41894043,
-                        "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
                     },
                     {
                         "noteId": 41894044,
-                        "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
                     }
                 ]
@@ -1377,7 +1377,7 @@ class TestBruinRepository:
         }
 
         ticket_note = "#Automation Engine#\n" \
-                      "Triage\n" \
+                      "Triage (VeloCloud)\n" \
                       "Orchestrator Instance: mettel.velocloud.net\n" \
                       "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
                       "Links: Edge - QoE - Transport - Events\n" \
@@ -1529,7 +1529,7 @@ class TestBruinRepository:
         }
 
         ticket_note = "#Automation Engine#\n" \
-                      "Triage\n" \
+                      "Triage (VeloCloud)\n" \
                       "Orchestrator Instance: mettel.velocloud.net\n" \
                       "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
                       "Links: Edge - QoE - Transport - Events\n" \
@@ -1601,7 +1601,7 @@ class TestBruinRepository:
         }
 
         ticket_note = "#Automation Engine#\n" \
-                      "Triage\n" \
+                      "Triage (VeloCloud)\n" \
                       "Orchestrator Instance: mettel.velocloud.net\n" \
                       "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
                       "Links: Edge - QoE - Transport - Events\n" \

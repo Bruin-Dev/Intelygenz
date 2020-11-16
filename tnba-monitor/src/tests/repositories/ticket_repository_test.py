@@ -41,7 +41,7 @@ class TestTicketRepository:
 
         ticket_note = {
             "noteId": 41894043,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-12-30T06:38:13.503-05:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-12-30T06:38:13.503-05:00',
             "createdDate": '2019-12-30T06:38:13.503-05:00',
         }
         result = TicketRepository.is_tnba_note(ticket_note)
@@ -80,7 +80,7 @@ class TestTicketRepository:
         ticket_notes = [
             {
                 "noteId": 41894040,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
@@ -95,12 +95,12 @@ class TestTicketRepository:
         ticket_notes = [
             {
                 "noteId": 41894040,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
             },
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
                 "createdDate": "2020-02-24T10:08:13.503-05:00",
             }
         ]
@@ -119,7 +119,7 @@ class TestTicketRepository:
         }
         ticket_note_2 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T12:07:13.503-05:00",
             "serviceNumber": [
                 'VC9999999',

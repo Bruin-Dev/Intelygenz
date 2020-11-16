@@ -3520,8 +3520,8 @@ class TestApiServer:
 
         api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id, f"{note_1}Triage note: 1/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_2}Triage note: 2/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_3}{note_4}\nTriage note: 3/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_2}Triage note: 2/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_3}{note_4}\nTriage note: 3/4"),
         ])
 
     @pytest.mark.asyncio
@@ -3569,8 +3569,8 @@ class TestApiServer:
 
         api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id, f"{note_1}Triage note: 1/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_2}Triage note: 2/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_3}{note_4}\nTriage note: 3/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_2}Triage note: 2/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_3}{note_4}\nTriage note: 3/4"),
         ])
 
     @pytest.mark.asyncio

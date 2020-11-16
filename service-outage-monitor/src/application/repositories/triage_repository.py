@@ -117,7 +117,7 @@ class TriageRepository:
 
         ticket_note_lines = [
             '#*Automation Engine*#',
-            'Triage',
+            'Triage (VeloCloud)',
         ]
 
         for key, value in relevant_data.items():
@@ -136,7 +136,7 @@ class TriageRepository:
 
         triage_note_fragments = [
             '#*Automation Engine*#',
-            'Triage',
+            'Triage (VeloCloud)',
             '',
         ]
 
