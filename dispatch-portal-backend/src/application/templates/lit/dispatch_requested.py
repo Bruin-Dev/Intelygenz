@@ -34,7 +34,7 @@ def get_clickable_link(name, url):
 def get_dispatch_requested_note(body, dispatch_number):
     link_to_dispatch = get_clickable_link(
         dispatch_number,
-        f"https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}"
+        f"https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}?vendor=LIT"
     )
     return LIT_DISPATCH_REQUESTED.format(
         dispatch_number=dispatch_number,

@@ -3,7 +3,7 @@ Dispatch Management - Dispatch Requested
 
 Please see the summary below.
 --
-Dispatch Number: {link_to_dispatch}
+Dispatch Number: {dispatch_number}
 Date of Dispatch: {date_of_dispatch}
 Time of Dispatch (Local): {time_of_dispatch}
 Time Zone (Local): {time_zone}
@@ -28,18 +28,9 @@ Department: {mettel_department}
 """
 
 
-def get_clickable_link(name, url):
-    return f'[{name}|{url}]'
-
-
 def get_dispatch_requested_note(body, dispatch_number):
-    link_to_dispatch = get_clickable_link(
-        dispatch_number,
-        f"https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}"
-    )
     return CTS_DISPATCH_REQUESTED.format(
         dispatch_number=dispatch_number,
-        link_to_dispatch=link_to_dispatch,
         date_of_dispatch=body.get('date_of_dispatch'),
         time_of_dispatch=body.get('time_of_dispatch'),
         time_zone=body.get('time_zone'),

@@ -5,7 +5,7 @@ Dispatch Management - Dispatch Requested
 
 Please see the summary below.
 --
-Dispatch Number: [IGZ_XXX|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_XXX]
+Dispatch Number: IGZ_XXX
 Date of Dispatch: 2019-11-14
 Time of Dispatch (Local): 6PM-8PM
 Time Zone (Local): Pacific Time

@@ -5,7 +5,7 @@ Dispatch Management - Dispatch Requested
 
 Please see the summary below.
 --
-Dispatch Number: [DIS37266|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]
+Dispatch Number: [DIS37266|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266?vendor=LIT]
 Date of Dispatch: 2019-11-14
 Time of Dispatch (Local): 6PM-8PM
 Time Zone (Local): Pacific Time
