@@ -158,6 +158,7 @@ resource "null_resource" "dispatch-portal-backend-healthcheck" {
                 null_resource.metrics-prometheus-healthcheck,
                 null_resource.notifier-healthcheck,
                 null_resource.velocloud-bridge-healthcheck,
+                null_resource.hawkeye-bridge-healthcheck,
                 null_resource.t7-bridge-healthcheck,
                 null_resource.generate_dispatch_portal_backend_task_definition_output_json,
                 aws_elasticache_cluster.automation-redis

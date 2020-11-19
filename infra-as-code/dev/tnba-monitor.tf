@@ -120,6 +120,7 @@ resource "aws_ecs_service" "automation-tnba-monitor" {
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.t7-bridge-healthcheck,
                  null_resource.notifier-healthcheck,
                  null_resource.metrics-prometheus-healthcheck ]

@@ -122,5 +122,6 @@ resource "aws_ecs_service" "automation-service-dispatch-monitor" {
                  null_resource.cts-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.notifier-healthcheck]
 }

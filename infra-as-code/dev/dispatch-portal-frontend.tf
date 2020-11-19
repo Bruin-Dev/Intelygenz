@@ -154,6 +154,7 @@ resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
                  null_resource.cts-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.t7-bridge-healthcheck,
                  null_resource.notifier-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,

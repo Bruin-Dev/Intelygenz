@@ -124,5 +124,6 @@ resource "aws_ecs_service" "automation-last-contact-report" {
                  null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.t7-bridge-healthcheck]
 }
