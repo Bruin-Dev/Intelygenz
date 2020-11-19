@@ -2748,6 +2748,33 @@ class TestServiceOutageMonitor:
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def reopen_outage_ticket_test(self, bruin_repository, hawkeye_repository, probes_response,
+                                        notifications_repository,
+                                        outage_monitor, devices_info, ticket_response_reopen, bruin_response_ok):
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_response_reopen)
+        bruin_repository.append_triage_note = CoroutineMock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
+
+        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
+
+        hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
+        bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor._build_triage_note.assert_not_called()
+        bruin_repository.append_triage_note.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(self):
         ticket_id = 12345
 

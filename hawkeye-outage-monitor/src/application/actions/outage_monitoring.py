@@ -301,9 +301,9 @@ class OutageMonitor:
                 ticket_creation_response = await self._bruin_repository.create_outage_ticket(
                     bruin_client_id, serial_number
                 )
-
-                if ticket_creation_response['status'] in range(200, 300):
-                    ticket_id = ticket_creation_response['body']
+                ticket_creation_status = ticket_creation_response['status']
+                ticket_id = ticket_creation_response['body']
+                if ticket_creation_status in range(200, 300):
 
                     self._logger.info(f'Outage ticket created for device {serial_number}! Ticket ID: {ticket_id}')
                     slack_message = (
@@ -314,18 +314,17 @@ class OutageMonitor:
                     self._logger.info(f'Appending triage note to outage ticket {ticket_id}...')
                     triage_note = self._build_triage_note(device['device_info'])
                     await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
-                elif ticket_creation_response['status'] == 409:
-                    ticket_id = ticket_creation_response['body']
+                elif ticket_creation_status == 409:
                     self._logger.info(
                         f'Faulty device {serial_number} already has an outage ticket in progress (ID = {ticket_id}).'
                     )
                     await self._append_triage_note_if_needed(ticket_id, device['device_info'])
-                elif ticket_creation_response['status'] == 471:
-                    ticket_id = ticket_creation_response['body']
+                elif ticket_creation_status == 471:
                     self._logger.info(
                         f'Faulty device {serial_number} has a resolved outage ticket (ID = {ticket_id}). '
-                        'Skipping outage ticket creation for this device...'
+                        'Re-opening ticket creation for this device...'
                     )
+                    await self._reopen_outage_ticket(ticket_id, device)
         else:
             self._logger.info(
                 "No devices were detected in outage state after re-check. Outage tickets won't be created"
@@ -377,6 +376,52 @@ class OutageMonitor:
             return next(elem for elem in iterable if condition(elem))
         except StopIteration:
             return fallback
+
+    async def _reopen_outage_ticket(self, ticket_id, device):
+        self._logger.info(f'Reopening Hawkeyey outage ticket {ticket_id}...')
+
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details_response_body = ticket_details_response['body']
+        ticket_details_response_status = ticket_details_response['status']
+        if ticket_details_response_status not in range(200, 300):
+            return
+
+        ticket_detail_for_reopen = self._get_first_element_matching(
+            ticket_details_response_body['ticketDetails'],
+            lambda detail: detail['detailValue'] == ['cached_info']['serial_number'],
+        )
+
+        ticket_reopening_response = await self._bruin_repository.open_ticket(ticket_id, ticket_detail_for_reopen)
+        ticket_reopening_response_status = ticket_reopening_response['status']
+
+        if ticket_reopening_response_status == 200:
+            self._logger.info(
+                f'Hawkeye outage ticket {ticket_id} reopening succeeded.')
+            slack_message = f'Hawkeye outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}'
+            await self._notifications_repository.send_slack_message(slack_message)
+            outage_causes = self._get_outage_causes_for_reopen_note(device)
+            await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, outage_causes)
+
+            # Check if this part is necessary
+            # self._metrics_repository.increment_tickets_reopened()
+        else:
+            self._logger.error(
+                f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.'
+            )
+
+    def _get_outage_causes_for_reopen_note(self, device: dict) -> str:
+        outage_causes = 'Outage causes:'
+        node_to_node_status: str = 'DOWN' if device['device_info']['nodetonode']['status'] == 0 else 'UP'
+        real_service_status: str = 'DOWN' if device['device_info']['realservice']['status'] == 0 else 'UP'
+        if node_to_node_status != "DOWN" and real_service_status != "DOWN":
+            outage_causes += ' Could not determine causes.'
+        else:
+            if real_service_status == "DOWN":
+                outage_causes += f'Real service status was {real_service_status}'
+            if node_to_node_status == "DOWN":
+                outage_causes += f'Node to node status was {node_to_node_status}'
+
+        return outage_causes
 
     def _build_triage_note(self, device_info: dict) -> str:
         tz_object = timezone(self._config.MONITOR_CONFIG['timezone'])
