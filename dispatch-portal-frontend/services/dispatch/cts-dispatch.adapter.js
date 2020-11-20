@@ -14,12 +14,13 @@ export const dispatchCtsInAdapter = data => ({
   hardTimeDispatch: '',
   hardTimeZone: '',
   requester: {
-    name: 'See "Details" section for requester name',
+    name: (data.dispatch && data.dispatch.requester_name) || '',
     groupEmail: '',
-    email: 'See "Details" section for requester email',
+    email: (data.dispatch && data.dispatch.requester_email) || '',
     department: '',
-    phoneNumber: 'See "Details" section for requester phone number',
-    departmentPhoneNumber: 'See "Details" section for requester phone number'
+    phoneNumber: (data.dispatch && data.dispatch.requester_phone) || '',
+    departmentPhoneNumber:
+      (data.dispatch && data.dispatch.requester_phone) || ''
   },
   onSiteContact: {
     site: (data.dispatch && data.dispatch.lookup_location_owner__c) || '',

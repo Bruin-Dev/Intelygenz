@@ -75,6 +75,9 @@ export const mockCtsSingleDispatch = {
     status__c: 'Completed',
     resource_trained__c: false,
     service_type__c: 'a251C000005Ics1QAC',
-    zip__c: '20005'
+    zip__c: '20005',
+    requester_name: 'Brad Gunnell',
+    requester_phone: '(877) 515-0911',
+    requester_email: 't1repair@mettel.net'
   }
 };

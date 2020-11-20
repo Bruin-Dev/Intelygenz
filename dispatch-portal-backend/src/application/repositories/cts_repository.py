@@ -26,6 +26,15 @@ class CtsRepository:
             return None
         return field.strip().replace(f'{field_name}: ', '')
 
+    def get_requester_info(self, dispatch):
+        requester_info = {}
+
+        requester_info['requester_name'] = self._find_field_in_dispatch_description(dispatch, 'Name')
+        requester_info['requester_phone'] = self._find_field_in_dispatch_description(dispatch, 'Phone')
+        requester_info['requester_email'] = self._find_field_in_dispatch_description(dispatch, 'Email')
+
+        return requester_info
+
     def get_onsite_time_needed(self, dispatch):
         onsite_time_needed = self._find_field_in_dispatch_description(dispatch, 'Onsite Time Needed')
         try:

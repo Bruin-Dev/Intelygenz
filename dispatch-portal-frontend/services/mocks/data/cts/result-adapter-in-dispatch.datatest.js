@@ -11,12 +11,12 @@ export const ctsDispatchMockGetOne = {
   hardTimeDispatch: '',
   hardTimeZone: '',
   requester: {
-    name: 'See "Details" section for requester name',
+    name: 'Brad Gunnell',
     groupEmail: '',
-    email: 'See "Details" section for requester email',
+    email: 't1repair@mettel.net',
     department: '',
-    phoneNumber: 'See "Details" section for requester phone number',
-    departmentPhoneNumber: 'See "Details" section for requester phone number'
+    phoneNumber: '(877) 515-0911',
+    departmentPhoneNumber: '(877) 515-0911'
   },
   onSiteContact: {
     site: 'Premier Financial Bancorp',

@@ -4,6 +4,11 @@ from application.mappers.cts_mapper import map_get_dispatch, map_create_dispatch
 class TestMappers:
 
     def map_get_dispatch_test(self):
+        requester_info = {
+            'requester_name': 'Test Name',
+            'requester_phone': '5102342333',
+            'requester_email': 'man_test@gmail.com'
+        }
         datetime_formatted = '2019-11-14 5.30AM'
         content = {
             'date_of_dispatch': "2019-11-14",
@@ -55,11 +60,17 @@ class TestMappers:
             'mettel_department_phone_number': '16666666666',
             'mettel_requester_email': 'karen.doe@mettel.net',
             'mettel_department': None,
-            'igz_dispatch_number': '1234'
+            'igz_dispatch_number': '1234',
+            'requester_name': 'Test Name',
+            'requester_phone': '5102342333',
+            'requester_email': 'man_test@gmail.com'
         }
 
-        result = map_get_dispatch(content, datetime_formatted)
+        result = map_get_dispatch(content, datetime_formatted, requester_info)
         assert result['date_of_dispatch'] == datetime_formatted
+        assert result['requester_name'] == requester_info['requester_name']
+        assert result['requester_phone'] == requester_info['requester_phone']
+        assert result['requester_email'] == requester_info['requester_email']
         assert result == expected_result
 
     def map_create_dispatch_test(self):

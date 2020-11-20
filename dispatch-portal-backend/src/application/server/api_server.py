@@ -511,9 +511,12 @@ class DispatchServer:
         datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(dispatch)
         datetime_formatted_str = datetime_tz_response['datetime_formatted_str'] if datetime_tz_response else ''
 
+        requester_info = self._cts_repository.get_requester_info(dispatch)
+
         response_dispatch['id'] = dispatch.get('Name') if dispatch.get('Name') else dispatch_number
         response_dispatch['vendor'] = 'cts'
-        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(dispatch, datetime_formatted_str)
+
+        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(dispatch, datetime_formatted_str, requester_info)
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -547,13 +550,14 @@ class DispatchServer:
         all_dispatches = response['body'].get('records', [])
         self._logger.info(f"[CTS] All Dispatches - {len(all_dispatches)} - took {time.time() - start_time}")
         response_dispatch['vendor'] = 'cts'
-        # response_dispatch['list_dispatch'] = [cts_mapper.map_get_dispatch(d) for d in all_dispatches]
 
         response_dispatch['list_dispatch'] = []
         for d in all_dispatches:
             datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(d)
             datetime_formatted_str = datetime_tz_response['datetime_formatted_str'] if datetime_tz_response else ''
-            response_dispatch['list_dispatch'].append(cts_mapper.map_get_dispatch(d, datetime_formatted_str))
+            requester_info = self._cts_repository.get_requester_info(d)
+            response_dispatch['list_dispatch'].append(cts_mapper.map_get_dispatch(d, datetime_formatted_str,
+                                                                                  requester_info))
 
         return jsonify(response_dispatch), response["status"], None
 

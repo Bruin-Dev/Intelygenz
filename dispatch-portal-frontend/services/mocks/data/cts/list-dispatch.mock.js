@@ -74,7 +74,10 @@ export const dispatchCtsList = {
       status__c: 'Completed',
       resource_trained__c: false,
       service_type__c: 'a251C000005Ics1QAC',
-      zip__c: '20005'
+      zip__c: '20005',
+      requester_name: 'Brad Gunnell',
+      requester_phone: '(877) 515-0911',
+      requester_email: 't1repair@mettel.net'
     },
     {
       attributes: {
@@ -150,7 +153,10 @@ export const dispatchCtsList = {
       status__c: 'Scheduled',
       resource_trained__c: false,
       service_type__c: 'a251C000005Ics1QAC',
-      zip__c: '11213'
+      zip__c: '11213',
+      requester_name: 'Perry Whitehair',
+      requester_phone: '(877) 515-0911',
+      requester_email: 't1repair@mettel.net'
     },
     {
       attributes: {
@@ -226,7 +232,10 @@ export const dispatchCtsList = {
       status__c: 'Complete Pending Collateral',
       resource_trained__c: false,
       service_type__c: 'a251C000005Ics1QAC',
-      zip__c: '07112'
+      zip__c: '07112',
+      requester_name: 'Nate A',
+      requester_phone: '(877) 515-0911',
+      requester_email: 't1repair@mettel.net'
     },
     {
       attributes: {
@@ -301,7 +310,10 @@ export const dispatchCtsList = {
       status__c: 'On Site',
       resource_trained__c: false,
       service_type__c: 'a250n000000PMQ2AAO',
-      zip__c: '76021'
+      zip__c: '76021',
+      requester_name: 'Karen Doe',
+      requester_phone: '+1 666 6666 666',
+      requester_email: 'karen.doe@mettel.net'
     },
     {
       attributes: {
@@ -1042,7 +1054,10 @@ export const dispatchCtsList = {
       status__c: 'Completed',
       resource_trained__c: false,
       service_type__c: 'a250n000000PMQ2AAO',
-      zip__c: '99088'
+      zip__c: '99088',
+      requester_name: 'Karen Doe',
+      requester_phone: '+1 666 6666 666',
+      requester_email: 'karen.doe@mettel.net'
     },
     {
       attributes: {
@@ -1117,7 +1132,10 @@ export const dispatchCtsList = {
       status__c: 'Scheduled',
       resource_trained__c: false,
       service_type__c: 'a250n000000PMQ2AAO',
-      zip__c: '94102'
+      zip__c: '94102',
+      requester_name: 'Karen Doe',
+      requester_phone: '+1 666 6666 666',
+      requester_email: 'karen.doe@mettel.net'
     },
     {
       attributes: {
@@ -1192,7 +1210,10 @@ export const dispatchCtsList = {
       status__c: 'Complete Pending Collateral',
       resource_trained__c: false,
       service_type__c: 'a250n000000PMQ2AAO',
-      zip__c: '10036'
+      zip__c: '10036',
+      requester_name: 'Karen Doe',
+      requester_phone: '+1 666 6666 666',
+      requester_email: 'karen.doe@mettel.net'
     }
   ]
 };

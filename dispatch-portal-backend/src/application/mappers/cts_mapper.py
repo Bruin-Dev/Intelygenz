@@ -2,13 +2,16 @@ import iso8601
 from pytz import timezone
 
 
-def map_get_dispatch(body, datetime_formatted):
+def map_get_dispatch(body, datetime_formatted, requester_info):
     '''
     From CTS to dispatch portal
     '''
     body = {k.lower(): v for k, v in body.items()}
     # TODO: not implemented - map fields properly
     body['date_of_dispatch'] = datetime_formatted
+    body['requester_name'] = requester_info['requester_name']
+    body['requester_phone'] = requester_info['requester_phone']
+    body['requester_email'] = requester_info['requester_email']
     return body
 
 
