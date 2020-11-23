@@ -128,7 +128,7 @@ def probe_1(serial_number_1):
             "lastUpdate": "2020-11-11T13:00:11Z"
         },
         "realservice": {
-            "status": 1,
+            "status": 0,
             "lastUpdate": "2020-10-15T02:18:28Z"
         }
     }
@@ -194,6 +194,65 @@ def probe_2(serial_number_2):
 
 
 @pytest.fixture(scope='function')
+def probe_up(serial_number_2):
+    return {
+        "probeId": "3",
+        "uid": "b8:27:eb:76:a8:de",
+        "os": "Linux ARM",
+        "name": "FIS_Demo_XrPi",
+        "testIp": "none",
+        "managementIp": "none",
+        "active": "1",
+        "type": "8",
+        "mode": "Automatic",
+        "n2nMode": "1",
+        "rsMode": "1",
+        "typeName": "xr_pi",
+        "serialNumber": serial_number_2,
+        "probeGroup": "FIS",
+        "location": "",
+        "latitude": "0",
+        "longitude": "0",
+        "endpointVersion": "9.6 SP1 build 121",
+        "xrVersion": "4.2.2.10681008",
+        "defaultInterface": "eth0",
+        "defaultGateway": "192.168.90.99",
+        "availableForMesh": "1",
+        "lastRestart": "2020-10-15T02:13:24Z",
+        "availability": {
+            "from": 1,
+            "to": 1,
+            "mesh": "1"
+        },
+        "ips": [
+            "192.168.90.102",
+            "192.226.111.211"
+        ],
+        "userGroups": [
+            "1",
+            "10"
+        ],
+        "wifi": {
+            "available": 0,
+            "associated": 0,
+            "bssid": "",
+            "ssid": "",
+            "frequency": "",
+            "level": "0",
+            "bitrate": ""
+        },
+        "nodetonode": {
+            "status": 1,
+            "lastUpdate": "2020-11-11T13:00:11Z"
+        },
+        "realservice": {
+            "status": 1,
+            "lastUpdate": "2020-10-15T02:18:28Z"
+        }
+    }
+
+
+@pytest.fixture(scope='function')
 def device_1_cached_info(serial_number_1, bruin_client_id):
     return {
         "serial_number": serial_number_1,
@@ -220,7 +279,7 @@ def device_2_cached_info(serial_number_2, bruin_client_id):
 @pytest.fixture(scope='function')
 def device_1_info(probe_1, device_1_cached_info):
     return {
-        'probe_info': probe_1,
+        'device_info': probe_1,
         'cached_info': device_1_cached_info,
     }
 
@@ -228,7 +287,15 @@ def device_1_info(probe_1, device_1_cached_info):
 @pytest.fixture(scope='function')
 def device_2_info(probe_2, device_2_cached_info):
     return {
-        'probe_info': probe_2,
+        'device_info': probe_2,
+        'cached_info': device_2_cached_info,
+    }
+
+
+@pytest.fixture(scope='function')
+def device_up_info(probe_up, device_2_cached_info):
+    return {
+        'device_info': probe_up,
         'cached_info': device_2_cached_info,
     }
 
@@ -238,6 +305,13 @@ def devices_info(device_1_info, device_2_info):
     return [
         device_1_info,
         device_2_info,
+    ]
+
+
+@pytest.fixture(scope='function')
+def devices_up_info(device_up_info):
+    return [
+        device_up_info,
     ]
 
 
@@ -258,6 +332,21 @@ def probes_response(probes):
 
 
 @pytest.fixture(scope='function')
+def probes_up(probe_up):
+    return [
+        probe_up,
+    ]
+
+
+@pytest.fixture(scope='function')
+def probes_up_response(probes_up):
+    return {
+        'body': probes_up,
+        'status': 200,
+    }
+
+
+@pytest.fixture(scope='function')
 def ticket_response_reopen():
     return {'body': {}, 'status': 471}
 
@@ -272,25 +361,44 @@ def bruin_exception_response():
 
 
 @pytest.fixture(scope='function')
-def bruin_example_request():
+def ticket_id():
+    return 1234
+
+
+@pytest.fixture(scope='function')
+def bruin_example_request(ticket_id):
     return {
         'request_id': uuid,
         'body': {
-            'ticket_id': 1234,
+            'ticket_id': ticket_id,
         },
     }
 
 
 @pytest.fixture(scope='function')
-def bruin_response_ok():
+def ticket_detail_for_serial_1(serial_number_1):
+    return {
+        "detailID": 2746938,
+        "detailValue": serial_number_1,
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_detail_for_serial_2(serial_number_2):
+    return {
+        "detailID": 2746939,
+        "detailValue": serial_number_2,
+    }
+
+
+@pytest.fixture(scope='function')
+def bruin_response_ok(ticket_detail_for_serial_1, ticket_detail_for_serial_2):
     return {
         'request_id': uuid,
         'body': {
             'ticketDetails': [
-                {
-                    "detailID": 2746938,
-                    "detailValue": 'VC1234567890',
-                },
+                ticket_detail_for_serial_1,
+                ticket_detail_for_serial_2,
             ],
             'ticketNotes': [
                 {
@@ -305,5 +413,13 @@ def bruin_response_ok():
                 }
             ]
         },
+        'status': 200,
+    }
+
+
+@pytest.fixture(scope='function')
+def bruin_reopen_response_ok():
+    return {
+        'body': 'success',
         'status': 200,
     }

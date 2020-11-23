@@ -322,7 +322,7 @@ class OutageMonitor:
                 elif ticket_creation_status == 471:
                     self._logger.info(
                         f'Faulty device {serial_number} has a resolved outage ticket (ID = {ticket_id}). '
-                        'Re-opening ticket creation for this device...'
+                        'Re-opening ticket...'
                     )
                     await self._reopen_outage_ticket(ticket_id, device)
         else:
@@ -378,7 +378,7 @@ class OutageMonitor:
             return fallback
 
     async def _reopen_outage_ticket(self, ticket_id, device):
-        self._logger.info(f'Reopening Hawkeyey outage ticket {ticket_id}...')
+        self._logger.info(f'Reopening Hawkeye outage ticket {ticket_id}...')
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         ticket_details_response_body = ticket_details_response['body']
@@ -388,10 +388,11 @@ class OutageMonitor:
 
         ticket_detail_for_reopen = self._get_first_element_matching(
             ticket_details_response_body['ticketDetails'],
-            lambda detail: detail['detailValue'] == ['cached_info']['serial_number'],
+            lambda detail: detail['detailValue'] == device['cached_info']['serial_number'],
         )
 
-        ticket_reopening_response = await self._bruin_repository.open_ticket(ticket_id, ticket_detail_for_reopen)
+        ticket_reopening_response = await self._bruin_repository.open_ticket(ticket_id,
+                                                                             ticket_detail_for_reopen['detailID'])
         ticket_reopening_response_status = ticket_reopening_response['status']
 
         if ticket_reopening_response_status == 200:
@@ -400,7 +401,9 @@ class OutageMonitor:
             slack_message = f'Hawkeye outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}'
             await self._notifications_repository.send_slack_message(slack_message)
             outage_causes = self._get_outage_causes_for_reopen_note(device)
-            await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, outage_causes)
+            await self._bruin_repository.append_reopening_note_to_ticket(ticket_id,
+                                                                         device['cached_info']['serial_number'],
+                                                                         outage_causes)
 
             # Check if this part is necessary
             # self._metrics_repository.increment_tickets_reopened()
@@ -410,18 +413,18 @@ class OutageMonitor:
             )
 
     def _get_outage_causes_for_reopen_note(self, device: dict) -> str:
-        outage_causes = 'Outage causes:'
+        lines = [
+            'Outage cause(s):',
+        ]
+
         node_to_node_status: str = 'DOWN' if device['device_info']['nodetonode']['status'] == 0 else 'UP'
         real_service_status: str = 'DOWN' if device['device_info']['realservice']['status'] == 0 else 'UP'
-        if node_to_node_status != "DOWN" and real_service_status != "DOWN":
-            outage_causes += ' Could not determine causes.'
-        else:
-            if real_service_status == "DOWN":
-                outage_causes += f'Real service status was {real_service_status}'
-            if node_to_node_status == "DOWN":
-                outage_causes += f'Node to node status was {node_to_node_status}'
+        if real_service_status == "DOWN":
+            lines.append(f'Real service status is {real_service_status}.')
+        if node_to_node_status == "DOWN":
+            lines.append(f'Node to node status is {node_to_node_status}.')
 
-        return outage_causes
+        return os.linesep.join(lines)
 
     def _build_triage_note(self, device_info: dict) -> str:
         tz_object = timezone(self._config.MONITOR_CONFIG['timezone'])

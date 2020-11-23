@@ -1609,6 +1609,7 @@ class TestServiceOutageMonitor:
                                        notifications_repository, customer_cache_repository)
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
+        outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
@@ -1623,6 +1624,10 @@ class TestServiceOutageMonitor:
         outage_monitor._build_triage_note.assert_not_called()
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor._reopen_outage_ticket.assert_has_awaits([
+            call(ticket_id, device_1_info),
+            call(ticket_id, device_2_info),
+        ])
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_healthy_state_test(self):
@@ -2748,31 +2753,92 @@ class TestServiceOutageMonitor:
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def reopen_outage_ticket_test(self, bruin_repository, hawkeye_repository, probes_response,
-                                        notifications_repository,
-                                        outage_monitor, devices_info, ticket_response_reopen, bruin_response_ok):
+    async def reopen_outage_ticket_test(self, probes_response, outage_monitor, devices_info, ticket_response_reopen,
+                                        bruin_response_ok):
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_response_reopen)
-        bruin_repository.append_triage_note = CoroutineMock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
+        outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_response_reopen)
+        outage_monitor._bruin_repository.append_triage_note = CoroutineMock()
+        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
+        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value={'status': 200, 'body': None})
 
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor._hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        bruin_repository.create_outage_ticket.assert_not_awaited()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note.assert_not_awaited()
+        outage_monitor._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor._map_probes_info_with_customer_cache.assert_called()
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def reopen_outage_ticket_bad_get_ticket_detail_test(self, device_1_info, ticket_id, bruin_exception_response,
+                                                              outage_monitor):
+        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_exception_response)
+        outage_monitor._bruin_repository.open_ticket = CoroutineMock()
+
+        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
+
+        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._bruin_repository.open_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def reopen_outage_ticket_with_reopen_request_having_non_2xx_status_test(self, device_1_info, ticket_id,
+                                                                                  ticket_detail_for_serial_1,
+                                                                                  bruin_response_ok,
+                                                                                  bruin_exception_response,
+                                                                                  outage_monitor):
+        ticket_detail_for_serial_1_id = ticket_detail_for_serial_1['detailID']
+
+        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
+        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_exception_response)
+        outage_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+
+        await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
+
+        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
+        outage_monitor._bruin_repository.append_reopening_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def reopen_outage_ticket_ok_test(self, device_1_info, ticket_id, ticket_detail_for_serial_1,
+                                           bruin_response_ok, bruin_reopen_response_ok, outage_monitor):
+        ticket_detail_for_serial_1_id = ticket_detail_for_serial_1['detailID']
+        serial_number = ticket_detail_for_serial_1['detailValue']
+        outage_causes = 'These are the outage causes'
+
+        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
+        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_reopen_response_ok)
+        outage_monitor._get_outage_causes_for_reopen_note = Mock(return_value=outage_causes)
+        outage_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
+
+        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
+        outage_monitor._get_outage_causes_for_reopen_note.assert_called_once_with(device_1_info)
+        outage_monitor._bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number, outage_causes
+        )
+        outage_monitor._notifications_repository.send_slack_message.assert_awaited()
+
+    def get_outage_causes_for_reopen_note_test(self, device_1_info, outage_monitor):
+        result = outage_monitor._get_outage_causes_for_reopen_note(device_1_info)
+        expected = os.linesep.join([
+            'Outage cause(s):',
+            'Real service status is DOWN.',
+        ])
+
+        assert result == expected
 
     @pytest.mark.asyncio
     async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(self):
