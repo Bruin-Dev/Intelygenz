@@ -189,6 +189,7 @@ In this stage there are two jobs:
      - `prometheus`
      - `t7-bridge`
      - `velocloud-bridge` 
+     - `hawkeye-bridge`
 
      Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
 
@@ -196,6 +197,8 @@ In this stage there are two jobs:
     
      - `customer-cache`
      - `dispatch-portal-backend`
+     - `hawkeye-customer-cache`
+     - `hawkeye-outage-monitor`
      - `last-contact-report`
      - `lumin-billing-report`
      - `service-affecting-monitor`
@@ -222,6 +225,7 @@ In this stage there are two jobs:
                          null_resource.cts-bridge-healthcheck,
                          null_resource.lit-bridge-healthcheck,
                          null_resource.velocloud-bridge-healthcheck,
+                         null_resource.hawkeye-bridge-healthcheck,
                          null_resource.t7-bridge-healthcheck,
                          null_resource.notifier-healthcheck,
                          null_resource.metrics-prometheus-healthcheck ]
@@ -246,6 +250,7 @@ In this stage there are two jobs:
                          null_resource.cts-bridge-healthcheck,
                          null_resource.lit-bridge-healthcheck,
                          null_resource.velocloud-bridge-healthcheck,
+                         null_resource.hawkeye-bridge-healthcheck,
                          null_resource.t7-bridge-healthcheck,
                          null_resource.notifier-healthcheck,
                          null_resource.metrics-prometheus-healthcheck,

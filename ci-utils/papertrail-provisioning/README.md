@@ -55,8 +55,16 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
                     "search_name": f"[dispatch-portal-backend] - logs"
                 },
                 {
+                    "query": f"hawkeye-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "search_name": f"[hawkeye-bridge] - logs"
+                },
+                {
                     "query": f"hawkeye-customer-cache AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
                     "search_name": f"[hawkeye-customer-cache] - logs"
+                },
+                {
+                    "query": f"hawkeye-outage-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "search_name": f"[hawkeye-outage-monitor] - logs"
                 },
                 {
                     "query": f"last-contact-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",

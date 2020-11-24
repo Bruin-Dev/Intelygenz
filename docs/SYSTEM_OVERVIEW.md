@@ -40,6 +40,8 @@ There are two types of microservices showed in the diagram above depending on th
 
     * *velocloud-bridge*
 
+    * *hawkeye-bridge*
+
     * *bruin-bridge*
 
     * *t7-bridge*
@@ -58,6 +60,8 @@ There are two types of microservices showed in the diagram above depending on th
 
     * *service-outage-monitor*
 
+    * *hawkeye-outage-monitor*
+
     * *sites-monitor*
 
     * *tnba-monitor*
@@ -65,6 +69,8 @@ There are two types of microservices showed in the diagram above depending on th
   * Those that take the role of both requester and replier in the context of NATS. These services can be considered a mixture between use cases and capabilities:
   
     * *customer-cache*
+
+    * *hawkeye-customer-cache*
 
   > All microservices that communicate with NATS can also communicate with the Redis cluster. This is needed
   to bypass the limit size that NATS enforces for all the messages it receives (1MB).
@@ -139,6 +145,44 @@ When another microservice requests velocloud data, it will be in charge of makin
 The following [diagram](https://www.draw.io/#G1bn-S0EvBXgnLW22Zwvdx4MJVx0hauXdQ) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: velocloud-bridge_microservice_relationships](img/system_overview/capabilities/velocloud-bridge_microservice_relationships.png)
+
+#### Hawkeye-bridge microservice
+
+This microservice is in charge of making requests to the Hawkeye API, taking the role of replier in the context of NATS.
+
+When another microservice requests Hawkeye data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
+
+The following [diagram](https://www.draw.io/#G1ki13-NoKadfUai12FWQCFebwkNGoKGFo) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+
+![IMAGE: hawkeye-bridge_microservice_relationships](img/system_overview/capabilities/hawkeye-bridge_microservice_relationships.png)
+
+#### Hawkeye-customer-cache microservice
+
+This microservice is in charge of crossing Bruin and Hawkeye data. More specifically, it focus on associating Bruin customers with Hawkeye devices.
+On the other hand, it also serves this information to the rest of services.
+
+This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).
+
+The following [diagram](https://www.draw.io/#G1QLpox45cZE4PV3dxlZsnK5Gv1N6hQNvM) shows the dependencies or interactions of this microservice with the rest.
+
+![IMAGE: hawkeye-customer-cache_microservice_relationships](img/system_overview/mixed_services/hawkeye-customer-cache_microservice_relationships.png)
+
+From the point of view of services to the left of `hawkeye-customer-cache`, it plays the role of a replier as it answers to requests sent by them.
+
+From the point of view of services to the right of `hawkeye-customer-cache`, it plays the role of a requester as it asks for data to Hawkeye and Bruin to cross it.
+
+#### Hawkeye-outage-monitor microservice
+
+This service is responsible for resolving/unresolving outage tickets depending on the state of a Hawkeye device. It is triggered every 3 minutes.
+
+If a device is detected to be in outage state then it is scheduled for a recheck in the next 5 seconds. If the device is still in outage state, the system
+will try creating a new outage ticket. If Bruin reports back that an outage ticket with Resolved status exists already then it is unresolved; if not, a new outage ticket may have been created or an outage ticket with In Progress status may exist already, so no additional action
+will be taken.
+
+In case the device was detected to be healthy, the system looks for an open outage ticket for this device and resolves it in case it exists.
+
+In the following [diagram](https://www.draw.io/#G1ZAQSFthTrg4w2RGuzINR03LNlT54aOpZ) it's possible see the relationship of this microservice with the others.
+![IMAGE: hawkeye-outage-monitor_microservice_relationships](img/system_overview/use_cases/hawkeye-outage-monitor_microservice_relationships.png)
 
 #### Last-contact-report microservice
 
