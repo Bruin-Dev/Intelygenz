@@ -5,7 +5,6 @@ import os
 import logging
 import sys
 
-
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'subscriber': {
@@ -29,6 +28,9 @@ MONITOR_CONFIG = {
         'outage_monitor': 60 * 3,
         'quarantine': quarantine_time,
     },
+    'semaphore': 10,
+    'autoresolve_ticket_creation_seconds': 60 * 60,
+    'autoresolve_last_outage_seconds': 60 * 60,
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

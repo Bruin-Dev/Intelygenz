@@ -2,7 +2,6 @@
 import logging
 import sys
 
-
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
     'subscriber': {
@@ -26,6 +25,9 @@ MONITOR_CONFIG = {
         'outage_monitor': 60 * 3,
         'quarantine': quarantine_time,
     },
+    'semaphore': 10,
+    'autoresolve_ticket_creation_seconds': 60 * 60,
+    'autoresolve_last_outage_seconds': 60 * 60,
 }
 
 ENVIRONMENT_NAME = "dev"

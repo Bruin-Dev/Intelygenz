@@ -1,4 +1,7 @@
+import os
+from datetime import datetime
 from shortuuid import uuid
+from pytz import timezone
 
 from application.repositories import nats_error_response
 
@@ -10,6 +13,80 @@ class BruinRepository:
         self._logger = logger
         self._event_bus = event_bus
         self._notifications_repository = notifications_repository
+
+    async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list, *,
+                          service_number: str = None):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'ticket_status': ticket_statuses,
+                'ticket_topic': ticket_topic,
+                'category': 'Network Scout',
+            },
+        }
+
+        if service_number:
+            request['body']['service_number'] = service_number
+
+        try:
+            if not service_number:
+                self._logger.info(
+                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'{ticket_topic} and belonging to client {client_id} from Bruin...'
+                )
+            else:
+                self._logger.info(
+                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin...'
+                )
+
+            response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
+                f'with ticket topic {ticket_topic} and belonging to client {client_id} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                if not service_number:
+                    self._logger.info(
+                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic} and belonging to client {client_id} from Bruin!'
+                    )
+                else:
+                    self._logger.info(
+                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic}, service number {service_number} and belonging to client '
+                        f'{client_id} from Bruin!'
+                    )
+            else:
+                if not service_number:
+                    err_msg = (
+                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic} and belonging to client {client_id} in '
+                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+                else:
+                    err_msg = (
+                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
+                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
 
     async def get_ticket_details(self, ticket_id: int):
         err_msg = None
@@ -37,6 +114,40 @@ class BruinRepository:
                     f'Error while retrieving details of ticket {ticket_id} in '
                     f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
                     f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def resolve_ticket(self, ticket_id: int, detail_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Resolving ticket {ticket_id} (affected detail ID: {detail_id})...')
+            response = await self._event_bus.rpc_request("bruin.ticket.status.resolve", request, timeout=15)
+            self._logger.info(f'Ticket {ticket_id} resolved!')
+        except Exception as e:
+            err_msg = f'An error occurred when resolving ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while resolving ticket {ticket_id} in {self._config.MONITOR_CONFIG["environment"].upper()} '
+                    f'environment: Error {response_status} - {response_body}'
                 )
 
         if err_msg:
@@ -171,6 +282,28 @@ class BruinRepository:
                 'body': f'Triage note split into {total_notes} chunks and appended successfully!',
                 'status': 200,
             }
+
+    async def get_open_outage_tickets(self, client_id: int, *, service_number: str = None):
+        ticket_statuses = ['New', 'InProgress', 'Draft']
+
+        return await self.get_outage_tickets(client_id, ticket_statuses, service_number=service_number)
+
+    async def get_outage_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
+        ticket_topic = 'VOO'
+
+        return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
+
+    async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        autoresolve_note = os.linesep.join([
+            '#*Automation Engine*#',
+            f'Auto-resolving detail for serial: {serial_number}',
+            f'Real service status is UP.',
+            f'Node to node status is UP.',
+            f'TimeStamp: {current_datetime_tz_aware}',
+        ])
+
+        return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[serial_number])
 
     async def __notify_error(self, err_msg):
         self._logger.error(err_msg)
