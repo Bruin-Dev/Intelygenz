@@ -363,7 +363,7 @@ class ServiceAffectingMonitor:
                     }
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
-                                                              ticket_details, timeout=30)
+                                                              ticket_details, timeout=90)
                 if ticket_id["status"] not in range(200, 300):
                     err_msg = (f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
                                f'Error {ticket_id["status"]} - {ticket_id["body"]}')
@@ -387,7 +387,7 @@ class ServiceAffectingMonitor:
                 }
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                   ticket_append_note_msg,
-                                                  timeout=15)
+                                                  timeout=45)
 
                 slack_message = {'request_id': uuid(),
                                  'message': f'Ticket created with ticket id: {ticket_id["body"]["ticketIds"][0]}\n'
