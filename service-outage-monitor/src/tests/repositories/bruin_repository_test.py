@@ -1055,6 +1055,7 @@ class TestBruinRepository:
     async def append_reopening_note_to_ticket_test(self):
         current_datetime = datetime.now()
         ticket_id = 11111
+        service_number = 'VC1234567'
         outage_causes = "Some causes of the outage"
         ticket_note = (
             '#*Automation Engine*#\n'
@@ -1081,9 +1082,13 @@ class TestBruinRepository:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
             with patch.object(bruin_repository_module, 'timezone', new=Mock()):
-                result = await bruin_repository.append_reopening_note_to_ticket(ticket_id, outage_causes)
+                result = await bruin_repository.append_reopening_note_to_ticket(
+                    ticket_id, service_number, outage_causes
+                )
 
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, ticket_note, service_numbers=[service_number]
+        )
         assert result == response
 
     @pytest.mark.asyncio

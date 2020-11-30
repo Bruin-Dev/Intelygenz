@@ -413,7 +413,8 @@ class OutageMonitor:
             self._metrics_repository.increment_first_triage_errors()
 
     async def _reopen_outage_ticket(self, ticket_id, edge_status):
-        self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
+        serial_number = edge_status['edgeSerialNumber']
+        self._logger.info(f'Reopening outage ticket {ticket_id} for serial {serial_number}...')
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         ticket_details_response_body = ticket_details_response['body']
@@ -421,21 +422,27 @@ class OutageMonitor:
         if ticket_details_response_status not in range(200, 300):
             return
 
-        detail_id_for_reopening = ticket_details_response_body['ticketDetails'][0]['detailID']
+        ticket_detail_for_reopen = self._get_first_element_matching(
+            ticket_details_response_body['ticketDetails'],
+            lambda detail: detail['detailValue'] == serial_number,
+        )
+        detail_id_for_reopening = ticket_detail_for_reopen['detailID']
+
         ticket_reopening_response = await self._bruin_repository.open_ticket(ticket_id, detail_id_for_reopening)
         ticket_reopening_response_status = ticket_reopening_response['status']
 
         if ticket_reopening_response_status == 200:
-            self._logger.info(f'[outage-ticket-reopening] Outage ticket {ticket_id} reopening succeeded.')
-            slack_message = f'Outage ticket {ticket_id} reopened. Ticket details at https://app.bruin.com/t/{ticket_id}'
+            self._logger.info(f'Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened successfully.')
+            slack_message = (
+                f'Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened: '
+                f'https://app.bruin.com/t/{ticket_id}'
+            )
             await self._notifications_repository.send_slack_message(slack_message)
             await self._post_note_in_outage_ticket(ticket_id, edge_status)
 
             self._metrics_repository.increment_tickets_reopened()
         else:
-            self._logger.error(
-                f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.'
-            )
+            self._logger.error(f'Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.')
 
     async def _post_note_in_outage_ticket(self, ticket_id, edge_status):
         outage_causes = self._get_outage_causes(edge_status)
@@ -452,7 +459,10 @@ class OutageMonitor:
         else:
             ticket_note_outage_causes += ' Could not determine causes.'
 
-        await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note_outage_causes)
+        serial_number = edge_status['edgeSerialNumber']
+        await self._bruin_repository.append_reopening_note_to_ticket(
+            ticket_id, serial_number, ticket_note_outage_causes
+        )
 
     def _get_outage_causes(self, edge_status):
         outage_causes = {}

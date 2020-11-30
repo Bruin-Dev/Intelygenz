@@ -364,7 +364,7 @@ class BruinRepository:
 
         return await self.append_note_to_ticket(ticket_id, autoresolve_note)
 
-    async def append_reopening_note_to_ticket(self, ticket_id: int, outage_causes: str):
+    async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, outage_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         reopening_note = os.linesep.join([
             f'#*Automation Engine*#',
@@ -373,7 +373,7 @@ class BruinRepository:
             f'TimeStamp: {current_datetime_tz_aware}',
         ])
 
-        return await self.append_note_to_ticket(ticket_id, reopening_note)
+        return await self.append_note_to_ticket(ticket_id, reopening_note, service_numbers=[service_number])
 
     async def get_outage_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
         ticket_topic = 'VOO'

@@ -4929,7 +4929,11 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def reopen_outage_ticket_with_failing_reopening_test(self):
         ticket_id = 1234567
-        detail_id = 9876543
+        detail_1_id = 9876543
+        detail_2_id = 1112223
+
+        serial_number_1 = 'VC1234567'
+        serial_number_2 = 'VC7654321'
         edge_status = {
             'host': 'mettel.velocloud.net',
             'enterpriseName': 'Militaires Sans Frontières',
@@ -4942,7 +4946,7 @@ class TestServiceOutageMonitor:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number_1,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -4967,17 +4971,28 @@ class TestServiceOutageMonitor:
             'body': {
                 'ticketDetails': [
                     {
-                        "detailID": detail_id,
+                        "detailID": detail_1_id,
                         "detailType": "Repair_WTN",
                         "detailStatus": "R",
-                        "detailValue": "VC05400002265",
+                        "detailValue": serial_number_2,
+                        "assignedToName": "0",
+                        "currentTaskID": None,
+                        "currentTaskName": None,
+                        "lastUpdatedBy": 0,
+                        "lastUpdatedAt": "2020-02-14T12:40:04.69-05:00"
+                    },
+                    {
+                        "detailID": detail_2_id,
+                        "detailType": "Repair_WTN",
+                        "detailStatus": "R",
+                        "detailValue": serial_number_1,
                         "assignedToName": "0",
                         "currentTaskID": None,
                         "currentTaskName": None,
                         "lastUpdatedBy": 0,
                         "lastUpdatedAt": "2020-02-14T12:40:04.69-05:00"
                     }
-                ]
+                ],
             },
             'status': 200,
         }
@@ -5012,13 +5027,17 @@ class TestServiceOutageMonitor:
         await outage_monitor._reopen_outage_ticket(ticket_id, edge_status)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_id)
+        bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_2_id)
         logger.error.assert_called()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_with_successful_reopening_test(self):
         ticket_id = 1234567
-        detail_id = 9876543
+        detail_1_id = 9876543
+        detail_2_id = 1112223
+
+        serial_number_1 = 'VC1234567'
+        serial_number_2 = 'VC7654321'
         edge_status = {
             'host': 'mettel.velocloud.net',
             'enterpriseName': 'Militaires Sans Frontières',
@@ -5031,7 +5050,7 @@ class TestServiceOutageMonitor:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number_1,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -5056,16 +5075,27 @@ class TestServiceOutageMonitor:
             'body': {
                 'ticketDetails': [
                     {
-                        "detailID": detail_id,
+                        "detailID": detail_1_id,
                         "detailType": "Repair_WTN",
                         "detailStatus": "R",
-                        "detailValue": "VC05400002265",
+                        "detailValue": serial_number_2,
                         "assignedToName": "0",
                         "currentTaskID": None,
                         "currentTaskName": None,
                         "lastUpdatedBy": 0,
                         "lastUpdatedAt": "2020-02-14T12:40:04.69-05:00"
-                    }
+                    },
+                    {
+                        "detailID": detail_2_id,
+                        "detailType": "Repair_WTN",
+                        "detailStatus": "R",
+                        "detailValue": serial_number_1,
+                        "assignedToName": "0",
+                        "currentTaskID": None,
+                        "currentTaskName": None,
+                        "lastUpdatedBy": 0,
+                        "lastUpdatedAt": "2020-02-14T12:40:04.69-05:00"
+                    },
                 ]
             },
             'status': 200,
@@ -5103,14 +5133,16 @@ class TestServiceOutageMonitor:
 
         outage_monitor._post_note_in_outage_ticket.assert_called_once_with(ticket_id, edge_status)
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_id)
+        bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_2_id)
         notifications_repository.send_slack_message.assert_called_once_with(
-            f'Outage ticket {ticket_id} reopened. Ticket details at https://app.bruin.com/t/{ticket_id}'
+            f'Detail {detail_2_id} of outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}'
         )
 
     @pytest.mark.asyncio
     async def post_note_in_outage_ticket_with_no_outage_causes_test(self):
         ticket_id = 1234567
+
+        serial_number = 'VC1234567'
         edge_status = {
             'host': 'mettel.velocloud.net',
             'enterpriseName': 'Militaires Sans Frontières',
@@ -5123,7 +5155,7 @@ class TestServiceOutageMonitor:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -5178,11 +5210,15 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
 
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note_outage_causes)
+        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number, ticket_note_outage_causes
+        )
 
     @pytest.mark.asyncio
     async def post_note_in_outage_ticket_with_outage_causes_and_only_faulty_edge_test(self):
         ticket_id = 1234567
+
+        serial_number = 'VC1234567'
         edge_state = 'OFFLINE'
         edge_status = {
             'host': 'mettel.velocloud.net',
@@ -5196,7 +5232,7 @@ class TestServiceOutageMonitor:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -5252,14 +5288,18 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
 
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note_outage_causes)
+        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number, ticket_note_outage_causes
+        )
 
     @pytest.mark.asyncio
     async def post_note_in_outage_ticket_with_outage_causes_and_only_faulty_links_test(self):
         ticket_id = 1234567
+
         link_1_interface = 'REX'
         link_2_interface = 'RAY'
         links_state = 'DISCONNECTED'
+        serial_number = 'VC1234567'
         edge_status = {
             'host': 'mettel.velocloud.net',
             'enterpriseName': 'Militaires Sans Frontières',
@@ -5272,7 +5312,7 @@ class TestServiceOutageMonitor:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -5330,15 +5370,19 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
 
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note_outage_causes)
+        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number, ticket_note_outage_causes
+        )
 
     @pytest.mark.asyncio
     async def post_note_in_outage_ticket_with_outage_causes_and_faulty_edge_and_faulty_links_test(self):
         ticket_id = 1234567
+
         edge_state = 'OFFLINE'
         link_1_interface = 'REX'
         link_2_interface = 'RAY'
         links_state = 'DISCONNECTED'
+        serial_number = 'VC1234567'
         edge_status = {
             'host': 'mettel.velocloud.net',
             'enterpriseName': 'Militaires Sans Frontières',
@@ -5351,7 +5395,7 @@ class TestServiceOutageMonitor:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -5412,7 +5456,9 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
 
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note_outage_causes)
+        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number, ticket_note_outage_causes
+        )
 
     def get_outage_causes_test(self):
         edge_1_state = 'CONNECTED'
