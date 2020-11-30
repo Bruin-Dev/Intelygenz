@@ -369,15 +369,13 @@ In this project [KRE](https://konstellation-io.github.io/website/) is used, it h
 
 ## Access Control
 
-In the creation and possible updates in the EKS clusters used for the KRE [environments](./docs/SYSTEM_OVERVIEW#kre-environments), an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
+In the creation and possible updates in the EKS clusters used for the KRE [environments](./docs/PIPELINES#kre-environments), an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
 
 ### Roles
 
 IAM roles are created for each of the users, although these are distinguished into three categories according to the tag `Project-Role` of them, this tag will also be used to associate them to a `ClusterRole` of the EKS cluster and allow access to certain resources of the same. The mentioned tags are the following:
 
 - **developer**: This tag identify users that will only have access to the [pods](https://kubernetes.io/docs/concepts/workloads/pods/) of any namespace to perform `get`, `list` and `watch` on them.
-
-- **developer-ops-privileged**: This tag identiy users that will have access to any resource in the `core` and `apps` API groups of any namespace.
 
 - **devops**: This tag identify users that will access to any resource in any namespace.
 
@@ -395,7 +393,7 @@ Below are the roles created for each of the users actually, as well as the categ
 | daniel.fernandez | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
 | joseluis.vega | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
 | sancho.munoz | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
-| xisco.capllonch | developer-ops-privileged | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-xisco.capllonch |
+| xisco.capllonch | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-xisco.capllonch |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
 
@@ -405,6 +403,12 @@ Below are the roles created for each of the users actually, as well as the categ
 
 The following tools are required to access to the EKS clusters created for each environment:
 
+- **pip3**: It is necessary to have `pip3` for install python packages required to access the KRE clusters. It can be installed with the following command show below:
+
+  ```sh
+  $ sudo apt-get install python3-pip
+  ```
+
 - **kubectl**: It is necessary to have the command-line tool for Kubernetes in version `1.17.0` to interact with the cluster. It can be installed by following the commands shown below:
 
   ```sh
@@ -412,6 +416,74 @@ The following tools are required to access to the EKS clusters created for each 
   $ chmod +x ./kubectl
   $ sudo mv ./kubectl /usr/local/bin/kubectl
   ```
+
+- **kubectx**: utility to manage and switch between kubectl contexts. It can be installed with the following the commands show below:
+
+  1. Get the latest tag name:
+
+      ```sh
+      LATEST_RELEASE_TAG=$(curl --silent "https://api.github.com/repos/ahmetb/kubectx/releases/latest" | jq -r .tag_name)
+      ```
+
+  2. Download the binary according to the OS used:
+
+     - *MacOS*:
+
+       ```sh
+       $ curl -L "https://github.com/ahmetb/kubectx/releases/download/${LATEST_RELEASE_TAG}/kubectx_${LATEST_RELEASE_TAG}_darwin_x86_64.tar.gz" -o kubectx.tar.gz
+       ```
+
+     - *Linux*:
+
+       ```sh
+       $ curl -L "https://github.com/ahmetb/kubectx/releases/download/${LATEST_RELEASE_TAG}/kubectx_${LATEST_RELEASE_TAG}_linux_x86_64.tar.gz" -o kubectx.tar.gz
+       ```
+
+  3. Unzip the files downloaded in the previous step and configure:
+
+     ```sh
+     $ tar -zxvf kubectx.tar.gz
+     $ chmod +x ./kubectx
+     $ sudo mv ./kubectx /usr/local/bin/kubectx
+     ```
+
+- **robo3t**: It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
+
+    - *MacOS*:
+      
+      ```sh
+      $ LATEST_RELEASE_URL=$(curl --silent "https://api.github.com/repos/Studio3T/robomongo/releases/latest" | jq -r '.assets[] | select(.name | contains("dmg")) | .browser_download_url')
+      $ curl -L "${LATEST_RELEASE_URL}" -o robo3t
+      ```
+      > Once downloaded, to install it just double click on the file and drag the robo3t icon to 'Applications'.
+
+  - *Linux*:
+
+      ```sh
+      $ LATEST_RELEASE_URL=$(curl --silent "https://api.github.com/repos/Studio3T/robomongo/releases/latest" | jq -r '.assets[] | select(.name | contains("linux")) | .browser_download_url')
+      $ LATEST_RELEASE_NAME=$(curl --silent "https://api.github.com/repos/Studio3T/robomongo/releases/latest" | jq -r '.assets[] | select(.name | contains("linux")) | .name')
+      $ curl -L "${LATEST_RELEASE_URL}" -o robo3t.tar.gz
+      $ tar -zxvf robo3t.tar.gz
+      $ sudo mkdir /opt/robomongo
+      $ sudo mv ${LATEST_RELEASE_NAME%%.tar.gz}/* /opt/robomongo
+      $ sudo chmod +x /opt/robomongo/bin/robo3t
+      $ sudo ln -s /opt/robomongo/bin/robo3t /usr/bin/robo3t
+      $ cat <<EOF | tee /tmp/robomongo.txt
+      [Desktop Entry]
+      Encoding=UTF-8
+      Name=Robomongo
+      Comment=Launch Robomongo
+      Icon=/opt/robomongo/robomongo.png
+      Exec=/usr/bin/robo3t
+      Terminal=false
+      Type=Application
+      Categories=Developer;
+      StartupNotify=true
+    EOF
+      $ mv /tmp/robomongo.txt ~/.local/share/applications/robomongo.desktop
+      ``` 
+
+
 
 - **awscli**: It is necessary to have the command line tool for AWS in version `1.18.98` or higher. It can be installed with `pip` with the following command show below:
 
@@ -459,6 +531,13 @@ The following steps must be followed to set up the configuration to access any o
     $ aws eks update-kubeconfig --name <kre_eks_cluster_name> -p <aws_role_profile_name>
     ```
 
+   > The name of the EKS cluster for production is `mettel-automation-kre` and for development is `mettel-automation-kre-dev`.
+
+4. Switch to the `kubectl` context related to the cluster to be interacted with using `kubectx`:
+
+    ```sh
+    $ kubectx arn:aws:eks:us-east-1:<aws_account_id>:cluster/<kre_eks_cluster_name>
+    ```
 # Lists of projects READMEs
 
 ## Microservices
