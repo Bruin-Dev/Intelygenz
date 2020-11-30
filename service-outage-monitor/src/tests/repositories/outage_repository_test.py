@@ -177,9 +177,12 @@ class TestOutageRepository:
         result = outage_utils.is_faulty_link(link_state_2)
         assert result is True
 
-    def is_outage_ticket_auto_resolvable_test(self):
+    def is_outage_ticket_detail_auto_resolvable_test(self):
+        serial_number_1 = 'VC1234567'
+        serial_number_2 = 'VC7654321'
+
         text_identifier = ("#*Automation Engine*#\n"
-                           "Auto-resolving ticket for serial\n")
+                           "Auto-resolving detail for serial\n")
 
         note_value1 = f"{text_identifier}TimeStamp: 2021-01-02 10:18:16-05:00"
         note_value2 = f"{text_identifier}TimeStamp: 2020-01-02 10:18:16-05:00"
@@ -192,10 +195,16 @@ class TestOutageRepository:
             {
                 "noteId": 41894040,
                 "noteValue": note_value1,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
             {
                 "noteId": 41894043,
                 "noteValue": note_value4,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
         ]
 
@@ -203,14 +212,23 @@ class TestOutageRepository:
             {
                 "noteId": 41894040,
                 "noteValue": note_value1,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
             {
                 "noteId": 41894041,
                 "noteValue": note_value2,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
             {
                 "noteId": 41894042,
                 "noteValue": note_value4,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
         ]
 
@@ -218,30 +236,118 @@ class TestOutageRepository:
             {
                 "noteId": 41894040,
                 "noteValue": note_value1,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
             {
                 "noteId": 41894041,
                 "noteValue": note_value4,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
             {
                 "noteId": 41894042,
                 "noteValue": note_value2,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             },
             {
                 "noteId": 41894043,
                 "noteValue": note_value3,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
             }
+        ]
+
+        ticket_notes4 = [
+            {
+                "noteId": 41894040,
+                "noteValue": note_value1,
+                "serviceNumber": [
+                    serial_number_2,
+                ],
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": note_value2,
+                "serviceNumber": [
+                    serial_number_2,
+                ],
+            },
+            {
+                "noteId": 41894043,
+                "noteValue": note_value3,
+                "serviceNumber": [
+                    serial_number_2,
+                ],
+            }
+        ]
+
+        ticket_notes5 = [
+            {
+                "noteId": 41894040,
+                "noteValue": note_value1,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
+            },
+            {
+                "noteId": 41894040,
+                "noteValue": note_value1,
+                "serviceNumber": [
+                    serial_number_2,
+                ],
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": note_value2,
+                "serviceNumber": [
+                    serial_number_1,
+                ],
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": note_value2,
+                "serviceNumber": [
+                    serial_number_2,
+                ],
+            },
         ]
 
         logger = Mock()
         outage_utils = OutageRepository(logger=logger)
         autoresolve_limit = 3
 
-        ticket_bool1 = outage_utils.is_outage_ticket_auto_resolvable(ticket_notes1, autoresolve_limit)
+        ticket_bool1 = outage_utils.is_outage_ticket_detail_auto_resolvable(
+            ticket_notes1, serial_number_1, autoresolve_limit
+        )
         assert ticket_bool1 is True
 
-        ticket_bool2 = outage_utils.is_outage_ticket_auto_resolvable(ticket_notes2, autoresolve_limit)
+        ticket_bool2 = outage_utils.is_outage_ticket_detail_auto_resolvable(
+            ticket_notes2, serial_number_1, autoresolve_limit
+        )
         assert ticket_bool2 is True
 
-        ticket_bool3 = outage_utils.is_outage_ticket_auto_resolvable(ticket_notes3, autoresolve_limit)
+        ticket_bool3 = outage_utils.is_outage_ticket_detail_auto_resolvable(
+            ticket_notes3, serial_number_1, autoresolve_limit
+        )
         assert ticket_bool3 is False
+
+        ticket_bool4 = outage_utils.is_outage_ticket_detail_auto_resolvable(
+            ticket_notes4, serial_number_2, autoresolve_limit
+        )
+        assert ticket_bool4 is False
+
+        ticket_bool5 = outage_utils.is_outage_ticket_detail_auto_resolvable(
+            ticket_notes5, serial_number_1, autoresolve_limit
+        )
+        assert ticket_bool5 is True
+
+        ticket_bool6 = outage_utils.is_outage_ticket_detail_auto_resolvable(
+            ticket_notes5, serial_number_2, autoresolve_limit
+        )
+        assert ticket_bool6 is True

@@ -222,23 +222,30 @@ class OutageMonitor:
             if ticket_details_response_status not in range(200, 300):
                 return
 
-            notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
-            can_ticket_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_auto_resolvable(
-                notes_from_outage_ticket, max_autoresolves=3
-            )
-            if not can_ticket_be_autoresolved_one_more_time:
-                self._logger.info(f'[ticket-autoresolve] Limit to autoresolve ticket {outage_ticket_id} linked to edge '
-                                  f'{edge_identifier} has been maxed out already. Skipping autoresolve...')
-                return
-
             details_from_ticket = ticket_details_response_body['ticketDetails']
             detail_for_ticket_resolution = self._get_first_element_matching(
                 details_from_ticket,
                 lambda detail: detail['detailValue'] == serial_number,
             )
+            ticket_detail_id = detail_for_ticket_resolution['detailID']
+
+            notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+            can_detail_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_detail_auto_resolvable(
+                notes_from_outage_ticket, serial_number, max_autoresolves=3
+            )
+            if not can_detail_be_autoresolved_one_more_time:
+                self._logger.info(
+                    f'[ticket-autoresolve] Limit to autoresolve detail {ticket_detail_id} (serial {serial_number}) '
+                    f'of ticket {outage_ticket_id} linked to edge {edge_identifier} has been maxed out already. '
+                    'Skipping autoresolve...'
+                )
+                return
 
             if self._is_detail_resolved(detail_for_ticket_resolution):
-                self._logger.info(f'Ticket {outage_ticket_id} is already resolved. Skipping autoresolve...')
+                self._logger.info(
+                    f'Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} is already '
+                    'resolved. Skipping autoresolve...'
+                )
                 return
 
             working_environment = self._config.MONITOR_CONFIG['environment']
@@ -247,11 +254,11 @@ class OutageMonitor:
                                   f'current environment is {working_environment.upper()}.')
                 return
 
-            self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier} '
-                              f'with serial number {serial_number}...')
-            resolve_ticket_response = await self._bruin_repository.resolve_ticket(
-                outage_ticket_id, detail_for_ticket_resolution['detailID']
+            self._logger.info(
+                f'Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge '
+                f'{edge_identifier} with serial number {serial_number}...'
             )
+            resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
             if resolve_ticket_response['status'] not in range(200, 300):
                 return
 
@@ -259,7 +266,10 @@ class OutageMonitor:
             await self._notify_successful_autoresolve(outage_ticket_id)
 
             self._metrics_repository.increment_tickets_autoresolved()
-            self._logger.info(f'Ticket {outage_ticket_id} linked to edge {edge_identifier} was autoresolved!')
+            self._logger.info(
+                f'Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} linked to '
+                f'edge {edge_identifier} was autoresolved!'
+            )
 
     @staticmethod
     def _is_detail_resolved(ticket_detail: dict):

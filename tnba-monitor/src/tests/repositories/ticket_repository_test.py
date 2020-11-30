@@ -49,7 +49,7 @@ class TestTicketRepository:
 
         ticket_note = {
             "noteId": 41894043,
-            "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-12-30T06:38:13.503-05:00',
+            "noteValue": f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-12-30T06:38:13.503-05:00',
             "createdDate": '2019-12-30T06:38:13.503-05:00',
         }
         result = TicketRepository.is_tnba_note(ticket_note)

@@ -32,14 +32,17 @@ class OutageRepository:
     def is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
-    def is_outage_ticket_auto_resolvable(self, ticket_notes: list, max_autoresolves: int) -> bool:
-        regex = re.compile(r"^#\*Automation Engine\*#\nAuto-resolving ticket for serial")
+    def is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
+                                                serial_number: str,
+                                                max_autoresolves: int) -> bool:
+        regex = re.compile(r"^#\*Automation Engine\*#\nAuto-resolving detail for serial")
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:
             note_value = ticket_note['noteValue']
-            match = regex.match(note_value)
-            times_autoresolved += bool(match)
+            is_autoresolve_note = bool(regex.match(note_value))
+            is_note_related_to_serial = serial_number in ticket_note['serviceNumber']
+            times_autoresolved += int(is_autoresolve_note and is_note_related_to_serial)
 
             if times_autoresolved >= max_autoresolves:
                 return False

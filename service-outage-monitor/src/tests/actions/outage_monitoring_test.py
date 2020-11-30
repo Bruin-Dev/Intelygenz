@@ -1976,7 +1976,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_repository.is_outage_ticket_auto_resolvable.assert_not_called()
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_resolve_limit_exceeded_test(self):
@@ -2057,15 +2057,24 @@ class TestServiceOutageMonitor:
         outage_ticket_notes = [
             {
                 "noteId": 68246614,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
             {
                 "noteId": 68246615,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
             {
                 "noteId": 68246616,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
         ]
 
@@ -2094,7 +2103,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
         outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=False)
+        outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=False)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
@@ -2108,8 +2117,8 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, max_autoresolves=3
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, serial_number, max_autoresolves=3
         )
         outage_monitor._is_detail_resolved.assert_not_called()
 
@@ -2192,11 +2201,17 @@ class TestServiceOutageMonitor:
         outage_ticket_notes = [
             {
                 "noteId": 68246614,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
             {
                 "noteId": 68246615,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
         ]
 
@@ -2227,7 +2242,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
         outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
@@ -2242,8 +2257,8 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, max_autoresolves=3
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, serial_number, max_autoresolves=3
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -2329,11 +2344,17 @@ class TestServiceOutageMonitor:
         outage_ticket_notes = [
             {
                 "noteId": 68246614,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
             {
                 "noteId": 68246615,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
         ]
 
@@ -2381,8 +2402,8 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, max_autoresolves=3
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, serial_number, max_autoresolves=3
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -2469,11 +2490,17 @@ class TestServiceOutageMonitor:
         outage_ticket_notes = [
             {
                 "noteId": 68246614,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
             {
                 "noteId": 68246615,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
         ]
 
@@ -2508,7 +2535,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
         outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
@@ -2528,8 +2555,8 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, max_autoresolves=3
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, serial_number, max_autoresolves=3
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
@@ -2616,11 +2643,17 @@ class TestServiceOutageMonitor:
         outage_ticket_notes = [
             {
                 "noteId": 68246614,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
             {
                 "noteId": 68246615,
-                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
             },
         ]
 
@@ -2655,7 +2688,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
         outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
@@ -2675,8 +2708,8 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, max_autoresolves=3
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, serial_number, max_autoresolves=3
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)

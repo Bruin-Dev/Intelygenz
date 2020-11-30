@@ -1048,7 +1048,9 @@ class TestBruinRepository:
             with patch.object(bruin_repository_module, 'timezone', new=Mock()):
                 result = await bruin_repository.append_autoresolve_note_to_ticket(ticket_id, serial_number)
 
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, ticket_note, service_numbers=[serial_number]
+        )
         assert result == response
 
     @pytest.mark.asyncio

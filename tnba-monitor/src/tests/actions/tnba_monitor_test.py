@@ -1676,7 +1676,7 @@ class TestTNBAMonitor:
             'ticket_notes': [
                 {
                     "noteId": 41894042,
-                    "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "noteValue": f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
             ]
@@ -1781,7 +1781,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -1877,7 +1877,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -2011,7 +2011,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -2154,7 +2154,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -2326,7 +2326,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -2570,7 +2570,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -2837,7 +2837,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -3145,7 +3145,7 @@ class TestTNBAMonitor:
                 {
                     "noteId": 41894040,
                     "noteValue": (
-                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                        f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00'
                     ),
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
                 },
@@ -3483,7 +3483,7 @@ class TestTNBAMonitor:
         }
         ticket_1_note_3 = {
             "noteId": 41894040,
-            "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "noteValue": f'#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
         }
         ticket_1_notes = [
