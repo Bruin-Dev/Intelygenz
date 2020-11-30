@@ -2,17 +2,20 @@
 variable "igz_users_email" {
   type = list
   default = [
-//    "brandon.samudio@intelygenz.com",
-//    "daniel.fernandez@intelygenz.com",
-//    "joseluis.vega@intelygenz.com",
-//    "juancarlos.gomez@intelygenz.com",
-//    "julia.hossu@intelygenz.com",
-//    "sancho.munoz@intelygenz.com",
-    "jonas.dacruz@intelygenz.com",
+    "alberto.iglesias@intelygenz.com",
+    "angel.costales@intelygenz.com",
     "angel.sanchez@intelygenz.com",
-    "gustavo.marin@intelygenz.com",
-    "mettel@intelygenz.com",
+    "angelluis.piquero@intelygenz.com",
+    "brandon.samudio@intelygenz.com",
+    "daniel.fernandez@intelygenz.com",
     "francisco.capllonch@intelygenz.com",
+    "gustavo.marin@intelygenz.com",
+    "jonas.dacruz@intelygenz.com",
+    "joseluis.vega@intelygenz.com",
+    "juancarlos.gomez@intelygenz.com",
+    "julia.hossu@intelygenz.com",
+    "mettel@intelygenz.com",
+    "sancho.munoz@intelygenz.com",
     "xoan.mallon@intelygenz.com"
   ]
 }
