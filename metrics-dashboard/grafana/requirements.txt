@@ -1,4 +1,4 @@
 pyyaml==5.2
 requests==2.22.0
 -f https://s3pypi.mettel-automation.net/igzpackages/index.html
-igzpackages==2.0.0
+igzpackages==2.0.1
