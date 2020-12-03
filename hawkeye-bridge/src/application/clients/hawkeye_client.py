@@ -93,12 +93,136 @@ class HawkeyeClient:
         retries = 0
         return await _get_probes()
 
+    async def get_tests(self, filters):
+        async def _get_test():
+            nonlocal retries
+            return_response = dict.fromkeys(["body", "status"])
+            try:
+                self._logger.info(f'Getting all test using filters {filters}...')
+                response = await self._session.get(
+                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/tests',
+                    params=filters,
+                    ssl=True,
+                )
+            except Exception as e:
+                return_response["body"] = "Error while connecting to Hawkeye API"
+                return_response["status"] = 500
+                self.__log_result(return_response)
+                return return_response
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 401:
+                await self.login()
+                return_response["body"] = "Got 401 from Hawkeye"
+                return_response["status"] = response.status
+                self.__log_result(return_response)
+                if retries >= self._config.HAWKEYE_CONFIG["retries"]:
+                    self._logger.error(f'Maximum number of retries exceeded')
+                    return return_response
+                retries += 1
+                return_response = await _get_test()
+
+            if response.status in range(500, 513):
+                return_response["body"] = "Got internal error from Hawkeye"
+                return_response["status"] = 500
+                self.__log_result(return_response)
+            return return_response
+        retries = 0
+        return await _get_test()
+
+    async def get_tests_results(self, filters):
+        async def _get_tests_results():
+            nonlocal retries
+            return_response = dict.fromkeys(["body", "status"])
+            try:
+                self._logger.info(f'Getting test results using filters {filters}...')
+                response = await self._session.get(
+                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/testsresults',
+                    params=filters,
+                    ssl=True,
+                )
+            except Exception as e:
+                return_response["body"] = "Error while connecting to Hawkeye API"
+                return_response["status"] = 500
+                self.__log_result(return_response)
+                return return_response
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                await self.login()
+                return_response["body"] = "Parameters or body were in an incorrect format"
+                return_response["status"] = response.status
+                self.__log_result(return_response)
+
+            if response.status == 401:
+                await self.login()
+                return_response["body"] = "Got 401 from Hawkeye"
+                return_response["status"] = response.status
+                self.__log_result(return_response)
+                if retries >= self._config.HAWKEYE_CONFIG["retries"]:
+                    self._logger.error(f'Maximum number of retries exceeded')
+                    return return_response
+                retries += 1
+                return_response = await _get_tests_results()
+
+            if response.status in range(500, 513):
+                return_response["body"] = "Got internal error from Hawkeye"
+                return_response["status"] = 500
+                self.__log_result(return_response)
+            return return_response
+        retries = 0
+        return await _get_tests_results()
+
+    async def get_test_result_details(self, id_test):
+        async def _get_test_result_details():
+            nonlocal retries
+            return_response = dict.fromkeys(["body", "status"])
+            try:
+                self._logger.info(f'Getting test results details ...')
+                response = await self._session.get(
+                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/testsresults/{id_test}',
+                    ssl=True,
+                )
+            except Exception as e:
+                return_response["body"] = "Error while connecting to Hawkeye API"
+                return_response["status"] = 500
+                self.__log_result(return_response)
+                return return_response
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 401:
+                await self.login()
+                return_response["body"] = "Got 401 from Hawkeye"
+                return_response["status"] = response.status
+                self.__log_result(return_response)
+                if retries >= self._config.HAWKEYE_CONFIG["retries"]:
+                    self._logger.error(f'Maximum number of retries exceeded')
+                    return return_response
+                retries += 1
+                return_response = await _get_test_result_details()
+
+            if response.status in range(500, 513):
+                return_response["body"] = "Got internal error from Hawkeye"
+                return_response["status"] = 500
+                self.__log_result(return_response)
+            return return_response
+        retries = 0
+        return await _get_test_result_details()
+
     def __log_result(self, result: dict):
         body, status = result['body'], result['status']
 
-        # Status 400 not exist now in this api
-        # if status == 400:
-        #     self._logger.error(f"Got error from Hawkeye -> {body}")
+        if status == 400:
+            self._logger.error(f"Got error from Hawkeye -> {body}")
         if status == 401:
             self._logger.error(f'Authentication error -> {body}')
         if status in range(500, 513):
