@@ -1,10 +1,6 @@
 LIT_DISPATCH_CONFIRMED = """#*Automation Engine*# {dispatch_number}
 Dispatch Management - Dispatch Confirmed
 Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}
-
-Field Engineer
-{tech_name}
-{tech_phone}
 """
 
 
@@ -14,6 +10,21 @@ def lit_get_dispatch_confirmed_note(body):
         date_of_dispatch=body.get('date_of_dispatch'),
         time_of_dispatch=body.get('time_of_dispatch'),
         time_zone=body.get('time_zone'),
+    )
+
+
+LIT_FIELD_ENGINEER_CONFIRMED = """#*Automation Engine*# {dispatch_number}
+Dispatch Management - Field Engineer Confirmed
+
+Field Engineer
+{tech_name}
+{tech_phone}
+"""
+
+
+def lit_get_field_engineer_confirmed_note(body):
+    return LIT_FIELD_ENGINEER_CONFIRMED.format(
+        dispatch_number=body.get('dispatch_number'),
         tech_name=body.get('tech_name'),
         tech_phone=body.get('tech_phone')
     )

@@ -4,10 +4,6 @@ from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_x_hour
 expected_dispatch_confirmed_note = """#*Automation Engine*# DIS37266
 Dispatch Management - Dispatch Confirmed
 Dispatch scheduled for 2019-11-14 @ 6PM-8PM Pacific Time
-
-Field Engineer
-Michael J. Fox
-+16666666666
 """
 
 
@@ -17,8 +13,6 @@ def lit_get_dispatch_requested_note_test():
       'date_of_dispatch': '2019-11-14',
       'time_of_dispatch': '6PM-8PM',
       'time_zone': 'Pacific Time',
-      'tech_name': 'Michael J. Fox',
-      'tech_phone': '+16666666666'
     }
     dispatch_confirmed_note = lit_get_dispatch_confirmed_note(body)
 

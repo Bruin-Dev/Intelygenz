@@ -26,6 +26,7 @@ class LitDispatchMonitor:
         self.MAIN_WATERMARK = '#*Automation Engine*#'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
         self.DISPATCH_CONFIRMED_WATERMARK = 'Dispatch Management - Dispatch Confirmed'
+        self.DISPATCH_FIELD_ENGINEER_CONFIRMED_WATERMARK = 'Dispatch Management - Field Engineer Confirmed'
         self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK = 'Dispatch Management - Field Engineer On Site'
         self.DISPATCH_REPAIR_COMPLETED_WATERMARK = 'Dispatch Management - Repair Completed'
         self.DISPATCH_CANCELLED_WATERMARK = 'Dispatch Management - Dispatch Cancelled'
@@ -198,7 +199,6 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                           f"- Error: we could not retrieve 'sms_to_tech' number from: "
                                           f"{dispatch.get('Tech_Mobile_Number')}")
-                        continue
 
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                       f"Getting ticket details")
@@ -236,6 +236,8 @@ class LitDispatchMonitor:
                                                                           self.DISPATCH_REQUESTED_WATERMARK)
                     confirmed_note_found = UtilsRepository.find_note(filtered_ticket_notes,
                                                                      self.DISPATCH_CONFIRMED_WATERMARK)
+                    confirmed_field_engineer_note_found = UtilsRepository.find_note(
+                        filtered_ticket_notes, self.DISPATCH_FIELD_ENGINEER_CONFIRMED_WATERMARK)
                     confirmed_sms_note_found = UtilsRepository.find_note(filtered_ticket_notes,
                                                                          self.DISPATCH_CONFIRMED_SMS_WATERMARK)
                     confirmed_sms_tech_note_found = UtilsRepository.find_note(
@@ -273,7 +275,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS")
                         sms_sended = await self._lit_repository.send_confirmed_sms(
-                            dispatch_number, ticket_id, datetime_formatted_str, sms_to, tech_name)
+                            dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                         if not sms_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -295,104 +297,139 @@ class LitDispatchMonitor:
                                       f"Confirmed Note, SMS sent and Confirmed SMS note sent OK."
                         self._logger.info(msg)
                         await self._notifications_repository.send_slack_message(msg)
+                        if tech_name is None or sms_to_tech is None:
+                            continue
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms confirmed note")
+                    if tech_name is not None and sms_to_tech is not None:
+                        # Check if dispatch has a Confirmed Field Engineer Note
 
-                    if confirmed_sms_tech_note_found is None:
-                        self._logger.info(f"Dispatch: {dispatch_number} "
-                                          f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
-                        sms_sended = await self._lit_repository.send_confirmed_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
-                        if not sms_sended:
+                        if confirmed_field_engineer_note_found is None:
+                            self._logger.info(f"Dispatch: {dispatch_number} "
+                                              f"Ticket_id: {ticket_id} - appending confirmed field engineer note")
+                            result_append_confirmed_field_engineer_note = \
+                                await self._lit_repository.append_confirmed_field_engineer_note(dispatch_number,
+                                                                                                ticket_id, dispatch)
+                            if not result_append_confirmed_field_engineer_note:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"Confirmed Field Engineer Note not appended."
+                            else:
+                                self._logger.info(f"Dispatch: {dispatch_number} "
+                                                  f"Ticket_id: {ticket_id} - Sending confirmed field engineer SMS")
+
+                                sms_sended = await self._lit_repository.send_confirmed_field_engineer_sms(
+                                    dispatch_number, ticket_id, datetime_formatted_str, tech_name, sms_to)
+
+                                if not sms_sended:
+                                    msg = f"[service-dispatch-monitor] [LIT] " \
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                          f"SMS could not be sent to {sms_to}."
+                                else:
+                                    msg = f"[service-dispatch-monitor] [LIT] " \
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                          f"Confirmed Field Engineer Note and Confirmed SMS note sent OK."
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"- already has a field engineer confirmed note")
+
+                        if confirmed_sms_tech_note_found is None:
+                            self._logger.info(f"Dispatch: {dispatch_number} "
+                                              f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
+                            sms_sended = await self._lit_repository.send_confirmed_sms_tech(
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
+                            if not sms_sended:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"SMS Tech could not be sent to {sms_to_tech}."
+                                self._logger.info(msg)
+                                await self._notifications_repository.send_slack_message(msg)
+                                continue
+                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                              f"- Confirm SMS tech note not found")
+
+                            result_append_confirmed_sms_note = \
+                                await self._lit_repository.append_confirmed_sms_tech_note(dispatch_number, ticket_id,
+                                                                                          sms_to_tech)
+
+                            if not result_append_confirmed_sms_note:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"Confirmed SMS tech note not appended"
+                                self._logger.info(msg)
+                                await self._notifications_repository.send_slack_message(msg)
+                                continue
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"SMS Tech could not be sent to {sms_to_tech}."
+                                  f"Confirmed Note, SMS tech sent and Confirmed SMS tech note sent OK."
                             self._logger.info(msg)
                             await self._notifications_repository.send_slack_message(msg)
                             continue
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- Confirm SMS tech note not found")
+                                          f"- already has a sms tech confirmed note")
 
-                        result_append_confirmed_sms_note = await self._lit_repository.append_confirmed_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to_tech)
+                        # Check for Tech updates
+                        # First retrieve original tech name from confirmed note
+                        updated_tech_notes = [confirmed_field_engineer_note_found]
+                        for ticket_note in filtered_ticket_notes:
+                            if self.DISPATCH_UPDATED_TECH_WATERMARK in ticket_note.get('noteValue'):
+                                updated_tech_notes.append(ticket_note)
 
-                        if not result_append_confirmed_sms_note:
+                        tech_names = []
+                        for note in updated_tech_notes:
+                            note_data = note.get('noteValue').splitlines()
+                            if (note_data.index('Field Engineer') + 1) < len(note_data):
+                                tech_names.append(note_data[note_data.index('Field Engineer') + 1])
+                        latest_tech_name_assigned = tech_names[-1] if len(tech_names) >= 1 else None
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"Latest tech name assigned: {latest_tech_name_assigned}")
+                        if latest_tech_name_assigned is not None and latest_tech_name_assigned != tech_name:
+                            # Latest tech in notes is different than the actual tech
+                            self._logger.info(f"[service-dispatch-monitor] [LIT] "
+                                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                              f"- The tech has changed. "
+                                              f"Actual: {tech_name} latest: {latest_tech_name_assigned}")
+                            # Append update tech note
+                            result_append_updated_tech_note = await self._lit_repository.append_updated_tech_note(
+                                dispatch_number, ticket_id, dispatch)
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"Confirmed SMS tech note not appended"
+                                  f"- A updated tech note appended"
+                            if not result_append_updated_tech_note:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- An updated tech note not appended"
                             self._logger.info(msg)
                             await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [LIT] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"Confirmed Note, SMS tech sent and Confirmed SMS tech note sent OK."
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-                        continue
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a sms tech confirmed note")
 
-                    # Check for Tech updates
-                    # First retrieve original tech name from confirmed note
-                    updated_tech_notes = [confirmed_note_found]
-                    for ticket_note in filtered_ticket_notes:
-                        if self.DISPATCH_UPDATED_TECH_WATERMARK in ticket_note.get('noteValue'):
-                            updated_tech_notes.append(ticket_note)
-
-                    tech_names = []
-                    for note in updated_tech_notes:
-                        note_data = note.get('noteValue').splitlines()
-                        if (note_data.index('Field Engineer') + 1) < len(note_data):
-                            tech_names.append(note_data[note_data.index('Field Engineer') + 1])
-                    latest_tech_name_assigned = tech_names[-1] if len(tech_names) >= 1 else None
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"Latest tech name assigned: {latest_tech_name_assigned}")
-                    if latest_tech_name_assigned is not None and latest_tech_name_assigned != tech_name:
-                        # Latest tech in notes is different than the actual tech
-                        self._logger.info(f"[service-dispatch-monitor] [LIT] "
-                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- The tech has changed. "
-                                          f"Actual: {tech_name} latest: {latest_tech_name_assigned}")
-                        # Append update tech note
-                        result_append_updated_tech_note = await self._lit_repository.append_updated_tech_note(
-                            dispatch_number, ticket_id, dispatch)
-                        msg = f"[service-dispatch-monitor] [LIT] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A updated tech note appended"
-                        if not result_append_updated_tech_note:
+                            # Send sms client
+                            result_sms_update_tech_sended = await self._lit_repository.send_updated_tech_sms(
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to, tech_name
+                            )
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- An updated tech note not appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
+                                  f"- A updated tech sms sent"
+                            if not result_sms_update_tech_sended:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- An updated tech sms not sent"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
 
-                        # Send sms client
-                        result_sms_update_tech_sended = await self._lit_repository.send_updated_tech_sms(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to, tech_name
-                        )
-                        msg = f"[service-dispatch-monitor] [LIT] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A updated tech sms sent"
-                        if not result_sms_update_tech_sended:
+                            # Send sms tech
+                            result_sms_tech_update_tech_sended = await self._lit_repository.send_updated_tech_sms_tech(
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech
+                            )
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- An updated tech sms not sent"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-
-                        # Send sms tech
-                        result_sms_tech_update_tech_sended = await self._lit_repository.send_updated_tech_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech
-                        )
-                        msg = f"[service-dispatch-monitor] [LIT] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A updated tech sms tech sent"
-                        if not result_sms_tech_update_tech_sended:
-                            msg = f"[service-dispatch-monitor] [LIT] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- An updated tech sms tech not sent"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
+                                  f"- A updated tech sms tech sent"
+                            if not result_sms_tech_update_tech_sended:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- An updated tech sms tech not sent"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
 
                     await self._lit_repository.check_reminders(dispatch, filtered_ticket_notes,
                                                                date_time_of_dispatch, datetime_formatted_str,

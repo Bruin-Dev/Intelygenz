@@ -188,6 +188,19 @@ def dispatch_confirmed_tech_phone_none(lit_dispatch_monitor, dispatch):
 
 
 @pytest.fixture(scope='function')
+def dispatch_confirmed_no_tech(lit_dispatch_monitor, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595126"
+    updated_dispatch["Tech_First_Name"] = None
+    updated_dispatch["Tech_Mobile_Number"] = None
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544803"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Central Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "9:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def dispatch_confirmed_skipped(lit_dispatch_monitor, dispatch):
     updated_dispatch = copy.deepcopy(dispatch)
     updated_dispatch["Dispatch_Number"] = "DIS37406"
@@ -750,10 +763,8 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
         "noteId": 70805301,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer\n"
-                     "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
+                                           date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=dispatch_confirmed.get('Time_Zone_Local'),
                                            tech_name=dispatch_confirmed.get('Tech_First_Name'),
@@ -770,6 +781,17 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
+    confirmed_field_engineer_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     f"Dispatch Management - Field Engineer Confirmed\n\n"
+                     "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
+                                           tech_name=dispatch_confirmed.get('Tech_First_Name'),
+                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
@@ -780,7 +802,41 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
     }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_field_engineer_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_without_field_engineer_note(ticket_details_1, dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(ticket_details_1)
+    dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+    confirmed_ticket_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch Management - Dispatch Confirmed\n"
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
+                                           date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
+                                           time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+                                           time_zone=dispatch_confirmed.get('Time_Zone_Local'),
+                                           tech_name=dispatch_confirmed.get('Tech_First_Name'),
+                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_2 = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+
     return updated_ticket_details
 
 
@@ -841,14 +897,10 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
         "noteId": 70805301,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer\n"
-                     "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
+                                           date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=dispatch_confirmed.get('Time_Zone_Local'),
-                                           tech_name='Test TechName',
-                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
+                                           time_zone=dispatch_confirmed.get('Time_Zone_Local')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -857,6 +909,17 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
         "noteId": 70805301,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_field_engineer_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     f"Dispatch Management - Field Engineer Confirmed\n\n"
+                     "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
+                                           tech_name="Test TechName",
+                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -871,6 +934,7 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
     }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_field_engineer_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
     return updated_ticket_details
 
@@ -883,14 +947,10 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
         "noteId": 70805301,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer\n"
-                     "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
+                                           date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=dispatch_confirmed_2.get('Time_Zone_Local'),
-                                           tech_name='Test TechName',
-                                           tech_phone=dispatch_confirmed_2.get('Tech_Mobile_Number')),
+                                           time_zone=dispatch_confirmed_2.get('Time_Zone_Local')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -899,6 +959,17 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
         "noteId": 70805301,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_field_engineer_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     f"Dispatch Management - Field Engineer Confirmed\n\n"
+                     "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
+                                           tech_name="Test TechName",
+                                           tech_phone=dispatch_confirmed_2.get('Tech_Mobile_Number')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -913,6 +984,7 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
     }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_field_engineer_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
     return updated_ticket_details
 
@@ -979,6 +1051,17 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
+    confirmed_field_engineer_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     f"Dispatch Management - Field Engineer Confirmed\n\n"
+                     "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
+                                           tech_name=dispatch_confirmed_2.get('Tech_First_Name'),
+                                           tech_phone=dispatch_confirmed_2.get('Tech_Mobile_Number')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805304,
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
@@ -989,6 +1072,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
     }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_field_engineer_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
     return updated_ticket_details
 
@@ -1197,8 +1281,7 @@ def append_note_response_2(append_note_response):
     updated_note["ticketNotes"][0]["noteID"] = 70897912
     updated_note["ticketNotes"][0]["noteValue"] = '#*Automation Engine*#\n' \
                                                   'Dispatch Management - Dispatch Confirmed\n' \
-                                                  'Dispatch scheduled for 2020-03-16 @ None None\n\n' \
-                                                  'Field Engineer\nJoe Malone\n+12123595129\n'
+                                                  'Dispatch scheduled for 2020-03-16 @ None None\n'
     return updated_note
 
 

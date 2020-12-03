@@ -11,8 +11,10 @@ from application.repositories import nats_error_response
 
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms_tech
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
+from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_field_engineer_confirmed_sms
 from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_field_engineer_confirmed_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_tech_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_note
 from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
@@ -242,9 +244,7 @@ class LitRepository:
         # A confirmed dispatch must have status: 'Request Confirmed'
         # and this two fields filled Tech_First_Name, Tech_Mobile_Number
         return all([dispatch is not None,
-                    dispatch.get('Dispatch_Status') == self.DISPATCH_CONFIRMED,
-                    dispatch.get("Tech_First_Name") is not None,
-                    dispatch.get("Tech_Mobile_Number") is not None])
+                    dispatch.get('Dispatch_Status') == self.DISPATCH_CONFIRMED])
 
     def is_tech_on_site(self, dispatch):
         # Filter tech on site dispatches
@@ -284,14 +284,13 @@ class LitRepository:
                 dispatches_splitted_by_status[dispatch.get('Dispatch_Status')].append(dispatch)
         return dispatches_splitted_by_status
 
-    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to, tech_name) -> bool:
+    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
             'date_of_dispatch': dispatch_datetime,
-            'tech_name': tech_name
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -310,6 +309,40 @@ class LitRepository:
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
             err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                       f'An error occurred when sending Confirmed SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(
+            f"SMS sent Response {sms_response_body}")
+        return True
+
+    async def send_confirmed_field_engineer_sms(self, dispatch_number, ticket_id, dispatch_datetime,
+                                                tech_name, sms_to) -> bool:
+        if sms_to is None:
+            return False
+
+        # Get SMS data
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'tech_name': tech_name
+        }
+
+        sms_data = lit_get_dispatch_field_engineer_confirmed_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
+        sms_response = await self._notifications_repository.send_sms(sms_payload)
+        sms_response_status = sms_response['status']
+        sms_response_body = sms_response['body']
+        if sms_response_status not in range(200, 300):
+            self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - SMS NOT sent")
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending Confirmed Field Engineer SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_slack_message(err_msg)
             return False
@@ -499,8 +532,6 @@ class LitRepository:
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'tech_name': dispatch.get('Tech_First_Name'),
-            'tech_phone': dispatch.get('Tech_Mobile_Number')
         }
         note = lit_get_dispatch_confirmed_note(note_data)
         # if self._config.DISPATCH_MONITOR_CONFIG['environment'] == 'production':
@@ -521,6 +552,32 @@ class LitRepository:
                           f"Ticket_id: {ticket_id} - Confirmed note appended")
         self._logger.info(
             f"Confirmed Note appended. Response {append_note_response_body}")
+        return True
+
+    async def append_confirmed_field_engineer_note(self, dispatch_number, ticket_id, dispatch) -> bool:
+        note_data = {
+            'dispatch_number': dispatch_number,
+            'tech_name': dispatch.get('Tech_First_Name'),
+            'tech_phone': dispatch.get('Tech_Mobile_Number')
+        }
+        confirmed_field_engineer_note = lit_get_field_engineer_confirmed_note(note_data)
+        append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id,
+                                                                                  confirmed_field_engineer_note)
+        append_sms_note_response_status = append_note_response['status']
+        append_sms_note_response_body = append_note_response['body']
+        if append_sms_note_response_status not in range(200, 300):
+            self._logger.info(f"Note: `{confirmed_field_engineer_note}` "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - Field Engineer Confirmed note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{confirmed_field_engineer_note}` " \
+                      f"- Field Engineer Confirmed note not appended"
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"Note: `{confirmed_field_engineer_note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - Field Engineer SMS note Appended")
+        self._logger.info(
+            f"Field Engineer Confirmed note appended. Response {append_sms_note_response_body}")
         return True
 
     async def append_confirmed_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
@@ -660,6 +717,8 @@ class LitRepository:
         self._logger.info("[service-dispatch-monitor] [LIT] Checking reminders")
 
         for reminder in self._reminders:
+            if reminder['type'] == 'tech' and sms_to_tech is None:
+                continue
             try:
                 current_hour = reminder['hour']
                 pre_log = f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
