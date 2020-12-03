@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 class HawkeyeRepository:
 
     def __init__(self, logger, hawkeye_client, config):
@@ -6,6 +9,9 @@ class HawkeyeRepository:
         self._hawkeye_client = hawkeye_client
 
     async def get_probes(self, params):
+        return await self.__make_paginated_request(self._hawkeye_client.get_probes, params)
+
+    async def __make_paginated_request(self, hawkclient: Callable, params):
         result = {
             'body': [],
             'status': 200,
@@ -15,10 +21,10 @@ class HawkeyeRepository:
         offset = 0
         limit = 500
         params['limit'] = limit
-        self._logger.info(f'Check all pages of probes')
+        self._logger.info(f'Check all pages')
         while has_more:
             params['offset'] = offset
-            response = await self._hawkeye_client.get_probes(params)
+            response = await hawkclient(params)
             if response['status'] not in range(200, 300):
                 if retries < self._config.HAWKEYE_CONFIG["retries"]:
                     retries += 1
