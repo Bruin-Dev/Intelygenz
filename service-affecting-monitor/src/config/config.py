@@ -27,9 +27,9 @@ MONITOR_CONFIG = {
     "jitter": 30,
     'monitoring_minutes_interval': 10,
     "monitoring_minutes_per_trouble": {
-        "latency": 10,
-        "packet_loss": 10,
-        "jitter": 10,
+        "latency": 30,
+        "packet_loss": 30,
+        "jitter": 30,
     },
 }
 
