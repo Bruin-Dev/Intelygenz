@@ -21,9 +21,9 @@ expected_dispatch_request_mail = """
 <p>Materials Needed:</p>
 <p>Laptop, cable, tuner, ladder,internet hotspot</p>
 <p>Service Category: Troubleshooting</p>
-<p>Name: Karen Doe</p>
-<p>Phone: +1 666 6666 666</p>
-<p>Email: karen.doe@mettel.net</p>
+<p>MetTel Requester Name: Karen Doe</p>
+<p>MetTel Requester Phone: +1 666 6666 666</p>
+<p>MetTel Requester Email: karen.doe@mettel.net</p>
 <p>IGZ Dispatch Number: IGZ_0001</p>
 """
 

@@ -39,6 +39,12 @@ class TestCtsRepository:
         assert cts_repository._find_field_in_dispatch_description(cts_dispatch_confirmed_none_description,
                                                                   'Onsite Timezone') == expected_2
 
+    def get_requester_info_test(self, cts_repository, cts_dispatch_confirmed):
+        requester_info = cts_repository.get_requester_info(cts_dispatch_confirmed)
+        assert requester_info['requester_name'] == 'Karen Doe'
+        assert requester_info['requester_phone'] == '+1 666 666 6666'
+        assert requester_info['requester_email'] == 'karen.doe@mettel.net'
+
     def get_onsite_time_needed_test(self, cts_repository, cts_dispatch_confirmed,
                                     cts_dispatch_confirmed_none_description,
                                     cts_dispatch_confirmed_bad_date,

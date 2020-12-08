@@ -29,9 +29,9 @@ class CtsRepository:
     def get_requester_info(self, dispatch):
         requester_info = {}
 
-        requester_info['requester_name'] = self._find_field_in_dispatch_description(dispatch, 'Name')
-        requester_info['requester_phone'] = self._find_field_in_dispatch_description(dispatch, 'Phone')
-        requester_info['requester_email'] = self._find_field_in_dispatch_description(dispatch, 'Email')
+        requester_info['requester_name'] = self._find_field_in_dispatch_description(dispatch, 'MetTel Requester Name')
+        requester_info['requester_phone'] = self._find_field_in_dispatch_description(dispatch, 'MetTel Requester Phone')
+        requester_info['requester_email'] = self._find_field_in_dispatch_description(dispatch, 'MetTel Requester Email')
 
         return requester_info
 

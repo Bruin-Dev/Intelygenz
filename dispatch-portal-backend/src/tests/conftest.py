@@ -214,8 +214,9 @@ def cts_dispatch():
                               'Failure Experienced: TEST Device is bouncing constantly\r\n'
                               'Onsite SOW: This is a TEST\r\n'
                               'Materials Needed: Laptop, cable, tuner, ladder, internet hotspot\r\n'
-                              'Service Category: Part Replacement\r\nName: Karen Doe\r\nPhone: +1 666 666 6666\r\n'
-                              'Email: karen.doe@mettel.net\r\nIGZ Dispatch Number: IGZ_0001',
+                              'Service Category: Part Replacement\r\nMetTel Requester Name: Karen Doe\r\n'
+                              'MetTel Requester Phone: +1 666 666 6666\r\n'
+                              'MetTel Requester Email: karen.doe@mettel.net\r\nIGZ Dispatch Number: IGZ_0001',
             'Duration_Onsite__c': None,
             'Early_Start__c': '2020-06-21T23:00:00.000+0000',
             'Ext_Ref_Num__c': '4680743',
@@ -288,8 +289,9 @@ def cts_dispatch_mapped():
                               "Failure Experienced: TEST Device is bouncing constantly\r\n"
                               "Onsite SOW: This is a TEST\r\n"
                               "Materials Needed: Laptop, cable, tuner, ladder, internet hotspot\r\n"
-                              "Service Category: Part Replacement\r\nName: Karen Doe\r\n"
-                              "Phone: +1 666 666 6666\r\nEmail: karen.doe@mettel.net\r\n"
+                              "Service Category: Part Replacement\r\nMetTel Requester Name: Karen Doe\r\n"
+                              "MetTel Requester Phone: +1 666 666 6666\r\nMetTel Requester "
+                              "Email: karen.doe@mettel.net\r\n"
                               "IGZ Dispatch Number: IGZ_0001",
             "duration_onsite__c": None,
             "early_start__c": "2020-06-21T23:00:00.000+0000",

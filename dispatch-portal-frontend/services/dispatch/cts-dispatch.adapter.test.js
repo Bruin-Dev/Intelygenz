@@ -33,13 +33,12 @@ describe('cts dispatch adapter tests', () => {
       hardTimeDispatch: '',
       hardTimeZone: '',
       requester: {
-        name: 'See "Details" section for requester name',
+        name: '',
         groupEmail: '',
-        email: 'See "Details" section for requester email',
+        email: '',
         department: '',
-        phoneNumber: 'See "Details" section for requester phone number',
-        departmentPhoneNumber:
-          'See "Details" section for requester phone number'
+        phoneNumber: '',
+        departmentPhoneNumber: ''
       },
       onSiteContact: {
         site: '',

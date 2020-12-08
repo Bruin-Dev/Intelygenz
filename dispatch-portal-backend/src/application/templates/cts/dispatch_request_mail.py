@@ -18,9 +18,9 @@ CTS_DISPATCH_REQUEST_MAIL = """
 <p>Materials Needed:</p>
 <p>{materials_needed}</p>
 <p>Service Category: {service_category}</p>
-<p>Name: {name} {lastname}</p>
-<p>Phone: {phone_number}</p>
-<p>Email: {email}</p>
+<p>MetTel Requester Name: {name} {lastname}</p>
+<p>MetTel Requester Phone: {phone_number}</p>
+<p>MetTel Requester Email: {email}</p>
 <p>IGZ Dispatch Number: {igz_dispatch_number}</p>
 """
 
