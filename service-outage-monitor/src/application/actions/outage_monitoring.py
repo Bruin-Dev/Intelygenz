@@ -367,6 +367,21 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
+                    elif ticket_creation_response_status == 472:
+                        self._logger.info(
+                            f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
+                            f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
+                            f'by Bruin. Appending reopen note to ticket...'
+                        )
+                        await self._post_note_in_outage_ticket(ticket_creation_response_body, edge_status)
+                    elif ticket_creation_response_status == 473:
+                        self._logger.info(
+                            f'[outage-recheck] There is a resolve outage ticket for the same location of faulty edge '
+                            f'{edge_identifier} (ticket ID = {ticket_creation_response_body}). The ticket was'
+                            f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
+                            f'appended to it. Appending initial triage note for this service number...'
+                        )
+                        await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for {len(edges_still_in_outage)} faulty '

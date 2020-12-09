@@ -948,6 +948,72 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def create_outage_ticket_returning_472_status_test(self):
+        client_id = 12345
+        service_number = 'VC1234567'
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': client_id,
+                'service_number': service_number,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 9999,
+            'status': 472,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.creation.outage.request", request, timeout=30)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def create_outage_ticket_returning_473_status_test(self):
+        client_id = 12345
+        service_number = 'VC1234567'
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': client_id,
+                'service_number': service_number,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 9999,
+            'status': 473,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.creation.outage.request", request, timeout=30)
+        assert result == response
+
+    @pytest.mark.asyncio
     async def create_outage_ticket_with_rpc_request_failing_test(self):
         client_id = 12345
         service_number = 'VC1234567'
