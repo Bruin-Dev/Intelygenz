@@ -51,6 +51,7 @@ MONITOR_CONFIG = {
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
     'autoresolve_ticket_creation_seconds': 60 * 60,
+    'autoresolve_last_outage_seconds': 60 * 60,
     'semaphore': 5,
 }
 

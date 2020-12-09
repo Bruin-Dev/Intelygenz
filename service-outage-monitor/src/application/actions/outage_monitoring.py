@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import time
 
 from collections import defaultdict
@@ -17,6 +18,10 @@ from pytz import utc
 from tenacity import retry
 from tenacity import stop_after_delay
 from tenacity import wait_exponential
+
+
+TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(VeloCloud\)')
+REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
 
 
 class OutageMonitor:
@@ -213,14 +218,12 @@ class OutageMonitor:
 
             outage_ticket: dict = outage_ticket_response_body[0]
             outage_ticket_id = outage_ticket['ticketID']
+            outage_ticket_creation_date = outage_ticket['createDate']
 
             if not self._was_ticket_created_by_automation_engine(outage_ticket):
                 self._logger.info(
                     f'Ticket {outage_ticket_id} was not created by Automation Engine. Skipping autoresolve...'
                 )
-                return
-
-            if not self._can_autoresolve_ticket_by_age(outage_ticket):
                 return
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(outage_ticket_id)
@@ -237,6 +240,15 @@ class OutageMonitor:
             ticket_detail_id = detail_for_ticket_resolution['detailID']
 
             notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+            relevant_notes = [note for note in notes_from_outage_ticket if serial_number in note['serviceNumber']]
+            if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
+                self._logger.info(
+                    f'Edge {edge_identifier} has been in outage state for a long time, so detail {ticket_detail_id} '
+                    f'(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping '
+                    f'autoresolve...'
+                )
+                return
+
             can_detail_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_detail_auto_resolvable(
                 notes_from_outage_ticket, serial_number, max_autoresolves=3
             )
@@ -292,6 +304,9 @@ class OutageMonitor:
             return next(elem for elem in iterable if condition(elem))
         except StopIteration:
             return fallback
+
+    def _get_last_element_matching(self, iterable, condition: Callable, fallback=None):
+        return self._get_first_element_matching(reversed(iterable), condition, fallback)
 
     async def _notify_successful_autoresolve(self, ticket_id):
         message = f'Outage ticket {ticket_id} was autoresolved. Details at https://app.bruin.com/t/{ticket_id}'
@@ -516,17 +531,30 @@ class OutageMonitor:
 
         return outage_causes or None
 
-    def _can_autoresolve_ticket_by_age(self, outage_ticket_info):
-        ticket_id = outage_ticket_info["ticketID"]
-        outage_ticket_creation_date_utc = datetime.strptime(outage_ticket_info["createDate"], "%m/%d/%Y %I:%M:%S %p")
-        now = datetime.utcnow()
-        seconds_from_creation = (now - outage_ticket_creation_date_utc).total_seconds()
-        max_ticket_age_seconds = self._config.MONITOR_CONFIG['autoresolve_ticket_creation_seconds']
-        self._logger.info(f'It has been {int(seconds_from_creation / 60)} minutes '
-                          f'since ticket creation for ticket {ticket_id}')
+    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
+        current_datetime = datetime.now(utc)
+        max_seconds_since_last_outage = self._config.MONITOR_CONFIG['autoresolve_last_outage_seconds']
 
-        if seconds_from_creation > max_ticket_age_seconds:
-            self._logger.info(f"Ticket age is greater than {int(max_ticket_age_seconds / 60)} minutes "
-                              f"for ticket {ticket_id}. Skipping autoresolve...")
-            return False
-        return True
+        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
+
+        last_reopen_note = self._get_last_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: REOPEN_NOTE_REGEX.match(note['noteValue'])
+        )
+        if last_reopen_note:
+            note_creation_date = parse(last_reopen_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
+
+        triage_note = self._get_first_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: TRIAGE_NOTE_REGEX.match(note['noteValue'])
+        )
+        if triage_note:
+            note_creation_date = parse(triage_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
+
+        ticket_creation_datetime = parse(ticket_creation_date, ignoretz=True)
+        seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
+        return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
