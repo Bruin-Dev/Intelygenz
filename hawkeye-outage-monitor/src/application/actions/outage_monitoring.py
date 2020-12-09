@@ -325,6 +325,26 @@ class OutageMonitor:
                         'Re-opening ticket...'
                     )
                     await self._reopen_outage_ticket(ticket_id, device)
+                elif ticket_creation_status == 472:
+                    self._logger.info(
+                        f'[outage-recheck] Faulty device {serial_number} has a resolved outage ticket '
+                        f'(ID = {ticket_id}). Its ticket detail was automatically unresolved '
+                        f'by Bruin. Appending reopen note to ticket...'
+                    )
+                    outage_causes = self._get_outage_causes_for_reopen_note(device)
+                    await self._bruin_repository.append_reopening_note_to_ticket(ticket_id,
+                                                                                 device['cached_info']['serial_number'],
+                                                                                 outage_causes)
+                elif ticket_creation_status == 473:
+                    self._logger.info(
+                        f'[outage-recheck] There is a resolve outage ticket for the same location of faulty device '
+                        f'{serial_number} (ticket ID = {ticket_id}). The ticket was'
+                        f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
+                        f'appended to it. Appending initial triage note for this service number...'
+                    )
+                    triage_note = self._build_triage_note(device['device_info'])
+                    await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
+
         else:
             self._logger.info(
                 "No devices were detected in outage state after re-check. Outage tickets won't be created"

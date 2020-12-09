@@ -1630,6 +1630,435 @@ class TestServiceOutageMonitor:
         ])
 
     @pytest.mark.asyncio
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_472_status_test(self):
+        serial_number_1 = 'B827EB76A8DE'
+        serial_number_2 = 'D827GD76C8FG'
+
+        probe_1_info = {
+            "probeId": "1",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number_1,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 0,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+        probe_2_info = {
+            "probeId": "3",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number_2,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 0,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+
+        bruin_client_id = 9994
+        device_1_cached_info = {
+            "serial_number": serial_number_1,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": bruin_client_id,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+        device_2_cached_info = {
+            "serial_number": serial_number_2,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": bruin_client_id,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+        devices_cached_info = [
+            device_1_cached_info,
+            device_2_cached_info,
+        ]
+
+        device_1_info = {
+            'device_info': probe_1_info,
+            'cached_info': device_1_cached_info,
+        }
+        device_2_info = {
+            'device_info': probe_2_info,
+            'cached_info': device_2_cached_info,
+        }
+        devices_info = [
+            device_1_info,
+            device_2_info,
+        ]
+
+        probes = [
+            probe_1_info,
+            probe_2_info,
+        ]
+        probes_response = {
+            'body': probes,
+            'status': 200,
+        }
+
+        ticket_id = 12345
+        create_ticket_response = {
+            'body': ticket_id,
+            'status': 472,
+        }
+
+        outage_causes = 'These are the outage causes'
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        customer_cache_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+
+        bruin_repository = Mock()
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
+        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+
+        hawkeye_repository = Mock()
+        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor._build_triage_note = Mock()
+        outage_monitor._run_ticket_autoresolve = CoroutineMock()
+        outage_monitor._get_outage_causes_for_reopen_note = Mock(return_value=outage_causes)
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
+
+        hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
+        bruin_repository.create_outage_ticket.assert_has_awaits([
+            call(bruin_client_id, serial_number_1),
+            call(bruin_client_id, serial_number_2),
+        ])
+        outage_monitor._get_outage_causes_for_reopen_note.assert_has_calls([
+            call(device_1_info),
+            call(device_2_info),
+        ])
+        bruin_repository.append_reopening_note_to_ticket.assert_has_awaits([
+            call(ticket_id, serial_number_1, outage_causes),
+            call(ticket_id, serial_number_2, outage_causes),
+        ])
+        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_473_status_test(self):
+        serial_number_1 = 'B827EB76A8DE'
+        serial_number_2 = 'D827GD76C8FG'
+
+        probe_1_info = {
+            "probeId": "1",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number_1,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 0,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+        probe_2_info = {
+            "probeId": "3",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number_2,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 0,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+
+        bruin_client_id = 9994
+        device_1_cached_info = {
+            "serial_number": serial_number_1,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": bruin_client_id,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+        device_2_cached_info = {
+            "serial_number": serial_number_2,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": bruin_client_id,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+        devices_cached_info = [
+            device_1_cached_info,
+            device_2_cached_info,
+        ]
+
+        device_1_info = {
+            'device_info': probe_1_info,
+            'cached_info': device_1_cached_info,
+        }
+        device_2_info = {
+            'device_info': probe_2_info,
+            'cached_info': device_2_cached_info,
+        }
+        devices_info = [
+            device_1_info,
+            device_2_info,
+        ]
+
+        probes = [
+            probe_1_info,
+            probe_2_info,
+        ]
+        probes_response = {
+            'body': probes,
+            'status': 200,
+        }
+
+        ticket_id = 12345
+        create_ticket_response = {
+            'body': ticket_id,
+            'status': 473,
+        }
+
+        triage_note = 'This is a triage note'
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        customer_cache_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+
+        bruin_repository = Mock()
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
+        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+
+        hawkeye_repository = Mock()
+        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor._build_triage_note = Mock(return_value=triage_note)
+        outage_monitor._run_ticket_autoresolve = CoroutineMock()
+        outage_monitor._reopen_outage_ticket = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
+
+        hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
+        bruin_repository.create_outage_ticket.assert_has_awaits([
+            call(bruin_client_id, serial_number_1),
+            call(bruin_client_id, serial_number_2),
+        ])
+        outage_monitor._build_triage_note.assert_has_calls([
+            call(probe_1_info),
+            call(probe_2_info),
+        ])
+        bruin_repository.append_triage_note_to_ticket.assert_has_awaits([
+            call(ticket_id, serial_number_1, triage_note),
+            call(ticket_id, serial_number_2, triage_note),
+        ])
+        outage_monitor._reopen_outage_ticket.assert_not_awaited()
+        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_healthy_state_test(self):
         serial_number_1 = 'B827EB76A8DE'
         serial_number_2 = 'D827GD76C8FG'

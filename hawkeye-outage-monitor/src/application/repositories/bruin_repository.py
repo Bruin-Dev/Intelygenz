@@ -180,7 +180,8 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if not (response_status in range(200, 300) or response_status == 409 or response_status == 471):
+            is_bruin_custom_status = response_status in (409, 471, 472, 473)
+            if not (response_status in range(200, 300) or is_bruin_custom_status):
                 err_msg = (
                     f'Error while creating outage ticket for device {service_number} that belongs to client '
                     f'{client_id}: Error {response_status} - {response_body}'
