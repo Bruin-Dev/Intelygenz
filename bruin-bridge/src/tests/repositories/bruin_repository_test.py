@@ -474,6 +474,66 @@ class TestBruinRepository:
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
+    async def post_outage_ticket_with_472_status_code_test(self):
+        client_id = 9994
+        service_number = "VC05400002265"
+
+        ticket_id = 4503440
+        response_status = 472
+        client_response = {
+            "body": {
+                "ticketId": ticket_id,
+                "inventoryId": 12796795,
+                "wtn": service_number,
+                "errorMessage": None,
+                "errorCode": response_status,
+            },
+            "status": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.post_outage_ticket(client_id, service_number)
+
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number)
+        assert result == {"body": ticket_id, "status": response_status}
+
+    @pytest.mark.asyncio
+    async def post_outage_ticket_with_473_status_code_test(self):
+        client_id = 9994
+        service_number = "VC05400002265"
+
+        ticket_id = 4503440
+        response_status = 473
+        client_response = {
+            "body": {
+                "ticketId": ticket_id,
+                "inventoryId": 12796795,
+                "wtn": service_number,
+                "errorMessage": None,
+                "errorCode": response_status,
+            },
+            "status": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.post_outage_ticket(client_id, service_number)
+
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number)
+        assert result == {"body": ticket_id, "status": response_status}
+
+    @pytest.mark.asyncio
     async def post_outage_ticket_with_error_status_code_test(self):
         client_id = 9994
         service_number = "VC05400002265"

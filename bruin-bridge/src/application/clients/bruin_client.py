@@ -496,6 +496,21 @@ class BruinClient:
                         f"There's no need to create a new ticket as there is an existing one with Resolved status"
                     )
                     status_code = 471
+                elif ticket_data['errorCode'] == 472:
+                    self._logger.info(
+                        f"Got HTTP 472 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                        f"There's no need to create a new ticket as there is an existing one with Resolved status. "
+                        f"The existing ticket has been unresolved and it's now In-Progress."
+                    )
+                    status_code = 472
+                elif ticket_data['errorCode'] == 473:
+                    self._logger.info(
+                        f"Got HTTP 473 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                        f"There's no need to create a new ticket as there is an existing one with Resolved status for "
+                        f"the same location of the service number. The existing ticket has been unresolved and it's "
+                        f"now In-Progress, and a new ticket detail has been added for the specified service number."
+                    )
+                    status_code = 473
 
                 return_response["body"] = ticket_data
                 return_response["status"] = status_code

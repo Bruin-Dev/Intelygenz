@@ -114,7 +114,8 @@ class BruinRepository:
         response = await self._bruin_client.post_outage_ticket(client_id, service_number)
 
         status_code = response['status']
-        if not (status_code in range(200, 300) or status_code == 409 or status_code == 471):
+        is_bruin_custom_status = status_code in (409, 471, 472, 473)
+        if not (status_code in range(200, 300) or is_bruin_custom_status):
             return response
 
         response['body'] = response['body']['ticketId']

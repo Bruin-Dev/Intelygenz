@@ -1441,7 +1441,10 @@ class TestPostOutageTicket:
             "ticketId": 4503440,
             "inventoryId": 12796795,
             "wtn": service_number,
-            "errorMessage": "Ticket is in progress.",
+            "errorMessage": (
+                "Warning: Ticket already exists. We'll add an additional line.\n Failed to add additional line: The "
+                "item already exists in 4503440, could not add another dulplicate one"
+            ),
             "errorCode": 409,
         }
         bruin_response_body = {
@@ -1498,6 +1501,104 @@ class TestPostOutageTicket:
         }
         bruin_response_status = 200
         bruin_custom_status = 471
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client._session.post.assert_awaited_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                ssl=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status": bruin_custom_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def post_outage_ticket_with_http_472_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": "Warning: We unresolved this line (detailId[5506458]) as well as its ticket[4503440].\n",
+            "errorCode": 472,
+        }
+        bruin_response_body = {
+            "assets": [ticket_data]
+        }
+        bruin_response_status = 200
+        bruin_custom_status = 472
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client._session.post.assert_awaited_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                ssl=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status": bruin_custom_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def post_outage_ticket_with_http_473_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": "Warning: We unresolved this line (detailId[5506458]) as well as its ticket[4503440].\n",
+            "errorCode": 473,
+        }
+        bruin_response_body = {
+            "assets": [ticket_data]
+        }
+        bruin_response_status = 200
+        bruin_custom_status = 473
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
