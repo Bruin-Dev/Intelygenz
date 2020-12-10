@@ -93,46 +93,6 @@ class HawkeyeClient:
         retries = 0
         return await _get_probes()
 
-    async def get_tests(self, filters):
-        async def _get_test():
-            nonlocal retries
-            return_response = dict.fromkeys(["body", "status"])
-            try:
-                self._logger.info(f'Getting all test using filters {filters}...')
-                response = await self._session.get(
-                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/tests',
-                    params=filters,
-                    ssl=True,
-                )
-            except Exception as e:
-                return_response["body"] = "Error while connecting to Hawkeye API"
-                return_response["status"] = 500
-                self.__log_result(return_response)
-                return return_response
-            if response.status in range(200, 300):
-                response_json = await response.json()
-                return_response["body"] = response_json
-                return_response["status"] = response.status
-
-            if response.status == 401:
-                await self.login()
-                return_response["body"] = "Got 401 from Hawkeye"
-                return_response["status"] = response.status
-                self.__log_result(return_response)
-                if retries >= self._config.HAWKEYE_CONFIG["retries"]:
-                    self._logger.error(f'Maximum number of retries exceeded')
-                    return return_response
-                retries += 1
-                return_response = await _get_test()
-
-            if response.status in range(500, 513):
-                return_response["body"] = "Got internal error from Hawkeye"
-                return_response["status"] = 500
-                self.__log_result(return_response)
-            return return_response
-        retries = 0
-        return await _get_test()
-
     async def get_tests_results(self, filters):
         async def _get_tests_results():
             nonlocal retries
