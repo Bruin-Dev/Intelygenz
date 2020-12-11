@@ -10,6 +10,12 @@ from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 from prometheus_client import start_http_server
 
+from application.actions.affecting_monitoring import AffectingMonitor
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.customer_cache_repository import CustomerCacheRepository
+from application.repositories.hawkeye_repository import HawkeyeRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.utils_repository import UtilsRepository
 from config import config
 
 
@@ -38,14 +44,32 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # REPOSITORIES
+        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
+        self._hawkeye_repository = HawkeyeRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                     notifications_repository=self._notifications_repository)
+        self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                 notifications_repository=self._notifications_repository)
+        self._customer_cache_repository = CustomerCacheRepository(
+            event_bus=self._event_bus, logger=self._logger, config=config,
+            notifications_repository=self._notifications_repository
+        )
+        self._utils_repository = UtilsRepository()
+
+        # ACTIONS
+        self._affecting_monitor = AffectingMonitor(
+            logger=self._logger, scheduler=self._scheduler, config=config,
+            bruin_repository=self._bruin_repository, hawkeye_repository=self._hawkeye_repository,
+            notifications_repository=self._notifications_repository,
+            customer_cache_repository=self._customer_cache_repository,
+            utils_repository=self._utils_repository,
+        )
+
     async def _start(self):
-        self._start_prometheus_metrics_server()
         await self._event_bus.connect()
 
+        await self._affecting_monitor.start_hawkeye_affecting_monitoring(exec_on_start=True)
         self._scheduler.start()
-
-    def _start_prometheus_metrics_server(self):
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

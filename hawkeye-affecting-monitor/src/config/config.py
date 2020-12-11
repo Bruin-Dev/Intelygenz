@@ -25,8 +25,12 @@ MONITOR_CONFIG = {
     'stop_delay': 300,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
+    'scan_interval': 60 * 15,
     'jobs_intervals': {
-        'affecting_monitor': 60 * 3,
+        'affecting_monitor': 60 * 15,
+    },
+    'semaphores': {
+        'bruin': 5,
     },
 }
 
