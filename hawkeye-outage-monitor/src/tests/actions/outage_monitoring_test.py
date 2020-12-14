@@ -1378,6 +1378,7 @@ class TestServiceOutageMonitor:
                                        notifications_repository, customer_cache_repository)
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
+        outage_monitor._append_triage_note_if_needed = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
@@ -1385,8 +1386,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes.assert_awaited_once()
         outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
         bruin_repository.create_outage_ticket.assert_awaited_once_with(bruin_client_id, serial_number_2)
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor._append_triage_note_if_needed.assert_awaited_once_with(ticket_id, probe_2_info)
 
     @pytest.mark.asyncio
     async def recheck_devices_for_ticket_creation_with_creation_response_having_471_status_test(self):
@@ -2387,6 +2387,352 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket.assert_not_awaited()
         outage_monitor._build_triage_note.assert_not_called()
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(self):
+        ticket_id = 12345
+
+        serial_number = 'B827EB92EB72'
+        device_info = {
+            "probeId": "1",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 1,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+
+        ticket_details_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+        outage_monitor._build_triage_note = Mock()
+        outage_monitor._triage_note_exists = Mock()
+
+        await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._triage_note_exists.assert_not_called()
+        outage_monitor._build_triage_note.assert_not_called()
+        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def append_triage_note_if_needed_with_triage_note_found_in_ticket_test(self):
+        ticket_id = 12345
+
+        serial_number = 'B827EB92EB72'
+        device_info = {
+            "probeId": "1",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 1,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+
+        ticket_detail_1 = {
+            'detailID': 12345,
+            'detailValue': serial_number,
+        }
+
+        ticket_notes = [
+            {
+                "noteId": 41894041,
+                "noteValue": f'#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00',
+                "createdDate": "2020-02-24T10:07:13.503-05:00",
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+        ]
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    ticket_detail_1,
+                ],
+                'ticketNotes': ticket_notes,
+            },
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+        outage_monitor._build_triage_note = Mock()
+        outage_monitor._triage_note_exists = Mock(return_value=True)
+
+        await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._triage_note_exists.assert_called_once_with(ticket_notes)
+        outage_monitor._build_triage_note.assert_not_called()
+        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def append_triage_note_if_needed_with_triage_note_not_found_in_ticket_test(self):
+        ticket_id = 12345
+
+        serial_number = 'B827EB92EB72'
+        device_info = {
+            "probeId": "1",
+            "uid": "b8:27:eb:76:a8:de",
+            "os": "Linux ARM",
+            "name": "FIS_Demo_XrPi",
+            "testIp": "none",
+            "managementIp": "none",
+            "active": "1",
+            "type": "8",
+            "mode": "Automatic",
+            "n2nMode": "1",
+            "rsMode": "1",
+            "typeName": "xr_pi",
+            "serialNumber": serial_number,
+            "probeGroup": "FIS",
+            "location": "",
+            "latitude": "0",
+            "longitude": "0",
+            "endpointVersion": "9.6 SP1 build 121",
+            "xrVersion": "4.2.2.10681008",
+            "defaultInterface": "eth0",
+            "defaultGateway": "192.168.90.99",
+            "availableForMesh": "1",
+            "lastRestart": "2020-10-15T02:13:24Z",
+            "availability": {
+                "from": 1,
+                "to": 1,
+                "mesh": "1"
+            },
+            "ips": [
+                "192.168.90.102",
+                "192.226.111.211"
+            ],
+            "userGroups": [
+                "1",
+                "10"
+            ],
+            "wifi": {
+                "available": 0,
+                "associated": 0,
+                "bssid": "",
+                "ssid": "",
+                "frequency": "",
+                "level": "0",
+                "bitrate": ""
+            },
+            "nodetonode": {
+                "status": 1,
+                "lastUpdate": "2020-11-11T13:00:11Z"
+            },
+            "realservice": {
+                "status": 1,
+                "lastUpdate": "2020-10-15T02:18:28Z"
+            }
+        }
+
+        ticket_detail_1 = {
+            'detailID': 12345,
+            'detailValue': serial_number,
+        }
+
+        ticket_notes = []
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    ticket_detail_1,
+                ],
+                'ticketNotes': ticket_notes,
+            },
+            'status': 200,
+        }
+
+        triage_note = 'This is a triage note'
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+        outage_monitor._build_triage_note = Mock(return_value=triage_note)
+        outage_monitor._triage_note_exists = Mock(return_value=False)
+
+        await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._triage_note_exists.assert_called_once_with(ticket_notes)
+        outage_monitor._build_triage_note.assert_called_once_with(device_info)
+        bruin_repository.append_triage_note_to_ticket.assert_awaited_once_with(ticket_id, serial_number, triage_note)
+
+    def triage_note_exists_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        hawkeye_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+
+        ticket_notes = []
+        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
+        assert triage_note_exists is False
+
+        ticket_notes = [
+            {
+                "noteId": 41894041,
+                "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2020-02-24 10:07:12+00:00',
+                "createdDate": "2020-02-24T10:07:13.503-05:00",
+                "serviceNumber": [
+                    'B827EB92EB72',
+                ],
+            },
+        ]
+        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
+        assert triage_note_exists is False
+
+        ticket_notes = [
+            {
+                "noteId": 41894041,
+                "noteValue": f'#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00',
+                "createdDate": "2020-02-24T10:07:13.503-05:00",
+                "serviceNumber": [
+                    'B827EB92EB72',
+                ],
+            },
+        ]
+        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
+        assert triage_note_exists is True
 
     def build_triage_note_test(self):
         probe_info = {

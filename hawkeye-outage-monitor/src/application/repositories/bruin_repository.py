@@ -11,6 +11,40 @@ class BruinRepository:
         self._event_bus = event_bus
         self._notifications_repository = notifications_repository
 
+    async def get_ticket_details(self, ticket_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting details of ticket {ticket_id} from Bruin...')
+            response = await self._event_bus.rpc_request("bruin.ticket.details.request", request, timeout=15)
+            self._logger.info(f'Got details of ticket {ticket_id} from Bruin!')
+        except Exception as e:
+            err_msg = f'An error occurred when requesting ticket details from Bruin API for ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving details of ticket {ticket_id} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def create_outage_ticket(self, client_id: int, service_number: str):
         err_msg = None
 

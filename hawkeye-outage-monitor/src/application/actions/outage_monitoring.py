@@ -1,14 +1,19 @@
 import time
 import os
+import re
 
 from datetime import datetime
 from datetime import timedelta
+from typing import Callable
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
+
+
+TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(Ixia\)')
 
 
 class OutageMonitor:
@@ -200,9 +205,9 @@ class OutageMonitor:
                 elif ticket_creation_response['status'] == 409:
                     ticket_id = ticket_creation_response['body']
                     self._logger.info(
-                        f'Faulty device {serial_number} already has an outage ticket in progress (ID = {ticket_id}). '
-                        'Skipping outage ticket creation for this device...'
+                        f'Faulty device {serial_number} already has an outage ticket in progress (ID = {ticket_id}).'
                     )
+                    await self._append_triage_note_if_needed(ticket_id, device['device_info'])
                 elif ticket_creation_response['status'] == 471:
                     ticket_id = ticket_creation_response['body']
                     self._logger.info(
@@ -218,6 +223,46 @@ class OutageMonitor:
             self._logger.info(f"{len(healthy_devices)} devices were detected in healthy state after re-check.")
         else:
             self._logger.info("No devices were detected in healthy state after re-check.")
+
+    async def _append_triage_note_if_needed(self, ticket_id: int, device_info: dict):
+        serial_number = device_info['serialNumber']
+        self._logger.info(f'Checking ticket {ticket_id} to see if device {serial_number} has a triage note already...')
+
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        if ticket_details_response['status'] not in range(200, 300):
+            return
+
+        ticket_notes = ticket_details_response['body']['ticketNotes']
+        relevant_notes = [note for note in ticket_notes if serial_number in note['serviceNumber']]
+
+        if self._triage_note_exists(relevant_notes):
+            self._logger.info(
+                f'Triage note already exists in ticket {ticket_id} for serial {serial_number}, so no triage '
+                f'note will be appended.'
+            )
+            return
+
+        self._logger.info(
+            f'No triage note was found for serial {serial_number} in ticket {ticket_id}. Appending triage note...'
+        )
+        triage_note = self._build_triage_note(device_info)
+        await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
+        self._logger.info(f'Triage note for device {serial_number} appended to ticket {ticket_id}!')
+
+    def _triage_note_exists(self, ticket_notes: list) -> bool:
+        triage_note = self._get_first_element_matching(ticket_notes, lambda note: self.__is_triage_note(note))
+        return bool(triage_note)
+
+    @staticmethod
+    def __is_triage_note(note: dict) -> bool:
+        return bool(TRIAGE_NOTE_REGEX.match(note['noteValue']))
+
+    @staticmethod
+    def _get_first_element_matching(iterable, condition: Callable, fallback=None):
+        try:
+            return next(elem for elem in iterable if condition(elem))
+        except StopIteration:
+            return fallback
 
     def _build_triage_note(self, device_info: dict) -> str:
         tz_object = timezone(self._config.MONITOR_CONFIG['timezone'])
