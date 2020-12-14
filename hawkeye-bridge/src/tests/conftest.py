@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from application.actions.get_probes import GetProbes
+from application.actions.get_test_results import GetTestResults
 from application.clients.hawkeye_client import HawkeyeClient
 from application.repositories.hawkeye_repository import HawkeyeRepository
 
@@ -28,6 +29,11 @@ def event_bus():
 @pytest.fixture(scope='function')
 def get_probes_init(logger, event_bus, hawkeye_repository):
     return GetProbes(logger, config, event_bus, hawkeye_repository)
+
+
+@pytest.fixture(scope='function')
+def get_test_result_init(logger, event_bus, hawkeye_repository):
+    return GetTestResults(logger, config, event_bus, hawkeye_repository)
 
 
 @pytest.fixture(scope='function')
@@ -57,13 +63,29 @@ def default_call_with_params():
 
 
 @pytest.fixture(scope='function')
+def default_call_with_params_test_result():
+    return {'request_id': '1234', 'response_topic': "hawkeye.test.request",
+            'body': {'probe_uids': ["b8:27:eb:76:a8:de"], 'start_date': 'fake_start_date', 'end_date': 'fake_end_date'}}
+
+
+@pytest.fixture(scope='function')
 def default_call_without_params():
     return {'request_id': '1234', 'response_topic': "hawkeye.probe.request", 'body': {}}
 
 
 @pytest.fixture(scope='function')
+def default_call_without_params_test_result():
+    return {'request_id': '1234', 'response_topic': "hawkeye.test.request", 'body': {}}
+
+
+@pytest.fixture(scope='function')
 def default_call_without_body():
     return {'request_id': '1234', 'response_topic': "hawkeye.probe.request"}
+
+
+@pytest.fixture(scope='function')
+def default_call_without_body_test_result():
+    return {'request_id': '1234', 'response_topic': "hawkeye.test.request"}
 
 
 @pytest.fixture(scope='function')
@@ -296,3 +318,241 @@ def response_bad_status(get_probes_down):
         'body': get_probes_down,
         'status': 400
     }
+
+
+@pytest.fixture(scope='function')
+def get_test_result():
+    return {
+        "total_count": "2",
+        "count": 2,
+        "limit": "100",
+        "offset": 0,
+        "has_more": 0,
+        "records": [
+            {
+                "id": "2951533",
+                "date": "2020-12-11T09:17:36Z",
+                "duration": "60",
+                "status": "Passed",
+                "reasonCause": "",
+                "tdrId": "2951533",
+                "identifier": "",
+                "module": "N2N",
+                "testId": "583",
+                "testType": "Voice bidirectional",
+                "parameters": " Voice Codec: G711 DSCP Setting: Best Effort",
+                "probeFrom": "88184-Pi1",
+                "probeTo": "88184-Pi2",
+                "mesh": 0,
+                "testOptions": "Voice Codec: G711 DSCP Setting: Best Effort ",
+                "meshId": 0
+            },
+            {
+                "id": "2951532",
+                "date": "2020-12-11T09:17:36Z",
+                "duration": "60",
+                "status": "Passed",
+                "reasonCause": "",
+                "tdrId": "2951532",
+                "identifier": "",
+                "module": "N2N",
+                "testId": "393",
+                "testType": "Voice bidirectional",
+                "parameters": " Voice Codec: G711 DSCP Setting: Best Effort",
+                "probeFrom": "TriNC-CARE-Pi2",
+                "probeTo": "DAL_XR2000_1",
+                "mesh": 0,
+                "testOptions": "Voice Codec: G711 DSCP Setting: Best Effort ",
+                "meshId": 0
+            },
+
+        ]
+    }
+
+
+@pytest.fixture(scope='function')
+def get_response_test_result(get_test_result):
+    return {
+        'status': 200,
+        'body': get_test_result
+    }
+
+
+@pytest.fixture(scope='function')
+def get_response_test_not_found_result():
+    return {
+        'status': 404,
+        'body': []
+    }
+
+
+@pytest.fixture(scope='function')
+def get_test_result_details():
+    return {
+        "id": "2951533",
+        "date": "2020-12-11T09:17:36Z",
+        "duration": "60",
+        "status": "Passed",
+        "reasonCause": "",
+        "module": "N2N",
+        "testId": "583",
+        "testType": "Voice bidirectional",
+        "parameters": " Voice Codec: G711 DSCP Setting: Best Effort",
+        "probeFrom": "88184-Pi1",
+        "probeTo": "88184-Pi2",
+        "probeFromId": "77",
+        "probeToId": "78",
+        "mesh": 0,
+        "meshId": "0",
+        "metrics": [
+            {
+                "metric": "Datagrams Out of Order",
+                "pairName": "Voice from->to",
+                "value": "0",
+                "threshold": "1",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Delay (ms)",
+                "pairName": "Voice from->to",
+                "value": "1",
+                "threshold": "100",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Jitter (ms)",
+                "pairName": "Voice from->to",
+                "value": "0.03",
+                "threshold": "5",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Jitter Max (ms)",
+                "pairName": "Voice from->to",
+                "value": "1",
+                "threshold": "5",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Loss",
+                "pairName": "Voice from->to",
+                "value": "0",
+                "threshold": "0.2",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Max loss burst",
+                "pairName": "Voice from->to",
+                "value": "0",
+                "threshold": "2",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "MOS",
+                "pairName": "Voice from->to",
+                "value": "4.37",
+                "threshold": "3.9",
+                "thresholdType": "1",
+                "status": "Passed"
+            },
+            {
+                "metric": "Source and destination ports",
+                "pairName": "Voice from->to",
+                "value": "source AUTO - dest AUTO",
+                "threshold": "",
+                "thresholdType": "-1",
+                "status": ""
+            },
+            {
+                "metric": "Datagrams Out of Order",
+                "pairName": "Voice to->from",
+                "value": "0",
+                "threshold": "1",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Delay (ms)",
+                "pairName": "Voice to->from",
+                "value": "1",
+                "threshold": "100",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Jitter (ms)",
+                "pairName": "Voice to->from",
+                "value": "0",
+                "threshold": "5",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Jitter Max (ms)",
+                "pairName": "Voice to->from",
+                "value": "0",
+                "threshold": "5",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Loss",
+                "pairName": "Voice to->from",
+                "value": "0",
+                "threshold": "0.2",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "Max loss burst",
+                "pairName": "Voice to->from",
+                "value": "0",
+                "threshold": "2",
+                "thresholdType": "0",
+                "status": "Passed"
+            },
+            {
+                "metric": "MOS",
+                "pairName": "Voice to->from",
+                "value": "4.37",
+                "threshold": "3.9",
+                "thresholdType": "1",
+                "status": "Passed"
+            },
+            {
+                "metric": "Source and destination ports",
+                "pairName": "Voice to->from",
+                "value": "source AUTO - dest AUTO",
+                "threshold": "",
+                "thresholdType": "-1",
+                "status": ""
+            }
+        ]
+    }
+
+
+@pytest.fixture(scope='function')
+def get_response_test_result_details(get_test_result_details):
+    return {
+        'status': 200,
+        'body': get_test_result_details
+    }
+
+
+@pytest.fixture(scope='function')
+def get_response_test_result_details_empty(get_test_result_details):
+    return {
+        'status': 404,
+        'body': []
+    }
+
+
+@pytest.fixture(scope='function')
+def response_return_all_test(get_test_result_details):
+    return {'body': {"b8:27:eb:76:a8:de": get_test_result_details}, 'status': 200}

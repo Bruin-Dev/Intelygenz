@@ -115,7 +115,6 @@ class HawkeyeClient:
                 return_response["status"] = response.status
 
             if response.status == 400:
-                await self.login()
                 return_response["body"] = "Parameters or body were in an incorrect format"
                 return_response["status"] = response.status
                 self.__log_result(return_response)
@@ -139,14 +138,14 @@ class HawkeyeClient:
         retries = 0
         return await _get_tests_results()
 
-    async def get_test_result_details(self, id_test):
+    async def get_test_result_details(self, tdr_id):
         async def _get_test_result_details():
             nonlocal retries
             return_response = dict.fromkeys(["body", "status"])
             try:
                 self._logger.info(f'Getting test results details ...')
                 response = await self._session.get(
-                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/testsresults/{id_test}',
+                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/testsresults/{tdr_id}',
                     ssl=True,
                 )
             except Exception as e:

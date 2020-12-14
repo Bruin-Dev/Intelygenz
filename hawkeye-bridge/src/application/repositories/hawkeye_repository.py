@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Callable
 from collections import defaultdict
 
@@ -12,34 +13,34 @@ class HawkeyeRepository:
     async def get_probes(self, params):
         return await self.__make_paginated_request(self._hawkeye_client.get_probes, params)
 
-    async def get_all_test(self, probes_id):
+    async def get_test_results(self, probes_uids, start_date, end_date):
         result = {
             'body': [],
             'status': 200,
         }
-        id_test_dict = defaultdict(lambda: [])
-        for probe_id in probes_id:
+        test_results_by_probe_uid = defaultdict(lambda: [])
+        for probe_uid in probes_uids:
             all_test_results_response = await self.__make_paginated_request(self._hawkeye_client.get_tests_results,
-                                                                            {'timeInterval': 'Last15Min',
+                                                                            {'startDate': start_date,
+                                                                             'endDate': end_date,
                                                                              'limit': 100,
-                                                                             'probeFrom': probes_id})
-            if all_test_results_response['status'] not in range(200, 300):
-                self._logger.error(f'Error when calling get_tests_results.')
-                return all_test_results_response
-            id_test_dict[probe_id] = all_test_results_response['body']
+                                                                             'probeFrom': probe_uid})
+            test_results_by_probe_uid[probe_uid] = all_test_results_response['body']
 
         result_details_with_probe = defaultdict(lambda: [])
-        for probe_id in id_test_dict.keys():
-            for test_result in id_test_dict[probe_id]:
-                response_details = await self._hawkeye_client.get_test_result_details(test_result['tdrId'])
+        for probe_uid, tests_results in test_results_by_probe_uid.items():
+            for test_result in tests_results:
+                tdr_id = test_result['tdrId']
+                response_details = await self._hawkeye_client.get_test_result_details(tdr_id)
                 if response_details['status'] not in range(200, 300):
-                    self._logger.error(f'Error when calling get_tests_results_details.')
-                    return response_details
-                result_details_with_probe[probe_id].append(response_details['body'])
+                    self._logger.error(f'Error when calling get_tests_results_details using TDR ID {tdr_id})')
+                    continue
+                result_details_with_probe[probe_uid].append(
+                    {'summary': test_result, 'metrics': response_details['body']['metrics']})
         result['body'] = result_details_with_probe
         return result
 
-    async def __make_paginated_request(self, hawkclient: Callable, params):
+    async def __make_paginated_request(self, fn: Callable, params: dict):
         result = {
             'body': [],
             'status': 200,
@@ -50,15 +51,16 @@ class HawkeyeRepository:
         limit = 500
         params['limit'] = limit
         self._logger.info(f'Check all pages')
+        self._logger.info(f'Fetching all pages using {fn.__name__}...')
         while has_more:
             params['offset'] = offset
-            response = await hawkclient(params)
+            response = await fn(params)
             if response['status'] not in range(200, 300):
                 if retries < self._config.HAWKEYE_CONFIG["retries"]:
                     retries += 1
                     continue
-                self._logger.error(f'There have been 5 or more errors when do the paginated call. '
-                                   f'The values obtained so far will be returned')
+                self._logger.error(
+                    f'There have been 5 or more errors when calling {fn.__name__}. ')
                 return result
             retries = 0
             result['body'] += response['body']['records']

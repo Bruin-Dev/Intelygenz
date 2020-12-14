@@ -39,17 +39,17 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
 
         self._event_bus.add_consumer(self._subscriber_probes, consumer_name="probes")
-        self._event_bus.add_consumer(self._subscriber_tests, consumer_name="tests")
+        self._event_bus.add_consumer(self._subscriber_tests, consumer_name="test_results")
 
         self._event_bus.set_producer(self._publisher)
 
         self._get_probes = GetProbes(self._logger, config.HAWKEYE_CONFIG, self._event_bus, self._hawkeye_repository)
         self._get_test_results = GetTestResults(self._logger, config.HAWKEYE_CONFIG, self._event_bus,
-                                               self._hawkeye_repository)
+                                                self._hawkeye_repository)
 
         self._report_hawkeye_probe = ActionWrapper(self._get_probes, "get_probes", is_async=True, logger=self._logger)
-        self._report_hawkeye_probe = ActionWrapper(self._get_test_results, "get_test_results", is_async=True,
-                                                   logger=self._logger)
+        self._get_test_results_w = ActionWrapper(self._get_test_results, "get_test_results", is_async=True,
+                                                 logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -59,8 +59,8 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="probes", topic="hawkeye.probe.request",
                                                  action_wrapper=self._report_hawkeye_probe,
                                                  queue="hawkeye_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="tests", topic="hawkeye.test.request",
-                                                 action_wrapper=self._report_hawkeye_probe,
+        await self._event_bus.subscribe_consumer(consumer_name="test_results", topic="hawkeye.test.request",
+                                                 action_wrapper=self._get_test_results_w,
                                                  queue="hawkeye_bridge")
 
     async def start_server(self):
