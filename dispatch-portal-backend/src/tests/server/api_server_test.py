@@ -161,7 +161,9 @@ class TestApiServer:
                 "mettel_department": "Customer Care",
                 "mettel_requester_email": "karen.doe@mettel.net",
                 'mettel_requester_phone_number': '(111) 111-1111',
-                "dispatch_status": "New Dispatch"
+                "dispatch_status": "New Dispatch",
+                "dispatch_tech_name": None,
+                "dispatch_tech_phone": None
             }
         }
 
@@ -366,7 +368,9 @@ class TestApiServer:
                     "mettel_department": "1",
                     "mettel_requester_email": "karen.doe@mettel.net",
                     'mettel_requester_phone_number': '(111) 111-1111',
-                    "dispatch_status": "New Dispatch"
+                    "dispatch_status": "New Dispatch",
+                    "dispatch_tech_name": None,
+                    "dispatch_tech_phone": None
                 },
                 {
                     "dispatch_number": "DIS37264",
@@ -391,7 +395,9 @@ class TestApiServer:
                     "mettel_department": "1",
                     "mettel_requester_email": "karen.doe@mettel.net",
                     'mettel_requester_phone_number': '(111) 111-1111',
-                    "dispatch_status": "Request Confirmed"
+                    "dispatch_status": "Request Confirmed",
+                    "dispatch_tech_name": None,
+                    "dispatch_tech_phone": None
                 }
             ]
         }

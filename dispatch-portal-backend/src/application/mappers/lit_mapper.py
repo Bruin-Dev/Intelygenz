@@ -33,6 +33,8 @@ def map_get_dispatch(body, datetime_formatted):
         "mettel_requester_email": body.get("mettel_requester_email"),
         "mettel_requester_phone_number": body.get("mettel_department_phone_number"),
         "dispatch_status": body.get('dispatch_status'),
+        "dispatch_tech_name": body.get('tech_first_name'),
+        "dispatch_tech_phone": body.get('tech_mobile_number')
     }
     return dispatch_request
 

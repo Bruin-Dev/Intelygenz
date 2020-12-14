@@ -66,7 +66,9 @@ class TestMappers:
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
             "mettel_requester_phone_number": '(111) 111-1111',
-            "dispatch_status": "New Dispatch"
+            "dispatch_status": "New Dispatch",
+            "dispatch_tech_name": None,
+            "dispatch_tech_phone": None
         }
         datetime_formatted = 'Nov 14, 2019 @ 12:30 AM Pacific'
 
@@ -135,7 +137,9 @@ class TestMappers:
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
             "mettel_requester_phone_number": '(111) 111-1111',
-            "dispatch_status": "New Dispatch"
+            "dispatch_status": "New Dispatch",
+            "dispatch_tech_name": None,
+            "dispatch_tech_phone": None
         }
 
         datetime_formatted = 'Nov 14, 2019 @ 12:30 AM Pacific'
