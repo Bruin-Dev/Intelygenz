@@ -2,8 +2,8 @@ terraform {
   backend "s3" {
     bucket          = "automation-infrastructure"
     region          = "us-east-1"
-    key             = "terraform-${TF_VAR_CURRENT_ENVIRONMENT}-network-resources.tfstate"
-    dynamodb_table  = "terraform-${TF_VAR_CURRENT_ENVIRONMENT}-network-resources-terraform-state-lock"
+    key             = "terraform-dev-network-resources.tfstate"
+    dynamodb_table  = "terraform-dev-network-resources-terraform-state-lock"
   }
 }
 
