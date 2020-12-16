@@ -184,51 +184,75 @@ function DispatchDetail({ authToken }) {
                   </p>
                 </div>
 
-                <div className="text-gray-900 font-bold text-xl mb-2">
-                  On-Site Contact
+                <div className="mb-4">
+                  <div className="text-gray-900 font-bold text-xl mb-2">
+                    On-Site Contact
+                  </div>
+                  <p className="text-gray-900 text-sm">
+                    Site:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-site">
+                      {data.onSiteContact.site}
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    Street:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-street">
+                      {data.onSiteContact.street}
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    City:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-city">
+                      {data.onSiteContact.city}
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    State:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-state">
+                      {data.onSiteContact.state}
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    Zip:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-zip">
+                      {data.onSiteContact.zip}
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    Phone number:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-phoneNumber">
+                      {data.onSiteContact.phoneNumber}
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    Name:{' '}
+                    <span data-test-id="dispatch-detail-onSiteContact-phoneNumber">
+                      {data.onSiteContact.name}
+                    </span>
+                  </p>
                 </div>
-                <p className="text-gray-900 text-sm">
-                  Site:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-site">
-                    {data.onSiteContact.site}
-                  </span>
-                </p>
-                <p className="text-gray-900 text-sm">
-                  Street:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-street">
-                    {data.onSiteContact.street}
-                  </span>
-                </p>
-                <p className="text-gray-900 text-sm">
-                  City:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-city">
-                    {data.onSiteContact.city}
-                  </span>
-                </p>
-                <p className="text-gray-900 text-sm">
-                  State:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-state">
-                    {data.onSiteContact.state}
-                  </span>
-                </p>
-                <p className="text-gray-900 text-sm">
-                  Zip:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-zip">
-                    {data.onSiteContact.zip}
-                  </span>
-                </p>
-                <p className="text-gray-900 text-sm">
-                  Phone number:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-phoneNumber">
-                    {data.onSiteContact.phoneNumber}
-                  </span>
-                </p>
-                <p className="text-gray-900 text-sm">
-                  Name:{' '}
-                  <span data-test-id="dispatch-detail-onSiteContact-phoneNumber">
-                    {data.onSiteContact.name}
-                  </span>
-                </p>
+
+                <div className="mb-4">
+                  <div className="text-gray-900 font-bold text-xl mb-2">
+                    Field Engineer
+                  </div>
+                  <p className="text-gray-900 text-sm">
+                    Name {data.vendor}:{' '}
+                    <span data-test-id="dispatch-detail-fieldEngineer-name">
+                      {
+                        data.vendor === config.VENDORS.CTS ? 'data.dispatch.api_resource_name__c' : 'data.dispatch.dispatch_tech_name'
+                      }
+                    </span>
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    Phone {data.vendor}:{' '}
+                      <span data-test-id="dispatch-detail-fieldEngineer-phone">
+                        {
+                          data.vendor === config.VENDORS.CTS ? 'data.dispatch.resource_phone_number__c' : 'data.dispatch.dispatch_tech_phone'
+                        }
+                      </span>
+                  </p>
+                </div>
               </div>
             </div>
 
