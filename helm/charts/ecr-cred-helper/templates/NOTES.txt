@@ -1,0 +1,1 @@
+ecr-cred-helper version: {{ .Chart.AppVersion }}

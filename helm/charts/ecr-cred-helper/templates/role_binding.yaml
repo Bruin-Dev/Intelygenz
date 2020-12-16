@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ecr-cred-helper
+subjects:
+- kind: ServiceAccount
+  name: sa-ecr-cred-helper
+roleRef:
+  kind: Role
+  name: ecr-cred-helper
+  apiGroup: ""

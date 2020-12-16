@@ -1,0 +1,47 @@
+# Default values for cts-bridge.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+config:
+  environment: "dev"
+  environment_name: "automation-test"
+  nats_server: "nats://nats:4222"
+  redis_hostname: "redis"
+  cts_client_id: ""
+  cts_client_secret: ""
+  cts_client_username: ""
+  cts_client_password: ""
+  cts_client_security_token: ""
+  cts_login_url: ""
+  cts_domain: ""
+  papertrail_active: "False"
+  papertrail_host: "logs.papertrailapp.com"
+  papertrail_port: 0
+  mode: "aws"
+  ecr_registry:
+    name: "ecr-registry"
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-cts-bridge
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,6 @@
+redis-ha:
+  persistentVolume:
+    enabled: false
+  exporter:
+    enabled: true
+  replicas: 1

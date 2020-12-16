@@ -157,6 +157,11 @@ last_contact.csv
 #Local thanos storage files
 metrics-dashboard/thanos/storage
 
+# Helm requirements
+charts/*/charts
+requirements.lock
+*Chart.lock
+
 # Generated csv files
 *old_cache.csv
 *new_cache.csv

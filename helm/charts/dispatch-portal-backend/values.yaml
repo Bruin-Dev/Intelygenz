@@ -1,0 +1,39 @@
+# Default values for dispatch-portal-backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+config:
+  environment: "dev"
+  environment_name: "automation-test"
+  nats_server: "nats://nats:4222"
+  redis_hostname: "redis"
+  papertrail_active: "False"
+  papertrail_host: "logs.papertrailapp.com"
+  papertrail_port: 1111
+  dispatch_portal_server_port: 5000
+  mode: "aws"
+  ecr_registry:
+    name: "ecr-registry"
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-dispatch-portal-backend
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
