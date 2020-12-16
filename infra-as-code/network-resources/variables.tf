@@ -2,7 +2,7 @@ variable "cidr_base" {
   description = "CIDR base for the environment"
   type = "map"
   default = {
-    "production"  = "10.1.0.0/16"
+    "production"  = "172.31.88.0/22"
     "dev"         = "172.31.84.0/22"
   }
 }
@@ -11,7 +11,7 @@ variable "cdir_public_1" {
   description = "CIDR base for public subnet 1"
   type = "map"
   default = {
-    "production"  = "10.1.1.0/24"
+    "production"  = "172.31.88.0/24"
     "dev"         = "172.31.84.0/24"
   }
 }
@@ -20,7 +20,7 @@ variable "cdir_public_2" {
   description = "CIDR base for public subnet 2"
   type = "map"
   default = {
-    "production"  = "10.1.2.0/24"
+    "production"  = "172.31.89.0/24"
     "dev"         = "172.31.85.0/24"
   }
 }
@@ -29,7 +29,7 @@ variable "cdir_private_1" {
   description = "CIDR base for private subnet 1"
   type = "map"
   default = {
-    "production"  = "10.1.11.0/24"
+    "production"  = "172.31.90.0/24"
     "dev"         = "172.31.86.0/24"
   }
 }
@@ -38,7 +38,7 @@ variable "cdir_private_2" {
   description = "CIDR base for private subnet 2"
   type = "map"
   default = {
-    "production"  = "10.1.12.0/24"
+    "production"  = "172.31.91.0/24"
     "dev"         = "172.31.87.0/24"
   }
 }
