@@ -50,7 +50,7 @@ resource "aws_ecs_task_definition" "automation-tnba-feedback" {
 resource "aws_security_group" "automation-tnba-feedback_service" {
   count = var.tnba_feedback_desired_tasks > 0 ? 1 : 0
 
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   name = local.automation-tnba-feedback-service-security_group-name
   description = "Allow egress from container"
 
@@ -118,9 +118,7 @@ resource "aws_ecs_service" "automation-tnba-feedback" {
   network_configuration {
     security_groups = [
       aws_security_group.automation-tnba-feedback_service[0].id]
-    subnets = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
+    subnets = data.aws_subnet_ids.mettel-automation-private-subnets.ids
     assign_public_ip = false
   }
 

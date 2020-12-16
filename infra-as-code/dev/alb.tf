@@ -1,7 +1,7 @@
 resource "aws_security_group" "automation-dev-inbound" {
   name = local.automation-dev-inbound-security_group-name
   description = "Allowed connections into ALB"
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
 
   lifecycle {
     create_before_destroy = true
@@ -99,9 +99,7 @@ data "aws_acm_certificate" "automation" {
 resource "aws_lb" "automation-alb" {
   name = var.ENVIRONMENT
   load_balancer_type = "application"
-  subnets = [
-    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-public-1a.id,
-    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-public-1b.id]
+  subnets = data.aws_subnet_ids.mettel-automation-public-subnets.ids
   security_groups = [
     aws_security_group.automation-dev-inbound.id]
 
@@ -137,7 +135,7 @@ resource "aws_lb_target_group" "automation-front_end" {
   name = "${var.ENVIRONMENT}-frontend"
   port = 80
   protocol = "HTTP"
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   target_type = "ip"
   stickiness {
     type = "lb_cookie"

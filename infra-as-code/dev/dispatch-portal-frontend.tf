@@ -53,7 +53,7 @@ resource "aws_ecs_task_definition" "automation-dispatch-portal-frontend" {
 }
 
 resource "aws_security_group" "automation-dispatch-portal-frontend_service" {
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   name = local.automation-dispatch-portal-service-security_group-name
   description = "Allow egress from container"
 
@@ -82,7 +82,7 @@ resource "aws_lb_target_group" "automation-dispatch-portal" {
   name = local.automation-dispatch-portal-target_group-name
   port = 8080
   protocol = "HTTP"
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   target_type = "ip"
   stickiness {
     type = "lb_cookie"
@@ -138,9 +138,7 @@ resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
   network_configuration {
     security_groups = [
       aws_security_group.automation-dispatch-portal-frontend_service.id]
-    subnets = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
+    subnets = data.aws_subnet_ids.mettel-automation-private-subnets.ids
     assign_public_ip = false
   }
 

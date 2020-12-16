@@ -17,6 +17,12 @@ locals {
   automation-default-security-group-name = "mettel-automation-default-sg-${var.CURRENT_ENVIRONMENT}"
   automation-default-security_group-tag-Name = "mettel-automation-default-${var.CURRENT_ENVIRONMENT}"
 
+  // virtual private gateway local vars
+  virtual-private-gateway-tag-Name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-vpg" : "${var.common_info.project}-vpg"
+
+  // Direct Connect way created and managed by MetTel's Network deparment
+  direct-connect-gateway-name = "Corporate-DC-GW"
+
   eks_tags = var.CURRENT_ENVIRONMENT == "dev" ? {
     format("kubernetes.io/cluster/%s-dev", var.EKS_KRE_BASE_NAME) = "",
     format("kubernetes.io/cluster/%s-dev", var.EKS_PROJECT_BASE_NAME) = ""

@@ -20,14 +20,12 @@ resource "aws_elasticache_cluster" "automation-redis" {
 
 resource "aws_elasticache_subnet_group" "automation-redis-subnet" {
   name = "${var.ENVIRONMENT}-redis-subnet"
-  subnet_ids = [
-    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
+  subnet_ids = data.aws_subnet_ids.mettel-automation-public-subnets.ids
 }
 
 resource "aws_security_group" "automation-redis-sg" {
   name = local.automation-redis-security_group-name
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   description = "Access control to redis cache"
 
   egress {
@@ -42,8 +40,8 @@ resource "aws_security_group" "automation-redis-sg" {
     protocol = "tcp"
     to_port = 6379
     cidr_blocks = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.cidr_block,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.cidr_block
+      data.aws_subnet.mettel-automation-private-subnet-1a.cidr_block,
+      data.aws_subnet.mettel-automation-private-subnet-1b.cidr_block
     ]
   }
 

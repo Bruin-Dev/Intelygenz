@@ -63,10 +63,8 @@
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -g True -a True -e ${TF_VAR_ENVIRONMENT} -p True
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
         /bin/bash ci-utils/lambda/lambda-python-package.sh infra-as-code/data-collector/lambdas/rest-api-data-collector/ rest-api-data-collector main.py

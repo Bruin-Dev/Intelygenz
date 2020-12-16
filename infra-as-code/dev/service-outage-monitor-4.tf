@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "automation-service-outage-monitor-4" {
 
 resource "aws_security_group" "automation-service-outage-monitor-4_service" {
   count = var.service_outage_monitor_4_desired_tasks > 0 ? 1 : 0
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   name = local.automation-service-outage-monitor-4-service-security_group-name
   description = "Allow egress from container"
 
@@ -114,9 +114,7 @@ resource "aws_ecs_service" "automation-service-outage-monitor-4" {
   network_configuration {
     security_groups = [
       aws_security_group.automation-service-outage-monitor-4_service[0].id]
-    subnets = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
+    subnets = data.aws_subnet_ids.mettel-automation-private-subnets.ids
     assign_public_ip = false
   }
 

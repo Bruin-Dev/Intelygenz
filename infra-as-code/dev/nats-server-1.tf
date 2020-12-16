@@ -28,7 +28,7 @@ resource "aws_ecs_task_definition" "automation-nats-server-1" {
 }
 
 resource "aws_security_group" "automation-nats_service-1" {
-  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
   name = local.automation-nats-server-1-nats_service-security_group-name
   description = "Allow egress from container"
 
@@ -111,9 +111,7 @@ resource "aws_ecs_service" "automation-nats-server-1" {
   network_configuration {
     security_groups = [
       aws_security_group.automation-nats_service-1.id]
-    subnets = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
+    subnets = data.aws_subnet_ids.mettel-automation-private-subnets.ids
     assign_public_ip = false
   }
 

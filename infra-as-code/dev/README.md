@@ -15,7 +15,6 @@
 | external | = 1.2 |
 | null | = 2.1 |
 | template | = 2.1 |
-| terraform | n/a |
 
 ## Inputs
 
