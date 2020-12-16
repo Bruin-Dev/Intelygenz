@@ -50,6 +50,10 @@ export const dispatchLitInAdapter = data => ({
         : '',
     fieldEngineerContactNumber:
       (data.dispatch && data.dispatch.field_engineer_contact_number) || ''
+  },
+  fieldEngineer: {
+    name: (data.dispatch && data.dispatch.dispatch_tech_name) || '',
+    phoneNumber: (data.dispatch && data.dispatch.dispatch_tech_phone) || ''
   }
 });
 

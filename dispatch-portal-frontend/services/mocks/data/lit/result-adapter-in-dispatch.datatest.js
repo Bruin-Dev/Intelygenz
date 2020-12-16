@@ -34,7 +34,11 @@ export const mocksInAdapterLitSingleDispatchResult = {
   status: 'New Dispatch',
   timeDispatch: '7AM-9AM',
   timeZone: 'Pacific Time',
-  vendor: 'LIT'
+  vendor: 'LIT',
+  fieldEngineer: {
+    name: 'JC Jávega',
+    phoneNumber: '+34633292080'
+  }
 };
 
 export const mocksInAdapterLitAllDispatchResult = {

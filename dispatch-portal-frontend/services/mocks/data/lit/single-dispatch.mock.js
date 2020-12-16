@@ -29,6 +29,8 @@ export const mockLitSingleDispatch = {
     hardTimeZone: 'Pacific Time',
     field_engineer_name: 'JC',
     field_engineer_last_name: 'Jávega',
-    field_engineer_contact_number: '+34633292080'
+    field_engineer_contact_number: '+34633292080',
+    dispatch_tech_name: 'JC Jávega',
+    dispatch_tech_phone: '+34633292080'
   }
 };

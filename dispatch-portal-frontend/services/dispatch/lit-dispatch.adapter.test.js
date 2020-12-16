@@ -55,7 +55,11 @@ describe('lit dispatch adapter tests', () => {
       status: '',
       timeDispatch: '',
       timeZone: '',
-      vendor: ''
+      vendor: '',
+      fieldEngineer: {
+        name: '',
+        phoneNumber: ''
+      }
     });
   });
 

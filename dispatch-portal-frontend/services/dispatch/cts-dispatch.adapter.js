@@ -40,6 +40,10 @@ export const dispatchCtsInAdapter = data => ({
     fieldEngineer: '',
     fieldEngineerContactNumber: '',
     res: (data.dispatch && data.dispatch.description__c) || ''
+  },
+  fieldEngineer: {
+    name: (data.dispatch && data.dispatch.api_resource_name__c) || '',
+    phoneNumber: (data.dispatch && data.dispatch.resource_phone_number__c) || ''
   }
 });
 

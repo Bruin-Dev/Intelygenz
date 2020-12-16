@@ -20,7 +20,9 @@ export const dispatchLitList = {
       scope_of_work: 'test new scope of work',
       site_survey_quote_required: false,
       time_of_dispatch: '7AM-9AM',
-      time_zone: 'Pacific Time'
+      time_zone: 'Pacific Time',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37266',
@@ -43,7 +45,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'Pallavi Kamath',
       mettel_department: 'Advanced Services Implementations',
       mettel_requester_email: 'pkamath@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37264',
@@ -65,7 +69,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'pkamath',
       mettel_department: '1',
       mettel_requester_email: 'pkamath@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37265',
@@ -87,7 +93,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'pkamath',
       mettel_department: '1',
       mettel_requester_email: 'pkamath@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37243',
@@ -109,7 +117,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'Test User1',
       mettel_department: 'Customer Care',
       mettel_requester_email: 'test@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37466',
@@ -133,7 +143,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'Karen Doe',
       mettel_department: 'Customer Care',
       mettel_requester_email: 'karen.doe@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37286',
@@ -155,7 +167,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'Test User1',
       mettel_department: 'Customer Care',
       mettel_requester_email: 'test@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37366',
@@ -177,7 +191,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'Test User1',
       mettel_department: 'Customer Care',
       mettel_requester_email: 'test@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     },
     {
       dispatch_number: 'DIS37358',
@@ -199,7 +215,9 @@ export const dispatchLitList = {
       name_of_mettel_requester: 'Test User1',
       mettel_department: 'Customer Care',
       mettel_requester_email: 'test@mettel.net',
-      dispatch_status: 'New Dispatch'
+      dispatch_status: 'New Dispatch',
+      dispatch_tech_name: 'JC Jávega',
+      dispatch_tech_phone: '+34633292080'
     }
   ]
 };

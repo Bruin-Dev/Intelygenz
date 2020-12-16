@@ -58,6 +58,10 @@ describe('cts dispatch adapter tests', () => {
         fieldEngineer: '',
         fieldEngineerContactNumber: '',
         res: ''
+      },
+      fieldEngineer: {
+        name: '',
+        phoneNumber: ''
       }
     });
   });
