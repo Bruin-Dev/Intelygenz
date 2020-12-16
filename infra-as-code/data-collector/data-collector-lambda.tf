@@ -12,7 +12,7 @@ resource "aws_iam_role_policy" "rest-api-data-collector-role-policy" {
 
 resource "aws_security_group" "data_collector_lambda_sg" {
   name        = local.rest-api-data-collector-lambda-security_group-name
-  vpc_id      = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id      = data.aws_vpc.mettel-automation-vpc.id
 
   egress {
     from_port   = 0
@@ -60,10 +60,7 @@ resource "aws_lambda_function" "data_collector" {
   runtime = "python3.8"
 
   vpc_config {
-    subnet_ids         = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id
-    ]
+    subnet_ids         = data.aws_subnet_ids.mettel-automation-private-subnets.ids
     security_group_ids = [aws_security_group.data_collector_lambda_sg.id]
   }
 

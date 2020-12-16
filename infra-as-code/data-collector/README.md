@@ -13,7 +13,6 @@
 |------|---------|
 | aws | =3.9.0 |
 | null | = 2.1 |
-| terraform | n/a |
 
 ## Inputs
 
@@ -32,5 +31,5 @@
 
 | Name | Description |
 |------|-------------|
-| api\_gateway\_endpoint\_data\_collector | n/a |
+| api\_gateway\_endpoint\_data\_collector | API Gateway endpoint for call data-collector lambda |
 

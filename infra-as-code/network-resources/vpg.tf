@@ -14,7 +14,6 @@ resource "aws_dx_gateway_association" "direct-connect-gateway-vpg-association" {
   associated_gateway_id = aws_vpn_gateway.vpn_gw.id
 
   allowed_prefixes = [
-    var.cdir_private_1[var.CURRENT_ENVIRONMENT],
-    var.cdir_private_2[var.CURRENT_ENVIRONMENT],
+    var.cidr_base[var.CURRENT_ENVIRONMENT]
   ]
 }

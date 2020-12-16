@@ -1,6 +1,6 @@
 resource "aws_security_group" "data_collector_docdb_sg" {
   name        = local.docdb-data-collector-security_group-name
-  vpc_id      = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  vpc_id      = data.aws_vpc.mettel-automation-vpc.id
 
   ingress {
     description = "Allow connections from data-collector lambda"
@@ -21,10 +21,7 @@ resource "aws_security_group" "data_collector_docdb_sg" {
 resource "aws_docdb_subnet_group" "docdb_subnet_data_collector" {
   name       = local.docdb-data-collector-subnet_group-name
 
-  subnet_ids = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id
-  ]
+  subnet_ids = data.aws_subnet_ids.mettel-automation-private-subnets.ids
 
   tags = {
     Name = local.docdb-data-collector-subnet_group-name

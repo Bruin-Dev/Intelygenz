@@ -36,10 +36,8 @@
         export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_DATABASE=${REST_API_DATA_COLLECTOR_MONGODB_DATABASE}
         envsubst < infra-as-code/data-collector/init.tf > temp_dc.tf
         envsubst < infra-as-code/data-collector/variables.tf > temp_vars_dc.tf
-        envsubst < infra-as-code/data-collector/references.tf > temp_references_dc.tf
         mv temp_dc.tf infra-as-code/data-collector/init.tf
         mv temp_vars_dc.tf infra-as-code/data-collector/variables.tf
-        mv temp_references_dc.tf infra-as-code/data-collector/references.tf
         cd infra-as-code/data-collector
         terraform init
         terraform destroy -auto-approve
