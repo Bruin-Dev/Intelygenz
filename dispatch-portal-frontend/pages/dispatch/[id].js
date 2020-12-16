@@ -237,7 +237,7 @@ function DispatchDetail({ authToken }) {
                     Field Engineer
                   </div>
                   <p className="text-gray-900 text-sm">
-                    Name {data.vendor}:{' '}
+                    Name:{' '}
                     <span data-test-id="dispatch-detail-fieldEngineer-name">
                       {
                         data.vendor === config.VENDORS.CTS ? 'data.dispatch.api_resource_name__c' : 'data.dispatch.dispatch_tech_name'
@@ -245,7 +245,7 @@ function DispatchDetail({ authToken }) {
                     </span>
                   </p>
                   <p className="text-gray-900 text-sm">
-                    Phone {data.vendor}:{' '}
+                    Phone:{' '}
                       <span data-test-id="dispatch-detail-fieldEngineer-phone">
                         {
                           data.vendor === config.VENDORS.CTS ? 'data.dispatch.resource_phone_number__c' : 'data.dispatch.dispatch_tech_phone'
