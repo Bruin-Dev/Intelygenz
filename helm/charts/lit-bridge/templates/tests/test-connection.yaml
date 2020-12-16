@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "lit-bridge.fullname" . }}-test-connection"
+  labels:
+    {{- include "lit-bridge.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "lit-bridge.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

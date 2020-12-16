@@ -1,0 +1,47 @@
+# Default values for lit-bridge.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+config:
+  lit_client_id: ""
+  lit_client_secret: ""
+  lit_client_username: ""
+  lit_client_password: ""
+  lit_client_security_token: ""
+  lit_login_url: ""
+  lit_domain: ""
+  environment: "dev"
+  environment_name: "automation-test"
+  nats_server: "nats://nats:4222"
+  redis_hostname: "redis"
+  papertrail_active: "False"
+  papertrail_host: "logs.papertrailapp.com"
+  papertrail_port: 0
+  mode: "aws"
+  ecr_registry:
+    name: "ecr-registry"
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-lit-bridge
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

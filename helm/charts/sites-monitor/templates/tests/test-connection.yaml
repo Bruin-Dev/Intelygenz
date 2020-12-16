@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "sites-monitor.fullname" . }}-test-connection"
+  labels:
+    {{- include "sites-monitor.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "sites-monitor.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
