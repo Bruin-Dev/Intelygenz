@@ -43,22 +43,3 @@ class T7Repository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
-
-    async def save_prediction(self, ticket_id: int, ticket_rows, predictions, available_options, suggested_notes):
-        request = {
-            'request_id': uuid(),
-            'body': {
-                'ticket_id': ticket_id,
-                'ticket_rows': ticket_rows,
-                'predictions': predictions,
-                'available_options': available_options,
-                'suggested_notes': suggested_notes,
-            },
-        }
-
-        try:
-            self._logger.info(f'Saving T7 prediction for ticket {ticket_id}...')
-            await self._event_bus.rpc_request("t7.save.prediction.request", request, timeout=60)
-        except Exception as e:
-            err_msg = f'An error occurred when saving T7 prediction for ticket {ticket_id}. Error: {e}'
-            self._logger.error(err_msg)

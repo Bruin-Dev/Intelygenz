@@ -1998,7 +1998,6 @@ class TestTNBAMonitor:
             t7_prediction_response_for_ticket_1,
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -2012,20 +2011,6 @@ class TestTNBAMonitor:
         ])
         bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': 'No predictions were found for ticket 67890, detail 2746930 and serial VC1111222!'
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2172,7 +2157,6 @@ class TestTNBAMonitor:
             t7_prediction_response_for_ticket_1,
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -2190,25 +2174,6 @@ class TestTNBAMonitor:
         assert notifications_repository.send_slack_message.await_count == 3
         bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': (
-                            'Prediction for ticket 67890, detail 2746930 and serial VC1111222 was found but it contains'
-                            ' an error from T7 API -> {\'code\': \'error_in_prediction\', \'message\': \''
-                            'Error executing prediction: The labels [\\\'Line Test Results Provided\\\']'
-                            ' are not in the "Task Result" labels map.\'}'
-                        )
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2383,7 +2348,6 @@ class TestTNBAMonitor:
             t7_prediction_response_for_ticket_1,
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -2401,20 +2365,6 @@ class TestTNBAMonitor:
             call(ticket_2_id, ticket_2_detail_1_id, ticket_2_detail_1_serial_number),
         ])
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': 'Error getting next results ticket[67890] detail[2746930] serial [VC1111222]'
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2555,7 +2505,6 @@ class TestTNBAMonitor:
         t7_repository.get_prediction = CoroutineMock(side_effect=[
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -2567,20 +2516,6 @@ class TestTNBAMonitor:
         bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(ticket_2_id, ticket_2_detail_1_id,
                                                                                      ticket_2_detail_1_serial_number)
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_2_id,
-                task_history_response_2['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': 'Error getting next results ticket[67890] detail[2746930] serial [VC1111222]'
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2950,7 +2885,6 @@ class TestTNBAMonitor:
             t7_prediction_response_for_ticket_1,
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -2971,48 +2905,6 @@ class TestTNBAMonitor:
             call(ticket_2_id, ticket_2_detail_1_id, ticket_2_detail_1_serial_number),
         ])
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_1['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Some weird next result!']},
-                    {'asset': 'VC9999999', 'available_options': ['Some weird next result!']}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': (
-                            'No predictions with name appearing in the next results were found for ticket 12345, detail'
-                            ' 2746930 and serial VC1234567!'
-                        )
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': (
-                            'No predictions with name appearing in the next results were found for ticket 12345, detail'
-                            ' 2746931 and serial VC9999999!'
-                        )
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Some weird next result!']}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': (
-                            'No predictions with name appearing in the next results were found for ticket 67890, detail'
-                            ' 2746930 and serial VC1111222!'
-                        )
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -3274,7 +3166,6 @@ class TestTNBAMonitor:
             t7_prediction_response_for_ticket_1,
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -3299,28 +3190,6 @@ class TestTNBAMonitor:
             call(t7_prediction_response_for_ticket_1_detail_1_predictions_item_1),
             call(t7_prediction_response_for_ticket_1_detail_2_predictions_item_1),
             call(t7_prediction_response_for_ticket_2_detail_1_predictions_item_1),
-        ])
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_1['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Repair Completed']},
-                    {'asset': 'VC9999999', 'available_options': ['Request Completed']}
-                ],
-                [
-                    {'asset': 'VC1234567', 'suggested_note': 'this_note', 'details': None},
-                    {'asset': 'VC9999999', 'suggested_note': 'this_note', 'details': None}
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Repair Completed']}],
-                [{'asset': 'VC1111222', 'suggested_note': 'this_note', 'details': None}]
-            ),
         ])
         assert notifications_repository.send_slack_message.await_count == 3
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
@@ -3927,7 +3796,6 @@ class TestTNBAMonitor:
             t7_prediction_response_for_ticket_1,
             t7_prediction_response_for_ticket_2,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -3949,28 +3817,6 @@ class TestTNBAMonitor:
             call(t7_prediction_response_for_ticket_1_detail_1_predictions_item_1),
             call(t7_prediction_response_for_ticket_1_detail_2_predictions_item_1),
             call(t7_prediction_response_for_ticket_2_detail_1_predictions_item_1),
-        ])
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_1['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Repair Completed']},
-                    {'asset': 'VC9999999', 'available_options': ['Request Completed']}
-                ],
-                [
-                    {'asset': 'VC1234567', 'suggested_note': 'This is TNBA note 1', 'details': None},
-                    {'asset': 'VC9999999', 'suggested_note': 'This is TNBA note 2', 'details': None}
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_response_for_ticket_2['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Repair Completed']}],
-                [{'asset': 'VC1111222', 'suggested_note': 'This is TNBA note 3', 'details': None}]
-            ),
         ])
         bruin_repository.append_multiple_notes_to_ticket.assert_has_awaits([
             call(
@@ -4794,7 +4640,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -4821,45 +4666,6 @@ class TestTNBAMonitor:
         prediction_repository.filter_predictions_in_next_results.assert_not_called()
         prediction_repository.get_best_prediction.assert_not_called()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': None},
-                    {'asset': 'VC9999999', 'available_options': None}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': (
-                            'TNBA note found for ticket 12345 and detail 2746930 is too recent. Skipping detail...'
-                        )
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': (
-                            'TNBA note found for ticket 12345 and detail 2746931 is too recent. Skipping detail...'
-                        )
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': (
-                            'TNBA note found for ticket 67890 and detail 2746930 is too recent. Skipping detail...'
-                        )
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -5028,7 +4834,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -5059,39 +4864,6 @@ class TestTNBAMonitor:
         prediction_repository.filter_predictions_in_next_results.assert_not_called()
         prediction_repository.get_best_prediction.assert_not_called()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': None},
-                    {'asset': 'VC9999999', 'available_options': None}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': 'No predictions were found for ticket 12345, detail 2746930 and serial VC1234567!'
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': 'No predictions were found for ticket 12345, detail 2746931 and serial VC9999999!'
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': 'No predictions were found for ticket 67890, detail 2746930 and serial VC1111222!'
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -5266,7 +5038,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -5301,54 +5072,6 @@ class TestTNBAMonitor:
         prediction_repository.filter_predictions_in_next_results.assert_not_called()
         prediction_repository.get_best_prediction.assert_not_called()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': None},
-                    {'asset': 'VC9999999', 'available_options': None}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': (
-                            'Prediction for ticket 12345, detail 2746930 and serial VC1234567 was found but it contains'
-                            ' an error from T7 API -> {\'code\': \'error_in_prediction\', \'message\': \''
-                            'Error executing prediction: The labels [\\\'Refer to ASR Carrier\\\'] are not in the'
-                            ' Task Result" labels map.\'}'
-                        )
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': (
-                            'Prediction for ticket 12345, detail 2746931 and serial VC9999999 was found but it contains'
-                            ' an error from T7 API -> {\'code\': \'error_in_prediction\', \'message\': \''
-                            'Error executing prediction: The labels [\\\'Service Repaired\\\', \\\''
-                            'Investigating Wireless Device Issue\\\'] are not in the "Task Result" labels map.\'}'
-                        )
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': (
-                            'Prediction for ticket 67890, detail 2746930 and serial VC1111222 was found but it contains'
-                            ' an error from T7 API -> {\'code\': \'error_in_prediction\', \'message\': \''
-                            'Error executing prediction: The labels [\\\'Line Test Results Provided\\\'] are not in'
-                            ' the "Task Result" labels map.\'}'
-                        )
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -5542,7 +5265,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -5577,39 +5299,6 @@ class TestTNBAMonitor:
         prediction_repository.filter_predictions_in_next_results.assert_not_called()
         prediction_repository.get_best_prediction.assert_not_called()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': None},
-                    {'asset': 'VC9999999', 'available_options': None}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': 'Error getting next results ticket[12345] detail[2746930] serial [VC1234567]'
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': 'Error getting next results ticket[12345] detail[2746931] serial [VC9999999]'
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': None}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': 'Error getting next results ticket[67890] detail[2746930] serial [VC1111222]'
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -5882,7 +5571,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -5921,48 +5609,6 @@ class TestTNBAMonitor:
         ])
         prediction_repository.get_best_prediction.assert_not_called()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Some weird next result!']},
-                    {'asset': 'VC9999999', 'available_options': ['Some weird next result!']}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': (
-                            'No predictions with name appearing in the next results were found for ticket 12345, detail'
-                            ' 2746930 and serial VC1234567!'
-                        )
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': (
-                            'No predictions with name appearing in the next results were found for ticket 12345, detail'
-                            ' 2746931 and serial VC9999999!'
-                        )
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Some weird next result!']}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': (
-                            'No predictions with name appearing in the next results were found for ticket 67890, detail'
-                            ' 2746930 and serial VC1111222!'
-                        )
-                    }
-                ]
-            ),
-        ])
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -6258,7 +5904,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -6299,48 +5944,6 @@ class TestTNBAMonitor:
             call(filtered_predictions_for_ticket_1_detail_1),
             call(filtered_predictions_for_ticket_1_detail_2),
             call(filtered_predictions_for_ticket_2_detail_1),
-        ])
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Request Completed']},
-                    {'asset': 'VC9999999', 'available_options': ['Request Completed']}
-                ],
-                [
-                    {
-                        'asset': 'VC1234567', 'suggested_note': None,
-                        'details': (
-                            "Best prediction for ticket 12345, detail 2746930 and serial VC1234567 didn't change since"
-                            " the last TNBA note was appended. Skipping detail..."
-                        )
-                    },
-                    {
-                        'asset': 'VC9999999', 'suggested_note': None,
-                        'details': (
-                            "Best prediction for ticket 12345, detail 2746931 and serial VC9999999 didn't change since"
-                            " the last TNBA note was appended. Skipping detail..."
-                        )
-                    }
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Request Completed']}],
-                [
-                    {
-                        'asset': 'VC1111222', 'suggested_note': None,
-                        'details': (
-                            "Best prediction for ticket 67890, detail 2746930 and serial VC1111222 didn't change since"
-                            " the last TNBA note was appended. Skipping detail..."
-                        )
-                    }
-                ]
-            ),
         ])
 
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
@@ -6638,7 +6241,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -6689,29 +6291,6 @@ class TestTNBAMonitor:
             call(prediction_object_for_ticket_1_detail_1_predictions_list_item_1),
             call(prediction_object_for_ticket_1_detail_2_predictions_list_item_1),
             call(prediction_object_for_ticket_2_detail_1_predictions_list_item_2),
-        ])
-
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Request Completed']},
-                    {'asset': 'VC9999999', 'available_options': ['Request Completed']}
-                ],
-                [
-                    {'asset': 'VC1234567', 'suggested_note': 'this_note', 'details': None},
-                    {'asset': 'VC9999999', 'suggested_note': 'this_note', 'details': None}
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Request Completed']}],
-                [{'asset': 'VC1111222', 'suggested_note': 'this_note', 'details': None}]
-            ),
         ])
 
         assert notifications_repository.send_slack_message.await_count == 3
@@ -7409,7 +6988,6 @@ class TestTNBAMonitor:
             t7_prediction_for_ticket_1_response,
             t7_prediction_for_ticket_2_response,
         ])
-        t7_repository.save_prediction = CoroutineMock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
@@ -7482,28 +7060,6 @@ class TestTNBAMonitor:
                         'service_number': ticket_2_detail_1_serial_number,
                     },
                 ],
-            ),
-        ])
-        t7_repository.save_prediction.assert_has_awaits([
-            call(
-                ticket_1_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_1_response['body'],
-                [
-                    {'asset': 'VC1234567', 'available_options': ['Request Completed']},
-                    {'asset': 'VC9999999', 'available_options': ['Request Completed']}
-                ],
-                [
-                    {'asset': 'VC1234567', 'suggested_note': 'This is TNBA note 1', 'details': None},
-                    {'asset': 'VC9999999', 'suggested_note': 'This is TNBA note 2', 'details': None}
-                ]
-            ),
-            call(
-                ticket_2_id,
-                task_history_response['body'],
-                t7_prediction_for_ticket_2_response['body'],
-                [{'asset': 'VC1111222', 'available_options': ['Request Completed']}],
-                [{'asset': 'VC1111222', 'suggested_note': 'This is TNBA note 3', 'details': None}]
             ),
         ])
         assert notifications_repository.send_slack_message.await_count == 2

@@ -252,8 +252,6 @@ class TNBAMonitor:
 
             tnba_notes: List[dict] = []
             slack_messages: List[str] = []
-            available_options: List[dict] = []
-            suggested_notes: List[dict] = []
 
             for ticket_detail in ticket['ticket_details']:
                 ticket_detail_response = await self._process_ticket_detail_without_tnba(
@@ -267,9 +265,6 @@ class TNBAMonitor:
 
                 if ticket_detail_response['slack_message']:
                     slack_messages.append(ticket_detail_response['slack_message'])
-
-                available_options.append(ticket_detail_response['available_options'])
-                suggested_notes.append(ticket_detail_response['suggested_notes'])
 
             if not tnba_notes:
                 self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
@@ -285,13 +280,6 @@ class TNBAMonitor:
                 slack_message = os.linesep.join(slack_messages)
                 await self._notifications_repository.send_slack_message(slack_message)
 
-            await self._t7_repository.save_prediction(
-                ticket_id,
-                task_history_response_body,
-                t7_prediction_response_body,
-                available_options,
-                suggested_notes
-            )
             self._logger.info(f'Finished processing ticket without TNBA notes. ID: {ticket_id}')
 
         self._logger.info('Finished processing tickets without TNBA notes!')
@@ -454,8 +442,6 @@ class TNBAMonitor:
 
             tnba_notes: List[dict] = []
             slack_messages: List[str] = []
-            available_options: List[dict] = []
-            suggested_notes: List[dict] = []
             ticket_notes = ticket['ticket_notes']
 
             for ticket_detail in ticket['ticket_details']:
@@ -471,9 +457,6 @@ class TNBAMonitor:
                 if ticket_detail_response['slack_message']:
                     slack_messages.append(ticket_detail_response['slack_message'])
 
-                available_options.append(ticket_detail_response['available_options'])
-                suggested_notes.append(ticket_detail_response['suggested_notes'])
-
             if not tnba_notes:
                 self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
             else:
@@ -488,13 +471,6 @@ class TNBAMonitor:
                 slack_message = os.linesep.join(slack_messages)
                 await self._notifications_repository.send_slack_message(slack_message)
 
-            await self._t7_repository.save_prediction(
-                ticket_id,
-                task_history_response_body,
-                t7_prediction_response_body,
-                available_options,
-                suggested_notes
-            )
             self._logger.info(f'Finished processing ticket with TNBA notes. ID: {ticket_id}')
 
         self._logger.info('Finished processing tickets with TNBA notes!')
