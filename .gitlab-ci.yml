@@ -41,8 +41,8 @@ variables:
   service_outage_monitor_4_desired_tasks: 1
   service_outage_monitor_triage_desired_tasks: 1
   sites_monitor_desired_tasks: 1
-  tnba_feedback_desired_tasks: 1
-  tnba_monitor_desired_tasks: 1
+  tnba_feedback_desired_tasks: 0
+  tnba_monitor_desired_tasks: 0
   t7_bridge_desired_tasks: 1
   velocloud_bridge_desired_tasks: 2
 
