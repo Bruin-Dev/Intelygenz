@@ -48,7 +48,11 @@ class PapertrailProvisioner:
         docker_images_file = parser.parse_args().docker_images_file
         with open(docker_images_file) as json_file:
             data = json.load(json_file)
-        return [elem['image_tag'] for elem in data if elem['repository'] == repository][0].split("-")[-1]
+
+        image_tag = [elem['image_tag'] for elem in data if elem['repository'] == repository]
+        if not image_tag:
+            return None
+        return image_tag[0].split("-")[-1]
 
     def papertrail_provision(self):
         file_exec = "go-papertrail-cli"
@@ -71,6 +75,8 @@ class PapertrailProvisioner:
                             if "repository" in search:
                                 repository = search['repository']
                                 build_number = self._get_build_number_query(repository)
+                                if not build_number:
+                                    continue
                                 query = query.replace('<BUILD_NUMBER>', build_number)
                             subprocess.call([papertrail_cli_exec, '-a', 'd', '-g', group_name, '-w', wildcard, '-S',
                                              search_name, '-q', query, '-p', destination_port, '-t', system_type,
