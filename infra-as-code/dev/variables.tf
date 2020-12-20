@@ -56,7 +56,7 @@ variable "NATS_MODULE_VERSION" {
 variable "cidr_base" {
   type = "map"
   default = {
-    "production"  = "10.1.0.0/16"
+    "production"  = "172.31.88.0/22"
     "dev"         = "172.31.84.0/22"
   }
 }
