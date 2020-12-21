@@ -53,14 +53,6 @@ variable "NATS_MODULE_VERSION" {
   default = "latest"
 }
 
-variable "cidr_base" {
-  type = "map"
-  default = {
-    "production"  = "172.31.88.0/22"
-    "dev"         = "172.31.84.0/22"
-  }
-}
-
 variable "CURRENT_ENVIRONMENT" {
   default = "dev"
   description = "Name of the environment to identify the network resources to be used"

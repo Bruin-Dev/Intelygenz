@@ -70,7 +70,7 @@ resource "aws_security_group" "automation-lumin-billing-report_service" {
     to_port = 5000
     protocol = "TCP"
     cidr_blocks = [
-      var.cidr_base[var.CURRENT_ENVIRONMENT]
+      data.aws_vpc.mettel-automation-vpc.cidr_block
     ]
   }
 

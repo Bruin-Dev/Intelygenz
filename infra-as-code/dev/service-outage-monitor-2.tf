@@ -73,7 +73,7 @@ resource "aws_security_group" "automation-service-outage-monitor-2_service" {
     to_port = 9090
     protocol = "TCP"
     cidr_blocks = [
-      var.cidr_base[var.CURRENT_ENVIRONMENT]
+      data.aws_vpc.mettel-automation-vpc.cidr_block
     ]
   }
 
