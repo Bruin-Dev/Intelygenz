@@ -3902,6 +3902,117 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_ticket_not_created_by_automation_engine_test(self):
+        serial_number = 'B827EB92EB72'
+        client_id = 9994
+
+        device = {
+            'cached_info': {
+                "serial_number": serial_number,
+                "last_contact": "2020-01-16T14:59:56.245Z",
+                "bruin_client_info": {
+                    "client_id": client_id,
+                    "client_name": "METTEL/NEW YORK",
+                },
+            },
+            'device_info': {
+                "probeId": "1",
+                "uid": "b8:27:eb:76:a8:de",
+                "os": "Linux ARM",
+                "name": "FIS_Demo_XrPi",
+                "testIp": "none",
+                "managementIp": "none",
+                "active": "1",
+                "type": "8",
+                "mode": "Automatic",
+                "n2nMode": "1",
+                "rsMode": "1",
+                "typeName": "xr_pi",
+                "serialNumber": "B827EB76A8DE",
+                "probeGroup": "FIS",
+                "location": "",
+                "latitude": "0",
+                "longitude": "0",
+                "endpointVersion": "9.6 SP1 build 121",
+                "xrVersion": "4.2.2.10681008",
+                "defaultInterface": "eth0",
+                "defaultGateway": "192.168.90.99",
+                "availableForMesh": "1",
+                "lastRestart": "2020-10-15T02:13:24Z",
+                "availability": {
+                    "from": 1,
+                    "to": 1,
+                    "mesh": "1"
+                },
+                "ips": [
+                    "192.168.90.102",
+                    "192.226.111.211"
+                ],
+                "userGroups": [
+                    "1",
+                    "10"
+                ],
+                "wifi": {
+                    "available": 0,
+                    "associated": 0,
+                    "bssid": "",
+                    "ssid": "",
+                    "frequency": "",
+                    "level": "0",
+                    "bitrate": ""
+                },
+                "nodetonode": {
+                    "status": 1,
+                    "lastUpdate": "2020-11-11T13:00:11Z"
+                },
+                "realservice": {
+                    "status": 1,
+                    "lastUpdate": "2020-10-15T02:18:28Z"
+                }
+            }
+        }
+
+        ticket_id = 99999
+        ticket = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": ticket_id,
+            "category": "Network Scout",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "InterMapper Service",
+        }
+        outage_ticket_response = {
+            'body': [
+                ticket
+            ],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
+
+        await outage_monitor._run_ticket_autoresolve(device)
+
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(ticket)
+        bruin_repository.get_ticket_details.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_test(self):
         serial_number = 'B827EB92EB72'
         client_id = 9994
@@ -3981,6 +4092,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -4008,6 +4120,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
 
         await outage_monitor._run_ticket_autoresolve(device)
@@ -4096,6 +4209,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -4123,6 +4237,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
 
         await outage_monitor._run_ticket_autoresolve(device)
@@ -4212,6 +4327,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": ticket_creation_date,
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -4291,6 +4407,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=False)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock()
 
@@ -4382,6 +4499,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": ticket_creation_date,
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -4470,6 +4588,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=False)
         outage_monitor._is_detail_resolved = Mock()
@@ -4563,6 +4682,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": ticket_creation_date,
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -4652,6 +4772,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=True)
@@ -4746,6 +4867,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": ticket_creation_date,
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -4838,6 +4960,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
@@ -4933,6 +5056,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": ticket_creation_date,
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -5031,6 +5155,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
@@ -5127,6 +5252,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": ticket_creation_date,
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -5225,6 +5351,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
@@ -5241,6 +5368,33 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
         bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(ticket_id, serial_number)
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
+
+    def was_ticket_created_by_automation_engine_test(self):
+        ticket = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "Network Scout",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
+        }
+        result = OutageMonitor._was_ticket_created_by_automation_engine(ticket)
+        assert result is True
+
+        ticket = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "Network Scout",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "InterMapper Service",
+        }
+        result = OutageMonitor._was_ticket_created_by_automation_engine(ticket)
+        assert result is False
 
     def is_outage_ticket_detail_auto_resolvable_test(self):
         event_bus = Mock()

@@ -124,6 +124,12 @@ class OutageMonitor:
             outage_ticket_id = outage_ticket['ticketID']
             outage_ticket_creation_date = outage_ticket['createDate']
 
+            if not self._was_ticket_created_by_automation_engine(outage_ticket):
+                self._logger.info(
+                    f'Ticket {outage_ticket_id} was not created by Automation Engine. Skipping autoresolve...'
+                )
+                return
+
             ticket_details_response = await self._bruin_repository.get_ticket_details(outage_ticket_id)
             ticket_details_response_body = ticket_details_response['body']
             ticket_details_response_status = ticket_details_response['status']
@@ -180,6 +186,10 @@ class OutageMonitor:
 
             self._logger.info(
                 f'Ticket {outage_ticket_id} linked to device {serial_number} was autoresolved!')
+
+    @staticmethod
+    def _was_ticket_created_by_automation_engine(ticket: dict) -> bool:
+        return ticket['createdBy'] == 'Intelygenz Ai'
 
     @staticmethod
     def is_outage_ticket_auto_resolvable(ticket_notes: list, max_autoresolves: int) -> bool:
