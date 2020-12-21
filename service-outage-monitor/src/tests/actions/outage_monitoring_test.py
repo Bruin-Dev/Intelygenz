@@ -1780,6 +1780,102 @@ class TestServiceOutageMonitor:
         outage_monitor._can_autoresolve_ticket_by_age.assert_not_called()
 
     @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_ticket_not_created_by_automation_engine_test(self):
+        serial_number = 'VC1234567'
+        client_id = 9994
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge = {
+            'cached_info': {
+                'edge': edge_full_id,
+                'last_contact': '2020-08-17T02:23:59',
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'METTEL/NEW YORK',
+                },
+            },
+            'status': [
+                {
+                    'host': 'mettel.velocloud.net',
+                    'enterpriseName': 'Militaires Sans Frontières',
+                    'enterpriseId': 1,
+                    'enterpriseProxyId': None,
+                    'enterpriseProxyName': None,
+                    'edgeName': 'Big Boss',
+                    'edgeState': 'CONNECTED',
+                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
+                    'edgeId': 1,
+                    'edgeSerialNumber': serial_number,
+                    'edgeHASerialNumber': None,
+                    'edgeModelNumber': 'edge520',
+                    'edgeLatitude': None,
+                    'edgeLongitude': None,
+                    'links': [
+                        {
+                            'displayName': '70.59.5.185',
+                            'isp': None,
+                            'interface': 'REX',
+                            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                            'linkState': 'DISCONNECTED',
+                            'linkLastActive': '2020-09-29T04:45:15.000Z',
+                            'linkVpnState': 'STABLE',
+                            'linkId': 5293,
+                            'linkIpAddress': '70.59.5.185',
+                        },
+                    ],
+                }
+            ]
+        }
+
+        outage_ticket_1_id = 99999
+        outage_ticket_1 = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": outage_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "InterMapper Service",
+        }
+        outage_ticket_response = {
+            'body': [
+                outage_ticket_1
+            ],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
+        outage_monitor._can_autoresolve_ticket_by_age = Mock()
+
+        await outage_monitor._run_ticket_autoresolve_for_edge(edge)
+
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
+        outage_monitor._can_autoresolve_ticket_by_age.assert_not_called()
+
+    @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_ticket_too_old_to_be_autoresolved_test(self):
         serial_number = 'VC1234567'
         client_id = 9994
@@ -1839,6 +1935,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -1866,11 +1963,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=False)
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_not_awaited()
 
@@ -1937,6 +2036,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -1969,11 +2069,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
@@ -2041,6 +2143,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -2109,12 +2212,14 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock()
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
@@ -2185,6 +2290,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -2248,6 +2354,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=True)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -2255,6 +2362,7 @@ class TestServiceOutageMonitor:
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
@@ -2328,6 +2436,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -2392,6 +2501,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=True)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -2400,6 +2510,7 @@ class TestServiceOutageMonitor:
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
@@ -2473,6 +2584,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -2545,6 +2657,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -2553,6 +2666,7 @@ class TestServiceOutageMonitor:
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
@@ -2626,6 +2740,7 @@ class TestServiceOutageMonitor:
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
             'body': [
@@ -2698,6 +2813,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -2706,6 +2822,7 @@ class TestServiceOutageMonitor:
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._can_autoresolve_ticket_by_age.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
@@ -2715,6 +2832,33 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
         bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(outage_ticket_1_id, serial_number)
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_1_id)
+
+    def was_ticket_created_by_automation_engine_test(self):
+        ticket = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "SD-WAN",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
+        }
+        result = OutageMonitor._was_ticket_created_by_automation_engine(ticket)
+        assert result is True
+
+        ticket = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "SD-WAN",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "InterMapper Service",
+        }
+        result = OutageMonitor._was_ticket_created_by_automation_engine(ticket)
+        assert result is False
 
     @pytest.mark.asyncio
     async def notify_successful_autoresolve_test(self):
