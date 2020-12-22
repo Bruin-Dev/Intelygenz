@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from application.clients import public_input_pb2 as public__input__pb2
+from application.clients.generated_grpc import public_input_pb2 as public__input__pb2
 
 
 class EntrypointStub(object):

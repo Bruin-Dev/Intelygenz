@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from application.repositories.t7_kre_repository import T7KRERepository
 
@@ -63,10 +63,10 @@ class TestT7KRERepository:
     def get_prediction_200_test(self):
         raw_predictions = {
             "body": {
-                "assetPredictions": [
+                "asset_predictions": [
                     {
                         "asset": "some_serial_number",
-                        "taskResults": [
+                        "task_results": [
                             {
                                 "name": "Some action",
                                 "probability": 0.9484384655952454
@@ -109,19 +109,19 @@ class TestT7KRERepository:
         )
         assert predictions == expected_predictions
 
-    def get_prediction_not_200_test(self):
-        raw_predictions = {
-            "body": "error test",
+    def get_prediction_not_200_from_client_test(self):
+        expected_response = {
+            "body": "Error from get_prediction client",
             "status": 500
         }
 
         logger = Mock()
 
         t7_kre_client = Mock()
-        t7_kre_client.get_prediction = Mock(return_value=raw_predictions)
+        t7_kre_client.get_prediction = Mock(return_value=expected_response)
 
         t7_kre_repository = T7KRERepository(logger, t7_kre_client)
-        predictions = t7_kre_repository.get_prediction(
+        response = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
             ticket_rows=self.valid_ticket_rows
         )
@@ -129,7 +129,7 @@ class TestT7KRERepository:
         t7_kre_repository._t7_kre_client.get_prediction.assert_called_once_with(
             self.valid_ticket_id, self.expected_ticket_rows
         )
-        assert predictions == raw_predictions
+        assert response == expected_response
 
     def post_automation_metrics_test(self):
         params = {"ticket_id": self.valid_ticket_id, "ticket_rows": self.valid_ticket_rows}

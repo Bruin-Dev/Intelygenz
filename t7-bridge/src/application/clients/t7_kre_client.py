@@ -1,9 +1,9 @@
 import json
 import grpc
 from google.protobuf.json_format import Parse, MessageToDict
+from typing import List
 
-from application.clients import public_input_pb2 as pb2
-from application.clients import public_input_pb2_grpc as pb2_grpc
+from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc, public_input_pb2 as pb2
 
 
 class T7KREClient:
@@ -18,78 +18,92 @@ class T7KREClient:
         return pb2_grpc.EntrypointStub(c)
 
     @staticmethod
-    def __create_request(request, ticket_id, ticket_rows):
-        request.ticket_id = ticket_id
-        for row in ticket_rows:
-            ticket_row = Parse(json.dumps(row), pb2.TicketRow())
-            request.ticket_rows.append(ticket_row)
+    def __grpc_to_http_status(grpc_code) -> int:
+        if grpc.StatusCode.INTERNAL == grpc_code:
+            return 400
+        elif grpc.StatusCode.UNAUTHENTICATED == grpc_code:
+            return 401
+        elif grpc.StatusCode.PERMISSION_DENIED == grpc_code:
+            return 403
+        elif grpc.StatusCode.UNIMPLEMENTED == grpc_code:
+            return 404
+        elif grpc.StatusCode.DEADLINE_EXCEEDED == grpc_code:
+            return 408
+        else:
+            return 500
 
-        return request
-
-    def get_prediction(self, ticket_id, ticket_rows):
+    def get_prediction(self, ticket_id: int, ticket_rows: List[dict]) -> dict:
         try:
             stub = self._create_stub()
 
-            request = self.__create_request(
+            save_prediction_response = stub.Prediction(Parse(
+                json.dumps({
+                    "ticket_id": ticket_id,
+                    "ticket_rows": ticket_rows
+                }).encode('utf8'),
                 pb2.PredictionRequest(),
-                ticket_id,
-                ticket_rows
+                ignore_unknown_fields=True
+            ), timeout=120)
+
+            dic_prediction_response = MessageToDict(
+                save_prediction_response,
+                preserving_proto_field_name=True
             )
 
-            save_prediction_response = stub.Prediction(request, timeout=120)
-            dic_prediction_response = MessageToDict(save_prediction_response)
             response = {
                 "body": dic_prediction_response,
                 "status": 200,
             }
-            self._logger.info(f'Got response getting predictions from KRE: {dic_prediction_response}')
+            self._logger.info(f'Got response getting predictions from Konstellation: {dic_prediction_response}')
 
-        except grpc.RpcError as kre_e:
+        except grpc.RpcError as grpc_e:
             response = {
-                "body": f"Error details for {kre_e.code()}: {kre_e.details}",
+                "body": f"Grpc error details: {grpc_e.details()}",
+                "status": self.__grpc_to_http_status(grpc_e.code())
+            }
+            self._logger.error(f'Got grpc error getting predictions from Konstellation: {response["body"]}')
+
+        except Exception as e:
+            response = {
+                "body": f"Error: {e.args[0]}",
                 "status": 500
             }
-            self._logger.error(f'Got error getting predictions from KRE: {kre_e.code()}: {kre_e.details}')
-
-        except Exception as kre_e:
-            response = {
-                "body": f"Error: {kre_e.args[0]}",
-                "status": 500
-            }
-            self._logger.error(f'Got error getting predictions from KRE: {kre_e.args[0]}')
+            self._logger.error(f'Got error getting predictions from Konstellation: {e.args[0]}')
 
         return response
 
-    def post_automation_metrics(self, ticket_id, ticket_rows):
+    def post_automation_metrics(self, ticket_id: int, ticket_rows: List[dict]) -> dict:
         try:
             stub = self._create_stub()
 
-            request = self.__create_request(
+            save_metrics_response = stub.SaveMetrics(Parse(
+                json.dumps({
+                    "ticket_id": ticket_id,
+                    "ticket_rows": ticket_rows
+                }).encode('utf8'),
                 pb2.SaveMetricsRequest(),
-                ticket_id,
-                ticket_rows
-            )
+                ignore_unknown_fields=True
+            ), timeout=120)
 
-            save_metrics_response = stub.SaveMetrics(request, timeout=120)
             response = {
                 "body": save_metrics_response.message,
                 "status": 200
             }
 
-            self._logger.info(f'Got response saving metrics from KRE: {response["body"]}')
+            self._logger.info(f'Got response saving metrics from Konstellation: {response["body"]}')
 
-        except grpc.RpcError as kre_e:
+        except grpc.RpcError as grpc_e:
             response = {
-                "body": f"Error details for {kre_e.code()}: {kre_e.details}",
+                "body": f"Grpc error details: {grpc_e.details()}",
+                "status": self.__grpc_to_http_status(grpc_e.code())
+            }
+            self._logger.error(f'Got grpc error saving metrics from Konstellation: {response["body"]}')
+
+        except Exception as e:
+            response = {
+                "body": f"Error: {e.args[0]}",
                 "status": 500
             }
-            self._logger.error(f'Got error saving metrics from KRE: {response["body"]}')
-
-        except Exception as kre_e:
-            response = {
-                "body": f"Error: {kre_e.args[0]}",
-                "status": 500
-            }
-            self._logger.error(f'Got error saving metrics from KRE: {response["body"]}')
+            self._logger.error(f'Got error saving metrics from Konstellation: {response["body"]}')
 
         return response

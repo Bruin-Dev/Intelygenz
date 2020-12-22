@@ -1,9 +1,7 @@
 import redis
 
 from config import config
-from application.clients.t7_client import T7Client
 from application.clients.t7_kre_client import T7KREClient
-from application.repositories.t7_repository import T7Repository
 from application.repositories.t7_kre_repository import T7KRERepository
 from application.actions.get_prediction import GetPrediction
 from application.actions.post_automation_metrics import PostAutomationMetrics
@@ -26,9 +24,6 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
-        self._t7_client = T7Client(self._logger, config)
-        self._t7_repository = T7Repository(self._logger, self._t7_client)
-
         self._t7_kre_client = T7KREClient(self._logger, config)
         self._t7_kre_repository = T7KRERepository(self._logger, self._t7_kre_client)
 
@@ -47,7 +42,6 @@ class Container:
             self._logger,
             config,
             self._event_bus,
-            self._t7_repository,
             self._t7_kre_repository,
         )
 
@@ -55,7 +49,6 @@ class Container:
             self._logger,
             config,
             self._event_bus,
-            self._t7_repository,
             self._t7_kre_repository,
         )
 

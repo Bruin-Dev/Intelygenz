@@ -1,5 +1,6 @@
 import re
 import humps
+from typing import List
 
 
 class T7KRERepository:
@@ -8,7 +9,7 @@ class T7KRERepository:
         self._logger = logger
         self._t7_kre_client = t7_kre_client
 
-    def get_prediction(self, ticket_id, ticket_rows):
+    def get_prediction(self, ticket_id: int, ticket_rows: List[dict]) -> dict:
         camel_ticket_rows = list(map(
             self.__row_dict_to_camel,
             ticket_rows
@@ -17,13 +18,13 @@ class T7KRERepository:
         prediction = self._t7_kre_client.get_prediction(ticket_id, camel_ticket_rows)
 
         if prediction["status"] in range(200, 300):
-            predictions = prediction["body"]["assetPredictions"]
+            predictions = prediction["body"]["asset_predictions"]
             body_prediction_response = list(
                 map(
                     lambda p: {
                         "assetId": p["asset"],
-                        "predictions": p["taskResults"]
-                    } if "taskResults" in p else {
+                        "predictions": p["task_results"]
+                    } if "task_results" in p else {
                         "assetId": p["asset"],
                         "error": p["error"]
                     },
@@ -31,13 +32,12 @@ class T7KRERepository:
                 )
             )
             prediction["body"] = body_prediction_response
-
-        if prediction["status"] not in range(200, 300):
+        else:
             return prediction
 
         return prediction
 
-    def post_automation_metrics(self, params):
+    def post_automation_metrics(self, params: dict) -> dict:
         ticket_id = params['ticket_id']
         camel_ticket_rows = list(map(
             self.__row_dict_to_camel,

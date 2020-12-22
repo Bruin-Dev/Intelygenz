@@ -10,6 +10,7 @@ omit =
     *setup.py*
     *__init__.py**
     *_test.py
+    */clients/generated_grpc/*
     *app.py
 [paths]
 source =
