@@ -47,36 +47,6 @@ class T7KRERepository:
         post_metrics_response = self._t7_kre_client.post_automation_metrics(ticket_id, camel_ticket_rows)
         return post_metrics_response
 
-    def save_prediction(self, ticket_id: int, ticket_rows, predictions, available_options, suggested_notes):
-        camel_ticket_rows = list(map(
-            self.__row_dict_to_camel,
-            ticket_rows
-        ))
-
-        camel_predictions = list(
-            map(
-                lambda p: {
-                    "asset": p["assetId"],
-                    "task_results": p["predictions"]
-                } if "predictions" in p else {
-                    "asset": p["assetId"],
-                    "error": p["error"]
-                },
-                predictions
-            )
-        )
-
-        prediction_feedback = {
-            "ticket_id": ticket_id,
-            "ticket_rows": camel_ticket_rows,
-            "asset_predictions": camel_predictions,
-            "asset_available_options": available_options,
-            "asset_suggestions_feedback": suggested_notes,
-        }
-
-        post_metrics_response = self._t7_kre_client.save_prediction(prediction_feedback)
-        return post_metrics_response
-
     @staticmethod
     def __row_dict_to_camel(row_input):
         row_output = {}

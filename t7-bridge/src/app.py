@@ -7,7 +7,6 @@ from application.repositories.t7_repository import T7Repository
 from application.repositories.t7_kre_repository import T7KRERepository
 from application.actions.get_prediction import GetPrediction
 from application.actions.post_automation_metrics import PostAutomationMetrics
-from application.actions.save_prediction import SavePrediction
 from igz.packages.nats.clients import NATSClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
@@ -38,12 +37,10 @@ class Container:
         self._publisher = NATSClient(config, logger=self._logger)
         self._subscriber_prediction = NATSClient(config, logger=self._logger)
         self._subscriber_automation_metrics = NATSClient(config, logger=self._logger)
-        self._subscriber_save_prediction = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_prediction, consumer_name="prediction")
         self._event_bus.add_consumer(self._subscriber_automation_metrics, consumer_name="automation_metrics")
-        self._event_bus.add_consumer(self._subscriber_save_prediction, consumer_name="save_prediction")
         self._event_bus.set_producer(self._publisher)
 
         self._get_prediction = GetPrediction(
@@ -62,19 +59,10 @@ class Container:
             self._t7_kre_repository,
         )
 
-        self._save_prediction = SavePrediction(
-            self._logger,
-            config,
-            self._event_bus,
-            self._t7_kre_repository,
-        )
-
         self._action_get_prediction = ActionWrapper(self._get_prediction, "get_prediction",
                                                     is_async=True, logger=self._logger)
         self._action_automation_metrics = ActionWrapper(self._post_automation_metrics, "post_automation_metrics",
                                                         is_async=True, logger=self._logger)
-        self._action_save_prediction = ActionWrapper(self._save_prediction, "save_prediction",
-                                                     is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -85,9 +73,6 @@ class Container:
                                                  queue="t7_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="automation_metrics", topic="t7.automation.metrics",
                                                  action_wrapper=self._action_automation_metrics,
-                                                 queue="t7_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="save_prediction", topic="t7.save.prediction.request",
-                                                 action_wrapper=self._action_save_prediction,
                                                  queue="t7_bridge")
 
     async def start_server(self):
