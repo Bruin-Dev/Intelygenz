@@ -35,13 +35,6 @@ KRE_CONFIG = {
     'base_url': os.environ['KRE_BASE_URL']
 }
 
-T7CONFIG = {
-    'base_url': os.environ['T7_BASE_URL'],
-    'client_name': 'mettel-automation',
-    'version': '1.0.0',
-    'auth-token': os.environ['T7_TOKEN']
-}
-
 QUART_CONFIG = {
     'title': 't7-bridge',
     'port': 5000

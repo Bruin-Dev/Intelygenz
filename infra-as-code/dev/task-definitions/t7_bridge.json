@@ -49,14 +49,6 @@
         "value": "${KRE_BASE_URL}"
       },
       {
-        "name": "T7_BASE_URL",
-        "value": "${T7_BASE_URL}"
-      },
-      {
-        "name": "T7_TOKEN",
-        "value": "${T7_TOKEN}"
-      },
-      {
         "name": "PAPERTRAIL_ACTIVE",
         "value": "${PAPERTRAIL_ACTIVE}"
       },

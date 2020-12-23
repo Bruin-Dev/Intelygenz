@@ -113,8 +113,6 @@ SLACK_URL = var_dict["SLACK_URL_DEV"]
 
 # T7 variables
 KRE_BASE_URL = var_dict["KRE_BASE_URL_DEV"]
-T7_BASE_URL = var_dict["T7_BASE_URL_DEV"]
-T7_TOKEN = var_dict["T7_TOKEN_DEV"]
 
 # Velocloud variables
 VELOCLOUD_CREDENTIALS = var_dict["VELOCLOUD_CREDENTIALS_DEV"]
@@ -399,8 +397,6 @@ env_dict = {
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'KRE_BASE_URL={KRE_BASE_URL}\n'
-        f'T7_BASE_URL={T7_BASE_URL}\n'
-        f'T7_TOKEN={T7_TOKEN}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',

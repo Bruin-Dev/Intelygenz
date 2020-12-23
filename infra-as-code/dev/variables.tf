@@ -339,14 +339,6 @@ variable "KRE_BASE_URL"{
   default = ""
 }
 
-variable "T7_BASE_URL"{
-  default = ""
-}
-
-variable "T7_TOKEN"{
-  default = ""
-}
-
 // velocloud-bridge environment variables
 
 variable "VELOCLOUD_CREDENTIALS" {
