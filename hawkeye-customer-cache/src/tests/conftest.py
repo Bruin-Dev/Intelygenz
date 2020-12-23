@@ -220,10 +220,30 @@ def response_internal_error():
 
 @pytest.fixture(scope='function')
 def cache_probes():
-    return [{'last_contact': '2020-11-05T13:57:07Z', 'serial_number': 'B827EB76A8DE',
-             'bruin_client_info': {'client_id': 'some client info'}},
-            {'last_contact': '2020-11-05T13:57:07Z', 'serial_number': 'B827EB1C60D5',
-             'bruin_client_info': {'client_id': 'some client info'}}]
+    return [
+        {
+            'probe_id': "27",
+            'probe_uid': "b8:27:eb:76:a8:de",
+            'probe_group': "FIS",
+            'device_type_name': "xr_pi",
+            'last_contact': '2020-11-05T13:57:07Z',
+            'serial_number': 'B827EB76A8DE',
+            'bruin_client_info': {
+                'client_id': 'some client info'
+            }
+        },
+        {
+            'probe_id': "58",
+            'probe_uid': "b8:27:eb:1c:60:d5",
+            'probe_group': "FIS",
+            'device_type_name': "xr_pi",
+            'last_contact': '2020-11-05T13:57:07Z',
+            'serial_number': 'B827EB1C60D5',
+            'bruin_client_info': {
+                'client_id': 'some client info'
+            }
+        }
+    ]
 
 
 @pytest.fixture(scope='function')
