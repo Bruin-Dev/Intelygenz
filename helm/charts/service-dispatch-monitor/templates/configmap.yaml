@@ -4,6 +4,8 @@ metadata:
   name: {{ include "service-dispatch-monitor.fullname" . }}-configmap
   labels:
     {{- include "service-dispatch-monitor.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   CURRENT_ENVIRONMENT: {{ .Values.config.environment}}
   ENVIRONMENT_NAME: {{ .Values.config.environment_name }}

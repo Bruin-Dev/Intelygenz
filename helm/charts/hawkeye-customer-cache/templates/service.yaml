@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hawkeye-customer-cache.fullname" . }}
+  labels:
+    {{- include "hawkeye-customer-cache.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "hawkeye-customer-cache.selectorLabels" . | nindent 4 }}

@@ -4,6 +4,8 @@ metadata:
   name: {{ include "dispatch-portal-backend.fullname" . }}-configmap
   labels:
     {{- include "dispatch-portal-backend.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   CURRENT_ENVIRONMENT: {{ .Values.config.environment}}
   ENVIRONMENT_NAME: {{ .Values.config.environment_name }}

@@ -4,6 +4,8 @@ metadata:
   name: {{ include "sites-monitor.fullname" . }}-configmap
   labels:
     {{- include "sites-monitor.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   CURRENT_ENVIRONMENT: {{ .Values.config.environment}}
   ENVIRONMENT_NAME: {{ .Values.config.environment_name }}

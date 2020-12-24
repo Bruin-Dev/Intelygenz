@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "service-outage-monitor-2.fullname" . }}-configmap
+  labels:
+    {{- include "service-outage-monitor-2.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  CURRENT_ENVIRONMENT: {{ .Values.config.environment}}
+  ENVIRONMENT_NAME: {{ .Values.config.environment_name }}
+  NATS_SERVER1: {{ .Values.config.nats_server }}
+  REDIS_HOSTNAME: {{ .Values.config.redis_hostname }}
+  PAPERTRAIL_ACTIVE: "{{ .Values.config.papertrail_active }}"
+  PAPERTRAIL_HOST: {{ .Values.config.papertrail_host }}
+  PAPERTRAIL_PORT: "{{ .Values.config.papertrail_port }}"
+  LAST_CONTACT_RECIPIENT: {{ .Values.config.last_contact_recipient }}
+  VELOCLOUD_HOSTS: {{ .Values.config.velocloud_hosts }}
+  VELOCLOUD_HOSTS_FILTER: {{ .Values.config.velocloud_hosts_filter}}
+  ENABLE_TRIAGE_MONITORING: "{{ .Values.config.enable_triage_monitoring }}"

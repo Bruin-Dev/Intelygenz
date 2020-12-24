@@ -34,9 +34,27 @@ service-dispatch-monitor-build:
     MODULE_NAME: service-dispatch-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - service-dispatch-monitor/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $service_dispatch_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - service-dispatch-monitor/**/*
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $service_dispatch_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_TAG =~ /^service-dispatch-monitor-v\d*.\d*.\d*$/'
   extends: .build_app_image
   needs: ["service-dispatch-monitor-test"]
+
+# =====================================
+# release jobs for service-dispatch-monitor module
+# =====================================
+release-service-dispatch-monitor:
+  stage: release
+  image: node:10
+  before_script:
+    - npm install --prefix service-dispatch-monitor
+  script:
+    - cd service-dispatch-monitor && npx semantic-release -e semantic-release-monorepo
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - service-dispatch-monitor/**/*

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "lumin-billing-report.fullname" . }}
+  labels:
+    {{- include "lumin-billing-report.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "lumin-billing-report.selectorLabels" . | nindent 4 }}

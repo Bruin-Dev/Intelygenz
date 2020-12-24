@@ -1,6 +1,19 @@
-# ====================================================
-# Linter validation jobs for infra-as-code/dev module
-# ====================================================
+# ===============================================
+# Linter validation jobs for infra-as-code module
+# ===============================================
+terraform-validate-basic-infra:
+  stage: validation
+  extends: .terraform_dirs_validate_template
+  variables:
+    MODULE: "infra-as-code/new-basic-infra"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+      changes:
+        - infra-as-code/new-basic-infra/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+
 terraform-validate-dev:
   stage: validation
   extends: .terraform_validate_template
@@ -12,174 +25,236 @@ terraform-validate-dev:
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
       changes:
         - infra-as-code/dev/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
 
-# =======================================================
-# Terraform deployment jobs for infra-as-code/dev module
-# =======================================================
+terraform-validate-kre:
+  stage: validation
+  extends: .terraform_basic_template_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+  script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - envsubst < infra-as-code/kre/${MODULE_EKS}/data.tf > temp_data.tf
+    - mv temp_data.tf infra-as-code/kre/${MODULE_EKS}/data.tf
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+        echo "Terraform directory basic code: $i"
+      done
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+        echo "The current Workdir is $i"
+        terraform init -backend=false $i
+        terraform validate
+      done
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/kre/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+
+# ==================================================
+# Terraform deployment jobs for infra-as-code module
+# ==================================================
+basic-infra-dev:
+  stage: basic_infra
+  extends: .terraform_template_deploy_basic_infra
+  variables:
+    MODULE: "infra-as-code/new-basic-infra"
+    IAM_TO_EKS_ROLES: developer, devops
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+    CERT_DOMAIN_NAME: "*.mettel-automation.net"
+    ALB_CONTROLLER_ROLE_NAME: "alb-controller-policy-eks-mettel-automation"
+    EXTERNAL_DNS_ROLE_NAME: "mettel-automation-external-dns-oidc"
+    HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, bitnami https://charts.bitnami.com/bitnami, ingress-nginx https://kubernetes.github.io/ingress-nginx"
+    HOSTED_ZONE_NAME: "mettel-automation.net."
+    HOSTED_ZONE_DOMAIN_FILTER: "mettel-automation.net"
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
+    RELOADER_CHART_V: ${RELOADER_CHART_V_DEV}
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
+    - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+#      when: manual
+#      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+
 deploy-branches:
   stage: deploy
   extends: .terraform_template_deploy_environment
+  variables:
+    MODULE: infra-as-code/new-dev
   before_script:
-    - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_DEV}
-    - export TF_VAR_PAPERTRAIL_HOST=${PAPERTRAIL_HOST_DEV}
-    - export TF_VAR_PAPERTRAIL_PORT=${PAPERTRAIL_PORT_DEV}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_DISPATCH_PORTAL_SERVER_PORT=${DISPATCH_PORTAL_SERVER_PORT}
-    - export TF_VAR_DIGI_REPORT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_DEV}
-    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_DEV}
-    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_DEV}
-    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_DEV}
-    - export TF_VAR_BRUIN_LOGIN_URL_IP=${BRUIN_LOGIN_URL_IP_DEV}
-    - export TF_VAR_BRUIN_BASE_URL_IP=${BRUIN_BASE_URL_IP_DEV}
-    - export TF_VAR_CTS_CLIENT_ID=${CTS_CLIENT_ID_DEV}
-    - export TF_VAR_CTS_CLIENT_SECRET=${CTS_CLIENT_SECRET_DEV}
-    - export TF_VAR_CTS_CLIENT_USERNAME=${CTS_CLIENT_USERNAME_DEV}
-    - export TF_VAR_CTS_CLIENT_PASSWORD=${CTS_CLIENT_PASSWORD_DEV}
-    - export TF_VAR_CTS_CLIENT_SECURITY_TOKEN=${CTS_CLIENT_SECURITY_TOKEN_DEV}
-    - export TF_VAR_CTS_LOGIN_URL=${CTS_LOGIN_URL_DEV}
-    - export TF_VAR_CTS_DOMAIN=${CTS_DOMAIN_DEV}
-    - export TF_VAR_DIGI_CLIENT_ID=${DIGI_CLIENT_ID_DEV}
-    - export TF_VAR_DIGI_CLIENT_SECRET=${DIGI_CLIENT_SECRET_DEV}
-    - export TF_VAR_DIGI_BASE_URL=${DIGI_BASE_URL_DEV}
-    - export TF_VAR_DIGI_IP_DEV=${DIGI_IP_DEV}
-    - export TF_VAR_DIGI_RECORD_NAME_DEV=${DIGI_RECORD_NAME_DEV}
-    - export TF_VAR_DIGI_IP_TEST=${DIGI_IP_TEST}
-    - export TF_VAR_DIGI_RECORD_NAME_TEST=${DIGI_RECORD_NAME_TEST}
-    - export TF_VAR_EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY=${EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY_DEV}
-    - export TF_VAR_EMAIL_TAGGER_MONITOR_REQUEST_API_KEY=${EMAIL_TAGGER_MONITOR_REQUEST_API_KEY_DEV}
-    - export TF_VAR_EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL=${EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL_DEV}
-    - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_DEV}
-    - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_DEV}
-    - export TF_VAR_LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
-    - export TF_VAR_LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_DEV}
-    - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
-    - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
-    - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
-    - export TF_VAR_LUMIN_URI=${LUMIN_URI}
-    - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
-    - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
-    - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_DEV}
-    - export TF_VAR_KRE_BASE_URL=${KRE_BASE_URL_DEV}
+    - export TF_VAR_ENVIRONMENT=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - export TF_VAR_SLACK_URL=${SLACK_URL_DEV}
-    - export TF_VAR_TELESTAX_URL=${TELESTAX_URL}
-    - export TF_VAR_TELESTAX_ACCOUNT_SID=${TELESTAX_ACCOUNT_SID}
-    - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
-    - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
-    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-branches
+    - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-      when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/'
+      when: manual
       allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+#
+#deploy-master:
+#  stage: deploy
+#  extends: .terraform_template_deploy_environment
+#  before_script:
+#    - terraform init -backend=true -get=true -input=false
+#    - export ENVIRONMENT_SLUG=master
+#    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+#    - export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_PRO}
+#    - export TF_VAR_PAPERTRAIL_HOST=${PAPERTRAIL_HOST_PRO}
+#    - export TF_VAR_PAPERTRAIL_PORT=${PAPERTRAIL_PORT_PRO}
+#    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+#    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
+#    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
+#    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
+#    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+#    - export TF_VAR_DISPATCH_PORTAL_SERVER_PORT=${DISPATCH_PORTAL_SERVER_PORT}
+#    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
+#    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+#    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+#    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
+#    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+#    - export TF_VAR_CTS_CLIENT_ID=${CTS_CLIENT_ID_PRO}
+#    - export TF_VAR_CTS_CLIENT_SECRET=${CTS_CLIENT_SECRET_PRO}
+#    - export TF_VAR_CTS_CLIENT_USERNAME=${CTS_CLIENT_USERNAME_PRO}
+#    - export TF_VAR_CTS_CLIENT_PASSWORD=${CTS_CLIENT_PASSWORD_PRO}
+#    - export TF_VAR_CTS_CLIENT_SECURITY_TOKEN=${CTS_CLIENT_SECURITY_TOKEN_PRO}
+#    - export TF_VAR_CTS_LOGIN_URL=${CTS_LOGIN_URL_PRO}
+#    - export TF_VAR_CTS_DOMAIN=${CTS_DOMAIN_PRO}
+#    - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_PRO}
+#    - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_PRO}
+#    - export TF_VAR_LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_PRO}
+#    - export TF_VAR_LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_PRO}
+#    - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_PRO}
+#    - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_PRO}
+#    - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_PRO}
+#    - export TF_VAR_LUMIN_URI=${LUMIN_URI}
+#    - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
+#    - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
+#    - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_PROD}
+#    - export TF_VAR_KRE_BASE_URL=${KRE_BASE_URL_PRO}
+#    - export TF_VAR_CURRENT_ENVIRONMENT=production
+#    - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
+#    - export TF_VAR_TELESTAX_URL=${TELESTAX_URL}
+#    - export TF_VAR_TELESTAX_ACCOUNT_SID=${TELESTAX_ACCOUNT_SID}
+#    - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
+#    - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
+#    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
+#  environment:
+#    name: $CI_COMMIT_REF_NAME
+#    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
+#    on_stop: destroy-master
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == "master"
 
-deploy-master:
+deploy-kre-dev:
   stage: deploy
-  extends: .terraform_template_deploy_environment
+  extends: .terraform_template_deploy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    KRE_RECORD_ALIAS_NAME: "*.kre-test.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre-test.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre-test.mettel-automation.net."
+    NGINX_INGRESS_CHART_V: ${NGINX_INGRESS_CHART_V_DEV}
+    EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_DEV}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_DEV}
+    KUBE2IAM_CHART_V: ${KUBE2IAM_CHART_V_DEV}
+    CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_DEV}
+    KRE_CHART_V: ${KRE_CHART_V_DEV}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+    IAM_TO_EKS_ROLES: developer, devops
+    HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, rimusz https://charts.rimusz.net, jetstack https://charts.jetstack.io, konstellation-io https://charts.konstellation.io"
   before_script:
-    - terraform init -backend=true -get=true -input=false
-    - export ENVIRONMENT_SLUG=master
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_PRO}
-    - export TF_VAR_PAPERTRAIL_HOST=${PAPERTRAIL_HOST_PRO}
-    - export TF_VAR_PAPERTRAIL_PORT=${PAPERTRAIL_PORT_PRO}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_DISPATCH_PORTAL_SERVER_PORT=${DISPATCH_PORTAL_SERVER_PORT}
-    - export TF_VAR_DIGI_REPORT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
-    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
-    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
-    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
-    - export TF_VAR_CTS_CLIENT_ID=${CTS_CLIENT_ID_PRO}
-    - export TF_VAR_CTS_CLIENT_SECRET=${CTS_CLIENT_SECRET_PRO}
-    - export TF_VAR_CTS_CLIENT_USERNAME=${CTS_CLIENT_USERNAME_PRO}
-    - export TF_VAR_CTS_CLIENT_PASSWORD=${CTS_CLIENT_PASSWORD_PRO}
-    - export TF_VAR_CTS_CLIENT_SECURITY_TOKEN=${CTS_CLIENT_SECURITY_TOKEN_PRO}
-    - export TF_VAR_CTS_LOGIN_URL=${CTS_LOGIN_URL_PRO}
-    - export TF_VAR_CTS_DOMAIN=${CTS_DOMAIN_PRO}
-    - export TF_VAR_DIGI_CLIENT_ID=${DIGI_CLIENT_ID_PRO}
-    - export TF_VAR_DIGI_CLIENT_SECRET=${DIGI_CLIENT_SECRET_PRO}
-    - export TF_VAR_DIGI_BASE_URL=${DIGI_BASE_URL_PRO}
-    - export TF_VAR_DIGI_IP_PRO=${DIGI_IP_PRO}
-    - export TF_VAR_DIGI_RECORD_NAME_PRO=${DIGI_RECORD_NAME_PRO}
-    - export TF_VAR_EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY=${EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY_PRO}
-    - export TF_VAR_EMAIL_TAGGER_MONITOR_REQUEST_API_KEY=${EMAIL_TAGGER_MONITOR_REQUEST_API_KEY_PRO}
-    - export TF_VAR_EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL=${EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL_PRO}
-    - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_PRO}
-    - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_PRO}
-    - export TF_VAR_LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_PRO}
-    - export TF_VAR_LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_PRO}
-    - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_PRO}
-    - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_PRO}
-    - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_PRO}
-    - export TF_VAR_LUMIN_URI=${LUMIN_URI}
-    - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
-    - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
-    - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_PROD}
-    - export TF_VAR_KRE_BASE_URL=${KRE_BASE_URL_PRO}
-    - export TF_VAR_CURRENT_ENVIRONMENT=production
-    - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
-    - export TF_VAR_TELESTAX_URL=${TELESTAX_URL}
-    - export TF_VAR_TELESTAX_ACCOUNT_SID=${TELESTAX_ACCOUNT_SID}
-    - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
-    - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
-    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
-    - export TF_VAR_TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
-    - export TF_VAR_TICKET_COLLECTOR_MONGO_PASSWORD=${TICKET_COLLECTOR_MONGO_PASSWORD}
-    - export TF_VAR_TICKET_COLLECTOR_MONGO_HOST=${TICKET_COLLECTOR_MONGO_HOST}
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
-    on_stop: destroy-master
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-
-# ====================================================
-# Terraform destroy jobs for infra-as-code/dev module
-# ====================================================
-destroy-branches:
-  stage: destroy
-  extends: .terraform_template_destroy_environment
-  before_script:
-    - terraform init -backend=true -get=true -input=false
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - export TF_VAR_SLACK_URL=${SLACK_URL_DEV}
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
       when: manual
       allow_failure: true
-  needs:
-    - deploy-branches
+
+deploy-kre-production:
+  stage: deploy
+  extends: .terraform_template_deploy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    KRE_RECORD_ALIAS_NAME: "*.kre.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre.mettel-automation.net."
+    NGINX_INGRESS_CHART_V: ${NGINX_INGRESS_CHART_V_PROD}
+    EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_PROD}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PROD}
+    KUBE2IAM_CHART_V: ${KUBE2IAM_CHART_V_PROD}
+    CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_PROD}
+    KRE_CHART_V: ${KRE_CHART_V_PROD}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PROD}
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PROD}
+    IAM_TO_EKS_ROLES: developer, devops
+    HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, rimusz https://charts.rimusz.net, jetstack https://charts.jetstack.io, konstellation-io https://charts.konstellation.io"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
+#deploy-eks-integration:
+#  stage: deploy
+#  extends: .terraform_template_deploy_eks
+#  variables:
+#    MODULE: infra-as-code/eks
+#    EKS_MODULE: 2-create-eks-cluster
+#    IAM_TO_EKS_ROLES: developer, devops
+#    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+#  before_script:
+#    - export ENVIRONMENT_SLUG="production"
+#    - export TF_VAR_ENVIRONMENT=${ENVIRONMENT_SLUG}
+#    - export TF_VAR_CURRENT_ENVIRONMENT=production
+#    - export EKS_CLUSTER_NAME="mettel-automation"
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "master"'
+
+# ===============================================
+# Terraform destroy jobs for infra-as-code module
+# ===============================================
+destroy-branches:
+  stage: destroy
+  extends: .terraform_template_destroy_environment
+  before_script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    action: stop
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+#  needs:
+#    - deploy-branches
 
 destroy-branches-aws-nuke:
   stage: destroy
@@ -194,22 +269,59 @@ destroy-branches-aws-nuke:
       when: manual
       allow_failure: true
 
-destroy-master:
+#destroy-master:
+#  stage: destroy
+#  extends: .terraform_template_destroy_environment
+#  before_script:
+#    - terraform init -backend=true -get=true -input=false
+#    - export ENVIRONMENT_SLUG=master
+#    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+#    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+#    - export TF_VAR_CURRENT_ENVIRONMENT=production
+#    - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
+#  environment:
+#    name: $CI_COMMIT_REF_NAME
+#    action: stop
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == "master"
+#      when: manual
+#      allow_failure: true
+#  needs:
+#    - deploy-master
+
+
+destroy-kre-dev:
   stage: destroy
-  extends: .terraform_template_destroy_environment
+  extends: .terraform_template_destroy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    KRE_RECORD_ALIAS_NAME: "*.kre-test.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre-test.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre-test.mettel-automation.net."
   before_script:
-    - terraform init -backend=true -get=true -input=false
-    - export ENVIRONMENT_SLUG=master
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+destroy-kre-production:
+  stage: destroy
+  extends: .terraform_template_destroy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    KRE_RECORD_ALIAS_NAME: "*.kre.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre.mettel-automation.net."
+  before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
-    - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
       allow_failure: true
-  needs:
-    - deploy-master

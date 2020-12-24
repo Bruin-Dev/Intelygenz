@@ -34,9 +34,24 @@ velocloud-bridge-build:
     MODULE_NAME: velocloud-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - velocloud-bridge/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $velocloud_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - velocloud-bridge/**/*
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $velocloud_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_TAG =~ /^velocloud-bridge-v\d*.\d*.\d*$/'
   extends: .build_app_image
   needs: ["velocloud-bridge-test"]
+
+# ========================================
+# release jobs for velocloud-bridge module
+# ========================================
+release-velocloud-bridge:
+  extends: .release_template
+  variables:
+    MODULE_NAME: velocloud-bridge
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - velocloud-bridge/**/*

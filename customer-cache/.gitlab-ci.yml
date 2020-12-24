@@ -34,9 +34,26 @@ customer-cache-build:
     MODULE_NAME: customer-cache
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - customer-cache/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $customer_cache_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - customer-cache/**/*
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $customer_cache_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_TAG =~ /^customer-cache-v\d*.\d*.\d*$/'
   extends: .build_app_image
   needs: ["customer-cache-test"]
+# =====================================
+# release jobs for customer-cache module
+# =====================================
+release-customer-cache:
+  stage: release
+  image: node:10
+  before_script:
+    - npm install --prefix customer-cache
+  script:
+    - cd customer-cache && npx semantic-release -e semantic-release-monorepo
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - customer-cache/**/*

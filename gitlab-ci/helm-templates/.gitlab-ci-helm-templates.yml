@@ -1,0 +1,42 @@
+.helm_template_deploy_chart: &helm_template_deploy_chart
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  cache:
+    policy: pull
+    key: "necessary-terraform-vars-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - output
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INITIALIZE HELM
+    - python3 ci-utils/helm/add_helm_repositories.py
+    - helm repo update
+    - helm dep up ${HELM_CHART_DIR}
+    # GET DOCKER IMAGE FOR HELM CHART
+    - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_NAME} -g -a -p -f "$DOCKER_IMAGES_FILE"
+    - source ci-utils/environments/build_number_assign.sh
+    # DECLARE HELM CHART SET ATTRIBUTES
+    - export HELM_CHART_SET_ATTRIBUTES="--set config.redis_hostname=${REDIS_HOSTNAME}
+     --set bruin_bridge.replicaCount=${bruin_bridge_desired_tasks}
+     --set bruin_bridge.bruin_client_id=${BRUIN_CLIENT_ID}
+     --set bruin_bridge.bruin_client_secret=${BRUIN_CLIENT_SECRET}
+     --set bruin_bridge.bruin_login_url_ip=${BRUIN_LOGIN_URL_IP}
+     --set bruin_bridge.bruin_login_url=${BRUIN_LOGIN_URL}
+     --set bruin_bridge.bruin_base_url_ip=${BRUIN_BASE_URL_IP}
+     --set bruin_bridge.bruin_base_url=${BRUIN_BASE_URL}
+     --set bruin_bridge.image.tag=${BRUIN_BRIDGE_BUILD_NUMBER}"
+    # DEPLOY HELM CHART
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+        helm upgrade --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
+          --set config.environment_name=${ENVIRONMENT_NAME} \
+          ${HELM_CHART_SET_ATTRIBUTES} -n default
+      else
+        helm upgrade --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
+          --set config.environment_name=${ENVIRONMENT_NAME} \
+          ${HELM_CHART_SET_ATTRIBUTES} -n ${ENVIRONMENT_NAME}
+      fi

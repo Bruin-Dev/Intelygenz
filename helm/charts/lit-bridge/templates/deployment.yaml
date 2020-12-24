@@ -4,6 +4,8 @@ metadata:
   name: {{ include "lit-bridge.fullname" . }}
   labels:
     {{- include "lit-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
 spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -11,11 +13,17 @@ spec:
   selector:
     matchLabels:
       {{- include "lit-bridge.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         {{- include "lit-bridge.labels" . | nindent 8 }}
     spec:
+      initContainers:
+        - name: wait-nats-server
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"

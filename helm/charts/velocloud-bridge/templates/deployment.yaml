@@ -4,6 +4,8 @@ metadata:
   name: {{ include "velocloud-bridge.fullname" . }}
   labels:
     {{- include "velocloud-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
 spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -11,19 +13,17 @@ spec:
   selector:
     matchLabels:
       {{- include "velocloud-bridge.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
   template:
     metadata:
-    {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
       labels:
         {{- include "velocloud-bridge.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      initContainers:
+        - name: wait-nats-server
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"

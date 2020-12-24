@@ -2,19 +2,60 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- Number of service-dispatch-monitor pods
 replicaCount: 1
 
 config:
+  # -- Name of environment for EKS cluster and network resources
   environment: "dev"
+  # -- Name of ephemeral environment for helm charts and
+  # redis elasticaches used
   environment_name: "automation-test"
+  # -- NATS cluster endpoint used by service-dispatch-monitor
   nats_server: "nats://nats:4222"
+  # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
+  # -- Indicates if the logs will be sent to papertrail or not.
   papertrail_active: "False"
+  # -- Papertrail host to which the logs will be sent
   papertrail_host: "logs.papertrailapp.com"
-  papertrail_port: 1111
+  # -- Papertrail port to which the logs will be sent
+  papertrail_port: "0"
+  # -- Indicates if the helm chart will be displayed in an aws or local environment,
+  # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
   ecr_registry:
+    # -- Name of the imagePullSecret created to access the images stored in ECR.
     name: "ecr-registry"
+  capabilities_replicas:
+    # -- Number of replicas of bruin-bridge. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # bruin-bridge service responds correctly to healthcheck calls.
+    bruin_bridge: "2"
+    # -- Number of replicas of cts-bridge. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # cts-bridge service responds correctly to healthcheck calls.
+    cts_bridge: "1"
+    # -- Number of replicas of hawkeye-bridge. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # hawkeye-bridge service responds correctly to healthcheck calls.
+    hawkeye_bridge: "0"
+    # -- Number of replicas of lit-bridge. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # lit-bridge service responds correctly to healthcheck calls.
+    lit_bridge: "1"
+    # -- Number of replicas of notifier. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # notifier service responds correctly to healthcheck calls.
+    notifier: "1"
+    # -- Number of replicas of t7-bridge. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # t7-bridge service responds correctly to healthcheck calls.
+    t7_bridge: "1"
+    # -- Number of replicas of velocloud-bridge. If it is higher than 0 an initContainer
+    # will be created in the service-dispatch-monitor deployment that will wait until the
+    # velocloud-bridge service responds correctly to healthcheck calls.
+    velocloud_bridge: "2"
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-service-dispatch-monitor

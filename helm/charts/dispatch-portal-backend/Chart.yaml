@@ -1,6 +1,6 @@
 apiVersion: v2
 name: dispatch-portal-backend
-description: A Helm chart for Kubernetes
+description: A Helm chart for Kubernetes to deploy microservice dispatch-portal-backend
 
 # A chart can be either an 'application' or a 'library' chart.
 #

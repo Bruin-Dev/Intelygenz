@@ -4,6 +4,8 @@ metadata:
   name: {{ include "cts-bridge.fullname" . }}-configmap
   labels:
     {{- include "cts-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
 data:
   CURRENT_ENVIRONMENT: {{ .Values.config.environment}}
   ENVIRONMENT_NAME: {{ .Values.config.environment_name }}

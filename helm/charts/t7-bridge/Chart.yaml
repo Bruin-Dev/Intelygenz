@@ -1,6 +1,6 @@
 apiVersion: v2
 name: t7-bridge
-description: A Helm chart for Kubernetes
+description: A Helm chart for Kubernetes to deploy microservice t7-bridge
 
 # A chart can be either an 'application' or a 'library' chart.
 #
