@@ -1,0 +1,29 @@
+# ============================================
+# Helm deploy jobs
+# ============================================
+helm-branches:
+  stage: helm
+  variables:
+    DOCKER_IMAGES_FILE: "/tmp/latest_images_for_ecr_repositories.json"
+    HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
+    HELM_CHART_RELEASE_NAME: "automation-engine"
+    HELM_CHART_DIR: "helm/charts/automation-engine"
+  extends: .helm_template_deploy_chart
+  before_script:
+    # GET REDIS HOSTNAMES FROM CACHE
+    - export REDIS_HOSTNAME=$(cat output/redis_hostname.txt)
+    # DECLARE NECESSARY ENVIRONMENT VARIABLES
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
+    - export ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
+    - export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_DEV}
+    - export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_DEV}
+    - export BRUIN_LOGIN_URL_IP=${BRUIN_LOGIN_URL_IP_DEV}
+    - export BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_DEV}
+    - export BRUIN_BASE_URL_IP=${BRUIN_BASE_URL_IP_DEV}
+    - export BRUIN_BASE_URL=${BRUIN_BASE_URL_DEV}
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $bruin_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
+      allow_failure: true

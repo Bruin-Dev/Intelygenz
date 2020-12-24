@@ -34,9 +34,27 @@ hawkeye-outage-monitor-build:
     MODULE_NAME: hawkeye-outage-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - hawkeye-outage-monitor/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $hawkeye_outage_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - hawkeye-outage-monitor/**/*
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $hawkeye_outage_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_TAG =~ /^hawkeye-outage-monitor-v\d*.\d*.\d*$/'
   extends: .build_app_image
   needs: ["hawkeye-outage-monitor-test"]
+
+# =====================================
+# release jobs for hawkeye-outage-monitor module
+# =====================================
+release-hawkeye-outage-monitor:
+  stage: release
+  image: node:10
+  before_script:
+    - npm install --prefix hawkeye-outage-monitor
+  script:
+    - cd hawkeye-outage-monitor && npx semantic-release -e semantic-release-monorepo
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - hawkeye-outage-monitor/**/*

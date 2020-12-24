@@ -1,0 +1,73 @@
+{{- if gt ( .Values.bruin_bridge.replicaCount | int) 0 }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bruin-bridge.name" . }}
+  labels:
+    {{- include "bruin-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.bruin_bridge.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "bruin-bridge.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "bruin-bridge.labels" . | nindent 8 }}
+    spec:
+      initContainers:
+        - name: wait-nats-server
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+        - name: wait-redis
+          image: busybox:1.28
+          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
+          envFrom:
+            - configMapRef:
+                name: {{ include "bruin-bridge.fullname" . }}-configmap
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.bruin_bridge.image.repository }}:{{ .Values.bruin_bridge.image.tag | default "automation-master-latest" }}"
+          imagePullPolicy: {{ .Values.bruin_bridge.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "bruin-bridge.fullname" . }}-configmap
+            - secretRef:
+                name: {{ include "bruin-bridge.fullname" . }}-secret
+          ports:
+            - name: http
+              containerPort: {{ .Values.bruin_bridge.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.bruin_bridge.service.port }}
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.bruin_bridge.service.port }}
+            initialDelaySeconds: 15
+      {{- if eq .Values.config.mode "local" }}
+      imagePullSecrets:
+        - name: {{ .Values.config.ecr_registry.name }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{ end }}

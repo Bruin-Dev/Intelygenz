@@ -34,9 +34,27 @@ dispatch-portal-backend-build:
     MODULE_NAME: dispatch-portal-backend
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - dispatch-portal-backend/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $dispatch_portal_backend_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - dispatch-portal-backend/**/*
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $dispatch_portal_backend_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_TAG =~ /^dispatch-portal-backend-v\d*.\d*.\d*$/'
   extends: .build_app_image
   needs: ["dispatch-portal-backend-test"]
+
+# =====================================
+# release jobs for dispatch-portal-backend module
+# =====================================
+release-dispatch-portal-backend:
+  stage: release
+  image: node:10
+  before_script:
+    - npm install --prefix dispatch-portal-backend
+  script:
+    - cd dispatch-portal-backend && npx semantic-release -e semantic-release-monorepo
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - dispatch-portal-backend/**/*

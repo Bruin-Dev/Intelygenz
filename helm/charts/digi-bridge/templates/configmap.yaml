@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "digi-bridge.fullname" . }}-configmap
+  labels:
+    {{- include "digi-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  CURRENT_ENVIRONMENT: {{ .Values.config.environment}}
+  ENVIRONMENT_NAME: {{ .Values.config.environment_name }}
+  NATS_SERVER1: {{ .Values.config.nats_server }}
+  REDIS_HOSTNAME: {{ .Values.config.redis_hostname }}
+  PAPERTRAIL_ACTIVE: "{{ .Values.config.papertrail_active }}"
+  PAPERTRAIL_HOST: {{ .Values.config.papertrail_host }}
+  PAPERTRAIL_PORT: "{{ .Values.config.papertrail_port }}"
+  DIGI_IP_PRO: "{{ .Values.config.digi_ip_pro }}"
+  DIGI_RECORD_NAME_PRO: "{{ .Values.config.digi_record_name_pro }}"
+  DIGI_IP_DEV: "{{ .Values.config.digi_ip_dev }}"
+  DIGI_RECORD_NAME_DEV: "{{ .Values.config.digi_record_name_dev }}"
+  DIGI_IP_TEST: "{{ .Values.config.digi_ip_test }}"
+  DIGI_RECORD_NAME_TEST: "{{ .Values.config.digi_record_name_test }}"

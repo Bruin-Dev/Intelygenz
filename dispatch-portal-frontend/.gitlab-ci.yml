@@ -16,9 +16,9 @@ dispatch-portal-frontend-linter:
     paths:
       - dispatch-portal-frontend/node_modules
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - dispatch-portal-frontend/**/*
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - dispatch-portal-frontend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   tags:
     - kubernetes
@@ -40,9 +40,9 @@ dispatch-portal-frontend-test:
     paths:
       - dispatch-portal-frontend/node_modules
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - dispatch-portal-frontend/**/*
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - dispatch-portal-frontend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   dependencies:
     - dispatch-portal-frontend-linter
@@ -62,9 +62,9 @@ dispatch-portal-frontend-test-e2e:
   script:
     - npm run ci:test --prefix dispatch-portal-frontend
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - dispatch-portal-frontend/**/*
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - dispatch-portal-frontend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   tags:
     - kubernetes
@@ -73,39 +73,26 @@ dispatch-portal-frontend-test-e2e:
 # =================================================================
 # Images builds jobs for dispatch-portal-frontend module components
 # =================================================================
-dispatch-portal-frontend-nextjs-build:
+dispatch-portal-frontend-build:
   stage: build
   variables:
     MODULE_NAME: dispatch-portal-frontend
     MODULE_VERSION: ${CI_PIPELINE_ID}
   script:
-    - docker build --build-arg CURRENT_ENV="PRO" --build-arg DNS_ENVIRONMENT=${DNS_ENVIRONMENT_VAR} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+    - docker build --build-arg CURRENT_ENV="PRO" --build-arg DNS_ENVIRONMENT=${DNS_ENVIRONMENT_VAR}
+      -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+      -t ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+      -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+    - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+    - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - dispatch-portal-frontend/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
-  needs: ["dispatch-portal-frontend-test", "dispatch-portal-frontend-test-e2e"]
-
-
-dispatch-portal-frontend-nginx-build:
-  stage: build
-  variables:
-    MODULE_NAME: dispatch-portal-frontend/nginx
-    MODULE_VERSION: ${CI_PIPELINE_ID}
-  script:
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - dispatch-portal-frontend/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $dispatch_portal_frontend_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+#      changes:
+#        - dispatch-portal-frontend/**/*
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $dispatch_portal_frontend_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_TAG =~ /^dispatch-portal-frontend-v\d*.\d*.\d*$/'
   extends: .build_app_image
   needs: ["dispatch-portal-frontend-test", "dispatch-portal-frontend-test-e2e"]
