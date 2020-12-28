@@ -1,0 +1,41 @@
+# ==============================================
+# Linter validation jobs for digi-bridge module
+# ==============================================
+digi-bridge-linter:
+  variables:
+    MODULE: digi-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - digi-bridge/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# =======================================
+# Unit tests jobs for digi-bridge module
+# =======================================
+digi-bridge-test:
+  variables:
+    MODULE: digi-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - digi-bridge/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python_alpine
+
+# ==========================================
+# Images builds jobs for digi-bridge module
+# ==========================================
+digi-bridge-build:
+  stage: build
+  variables:
+    MODULE_NAME: digi-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - digi-bridge/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+
