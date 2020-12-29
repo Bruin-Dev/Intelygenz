@@ -25,12 +25,12 @@ class DiGiClient:
         }
         form_data = {
             "grant_type": "client_credentials",
-            "scope": "public_api"
+            "scope": "write:dms"
         }
 
         try:
             response = await self._session.post(
-                f'{self._config.DIGI_CONFIG["login_url"]}/Identity/rest/oauth/token',
+                f'{self._config.DIGI_CONFIG["base_url"]}/Identity/rest/oauth/token',
                 data=form_data,
                 headers=headers,
             )
@@ -41,15 +41,14 @@ class DiGiClient:
             self._logger.error("An error occurred while trying to login to DiGi")
             self._logger.error(f"Error: {err}")
 
-    def _get_request_headers(self):
+    def _get_request_headers(self, params):
         if not self._bearer_token:
             raise Exception("Missing BEARER token")
 
-        headers = {
+        token = {
             "authorization": f"Bearer {self._bearer_token}",
-            "Content-Type": "application/json-patch+json",
-            "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
         }
+        headers = {**token, **params}
         return headers
 
     async def reboot(self, params):

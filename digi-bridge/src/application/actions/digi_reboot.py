@@ -26,11 +26,12 @@ class DiGiReboot:
 
         payload = msg['body']
 
-        if not all(key in payload.keys() for key in ("velo_serial", "ticket")):
+        if not all(key in payload.keys() for key in ("velo_serial", "ticket", "MAC")):
             self._logger.error(f'Cannot reboot DiGi client using {json.dumps(msg)}. '
                                f'JSON malformed')
 
-            response["body"] = 'You must include "velo_serial" and "ticket" in the "body" field of the response request'
+            response["body"] = 'You must include "velo_serial", "ticket", "MAC" ' \
+                               'in the "body" field of the response request'
             response["status"] = 400
             await self._event_bus.publish_message(msg['response_topic'], response)
             return
