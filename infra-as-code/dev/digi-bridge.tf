@@ -19,7 +19,13 @@ data "template_file" "automation-digi-bridge" {
     log_prefix = local.log_prefix
     DIGI_CLIENT_ID = var.DIGI_CLIENT_ID
     DIGI_CLIENT_SECRET = var.DIGI_CLIENT_SECRET
-    DIGI_LOGIN_URL = var.DIGI_LOGIN_URL
+    DIGI_BASE_URL = var.DIGI_BASE_URL
+    DIGI_IP_PRO = var.DIGI_IP_PRO
+    DIGI_RECORD_NAME_PRO = var.DIGI_RECORD_NAME_PRO
+    DIGI_IP_DEV = var.DIGI_IP_DEV
+    DIGI_RECORD_NAME_DEV = var.DIGI_RECORD_NAME_DEV
+    DIGI_IP_TEST = var.DIGI_IP_TEST
+    DIGI_RECORD_NAME_TEST = var.DIGI_RECORD_NAME_TEST
     NATS_SERVER1 = local.nats_server1
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     REDIS_HOSTNAME = local.redis-hostname

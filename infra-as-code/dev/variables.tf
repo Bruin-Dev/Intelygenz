@@ -133,6 +133,30 @@ variable "DIGI_LOGIN_URL" {
   default = ""
 }
 
+variable "DIGI_IP_PRO" {
+  default = ""
+}
+
+variable "DIGI_RECORD_NAME_PRO" {
+  default = ""
+}
+
+variable "DIGI_IP_DEV" {
+  default = ""
+}
+
+variable "DIGI_RECORD_NAME_DEV" {
+  default = ""
+}
+
+variable "DIGI_IP_TEST" {
+  default = ""
+}
+
+variable "DIGI_RECORD_NAME_TEST" {
+  default = ""
+}
+
 // dispatch-portal environment variables
 
 variable "DISPATCH_PORTAL_SERVER_PORT" {

@@ -57,6 +57,30 @@
         "value": "${DIGI_LOGIN_URL}"
       },
       {
+        "name": "DIGI_IP_PRO",
+        "value": "${DIGI_IP_PRO}"
+      },
+      {
+        "name": "DIGI_RECORD_NAME_PRO",
+        "value": "${DIGI_RECORD_NAME_PRO}"
+      },
+      {
+        "name": "DIGI_IP_DEV",
+        "value": "${DIGI_IP_DEV}"
+      },
+      {
+        "name": "DIGI_RECORD_NAME_DEV",
+        "value": "${DIGI_RECORD_NAME_DEV}"
+      },
+      {
+        "name": "DIGI_IP_TEST",
+        "value": "${DIGI_IP_TEST}"
+      },
+      {
+        "name": "DIGI_RECORD_NAME_TEST",
+        "value": "${DIGI_RECORD_NAME_TEST}"
+      },
+      {
         "name": "CURRENT_ENVIRONMENT",
         "value": "${CURRENT_ENVIRONMENT}"
       },
