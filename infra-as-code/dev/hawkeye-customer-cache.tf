@@ -126,6 +126,7 @@ resource "aws_ecs_service" "automation-hawkeye-customer-cache" {
   }
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
+                 null_resource.digi-bridge-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
                  null_resource.hawkeye-bridge-healthcheck,
                  null_resource.t7-bridge-healthcheck,

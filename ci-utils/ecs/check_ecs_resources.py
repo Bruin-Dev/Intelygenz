@@ -17,6 +17,7 @@ class CheckECSResources:
     _ecs_services_tasks = [os.environ['TF_VAR_bruin_bridge_desired_tasks'],
                            os.environ['TF_VAR_cts_bridge_desired_tasks'],
                            os.environ['TF_VAR_customer_cache_desired_tasks'],
+                           os.environ['TF_VAR_digi_bridge_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_backend_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_frontend_desired_tasks'],
                            os.environ['TF_VAR_hawkeye_bridge_desired_tasks'],

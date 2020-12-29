@@ -19,6 +19,7 @@ variables:
   bruin_bridge_desired_tasks: 2
   cts_bridge_desired_tasks: 1
   customer_cache_desired_tasks: 1
+  digi_bridge_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
   hawkeye_bridge_desired_tasks: 1
@@ -60,6 +61,7 @@ include:
   - local: 'cts-bridge/.gitlab-ci.yml'
   - local: 'customer-cache/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
+  - local: 'digi-bridge/.gitlab-ci.yml'
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'
   - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
   - local: 'hawkeye-bridge/.gitlab-ci.yml'

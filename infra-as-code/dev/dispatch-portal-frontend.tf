@@ -150,6 +150,7 @@ resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
+                 null_resource.digi-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
                  null_resource.hawkeye-bridge-healthcheck,

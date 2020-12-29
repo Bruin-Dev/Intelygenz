@@ -128,6 +128,7 @@ resource "aws_ecs_service" "automation-sites-monitor" {
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
+                 null_resource.digi-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,

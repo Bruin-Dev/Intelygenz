@@ -152,6 +152,7 @@ resource "null_resource" "dispatch-portal-backend-healthcheck" {
                 aws_ecs_task_definition.automation-dispatch-portal-backend,
                 null_resource.bruin-bridge-healthcheck,
                 null_resource.cts-bridge-healthcheck,
+                null_resource.digi-bridge-healthcheck,
                 null_resource.lit-bridge-healthcheck,
                 null_resource.metrics-prometheus-healthcheck,
                 null_resource.notifier-healthcheck,

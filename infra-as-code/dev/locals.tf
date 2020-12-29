@@ -57,6 +57,16 @@ locals {
   automation-cts-bridge-task_definition = "${aws_ecs_task_definition.automation-cts-bridge.family}:${aws_ecs_task_definition.automation-cts-bridge.revision}"
   automation-cts-bridge-service_discovery_service-name = "cts-bridge-${var.ENVIRONMENT}"
 
+  // automation-digi-bridge local vars
+  automation-digi-bridge-image = "${data.aws_ecr_repository.automation-digi-bridge.repository_url}:${data.external.digi-bridge-build_number.result["image_tag"]}"
+  automation-digi-bridge-papertrail_prefix = "digi-bridge-${element(split("-", data.external.digi-bridge-build_number.result["image_tag"]),2)}"
+  automation-digi-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge_service-security_group-name = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge-resource-name = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge-task_definition = "${aws_ecs_task_definition.automation-digi-bridge.family}:${aws_ecs_task_definition.automation-digi-bridge.revision}"
+  automation-digi-bridge-service_discovery_service-name = "digi-bridge-${var.ENVIRONMENT}"
+
   // customer-cache local vars
   automation-customer-cache-image = "${data.aws_ecr_repository.automation-customer-cache.repository_url}:${data.external.customer-cache-build_number.result["image_tag"]}"
   automation-customer-cache-papertrail_prefix = "customer-cache-${element(split("-", data.external.customer-cache-build_number.result["image_tag"]),2)}"
@@ -502,6 +512,10 @@ locals {
   // alarm running_task_count_hawkeye-outage-monitor local variables
   running_task_count_hawkeye-outage-monitor_alarm-name = "Running tasks count of hawkeye-outage-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_hawkeye-outage-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_hawkeye-outage-monitor"
+
+  // alarm running_task_count_digi-bridge local variables
+  running_task_count_digi-bridge_alarm-name = "Running tasks count of digi-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_digi-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_digi-bridge"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"

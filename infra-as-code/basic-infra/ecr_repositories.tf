@@ -105,3 +105,7 @@ resource "aws_ecr_repository" "automation-hawkeye-customer-cache" {
 resource "aws_ecr_repository" "automation-hawkeye-outage-monitor" {
   name = "automation-hawkeye-outage-monitor"
 }
+
+resource "aws_ecr_repository" "automation-digi-bridge" {
+  name = "automation-digi-bridge"
+}

@@ -119,6 +119,20 @@ variable "CTS_DOMAIN" {
   default = ""
 }
 
+// digi-bridge environment variables
+
+variable "DIGI_CLIENT_ID" {
+  default = ""
+}
+
+variable "DIGI_CLIENT_SECRET" {
+  default = ""
+}
+
+variable "DIGI_LOGIN_URL" {
+  default = ""
+}
+
 // dispatch-portal environment variables
 
 variable "DISPATCH_PORTAL_SERVER_PORT" {
@@ -369,6 +383,12 @@ variable "cts_bridge_desired_tasks" {
   description = "Number of desired tasks of microservice cts-bridge"
 }
 
+variable "digi_bridge_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice digi-bridge"
+}
+
 variable "dispatch_portal_frontend_desired_tasks" {
   default = 1
   type = number
@@ -541,8 +561,14 @@ variable "bruin-bridge-task-definition-json" {
 
 variable "cts-bridge-task-definition-json" {
   type = string
-  description = "Task definition arn output in rendered json for CTS-bridge"
+  description = "Task definition arn output in rendered json for cts-bridge"
   default = "/tmp/cts-bridge-task-definition.json"
+}
+
+variable "digi-bridge-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for digi-bridge"
+  default = "/tmp/digi-bridge-task-definition.json"
 }
 
 variable "customer-cache-task-definition-json" {

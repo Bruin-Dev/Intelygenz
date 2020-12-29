@@ -662,3 +662,27 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_hawkeye-outage-monito
     Environment = var.ENVIRONMENT
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_digi_bridge_alarm" {
+  count = var.digi_bridge_desired_tasks > 0 ? 1 : 0
+  alarm_name = local.running_task_count_digi-bridge_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.digi_bridge_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of digi-bridge service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-digi-bridge"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_digi-bridge_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
