@@ -68,6 +68,7 @@ class ServiceAffectingMonitor:
         await self._latency_check()
         await self._packet_loss_check()
         await self._jitter_check()
+        await self._bandwidth_check()
 
         self._logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
 
@@ -320,6 +321,66 @@ class ServiceAffectingMonitor:
 
         self._logger.info("Finished looking for jitter issues!")
 
+    async def _bandwidth_check(self):
+        self._logger.info('Looking for bandwidth issues...')
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bandwidth_checks()
+        links_metrics: list = links_metrics_response['body']
+
+        if not links_metrics:
+            self._logger.info("List of links arrived empty while checking bandwidth issues. Skipping...")
+            return
+
+        links_metrics = self._structure_links_metrics(links_metrics)
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+
+        for elem in metrics_with_cache_and_contact_info:
+            cached_info = elem['cached_info']
+            link_status = elem['link_status']
+            metrics = elem['link_metrics']
+
+            # TODO: Remove this check as soon as the customer asks to release Bandwidth check for all edges
+            client_id = cached_info['bruin_client_info']['client_id']
+            if not self._is_rep_services_client_id(client_id):
+                continue
+
+            tx_bandwidth = metrics['bpsOfBestPathTx']
+            rx_bandwidth = metrics['bpsOfBestPathRx']
+
+            if tx_bandwidth == 0 and rx_bandwidth == 0:
+                continue
+
+            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+
+            minutes_to_check = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['bandwidth']
+            threshold = self._config.MONITOR_CONFIG['bandwidth_percentage']
+
+            rx_throughput = (metrics['bytesRx'] * 8) / (minutes_to_check * 60)
+            tx_throughput = (metrics['bytesTx'] * 8) / (minutes_to_check * 60)
+
+            bandwidth_dict = {}
+
+            if rx_bandwidth > 0 and (rx_throughput / rx_bandwidth) * 100 > threshold:
+                bandwidth_dict['rx_throughput'] = rx_throughput
+                bandwidth_dict['rx_bandwidth'] = rx_bandwidth
+                bandwidth_dict['rx_threshold'] = (threshold / 100) * rx_bandwidth
+
+            if tx_bandwidth > 0 and (tx_throughput / tx_bandwidth) * 100 > threshold:
+                bandwidth_dict['tx_throughput'] = tx_throughput
+                bandwidth_dict['tx_bandwidth'] = tx_bandwidth
+                bandwidth_dict['tx_threshold'] = (threshold / 100) * tx_bandwidth
+
+            if not bandwidth_dict:
+                self._logger.info(
+                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed any bandwidth thresholds"
+                )
+                continue
+
+            ticket_dict = self._compose_bandwidth_ticket_dict(link_info=elem, bandwidth_metrics=bandwidth_dict)
+            await self._notify_trouble(link_info=elem, trouble='Bandwidth Over Utilization', ticket_dict=ticket_dict)
+
+        self._logger.info("Finished looking for bandwidth issues!")
+
     async def _notify_trouble(self, link_info, trouble, ticket_dict):
         cached_info = link_info['cached_info']
         contact_info = link_info['contact_info']
@@ -436,6 +497,10 @@ class ServiceAffectingMonitor:
                                     f'{self._config.MONITOR_CONFIG["environment"]}'
                     await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
 
+    @staticmethod
+    def _is_rep_services_client_id(client_id: int):
+        return client_id == 83109
+
     def _compose_ticket_dict(self, link_info, input, output, trouble, threshold):
         edge_overview = OrderedDict()
         edge_overview["Edge Name"] = link_info["edge_status"]["edgeName"]
@@ -462,6 +527,51 @@ class ServiceAffectingMonitor:
             f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/links/] \n'
 
         return edge_overview
+
+    def _compose_bandwidth_ticket_dict(self, link_info: dict, bandwidth_metrics: dict) -> dict:
+        edge_overview = OrderedDict()
+
+        edge_overview["Edge Name"] = link_info["edge_status"]["edgeName"]
+        edge_overview["Trouble"] = 'Bandwidth Over Utilization'
+        edge_overview["Interface"] = link_info['link_status']['interface']
+        edge_overview["Name"] = link_info['link_status']['displayName']
+        edge_overview['Interval for Scan'] = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['bandwidth']
+        edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+
+        if 'rx_throughput' in bandwidth_metrics:
+            edge_overview['Throughput (Receive)'] = self._humanize_bps(bandwidth_metrics['rx_throughput'])
+            edge_overview['Bandwidth (Receive)'] = self._humanize_bps(bandwidth_metrics['rx_bandwidth'])
+            edge_overview['Threshold (Receive)'] = f"{self._config.MONITOR_CONFIG['bandwidth_percentage']}% " \
+                                                   f"({self._humanize_bps(bandwidth_metrics['rx_threshold'])})"
+        if 'tx_throughput' in bandwidth_metrics:
+            edge_overview['Throughput (Transfer)'] = self._humanize_bps(bandwidth_metrics['tx_throughput'])
+            edge_overview['Bandwidth (Transfer)'] = self._humanize_bps(bandwidth_metrics['tx_bandwidth'])
+            edge_overview['Threshold (Transfer)'] = f"{self._config.MONITOR_CONFIG['bandwidth_percentage']}% " \
+                                                    f"({self._humanize_bps(bandwidth_metrics['tx_threshold'])})"
+
+        edge_overview["Links"] = \
+            f'[Edge|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
+            f'{link_info["edge_status"]["enterpriseId"]}' \
+            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/] - ' \
+            f'[QoE|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
+            f'{link_info["edge_status"]["enterpriseId"]}' \
+            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/qoe/] - ' \
+            f'[Transport|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
+            f'{link_info["edge_status"]["enterpriseId"]}' \
+            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/links/] \n'
+
+        return edge_overview
+
+    @staticmethod
+    def _humanize_bps(bps: int) -> str:
+        if 0 <= bps < 1000:
+            return f'{round(bps, 3)} bps'
+        if 1000 <= bps < 100000000:
+            return f'{round((bps / 1000), 3)} Kbps'
+        if 100000000 <= bps < 100000000000:
+            return f'{round((bps / 1000000), 3)} Mbps'
+        if bps >= 100000000000:
+            return f'{round((bps / 1000000000), 3)} Gbps'
 
     def _ticket_object_to_string(self, ticket_dict, watermark=None):
         edge_triage_str = "#*Automation Engine*# \n"

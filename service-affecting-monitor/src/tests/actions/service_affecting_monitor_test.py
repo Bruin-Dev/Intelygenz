@@ -124,6 +124,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
+        service_affecting_monitor._bandwidth_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -131,6 +132,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._latency_check.assert_awaited_once()
         service_affecting_monitor._packet_loss_check.assert_awaited_once()
         service_affecting_monitor._jitter_check.assert_awaited_once()
+        service_affecting_monitor._bandwidth_check.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process_non_2xx_customer_cache_return_ko_test(self):
@@ -157,6 +159,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
+        service_affecting_monitor._bandwidth_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -164,6 +167,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._latency_check.assert_not_awaited()
         service_affecting_monitor._packet_loss_check.assert_not_awaited()
         service_affecting_monitor._jitter_check.assert_not_awaited()
+        service_affecting_monitor._bandwidth_check.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process_empty_customer_cache_return_ko_test(self):
@@ -190,6 +194,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
+        service_affecting_monitor._bandwidth_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -197,6 +202,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._latency_check.assert_not_awaited()
         service_affecting_monitor._packet_loss_check.assert_not_awaited()
         service_affecting_monitor._jitter_check.assert_not_awaited()
+        service_affecting_monitor._bandwidth_check.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def latency_check_with_no_troubles_test(self):
@@ -1285,6 +1291,743 @@ class TestServiceAffectingMonitor:
             link_info=metrics_with_cache_and_contact_info_return[0],
             trouble='Jitter',
             ticket_dict=ticket_dict
+        )
+
+    @pytest.mark.asyncio
+    async def bandwidth_check_with_no_troubles_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1_bandwidth_bps_rx = 100
+        link_1_bandwidth_bps_tx = 100
+        link_1_bytes_rx = 1200
+        link_1_bytes_tx = 1300
+
+        link_2_bandwidth_bps_rx = 100
+        link_2_bandwidth_bps_tx = 100
+        link_2_bytes_rx = 1500
+        link_2_bytes_tx = 1700
+
+        link_3_bandwidth_bps_rx = 100
+        link_3_bandwidth_bps_tx = 100
+        link_3_bytes_rx = 2000
+        link_3_bytes_tx = 2200
+
+        link_1 = {
+            'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+            'bytesTx': link_1_bytes_tx,
+            'bytesRx': link_1_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+        link_2 = {
+            'bpsOfBestPathTx': link_2_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_2_bandwidth_bps_rx,
+            'bytesTx': link_2_bytes_tx,
+            'bytesRx': link_2_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+        link_3 = {
+            'bpsOfBestPathTx': link_3_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_3_bandwidth_bps_rx,
+            'bytesTx': link_3_bytes_tx,
+            'bytesRx': link_3_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+
+        links_metric_body = [link_1, link_2, link_3]
+        links_metric_status = 200
+
+        link_metrics_return = {
+                                'body': links_metric_body,
+                                'status': links_metric_status
+
+        }
+
+        structure_link_1 = {
+                            'edge_status': {
+                                            "host": "mettel.velocloud.net",
+                                            "enterprise_id": 137,
+                                            "edge_id": 1602,
+                                            "name": "TEST",
+                                            "edgeState": "OFFLINE",
+                                            "serialNumber": "VC05200028729",
+                                            "enterprise_name": "Titan America|85940|"},
+                            'link_status': {
+                                            'interface': 'GE1'
+                            },
+                            'link_metrics': {
+                                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                                'bytesTx': link_1_bytes_tx,
+                                'bytesRx': link_1_bytes_rx,
+                            }
+        }
+        structure_link_2 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE2'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+        structure_link_3 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE3'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+        structure_link_return = [structure_link_1,
+                                 structure_link_2,
+                                 structure_link_3]
+        metrics_with_cache_and_contact_info_return = [
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_1},
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_2},
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_3}]
+
+        logger = Mock()
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
+
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
+            return_value=metrics_with_cache_and_contact_info_return)
+        service_affecting_monitor._is_rep_services_client_id = Mock(return_value=True)
+        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock()
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._bandwidth_check()
+
+        velocloud_repository.get_links_metrics_for_bandwidth_checks.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
+            structure_link_return)
+        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_not_called()
+        service_affecting_monitor._notify_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def bandwidth_check_empty_link_metrics_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+
+        links_metric_body = []
+        links_metric_status = 200
+
+        link_metrics_return = {
+            'body': links_metric_body,
+            'status': links_metric_status
+
+        }
+
+        logger = Mock()
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
+
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        service_affecting_monitor._structure_links_metrics = Mock()
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock()
+        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock()
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._bandwidth_check()
+
+        velocloud_repository.get_links_metrics_for_bandwidth_checks.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_not_called()
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
+        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_not_called()
+        service_affecting_monitor._notify_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def bandwidth_check_with_invalid_rx_and_tx_bandwidth_metrics_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1_bandwidth_bps_rx = 0
+        link_1_bandwidth_bps_tx = 0
+        link_1_bytes_rx = 1200
+        link_1_bytes_tx = 1300
+
+        link_2_bandwidth_bps_rx = 0
+        link_2_bandwidth_bps_tx = 0
+        link_2_bytes_rx = 1500
+        link_2_bytes_tx = 1700
+
+        link_3_bandwidth_bps_rx = 0
+        link_3_bandwidth_bps_tx = 0
+        link_3_bytes_rx = 2000
+        link_3_bytes_tx = 2200
+
+        link_1 = {
+            'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+            'bytesTx': link_1_bytes_tx,
+            'bytesRx': link_1_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+        link_2 = {
+            'bpsOfBestPathTx': link_2_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_2_bandwidth_bps_rx,
+            'bytesTx': link_2_bytes_tx,
+            'bytesRx': link_2_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+        link_3 = {
+            'bpsOfBestPathTx': link_3_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_3_bandwidth_bps_rx,
+            'bytesTx': link_3_bytes_tx,
+            'bytesRx': link_3_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+
+        links_metric_body = [link_1, link_2, link_3]
+        links_metric_status = 200
+
+        link_metrics_return = {
+                                'body': links_metric_body,
+                                'status': links_metric_status
+
+        }
+
+        structure_link_1 = {
+                            'edge_status': {
+                                            "host": "mettel.velocloud.net",
+                                            "enterprise_id": 137,
+                                            "edge_id": 1602,
+                                            "name": "TEST",
+                                            "edgeState": "OFFLINE",
+                                            "serialNumber": "VC05200028729",
+                                            "enterprise_name": "Titan America|85940|"},
+                            'link_status': {
+                                            'interface': 'GE1'
+                            },
+                            'link_metrics': {
+                                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                                'bytesTx': link_1_bytes_tx,
+                                'bytesRx': link_1_bytes_rx,
+                            }
+        }
+        structure_link_2 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE2'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+        structure_link_3 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE3'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+        structure_link_return = [structure_link_1,
+                                 structure_link_2,
+                                 structure_link_3]
+        metrics_with_cache_and_contact_info_return = [
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_1},
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_2},
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_3}]
+
+        logger = Mock()
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
+
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
+            return_value=metrics_with_cache_and_contact_info_return)
+        service_affecting_monitor._is_rep_services_client_id = Mock(return_value=True)
+        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock()
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._bandwidth_check()
+
+        velocloud_repository.get_links_metrics_for_bandwidth_checks.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
+            structure_link_return)
+        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_not_called()
+        service_affecting_monitor._notify_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def bandwidth_check_with_link_and_tx_values_above_threshold_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1_bandwidth_bps_rx = 100
+        link_1_bandwidth_bps_tx = 100
+        link_1_bytes_rx = 1200
+        link_1_bytes_tx = 9900
+
+        link_1 = {
+            'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+            'bytesTx': link_1_bytes_tx,
+            'bytesRx': link_1_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+
+        links_metric_body = [link_1]
+        links_metric_status = 200
+
+        link_metrics_return = {
+            'body': links_metric_body,
+            'status': links_metric_status
+
+        }
+
+        structure_link_1 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+
+        structure_link_return = [structure_link_1]
+        metrics_with_cache_and_contact_info_return = [
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_1}]
+
+        bandwidth_metrics = {
+            'tx_throughput': 88,
+            'tx_bandwidth': link_1_bandwidth_bps_tx,
+            'tx_threshold': 80,
+        }
+
+        logger = Mock()
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
+
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
+            return_value=metrics_with_cache_and_contact_info_return)
+        service_affecting_monitor._is_rep_services_client_id = Mock(return_value=True)
+
+        ticket_dict = {'ticket': 'some ticket details'}
+        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock(return_value=ticket_dict)
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._bandwidth_check()
+
+        velocloud_repository.get_links_metrics_for_bandwidth_checks.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
+            structure_link_return)
+        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_called_once_with(
+            link_info=metrics_with_cache_and_contact_info_return[0],
+            bandwidth_metrics=bandwidth_metrics,
+        )
+        service_affecting_monitor._notify_trouble.assert_awaited_with(
+            link_info=metrics_with_cache_and_contact_info_return[0],
+            trouble='Bandwidth Over Utilization',
+            ticket_dict=ticket_dict,
+        )
+
+    @pytest.mark.asyncio
+    async def bandwidth_check_with_link_and_rx_values_above_threshold_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1_bandwidth_bps_rx = 100
+        link_1_bandwidth_bps_tx = 100
+        link_1_bytes_rx = 9900
+        link_1_bytes_tx = 1200
+
+        link_1 = {
+            'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+            'bytesTx': link_1_bytes_tx,
+            'bytesRx': link_1_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+
+        links_metric_body = [link_1]
+        links_metric_status = 200
+
+        link_metrics_return = {
+            'body': links_metric_body,
+            'status': links_metric_status
+
+        }
+
+        structure_link_1 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+
+        structure_link_return = [structure_link_1]
+        metrics_with_cache_and_contact_info_return = [
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_1}]
+
+        bandwidth_metrics = {
+            'rx_throughput': 88,
+            'rx_bandwidth': link_1_bandwidth_bps_rx,
+            'rx_threshold': 80,
+        }
+
+        logger = Mock()
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
+
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
+            return_value=metrics_with_cache_and_contact_info_return)
+        service_affecting_monitor._is_rep_services_client_id = Mock(return_value=True)
+
+        ticket_dict = {'ticket': 'some ticket details'}
+        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock(return_value=ticket_dict)
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._bandwidth_check()
+
+        velocloud_repository.get_links_metrics_for_bandwidth_checks.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
+            structure_link_return)
+        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_called_once_with(
+            link_info=metrics_with_cache_and_contact_info_return[0],
+            bandwidth_metrics=bandwidth_metrics,
+        )
+        service_affecting_monitor._notify_trouble.assert_awaited_with(
+            link_info=metrics_with_cache_and_contact_info_return[0],
+            trouble='Bandwidth Over Utilization',
+            ticket_dict=ticket_dict,
+        )
+
+    @pytest.mark.asyncio
+    async def bandwidth_check_with_link_and_rx_plus_tx_values_above_threshold_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1_bandwidth_bps_rx = 100
+        link_1_bandwidth_bps_tx = 100
+        link_1_bytes_rx = 9900
+        link_1_bytes_tx = 9900
+
+        link_1 = {
+            'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+            'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+            'bytesTx': link_1_bytes_tx,
+            'bytesRx': link_1_bytes_rx,
+            'link': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|",
+
+            }
+        }
+
+        links_metric_body = [link_1]
+        links_metric_status = 200
+
+        link_metrics_return = {
+            'body': links_metric_body,
+            'status': links_metric_status
+
+        }
+
+        structure_link_1 = {
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"},
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
+        }
+
+        structure_link_return = [structure_link_1]
+        metrics_with_cache_and_contact_info_return = [
+            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+             'contact_info': "some_contact_info", **structure_link_1}]
+
+        bandwidth_metrics = {
+            'rx_throughput': 88,
+            'rx_bandwidth': link_1_bandwidth_bps_rx,
+            'rx_threshold': 80,
+            'tx_throughput': 88,
+            'tx_bandwidth': link_1_bandwidth_bps_tx,
+            'tx_threshold': 80,
+        }
+
+        logger = Mock()
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
+
+        customer_cache_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository)
+        service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
+            return_value=metrics_with_cache_and_contact_info_return)
+
+        ticket_dict = {'ticket': 'some ticket details'}
+        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock(return_value=ticket_dict)
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._bandwidth_check()
+
+        velocloud_repository.get_links_metrics_for_bandwidth_checks.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
+            structure_link_return)
+        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_called_once_with(
+            link_info=metrics_with_cache_and_contact_info_return[0],
+            bandwidth_metrics=bandwidth_metrics,
+        )
+        service_affecting_monitor._notify_trouble.assert_awaited_with(
+            link_info=metrics_with_cache_and_contact_info_return[0],
+            trouble='Bandwidth Over Utilization',
+            ticket_dict=ticket_dict,
         )
 
     @pytest.mark.asyncio

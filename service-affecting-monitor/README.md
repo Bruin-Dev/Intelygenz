@@ -17,7 +17,7 @@ If it does, then a ticket is created or reopened, in case it exists and it"s res
 This is the algorithm implemented to carry out the monitoring of edges:
 
 1. Get the cache of customers for the Velocloud host(s) specified in `config/contact_info.py
-2. Run three different processes, one for each kind of trouble: latency, packet loss and jitter.
+2. Run three different processes, one for each kind of trouble: latency, packet loss, jitter and bandwidth over utilization.
 3. Get the metrics collected during the last `10 minutes` for all links in the Velocloud host(s) specified in `config/contact_info.py
 4. Filter links metrics to get metrics of those links under edges that exist in the cache of customers and also in `config/contact_info.py`
 5. Map link metrics with contact info (extracted from `config/contact_info.py`) and Bruin customer info (extracted from customer cache).
@@ -45,7 +45,11 @@ This is the algorithm implemented to carry out the monitoring of edges:
                 "bestLossPctRx": 9,
                 "bestLossPctTx": 7,
                 "bestJitterMsRx": 31,
-                "bestJitterMsTx": 29
+                "bestJitterMsTx": 29,
+                "bytesRx": 100,
+                "bytesTx": 100,
+                "bpsOfBestPathRx": 10,
+                "bpsOfBestPathTx": 10
             },
             "cached_info": {
                 "edge": {
@@ -86,15 +90,19 @@ This is the algorithm implemented to carry out the monitoring of edges:
 
 ## Thesholds
 ### Latency
-A link can have a latency of up to `120 milliseconds` when transmiting or receiving info. If this threshold is
+A link can have a latency of up to `120 milliseconds` when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue.
 
 ### Packet loss
-A link can lose up to `8 packets` when transmiting or receiving info. If this threshold is
-exceeded, the process will report this issue. 
+A link can lose up to `8 packets` when transmitting or receiving info. If this threshold is
+exceeded, the process will report this issue.
 
 ### Jitter
-A link can stay in jitter state up to `30 milliseconds` when transmiting or receiving info. If this threshold is
+A link can stay in jitter state up to `30 milliseconds` when transmitting or receiving info. If this threshold is
+exceeded, the process will report this issue.
+
+### Bandwidth Over Utilization
+A link can use up to `80%` of the available bandwidth when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue. 
 
 # Capabilities used

@@ -25,11 +25,13 @@ MONITOR_CONFIG = {
     "latency": 120,
     "packet_loss": 8,
     "jitter": 30,
+    "bandwidth_percentage": 80,
     'monitoring_minutes_interval': 10,
     "monitoring_minutes_per_trouble": {
         "latency": 20,
         "packet_loss": 20,
         "jitter": 20,
+        "bandwidth": 20,
     },
 }
 
