@@ -53,8 +53,8 @@
         "value": "${DIGI_CLIENT_SECRET}"
       },
       {
-        "name": "DIGI_LOGIN_URL",
-        "value": "${DIGI_LOGIN_URL}"
+        "name": "DIGI_BASE_URL",
+        "value": "${DIGI_BASE_URL}"
       },
       {
         "name": "DIGI_IP_PRO",

@@ -129,7 +129,7 @@ variable "DIGI_CLIENT_SECRET" {
   default = ""
 }
 
-variable "DIGI_LOGIN_URL" {
+variable "DIGI_BASE_URL" {
   default = ""
 }
 
