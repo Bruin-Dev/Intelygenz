@@ -33,6 +33,7 @@ class DiGiClient:
                 f'{self._config.DIGI_CONFIG["base_url"]}/Identity/rest/oauth/token',
                 data=form_data,
                 headers=headers,
+                ssl=False
             )
 
             self._bearer_token = (await response.json())["access_token"]
@@ -57,26 +58,32 @@ class DiGiClient:
 
             self._logger.info(f'Rebooting DiGi device with params {json.dumps(parsed_params)}')
 
-            response = await self._session.get(
+            response = await self._session.post(
                 f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
                 params=parsed_params,
-                headers=self._get_request_headers(),
+                headers=self._get_request_headers(parsed_params),
                 ssl=False,
             )
             return_response = dict.fromkeys(["body", "status"])
 
             response_json = await response.json()
-            response_error = response_json.get('error')
-            response_message = response_json.get('message')
             return_response["body"] = response_json
+            return_response["status"] = 200
 
             if response.status not in range(200, 300):
                 self._logger.error(f"Got {response.status}. Response returned {response_json}")
                 return_response["status"] = 500
-            if response_error is not None:
+                return return_response
+
+            response_error = [error_message for error_message in response_json
+                              if error_message.get("error") is not None]
+            if len(response_error) > 0:
                 self._logger.error(f"Got an error of {response_error}")
                 return_response["status"] = 400
-            if response_message.contains('Aborted'):
+                return return_response
+
+            response_message = [message for message in response_json if 'Aborted' in message['Message']]
+            if len(response_message) > 0:
                 self._logger.error(f"DiGi reboot aborted with message returning: {response_message}")
                 return_response["status"] = 400
 
