@@ -11,4 +11,5 @@ RUN pip install -r requirements.txt
 
 ENV PYTHONUNBUFFERED 1
 
-CMD ["python3", "-u", "src/app.py"]
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT [ "/bin/sh", "-c", "./entrypoint.sh" ]
