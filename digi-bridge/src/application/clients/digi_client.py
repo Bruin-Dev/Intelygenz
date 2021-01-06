@@ -46,10 +46,10 @@ class DiGiClient:
         if not self._bearer_token:
             raise Exception("Missing BEARER token")
 
-        token = {
+        headers = {
             "authorization": f"Bearer {self._bearer_token}",
+            **params
         }
-        headers = {**token, **params}
         return headers
 
     async def reboot(self, params):
@@ -60,7 +60,6 @@ class DiGiClient:
 
             response = await self._session.post(
                 f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
-                params=parsed_params,
                 headers=self._get_request_headers(parsed_params),
                 ssl=False,
             )
