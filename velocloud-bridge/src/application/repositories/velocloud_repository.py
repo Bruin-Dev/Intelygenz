@@ -71,3 +71,6 @@ class VelocloudRepository:
             elem['link']['host'] = velocloud_host
 
         return links_metric_info_response
+
+    async def get_enterprise_edges(self, host, enterprise_id):
+        return await self._velocloud_client.get_enterprise_edges(host, enterprise_id)

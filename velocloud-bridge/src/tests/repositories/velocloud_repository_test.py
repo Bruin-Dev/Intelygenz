@@ -334,3 +334,22 @@ class TestVelocloudRepository:
 
         velocloud_client.get_links_metric_info.assert_awaited_once_with(velocloud_host, interval)
         assert result == client_result
+
+    @pytest.mark.asyncio
+    async def get_enterprise_edge_test(self):
+        host = "some.host"
+        enterprise_id = 113
+
+        enterprise_list = ["List of enterprise edges"]
+
+        logger = Mock()
+
+        velocloud_client = Mock()
+        velocloud_client.get_enterprise_edges = CoroutineMock(return_value=enterprise_list)
+
+        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+
+        results = await velocloud_repository.get_enterprise_edges(host, enterprise_id)
+
+        velocloud_client.get_enterprise_edges.assert_awaited_once_with(host, enterprise_id)
+        assert results == enterprise_list
