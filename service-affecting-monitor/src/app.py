@@ -1,6 +1,7 @@
 import asyncio
 import redis
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
+from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 
@@ -45,9 +46,7 @@ class Container:
         self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                          notifications_repository=self._notifications_repository)
         self._customer_cache_repository = CustomerCacheRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            config=config,
+            event_bus=self._event_bus, logger=self._logger, config=config,
             notifications_repository=self._notifications_repository
         )
 
@@ -56,6 +55,9 @@ class Container:
                                                                   self._metrics_repository, self._bruin_repository,
                                                                   self._velocloud_repository,
                                                                   self._customer_cache_repository)
+        self._service_affecting_monitor_reports = ServiceAffectingMonitorReports(
+            self._event_bus, self._logger, self._scheduler, config, self._template_renderer, self._bruin_repository,
+            self._notifications_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()
@@ -63,6 +65,7 @@ class Container:
         await self._event_bus.connect()
 
         await self._service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=True)
+        await self._service_affecting_monitor_reports.start_service_affecting_monitor_job(exec_on_start=False)
 
         self._scheduler.start()
 

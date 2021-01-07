@@ -32,7 +32,22 @@ MONITOR_CONFIG = {
         "packet_loss": 20,
         "jitter": 20,
         "bandwidth": 20,
-    },
+    }
+}
+
+MONITOR_REPORT_CONFIG = {
+    'semaphore': 5,
+    'reports': [
+        {
+            'name': 'Report - Bandwitdh Over Utilization',
+            'type': 'bandwitdh_over_utilization',
+            'crontab': '0 8 * * *',
+            'threshold': 3,  # Number of tickets to include in the report
+            'client_id': 83109,
+            'trailing_days': 14,
+            'recipient': os.environ["LAST_CONTACT_RECIPIENT"]
+        }
+    ]
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

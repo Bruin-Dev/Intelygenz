@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch, call
@@ -308,6 +309,13 @@ class TestBruinRepository:
         response = BruinRepository.find_detail_by_serial(ticket_mock, edge_serial_number)
         assert response is None
 
+    def find_bandwidth_over_utilization_tickets_test(self, service_affecting_monitor_reports,
+                                                     response_bruin_with_all_tickets):
+        response = BruinRepository.find_bandwidth_over_utilization_tickets(
+            response_bruin_with_all_tickets, service_affecting_monitor_reports.MAIN_WATERMARK)
+
+        assert response == response_bruin_with_all_tickets
+
     @pytest.mark.asyncio
     async def get_affecting_ticket_by_trouble_ok_test(self):
         event_bus = Mock()
@@ -425,3 +433,165 @@ class TestBruinRepository:
 
         assert affecting_ticket == {}
         assert event_bus.rpc_request.called
+
+    @pytest.mark.asyncio
+    async def get_ticket_details_test(self, service_affecting_monitor_reports, ticket_1, ticket_details_1):
+        response_ticket_details_1 = {
+            'body': ticket_details_1,
+            'status': 200
+        }
+        expected_response = {
+            "ticket": ticket_1,
+            "ticket_details": ticket_details_1
+        }
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_ticket_details_1])
+        response = await service_affecting_monitor_reports._bruin_repository._get_ticket_details(ticket_1)
+        assert response == expected_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_details_400_test(self, service_affecting_monitor_reports, ticket_1):
+        response_ticket_details_1 = {
+            'body': "Some error",
+            'status': 400
+        }
+        expected_response = None
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_ticket_details_1])
+
+        response = await service_affecting_monitor_reports._bruin_repository._get_ticket_details(ticket_1)
+
+        assert response == expected_response
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_for_report_test(self, service_affecting_monitor_reports,
+                                                   response_bruin_with_all_tickets,
+                                                   response_bruin_with_all_tickets_without_details, report,
+                                                   ticket_1, ticket_details_1, ticket_2, ticket_details_2,
+                                                   ticket_3, ticket_details_3, ticket_4, ticket_details_4):
+        start_date = 'start_date'
+        end_date = 'end_date'
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+        ticket_request_msg = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': report['client_id'],
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'start_date': start_date,
+                'end_date': end_date,
+                'ticket_status': ticket_statuses
+            }
+        }
+        responses_get_ticket_details = [
+            {
+                "ticket": ticket_1,
+                "ticket_details": ticket_details_1
+            },
+            {
+                "ticket": ticket_2,
+                "ticket_details": ticket_details_2
+            },
+            {
+                "ticket": ticket_3,
+                "ticket_details": ticket_details_3
+            },
+            {
+                "ticket": ticket_4,
+                "ticket_details": ticket_details_4
+            }
+        ]
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_bruin_with_all_tickets_without_details])
+
+        with uuid_mock:
+            with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
+                response = await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
+                    report, start_date, end_date)
+
+        assert response == response_bruin_with_all_tickets
+
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
+            call("bruin.ticket.request", ticket_request_msg, timeout=90)
+        ])
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_for_report_no_tickets_test(self, service_affecting_monitor_reports, report,
+                                                              response_bruin_with_no_tickets):
+        start_date = 'start_date'
+        end_date = 'end_date'
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+        ticket_request_msg = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': report['client_id'],
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'start_date': start_date,
+                'end_date': end_date,
+                'ticket_status': ticket_statuses
+            }
+        }
+
+        responses_get_ticket_details = []
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_bruin_with_no_tickets])
+
+        with uuid_mock:
+            with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
+                response = await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
+                    report, start_date, end_date)
+
+        assert response == {}
+
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
+            call("bruin.ticket.request", ticket_request_msg, timeout=90)
+        ])
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_for_report_with_error_test(self, bruin_repository, report,
+                                                              response_bruin_with_error):
+        start_date = 'start_date'
+        end_date = 'end_date'
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+        ticket_request_msg = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': report['client_id'],
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'start_date': start_date,
+                'end_date': end_date,
+                'ticket_status': ticket_statuses
+            }
+        }
+        expected_response = None
+        responses_get_ticket_details = []
+        bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_bruin_with_error])
+
+        with uuid_mock:
+            with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
+                response = await bruin_repository.get_affecting_ticket_for_report(report, start_date, end_date)
+
+        assert response == expected_response
+
+        bruin_repository._event_bus.rpc_request.assert_has_awaits([
+            call("bruin.ticket.request", ticket_request_msg, timeout=90)
+        ])
+
+    @pytest.mark.asyncio
+    async def map_tickets_with_serial_numbers_test(self, service_affecting_monitor_reports,
+                                                   response_bruin_with_all_tickets, response_mapped_tickets):
+        response = service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers(
+            response_bruin_with_all_tickets)
+
+        assert response == response_mapped_tickets
+
+    @pytest.mark.asyncio
+    async def prepare_items_for_report_test(self, service_affecting_monitor_reports, response_mapped_tickets,
+                                            response_prepare_items_for_report):
+        response = service_affecting_monitor_reports._bruin_repository.prepare_items_for_report(
+            response_mapped_tickets)
+
+        assert response == response_prepare_items_for_report

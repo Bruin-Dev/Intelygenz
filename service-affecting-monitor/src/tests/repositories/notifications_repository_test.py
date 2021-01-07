@@ -42,3 +42,26 @@ class TestNotificationsRepository:
             },
             timeout=10,
         )
+
+    @pytest.mark.asyncio
+    async def send_email_test(self):
+        email_data = {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': 'some-subject',
+                'recipient': 'some-recipient',
+                'text': 'this is the accessible text for the email',
+                'html': '<html><head>some-data</head><body>some-more-data</body></html>',
+                'images': [],
+                'attachments': []
+            }
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        notifications_repository = NotificationsRepository(event_bus)
+
+        await notifications_repository.send_email(email_data)
+
+        event_bus.rpc_request.assert_awaited_once_with("notification.email.request", email_data, timeout=60)

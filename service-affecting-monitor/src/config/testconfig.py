@@ -32,6 +32,21 @@ MONITOR_CONFIG = {
     },
 }
 
+MONITOR_REPORT_CONFIG = {
+    "semaphore": 5,
+    'reports': [
+        {
+            'name': 'Report - Bandwitdh Over Utilization',
+            'type': 'bandwitdh_over_utilization',
+            'crontab': '20 16 * * *',
+            'threshold': 3,  # Number of tickets to include in the report
+            'client_id': 83109,
+            'trailing_days': 14,
+            'recipient': 'mettel@intelygenz.com'
+        }
+    ]
+}
+
 LOG_CONFIG = {
     'name': 'test-name',
     'level': logging.DEBUG,

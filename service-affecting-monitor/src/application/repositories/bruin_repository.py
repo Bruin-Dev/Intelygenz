@@ -1,8 +1,10 @@
 import math
+import asyncio
 import os
+import copy
 from datetime import datetime
 from dateutil.parser import parse
-
+from collections import defaultdict
 from pytz import timezone
 from shortuuid import uuid
 
@@ -15,6 +17,7 @@ class BruinRepository:
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
+        self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_REPORT_CONFIG["semaphore"])
 
     async def append_note_to_ticket(self, ticket_id: int, note: str):
         err_msg = None
@@ -141,6 +144,97 @@ class BruinRepository:
         self._logger.info(f'No service affecting tickets found for serial: {serial}')
         return {}
 
+    async def _get_ticket_details(self, ticket):
+        async with self._semaphore:
+            ticket_id = ticket['ticketID']
+            ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
+            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
+                                                               ticket_details_request,
+                                                               timeout=15)
+
+            if ticket_details['status'] not in range(200, 300):
+                self._logger.error(f"Error: an error occurred retrieving ticket details for ticket: {ticket_id}")
+                return None
+
+            ticket_details_body = ticket_details['body']
+            self._logger.info(f'Returning ticket details of ticket: {ticket_id}')
+            return {
+                "ticket": ticket,
+                "ticket_details": ticket_details_body
+            }
+
+    async def get_affecting_ticket_for_report(self, report, start_date, end_date):
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+        ticket_request_msg = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': report['client_id'],
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'start_date': start_date,
+                'end_date': end_date,
+                'ticket_status': ticket_statuses
+            }
+        }
+
+        self._logger.info(f"Retrieving affecting tickets for trailing days: {report['trailing_days']}")
+
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=90)
+
+        if all_tickets['status'] not in range(200, 300):
+            self._logger.error(f"Error: an error occurred retrieving affecting tickets for report")
+            return None
+
+        if len(all_tickets['body']) > 0:
+            self._logger.info(f"Getting ticket {len(all_tickets['body'])} details")
+            all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]), reverse=True)
+            tasks = [self._get_ticket_details(ticket) for ticket in all_tickets_sorted]
+            ret_tickets = await asyncio.gather(*tasks, return_exceptions=True)
+            ret_tickets = {ticket['ticket']['ticketID']: ticket for ticket in ret_tickets if ticket}
+
+            return ret_tickets
+        self._logger.info(f"No service affecting tickets found for trailing days: {report['trailing_days']}")
+        return {}
+
+    def map_tickets_with_serial_numbers(self, tickets):
+        all_serials = defaultdict(list)
+
+        self._logger.info(f"[bruin_repository] processing {len(tickets.keys())}")
+
+        for ticket_id, ticket_data in tickets.items():
+            self._logger.info(f"[bruin_repository] ticket_id: {ticket_id}")
+            serials = list({td['detailValue'].upper() for td in ticket_data['ticket_details']['ticketDetails']})
+            for serial in serials:
+                all_serials[serial].append(ticket_data)
+        return all_serials
+
+    def prepare_items_for_report(self, all_serials):
+        items_for_report = []
+
+        for serial, tickets in all_serials.items():
+            self._logger.info(f"--> {serial} : {len(tickets)} tickets")
+            item_report = {
+                'customer': dict(),
+                'location': None,
+                'serial_number': serial,
+                'number_of_tickets': len(tickets),
+                'bruin_tickets_id': [],
+            }
+            only_first_time = True
+            for ticket_data in tickets:
+                ticket = ticket_data['ticket']
+                if only_first_time:
+                    only_first_time = False
+                    item_report['customer'] = {
+                        'client_id': ticket['clientID'],
+                        'client_name': ticket['clientName']
+                    }
+                    item_report['location'] = ticket['address']
+                item_report['bruin_tickets_id'].append(ticket['ticketID'])
+            items_for_report.append(item_report)
+
+        return items_for_report
+
     @staticmethod
     def find_detail_by_serial(ticket, edge_serial_number):
         ticket_details = None
@@ -149,3 +243,15 @@ class BruinRepository:
                 ticket_details = detail
                 break
         return ticket_details
+
+    @staticmethod
+    def find_bandwidth_over_utilization_tickets(tickets, watermark):
+        trouble = "Bandwidth Over Utilization"
+        ret = {}
+        for ticket_id, ticket_details in tickets.items():
+            if 'ticketNotes' in ticket_details['ticket_details']:
+                for ticket_note in ticket_details['ticket_details']['ticketNotes']:
+                    if "noteValue" in ticket_note and ticket_note["noteValue"] and \
+                            watermark in ticket_note["noteValue"] and trouble in ticket_note["noteValue"]:
+                        ret[ticket_id] = tickets[ticket_id]
+        return ret
