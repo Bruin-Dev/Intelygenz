@@ -109,12 +109,14 @@ def instance_cache_edges():
     return [{
         'edge': {'host': 'some host', 'enterprise_id': 123, 'edge_id': 321},
         'last_contact': str(datetime.now()),
+        'logical_ids': ['list of logical ids'],
         'serial_number': "VC01",
         'bruin_client_info': {'client_id': 'some client info'}
     },
         {
             'edge': {'host': 'some host', 'enterprise_id': 1, 'edge_id': 321},
             'last_contact': str(datetime.now()),
+            'logical_ids': ['list of logical ids'],
             'serial_number': "VC02",
             'bruin_client_info': {'client_id': 'some client info'}
         }]
@@ -129,10 +131,12 @@ def example_response_velo_host():
 def instance_edges_refresh_cache():
     return [{
         'edge': {'host': 'metvco02.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
+        'logical_ids': ['list of logical ids'],
         'serial_number': "VC01"
     },
         {
             'edge': {'host': 'metvco04.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
+            'logical_ids': ['list of logical ids'],
             'serial_number': "VC02"
         }]
 
@@ -154,6 +158,17 @@ def instance_velocloud_request():
         'request_id': '2222',
         'body': {
             'host': 'mettel.velocloud.net',
+        }
+    }
+
+
+@pytest.fixture(scope='function')
+def instance_enterprise_velocloud_request():
+    return {
+        'request_id': '2222',
+        'body': {
+            'host': 'mettel.velocloud.net',
+            'enterprise_id': '123'
         }
     }
 
@@ -258,6 +273,54 @@ def instance_velocloud_response():
                 'linkIpAddress': '0.0.0.0',
                 'host': 'mettel.velocloud.net'
             },
+        ],
+        'status': 200,
+    }
+
+
+@pytest.fixture(scope='function')
+def instance_enterprise_edge_response():
+    return {
+        'request_id': '2222',
+        'body': [
+            {
+                "id": 1,
+                "enterpriseId": 1,
+                "serialNumber": "3SQFXC2",
+                "links": [
+                    {
+                        "id": 3216,
+                        "edgeId": 1,
+                        "logicalId": "82:b2:34:26:c6:b6:0000",
+                        "interface": "GE5",
+                    },
+                    {
+                        "id": 3062,
+                        "edgeId": 1,
+                        "logicalId": "82:b2:34:26:c6:b6:0000",
+                        "interface": "GE6",
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "enterpriseId": 1,
+                "serialNumber": "3SQFXC2",
+                "links": [
+                    {
+                        "id": 3216,
+                        "edgeId": 2,
+                        "logicalId": "82:b2:34:26:c6:b6:0000",
+                        "interface": "GE5",
+                    },
+                    {
+                        "id": 3062,
+                        "edgeId": 2,
+                        "logicalId": "82:b2:34:26:c6:b6:0000",
+                        "interface": "GE6",
+                    }
+                ]
+            }
         ],
         'status': 200,
     }

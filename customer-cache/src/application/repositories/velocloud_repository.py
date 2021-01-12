@@ -22,14 +22,18 @@ class VelocloudRepository:
         edge_list = await self.get_edges()
         self._logger.info(f"Got all edges from all velos. Took {(time.time() - start_time) // 60} minutes")
 
+        self._logger.info("Getting list of logical IDs by each velo edge")
+        logical_ids_by_edge_list = await self._get_logical_id_by_edge_list(edge_list)
+        self._logger.info(f"Got all logical IDs by each velo edge. Took {(time.time() - start_time) // 60} minutes")
+
         self._logger.info(f"Mapping edges to serials...")
-        edges_with_serial = await self._get_all_serials(edge_list)
+        edges_with_serial = await self._get_all_serials(edge_list, logical_ids_by_edge_list)
         self._logger.info(f"Amount of edges: {len(edges_with_serial)}")
         self._logger.info(f"Finished building velos + serials map. Took {(time.time() - start_time) // 60} minutes")
 
         return edges_with_serial
 
-    async def _get_all_serials(self, edge_list):
+    async def _get_all_serials(self, edge_list, logical_ids_by_edge_list):
         edges_with_serials = []
 
         for edge in edge_list:
@@ -49,10 +53,19 @@ class VelocloudRepository:
                 self._logger.info(f"Edge {EdgeIdentifier(**edge_full_id)} doesn't have a serial")
                 continue
 
+            logical_id_list = next((logical_id_edge for logical_id_edge in logical_ids_by_edge_list
+                                   if logical_id_edge['host'] == edge['host']
+                                   if logical_id_edge['enterprise_id'] == edge['enterpriseId']
+                                   if logical_id_edge['edge_id'] == edge['edgeId']), None)
+            logical_id = []
+            if logical_id_list is not None:
+                logical_id = logical_id_list['logical_id']
+
             edges_with_serials.append({
                 'edge': edge_full_id,
                 'serial_number': serial_number,
                 'last_contact': last_contact,
+                'logical_ids': logical_id
             })
 
         return edges_with_serials
@@ -81,6 +94,40 @@ class VelocloudRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving edges links in {self._config.ENVIRONMENT_NAME.upper()} '
+                    f'environment: Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            await self._notify_error(err_msg)
+
+        return response
+
+    async def _get_all_enterprise_edges(self, host, enterprise_id, rpc_timeout=300):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                'host': host,
+                'enterprise_id': enterprise_id
+            },
+        }
+
+        try:
+            self._logger.info(f"Getting all edges from Velocloud host {host} and enterprise ID {enterprise_id}...")
+            response = await self._event_bus.rpc_request("request.enterprises.edges", request, timeout=rpc_timeout)
+            self._logger.info(f"Got all edges from Velocloud host {host} and enterprise ID {enterprise_id}!")
+        except Exception as e:
+            err_msg = f'An error occurred when requesting edge list from host {host} and enterprise ' \
+                      f'ID {enterprise_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving edge list in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -148,6 +195,34 @@ class VelocloudRepository:
 
         edges = list(edges_by_edge_identifier.values())
         return edges
+
+    async def _get_logical_id_by_edge_list(self, edge_list):
+        host_to_enterprise_id = {}
+        for edge in edge_list:
+            host = edge['host']
+            host_to_enterprise_id.setdefault(host, set())
+            host_to_enterprise_id[host].add(edge['enterpriseId'])
+
+        logical_id_by_edge_full_id_list = []
+        for host in host_to_enterprise_id:
+            for enterprise in host_to_enterprise_id[host]:
+                enterprise_edge_list = await self._get_all_enterprise_edges(host, enterprise, rpc_timeout=90)
+                if enterprise_edge_list['status'] not in range(200, 300):
+                    self._logger.error(f'Error could not get enterprise edges of enterprise {enterprise}')
+                    continue
+                for edge in enterprise_edge_list['body']:
+                    edge_full_id_and_logical_id = {
+                        'host': host,
+                        'enterprise_id': enterprise,
+                        'edge_id': edge['id'],
+                        'logical_id': []
+                    }
+                    for link in edge["links"]:
+                        logical_id_dict = {'interface_name': link['interface'], 'logical_id': link['logicalId']}
+                        edge_full_id_and_logical_id['logical_id'].append(logical_id_dict)
+                    logical_id_by_edge_full_id_list.append(edge_full_id_and_logical_id)
+
+        return logical_id_by_edge_full_id_list
 
     async def get_edges(self):
         edge_links_list = await self.get_all_edges_links()

@@ -139,6 +139,7 @@ class BruinRepository:
                 return {
                     'edge': edge_with_serial['edge'],
                     'last_contact': edge_with_serial['last_contact'],
+                    'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,
                     'bruin_client_info': client_info_response_body
                 }
