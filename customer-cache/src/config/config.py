@@ -38,7 +38,7 @@ REFRESH_CONFIG = {
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
-    'semaphore': 10,
+    'semaphore': 3,
     'velo_servers': [
         {"mettel.velocloud.net": []},
         {"metvco02.mettel.net": []},

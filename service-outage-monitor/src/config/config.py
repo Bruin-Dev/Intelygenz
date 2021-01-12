@@ -51,7 +51,7 @@ MONITOR_CONFIG = {
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
     'autoresolve_ticket_creation_seconds': 60 * 60,
-    'semaphore': 10,
+    'semaphore': 5,
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

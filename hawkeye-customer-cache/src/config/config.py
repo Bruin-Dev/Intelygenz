@@ -27,7 +27,7 @@ REFRESH_CONFIG = {
     'min': 5,
     'stop_delay': 300,
     'refresh_map_minutes': 60 * 4,
-    'semaphore': 10,
+    'semaphore': 1,
     'environment': ENVIRONMENT_NAME,
     'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
     "attempts_threshold": 10,
