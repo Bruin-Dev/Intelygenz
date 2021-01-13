@@ -61,7 +61,8 @@ class TestEmailClient:
         # use assert_called_with here
         test_client._email_server.sendmail.assert_called_once()
         assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_CONFIG['sender_email']
-        assert test_client._email_server.sendmail.call_args[0][1] == test_msg['recipient']
+        assert test_client._email_server.sendmail.call_args[0][1] == test_msg['recipient'].split(
+            test_client.EMAIL_SEPARATOR)
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
         test_client._email_server.quit.assert_called_once()
         test_client._logger.exception.assert_not_called()

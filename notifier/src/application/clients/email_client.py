@@ -13,6 +13,7 @@ class EmailClient:
         self._config = config
         self._logger = logger
         self._email_server = None
+        self.EMAIL_SEPARATOR = ', '
 
     def email_login(self):
         self._email_server = smtplib.SMTP('smtp.gmail.com:587')
@@ -51,7 +52,7 @@ class EmailClient:
                 mime_msg.attach(attachment)
 
             self._email_server.sendmail(self._config.EMAIL_CONFIG['sender_email'],
-                                        msg["recipient"],
+                                        msg["recipient"].split(self.EMAIL_SEPARATOR),
                                         mime_msg.as_string())
 
             self._logger.info("Success: Email sent!")
