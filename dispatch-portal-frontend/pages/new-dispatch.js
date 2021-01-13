@@ -45,6 +45,7 @@ function NewDispatch({ authToken }) {
   const [blockedVendors, setBlockedVendors] = useState([]);
   const [statesOptions, setStatesOptions] = useState(statesUSA);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
+  const [immediatelySelected, setimmediatelySelected] = useState(false);
   const isTicketIdValid = !!watch('mettelId');
   const dispatchService = new DispatchService();
   const locationService = new LocationService();
@@ -115,16 +116,18 @@ function NewDispatch({ authToken }) {
       setStatesOptions(statesCanada);
       return;
     }
-
     if (country === countryOptions[2]) {
       setStatesOptions(statesPR);
       return;
     }
-
     if (country === countryOptions[0]) {
       setStatesOptions(statesUSA);
     }
   };
+
+  const changeSLALevel = slaLevelvalue => {
+    setimmediatelySelected(slaLevelvalue === "Immediately")
+  }
 
   const showFieldByVendor = vendor => selectedVendor.includes(vendor);
 
@@ -155,6 +158,57 @@ function NewDispatch({ authToken }) {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex">
             <div className="w-full md:w-1/2 p-8">
+
+              <div className="flex flex-col slaLevel-mb" data-testid="cts-field">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="slaLevel"
+                >
+                  Sla Level
+                  <div className="relative">
+                    <select
+                      name="slaLevel"
+                      data-testid="slaLevel"
+                      id="slaLevel"
+                      ref={register({ required: true })}
+                      className={
+                        errors.slaLevel
+                          ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                          : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                      }
+                      onChange={e => changeSLALevel(e.target.value)}
+                    >
+                      {slaLevelOptions.map((slaLeveloption, index) => (
+                        <option
+                          key={`slaLeveloption-${index}`}
+                          value={slaLeveloption}
+                        >
+                          {slaLeveloption}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div
+                      className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                      style={{ top: '13px', right: '0px' }}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  {errors.country && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+
               <div className="flex flex-col">
                 <div className="-mx-3 md:flex mb-6">
                   <div className="md:w-1/2 px-3 mb-6 md:mb-0">
@@ -182,6 +236,7 @@ function NewDispatch({ authToken }) {
                       )}
                     </label>
                   </div>
+
                   <div className="md:w-1/2 px-3">
                     <label
                       className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
@@ -199,6 +254,7 @@ function NewDispatch({ authToken }) {
                               ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
                               : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
                           }
+                          disabled = {immediatelySelected}
                         >
                           {timeOptions.map(time => (
                             <option value={time} key={`time-${time}`}>
@@ -247,6 +303,7 @@ function NewDispatch({ authToken }) {
                             ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
                             : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
                         }
+                        disabled = {immediatelySelected}
                       >
                         {timeZoneOptions.map((zone, index) => (
                           <option key={`timeZone-${index}`} value={zone.name}>
@@ -367,56 +424,6 @@ function NewDispatch({ authToken }) {
                   </button>
                 </div>
               </div>
-
-              {showFieldByVendor(config.VENDORS.CTS) && (
-                <div className="flex flex-col" data-testid="cts-field">
-                  <label
-                    className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
-                    htmlFor="slaLevel"
-                  >
-                    Sla Level (only for {config.VENDORS.CTS})
-                    <div className="relative">
-                      <select
-                        name="slaLevel"
-                        data-testid="slaLevel"
-                        id="slaLevel"
-                        ref={register({ required: true })}
-                        className={
-                          errors.slaLevel
-                            ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
-                            : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
-                        }
-                      >
-                        {slaLevelOptions.map((slaLeveloption, index) => (
-                          <option
-                            key={`slaLeveloption-${index}`}
-                            value={slaLeveloption}
-                          >
-                            {slaLeveloption}
-                          </option>
-                        ))}
-                      </select>
-                      <div
-                        className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
-                        style={{ top: '13px', right: '0px' }}
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                        </svg>
-                      </div>
-                    </div>
-                    {errors.country && (
-                      <p className="text-red-500 text-xs italic">
-                        This field is required
-                      </p>
-                    )}
-                  </label>
-                </div>
-              )}
             </div>
           </div>
 

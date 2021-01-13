@@ -95,7 +95,7 @@ export const timeOptions = [
 
 export const countryOptions = ['United States', 'Canada', 'PR'];
 
-export const slaLevelOptions = ['Pre-planned', 'Next bussiness day'];
+export const slaLevelOptions = ['Pre-planned', 'Next bussiness day', 'Immediately'];
 
 export const requesterPhoneNumberOptions = [
   {
