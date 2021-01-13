@@ -26,7 +26,8 @@ REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
 
 class OutageMonitor:
     def __init__(self, event_bus, logger, scheduler, config, outage_repository, bruin_repository, velocloud_repository,
-                 notifications_repository, triage_repository, customer_cache_repository, metrics_repository):
+                 notifications_repository, triage_repository, customer_cache_repository, metrics_repository,
+                 digi_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -38,6 +39,7 @@ class OutageMonitor:
         self._triage_repository = triage_repository
         self._customer_cache_repository = customer_cache_repository
         self._metrics_repository = metrics_repository
+        self._digi_repository = digi_repository
 
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
 
@@ -371,6 +373,9 @@ class OutageMonitor:
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
+                        logical_id_list = edge['cached_info']['logical_ids']
+                        await self._check_for_digi_reboot(ticket_creation_response_body,
+                                                          logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 409:
                         self._logger.info(
                             f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
@@ -558,3 +563,25 @@ class OutageMonitor:
         ticket_creation_datetime = parse(ticket_creation_date, ignoretz=True)
         seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
         return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
+
+    async def _check_for_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, edge_full_id):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        digi_headers = ['00:04:2d', '00:27:04']
+        digi_links = []
+        for header in digi_headers:
+            digi_link = [link for link in logical_id_list if header in link["logical_id"]]
+            digi_links = digi_links + digi_link
+
+        for digi_link in digi_links:
+            link_status = next((link for link in edge_status['links']
+                                if link['interface'] == digi_link['interface_name']), None)
+            if link_status is not None and self._outage_repository.is_faulty_link(link_status['linkState']):
+                reboot = self._digi_repository.reboot_link(serial_number, ticket_id, digi_link['logical_id'])
+                if reboot['status'] in range(200, 300):
+                    self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
+                                                                   digi_link['interface_name'])
+                    slack_message = (
+                        f'DiGi reboot started for faulty edge {edge_identifier}. Ticket '
+                        f'details at https://app.bruin.com/t/{ticket_id}.'
+                    )
+                    await self._notifications_repository.send_slack_message(slack_message)

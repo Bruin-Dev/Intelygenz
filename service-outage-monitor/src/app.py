@@ -21,6 +21,7 @@ from application.repositories.triage_metrics_repository import TriageMetricsRepo
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories.digi_repository import DiGiRepository
 from config import config
 
 
@@ -59,6 +60,8 @@ class Container:
                                                          notifications_repository=self._notifications_repository)
         self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                  notifications_repository=self._notifications_repository)
+        self._digi_repository = DiGiRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                               notifications_repository=self._notifications_repository)
         self._utils_repository = UtilsRepository()
         self._triage_repository = TriageRepository(config, self._utils_repository)
         self._customer_cache_repository = CustomerCacheRepository(
@@ -79,7 +82,7 @@ class Container:
                                              config, self._outage_repository, self._bruin_repository,
                                              self._velocloud_repository, self._notifications_repository,
                                              self._triage_repository, self._customer_cache_repository,
-                                             self._outage_monitoring_metrics_repository)
+                                             self._outage_monitoring_metrics_repository, self._digi_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()
