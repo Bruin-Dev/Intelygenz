@@ -615,7 +615,7 @@ class DispatchServer:
             'request_id': uuid(),
             'email_data': {
                 'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': self._config.CTS_CONFIG["email"],
+                'recipient': f"{self._config.CTS_CONFIG['email']}, {self._config.CTS_CONFIG['email_cc']}",
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [],
@@ -623,6 +623,7 @@ class DispatchServer:
             }
         }
         response_send_email = await self._notifications_repository.send_email(email_data)
+
         response_send_email_status = response_send_email['status']
         if response_send_email_status not in range(200, 300):
             self._logger.error("[CTS] we could not send the email")
@@ -720,7 +721,7 @@ class DispatchServer:
                 'request_id': uuid(),
                 'email_data': {
                     'subject': f'CTS - Service Submission - {ticket_id}',
-                    'recipient': self._config.CTS_CONFIG["email"],
+                    'recipient': f"{self._config.CTS_CONFIG['email']}, {self._config.CTS_CONFIG['email_cc']}",
                     'text': 'this is the accessible text for the email',
                     'html': email_html,
                     'images': [],

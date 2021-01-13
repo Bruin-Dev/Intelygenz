@@ -2919,7 +2919,8 @@ class TestApiServer:
             'request_id': uuid_,
             'email_data': {
                 'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': api_server_test._config.CTS_CONFIG["email"],
+                'recipient':
+                    f"{api_server_test._config.CTS_CONFIG['email']}, {api_server_test._config.CTS_CONFIG['email_cc']}",
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [],
@@ -3039,7 +3040,8 @@ class TestApiServer:
             'request_id': uuid_,
             'email_data': {
                 'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': api_server_test._config.CTS_CONFIG["email"],
+                'recipient':
+                    f"{api_server_test._config.CTS_CONFIG['email']}, {api_server_test._config.CTS_CONFIG['email_cc']}",
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [],
@@ -3092,7 +3094,8 @@ class TestApiServer:
             'request_id': uuid_,
             'email_data': {
                 'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': api_server_test._config.CTS_CONFIG["email"],
+                'recipient':
+                    f"{api_server_test._config.CTS_CONFIG['email']}, {api_server_test._config.CTS_CONFIG['email_cc']}",
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [],
@@ -3159,7 +3162,8 @@ class TestApiServer:
             'request_id': uuid_,
             'email_data': {
                 'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': api_server_test._config.CTS_CONFIG["email"],
+                'recipient':
+                    f"{api_server_test._config.CTS_CONFIG['email']}, {api_server_test._config.CTS_CONFIG['email_cc']}",
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [],
@@ -3385,7 +3389,8 @@ class TestApiServer:
             'request_id': uuid_,
             'email_data': {
                 'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': api_server_test._config.CTS_CONFIG["email"],
+                'recipient':
+                    f"{api_server_test._config.CTS_CONFIG['email']}, {api_server_test._config.CTS_CONFIG['email_cc']}",
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [],

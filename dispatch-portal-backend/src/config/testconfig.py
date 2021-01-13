@@ -30,7 +30,9 @@ DISPATCH_PORTAL_CONFIG = {
 CTS_CONFIG = {
     # Email for requests and cancellations
     # 'email': 'CTS-MettelService@core-techs.com',
-    'email': 'mettel.automation@intelygenz.com'
+    'email': 'mettel.automation@intelygenz.com',
+    # 'email_cc': 'holmdelnoc@mettel.net',
+    'email_cc': 'mettel.automation@intelygenz.com'
 }
 
 LIT_CONFIG = {
