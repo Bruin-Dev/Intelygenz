@@ -328,7 +328,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
     post:
-      description: Creates a new dispatch for LIT
+      description: Creates/Request a new dispatch for CTS
       tags:
         - cts
       operationId: add_dispatch_cts
@@ -497,8 +497,8 @@ components:
           example: false
         time_of_dispatch:
           type: string
-          description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
-          example: "6PM-8PM"
+          description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on, also accepts Immediately"
+          example: "6PM-8PM or Immediately"
         time_zone:
           enum: [ "Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time" ]
           type: string
@@ -692,7 +692,7 @@ components:
         mettel_bruin_ticket_id:
           type: string
         sla_level:
-          enum: [ "Pre-planned", "Next bussiness day" ]
+          enum: [ "Pre-planned", "Next bussiness day", "Immediately" ]
           type: string
         location_country:
           type: string
