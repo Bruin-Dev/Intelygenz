@@ -78,7 +78,8 @@ export const dispatchLitOutAdapter = data => ({
   name_of_mettel_requester: `${data.firstNameRequester} ${data.lastNameRequester}`,
   mettel_department: data.department,
   mettel_requester_email: data.emailRequester,
-  mettel_department_phone_number: data.phoneNumberRequester
+  mettel_department_phone_number: data.phoneNumberRequester,
+  sla_level: data.slaLevel
 });
 
 export const dispatchLitInAdapterGeAll = data => ({

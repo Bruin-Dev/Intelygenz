@@ -126,8 +126,8 @@ function NewDispatch({ authToken }) {
   };
 
   const changeSLALevel = slaLevelvalue => {
-    setimmediatelySelected(slaLevelvalue === "Immediately")
-  }
+    setimmediatelySelected(slaLevelvalue === `Immediately`);
+  };
 
   const showFieldByVendor = vendor => selectedVendor.includes(vendor);
 
@@ -158,8 +158,7 @@ function NewDispatch({ authToken }) {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex">
             <div className="w-full md:w-1/2 p-8">
-
-              <div className="flex flex-col slaLevel-mb" data-testid="cts-field">
+              <div className="flex flex-col sla" data-testid="cts-field">
                 <label
                   className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
                   htmlFor="slaLevel"
@@ -254,7 +253,6 @@ function NewDispatch({ authToken }) {
                               ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
                               : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
                           }
-                          disabled = {immediatelySelected}
                         >
                           {timeOptions.map(time => (
                             <option value={time} key={`time-${time}`}>
@@ -303,7 +301,6 @@ function NewDispatch({ authToken }) {
                             ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
                             : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
                         }
-                        disabled = {immediatelySelected}
                       >
                         {timeZoneOptions.map((zone, index) => (
                           <option key={`timeZone-${index}`} value={zone.name}>
