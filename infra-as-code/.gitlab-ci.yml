@@ -245,9 +245,9 @@ deploy-kre-dev:
     MODULE: infra-as-code/kre
     MODULE_EKS: 2-create-eks-cluster
     EKS_CLUSTER_NAME: mettel-automation-kre-dev
-    KRE_RECORD_ALIAS_NAME: "*.kre-dev.mettel-automation.net."
-    BASE_DOMAIN_URL: "kre-dev.mettel-automation.net"
-    HOSTED_ZONE_NAME: "kre-dev.mettel-automation.net."
+    KRE_RECORD_ALIAS_NAME: "*.kre-test.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre-test.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre-test.mettel-automation.net."
     NGINX_INGRESS_CHART_V: ${NGINX_INGRESS_CHART_V_DEV}
     EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_DEV}
     HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_DEV}
@@ -360,9 +360,9 @@ destroy-kre-dev:
     MODULE: infra-as-code/kre
     MODULE_EKS: 2-create-eks-cluster
     EKS_CLUSTER_NAME: mettel-automation-kre-dev
-    KRE_RECORD_ALIAS_NAME: "*.kre-dev.mettel-automation.net."
-    BASE_DOMAIN_URL: "kre-dev.mettel-automation.net"
-    HOSTED_ZONE_NAME: "kre-dev.mettel-automation.net."
+    KRE_RECORD_ALIAS_NAME: "*.kre-test.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre-test.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre-test.mettel-automation.net."
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
   rules:

@@ -35,6 +35,6 @@ locals  {
   // default region used in AWS
   aws_default_region = "us-east-1"
 
-  // kre hosted zone name
-  kre_record_hosted_zone_name = var.CURRENT_ENVIRONMENT == "dev" ? "kre-${var.CURRENT_ENVIRONMENT}.mettel-automation.net." : "kre.mettel-automation.net."
+  // TODO: After domain return to valid declare value as kre_record_hosted_zone_name = var.CURRENT_ENVIRONMENT == "dev" ? "kre-${var.CURRENT_ENVIRONMENT}.mettel-automation.net." : "kre.mettel-automation.net."
+  kre_record_hosted_zone_name = var.CURRENT_ENVIRONMENT == "dev" ? "kre-test.mettel-automation.net." : "kre.mettel-automation.net."
 }
