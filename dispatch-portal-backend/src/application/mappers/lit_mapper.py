@@ -44,10 +44,14 @@ def map_create_dispatch(body):
     from dispatch portal to lit
     '''
     body = {k.lower(): v for k, v in body.items()}
+
+    # Immediately needs to be translated to ASAP to fit in the proper field
+    sla_level_or_time_of_dispatch = 'ASAP' if body["sla_level"] == 'Immediately' else body.get('time_of_dispatch')
+
     dispatch_request = {
         "date_of_dispatch": body['date_of_dispatch'],
         "site_survey_quote_required": body['site_survey_quote_required'],
-        "local_time_of_dispatch": body.get('time_of_dispatch'),
+        "local_time_of_dispatch": sla_level_or_time_of_dispatch,
         "hard_time_of_dispatch_local": body.get('time_of_dispatch'),
         "time_zone_local": body.get('time_zone'),
         "hard_time_of_dispatch_time_zone_local": body.get('time_zone'),

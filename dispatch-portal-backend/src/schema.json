@@ -722,6 +722,7 @@
           "job_site_zip_code",
           "job_site_contact_name",
           "job_site_contact_number",
+          "sla_level",
           "materials_needed_for_dispatch",
           "scope_of_work",
           "mettel_tech_call_in_instructions",
@@ -785,6 +786,14 @@
           "job_site_contact_number": {
             "type": "string",
             "example": "+1 666 6666 666"
+          },
+          "sla_level": {
+            "enum": [
+              "Pre-planned",
+              "Next bussiness day",
+              "Immediately"
+            ],
+            "type": "string"
           },
           "materials_needed_for_dispatch": {
             "type": "string",

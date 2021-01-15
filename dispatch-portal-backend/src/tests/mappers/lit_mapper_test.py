@@ -166,13 +166,62 @@ class TestMappers:
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
-            "mettel_department_phone_number": "16666666666"
+            "mettel_department_phone_number": "16666666666",
+            "sla_level": "Pre-planned",
         }
 
         expected_map = {
             "date_of_dispatch": "2019-11-14",
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
+            "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "mettel_bruin_ticketid": "T-12345",
+            "job_site": "Red Rose Inn",
+            "job_site_street": "123 Fake Street",
+            "job_site_city": "Pleasantown",
+            "job_site_state": "CA",
+            "job_site_zip_code": "99088",
+            "job_site_contact_name_and_phone_number": "Jane Doe +1 666 6666 666",
+            "special_materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+            "scope_of_work": "Device is bouncing constantly",
+            "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
+            "name_of_mettel_requester": "Karen Doe",
+            "mettel_department": "Customer Care",
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "16666666666"
+        }
+        assert expected_map == map_create_dispatch(content)
+
+    def map_create_dispatch_immediately_test(self):
+        content = {
+            "date_of_dispatch": "2019-11-14",
+            "site_survey_quote_required": False,
+            "time_of_dispatch": "6PM-8PM",
+            "time_zone": "Pacific Time",
+            "mettel_bruin_ticket_id": "T-12345",
+            "job_site": "Red Rose Inn",
+            "job_site_street": "123 Fake Street",
+            "job_site_city": "Pleasantown",
+            "job_site_state": "CA",
+            "job_site_zip_code": "99088",
+            "job_site_contact_name": "Jane Doe",
+            "job_site_contact_number": "+1 666 6666 666",
+            "materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+            "scope_of_work": "Device is bouncing constantly",
+            "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
+            "name_of_mettel_requester": "Karen Doe",
+            "mettel_department": "Customer Care",
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "16666666666",
+            "sla_level": "Immediately",
+        }
+
+        expected_map = {
+            "date_of_dispatch": "2019-11-14",
+            "site_survey_quote_required": False,
+            "local_time_of_dispatch": "ASAP",
             "time_zone_local": "Pacific Time",
             "hard_time_of_dispatch_local": "6PM-8PM",
             "hard_time_of_dispatch_time_zone_local": "Pacific Time",
