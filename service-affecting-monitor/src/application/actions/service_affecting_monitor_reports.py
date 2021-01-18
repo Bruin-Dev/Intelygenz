@@ -64,6 +64,10 @@ class ServiceAffectingMonitorReports:
 
         affecting_tickets = await self._bruin_repository.get_affecting_ticket_for_report(report, start_date_str,
                                                                                          end_date_str)
+        if not affecting_tickets:
+            self._logger.error(f"[service-affecting-monitor-reports] Report could not be generated."
+                               f"We could not retrieve all tickets.")
+            return
         filtered_affecting_tickets = BruinRepository.find_bandwidth_over_utilization_tickets(affecting_tickets,
                                                                                              self.MAIN_WATERMARK)
 

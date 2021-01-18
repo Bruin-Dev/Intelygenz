@@ -37,6 +37,8 @@ MONITOR_CONFIG = {
 
 MONITOR_REPORT_CONFIG = {
     'semaphore': 5,
+    'wait_fixed': 15,
+    'stop_after_attempt': 3,
     'reports': [
         {
             'name': 'Report - Bandwitdh Over Utilization',

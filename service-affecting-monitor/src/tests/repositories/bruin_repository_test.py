@@ -10,6 +10,7 @@ from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application.repositories import bruin_repository as bruin_repository_module
+from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
@@ -17,6 +18,7 @@ from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
+uuid_2_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
 
 
 class TestBruinRepository:
@@ -464,6 +466,26 @@ class TestBruinRepository:
         assert response == expected_response
 
     @pytest.mark.asyncio
+    async def get_ticket_details_401_and_or_403_test(self, service_affecting_monitor_reports, ticket_1):
+        response_ticket_details_1 = {
+            'body': "Some error",
+            'status': 401
+        }
+        slack_msg = f"[service-affecting-monitor-reports]" \
+                    f"Max retries reached getting ticket details {ticket_1['ticketID']}"
+        expected_response = None
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_ticket_details_1])
+
+        response = await service_affecting_monitor_reports._bruin_repository._get_ticket_details(ticket_1)
+
+        assert response == expected_response
+
+        service_affecting_monitor_reports._notifications_repository.send_slack_message.\
+            assert_awaited_once_with(slack_msg)
+
+    @pytest.mark.asyncio
     async def get_affecting_ticket_for_report_test(self, service_affecting_monitor_reports,
                                                    response_bruin_with_all_tickets,
                                                    response_bruin_with_all_tickets_without_details, report,
@@ -547,6 +569,55 @@ class TestBruinRepository:
         service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
             call("bruin.ticket.request", ticket_request_msg, timeout=90)
         ])
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_for_report_retries_test(self, service_affecting_monitor_reports, report,
+                                                           response_bruin_401, response_bruin_403):
+        start_date = 'start_date'
+        end_date = 'end_date'
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+        ticket_request_msg = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': report['client_id'],
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'start_date': start_date,
+                'end_date': end_date,
+                'ticket_status': ticket_statuses
+            }
+        }
+        slack_msg = f"[service-affecting-monitor-reports] Max retries reached getting all tickets for the report."
+        slack_call = {
+            'request_id': uuid_,
+            'body': slack_msg
+        }
+        response_slack = {
+            'request_id': uuid_,
+            'body': None,
+            'status': 200
+        }
+
+        responses_get_ticket_details = []
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+            side_effect=[response_bruin_403, response_bruin_401, response_bruin_403])
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_2_mock:
+            with uuid_mock:
+                with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
+                    response = \
+                        await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
+                            report, start_date, end_date)
+
+        assert response is None
+
+        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
+            call("bruin.ticket.request", ticket_request_msg, timeout=90),
+            call("bruin.ticket.request", ticket_request_msg, timeout=90)
+        ])
+        service_affecting_monitor_reports._notifications_repository.send_slack_message.assert_awaited_once_with(
+            slack_msg)
 
     @pytest.mark.asyncio
     async def get_affecting_ticket_for_report_with_error_test(self, bruin_repository, report,

@@ -7,6 +7,7 @@ from dateutil.parser import parse
 from collections import defaultdict
 from pytz import timezone
 from shortuuid import uuid
+from tenacity import wait_fixed, retry, stop_after_attempt
 
 from application.repositories import nats_error_response
 
@@ -145,56 +146,87 @@ class BruinRepository:
         return {}
 
     async def _get_ticket_details(self, ticket):
-        async with self._semaphore:
-            ticket_id = ticket['ticketID']
-            ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
-            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
-                                                               ticket_details_request,
-                                                               timeout=15)
+        @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
+               stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
+               reraise=True)
+        async def _get_ticket_details():
+            async with self._semaphore:
+                ticket_id = ticket['ticketID']
+                ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
+                ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
+                                                                   ticket_details_request,
+                                                                   timeout=15)
+                if ticket_details['status'] in [401, 403]:
+                    self._logger.exception(f"Error: Retry after few seconds. Status: {ticket_details['status']}")
+                    raise Exception(f"Error: Retry after few seconds. Status: {ticket_details['status']}")
 
-            if ticket_details['status'] not in range(200, 300):
-                self._logger.error(f"Error: an error occurred retrieving ticket details for ticket: {ticket_id}")
-                return None
+                if ticket_details['status'] not in range(200, 300):
+                    self._logger.error(f"Error: an error occurred retrieving ticket details for ticket: {ticket_id}")
+                    return None
 
-            ticket_details_body = ticket_details['body']
-            self._logger.info(f'Returning ticket details of ticket: {ticket_id}')
-            return {
-                "ticket": ticket,
-                "ticket_details": ticket_details_body
-            }
-
-    async def get_affecting_ticket_for_report(self, report, start_date, end_date):
-        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
-        ticket_request_msg = {
-            'request_id': uuid(),
-            'body': {
-                'client_id': report['client_id'],
-                'category': 'SD-WAN',
-                'ticket_topic': 'VAS',
-                'start_date': start_date,
-                'end_date': end_date,
-                'ticket_status': ticket_statuses
-            }
-        }
-
-        self._logger.info(f"Retrieving affecting tickets for trailing days: {report['trailing_days']}")
-
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=90)
-
-        if all_tickets['status'] not in range(200, 300):
-            self._logger.error(f"Error: an error occurred retrieving affecting tickets for report")
+                ticket_details_body = ticket_details['body']
+                self._logger.info(f'Returning ticket details of ticket: {ticket_id}')
+                return {
+                    "ticket": ticket,
+                    "ticket_details": ticket_details_body
+                }
+        try:
+            return await _get_ticket_details()
+        except Exception as e:
+            msg = f"[service-affecting-monitor-reports]" \
+                  f"Max retries reached getting ticket details {ticket['ticketID']}"
+            self._logger.error(msg)
+            await self._notifications_repository.send_slack_message(msg)
             return None
 
-        if len(all_tickets['body']) > 0:
-            self._logger.info(f"Getting ticket {len(all_tickets['body'])} details")
-            all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]), reverse=True)
-            tasks = [self._get_ticket_details(ticket) for ticket in all_tickets_sorted]
-            ret_tickets = await asyncio.gather(*tasks, return_exceptions=True)
-            ret_tickets = {ticket['ticket']['ticketID']: ticket for ticket in ret_tickets if ticket}
+    async def get_affecting_ticket_for_report(self, report, start_date, end_date):
+        @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
+               stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
+               reraise=True)
+        async def get_affecting_ticket_for_report():
+            ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+            ticket_request_msg = {
+                'request_id': uuid(),
+                'body': {
+                    'client_id': report['client_id'],
+                    'category': 'SD-WAN',
+                    'ticket_topic': 'VAS',
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'ticket_status': ticket_statuses
+                }
+            }
 
-            return ret_tickets
-        self._logger.info(f"No service affecting tickets found for trailing days: {report['trailing_days']}")
-        return {}
+            self._logger.info(f"Retrieving affecting tickets for trailing days: {report['trailing_days']}")
+
+            all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=90)
+
+            if all_tickets['status'] in [401, 403]:
+                self._logger.exception(f"Error: Retry after few seconds all tickets. Status: {all_tickets['status']}")
+                raise Exception(f"Error: Retry after few seconds all tickets. Status: {all_tickets['status']}")
+
+            if all_tickets['status'] not in range(200, 300):
+                self._logger.error(f"Error: an error occurred retrieving affecting tickets for report")
+                return None
+
+            if len(all_tickets['body']) > 0:
+                self._logger.info(f"Getting ticket {len(all_tickets['body'])} details")
+                all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]),
+                                            reverse=True)
+                tasks = [self._get_ticket_details(ticket) for ticket in all_tickets_sorted]
+                ret_tickets = await asyncio.gather(*tasks, return_exceptions=True)
+                ret_tickets = {ticket['ticket']['ticketID']: ticket for ticket in ret_tickets if ticket}
+
+                return ret_tickets
+            self._logger.info(f"No service affecting tickets found for trailing days: {report['trailing_days']}")
+            return {}
+        try:
+            return await get_affecting_ticket_for_report()
+        except Exception as e:
+            msg = f"[service-affecting-monitor-reports] Max retries reached getting all tickets for the report."
+            self._logger.error(f"{msg} - exception: {e}")
+            await self._notifications_repository.send_slack_message(msg)
+            return None
 
     def map_tickets_with_serial_numbers(self, tickets):
         all_serials = defaultdict(list)

@@ -135,6 +135,22 @@ def response_bruin_with_no_tickets():
 
 
 @pytest.fixture(scope='function')
+def response_bruin_401():
+    return {
+        'body': "error 401",
+        'status': 401
+    }
+
+
+@pytest.fixture(scope='function')
+def response_bruin_403():
+    return {
+        'body': "error 403",
+        'status': 403
+    }
+
+
+@pytest.fixture(scope='function')
 def response_bruin_with_error():
     return {
         'body': "Some error",
@@ -163,6 +179,11 @@ def response_bruin_with_all_tickets(ticket_1, ticket_details_1, ticket_2, ticket
             "ticket_details": ticket_details_4
         }
     }
+
+
+@pytest.fixture(scope='function')
+def response_bruin_with_all_tickets_with_exception():
+    return None
 
 
 @pytest.fixture(scope='function')
