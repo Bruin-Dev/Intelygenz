@@ -30,10 +30,11 @@ class HawkeyeRepository:
         result_details_with_probe = defaultdict(lambda: [])
         for probe_uid, tests_results in test_results_by_probe_uid.items():
             for test_result in tests_results:
-                tdr_id = test_result['tdrId']
-                response_details = await self._hawkeye_client.get_test_result_details(tdr_id)
+                test_result_id = test_result['id']
+                response_details = await self._hawkeye_client.get_test_result_details(test_result_id)
                 if response_details['status'] not in range(200, 300):
-                    self._logger.error(f'Error when calling get_tests_results_details using TDR ID {tdr_id})')
+                    self._logger.error(f'Error when calling get_tests_result_details using test result ID'
+                                       f' {test_result_id})')
                     continue
                 result_details_with_probe[probe_uid].append(
                     {'summary': test_result, 'metrics': response_details['body']['metrics']})

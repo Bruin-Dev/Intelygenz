@@ -39,7 +39,7 @@ class TestGetTestResults:
 
     @pytest.mark.asyncio
     async def get_test_no_body_ok_test(self, get_test_result_init, default_call_without_body_test_result,
-                                      init_msg):
+                                       init_msg):
         get_test_result_init._event_bus.publish_message = CoroutineMock()
         await get_test_result_init.get_test_results(default_call_without_body_test_result)
 

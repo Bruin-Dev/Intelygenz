@@ -1,12 +1,10 @@
 from unittest.mock import Mock
 
 import pytest
-
 from application.actions.get_probes import GetProbes
 from application.actions.get_test_results import GetTestResults
 from application.clients.hawkeye_client import HawkeyeClient
 from application.repositories.hawkeye_repository import HawkeyeRepository
-
 from config import testconfig as config
 
 
@@ -332,39 +330,39 @@ def get_test_result():
         "records": [
             {
                 "id": "2951533",
-                "date": "2020-12-11T09:17:36Z",
-                "duration": "60",
-                "status": "Passed",
-                "reasonCause": "",
-                "tdrId": "2951533",
-                "identifier": "",
-                "module": "N2N",
-                "testId": "583",
-                "testType": "Voice bidirectional",
-                "parameters": " Voice Codec: G711 DSCP Setting: Best Effort",
-                "probeFrom": "88184-Pi1",
-                "probeTo": "88184-Pi2",
+                "date": "2021-01-21T15:21:55Z",
+                "duration": 0,
+                "meshId": 0,
                 "mesh": 0,
-                "testOptions": "Voice Codec: G711 DSCP Setting: Best Effort ",
-                "meshId": 0
+                "module": "RealService",
+                "probeFrom": "ATL_XR2000_1",
+                "probeTo": "8.8.8.8",
+                "reasonCause": "",
+                "status": "Passed",
+                "testId": "316",
+                "testOptions": "Destination Servers: 8.8.8.8 Interval: 20 ms Count: 100 packets Packet Size:"
+                               " 32 bytes (74) IP Protocol: ipv4 Class of Service: Best Effort Jitter "
+                               "Calculation: Enabled",
+                "testTag": "Core",
+                "testType": "ICMP Test",
+                "userId": "1"
             },
             {
                 "id": "2951532",
-                "date": "2020-12-11T09:17:36Z",
-                "duration": "60",
-                "status": "Passed",
-                "reasonCause": "",
-                "tdrId": "2951532",
-                "identifier": "",
-                "module": "N2N",
-                "testId": "393",
-                "testType": "Voice bidirectional",
-                "parameters": " Voice Codec: G711 DSCP Setting: Best Effort",
-                "probeFrom": "TriNC-CARE-Pi2",
-                "probeTo": "DAL_XR2000_1",
+                "date": "2021-01-21T15:21:49Z",
+                "duration": 30,
+                "meshId": 0,
                 "mesh": 0,
-                "testOptions": "Voice Codec: G711 DSCP Setting: Best Effort ",
-                "meshId": 0
+                "module": "N2N",
+                "probeFrom": "Test_Titan",
+                "probeTo": "ATL_XR2000_1",
+                "reasonCause": "",
+                "status": "Passed",
+                "testId": 630,
+                "testOptions": "DSCP Setting: Best Effort",
+                "testTag": "",
+                "testType": "Network KPI",
+                "userId": 6
             },
 
         ]

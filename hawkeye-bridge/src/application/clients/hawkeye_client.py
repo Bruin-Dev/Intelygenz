@@ -138,14 +138,14 @@ class HawkeyeClient:
         retries = 0
         return await _get_tests_results()
 
-    async def get_test_result_details(self, tdr_id):
+    async def get_test_result_details(self, test_result_id):
         async def _get_test_result_details():
             nonlocal retries
             return_response = dict.fromkeys(["body", "status"])
             try:
-                self._logger.info(f'Getting test results details ...')
+                self._logger.info(f'Getting details of test result {test_result_id}...')
                 response = await self._session.get(
-                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/testsresults/{tdr_id}',
+                    f'{self._config.HAWKEYE_CONFIG["base_url"]}/testsresults/{test_result_id}',
                     ssl=True,
                 )
             except Exception as e:

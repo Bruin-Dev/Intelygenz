@@ -1,20 +1,26 @@
 # Table of contents
+
 - [Hawkeye API](#hawkeye-api)
-  - [Description](#description)
-  - [Links](#links)
+    - [Description](#description)
+    - [Links](#links)
 - [Running in docker-compose](#running-in-docker-compose)
 
 # Hawkeye API
 
 ## Description
+
 Hawkeye Bridge is used to make calls to the Hawkeye API.
 
 # Get probes
+
 ### Description
+
 When the hawkeye bridge receives a request with a request message from topic `hawkeye.probe.request` it makes a callback
-to function `get_probe`. This request can have the `status` or `serial_number` parameters to filter the results of the call
+to function `get_probe`. This request can have the `status` or `serial_number` parameters to filter the results of the
+call
 
 ### Request message
+
 ```
 {
   "request_id": "1234",
@@ -23,7 +29,9 @@ to function `get_probe`. This request can have the `status` or `serial_number` p
   }
 }
 ```
+
 ### Response message
+
 ```
 {
   "request_id": "1234",
@@ -88,12 +96,94 @@ to function `get_probe`. This request can have the `status` or `serial_number` p
 }
 ```
 
+# Get test results
+
+### Description
+
+When the hawkeye bridge receives a request with a request message from topic `hawkeye.test.request` it makes a callback
+to function `get_test_results`. This request must have keys `probe_uids` and one dictionary called `interval`, which
+has `start` and `end` parameters to filter the results of the call
+
+### Request message
+
+```
+{
+  "request_id": "1234",
+  "body":  {
+    "probe_uids":["ATL_XR2000_1"], 
+    "interval":{
+      "start": '2021-01-25 12:14:39.603347',
+      "end": '2021-01-25 12:00:49.998494'
+    } 
+  }
+}
+```
+
+### Response message
+
+```
+{
+  'body': {
+    "ATL_XR2000_1": {
+      'summary': {
+                "id": "DlfsJHcB0dCO9W0n6nGC",
+                "date": "2021-01-21T15:21:55Z",
+                "duration": 0,
+                "meshId": 0,
+                "mesh": 0,
+                "module": "RealService",
+                "probeFrom": "ATL_XR2000_1",
+                "probeTo": "8.8.8.8",
+                "reasonCause": "",
+                "status": "Passed",
+                "testId": "316",
+                "testOptions": "Destination Servers: 8.8.8.8 Interval: 20 ms Count: 100 packets Packet Size:"
+                               " 32 bytes (74) IP Protocol: ipv4 Class of Service: Best Effort Jitter "
+                               "Calculation: Enabled",
+                "testTag": "Core",
+                "testType": "ICMP Test",
+                "userId": "1"
+              },  
+      'metrics': [
+                {
+                    "metric": "Datagrams Out of Order",
+                    "pairName": "Voice from->to",
+                    "value": "0",
+                    "threshold": "1",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                },
+                {
+                    "metric": "Delay (ms)",
+                    "pairName": "Voice from->to",
+                    "value": "1",
+                    "threshold": "100",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                },
+                {
+                    "metric": "Jitter (ms)",
+                    "pairName": "Voice from->to",
+                    "value": "0.03",
+                    "threshold": "5",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                }
+      ]
+    }
+  }, 
+  'status': 200
+}
+```
+
 ## Links
+
 Hawkeye swagger:
 https://ixia.metconnect.net/swagger/index.html
 
 Hawkeye app:
 https://ixia.metconnect.net/ixrr_login.php
 
-# Running in docker-compose 
+# Running in docker-compose
+
 `docker-compose up --build redis nats-server hawkeye-bridge`
