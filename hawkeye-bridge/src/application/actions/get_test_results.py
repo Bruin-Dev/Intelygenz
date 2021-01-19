@@ -24,15 +24,14 @@ class GetTestResults:
             probes_response["body"] = 'Must include "probe_uids" in the body of the request'
             await self._event_bus.publish_message(msg['response_topic'], probes_response)
             return
-        if 'start_date' not in body or 'end_date' not in body:
+        if 'interval' not in body:
             probes_response["status"] = 400
-            probes_response["body"] = 'Must include "start_date" and "end_date" in the body of the request'
+            probes_response["body"] = 'Must include "interval" in the body of the request'
             await self._event_bus.publish_message(msg['response_topic'], probes_response)
             return
         self._logger.info(f'Collecting all test results ...')
 
-        filtered_tests = await self._hawkeye_repository.get_test_results(body['probe_uids'], body['start_date'],
-                                                                         body['end_date'])
+        filtered_tests = await self._hawkeye_repository.get_test_results(body['probe_uids'], body['interval'])
 
         filtered_tests_response = {**probes_response, **filtered_tests}
 

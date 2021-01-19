@@ -65,7 +65,8 @@ def default_call_with_params():
 @pytest.fixture(scope='function')
 def default_call_with_params_test_result():
     return {'request_id': '1234', 'response_topic': "hawkeye.test.request",
-            'body': {'probe_uids': ["b8:27:eb:76:a8:de"], 'start_date': 'fake_start_date', 'end_date': 'fake_end_date'}}
+            'body': {'probe_uids': ["b8:27:eb:76:a8:de"],
+                     'interval': {'start': 'fake_start_date', 'end': 'fake_end_date'}}}
 
 
 @pytest.fixture(scope='function')
@@ -374,7 +375,7 @@ def get_test_result():
 def get_response_test_result(get_test_result):
     return {
         'status': 200,
-        'body': get_test_result
+        'body': get_test_result['records']
     }
 
 

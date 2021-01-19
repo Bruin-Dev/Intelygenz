@@ -13,7 +13,7 @@ class HawkeyeRepository:
     async def get_probes(self, params):
         return await self.__make_paginated_request(self._hawkeye_client.get_probes, params)
 
-    async def get_test_results(self, probes_uids, start_date, end_date):
+    async def get_test_results(self, probes_uids, interval):
         result = {
             'body': [],
             'status': 200,
@@ -21,8 +21,8 @@ class HawkeyeRepository:
         test_results_by_probe_uid = defaultdict(lambda: [])
         for probe_uid in probes_uids:
             all_test_results_response = await self.__make_paginated_request(self._hawkeye_client.get_tests_results,
-                                                                            {'startDate': start_date,
-                                                                             'endDate': end_date,
+                                                                            {'startDate': interval['start'],
+                                                                             'endDate': interval['end'],
                                                                              'limit': 100,
                                                                              'probeFrom': probe_uid})
             test_results_by_probe_uid[probe_uid] = all_test_results_response['body']

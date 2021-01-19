@@ -7,19 +7,7 @@ from config import testconfig as config
 
 
 def init_self_and_name_get_probes(hawkeye_repository):
-    hawkeye_repository._hawkeye_client.get_probes.__self__ = Mock(return_value='')
-    hawkeye_repository._hawkeye_client.get_probes.__self__.__class__ = Mock(return_value='')
-    hawkeye_repository._hawkeye_client.get_probes.__self__.__class__.__name__ = Mock(return_value='HawkeyeRepository')
     hawkeye_repository._hawkeye_client.get_probes.__name__ = Mock(return_value='get_probes')
-    return hawkeye_repository
-
-
-def init_self_and_name_get_test_results(hawkeye_repository):
-    hawkeye_repository._hawkeye_client.get_test_results.__self__ = Mock(return_value='')
-    hawkeye_repository._hawkeye_client.get_test_results.__self__.__class__ = Mock(return_value='')
-    hawkeye_repository._hawkeye_client.get_test_results.__self__.__class__.__name__ = Mock(
-        return_value='HawkeyeRepository')
-    hawkeye_repository._hawkeye_client.get_test_results.__name__ = Mock(return_value='get_probes')
     return hawkeye_repository
 
 
@@ -95,7 +83,8 @@ class TestHawkeyeRepository:
             return_value=get_response_test_result)
         hawkeye_repository._hawkeye_client.get_test_result_details = CoroutineMock(
             side_effect=[get_response_test_result_details, get_response_test_result_details_empty])
-        result = await hawkeye_repository.get_test_results(probes_id, 'fake_start_date', 'fake_end_date')
-        assert result['body'][probes_id[0]] == [{'summary': get_response_test_result['body']['records'][0],
-                            'metrics': get_response_test_result_details['body']['metrics']}]
+        result = await hawkeye_repository.get_test_results(probes_id,
+                                                           {'start': 'fake_start_date', 'end': 'fake_end_date'})
+        assert result['body'][probes_id[0]] == [{'summary': get_response_test_result['body'][0],
+                                                 'metrics': get_response_test_result_details['body']['metrics']}]
         assert result['status'] == 200
