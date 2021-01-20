@@ -358,6 +358,7 @@ class OutageMonitor:
                     )
                     ticket_creation_response_body = ticket_creation_response['body']
                     ticket_creation_response_status = ticket_creation_response['status']
+                    logical_id_list = edge['cached_info']['logical_ids']
                     if ticket_creation_response_status in range(200, 300):
                         self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
                         self._metrics_repository.increment_tickets_created()
@@ -368,7 +369,6 @@ class OutageMonitor:
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
-                        logical_id_list = edge['cached_info']['logical_ids']
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 409:
@@ -382,6 +382,8 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
+                        await self._check_for_digi_reboot(ticket_creation_response_body,
+                                                          logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 472:
                         self._logger.info(
                             f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '

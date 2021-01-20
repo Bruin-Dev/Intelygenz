@@ -2723,7 +2723,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                                                              digi_repository)
+                                       digi_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -4508,17 +4508,21 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
+        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
+
         cached_edge_1 = {
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
         cached_edge_2 = {
             'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_2_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
 
         links_grouped_by_edge_1 = {
@@ -4836,17 +4840,21 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
+        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
+
         cached_edge_1 = {
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
         cached_edge_2 = {
             'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_2_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
 
         links_grouped_by_edge_1 = {
@@ -5127,6 +5135,7 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+        outage_monitor._check_for_digi_reboot = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
@@ -5143,6 +5152,12 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_has_awaits([
             call(outage_ticket_creation_body_1, new_links_grouped_by_edge_1),
             call(outage_ticket_creation_body_2, new_links_grouped_by_edge_2),
+        ])
+        outage_monitor._check_for_digi_reboot.assert_has_awaits([
+            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1,
+                 edge_1_full_id),
+            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2,
+                 edge_2_full_id),
         ])
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -5167,17 +5182,21 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
+        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
+
         cached_edge_1 = {
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
         cached_edge_2 = {
             'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_2_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
 
         links_grouped_by_edge_1 = {
@@ -5500,17 +5519,21 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
+        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
+
         cached_edge_1 = {
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
         cached_edge_2 = {
             'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_2_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list
         }
 
         links_grouped_by_edge_1 = {
