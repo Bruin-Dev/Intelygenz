@@ -445,7 +445,7 @@ class BruinRepository:
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
 
         digi_reboot_note = os.linesep.join([
-            f'# Automation Engine#',
+            f'#*Automation Engine*#',
             f'Offline DiGi interface identified for serial: {serial_number}',
             f'Interface: {interface}',
             f'Automatic reboot attempt started.',

@@ -1,17 +1,16 @@
+import os
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-
+from application.repositories.bruin_repository import BruinRepository
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
-from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
-
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
@@ -1724,3 +1723,39 @@ class TestBruinRepository:
             note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         assert note_appended == 503
+
+    @pytest.mark.asyncio
+    async def append_digi_reboot_note_test(self):
+        current_datetime = datetime.now()
+        ticket_id = 11111
+        service_number = 'VC1234567'
+        outage_causes = "Some causes of the outage"
+        interface = 'GE1'
+        ticket_note = os.linesep.join([
+            '#*Automation Engine*#',
+            f'Offline DiGi interface identified for serial: {service_number}',
+            f'Interface: {interface}',
+            f'Automatic reboot attempt started.',
+            f'TimeStamp: {current_datetime}'
+        ])
+
+        return_body = {
+                        'body': 'Success',
+                        'status': 200
+        }
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=return_body)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            results = await bruin_repository.append_digi_reboot_note(ticket_id, service_number, interface)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note,
+                                                                        service_numbers=[service_number])
+        assert results == return_body

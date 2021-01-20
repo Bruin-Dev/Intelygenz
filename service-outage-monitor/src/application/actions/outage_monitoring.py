@@ -1,24 +1,19 @@
-import asyncio
-import json
 import re
 import time
-
 from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
 from time import perf_counter
 from typing import Callable
 
-from application.repositories import EdgeIdentifier
+import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
-from tenacity import retry
-from tenacity import stop_after_delay
-from tenacity import wait_exponential
 
+from application.repositories import EdgeIdentifier
 
 TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(VeloCloud\)')
 REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
@@ -576,10 +571,10 @@ class OutageMonitor:
             link_status = next((link for link in edge_status['links']
                                 if link['interface'] == digi_link['interface_name']), None)
             if link_status is not None and self._outage_repository.is_faulty_link(link_status['linkState']):
-                reboot = self._digi_repository.reboot_link(serial_number, ticket_id, digi_link['logical_id'])
+                reboot = await self._digi_repository.reboot_link(serial_number, ticket_id, digi_link['logical_id'])
                 if reboot['status'] in range(200, 300):
-                    self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
-                                                                   digi_link['interface_name'])
+                    await self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
+                                                                         digi_link['interface_name'])
                     slack_message = (
                         f'DiGi reboot started for faulty edge {edge_identifier}. Ticket '
                         f'details at https://app.bruin.com/t/{ticket_id}.'
