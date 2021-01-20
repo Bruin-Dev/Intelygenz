@@ -712,7 +712,7 @@ class TestServiceAffectingMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def add_device_to_tickets_mapping_ok_test(self):
+    async def add_device_to_tickets_mapping_with_resolved_ticket_detail_found_test(self):
         bruin_client_id = 9994
 
         serial_number_1 = "B827EB76A8DE"
@@ -731,13 +731,18 @@ class TestServiceAffectingMonitor:
             'status': 200,
         }
 
+        ticket_detail_1_id = 2746930
         ticket_detail_1 = {
-            "detailID": 2746930,
+            "detailID": ticket_detail_1_id,
             "detailValue": serial_number_1,
+            'detailStatus': 'R',
         }
+
+        ticket_detail_2_id = 2746931
         ticket_detail_2 = {
-            "detailID": 2746931,
+            "detailID": ticket_detail_2_id,
             "detailValue": serial_number_2,
+            'detailStatus': 'I',
         }
         ticket_details_list = [
             ticket_detail_1,
@@ -817,6 +822,7 @@ class TestServiceAffectingMonitor:
 
         affecting_monitor = AffectingMonitor(logger, scheduler, config, bruin_repository, hawkeye_repository,
                                              notifications_repository, customer_cache_repository, utils_repository)
+        affecting_monitor._find_ticket_detail_by_serial = Mock(return_value=ticket_detail_1)
         affecting_monitor._find_ticket_notes_by_serial = Mock(return_value=relevant_notes)
         affecting_monitor._get_notes_sorted_by_date_and_id_asc = Mock(return_value=relevant_notes_sorted)
 
@@ -828,12 +834,162 @@ class TestServiceAffectingMonitor:
             client_id=bruin_client_id, service_number=serial_number_1
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        affecting_monitor._find_ticket_detail_by_serial.assert_called_once_with(ticket_details_list, serial_number_1)
         affecting_monitor._find_ticket_notes_by_serial.assert_called_once_with(ticket_notes, serial_number_1)
         affecting_monitor._get_notes_sorted_by_date_and_id_asc.assert_called_once_with(relevant_notes)
 
         expected_tickets_mapping = {
             serial_number_1: {
                 'ticket_id': ticket_id,
+                'detail_id': ticket_detail_1_id,
+                'is_detail_resolved': True,
+                'initial_notes': [
+                    {
+                        'text': ticket_note_1['noteValue'],
+                        'date': parse(ticket_note_1['createdDate']).astimezone(utc),
+                    },
+                    {
+                        'text': ticket_note_2['noteValue'],
+                        'date': parse(ticket_note_2['createdDate']).astimezone(utc),
+                    },
+                ],
+                'new_notes': [],
+            },
+        }
+        assert affecting_monitor._tickets_by_serial == expected_tickets_mapping
+
+    @pytest.mark.asyncio
+    async def add_device_to_tickets_mapping_with_unresolved_ticket_detail_found_test(self):
+        bruin_client_id = 9994
+
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "IXPR-TW19480107"
+
+        ticket_id = 12345
+        open_affecting_ticket_response = {
+            'body': [
+                {
+                    'ticketID': ticket_id,
+                    'clientID': bruin_client_id,
+                    'clientName': 'METTEL/NEW YORK',
+                    'createDate': '4/23/2019 7:59:50 PM',
+                }
+            ],
+            'status': 200,
+        }
+
+        ticket_detail_1_id = 2746930
+        ticket_detail_1 = {
+            "detailID": ticket_detail_1_id,
+            "detailValue": serial_number_1,
+            'detailStatus': 'I',
+        }
+
+        ticket_detail_2_id = 2746931
+        ticket_detail_2 = {
+            "detailID": ticket_detail_2_id,
+            "detailValue": serial_number_2,
+            'detailStatus': 'I',
+        }
+        ticket_details_list = [
+            ticket_detail_1,
+            ticket_detail_2,
+        ]
+
+        ticket_note_1 = {
+            "noteId": 41894041,
+            "noteValue": f'Some note',
+            "createdDate": "2020-02-25T10:07:13.503-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_2 = {
+            "noteId": 41894042,
+            "noteValue": f'Some note 2',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                serial_number_1,
+                serial_number_2,
+            ],
+        }
+        ticket_note_3 = {
+            "noteId": 41894042,
+            "noteValue": f'Some note 3',
+            "createdDate": "2020-02-26T10:07:13.503-05:00",
+            "serviceNumber": [
+                serial_number_2,
+            ],
+        }
+        ticket_note_4 = {
+            "noteId": 41894042,
+            "noteValue": None,
+            "createdDate": "2020-02-21T10:07:13.503-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
+            ticket_note_4,
+        ]
+
+        ticket_details = {
+            'ticketDetails': ticket_details_list,
+            'ticketNotes': ticket_notes,
+        }
+        ticket_details_response = {
+            'body': ticket_details,
+            'status': 200,
+        }
+
+        relevant_notes = [
+            ticket_note_2,
+            ticket_note_1,
+        ]
+
+        relevant_notes_sorted = [
+            ticket_note_1,
+            ticket_note_2,
+        ]
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+        utils_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=open_affecting_ticket_response)
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+
+        affecting_monitor = AffectingMonitor(logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                             notifications_repository, customer_cache_repository, utils_repository)
+        affecting_monitor._find_ticket_detail_by_serial = Mock(return_value=ticket_detail_1)
+        affecting_monitor._find_ticket_notes_by_serial = Mock(return_value=relevant_notes)
+        affecting_monitor._get_notes_sorted_by_date_and_id_asc = Mock(return_value=relevant_notes_sorted)
+
+        await affecting_monitor._add_device_to_tickets_mapping(
+            serial_number=serial_number_1, bruin_client_id=bruin_client_id
+        )
+
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
+            client_id=bruin_client_id, service_number=serial_number_1
+        )
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        affecting_monitor._find_ticket_detail_by_serial.assert_called_once_with(ticket_details_list, serial_number_1)
+        affecting_monitor._find_ticket_notes_by_serial.assert_called_once_with(ticket_notes, serial_number_1)
+        affecting_monitor._get_notes_sorted_by_date_and_id_asc.assert_called_once_with(relevant_notes)
+
+        expected_tickets_mapping = {
+            serial_number_1: {
+                'ticket_id': ticket_id,
+                'detail_id': ticket_detail_1_id,
+                'is_detail_resolved': False,
                 'initial_notes': [
                     {
                         'text': ticket_note_1['noteValue'],
@@ -978,6 +1134,38 @@ class TestServiceAffectingMonitor:
 
         expected_tickets_mapping = {}
         assert affecting_monitor._tickets_by_serial == expected_tickets_mapping
+
+    def find_ticket_detail_by_serial_test(self):
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "IXPR-TW19480107"
+
+        ticket_detail_1 = {
+            "detailID": 2746930,
+            "detailValue": serial_number_1,
+        }
+        ticket_detail_2 = {
+            "detailID": 2746931,
+            "detailValue": serial_number_2,
+        }
+        ticket_details_list = [
+            ticket_detail_1,
+            ticket_detail_2,
+        ]
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        hawkeye_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+        utils_repository = UtilsRepository()
+
+        affecting_monitor = AffectingMonitor(logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                             notifications_repository, customer_cache_repository, utils_repository)
+
+        result = affecting_monitor._find_ticket_detail_by_serial(ticket_details_list, serial_number_1)
+        assert result == ticket_detail_1
 
     def find_ticket_notes_by_serial_test(self):
         serial_number_1 = "B827EB76A8DE"
@@ -1316,9 +1504,12 @@ class TestServiceAffectingMonitor:
         ticket_new_notes = []
 
         ticket_id = 12345
+        ticket_detail_id = 67890
         tickets_mapping = {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': ticket_detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -1417,9 +1608,12 @@ class TestServiceAffectingMonitor:
         ]
 
         ticket_id = 12345
+        ticket_detail_id = 67890
         tickets_mapping = {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': ticket_detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -1911,6 +2105,125 @@ class TestServiceAffectingMonitor:
         affecting_monitor._build_passed_note.assert_not_called()
         assert affecting_monitor._tickets_by_serial is tickets_mapping
 
+    def process_passed_test_result_with_ticket_having_resolved_detail_found_for_serial_test(self):
+        serial_number = 'B827EB76A8DE'
+
+        test_result = {
+            "summary": {
+                "id": "DlfsJHcB0dCO9W0n6nGC",
+                "date": "2020-12-10T12:01:32Z",
+                "duration": "30",
+                "status": "Passed",
+                "reasonCause": "",
+                "module": "MESH",
+                "testId": "335",
+                "testType": "Network KPI",
+                "probeFrom": "Vi_Pi_DRI test",
+                "probeTo": "V_Basement",
+                "mesh": 1,
+                "testOptions": "DSCP Setting: Best Effort ",
+                "meshId": "CORE",
+                "testTag": "",
+                "userId": 6,
+            },
+            "metrics": [
+                {
+                    "metric": "Jitter (ms)",
+                    "pairName": "KPI from->to",
+                    "value": "4",
+                    "threshold": "5",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                },
+                {
+                    "metric": "Loss",
+                    "pairName": "KPI from->to",
+                    "value": "0.1",
+                    "threshold": "0.2",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                },
+            ]
+        }
+
+        device_cached_info = {
+            "probe_uid": 'b8:27:eb:76:a8:de',
+            "serial_number": serial_number,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": 9994,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+
+        ticket_initial_notes = [
+            {
+                'text': (
+                    '#*Automation Engine*#\n'
+                    'Service Affecting (Ixia)\n'
+                    'Device Name: ATL_XR2000_1\n'
+                    '\n'
+                    'All thresholds are normal.\n'
+                    '\n'
+                    'Test Status: PASSED\n'
+                    'Test Type: ICMP Test\n'
+                    'Test: 316 - Test Result: 2569942'
+                ),
+                'date': parse('2020-12-10T12:01:32Z'),
+            }
+        ]
+        ticket_new_notes = [
+            {
+                'text': (
+                    '#*Automation Engine*#\n'
+                    'Service Affecting (Ixia)\n'
+                    'Device Name: ATL_XR2000_1\n'
+                    '\n'
+                    'Trouble: Jitter Max (ms)\n'
+                    'Threshold: 8\n'
+                    'Value: 8.3\n'
+                    '\n'
+                    'Test Status: FAILED\n'
+                    'Test Type: ICMP Test\n'
+                    'Test: 316 - Test Result: 2569999'
+                ),
+                'date': parse('2020-12-10T13:01:32Z'),
+            }
+        ]
+
+        tickets_mapping = {
+            serial_number: {
+                'ticket_id': 1234,
+                'detail_id': 5678,
+                'is_detail_resolved': True,
+                'initial_notes': ticket_initial_notes,
+                'new_notes': ticket_new_notes,
+            }
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        hawkeye_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+        utils_repository = Mock()
+
+        affecting_monitor = AffectingMonitor(logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                             notifications_repository, customer_cache_repository, utils_repository)
+        affecting_monitor._tickets_by_serial = tickets_mapping
+        affecting_monitor._get_last_note_by_test_type = Mock()
+        affecting_monitor._is_passed_note = Mock()
+        affecting_monitor._build_passed_note = Mock()
+
+        affecting_monitor._process_passed_test_result(test_result=test_result, device_cached_info=device_cached_info)
+
+        affecting_monitor._get_last_note_by_test_type.assert_not_called()
+        affecting_monitor._is_passed_note.assert_not_called()
+        affecting_monitor._build_passed_note.assert_not_called()
+        assert affecting_monitor._tickets_by_serial is tickets_mapping
+
     def process_passed_test_result_with_no_notes_found_for_target_test_type_test(self):
         serial_number = 'B827EB76A8DE'
 
@@ -2001,6 +2314,8 @@ class TestServiceAffectingMonitor:
         tickets_mapping = {
             serial_number: {
                 'ticket_id': 1234,
+                'detail_id': 5678,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -2121,6 +2436,8 @@ class TestServiceAffectingMonitor:
         tickets_mapping = {
             serial_number: {
                 'ticket_id': 1234,
+                'detail_id': 5678,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -2245,6 +2562,8 @@ class TestServiceAffectingMonitor:
         tickets_mapping = {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': 5678,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -2290,6 +2609,8 @@ class TestServiceAffectingMonitor:
         assert affecting_monitor._tickets_by_serial == {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': 5678,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': updated_new_notes,
             }
@@ -2903,6 +3224,8 @@ class TestServiceAffectingMonitor:
         assert affecting_monitor._tickets_by_serial == {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': None,
+                'is_detail_resolved': False,
                 'initial_notes': [],
                 'new_notes': [
                     {
@@ -2914,7 +3237,7 @@ class TestServiceAffectingMonitor:
         }
 
     @pytest.mark.asyncio
-    async def process_failed_test_result_with_ticket_found_for_serial_and_no_note_found_for_test_type_test(self):
+    async def process_failed_test_result_with_unresolved_ticket_detail_found_and_no_note_found_for_test_type_test(self):
         serial_number = 'B827EB76A8DE'
 
         test_type = 'Network KPI'
@@ -3008,9 +3331,12 @@ class TestServiceAffectingMonitor:
         all_ticket_notes = ticket_initial_notes + ticket_new_notes
 
         ticket_id = 12345
+        detail_id = 67890
         tickets_mapping = {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -3058,13 +3384,16 @@ class TestServiceAffectingMonitor:
         assert affecting_monitor._tickets_by_serial == {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': updated_new_notes,
             }
         }
 
     @pytest.mark.asyncio
-    async def process_failed_test_result_with_ticket_found_for_serial_and_passed_note_found_for_test_type_test(self):
+    async def process_failed_test_result_with_unresolved_ticket_detail_found_and_passed_note_found_for_test_type_test(
+            self):
         serial_number = 'B827EB76A8DE'
 
         test_type = 'Network KPI'
@@ -3160,9 +3489,12 @@ class TestServiceAffectingMonitor:
         all_ticket_notes = ticket_initial_notes + ticket_new_notes
 
         ticket_id = 12345
+        detail_id = 67890
         tickets_mapping = {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -3210,13 +3542,16 @@ class TestServiceAffectingMonitor:
         assert affecting_monitor._tickets_by_serial == {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': updated_new_notes,
             }
         }
 
     @pytest.mark.asyncio
-    async def process_failed_test_result_with_ticket_found_for_serial_and_failed_note_found_for_test_type_test(self):
+    async def process_failed_test_result_with_unresolved_ticket_detail_found_and_failed_note_found_for_test_type_test(
+            self):
         serial_number = 'B827EB76A8DE'
 
         test_type = 'Network KPI'
@@ -3311,9 +3646,12 @@ class TestServiceAffectingMonitor:
         all_ticket_notes = ticket_initial_notes + ticket_new_notes
 
         ticket_id = 12345
+        detail_id = 67890
         tickets_mapping = {
             serial_number: {
                 'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': False,
                 'initial_notes': ticket_initial_notes,
                 'new_notes': ticket_new_notes,
             }
@@ -3352,3 +3690,328 @@ class TestServiceAffectingMonitor:
         affecting_monitor._is_passed_note.assert_called_once_with(ticket_initial_note_1_text)
         affecting_monitor._build_failed_note.assert_not_called()
         assert affecting_monitor._tickets_by_serial is tickets_mapping
+
+    @pytest.mark.asyncio
+    async def process_failed_test_result_with_resolved_ticket_detail_found_and_unsuccessful_unresolve_test(self):
+        serial_number = 'B827EB76A8DE'
+
+        test_type = 'Network KPI'
+        test_result = {
+            "summary": {
+                "id": "DlfsJHcB0dCO9W0n6nGC",
+                "date": "2020-12-10T12:01:32Z",
+                "duration": "30",
+                "status": "Failed",
+                "reasonCause": "",
+                "module": "MESH",
+                "testId": "335",
+                "testType": test_type,
+                "probeFrom": "Vi_Pi_DRI test",
+                "probeTo": "V_Basement",
+                "mesh": 1,
+                "testOptions": "DSCP Setting: Best Effort ",
+                "meshId": "CORE",
+                "testTag": "",
+                "userId": 6,
+            },
+            "metrics": [
+                {
+                    "metric": "Jitter (ms)",
+                    "pairName": "KPI from->to",
+                    "value": "6",
+                    "threshold": "5",
+                    "thresholdType": "0",
+                    "status": "Failed"
+                },
+                {
+                    "metric": "Loss",
+                    "pairName": "KPI from->to",
+                    "value": "0.1",
+                    "threshold": "0.2",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                },
+            ]
+        }
+
+        client_id = 9994
+        device_cached_info = {
+            "probe_uid": 'b8:27:eb:76:a8:de',
+            "serial_number": serial_number,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": client_id,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+
+        ticket_initial_notes = [
+            {
+                'text': (
+                    '#*Automation Engine*#\n'
+                    'Service Affecting (Ixia)\n'
+                    'Device Name: ATL_XR2000_1\n'
+                    '\n'
+                    'Trouble: Jitter Max (ms)\n'
+                    'Threshold: 8\n'
+                    'Value: 8.3\n'
+                    '\n'
+                    'Test Status: PASSED\n'
+                    f'Test Type: {test_type}\n'
+                    'Test: 316 - Test Result: 2569942'
+                ),
+                'date': parse('2020-12-10T12:01:32Z'),
+            },
+        ]
+
+        ticket_new_note_1 = {
+            'text': (
+                '#*Automation Engine*#\n'
+                'Service Affecting (Ixia)\n'
+                'Device Name: ATL_XR2000_1\n'
+                '\n'
+                'Trouble: Jitter Max (ms)\n'
+                'Threshold: 8\n'
+                'Value: 8.3\n'
+                '\n'
+                'Test Status: FAILED\n'
+                'Test Type: ICMP Test\n'
+                'Test: 316 - Test Result: 2569999'
+            ),
+            'date': parse('2020-12-10T13:01:32Z'),
+        }
+        ticket_new_notes = [
+            ticket_new_note_1,
+        ]
+
+        ticket_id = 12345
+        detail_id = 67890
+        tickets_mapping = {
+            serial_number: {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': True,
+                'initial_notes': ticket_initial_notes,
+                'new_notes': ticket_new_notes,
+            }
+        }
+
+        failed_test_note = 'This is a FAILED note'
+
+        unresolve_detail_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+        utils_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.create_affecting_ticket = CoroutineMock()
+        bruin_repository.unresolve_ticket_detail = CoroutineMock(return_value=unresolve_detail_response)
+
+        affecting_monitor = AffectingMonitor(logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                             notifications_repository, customer_cache_repository, utils_repository)
+        affecting_monitor._tickets_by_serial = tickets_mapping
+        affecting_monitor._get_last_note_by_test_type = Mock()
+        affecting_monitor._is_passed_note = Mock()
+        affecting_monitor._build_failed_note = Mock(return_value=failed_test_note)
+
+        current_datetime = datetime.utcnow()
+        datetime_mock = Mock()
+        datetime_mock.utcnow = Mock(return_value=current_datetime)
+        with patch.object(affecting_monitoring_module, 'datetime', new=datetime_mock):
+            await affecting_monitor._process_failed_test_result(
+                test_result=test_result, device_cached_info=device_cached_info
+            )
+
+        bruin_repository.create_affecting_ticket.assert_not_awaited()
+        affecting_monitor._get_last_note_by_test_type.assert_not_called()
+        affecting_monitor._is_passed_note.assert_not_called()
+        bruin_repository.unresolve_ticket_detail.assert_awaited_once_with(ticket_id, detail_id)
+        affecting_monitor._build_failed_note.assert_called_once_with(test_result)
+        updated_new_notes = [
+            ticket_new_note_1,
+            {
+                'text': failed_test_note,
+                'date': current_datetime,
+            }
+        ]
+        assert affecting_monitor._tickets_by_serial == {
+            serial_number: {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': True,
+                'initial_notes': ticket_initial_notes,
+                'new_notes': updated_new_notes,
+            }
+        }
+
+    @pytest.mark.asyncio
+    async def process_failed_test_result_with_resolved_ticket_detail_found_and_successful_unresolve_test(self):
+        serial_number = 'B827EB76A8DE'
+
+        test_type = 'Network KPI'
+        test_result = {
+            "summary": {
+                "id": "DlfsJHcB0dCO9W0n6nGC",
+                "date": "2020-12-10T12:01:32Z",
+                "duration": "30",
+                "status": "Failed",
+                "reasonCause": "",
+                "module": "MESH",
+                "testId": "335",
+                "testType": test_type,
+                "probeFrom": "Vi_Pi_DRI test",
+                "probeTo": "V_Basement",
+                "mesh": 1,
+                "testOptions": "DSCP Setting: Best Effort ",
+                "meshId": "CORE",
+                "testTag": "",
+                "userId": 6,
+            },
+            "metrics": [
+                {
+                    "metric": "Jitter (ms)",
+                    "pairName": "KPI from->to",
+                    "value": "6",
+                    "threshold": "5",
+                    "thresholdType": "0",
+                    "status": "Failed"
+                },
+                {
+                    "metric": "Loss",
+                    "pairName": "KPI from->to",
+                    "value": "0.1",
+                    "threshold": "0.2",
+                    "thresholdType": "0",
+                    "status": "Passed"
+                },
+            ]
+        }
+
+        client_id = 9994
+        device_cached_info = {
+            "probe_uid": 'b8:27:eb:76:a8:de',
+            "serial_number": serial_number,
+            "last_contact": "2020-01-16T14:59:56.245Z",
+            "bruin_client_info": {
+                "client_id": client_id,
+                "client_name": "METTEL/NEW YORK",
+            },
+        }
+
+        ticket_initial_notes = [
+            {
+                'text': (
+                    '#*Automation Engine*#\n'
+                    'Service Affecting (Ixia)\n'
+                    'Device Name: ATL_XR2000_1\n'
+                    '\n'
+                    'Trouble: Jitter Max (ms)\n'
+                    'Threshold: 8\n'
+                    'Value: 8.3\n'
+                    '\n'
+                    'Test Status: PASSED\n'
+                    f'Test Type: {test_type}\n'
+                    'Test: 316 - Test Result: 2569942'
+                ),
+                'date': parse('2020-12-10T12:01:32Z'),
+            },
+        ]
+
+        ticket_new_note_1 = {
+            'text': (
+                '#*Automation Engine*#\n'
+                'Service Affecting (Ixia)\n'
+                'Device Name: ATL_XR2000_1\n'
+                '\n'
+                'Trouble: Jitter Max (ms)\n'
+                'Threshold: 8\n'
+                'Value: 8.3\n'
+                '\n'
+                'Test Status: FAILED\n'
+                'Test Type: ICMP Test\n'
+                'Test: 316 - Test Result: 2569999'
+            ),
+            'date': parse('2020-12-10T13:01:32Z'),
+        }
+        ticket_new_notes = [
+            ticket_new_note_1,
+        ]
+
+        ticket_id = 12345
+        detail_id = 67890
+        tickets_mapping = {
+            serial_number: {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': True,
+                'initial_notes': ticket_initial_notes,
+                'new_notes': ticket_new_notes,
+            }
+        }
+
+        failed_test_note = 'This is a FAILED note'
+
+        unresolve_detail_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        customer_cache_repository = Mock()
+        utils_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.create_affecting_ticket = CoroutineMock()
+        bruin_repository.unresolve_ticket_detail = CoroutineMock(return_value=unresolve_detail_response)
+
+        notifications_repository = Mock()
+        notifications_repository.notify_ticket_detail_was_unresolved = CoroutineMock()
+
+        affecting_monitor = AffectingMonitor(logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                             notifications_repository, customer_cache_repository, utils_repository)
+        affecting_monitor._tickets_by_serial = tickets_mapping
+        affecting_monitor._get_last_note_by_test_type = Mock()
+        affecting_monitor._is_passed_note = Mock()
+        affecting_monitor._build_failed_note = Mock(return_value=failed_test_note)
+
+        current_datetime = datetime.utcnow()
+        datetime_mock = Mock()
+        datetime_mock.utcnow = Mock(return_value=current_datetime)
+        with patch.object(affecting_monitoring_module, 'datetime', new=datetime_mock):
+            await affecting_monitor._process_failed_test_result(
+                test_result=test_result, device_cached_info=device_cached_info
+            )
+
+        bruin_repository.create_affecting_ticket.assert_not_awaited()
+        affecting_monitor._get_last_note_by_test_type.assert_not_called()
+        affecting_monitor._is_passed_note.assert_not_called()
+        bruin_repository.unresolve_ticket_detail.assert_awaited_once_with(ticket_id, detail_id)
+        notifications_repository.notify_ticket_detail_was_unresolved.assert_awaited_once_with(ticket_id, serial_number)
+        affecting_monitor._build_failed_note.assert_called_once_with(test_result)
+        updated_new_notes = [
+            ticket_new_note_1,
+            {
+                'text': failed_test_note,
+                'date': current_datetime,
+            }
+        ]
+        assert affecting_monitor._tickets_by_serial == {
+            serial_number: {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+                'is_detail_resolved': False,
+                'initial_notes': ticket_initial_notes,
+                'new_notes': updated_new_notes,
+            }
+        }

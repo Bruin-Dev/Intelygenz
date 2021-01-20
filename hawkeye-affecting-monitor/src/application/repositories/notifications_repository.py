@@ -18,6 +18,13 @@ class NotificationsRepository:
         )
         await self.send_slack_message(message)
 
+    async def notify_ticket_detail_was_unresolved(self, ticket_id: int, serial_number: str):
+        message = (
+            f'Detail corresponding to Ixia device {serial_number} in Service Affecting ticket {ticket_id} has been '
+            f'unresolved: https://app.bruin.com/t/{ticket_id}'
+        )
+        await self.send_slack_message(message)
+
     async def notify_multiple_notes_were_posted_to_ticket(self, ticket_id: int, serial_number: str):
         message = (
             f'Multiple Affecting notes related to Ixia device {serial_number} were posted to Service Affecting ticket '

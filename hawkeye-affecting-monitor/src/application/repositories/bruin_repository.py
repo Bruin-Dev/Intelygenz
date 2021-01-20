@@ -223,13 +223,49 @@ class BruinRepository:
 
         return response
 
+    async def unresolve_ticket_detail(self, ticket_id: int, detail_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Unresolving detail {detail_id} of ticket {ticket_id}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.status.open", request, timeout=15)
+        except Exception as e:
+            err_msg = f'An error occurred when unresolving detail {detail_id} of affecting ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while unresolving detail {detail_id} of affecting ticket {ticket_id} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+            else:
+                self._logger.info(f'Detail {detail_id} of ticket {ticket_id} unresolved successfully!')
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
         ticket_topic = 'VAS'
 
         return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
 
     async def get_open_affecting_tickets(self, client_id: int, *, service_number: str = None):
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved']
 
         return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
 

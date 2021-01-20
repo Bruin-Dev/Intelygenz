@@ -63,6 +63,26 @@ class TestNotificationsRepository:
         notifications_repository.send_slack_message.assert_awaited_once_with(message)
 
     @pytest.mark.asyncio
+    async def notify_ticket_detail_was_unresolved_test(self):
+        ticket_id = 12345
+        serial_number = 'B827EB76A8DE'
+
+        message = (
+            f'Detail corresponding to Ixia device {serial_number} in Service Affecting ticket {ticket_id} has been '
+            f'unresolved: https://app.bruin.com/t/{ticket_id}'
+        )
+
+        event_bus = Mock()
+
+        notifications_repository = NotificationsRepository(event_bus)
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            await notifications_repository.notify_ticket_detail_was_unresolved(ticket_id, serial_number)
+
+        notifications_repository.send_slack_message.assert_awaited_once_with(message)
+
+    @pytest.mark.asyncio
     async def notify_multiple_notes_were_posted_to_ticket_test(self):
         ticket_id = 12345
         serial_number = 'B827EB76A8DE'

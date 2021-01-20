@@ -160,13 +160,17 @@ class AffectingMonitor:
                 return
 
             ticket_details: dict = ticket_details_response['body']
+            ticket_details_list = ticket_details['ticketDetails']
             ticket_notes = ticket_details['ticketNotes']
 
+            relevant_detail: dict = self._find_ticket_detail_by_serial(ticket_details_list, serial_number)
             relevant_notes: list = self._find_ticket_notes_by_serial(ticket_notes, serial_number)
             sorted_relevant_notes = self._get_notes_sorted_by_date_and_id_asc(relevant_notes)
 
             self._tickets_by_serial[serial_number] = {
                 'ticket_id': affecting_ticket['ticketID'],
+                'detail_id': relevant_detail['detailID'],
+                'is_detail_resolved': relevant_detail['detailStatus'] == 'R',
                 'initial_notes': [
                     {
                         'text': note['noteValue'],
@@ -176,6 +180,12 @@ class AffectingMonitor:
                 ],
                 'new_notes': [],
             }
+
+    def _find_ticket_detail_by_serial(self, ticket_details: list, serial_number: str) -> dict:
+        return self._utils_repository.get_first_element_matching(
+            iterable=ticket_details,
+            condition=lambda detail: detail['detailValue'] == serial_number,
+        )
 
     @staticmethod
     def _find_ticket_notes_by_serial(ticket_notes: list, serial_number: str) -> list:
@@ -284,6 +294,14 @@ class AffectingMonitor:
             return
 
         ticket_id = affecting_ticket['ticket_id']
+        if affecting_ticket['is_detail_resolved']:
+            self._logger.info(
+                f'Serial {serial_number} is under an affecting ticket (ID {ticket_id}) whose ticket detail is resolved '
+                f'and all thresholds are normal for test type {test_type}, so the current PASSED state will not be '
+                'reported. Skipping...'
+            )
+            return
+
         ticket_notes: list = affecting_ticket['initial_notes'] + affecting_ticket['new_notes']
 
         last_note = self._get_last_note_by_test_type(ticket_notes, test_type)
@@ -366,6 +384,8 @@ class AffectingMonitor:
             failed_note = self._build_failed_note(test_result)
             self._tickets_by_serial[serial_number] = {
                 'ticket_id': ticket_id,
+                'detail_id': None,
+                'is_detail_resolved': False,  # The ticket was just created, so assuming the detail is unresolved is OK
                 'initial_notes': [],
                 'new_notes': [
                     {
@@ -376,13 +396,43 @@ class AffectingMonitor:
             }
         else:
             ticket_id = self._tickets_by_serial[serial_number]['ticket_id']
-            ticket_notes: list = affecting_ticket['initial_notes'] + affecting_ticket['new_notes']
+            detail_id = self._tickets_by_serial[serial_number]['detail_id']
 
             self._logger.info(
                 f'Serial {serial_number} is under affecting ticket {ticket_id} and some troubles were spotted for '
                 f'test type {test_type}.'
             )
 
+            if self._tickets_by_serial[serial_number]['is_detail_resolved']:
+                self._logger.info(
+                    f'Ticket detail of affecting ticket {ticket_id} that is related to serial {serial_number} is '
+                    f'currently unresolved and a FAILED state was spotted. Unresolving detail...'
+                )
+
+                unresolve_detail_response = await self._bruin_repository.unresolve_ticket_detail(ticket_id, detail_id)
+                if unresolve_detail_response['status'] not in range(200, 300):
+                    self._logger.info(
+                        f'Ticket detail of affecting ticket {ticket_id} that is related to serial {serial_number} '
+                        'could not be unresolved. A note reporting the spotted FAILED state will be built and '
+                        'appended to the ticket later on.'
+                    )
+                else:
+                    self._logger.info(
+                        f'Ticket detail of affecting ticket {ticket_id} that is related to serial {serial_number} '
+                        'was unresolved successfully. A note reporting the spotted FAILED state will be built and '
+                        'appended to the ticket later on.'
+                    )
+                    await self._notifications_repository.notify_ticket_detail_was_unresolved(ticket_id, serial_number)
+                    self._tickets_by_serial[serial_number]['is_detail_resolved'] = False
+
+                failed_note = self._build_failed_note(test_result)
+                self._tickets_by_serial[serial_number]['new_notes'].append({
+                    'text': failed_note,
+                    'date': datetime.utcnow(),
+                })
+                return
+
+            ticket_notes: list = affecting_ticket['initial_notes'] + affecting_ticket['new_notes']
             last_note = self._get_last_note_by_test_type(ticket_notes, test_type)
             if not last_note:
                 self._logger.info(
