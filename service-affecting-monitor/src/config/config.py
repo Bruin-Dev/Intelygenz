@@ -47,7 +47,7 @@ MONITOR_REPORT_CONFIG = {
             'threshold': 3,  # Number of tickets to include in the report
             'client_id': 83109,
             'trailing_days': 14,
-            'recipient': os.environ["LAST_CONTACT_RECIPIENT"]
+            'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, mettel.automation@intelygenz.com'
         }
     ]
 }
