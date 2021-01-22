@@ -17,7 +17,8 @@ data "template_file" "automation-bruin-bridge" {
     image = local.automation-bruin-bridge-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
-    
+
+    CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
     REDIS_HOSTNAME = local.redis-hostname
@@ -25,6 +26,8 @@ data "template_file" "automation-bruin-bridge" {
     BRUIN_CLIENT_SECRET = var.BRUIN_CLIENT_SECRET
     BRUIN_LOGIN_URL = var.BRUIN_LOGIN_URL
     BRUIN_BASE_URL = var.BRUIN_BASE_URL
+    BRUIN_LOGIN_URL_IP = var.BRUIN_LOGIN_URL_IP
+    BRUIN_BASE_URL_IP = var.BRUIN_BASE_URL_IP
     PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-bruin-bridge-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST

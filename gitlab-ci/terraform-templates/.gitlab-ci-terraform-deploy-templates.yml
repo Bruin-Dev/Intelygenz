@@ -85,6 +85,7 @@
         cd ${CI_PROJECT_DIR}
       fi
     - terraform init infra-as-code/dev
+    - terraform refresh infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
   tags:
     - kubernetes

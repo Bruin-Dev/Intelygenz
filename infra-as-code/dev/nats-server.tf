@@ -130,7 +130,11 @@ resource "aws_ecs_service" "automation-nats-server" {
     registry_arn = aws_service_discovery_service.nats-server.arn
   }
 
-
+   depends_on = [
+     aws_elasticache_cluster.automation-redis,
+     aws_elasticache_cluster.automation-redis-customer-cache,
+     aws_elasticache_cluster.automation-redis-tnba-feedback
+   ]
 }
 
 data "template_file" "automation-nats-server-task-definition-output" {

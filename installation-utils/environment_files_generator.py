@@ -149,6 +149,7 @@ env_dict = {
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('bruin-bridge', 'src', 'config', 'env'):
+        f'CURRENT_ENVIRONMENT={ENVIRONMENT_NAME}\n'
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'

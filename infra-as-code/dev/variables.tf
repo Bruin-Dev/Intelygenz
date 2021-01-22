@@ -89,6 +89,14 @@ variable "BRUIN_BASE_URL" {
   default = ""
 }
 
+variable "BRUIN_BASE_URL_IP" {
+  default = ""
+}
+
+variable "BRUIN_LOGIN_URL_IP" {
+  default = ""
+}
+
 // cts-bridge environment variables
 
 variable "CTS_CLIENT_ID" {

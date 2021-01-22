@@ -33,6 +33,10 @@
     },
     "environment": [
       {
+        "name": "CURRENT_ENVIRONMENT",
+        "value": "${CURRENT_ENVIRONMENT}"
+      },
+      {
         "name": "PYTHONUNBUFFERED",
         "value": "${PYTHONUNBUFFERED}"
       },
@@ -79,6 +83,14 @@
       {
         "name": "ENVIRONMENT_NAME",
         "value": "${ENVIRONMENT_NAME}"
+      },
+      {
+        "name": "BRUIN_LOGIN_URL_IP",
+        "value": "${BRUIN_LOGIN_URL_IP}"
+      },
+      {
+        "name": "BRUIN_BASE_URL_IP",
+        "value": "${BRUIN_BASE_URL_IP}"
       }
     ]
   }
