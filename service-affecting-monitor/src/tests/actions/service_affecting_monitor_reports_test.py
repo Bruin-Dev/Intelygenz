@@ -16,7 +16,6 @@ from asynctest import CoroutineMock
 
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_)
 
@@ -24,10 +23,12 @@ uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=
 class TestServiceAffectingMonitorReports:
 
     def instance_test(
-            self, event_bus, logger, scheduler, template_renderer, bruin_repository, notifications_repository):
+            self, event_bus, logger, scheduler, template_renderer, bruin_repository, notifications_repository,
+            customer_cache_repository):
         config = testconfig
         service_affecting_monitor_reports = ServiceAffectingMonitorReports(
-            event_bus, logger, scheduler, config, template_renderer, bruin_repository, notifications_repository
+            event_bus, logger, scheduler, config, template_renderer, bruin_repository, notifications_repository,
+            customer_cache_repository
         )
 
         assert service_affecting_monitor_reports._event_bus is event_bus
@@ -37,6 +38,7 @@ class TestServiceAffectingMonitorReports:
         assert service_affecting_monitor_reports._template_renderer is template_renderer
         assert service_affecting_monitor_reports._bruin_repository is bruin_repository
         assert service_affecting_monitor_reports._notifications_repository is notifications_repository
+        assert service_affecting_monitor_reports._customer_cache_repository is customer_cache_repository
 
     def get_report_function_test(self, service_affecting_monitor_reports, report):
         assert service_affecting_monitor_reports._get_report_function(report) == \
@@ -77,7 +79,9 @@ class TestServiceAffectingMonitorReports:
     async def service_affecting_monitor_report_bandwidth_over_utilization_test(self, service_affecting_monitor_reports,
                                                                                report, response_bruin_with_all_tickets,
                                                                                response_mapped_tickets,
-                                                                               response_prepare_items_for_report):
+                                                                               response_prepare_items_for_report,
+                                                                               response_customer_cache,
+                                                                               filter_response_bruin_with_all_tickets):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -92,7 +96,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets]
         )
-        service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers = Mock(
+        service_affecting_monitor_reports._bruin_repository.group_by_serial_tickets = Mock(
             return_value=response_mapped_tickets
         )
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report = Mock(
@@ -101,22 +105,59 @@ class TestServiceAffectingMonitorReports:
             Mock()
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
 
+        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+            return_value=response_customer_cache)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             await service_affecting_monitor_reports._service_affecting_monitor_report_bandwidth_over_utilization(report)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_awaited_once_with(
             report, start_date_str, end_date_str)
-        service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers.assert_called_once_with(
-            response_bruin_with_all_tickets)
+        service_affecting_monitor_reports._bruin_repository.group_by_serial_tickets.assert_called_once_with(
+            filter_response_bruin_with_all_tickets)
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report.assert_called_once_with(
             response_mapped_tickets)
-        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object.\
+        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object. \
             assert_called_once_with(report=report, report_items=response_prepare_items_for_report)
         service_affecting_monitor_reports._notifications_repository.send_email.assert_awaited_once()
 
     @pytest.mark.asyncio
+    async def service_affecting_monitor_report_bandwidth_over_utilization_no_cache_test(self, report,
+                                                                                        service_affecting_monitor_reports,
+                                                                                        response_empty_customer_cache):
+        end_date = datetime.utcnow().replace(tzinfo=tz.utc)
+
+        datetime_mock = Mock()
+        datetime_mock.utcnow = Mock(return_value=end_date)
+        datetime_mock.now = Mock(return_value=end_date)
+
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+            return_value=response_empty_customer_cache)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            await service_affecting_monitor_reports._service_affecting_monitor_report_bandwidth_over_utilization(report)
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def service_affecting_monitor_report_bandwidth_over_utilization_bad_response_cache_test(self, report,
+                                                                                                  service_affecting_monitor_reports,
+                                                                                                  response_bad_status_customer_cache):
+        end_date = datetime.utcnow().replace(tzinfo=tz.utc)
+
+        datetime_mock = Mock()
+        datetime_mock.utcnow = Mock(return_value=end_date)
+        datetime_mock.now = Mock(return_value=end_date)
+
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+            return_value=response_bad_status_customer_cache)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            await service_affecting_monitor_reports._service_affecting_monitor_report_bandwidth_over_utilization(report)
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def service_affecting_monitor_report_bandwidth_over_utilization_no_items_for_report_test(
-            self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets, response_mapped_tickets):
+            self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets, response_mapped_tickets,
+            response_customer_cache, filter_response_bruin_with_all_tickets):
         response_prepare__no_items_for_report = []
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
@@ -132,7 +173,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets]
         )
-        service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers = Mock(
+        service_affecting_monitor_reports._bruin_repository.group_by_serial_tickets = Mock(
             return_value=response_mapped_tickets
         )
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report = Mock(
@@ -140,14 +181,16 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object = \
             Mock()
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+            return_value=response_customer_cache)
 
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             await service_affecting_monitor_reports._service_affecting_monitor_report_bandwidth_over_utilization(report)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_awaited_once_with(
             report, start_date_str, end_date_str)
-        service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers.assert_called_once_with(
-            response_bruin_with_all_tickets)
+        service_affecting_monitor_reports._bruin_repository.group_by_serial_tickets.assert_called_once_with(
+            filter_response_bruin_with_all_tickets)
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report.assert_called_once_with(
             response_mapped_tickets)
         service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object. \
@@ -156,7 +199,8 @@ class TestServiceAffectingMonitorReports:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_report_bandwidth_over_utilization_with_exception_test(
-            self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets_with_exception):
+            self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets_with_exception,
+            response_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -171,19 +215,21 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets_with_exception]
         )
-        service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers = Mock()
+        service_affecting_monitor_reports._bruin_repository.map_ticket_details_and_notes_with_serial_numbers = Mock()
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report = Mock()
         service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object = \
             Mock()
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+            return_value=response_customer_cache)
 
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             await service_affecting_monitor_reports._service_affecting_monitor_report_bandwidth_over_utilization(report)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_awaited_once_with(
             report, start_date_str, end_date_str)
-        service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers.assert_not_called()
+        service_affecting_monitor_reports._bruin_repository.map_ticket_details_and_notes_with_serial_numbers.assert_not_called()
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report.assert_not_called()
-        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object.\
+        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object. \
             assert_not_called()
         service_affecting_monitor_reports._notifications_repository.send_email.assert_not_called()

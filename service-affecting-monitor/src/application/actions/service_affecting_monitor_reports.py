@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 from datetime import timezone as tz
 
@@ -13,7 +14,7 @@ from application.repositories.bruin_repository import BruinRepository
 class ServiceAffectingMonitorReports:
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, bruin_repository,
-                 notifications_repository):
+                 notifications_repository, customer_cache_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -21,8 +22,13 @@ class ServiceAffectingMonitorReports:
         self._template_renderer = template_renderer
         self._bruin_repository = bruin_repository
         self._notifications_repository = notifications_repository
-        self.MAIN_WATERMARK = '#*Automation Engine*#'
         self._ISO_8601_FORMAT_UTC = "%Y-%m-%dT%H:%M:%SZ"
+        self._customer_cache_repository = customer_cache_repository
+
+        self.__reset_state()
+
+    def __reset_state(self):
+        self._customer_cache = []
 
     def _get_report_function(self, report):
         switcher = {
@@ -60,6 +66,19 @@ class ServiceAffectingMonitorReports:
         start_date_str = start_date.strftime(self._ISO_8601_FORMAT_UTC)
         end_date_str = end_date.strftime(self._ISO_8601_FORMAT_UTC)
         start = datetime.now()
+        self.__reset_state()
+
+        self._logger.info(f"Processing all links of {len(self._config.MONITOR_CONFIG['device_by_id'])} edges...")
+
+        customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
+        if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
+            return
+
+        self._customer_cache: list = customer_cache_response['body']
+        if not self._customer_cache:
+            self._logger.info('Got an empty customer cache. Process cannot keep going.')
+            return
+
         self._logger.info(f"[service-affecting-monitor-reports] Starting report")
 
         affecting_tickets = await self._bruin_repository.get_affecting_ticket_for_report(report, start_date_str,
@@ -68,15 +87,21 @@ class ServiceAffectingMonitorReports:
             self._logger.error(f"[service-affecting-monitor-reports] Report could not be generated."
                                f"We could not retrieve all tickets.")
             return
-        filtered_affecting_tickets = BruinRepository.find_bandwidth_over_utilization_tickets(affecting_tickets,
-                                                                                             self.MAIN_WATERMARK)
 
-        mapped_serials_tickets = self._bruin_repository.map_tickets_with_serial_numbers(filtered_affecting_tickets)
+        set_cache_serials = set(edge['serial_number'] for edge in self._customer_cache)
 
-        final_report_list = self._bruin_repository.prepare_items_for_report(mapped_serials_tickets)
+        transformed_tickets = BruinRepository.transform_tickets_into_ticket_details(affecting_tickets)
 
+        filtered_affecting_tickets = BruinRepository.filter_tickets_with_serial_cached(transformed_tickets,
+                                                                                       set_cache_serials)
+
+        filtered_affecting_tickets = BruinRepository.filter_bandwidth_notes(filtered_affecting_tickets)
+
+        mapped_serials_tickets = self._bruin_repository.group_ticket_details_by_serial(filtered_affecting_tickets)
+
+        report_list = self._bruin_repository.prepare_items_for_report(mapped_serials_tickets)
         # Last filter - number of tickets greater than 3
-        final_report_list = [item for item in final_report_list if item['number_of_tickets'] > report['threshold']]
+        final_report_list = [item for item in report_list if item['number_of_tickets'] > report['threshold']]
 
         end = datetime.now() - start
         if len(final_report_list) > 0:

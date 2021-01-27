@@ -1,7 +1,7 @@
 import math
 import asyncio
 import os
-import copy
+import re
 from datetime import datetime
 from dateutil.parser import parse
 from collections import defaultdict
@@ -10,6 +10,8 @@ from shortuuid import uuid
 from tenacity import wait_fixed, retry, stop_after_attempt
 
 from application.repositories import nats_error_response
+
+INTERFACE_NOTE_REGEX = re.compile(r'Interface: (?P<interface_name>[a-zA-Z0-9]+)')
 
 
 class BruinRepository:
@@ -139,9 +141,9 @@ class BruinRepository:
             ticket_details_body = ticket_details['body']
             self._logger.info(f'Returning ticket details of ticket: {ticket_id}')
             return {
-                    'ticketID': ticket_id,
-                    **ticket_details_body,
-                  }
+                'ticketID': ticket_id,
+                **ticket_details_body,
+            }
         self._logger.info(f'No service affecting tickets found for serial: {serial}')
         return {}
 
@@ -170,6 +172,7 @@ class BruinRepository:
                     "ticket": ticket,
                     "ticket_details": ticket_details_body
                 }
+
         try:
             return await _get_ticket_details()
         except Exception as e:
@@ -220,6 +223,7 @@ class BruinRepository:
                 return ret_tickets
             self._logger.info(f"No service affecting tickets found for trailing days: {report['trailing_days']}")
             return {}
+
         try:
             return await get_affecting_ticket_for_report()
         except Exception as e:
@@ -228,41 +232,69 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(msg)
             return None
 
-    def map_tickets_with_serial_numbers(self, tickets):
+    def group_ticket_details_by_serial(self, tickets):
         all_serials = defaultdict(list)
 
-        self._logger.info(f"[bruin_repository] processing {len(tickets.keys())}")
+        self._logger.info(f"[bruin_repository] processing {len(tickets)}")
 
-        for ticket_id, ticket_data in tickets.items():
-            self._logger.info(f"[bruin_repository] ticket_id: {ticket_id}")
-            serials = list({td['detailValue'].upper() for td in ticket_data['ticket_details']['ticketDetails']})
-            for serial in serials:
-                all_serials[serial].append(ticket_data)
+        for detail_object in tickets:
+            self._logger.info(f"[bruin_repository] ticket_id: {detail_object['ticket_id']}")
+            serial = detail_object['ticket_detail']['detailValue'].upper()
+            all_serials[serial].append(detail_object)
         return all_serials
+
+    @staticmethod
+    def search_interfaces_in_details(ticket_details):
+        interfaces = set()
+        for detail_object in ticket_details:
+            for note in detail_object['ticket_notes']:
+                interface = INTERFACE_NOTE_REGEX.search(note['noteValue'])
+                if interface:
+                    interfaces.add(interface['interface_name'])
+        return list(interfaces)
+
+    @staticmethod
+    def transform_tickets_into_ticket_details(tickets: dict) -> list:
+        result = []
+        for ticket_id, ticket_details in tickets.items():
+            ticket_id = ticket_id
+            details = ticket_details['ticket_details']['ticketDetails']
+            notes = ticket_details['ticket_details']['ticketNotes']
+            ticket = ticket_details['ticket']
+            for detail in details:
+                serial_number = detail['detailValue']
+                notes_related_to_serial = [
+                    note
+                    for note in notes
+                    if serial_number in note['serviceNumber']
+                ]
+                result.append({
+                    'ticket_id': ticket_id,
+                    'ticket': ticket,
+                    'ticket_detail': detail,
+                    'ticket_notes': notes_related_to_serial,
+                })
+        return result
 
     def prepare_items_for_report(self, all_serials):
         items_for_report = []
 
-        for serial, tickets in all_serials.items():
-            self._logger.info(f"--> {serial} : {len(tickets)} tickets")
+        for serial, ticket_details in all_serials.items():
+            self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
             item_report = {
-                'customer': dict(),
-                'location': None,
+                'customer': {
+                    'clientID': ticket_details[0]['ticket']['clientID'],
+                    'clientName': ticket_details[0]['ticket']['clientName'],
+                },
+                'location': ticket_details[0]['ticket']['address'],
                 'serial_number': serial,
-                'number_of_tickets': len(tickets),
-                'bruin_tickets_id': [],
+                'number_of_tickets': len(ticket_details),
+                'bruin_tickets_id': set(
+                    detail_object['ticket_id']
+                    for detail_object in ticket_details
+                ),
+                'interfaces': self.search_interfaces_in_details(ticket_details)
             }
-            only_first_time = True
-            for ticket_data in tickets:
-                ticket = ticket_data['ticket']
-                if only_first_time:
-                    only_first_time = False
-                    item_report['customer'] = {
-                        'client_id': ticket['clientID'],
-                        'client_name': ticket['clientName']
-                    }
-                    item_report['location'] = ticket['address']
-                item_report['bruin_tickets_id'].append(ticket['ticketID'])
             items_for_report.append(item_report)
 
         return items_for_report
@@ -277,13 +309,34 @@ class BruinRepository:
         return ticket_details
 
     @staticmethod
-    def find_bandwidth_over_utilization_tickets(tickets, watermark):
+    def filter_tickets_with_serial_cached(ticket_details, list_cache_serials):
+        return [
+            detail_object
+            for detail_object in ticket_details
+            if detail_object['ticket_detail']['detailValue'] in list_cache_serials
+        ]
+
+    @staticmethod
+    def filter_bandwidth_notes(tickets_details):
         trouble = "Bandwidth Over Utilization"
-        ret = {}
-        for ticket_id, ticket_details in tickets.items():
-            if 'ticketNotes' in ticket_details['ticket_details']:
-                for ticket_note in ticket_details['ticket_details']['ticketNotes']:
-                    if "noteValue" in ticket_note and ticket_note["noteValue"] and \
-                            watermark in ticket_note["noteValue"] and trouble in ticket_note["noteValue"]:
-                        ret[ticket_id] = tickets[ticket_id]
+        ret = []
+        for detail_object in tickets_details:
+            bandwidth_notes = [
+                ticket_note
+                for ticket_note in detail_object['ticket_notes']
+                if ticket_note["noteValue"]
+                if '#*Automation Engine*#' in ticket_note["noteValue"]
+                if trouble in ticket_note["noteValue"]
+            ]
+
+            if bandwidth_notes:
+                ret.append({
+                    'ticket_id': detail_object['ticket_id'],
+                    'ticket': detail_object['ticket'],
+                    'ticket_detail': detail_object['ticket_detail'],
+                    'ticket_notes': bandwidth_notes,
+                })
         return ret
+
+
+

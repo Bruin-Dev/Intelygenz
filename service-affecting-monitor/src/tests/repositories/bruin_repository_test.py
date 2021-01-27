@@ -15,7 +15,6 @@ from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
 uuid_2_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
@@ -311,12 +310,14 @@ class TestBruinRepository:
         response = BruinRepository.find_detail_by_serial(ticket_mock, edge_serial_number)
         assert response is None
 
-    def find_bandwidth_over_utilization_tickets_test(self, service_affecting_monitor_reports,
-                                                     response_bruin_with_all_tickets):
-        response = BruinRepository.find_bandwidth_over_utilization_tickets(
-            response_bruin_with_all_tickets, service_affecting_monitor_reports.MAIN_WATERMARK)
+    def find_bandwidth_over_utilization_tickets_test(self,
+                                                     response_bruin_with_all_tickets,
+                                                     list_customer_cache_serials,
+                                                     filter_response_bruin_with_all_tickets):
+        response = BruinRepository.filter_bandwidth_notes(
+            response_bruin_with_all_tickets)
 
-        assert response == response_bruin_with_all_tickets
+        assert response == filter_response_bruin_with_all_tickets
 
     @pytest.mark.asyncio
     async def get_affecting_ticket_by_trouble_ok_test(self):
@@ -354,9 +355,9 @@ class TestBruinRepository:
             ]
         }
         ticket_list = {
-                        'body': [{'ticketID': 3521038, "createDate": "11/9/2020 2:15:36 AM"},
-                                 {'ticketID': 3521039, "createDate": "11/9/2020 3:15:36 AM"}],
-                        'status': 200
+            'body': [{'ticketID': 3521038, "createDate": "11/9/2020 2:15:36 AM"},
+                     {'ticketID': 3521039, "createDate": "11/9/2020 3:15:36 AM"}],
+            'status': 200
         }
         ticket_details = {
             'body': affecting_ticket_mock,
@@ -482,7 +483,7 @@ class TestBruinRepository:
 
         assert response == expected_response
 
-        service_affecting_monitor_reports._notifications_repository.send_slack_message.\
+        service_affecting_monitor_reports._notifications_repository.send_slack_message. \
             assert_awaited_once_with(slack_msg)
 
     @pytest.mark.asyncio
@@ -654,7 +655,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def map_tickets_with_serial_numbers_test(self, service_affecting_monitor_reports,
                                                    response_bruin_with_all_tickets, response_mapped_tickets):
-        response = service_affecting_monitor_reports._bruin_repository.map_tickets_with_serial_numbers(
+        response = service_affecting_monitor_reports._bruin_repository.group_by_serial_tickets(
             response_bruin_with_all_tickets)
 
         assert response == response_mapped_tickets
@@ -666,3 +667,21 @@ class TestBruinRepository:
             response_mapped_tickets)
 
         assert response == response_prepare_items_for_report
+
+    @pytest.mark.asyncio
+    async def filter_tickets_with_serial_cached_test(self, service_affecting_monitor_reports,
+                                                     response_bruin_one_tickets):
+        response = service_affecting_monitor_reports._bruin_repository.filter_tickets_with_serial_cached(
+            response_bruin_one_tickets, ['VC05200085762']
+            )
+
+        assert response == response_bruin_one_tickets
+
+    @pytest.mark.asyncio
+    async def filter_tickets_with_serial_cached_without_details_test(self, service_affecting_monitor_reports,
+                                                                     response_bruin_one_tickets_no_details):
+        response = service_affecting_monitor_reports._bruin_repository.filter_bandwidth_notes(
+            response_bruin_one_tickets_no_details
+        )
+
+        assert response == {}

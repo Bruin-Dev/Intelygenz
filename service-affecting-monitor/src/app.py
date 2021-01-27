@@ -57,7 +57,7 @@ class Container:
                                                                   self._customer_cache_repository)
         self._service_affecting_monitor_reports = ServiceAffectingMonitorReports(
             self._event_bus, self._logger, self._scheduler, config, self._template_renderer, self._bruin_repository,
-            self._notifications_repository)
+            self._notifications_repository, self._customer_cache_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()

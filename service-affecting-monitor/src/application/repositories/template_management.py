@@ -72,6 +72,7 @@ class TemplateRenderer:
                 "__LOCATION__": f"{'<br>'.join(list(value['location'].values()))}",
                 "__NUMBER_OF_TICKETS__": f"{value['number_of_tickets']}",
                 "__BRUIN_TICKETS_ID__": f"{',<br>'.join([str(i) for i in value['bruin_tickets_id']])}",
+                "__INTERFACES__": f"{',<br>'.join([str(i) for i in value['interfaces']])}",
             })
         template_vars["__OVERVIEW_ROWS__"] = rows
         email_html = templ.render(**template_vars)

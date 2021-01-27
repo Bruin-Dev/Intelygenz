@@ -1742,14 +1742,15 @@ class TestServiceAffectingMonitor:
         structure_link_1 = {
             'edge_status': {
                 "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602,
-                "name": "TEST",
+                "enterpriseId": 137,
+                "edgeId": 1602,
+                "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
                 "enterprise_name": "Titan America|85940|"},
             'link_status': {
-                'interface': 'GE1'
+                'interface': 'GE1',
+                'displayName': 'GE1'
             },
             'link_metrics': {
                 'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
@@ -1764,11 +1765,6 @@ class TestServiceAffectingMonitor:
             {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
              'contact_info': "some_contact_info", **structure_link_1}]
 
-        bandwidth_metrics = {
-            'tx_throughput': 88,
-            'tx_bandwidth': link_1_bandwidth_bps_tx,
-            'tx_threshold': 80,
-        }
 
         logger = Mock()
         metrics_repository = Mock()
@@ -1786,8 +1782,6 @@ class TestServiceAffectingMonitor:
             return_value=metrics_with_cache_and_contact_info_return)
         service_affecting_monitor._is_rep_services_client_id = Mock(return_value=True)
 
-        ticket_dict = {'ticket': 'some ticket details'}
-        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock(return_value=ticket_dict)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._bandwidth_check()
@@ -1796,15 +1790,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
             structure_link_return)
-        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_called_once_with(
-            link_info=metrics_with_cache_and_contact_info_return[0],
-            bandwidth_metrics=bandwidth_metrics,
-        )
-        service_affecting_monitor._notify_trouble.assert_awaited_with(
-            link_info=metrics_with_cache_and_contact_info_return[0],
-            trouble='Bandwidth Over Utilization',
-            ticket_dict=ticket_dict,
-        )
+        service_affecting_monitor._notify_trouble.assert_awaited()
 
     @pytest.mark.asyncio
     async def bandwidth_check_with_link_and_rx_values_above_threshold_test(self):
@@ -1853,14 +1839,15 @@ class TestServiceAffectingMonitor:
         structure_link_1 = {
             'edge_status': {
                 "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602,
-                "name": "TEST",
+                "enterpriseId": 137,
+                "edgeId": 1602,
+                "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
                 "enterprise_name": "Titan America|85940|"},
             'link_status': {
-                'interface': 'GE1'
+                'interface': 'GE1',
+                'displayName': 'GE1'
             },
             'link_metrics': {
                 'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
@@ -1875,11 +1862,6 @@ class TestServiceAffectingMonitor:
             {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
              'contact_info': "some_contact_info", **structure_link_1}]
 
-        bandwidth_metrics = {
-            'rx_throughput': 88,
-            'rx_bandwidth': link_1_bandwidth_bps_rx,
-            'rx_threshold': 80,
-        }
 
         logger = Mock()
         metrics_repository = Mock()
@@ -1897,8 +1879,6 @@ class TestServiceAffectingMonitor:
             return_value=metrics_with_cache_and_contact_info_return)
         service_affecting_monitor._is_rep_services_client_id = Mock(return_value=True)
 
-        ticket_dict = {'ticket': 'some ticket details'}
-        service_affecting_monitor._compose_bandwidth_ticket_dict = Mock(return_value=ticket_dict)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._bandwidth_check()
@@ -1907,15 +1887,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._structure_links_metrics.assert_called_with(links_metric_body)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_with(
             structure_link_return)
-        service_affecting_monitor._compose_bandwidth_ticket_dict.assert_called_once_with(
-            link_info=metrics_with_cache_and_contact_info_return[0],
-            bandwidth_metrics=bandwidth_metrics,
-        )
-        service_affecting_monitor._notify_trouble.assert_awaited_with(
-            link_info=metrics_with_cache_and_contact_info_return[0],
-            trouble='Bandwidth Over Utilization',
-            ticket_dict=ticket_dict,
-        )
+        service_affecting_monitor._notify_trouble.assert_awaited()
 
     @pytest.mark.asyncio
     async def bandwidth_check_with_link_and_rx_plus_tx_values_above_threshold_test(self):
