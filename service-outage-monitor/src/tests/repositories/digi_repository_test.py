@@ -39,7 +39,7 @@ class TestDiGiRepository:
             'request_id': uuid_,
             'body': {
                 'velo_serial': service_number,
-                'ticket': ticket_id,
+                'ticket': str(ticket_id),
                 'MAC': logical_id
             },
         }
@@ -72,7 +72,7 @@ class TestDiGiRepository:
             'request_id': uuid_,
             'body': {
                 'velo_serial': service_number,
-                'ticket': ticket_id,
+                'ticket': str(ticket_id),
                 'MAC': logical_id
             },
         }
@@ -110,7 +110,7 @@ class TestDiGiRepository:
             'request_id': uuid_,
             'body': {
                 'velo_serial': service_number,
-                'ticket': ticket_id,
+                'ticket': str(ticket_id),
                 'MAC': logical_id
             },
         }
