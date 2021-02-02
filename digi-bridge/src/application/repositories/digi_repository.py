@@ -23,5 +23,5 @@ class DiGiRepository:
                                 next_run_time=next_run_time, replace_existing=True,
                                 id='login')
 
-    async def reboot(self, payload):
-        return await self._digi_client.reboot(payload)
+    async def reboot(self, request_id, payload):
+        return await self._digi_client.reboot(request_id, payload)

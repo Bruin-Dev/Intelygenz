@@ -44,7 +44,7 @@ class TestDiGiReboot:
 
         await digi_reboot.digi_reboot(msg)
 
-        digi_repository.reboot.assert_awaited_once_with(msg['body'])
+        digi_repository.reboot.assert_awaited_once_with(msg['request_id'], msg['body'])
         event_bus.publish_message.assert_awaited_once_with(msg['response_topic'], dict(request_id=msg['request_id'],
                                                                                        body=reboot_return['body'],
                                                                                        status=reboot_return['status']))

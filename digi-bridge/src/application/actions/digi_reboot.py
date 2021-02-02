@@ -38,7 +38,7 @@ class DiGiReboot:
 
         self._logger.info(f'Attempting to reboot DiGi client with payload of: {json.dumps(payload)}')
 
-        results = await self._digi_repository.reboot(payload)
+        results = await self._digi_repository.reboot(request_id, payload)
 
         response["body"] = results['body']
         response["status"] = results['status']

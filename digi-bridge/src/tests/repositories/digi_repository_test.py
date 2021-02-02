@@ -79,9 +79,11 @@ class TestDiGiRepository:
         digi_client = Mock()
         digi_client.reboot = CoroutineMock()
 
+        request_id = 'test_id'
+
         payload = {"velo_serial": 123, "ticket": 321}
         digi_repository = DiGiRepository(config, logger, scheduler, digi_client)
 
-        reboot_return = await digi_repository.reboot(payload)
+        reboot_return = await digi_repository.reboot(request_id, payload)
 
-        digi_client.reboot.assert_awaited_once_with(payload)
+        digi_client.reboot.assert_awaited_once_with(request_id, payload)
