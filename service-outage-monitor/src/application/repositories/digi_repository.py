@@ -45,3 +45,26 @@ class DiGiRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    def get_digi_links(self, logical_id_list):
+        digi_headers = ['00:04:2d', '00:27:04']
+        digi_links = []
+        for header in digi_headers:
+            digi_link = [link for link in logical_id_list if header in link["logical_id"]]
+            digi_links = digi_links + digi_link
+
+        return digi_links
+
+    def get_interface_name_from_digi_note(self, digi_note):
+        if digi_note and digi_note.get('noteValue'):
+            interface_name = None
+            lines = digi_note.get('noteValue').splitlines()
+            for line in lines:
+                if line and len(line) > 0 and 'Interface: ' in line:
+                    interface_name = ''.join(ch for ch in line)
+                    break
+            if interface_name is None or interface_name.strip() == '':
+                return ''
+            return interface_name.strip().replace('Interface: ', '')
+
+        return ''

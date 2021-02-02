@@ -355,6 +355,47 @@ class BruinRepository:
 
         return response
 
+    async def change_detail_work_queue(self, serial_number, ticket_id, ticket_detail_id, task_result):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "service_number": serial_number,
+                "ticket_id": ticket_id,
+                "detail_id": ticket_detail_id,
+                "queue_name": task_result
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Changing task result for ticket {ticket_id} and detail id {ticket_detail_id} for device '
+                f'{serial_number} to {task_result}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
+            self._logger.info(f'Ticket {ticket_id} task result changed to  {task_result}')
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when changing task result for ticket {ticket_id}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while changing task result for ticket {ticket_id} in '
+                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
@@ -452,3 +493,13 @@ class BruinRepository:
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
         return await self.append_note_to_ticket(ticket_id, digi_reboot_note, service_numbers=[serial_number])
+
+    async def append_task_result_change(self, ticket_id, task_result):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        task_result_note = os.linesep.join([
+            f'#*Automation Engine*#',
+            f'Task result change',
+            f'Changing task result to: {task_result}',
+            f'TimeStamp: {current_datetime_tz_aware}'
+        ])
+        return await self.append_note_to_ticket(ticket_id, task_result_note)

@@ -302,6 +302,13 @@ class OutageMonitor:
         except StopIteration:
             return fallback
 
+    def _find_note(self, ticket_notes, watermark):
+        return self._get_first_element_matching(
+            iterable=ticket_notes,
+            condition=lambda note: watermark in note.get('noteValue'),
+            fallback=None
+        )
+
     def _get_last_element_matching(self, iterable, condition: Callable, fallback=None):
         return self._get_first_element_matching(reversed(iterable), condition, fallback)
 
@@ -376,6 +383,9 @@ class OutageMonitor:
                             f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
                             f'(ID = {ticket_creation_response_body}). Skipping outage ticket creation for this edge...'
                         )
+                        await self._check_for_failed_digi_reboot(ticket_creation_response_body,
+                                                                 logical_id_list, serial_number, edge_status,
+                                                                 edge_full_id)
                     elif ticket_creation_response_status == 471:
                         self._logger.info(
                             f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
@@ -563,11 +573,8 @@ class OutageMonitor:
 
     async def _check_for_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, edge_full_id):
         edge_identifier = EdgeIdentifier(**edge_full_id)
-        digi_headers = ['00:04:2d', '00:27:04']
-        digi_links = []
-        for header in digi_headers:
-            digi_link = [link for link in logical_id_list if header in link["logical_id"]]
-            digi_links = digi_links + digi_link
+        self._logger.info(f'Checking edge {edge_identifier} for DiGi Links')
+        digi_links = self._digi_repository.get_digi_links(logical_id_list)
 
         for digi_link in digi_links:
             link_status = next((link for link in edge_status['links']
@@ -575,6 +582,8 @@ class OutageMonitor:
             if link_status is not None and self._outage_repository.is_faulty_link(link_status['linkState']):
                 reboot = await self._digi_repository.reboot_link(serial_number, ticket_id, digi_link['logical_id'])
                 if reboot['status'] in range(200, 300):
+                    self._logger.info(f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
+                                      f'in edge {edge_identifier}')
                     await self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
                                                                          digi_link['interface_name'])
                     slack_message = (
@@ -582,3 +591,48 @@ class OutageMonitor:
                         f'details at https://app.bruin.com/t/{ticket_id}.'
                     )
                     await self._notifications_repository.send_slack_message(slack_message)
+
+    async def _check_for_failed_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, edge_full_id):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        self._logger.info(f'Checking edge {edge_identifier} for DiGi Links')
+        digi_links = self._digi_repository.get_digi_links(logical_id_list)
+
+        for digi_link in digi_links:
+            link_status = next((link for link in edge_status['links']
+                                if link['interface'] == digi_link['interface_name']), None)
+            if link_status is not None and self._outage_repository.is_faulty_link(link_status['linkState']):
+
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+                ticket_details_response_body = ticket_details_response['body']
+                ticket_details_response_status = ticket_details_response['status']
+                if ticket_details_response_status not in range(200, 300):
+                    return
+
+                details_from_ticket = ticket_details_response_body['ticketDetails']
+                detail_for_ticket_resolution = self._get_first_element_matching(
+                    details_from_ticket,
+                    lambda detail: detail['detailValue'] == serial_number,
+                )
+                ticket_detail_id = detail_for_ticket_resolution['detailID']
+
+                notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+                relevant_notes = [note for note in notes_from_outage_ticket if serial_number in note['serviceNumber']]
+                digi_note = self._find_note(relevant_notes, 'DiGi')
+
+                if digi_note is None:
+                    self._logger.info(f'No DiGi note was found for ticket {ticket_id}')
+
+                task_result = "Wireless Repair Intervention Needed"
+                task_result_note = self._find_note(relevant_notes, 'Wireless Repair Intervention Needed')
+
+                if task_result_note is None:
+                    self._logger.info(f'Task results has already been changed to "{task_result}"')
+
+                digi_note_interface_name = self._digi_repository.get_interface_name_from_digi_note(digi_note)
+
+                if digi_note_interface_name == link_status['interface']:
+                    self._logger.info(f'Changing task results of ticket_id {ticket_id} to "{task_result}"')
+                    await self._bruin_repository.change_detail_work_queue(serial_number, ticket_id, ticket_detail_id,
+                                                                          task_result)
+                    await self._bruin_repository.append_task_result_change(ticket_id, task_result)
+                    return
