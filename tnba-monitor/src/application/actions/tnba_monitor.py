@@ -12,8 +12,7 @@ from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
 TNBA_NOTE_APPENDED_SUCCESS_MSG = (
-    'TNBA note appended to ticket {ticket_id} and detail {detail_id} (serial: {serial_number}) '
-    'with prediction: {prediction}. Details at app.bruin.com/t/{ticket_id}'
+    '{notes_count} TNBA note(s) were appended to ticket {ticket_id}: app.bruin.com/t/{ticket_id}'
 )
 
 
@@ -32,11 +31,12 @@ class TNBAMonitor:
         self._prediction_repository = prediction_repository
         self._notifications_repository = notifications_repository
 
-        self.__reset_customer_cache()
+        self.__reset_state()
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
 
-    def __reset_customer_cache(self):
-        self._customer_cache = []
+    def __reset_state(self):
+        self._customer_cache_by_serial = {}
+        self._tnba_notes_to_append = []
 
     async def start_tnba_automated_process(self, exec_on_start=False):
         self._logger.info('Scheduling TNBA automated process job...')
@@ -56,7 +56,7 @@ class TNBAMonitor:
             self._logger.info(f'Skipping start of TNBA automated process job. Reason: {conflict}')
 
     async def _run_tickets_polling(self):
-        self.__reset_customer_cache()
+        self.__reset_state()
 
         self._logger.info('Starting TNBA process...')
 
@@ -64,41 +64,73 @@ class TNBAMonitor:
         if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
             return
 
-        self._customer_cache = customer_cache_response['body']
+        customer_cache = customer_cache_response['body']
+        self._customer_cache_by_serial = {
+            cached_info['serial_number']: cached_info
+            for cached_info in customer_cache
+        }
 
         start_time = time.time()
 
         self._logger.info('Getting all open tickets for all customers...')
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
+
         self._logger.info(
             f'Got {len(open_tickets)} open tickets for all customers. '
             f'Filtering them (and their details) to get only the ones under the device list')
         relevant_open_tickets = self._filter_tickets_and_details_related_to_edges_under_monitoring(open_tickets)
+
         self._logger.info(
             f'Got {len(relevant_open_tickets)} relevant tickets for all customers. '
             f'Cleaning them up to exclude all invalid notes...'
         )
-        relevant_open_tickets = self._filter_invalid_notes_in_tickets(relevant_open_tickets)
+        relevant_open_tickets = self._filter_irrelevant_notes_in_tickets(relevant_open_tickets)
 
-        self._logger.info('Splitting tickets in tickets with and without TNBA notes...')
-        tickets_with_tnba, tickets_without_tnba = self._distinguish_tickets_with_and_without_tnba(relevant_open_tickets)
+        self._logger.info('Getting T7 predictions for all relevant open tickets...')
+        predictions_by_ticket_id = await self._get_predictions_by_ticket_id(relevant_open_tickets)
 
-        self._logger.info(f'Tickets split successfully. '
-                          f'Tickets with TNBA: {len(tickets_with_tnba)}. '
-                          f'Tickets without TNBA: {len(tickets_without_tnba)}. '
-                          f'Processing both ticket sets...')
-        await asyncio.gather(
-            self._process_tickets_with_tnba(tickets_with_tnba),
-            self._process_tickets_without_tnba(tickets_without_tnba),
+        self._logger.info('Removing erroneous T7 predictions...')
+        predictions_by_ticket_id = self._remove_erroneous_predictions(predictions_by_ticket_id)
+
+        self._logger.info('Splitting ticket details in ticket details with and without TNBA notes...')
+        ticket_details_with_tnba, ticket_details_without_tnba = self._distinguish_ticket_details_with_and_without_tnba(
+            relevant_open_tickets
         )
 
+        self._logger.info('Mapping all ticket details with their predictions...')
+        ticket_details_with_tnba = self._map_ticket_details_with_predictions(
+            ticket_details_with_tnba, predictions_by_ticket_id
+        )
+        ticket_details_without_tnba = self._map_ticket_details_with_predictions(
+            ticket_details_without_tnba, predictions_by_ticket_id
+        )
+
+        self._logger.info(f'Ticket details split and mapped with predictions successfully. '
+                          f'Ticket details with TNBA: {len(ticket_details_with_tnba)}. '
+                          f'Ticket details without TNBA: {len(ticket_details_without_tnba)}. '
+                          f'Processing both ticket details sets...')
+        await asyncio.gather(
+            self._process_ticket_details_with_tnba(ticket_details_with_tnba),
+            self._process_ticket_details_without_tnba(ticket_details_without_tnba),
+        )
+        self._logger.info('All ticket details were processed.')
+
+        if not self._tnba_notes_to_append:
+            self._logger.info('No TNBA notes for append were built for any detail processed.')
+        else:
+            self._logger.info(f'{len(self._tnba_notes_to_append)} TNBA notes were built for append.')
+            await self._append_tnba_notes()
+
         end_time = time.time()
-        self._logger.info(f'TNBA process finished! Took {(end_time - start_time) // 60} minutes.')
+        self._logger.info(f'TNBA process finished! Took {round((end_time - start_time) / 60, 2)} minutes.')
 
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []
 
-        bruin_clients_ids: Set[int] = set(elem['bruin_client_info']['client_id'] for elem in self._customer_cache)
+        bruin_clients_ids: Set[int] = set(
+            elem['bruin_client_info']['client_id']
+            for elem in list(self._customer_cache_by_serial.values())
+        )
         tasks = [
             self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
@@ -164,7 +196,7 @@ class TNBAMonitor:
             )
 
     def _filter_tickets_and_details_related_to_edges_under_monitoring(self, tickets):
-        serials_under_monitoring: Set[str] = set(elem['serial_number'] for elem in self._customer_cache)
+        serials_under_monitoring: Set[str] = set(self._customer_cache_by_serial.keys())
 
         relevant_tickets = []
         for ticket in tickets:
@@ -188,7 +220,9 @@ class TNBAMonitor:
 
         return relevant_tickets
 
-    def _filter_invalid_notes_in_tickets(self, tickets):
+    def _filter_irrelevant_notes_in_tickets(self, tickets):
+        serials_under_monitoring: Set[str] = set(self._customer_cache_by_serial.keys())
+
         sanitized_tickets = []
 
         for ticket in tickets:
@@ -198,6 +232,15 @@ class TNBAMonitor:
                 if note['noteValue'] is not None
             ]
 
+            for index, note in enumerate(relevant_notes):
+                service_numbers_in_note = set(note['serviceNumber'])
+                relevant_service_numbers = serials_under_monitoring & service_numbers_in_note
+
+                if not relevant_service_numbers:
+                    del relevant_notes[index]
+                else:
+                    relevant_notes[index]['serviceNumber'] = list(relevant_service_numbers)
+
             sanitized_tickets.append({
                 'ticket_id': ticket['ticket_id'],
                 'ticket_details': ticket['ticket_details'],
@@ -206,142 +249,146 @@ class TNBAMonitor:
 
         return sanitized_tickets
 
-    def _distinguish_tickets_with_and_without_tnba(self, tickets) -> tuple:
-        tickets_with_tnba = [
-            ticket
-            for ticket in tickets
-            if self._ticket_repository.has_tnba_note(ticket['ticket_notes'])
-        ]
-
-        tickets_without_tnba = [
-            ticket
-            for ticket in tickets
-            if ticket not in tickets_with_tnba
-        ]
-
-        return tickets_with_tnba, tickets_without_tnba
-
-    async def _process_tickets_without_tnba(self, tickets: List[dict]):
-        self._logger.info('Processing tickets without TNBA notes...')
+    async def _get_predictions_by_ticket_id(self, tickets: list) -> dict:
+        result = {}
 
         for ticket in tickets:
             ticket_id = ticket["ticket_id"]
-            self._logger.info(f'Processing ticket {ticket_id} without TNBA notes...')
+            self._logger.info(f'Claiming T7 predictions for ticket {ticket_id}...')
 
             task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
-            task_history_response_body = task_history_response['body']
-            task_history_response_status = task_history_response['status']
-            if task_history_response_status not in range(200, 300):
-                self._logger.error(
-                    f'Error on _process_tickets_without_tnba getting ticket_task_history for ticket_id[{ticket_id}]'
-                )
+            if task_history_response['status'] not in range(200, 300):
                 continue
 
-            ticket_rows_with_asset = [tr for tr in task_history_response_body if
-                                      tr.get('Asset') and tr['Asset'] is not None]
-
-            if len(ticket_rows_with_asset) == 0:
-                self._logger.info(f'Skipped get_prediction for ticket_id[{ticket_id}] without assets...')
+            task_history: list = task_history_response['body']
+            any_ticket_row_has_asset = any(row.get('Asset') for row in task_history)
+            if not any_ticket_row_has_asset:
+                self._logger.info(f"Task history of ticket {ticket_id} doesn't have any asset. Skipping...")
                 continue
 
-            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history_response_body)
-            t7_prediction_response_body = t7_prediction_response['body']
-            t7_prediction_response_status = t7_prediction_response['status']
-            if t7_prediction_response_status not in range(200, 300):
+            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history)
+            if t7_prediction_response['status'] not in range(200, 300):
                 continue
 
-            tnba_notes: List[dict] = []
-            slack_messages: List[str] = []
+            ticket_predictions: list = t7_prediction_response['body']
+            if not ticket_predictions:
+                self._logger.info(f"There are no predictions for ticket {ticket_id}. Skipping...")
+                continue
 
-            for ticket_detail in ticket['ticket_details']:
-                ticket_detail_response = await self._process_ticket_detail_without_tnba(
-                    ticket_id,
-                    ticket_detail,
-                    t7_prediction_response_body
-                )
+            result[ticket_id] = ticket_predictions
+            self._logger.info(f'T7 predictions found for ticket {ticket_id}!')
 
-                if ticket_detail_response['tnba_note']:
-                    tnba_notes.append(ticket_detail_response['tnba_note'])
+        return result
 
-                if ticket_detail_response['slack_message']:
-                    slack_messages.append(ticket_detail_response['slack_message'])
+    def _remove_erroneous_predictions(self, predictions_by_ticket_id: dict) -> dict:
+        result = {}
 
-            if not tnba_notes:
-                self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
-            else:
-                self._logger.info(f'Appending TNBA notes to ticket {ticket_id}...')
-                append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(
-                    ticket_id, tnba_notes
-                )
-                append_notes_response_status = append_notes_response['status']
-                if append_notes_response_status not in range(200, 300):
+        for ticket_id, prediction_objects in predictions_by_ticket_id.items():
+            valid_predictions = []
+
+            for prediction_obj in prediction_objects:
+                serial_number = prediction_obj['assetId']
+
+                if 'error' in prediction_obj.keys():
+                    self._logger.info(
+                        f"Prediction for serial {serial_number} in ticket {ticket_id} was found but it contains an "
+                        f"error from T7 API -> {prediction_obj['error']}"
+                    )
                     continue
 
-                slack_message = os.linesep.join(slack_messages)
-                await self._notifications_repository.send_slack_message(slack_message)
+                valid_predictions.append(prediction_obj)
 
-            self._logger.info(f'Finished processing ticket without TNBA notes. ID: {ticket_id}')
+            if not valid_predictions:
+                self._logger.info(f"All predictions in ticket {ticket_id} were erroneous. Skipping ticket...")
+                continue
 
-        self._logger.info('Finished processing tickets without TNBA notes!')
+            result[ticket_id] = valid_predictions
 
-    async def _process_ticket_detail_without_tnba(
-            self,
-            ticket_id: int,
-            ticket_detail: dict,
-            ticket_predictions: list
-    ):
+        return result
 
-        ticket_detail_id = ticket_detail['detailID']
-        self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
+    def _distinguish_ticket_details_with_and_without_tnba(self, tickets: list) -> tuple:
+        ticket_details_with_tnba = []
+        ticket_details_without_tnba = []
 
-        serial_number = ticket_detail['detailValue']
+        for ticket in tickets:
+            ticket_id = ticket['ticket_id']
+            ticket_details = ticket['ticket_details']
+            ticket_notes = ticket['ticket_notes']
 
-        response = {
-            'tnba_note': None,
-            'slack_message': None,
-            'available_options': {
-                'asset': serial_number,
-                'available_options': None,
-            },
-            'suggested_notes': {
-                'asset': serial_number,
-                'suggested_note': None,
-                'details': None,
-            }
-        }
+            for detail in ticket_details:
+                serial_number = detail['detailValue']
 
-        self._logger.info(
-            f'Seeking predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} '
-            f'in the response received from T7 API...'
-        )
+                notes_related_to_serial = [
+                    note
+                    for note in ticket_notes
+                    if serial_number in note['serviceNumber']
+                ]
 
-        prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
-            ticket_predictions, serial_number
-        )
+                detail_object = {
+                    'ticket_id': ticket_id,
+                    'ticket_detail': detail,
+                    'ticket_notes': notes_related_to_serial,
+                }
 
-        if not prediction_object_for_serial:
-            msg = (
-                f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
-                f"{serial_number}!"
+                if self._ticket_repository.has_tnba_note(notes_related_to_serial):
+                    ticket_details_with_tnba.append(detail_object)
+                else:
+                    ticket_details_without_tnba.append(detail_object)
+
+        return ticket_details_with_tnba, ticket_details_without_tnba
+
+    def _map_ticket_details_with_predictions(self, ticket_details: list, predictions_by_ticket_id: dict) -> list:
+        result = []
+
+        for detail_object in ticket_details:
+            ticket_id = detail_object['ticket_id']
+            serial_number = detail_object['ticket_detail']['detailValue']
+            predictions_for_ticket: list = predictions_by_ticket_id.get(ticket_id)
+
+            if not predictions_for_ticket:
+                self._logger.info(
+                    f'Ticket {ticket_id} does not have any prediction associated. Skipping serial '
+                    f'{serial_number}...'
+                )
+                continue
+
+            prediction_object_related_to_serial = self._prediction_repository.find_prediction_object_by_serial(
+                predictions=predictions_for_ticket,
+                serial_number=serial_number,
             )
-            self._logger.info(msg)
-            response['suggested_notes']['details'] = msg
-            return response
+            if not prediction_object_related_to_serial:
+                self._logger.info(
+                    f'No predictions were found for ticket {ticket_id} and serial {serial_number}. Skipping...'
+                )
+                continue
 
-        elif 'error' in prediction_object_for_serial.keys():
-            msg = (
-                f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
-                f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
-            )
-            self._logger.info(msg)
-            await self._notifications_repository.send_slack_message(msg)
-            response['suggested_notes']['details'] = msg
-            return response
+            predictions: list = prediction_object_related_to_serial['predictions']
 
-        self._logger.info(
-            f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
-            f'{prediction_object_for_serial}'
-        )
+            result.append({
+                **detail_object,
+                'ticket_detail_predictions': predictions,
+            })
+
+        return result
+
+    async def _process_ticket_details_without_tnba(self, ticket_details: List[dict]):
+        self._logger.info('Processing ticket details without TNBA notes...')
+
+        tasks = [
+            self._process_ticket_detail_without_tnba(detail_object)
+            for detail_object in ticket_details
+        ]
+        await asyncio.gather(*tasks)
+
+        self._logger.info('Finished processing ticket details without TNBA notes!')
+
+    async def _process_ticket_detail_without_tnba(self, detail_object: dict):
+        ticket_id = detail_object['ticket_id']
+        ticket_detail_id = detail_object['ticket_detail']['detailID']
+        serial_number = detail_object['ticket_detail']['detailValue']
+        predictions = detail_object['ticket_detail_predictions']
+
+        self._logger.info(f'Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}...')
 
         next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
             ticket_id, ticket_detail_id, serial_number
@@ -349,17 +396,13 @@ class TNBAMonitor:
         next_results_response_body = next_results_response['body']
         next_results_response_status = next_results_response['status']
         if next_results_response_status not in range(200, 300):
-            msg = f'Error getting next results ticket[{ticket_id}] detail[{ticket_detail_id}] serial [{serial_number}]'
-            response['suggested_notes']['details'] = msg
-            return response
+            return
 
         self._logger.info(
             f'Filtering predictions available in next results for ticket {ticket_id}, '
             f'detail {ticket_detail_id} and serial {serial_number}...'
         )
-        predictions: list = prediction_object_for_serial['predictions']
         next_results: list = next_results_response_body['nextResults']
-        response['available_options']['available_options'] = [result['resultName'].strip() for result in next_results]
 
         relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
             predictions, next_results
@@ -371,8 +414,7 @@ class TNBAMonitor:
                 f"detail {ticket_detail_id} and serial {serial_number}!"
             )
             self._logger.info(msg)
-            response['suggested_notes']['details'] = msg
-            return response
+            return
 
         self._logger.info(
             f'Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} '
@@ -388,118 +430,43 @@ class TNBAMonitor:
         tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
 
         if self._config.ENVIRONMENT == 'production':
-            response['tnba_note'] = {
+            self._tnba_notes_to_append.append({
+                'ticket_id': ticket_id,
                 'text': tnba_note,
                 'detail_id': ticket_detail_id,
                 'service_number': serial_number,
-            }
-            response['slack_message'] = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
-                ticket_id=ticket_id, detail_id=ticket_detail_id,
-                serial_number=serial_number, prediction=best_prediction['name'],
-            )
-            response['suggested_notes']['suggested_note'] = tnba_note
-            return response
+            })
         elif self._config.ENVIRONMENT == 'dev':
             tnba_message = (
                 f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
                 f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
             )
-            response['suggested_notes']['suggested_note'] = tnba_note
             self._logger.info(tnba_message)
             await self._notifications_repository.send_slack_message(tnba_message)
 
-        self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
-        return response
+        self._logger.info(
+            f'Finished processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}!'
+        )
 
-    async def _process_tickets_with_tnba(self, tickets: List[dict]):
-        self._logger.info('Processing tickets with TNBA notes...')
+    async def _process_ticket_details_with_tnba(self, ticket_details: List[dict]):
+        self._logger.info('Processing ticket details with TNBA notes...')
 
-        for ticket in tickets:
-            ticket_id = ticket["ticket_id"]
-            self._logger.info(f'Processing ticket {ticket_id} with TNBA notes...')
+        tasks = [
+            self._process_ticket_detail_with_tnba(detail_object)
+            for detail_object in ticket_details
+        ]
+        await asyncio.gather(*tasks)
 
-            task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
-            task_history_response_body = task_history_response['body']
-            task_history_response_status = task_history_response['status']
-            if task_history_response_status not in range(200, 300):
-                self._logger.error(
-                    f'Error on _process_tickets_with_tnba getting ticket_task_history for ticket_id[{ticket_id}]'
-                )
-                continue
+        self._logger.info('Finished processing ticket details with TNBA notes!')
 
-            ticket_rows_with_asset = [tr for tr in task_history_response_body if
-                                      tr.get('Asset') and tr['Asset'] is not None]
+    async def _process_ticket_detail_with_tnba(self, detail_object: dict):
+        ticket_id = detail_object['ticket_id']
+        ticket_detail_id = detail_object['ticket_detail']['detailID']
+        ticket_notes = detail_object['ticket_notes']
+        serial_number = detail_object['ticket_detail']['detailValue']
+        predictions = detail_object['ticket_detail_predictions']
 
-            if len(ticket_rows_with_asset) == 0:
-                self._logger.info(f'Skipped get_prediction for ticket_id[{ticket_id}] without assets...')
-                continue
-
-            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history_response_body)
-            t7_prediction_response_body = t7_prediction_response['body']
-            t7_prediction_response_status = t7_prediction_response['status']
-            if t7_prediction_response_status not in range(200, 300):
-                continue
-
-            tnba_notes: List[dict] = []
-            slack_messages: List[str] = []
-            ticket_notes = ticket['ticket_notes']
-
-            for ticket_detail in ticket['ticket_details']:
-                ticket_detail_response = await self._process_ticket_detail_with_tnba(
-                    ticket_id,
-                    ticket_detail,
-                    t7_prediction_response_body,
-                    ticket_notes
-                )
-                if ticket_detail_response['tnba_note']:
-                    tnba_notes.append(ticket_detail_response['tnba_note'])
-
-                if ticket_detail_response['slack_message']:
-                    slack_messages.append(ticket_detail_response['slack_message'])
-
-            if not tnba_notes:
-                self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
-            else:
-                self._logger.info(f'Appending TNBA notes to ticket {ticket_id}...')
-                append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(
-                    ticket_id, tnba_notes
-                )
-                append_notes_response_status = append_notes_response['status']
-                if append_notes_response_status not in range(200, 300):
-                    continue
-
-                slack_message = os.linesep.join(slack_messages)
-                await self._notifications_repository.send_slack_message(slack_message)
-
-            self._logger.info(f'Finished processing ticket with TNBA notes. ID: {ticket_id}')
-
-        self._logger.info('Finished processing tickets with TNBA notes!')
-
-    async def _process_ticket_detail_with_tnba(
-            self,
-            ticket_id: int,
-            ticket_detail: dict,
-            ticket_predictions: list,
-            ticket_notes: list,
-    ):
-        ticket_detail_id = ticket_detail['detailID']
-        self._logger.info(f'Processing detail {ticket_detail_id} of ticket {ticket_id}...')
-
-        serial_number = ticket_detail['detailValue']
-
-        response = {
-            'tnba_note': None,
-            'slack_message': None,
-            'available_options': {
-                'asset': serial_number,
-                'available_options': None,
-            },
-            'suggested_notes': {
-                'asset': serial_number,
-                'suggested_note': None,
-                'details': None,
-            }
-        }
+        self._logger.info(f'Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}...')
 
         self._logger.info(
             f'Looking for the last TNBA note appended to ticket {ticket_id} and detail {ticket_detail_id}...'
@@ -514,41 +481,7 @@ class TNBAMonitor:
                 f'Skipping detail...'
             )
             self._logger.info(msg)
-            response['suggested_notes']['details'] = msg
-            return response
-
-        self._logger.info(
-            f'Seeking predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} '
-            f'in the response received from T7 API...'
-        )
-
-        prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
-            ticket_predictions, serial_number
-        )
-
-        if not prediction_object_for_serial:
-            msg = (
-                f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
-                f"{serial_number}!"
-            )
-            self._logger.info(msg)
-            response['suggested_notes']['details'] = msg
-            return response
-
-        elif 'error' in prediction_object_for_serial.keys():
-            msg = (
-                f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
-                f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
-            )
-            self._logger.info(msg)
-            await self._notifications_repository.send_slack_message(msg)
-            response['suggested_notes']['details'] = msg
-            return response
-
-        self._logger.info(
-            f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
-            f'{prediction_object_for_serial}'
-        )
+            return
 
         next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
             ticket_id, ticket_detail_id, serial_number
@@ -556,17 +489,13 @@ class TNBAMonitor:
         next_results_response_body = next_results_response['body']
         next_results_response_status = next_results_response['status']
         if next_results_response_status not in range(200, 300):
-            msg = f'Error getting next results ticket[{ticket_id}] detail[{ticket_detail_id}] serial [{serial_number}]'
-            response['suggested_notes']['details'] = msg
-            return response
+            return
 
         self._logger.info(
             f'Filtering predictions available in next results for ticket {ticket_id}, '
             f'detail {ticket_detail_id} and serial {serial_number}...'
         )
-        predictions: list = prediction_object_for_serial['predictions']
         next_results: list = next_results_response_body['nextResults']
-        response['available_options']['available_options'] = [result['resultName'].strip() for result in next_results]
 
         relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
             predictions, next_results
@@ -578,8 +507,7 @@ class TNBAMonitor:
                 f"detail {ticket_detail_id} and serial {serial_number}!"
             )
             self._logger.info(msg)
-            response['suggested_notes']['details'] = msg
-            return response
+            return
 
         self._logger.info(
             f'Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} '
@@ -595,8 +523,7 @@ class TNBAMonitor:
                 f"didn't change since the last TNBA note was appended. Skipping detail..."
             )
             self._logger.info(msg)
-            response['suggested_notes']['details'] = msg
-            return response
+            return
 
         self._logger.info(
             f"Best prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} "
@@ -610,25 +537,47 @@ class TNBAMonitor:
         tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
 
         if self._config.ENVIRONMENT == 'production':
-            response['tnba_note'] = {
+            self._tnba_notes_to_append.append({
+                'ticket_id': ticket_id,
                 'text': tnba_note,
                 'detail_id': ticket_detail_id,
                 'service_number': serial_number,
-            }
-            response['slack_message'] = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
-                ticket_id=ticket_id, detail_id=ticket_detail_id,
-                serial_number=serial_number, prediction=best_prediction['name'],
-            )
-            response['suggested_notes']['suggested_note'] = tnba_note
-            return response
+            })
         elif self._config.ENVIRONMENT == 'dev':
             tnba_message = (
                 f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
                 f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
             )
-            response['suggested_notes']['suggested_note'] = tnba_note
             self._logger.info(tnba_message)
             await self._notifications_repository.send_slack_message(tnba_message)
 
-        self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
-        return response
+        self._logger.info(
+            f'Finished processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}!'
+        )
+
+    async def _append_tnba_notes(self):
+        notes_by_ticket_id = {}
+
+        for note_object in self._tnba_notes_to_append:
+            ticket_id = note_object['ticket_id']
+            tnba_note = note_object['text']
+            ticket_detail_id = note_object['detail_id']
+            service_number = note_object['service_number']
+
+            notes_by_ticket_id.setdefault(ticket_id, [])
+            notes_by_ticket_id[ticket_id].append({
+                'text': tnba_note,
+                'detail_id': ticket_detail_id,
+                'service_number': service_number,
+            })
+
+        for ticket_id, notes in notes_by_ticket_id.items():
+            self._logger.info(f'Appending {len(notes)} TNBA notes to ticket {ticket_id}...')
+
+            append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
+            append_notes_response_status = append_notes_response['status']
+            if append_notes_response_status not in range(200, 300):
+                continue
+
+            slack_message = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(notes_count=len(notes), ticket_id=ticket_id)
+            await self._notifications_repository.send_slack_message(slack_message)
