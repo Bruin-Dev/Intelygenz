@@ -138,3 +138,80 @@ class TestDiGiRepository:
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == return_body
+
+    def get_digi_links_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        logical_id_list = [{'interface_name': 'test', 'logical_id': '123'},
+                           {'interface_name': 'GE1', 'logical_id': '00:27:04:123'},
+                           {'interface_name': 'GE3', 'logical_id': '00:27:04:122'},
+                           {'interface_name': 'GE2', 'logical_id': '00:04:2d:123'}]
+        expected_digi_list = [logical_id_list[3], logical_id_list[1], logical_id_list[2]]
+
+        digi_repository = DiGiRepository(event_bus, logger, config, notifications_repository)
+
+        digi_links = digi_repository.get_digi_links(logical_id_list)
+
+        assert digi_links == expected_digi_list
+
+    def get_interface_name_from_digi_note_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        expected_interface = 'GE2'
+
+        digi_reboot_note = os.linesep.join([
+            f'#*Automation Engine*#',
+            f'Offline DiGi interface identified for serial: VCO',
+            f'Interface: {expected_interface}',
+            f'Automatic reboot attempt started.',
+            f'TimeStamp: '
+        ])
+
+        bruin_note = {'noteValue': digi_reboot_note}
+
+        digi_repository = DiGiRepository(event_bus, logger, config, notifications_repository)
+
+        interface = digi_repository.get_interface_name_from_digi_note(bruin_note)
+
+        assert interface == expected_interface
+
+    def get_interface_name_from_digi_note_no_interface_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        digi_reboot_note = os.linesep.join([
+            f'#*Automation Engine*#',
+            f'Offline DiGi interface identified for serial: VCO',
+            f'Automatic reboot attempt started.',
+            f'TimeStamp: '
+        ])
+
+        bruin_note = {'noteValue': digi_reboot_note}
+
+        digi_repository = DiGiRepository(event_bus, logger, config, notifications_repository)
+
+        interface = digi_repository.get_interface_name_from_digi_note(bruin_note)
+
+        assert interface == ''
+
+    def get_interface_name_from_digi_note_no_note_value_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_note = {}
+
+        digi_repository = DiGiRepository(event_bus, logger, config, notifications_repository)
+
+        interface = digi_repository.get_interface_name_from_digi_note(bruin_note)
+
+        assert interface == ''

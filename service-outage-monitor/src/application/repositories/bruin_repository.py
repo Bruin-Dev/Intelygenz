@@ -494,7 +494,7 @@ class BruinRepository:
         ])
         return await self.append_note_to_ticket(ticket_id, digi_reboot_note, service_numbers=[serial_number])
 
-    async def append_task_result_change(self, ticket_id, task_result):
+    async def append_task_result_change_note(self, ticket_id, task_result):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         task_result_note = os.linesep.join([
             f'#*Automation Engine*#',

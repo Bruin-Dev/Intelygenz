@@ -621,18 +621,21 @@ class OutageMonitor:
 
                 if digi_note is None:
                     self._logger.info(f'No DiGi note was found for ticket {ticket_id}')
+                    return
 
                 task_result = "Wireless Repair Intervention Needed"
                 task_result_note = self._find_note(relevant_notes, 'Wireless Repair Intervention Needed')
 
-                if task_result_note is None:
+                if task_result_note is not None:
                     self._logger.info(f'Task results has already been changed to "{task_result}"')
+                    return
 
                 digi_note_interface_name = self._digi_repository.get_interface_name_from_digi_note(digi_note)
 
                 if digi_note_interface_name == link_status['interface']:
-                    self._logger.info(f'Changing task results of ticket_id {ticket_id} to "{task_result}"')
+                    self._logger.info(f'DiGi reboot attempt failed. Changing the task results of ticket_id {ticket_id} '
+                                      f'to "{task_result}"')
                     await self._bruin_repository.change_detail_work_queue(serial_number, ticket_id, ticket_detail_id,
                                                                           task_result)
-                    await self._bruin_repository.append_task_result_change(ticket_id, task_result)
+                    await self._bruin_repository.append_task_result_change_note(ticket_id, task_result)
                     return
