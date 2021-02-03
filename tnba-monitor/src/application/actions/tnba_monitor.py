@@ -1,6 +1,6 @@
 import asyncio
+import re
 import time
-import os
 
 from datetime import datetime
 from typing import List
@@ -8,18 +8,23 @@ from typing import Set
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from dateutil.parser import parse
 from pytz import timezone
+from pytz import utc
 from tenacity import retry, wait_exponential, stop_after_delay
 
 TNBA_NOTE_APPENDED_SUCCESS_MSG = (
     '{notes_count} TNBA note(s) were appended to ticket {ticket_id}: app.bruin.com/t/{ticket_id}'
 )
 
+TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(VeloCloud\)')
+REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
+
 
 class TNBAMonitor:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                  customer_cache_repository, bruin_repository, prediction_repository,
-                 notifications_repository):
+                 notifications_repository, utils_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -30,6 +35,7 @@ class TNBAMonitor:
         self._bruin_repository = bruin_repository
         self._prediction_repository = prediction_repository
         self._notifications_repository = notifications_repository
+        self._utils_repository = utils_repository
 
         self.__reset_state()
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
@@ -97,6 +103,12 @@ class TNBAMonitor:
             relevant_open_tickets
         )
 
+        self._logger.info('Discarding ticket details of outage tickets whose last outage happened too recently...')
+        ticket_details_with_tnba = self._filter_outage_ticket_details_based_on_last_outage(ticket_details_with_tnba)
+        ticket_details_without_tnba = self._filter_outage_ticket_details_based_on_last_outage(
+            ticket_details_without_tnba
+        )
+
         self._logger.info('Mapping all ticket details with their predictions...')
         ticket_details_with_tnba = self._map_ticket_details_with_predictions(
             ticket_details_with_tnba, predictions_by_ticket_id
@@ -159,10 +171,13 @@ class TNBAMonitor:
                     open_affecting_tickets_response_body = []
 
                 all_open_tickets: list = open_outage_tickets_response_body + open_affecting_tickets_response_body
-                open_tickets_ids = (ticket['ticketID'] for ticket in all_open_tickets)
 
                 self._logger.info(f'Getting all opened tickets for Bruin customer {client_id}...')
-                for ticket_id in open_tickets_ids:
+                for ticket in all_open_tickets:
+                    ticket_id = ticket['ticketID']
+                    ticket_creation_date = ticket['createDate']
+                    ticket_topic = ticket['topic']
+
                     ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                     ticket_details_response_body = ticket_details_response['body']
                     ticket_details_response_status = ticket_details_response['status']
@@ -180,6 +195,8 @@ class TNBAMonitor:
 
                     result.append({
                         'ticket_id': ticket_id,
+                        'ticket_creation_date': ticket_creation_date,
+                        'ticket_topic': ticket_topic,
                         'ticket_details': ticket_details_list,
                         'ticket_notes': ticket_details_response_body['ticketNotes'],
                     })
@@ -214,6 +231,8 @@ class TNBAMonitor:
 
             relevant_tickets.append({
                 'ticket_id': ticket['ticket_id'],
+                'ticket_creation_date': ticket['ticket_creation_date'],
+                'ticket_topic': ticket['ticket_topic'],
                 'ticket_details': relevant_details,
                 'ticket_notes': ticket['ticket_notes'],
             })
@@ -243,6 +262,8 @@ class TNBAMonitor:
 
             sanitized_tickets.append({
                 'ticket_id': ticket['ticket_id'],
+                'ticket_creation_date': ticket['ticket_creation_date'],
+                'ticket_topic': ticket['ticket_topic'],
                 'ticket_details': ticket['ticket_details'],
                 'ticket_notes': relevant_notes,
             })
@@ -312,6 +333,8 @@ class TNBAMonitor:
 
         for ticket in tickets:
             ticket_id = ticket['ticket_id']
+            ticket_creation_date = ticket['ticket_creation_date']
+            ticket_topic = ticket['ticket_topic']
             ticket_details = ticket['ticket_details']
             ticket_notes = ticket['ticket_notes']
 
@@ -326,6 +349,8 @@ class TNBAMonitor:
 
                 detail_object = {
                     'ticket_id': ticket_id,
+                    'ticket_creation_date': ticket_creation_date,
+                    'ticket_topic': ticket_topic,
                     'ticket_detail': detail,
                     'ticket_notes': notes_related_to_serial,
                 }
@@ -336,6 +361,59 @@ class TNBAMonitor:
                     ticket_details_without_tnba.append(detail_object)
 
         return ticket_details_with_tnba, ticket_details_without_tnba
+
+    def _filter_outage_ticket_details_based_on_last_outage(self, ticket_details: list) -> list:
+        result = []
+
+        for detail_object in ticket_details:
+            ticket_id = detail_object['ticket_id']
+            serial_number = detail_object['ticket_detail']['detailValue']
+            ticket_notes = detail_object['ticket_notes']
+            ticket_creation_date = detail_object['ticket_creation_date']
+
+            if self._is_detail_in_outage_ticket(detail_object):
+                if self._was_last_outage_detected_recently(ticket_notes, ticket_creation_date):
+                    self._logger.info(
+                        f'Last outage detected for serial {serial_number} in Service Outage ticket {ticket_id} is '
+                        'too recent. Skipping...'
+                    )
+                    continue
+
+            result.append(detail_object)
+
+        return result
+
+    @staticmethod
+    def _is_detail_in_outage_ticket(ticket_detail: dict) -> bool:
+        return ticket_detail['ticket_topic'] == 'Service Outage Trouble'
+
+    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
+        current_datetime = datetime.now().astimezone(utc)
+        max_seconds_since_last_outage = self._config.MONITOR_CONFIG['last_outage_seconds']
+
+        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
+
+        last_reopen_note = self._utils_repository.get_last_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: REOPEN_NOTE_REGEX.match(note['noteValue'])
+        )
+        if last_reopen_note:
+            note_creation_date = parse(last_reopen_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
+
+        triage_note = self._utils_repository.get_first_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: TRIAGE_NOTE_REGEX.match(note['noteValue'])
+        )
+        if triage_note:
+            note_creation_date = parse(triage_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
+
+        ticket_creation_datetime = parse(ticket_creation_date, ignoretz=True).astimezone(utc)
+        seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
+        return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
     def _map_ticket_details_with_predictions(self, ticket_details: list, predictions_by_ticket_id: dict) -> list:
         result = []

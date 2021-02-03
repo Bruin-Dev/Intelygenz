@@ -25,6 +25,7 @@ MONITOR_CONFIG = {
     'semaphore': 1,
     'velo_filter': {"mettel.velocloud.net": []},
     'tnba_notes_age_for_new_appends_in_minutes': 30,
+    'last_outage_seconds': 60 * 60,
 }
 
 ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]

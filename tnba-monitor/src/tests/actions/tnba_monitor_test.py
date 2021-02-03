@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 from unittest.mock import Mock
 from unittest.mock import call
 from unittest.mock import patch
@@ -7,10 +8,12 @@ import pytest
 
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from dateutil.parser import parse
 from shortuuid import uuid
 
 from application.actions.tnba_monitor import TNBAMonitor
 from application.actions import tnba_monitor as tnba_monitor_module
+from application.repositories.utils_repository import UtilsRepository
 from config import testconfig
 
 
@@ -27,10 +30,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         assert tnba_monitor._event_bus is event_bus
         assert tnba_monitor._logger is logger
@@ -58,10 +62,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -90,10 +95,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
 
@@ -121,13 +127,14 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(return_value=get_cache_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._process_ticket_details_with_tnba = CoroutineMock()
         tnba_monitor._process_ticket_details_without_tnba = CoroutineMock()
 
@@ -154,13 +161,14 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(return_value=get_cache_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._process_ticket_details_with_tnba = CoroutineMock()
         tnba_monitor._process_ticket_details_without_tnba = CoroutineMock()
 
@@ -179,6 +187,9 @@ class TestTNBAMonitor:
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC7654321'
         edge_3_serial = 'VC1111111'
+
+        affecting_topic = 'Service Affecting Trouble'
+        outage_topic = 'Service Outage Trouble'
 
         edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
         edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
@@ -229,6 +240,7 @@ class TestTNBAMonitor:
         }
 
         ticket_1_for_bruin_client_1_id = 12345
+        ticket_1_for_bruin_client_1_creation_date = '1/02/2021 10:08:13 AM'
         ticket_1_for_bruin_client_1_detail_1 = {
             "detailID": 2746937,
             "detailValue": edge_1_serial,
@@ -283,6 +295,8 @@ class TestTNBAMonitor:
         }
         ticket_1_with_details_for_bruin_client_1 = {
             'ticket_id': ticket_1_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
+            'ticket_topic': outage_topic,
             'ticket_details': ticket_1_for_bruin_client_1_details,
             'ticket_notes': [
                 ticket_1_note_1_for_bruin_client_1,
@@ -294,6 +308,7 @@ class TestTNBAMonitor:
         }
 
         ticket_2_for_bruin_client_1_id = 11223
+        ticket_2_for_bruin_client_1_creation_date = '1/03/2021 10:08:13 AM'
         ticket_2_for_bruin_client_1_detail_1 = {
             "detailID": 2746938,
             "detailValue": 'VC999999999',
@@ -311,6 +326,8 @@ class TestTNBAMonitor:
         }
         ticket_2_with_details_for_bruin_client_1 = {
             'ticket_id': ticket_2_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_2_for_bruin_client_1_creation_date,
+            'ticket_topic': affecting_topic,
             'ticket_details': ticket_2_for_bruin_client_1_details,
             'ticket_notes': [
                 ticket_2_note_1_for_bruin_client_1,
@@ -318,6 +335,7 @@ class TestTNBAMonitor:
         }
 
         ticket_1_for_bruin_client_2_id = 67890
+        ticket_1_for_bruin_client_2_creation_date = '1/04/2021 10:08:13 AM'
         ticket_1_for_bruin_client_2_detail_1 = {
             "detailID": 2746937,
             "detailValue": edge_3_serial,
@@ -335,6 +353,8 @@ class TestTNBAMonitor:
         }
         ticket_1_with_details_for_bruin_client_2 = {
             'ticket_id': ticket_1_for_bruin_client_2_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_2_creation_date,
+            'ticket_topic': outage_topic,
             'ticket_details': ticket_1_for_bruin_client_2_details,
             'ticket_notes': [
                 ticket_1_note_1_for_bruin_client_2,
@@ -413,6 +433,8 @@ class TestTNBAMonitor:
 
         ticket_1_for_client_1_detail_object_1 = {
             'ticket_id': ticket_1_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
+            'ticket_topic': outage_topic,
             'ticket_detail': ticket_1_for_bruin_client_1_detail_1,
             'ticket_notes': [
                 ticket_1_note_2_for_bruin_client_1,
@@ -421,6 +443,8 @@ class TestTNBAMonitor:
         }
         ticket_1_for_client_1_detail_object_2 = {
             'ticket_id': ticket_1_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
+            'ticket_topic': affecting_topic,
             'ticket_detail': ticket_1_for_bruin_client_1_detail_2,
             'ticket_notes': [
                 ticket_1_note_4_for_bruin_client_1,
@@ -429,6 +453,8 @@ class TestTNBAMonitor:
         }
         ticket_1_for_client_2_detail_object_1 = {
             'ticket_id': ticket_2_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_2_creation_date,
+            'ticket_topic': outage_topic,
             'ticket_detail': ticket_2_for_bruin_client_1_detail_1,
             'ticket_notes': [],
         }
@@ -440,19 +466,17 @@ class TestTNBAMonitor:
             ticket_1_for_client_2_detail_object_1,
         ]
 
-        ticket_1_for_client_1_detail_object_1_with_predictions = {
-            'ticket_id': ticket_1_for_bruin_client_1_id,
-            'ticket_detail': ticket_1_for_bruin_client_1_detail_1,
-            'ticket_notes': [
-                ticket_1_note_2_for_bruin_client_1,
-                ticket_1_note_4_for_bruin_client_1,
-            ],
-            'ticket_detail_predictions': [
-                predictions_for_serial_1_of_ticket_1_of_bruin_client_1,
-            ]
-        }
+        ticket_details_with_tnba_with_outage_details_filtered = [
+            ticket_1_for_client_1_detail_object_2,
+        ]
+        ticket_details_without_tnba_with_outage_details_filtered = [
+            ticket_1_for_client_2_detail_object_1,
+        ]
+
         ticket_1_for_client_1_detail_object_2_with_predictions = {
             'ticket_id': ticket_1_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
+            'ticket_topic': affecting_topic,
             'ticket_detail': ticket_1_for_bruin_client_1_detail_2,
             'ticket_notes': [
                 ticket_1_note_4_for_bruin_client_1,
@@ -464,6 +488,8 @@ class TestTNBAMonitor:
         }
         ticket_1_for_client_2_detail_object_1_with_predictions = {
             'ticket_id': ticket_2_for_bruin_client_1_id,
+            'ticket_creation_date': ticket_1_for_bruin_client_2_creation_date,
+            'ticket_topic': outage_topic,
             'ticket_detail': ticket_2_for_bruin_client_1_detail_1,
             'ticket_notes': [],
             'ticket_detail_predictions': [
@@ -471,7 +497,6 @@ class TestTNBAMonitor:
             ]
         }
         ticket_details_with_tnba_with_predictions = [
-            ticket_1_for_client_1_detail_object_1_with_predictions,
             ticket_1_for_client_1_detail_object_2_with_predictions,
         ]
         ticket_details_without_tnba_with_predictions = [
@@ -487,13 +512,14 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(return_value=get_cache_response)
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._tnba_notes_to_append = []
         tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(
             return_value=open_tickets_with_details)
@@ -505,6 +531,10 @@ class TestTNBAMonitor:
         tnba_monitor._distinguish_ticket_details_with_and_without_tnba = Mock(
             return_value=(ticket_details_with_tnba, ticket_details_without_tnba)
         )
+        tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock(side_effect=[
+            ticket_details_with_tnba_with_outage_details_filtered,
+            ticket_details_without_tnba_with_outage_details_filtered,
+        ])
         tnba_monitor._map_ticket_details_with_predictions = Mock(side_effect=[
             ticket_details_with_tnba_with_predictions,
             ticket_details_without_tnba_with_predictions,
@@ -516,6 +546,14 @@ class TestTNBAMonitor:
         await tnba_monitor._run_tickets_polling()
 
         customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
+        tnba_monitor._filter_outage_ticket_details_based_on_last_outage.assert_has_calls([
+            call(ticket_details_with_tnba),
+            call(ticket_details_without_tnba),
+        ])
+        tnba_monitor._map_ticket_details_with_predictions.assert_has_calls([
+            call(ticket_details_with_tnba_with_outage_details_filtered, predictions_by_ticket_id),
+            call(ticket_details_without_tnba_with_outage_details_filtered, predictions_by_ticket_id),
+        ])
         tnba_monitor._process_ticket_details_with_tnba.assert_awaited_once_with(
             ticket_details_with_tnba_with_predictions
         )
@@ -537,10 +575,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
 
@@ -662,10 +701,11 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
         tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1,
@@ -769,10 +809,11 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
         tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1,
@@ -791,11 +832,37 @@ class TestTNBAMonitor:
         uuid_ = uuid()
         bruin_client_id = 12345
 
+        affecting_topic = 'Service Affecting Trouble'
+        outage_topic = 'Service Outage Trouble'
+
         ticket_1_id = 11111
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
+
         ticket_2_id = 22222
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
+
         ticket_3_id = 33333
-        outage_ticket_ids = [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}]
-        affecting_ticket_ids = [{'ticketID': ticket_3_id}]
+        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
+
+        outage_tickets = [
+            {
+                'ticketID': ticket_1_id,
+                'createDate': ticket_1_creation_date,
+                'topic': outage_topic,
+            },
+            {
+                'ticketID': ticket_2_id,
+                'createDate': ticket_2_creation_date,
+                'topic': outage_topic,
+            },
+        ]
+        affecting_tickets = [
+            {
+                'ticketID': ticket_3_id,
+                'createDate': ticket_3_creation_date,
+                'topic': affecting_topic,
+            },
+        ]
 
         outage_ticket_1_details_item_1 = {
             "detailID": 2746937,
@@ -865,12 +932,12 @@ class TestTNBAMonitor:
 
         get_open_outage_tickets_response = {
             'request_id': uuid_,
-            'body': outage_ticket_ids,
+            'body': outage_tickets,
             'status': 200,
         }
         get_open_affecting_tickets_response = {
             'request_id': uuid_,
-            'body': affecting_ticket_ids,
+            'body': affecting_tickets,
             'status': 200,
         }
 
@@ -901,6 +968,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -913,7 +981,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -926,16 +994,22 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': outage_topic,
                 'ticket_details': outage_ticket_1_details_items,
                 'ticket_notes': outage_ticket_1_notes,
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': outage_topic,
                 'ticket_details': outage_ticket_2_details_items,
                 'ticket_notes': outage_ticket_2_notes,
             },
             {
                 'ticket_id': ticket_3_id,
+                'ticket_creation_date': ticket_3_creation_date,
+                'ticket_topic': affecting_topic,
                 'ticket_details': affecting_ticket_1_details_items,
                 'ticket_notes': affecting_ticket_1_notes,
             },
@@ -948,8 +1022,15 @@ class TestTNBAMonitor:
         bruin_client_id = 12345
 
         uuid_ = uuid()
+
+        affecting_topic = 'Service Affecting Trouble'
+
         ticket_1_id = 11111
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
+
         ticket_2_id = 22222
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
+
         get_open_outage_tickets_response = {
             'request_id': uuid_,
             'body': 'Got internal error from Bruin',
@@ -957,7 +1038,18 @@ class TestTNBAMonitor:
         }
         get_open_affecting_tickets_response = {
             'request_id': uuid_,
-            'body': [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}],
+            'body': [
+                {
+                    'ticketID': ticket_1_id,
+                    'createDate': ticket_1_creation_date,
+                    'topic': affecting_topic,
+                },
+                {
+                    'ticketID': ticket_2_id,
+                    'createDate': ticket_2_creation_date,
+                    'topic': affecting_topic,
+                },
+            ],
             'status': 200,
         }
 
@@ -1025,6 +1117,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1036,7 +1129,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1050,11 +1143,15 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': affecting_topic,
                 'ticket_details': affecting_ticket_1_details_items,
                 'ticket_notes': affecting_ticket_1_notes,
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': affecting_topic,
                 'ticket_details': affecting_ticket_2_details_items,
                 'ticket_notes': affecting_ticket_2_notes,
             },
@@ -1067,11 +1164,29 @@ class TestTNBAMonitor:
         bruin_client_id = 12345
 
         uuid_ = uuid()
+
+        outage_topic = 'Service Outage Trouble'
+
         ticket_1_id = 11111
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
+
         ticket_2_id = 22222
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
+
         get_open_outage_tickets_response = {
             'request_id': uuid_,
-            'body': [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}],
+            'body': [
+                {
+                    'ticketID': ticket_1_id,
+                    'createDate': ticket_1_creation_date,
+                    'topic': outage_topic,
+                },
+                {
+                    'ticketID': ticket_2_id,
+                    'createDate': ticket_2_creation_date,
+                    'topic': outage_topic,
+                },
+            ],
             'status': 200,
         }
         get_open_affecting_tickets_response = {
@@ -1144,6 +1259,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1155,7 +1271,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1169,11 +1285,15 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': outage_topic,
                 'ticket_details': outage_ticket_1_details_items,
                 'ticket_notes': outage_ticket_1_notes,
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': outage_topic,
                 'ticket_details': outage_ticket_2_details_items,
                 'ticket_notes': outage_ticket_2_notes,
             },
@@ -1185,11 +1305,37 @@ class TestTNBAMonitor:
         uuid_ = uuid()
         bruin_client_id = 12345
 
+        affecting_topic = 'Service Affecting Trouble'
+        outage_topic = 'Service Outage Trouble'
+
         ticket_1_id = 11111
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
+
         ticket_2_id = 22222
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
+
         ticket_3_id = 33333
-        outage_ticket_ids = [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}]
-        affecting_ticket_ids = [{'ticketID': ticket_3_id}]
+        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
+
+        outage_tickets = [
+            {
+                'ticketID': ticket_1_id,
+                'createDate': ticket_1_creation_date,
+                'topic': outage_topic,
+            },
+            {
+                'ticketID': ticket_2_id,
+                'createDate': ticket_2_creation_date,
+                'topic': outage_topic,
+            },
+        ]
+        affecting_tickets = [
+            {
+                'ticketID': ticket_3_id,
+                'createDate': ticket_3_creation_date,
+                'topic': affecting_topic,
+            },
+        ]
 
         outage_ticket_1_details_item_1 = {
             "detailID": 2746937,
@@ -1237,12 +1383,12 @@ class TestTNBAMonitor:
 
         get_open_outage_tickets_response = {
             'request_id': uuid_,
-            'body': outage_ticket_ids,
+            'body': outage_tickets,
             'status': 200,
         }
         get_open_affecting_tickets_response = {
             'request_id': uuid_,
-            'body': affecting_ticket_ids,
+            'body': affecting_tickets,
             'status': 200,
         }
 
@@ -1273,6 +1419,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1285,7 +1432,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1298,11 +1445,15 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': outage_topic,
                 'ticket_details': outage_ticket_1_details_items,
                 'ticket_notes': outage_ticket_1_notes,
             },
             {
                 'ticket_id': ticket_3_id,
+                'ticket_creation_date': ticket_3_creation_date,
+                'ticket_topic': affecting_topic,
                 'ticket_details': affecting_ticket_1_details_items,
                 'ticket_notes': affecting_ticket_1_notes,
             }
@@ -1314,11 +1465,37 @@ class TestTNBAMonitor:
         uuid_ = uuid()
         bruin_client_id = 12345
 
+        affecting_topic = 'Service Affecting Trouble'
+        outage_topic = 'Service Outage Trouble'
+
         ticket_1_id = 11111
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
+
         ticket_2_id = 22222
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
+
         ticket_3_id = 33333
-        outage_ticket_ids = [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}]
-        affecting_ticket_ids = [{'ticketID': ticket_3_id}]
+        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
+
+        outage_tickets = [
+            {
+                'ticketID': ticket_1_id,
+                'createDate': ticket_1_creation_date,
+                'topic': outage_topic,
+            },
+            {
+                'ticketID': ticket_2_id,
+                'createDate': ticket_2_creation_date,
+                'topic': outage_topic,
+            },
+        ]
+        affecting_tickets = [
+            {
+                'ticketID': ticket_3_id,
+                'createDate': ticket_3_creation_date,
+                'topic': affecting_topic,
+            },
+        ]
 
         outage_ticket_1_details_item_1 = {
             "detailID": 2746937,
@@ -1373,12 +1550,12 @@ class TestTNBAMonitor:
 
         get_open_outage_tickets_response = {
             'request_id': uuid_,
-            'body': outage_ticket_ids,
+            'body': outage_tickets,
             'status': 200,
         }
         get_open_affecting_tickets_response = {
             'request_id': uuid_,
-            'body': affecting_ticket_ids,
+            'body': affecting_tickets,
             'status': 200,
         }
 
@@ -1409,6 +1586,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1421,7 +1599,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1434,11 +1612,15 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': outage_topic,
                 'ticket_details': outage_ticket_1_details_items,
                 'ticket_notes': outage_ticket_1_notes,
             },
             {
                 'ticket_id': ticket_3_id,
+                'ticket_creation_date': ticket_3_creation_date,
+                'ticket_topic': affecting_topic,
                 'ticket_details': affecting_ticket_1_details_items,
                 'ticket_notes': affecting_ticket_1_notes,
             }
@@ -1509,7 +1691,10 @@ class TestTNBAMonitor:
             },
         }
 
+        ticket_topic = 'Service Outage Trouble'
+
         ticket_1_id = 12345
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
         ticket_1_detail_1 = {
             "detailID": 2746930,
             "detailValue": edge_1_serial,
@@ -1527,6 +1712,8 @@ class TestTNBAMonitor:
         ]
         ticket_1 = {
             'ticket_id': ticket_1_id,
+            'ticket_creation_date': ticket_1_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': [
                 ticket_1_detail_1,
                 ticket_1_detail_2,
@@ -1535,6 +1722,7 @@ class TestTNBAMonitor:
         }
 
         ticket_2_id = 67890
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
         ticket_2_detail_1 = {
             "detailID": 2746932,
             "detailValue": edge_3_serial,
@@ -1556,6 +1744,8 @@ class TestTNBAMonitor:
         ]
         ticket_2 = {
             'ticket_id': ticket_2_id,
+            'ticket_creation_date': ticket_2_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': [
                 ticket_2_detail_1,
                 ticket_2_detail_2,
@@ -1565,6 +1755,7 @@ class TestTNBAMonitor:
         }
 
         ticket_3_id = 22222
+        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
         ticket_3_detail_1 = {
             "detailID": 2746932,
             "detailValue": 'VC9992221',
@@ -1578,6 +1769,8 @@ class TestTNBAMonitor:
         ]
         ticket_3 = {
             'ticket_id': ticket_3_id,
+            'ticket_creation_date': ticket_3_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': [
                 ticket_3_detail_1,
             ],
@@ -1585,6 +1778,7 @@ class TestTNBAMonitor:
         }
 
         ticket_4_id = 11111
+        ticket_4_creation_date = "1/05/2021 10:08:13 AM"
         ticket_4_detail_1 = {
             "detailID": 2746935,
             "detailValue": edge_5_serial,
@@ -1598,6 +1792,8 @@ class TestTNBAMonitor:
         ]
         ticket_4 = {
             'ticket_id': ticket_4_id,
+            'ticket_creation_date': ticket_4_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': [
                 ticket_4_detail_1,
             ],
@@ -1621,10 +1817,11 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
 
         result = tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring(tickets)
@@ -1632,6 +1829,8 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_details': [
                     ticket_1_detail_1,
                 ],
@@ -1639,6 +1838,8 @@ class TestTNBAMonitor:
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_details': [
                     ticket_2_detail_1,
                     ticket_2_detail_3,
@@ -1647,6 +1848,8 @@ class TestTNBAMonitor:
             },
             {
                 'ticket_id': ticket_4_id,
+                'ticket_creation_date': ticket_4_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_details': [
                     ticket_4_detail_1,
                 ],
@@ -1702,7 +1905,10 @@ class TestTNBAMonitor:
             },
         }
 
+        ticket_topic = 'Service Outage Trouble'
+
         ticket_1_id = 12345
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
         ticket_1_details = [
             {
                 "detailID": 2746937,
@@ -1752,6 +1958,8 @@ class TestTNBAMonitor:
         }
         ticket_1 = {
             'ticket_id': ticket_1_id,
+            'ticket_creation_date': ticket_1_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': ticket_1_details,
             'ticket_notes': [
                 ticket_1_note_1,
@@ -1763,6 +1971,7 @@ class TestTNBAMonitor:
         }
 
         ticket_2_id = 11223
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
         ticket_2_details = [
             {
                 "detailID": 2746938,
@@ -1801,6 +2010,8 @@ class TestTNBAMonitor:
         }
         ticket_2 = {
             'ticket_id': ticket_2_id,
+            'ticket_creation_date': ticket_2_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': ticket_2_details,
             'ticket_notes': [
                 ticket_2_note_1,
@@ -1810,6 +2021,7 @@ class TestTNBAMonitor:
         }
 
         ticket_3_id = 67890
+        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
         ticket_3_details = [
             {
                 "detailID": 2746937,
@@ -1836,6 +2048,8 @@ class TestTNBAMonitor:
         }
         ticket_3 = {
             'ticket_id': ticket_3_id,
+            'ticket_creation_date': ticket_3_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': ticket_3_details,
             'ticket_notes': [
                 ticket_3_note_1,
@@ -1859,10 +2073,11 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
 
         result = tnba_monitor._filter_irrelevant_notes_in_tickets(tickets)
@@ -1870,6 +2085,8 @@ class TestTNBAMonitor:
         expected = [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_details': ticket_1_details,
                 'ticket_notes': [
                     {
@@ -1884,6 +2101,8 @@ class TestTNBAMonitor:
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_details': ticket_2_details,
                 'ticket_notes': [
                     ticket_2_note_1,
@@ -1892,6 +2111,8 @@ class TestTNBAMonitor:
             },
             {
                 'ticket_id': ticket_3_id,
+                'ticket_creation_date': ticket_3_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_details': ticket_3_details,
                 'ticket_notes': [
                     {
@@ -1993,6 +2214,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
@@ -2002,7 +2224,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2062,6 +2284,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
@@ -2071,7 +2294,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2139,6 +2362,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
@@ -2148,7 +2372,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2221,6 +2445,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
@@ -2230,7 +2455,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2303,6 +2528,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
@@ -2312,7 +2538,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2371,10 +2597,11 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = tnba_monitor._remove_erroneous_predictions(predictions_by_ticket_id)
 
@@ -2436,10 +2663,11 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         ticket_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = tnba_monitor._remove_erroneous_predictions(predictions_by_ticket_id)
 
@@ -2453,6 +2681,8 @@ class TestTNBAMonitor:
 
         ticket_id_1 = 12345
         ticket_id_2 = 67890
+        ticket_creation_date = "1/02/2021 10:08:13 AM"
+        ticket_topic = "Service Outage Trouble"
 
         ticket_prediction_object_1_predictions = [
             {
@@ -2501,21 +2731,29 @@ class TestTNBAMonitor:
 
         ticket_detail_object_1 = {
             'ticket_id': ticket_id_1,
+            'ticket_creation_date': ticket_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_detail': ticket_detail_1,
             'ticket_notes': [],
         }
         ticket_detail_object_2 = {
             'ticket_id': ticket_id_1,
+            'ticket_creation_date': ticket_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_detail': ticket_detail_2,
             'ticket_notes': [],
         }
         ticket_detail_object_3 = {
             'ticket_id': ticket_id_1,
+            'ticket_creation_date': ticket_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_detail': ticket_detail_3,
             'ticket_notes': [],
         }
         ticket_detail_object_4 = {
             'ticket_id': ticket_id_2,
+            'ticket_creation_date': ticket_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_detail': ticket_detail_4,
             'ticket_notes': [],
         }
@@ -2535,6 +2773,7 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         t7_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.find_prediction_object_by_serial = Mock(side_effect=[
@@ -2545,7 +2784,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         result = tnba_monitor._map_ticket_details_with_predictions(ticket_detail_objects, predictions_by_ticket_id)
 
@@ -2567,6 +2806,8 @@ class TestTNBAMonitor:
         edge_3_serial = 'VC1111111'
 
         ticket_1_id = 12345
+        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
+        ticket_topic = "Service Outage Trouble"
 
         ticket_1_detail_1 = {
             "detailID": 2746937,
@@ -2620,6 +2861,8 @@ class TestTNBAMonitor:
         }
         ticket_1_with_details = {
             'ticket_id': ticket_1_id,
+            'ticket_creation_date': ticket_1_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': ticket_1_details,
             'ticket_notes': [
                 ticket_1_note_1,
@@ -2630,6 +2873,7 @@ class TestTNBAMonitor:
         }
 
         ticket_2_id = 11223
+        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
         ticket_2_detail_1 = {
             "detailID": 2746938,
             "detailValue": edge_1_serial,
@@ -2652,6 +2896,8 @@ class TestTNBAMonitor:
         }
         ticket_2_with_details = {
             'ticket_id': ticket_2_id,
+            'ticket_creation_date': ticket_2_creation_date,
+            'ticket_topic': ticket_topic,
             'ticket_details': ticket_2_details,
             'ticket_notes': [
                 ticket_2_note_1,
@@ -2672,6 +2918,7 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         bruin_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.has_tnba_note = Mock(side_effect=[
@@ -2684,7 +2931,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         ticket_details_with_tnba, ticket_details_without_tnba = \
             tnba_monitor._distinguish_ticket_details_with_and_without_tnba(tickets)
@@ -2692,6 +2939,8 @@ class TestTNBAMonitor:
         assert ticket_details_with_tnba == [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_detail': ticket_1_detail_1,
                 'ticket_notes': [
                     ticket_1_note_1,
@@ -2701,6 +2950,8 @@ class TestTNBAMonitor:
             },
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_detail': ticket_1_detail_2,
                 'ticket_notes': [
                     ticket_1_note_3,
@@ -2711,11 +2962,15 @@ class TestTNBAMonitor:
         assert ticket_details_without_tnba == [
             {
                 'ticket_id': ticket_1_id,
+                'ticket_creation_date': ticket_1_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_detail': ticket_1_detail_3,
                 'ticket_notes': [],
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_detail': ticket_2_detail_1,
                 'ticket_notes': [
                     ticket_2_note_1,
@@ -2723,10 +2978,296 @@ class TestTNBAMonitor:
             },
             {
                 'ticket_id': ticket_2_id,
+                'ticket_creation_date': ticket_2_creation_date,
+                'ticket_topic': ticket_topic,
                 'ticket_detail': ticket_2_detail_2,
                 'ticket_notes': [],
             },
         ]
+
+    def filter_outage_ticket_details_based_on_last_outage_with_affecting_ticket_details_test(self):
+        affecting_ticket_detail_1 = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': "Service Affecting Trouble",
+            'ticket_detail': {
+                'detailID': 1,
+                'detailValue': 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+        affecting_ticket_detail_2 = {
+            'ticket_id': 67890,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': "Service Affecting Trouble",
+            'ticket_detail': {
+                'detailID': 1,
+                'detailValue': 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+        ticket_details = [
+            affecting_ticket_detail_1,
+            affecting_ticket_detail_2,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        customer_cache_repository = Mock()
+        prediction_repository = Mock()
+        notifications_repository = Mock()
+        bruin_repository = Mock()
+        t7_repository = Mock()
+        utils_repository = Mock()
+        ticket_repository = Mock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository,
+                                   prediction_repository, notifications_repository, utils_repository)
+        tnba_monitor._is_detail_in_outage_ticket = Mock(return_value=False)
+
+        result = tnba_monitor._filter_outage_ticket_details_based_on_last_outage(ticket_details)
+        assert result == ticket_details
+
+    def filter_outage_ticket_details_based_on_last_outage_with_outage_ticket_details_test(self):
+        outage_ticket_detail_1 = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': "Service Outage Trouble",
+            'ticket_detail': {
+                'detailID': 1,
+                'detailValue': 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+        outage_ticket_detail_2 = {
+            'ticket_id': 67890,
+            'ticket_creation_date': "1/04/2021 10:08:13 AM",
+            'ticket_topic': "Service Outage Trouble",
+            'ticket_detail': {
+                'detailID': 1,
+                'detailValue': 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+        ticket_details = [
+            outage_ticket_detail_1,
+            outage_ticket_detail_2,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        customer_cache_repository = Mock()
+        prediction_repository = Mock()
+        notifications_repository = Mock()
+        bruin_repository = Mock()
+        t7_repository = Mock()
+        utils_repository = Mock()
+        ticket_repository = Mock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository,
+                                   prediction_repository, notifications_repository, utils_repository)
+        tnba_monitor._is_detail_in_outage_ticket = Mock(return_value=True)
+        tnba_monitor._was_last_outage_detected_recently = Mock(side_effect=[
+            True,
+            False,
+        ])
+
+        result = tnba_monitor._filter_outage_ticket_details_based_on_last_outage(ticket_details)
+        expected = [
+            outage_ticket_detail_2,
+        ]
+        assert result == expected
+
+    def is_detail_in_outage_ticket_test(self):
+        detail_object = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': 'Service Outage Trouble',
+            'ticket_detail': {
+                "detailID": 2746937,
+                "detailValue": 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+
+        result = TNBAMonitor._is_detail_in_outage_ticket(detail_object)
+        assert result is True
+
+        detail_object = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': 'Service Affecting Trouble',
+            'ticket_detail': {
+                "detailID": 2746937,
+                "detailValue": 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+
+        result = TNBAMonitor._is_detail_in_outage_ticket(detail_object)
+        assert result is False
+
+    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        ticket_notes = []
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        customer_cache_repository = Mock()
+        prediction_repository = Mock()
+        notifications_repository = Mock()
+        bruin_repository = Mock()
+        t7_repository = Mock()
+        ticket_repository = Mock()
+        utils_repository = UtilsRepository()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository,
+                                   prediction_repository, notifications_repository, utils_repository)
+
+        new_now = parse(ticket_creation_date) + timedelta(minutes=59, seconds=59)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(ticket_creation_date) + timedelta(hours=1)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(ticket_creation_date) + timedelta(hours=1, seconds=1)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is False
+
+    def was_last_outage_detected_recently_with_reopen_note_found_test(self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*Automation Engine*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": triage_timestamp,
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*Automation Engine*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": reopen_timestamp,
+        }
+
+        ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        customer_cache_repository = Mock()
+        prediction_repository = Mock()
+        notifications_repository = Mock()
+        bruin_repository = Mock()
+        t7_repository = Mock()
+        ticket_repository = Mock()
+        utils_repository = UtilsRepository()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository,
+                                   prediction_repository, notifications_repository, utils_repository)
+        datetime_mock = Mock()
+
+        new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is False
+
+    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": triage_timestamp,
+        }
+
+        ticket_notes = [
+            ticket_note_1,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        customer_cache_repository = Mock()
+        prediction_repository = Mock()
+        notifications_repository = Mock()
+        bruin_repository = Mock()
+        t7_repository = Mock()
+        ticket_repository = Mock()
+        utils_repository = UtilsRepository()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   customer_cache_repository, bruin_repository,
+                                   prediction_repository, notifications_repository, utils_repository)
+
+        datetime_mock = Mock()
+
+        new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(triage_timestamp) + timedelta(hours=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+            result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is False
 
     @pytest.mark.asyncio
     async def process_ticket_details_without_tnba_ok_test(self):
@@ -2773,10 +3314,11 @@ class TestTNBAMonitor:
         prediction_repository = Mock()
         ticket_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._process_ticket_detail_without_tnba = CoroutineMock()
 
         await tnba_monitor._process_ticket_details_without_tnba(ticket_details)
@@ -2797,6 +3339,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.build_tnba_note_from_prediction = Mock()
@@ -2810,7 +3353,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._process_ticket_detail_without_tnba = CoroutineMock()
 
         await tnba_monitor._process_ticket_details_without_tnba(ticket_details)
@@ -2851,6 +3394,7 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         prediction_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.build_tnba_note_from_prediction = Mock()
@@ -2860,7 +3404,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
 
@@ -2925,6 +3469,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         t7_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -2934,7 +3479,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
 
@@ -3001,6 +3546,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         ticket_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -3014,7 +3560,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         with patch.object(config, 'ENVIRONMENT', "dev"):
             await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
@@ -3085,6 +3631,7 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         t7_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -3098,7 +3645,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         with patch.object(config, 'ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
@@ -3173,10 +3720,11 @@ class TestTNBAMonitor:
         prediction_repository = Mock()
         bruin_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._process_ticket_detail_with_tnba = CoroutineMock()
 
         await tnba_monitor._process_ticket_details_with_tnba(ticket_details)
@@ -3200,10 +3748,11 @@ class TestTNBAMonitor:
         prediction_repository = Mock()
         bruin_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._process_ticket_detail_with_tnba = CoroutineMock()
 
         await tnba_monitor._process_ticket_details_with_tnba(ticket_details)
@@ -3247,6 +3796,7 @@ class TestTNBAMonitor:
         prediction_repository = Mock()
         bruin_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
@@ -3254,7 +3804,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
 
@@ -3306,6 +3856,7 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         prediction_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
@@ -3316,7 +3867,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
 
@@ -3392,6 +3943,8 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         t7_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -3405,7 +3958,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
 
@@ -3483,6 +4036,8 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         t7_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -3498,7 +4053,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
 
@@ -3579,6 +4134,8 @@ class TestTNBAMonitor:
         config = testconfig
         customer_cache_repository = Mock()
         t7_repository = Mock()
+        utils_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -3597,7 +4154,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         with patch.object(config, 'ENVIRONMENT', "dev"):
             await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
@@ -3683,6 +4240,8 @@ class TestTNBAMonitor:
         customer_cache_repository = Mock()
         t7_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
+        utils_repository = Mock()
 
         prediction_repository = Mock()
         prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
@@ -3699,7 +4258,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
 
         with patch.object(config, 'ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
@@ -3774,6 +4333,8 @@ class TestTNBAMonitor:
         t7_repository = Mock()
         prediction_repository = Mock()
         ticket_repository = Mock()
+        utils_repository = Mock()
+        utils_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_multiple_notes_to_ticket = CoroutineMock(return_value=append_notes_response)
@@ -3783,7 +4344,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    customer_cache_repository, bruin_repository,
-                                   prediction_repository, notifications_repository)
+                                   prediction_repository, notifications_repository, utils_repository)
         tnba_monitor._tnba_notes_to_append = [
             {
                 'ticket_id': ticket_1_id,
