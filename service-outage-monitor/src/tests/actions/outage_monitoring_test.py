@@ -7342,10 +7342,13 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         config = testconfig
         velocloud_repository = Mock()
-        notifications_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+        slack_message = f'Forwarding ticket {ticket_id} to Wireless team'
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -7353,6 +7356,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
         outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
 
         digi_repository = Mock()
@@ -7376,6 +7380,7 @@ class TestServiceOutageMonitor:
                                                                            outage_ticket_detail_1['detailID'],
                                                                            task_result)
         bruin_repository.append_task_result_change_note.assert_awaited_once_with(ticket_id, task_result)
+        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
 
     @pytest.mark.asyncio
     async def check_for_failed_digi_reboot_failed_rpc_call_test(self):
@@ -7514,6 +7519,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
         outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
 
         digi_repository = Mock()
@@ -7667,6 +7673,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
         outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
 
         digi_repository = Mock()
@@ -7836,6 +7843,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
         outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
 
         digi_repository = Mock()
@@ -8002,6 +8010,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
         outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
 
         digi_repository = Mock()

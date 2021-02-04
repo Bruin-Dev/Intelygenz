@@ -593,6 +593,8 @@ class OutageMonitor:
                     await self._notifications_repository.send_slack_message(slack_message)
 
     async def _check_for_failed_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, edge_full_id):
+        if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
+            return
         edge_identifier = EdgeIdentifier(**edge_full_id)
         self._logger.info(f'Checking edge {edge_identifier} for DiGi Links')
         digi_links = self._digi_repository.get_digi_links(logical_id_list)
@@ -633,9 +635,10 @@ class OutageMonitor:
                 digi_note_interface_name = self._digi_repository.get_interface_name_from_digi_note(digi_note)
 
                 if digi_note_interface_name == link_status['interface']:
-                    self._logger.info(f'DiGi reboot attempt failed. Changing the task results of ticket_id {ticket_id} '
-                                      f'to "{task_result}"')
+                    self._logger.info(f'DiGi reboot attempt failed. Forwarding ticket {ticket_id} to Wireless team')
                     await self._bruin_repository.change_detail_work_queue(serial_number, ticket_id, ticket_detail_id,
                                                                           task_result)
                     await self._bruin_repository.append_task_result_change_note(ticket_id, task_result)
+                    slack_message = f'Forwarding ticket {ticket_id} to Wireless team'
+                    await self._notifications_repository.send_slack_message(slack_message)
                     return
