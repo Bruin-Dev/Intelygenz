@@ -212,19 +212,99 @@ class TestTicketRepository:
                 result = ticket_repository.is_tnba_note_old_enough(ticket_note)
                 assert result is False
 
+    def is_detail_in_outage_ticket_test(self):
+        detail_object = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': 'Service Outage Trouble',
+            'ticket_creator': 'Intelygenz AI',
+            'ticket_detail': {
+                "detailID": 2746937,
+                "detailValue": 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+
+        result = TicketRepository.is_detail_in_outage_ticket(detail_object)
+        assert result is True
+
+        detail_object = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': 'Service Affecting Trouble',
+            'ticket_creator': 'Intelygenz AI',
+            'ticket_detail': {
+                "detailID": 2746937,
+                "detailValue": 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+
+        result = TicketRepository.is_detail_in_outage_ticket(detail_object)
+        assert result is False
+
+    def was_ticket_created_by_automation_engine_test(self):
+        detail_object = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': 'Service Outage Trouble',
+            'ticket_creator': 'Intelygenz Ai',
+            'ticket_detail': {
+                'detailID': 1,
+                'detailValue': 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+        result = TicketRepository.was_ticket_created_by_automation_engine(detail_object)
+        assert result is True
+
+        detail_object = {
+            'ticket_id': 12345,
+            'ticket_creation_date': "1/03/2021 10:08:13 AM",
+            'ticket_topic': 'Service Outage Trouble',
+            'ticket_creator': 'Otacon',
+            'ticket_detail': {
+                'detailID': 1,
+                'detailValue': 'VC1234567',
+            },
+            'ticket_notes': [],
+        }
+        result = TicketRepository.was_ticket_created_by_automation_engine(detail_object)
+        assert result is False
+
     def build_tnba_note_from_prediction_test(self):
+        serial_number = 'VC1234567'
         prediction = {
             'name': 'Holmdel NOC Investigate',
             'probability': 0.1234567890123456
         }
 
-        result = TicketRepository.build_tnba_note_from_prediction(prediction)
+        result = TicketRepository.build_tnba_note_from_prediction(prediction, serial_number)
 
         assert result == os.linesep.join([
             '#*Automation Engine*#',
             'TNBA',
             '',
-            'The next best action for this ticket is: Holmdel NOC Investigate.',
+            'The next best action for VC1234567 is: Holmdel NOC Investigate.',
+            '',
+            'TNBA is based on AI model designed specifically for MetTel.',
+        ])
+
+    def build_tnba_note_from_request_or_repair_completed_prediction_test(self):
+        serial_number = 'VC1234567'
+        prediction = {
+            'name': 'Repair Completed',
+            'probability': 0.1234567890123456
+        }
+
+        result = TicketRepository.build_tnba_note_from_request_or_repair_completed_prediction(prediction, serial_number)
+
+        assert result == os.linesep.join([
+            '#*Automation Engine*#',
+            'TNBA',
+            '',
+            'The next best action for VC1234567 is: Repair Completed. Since it is a high confidence prediction',
+            'the task has been automatically transitioned.',
             '',
             'TNBA is based on AI model designed specifically for MetTel.',
         ])

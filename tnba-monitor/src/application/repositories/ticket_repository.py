@@ -51,12 +51,34 @@ class TicketRepository:
         return self.is_note_older_than(ticket_note, age=age)
 
     @staticmethod
-    def build_tnba_note_from_prediction(prediction: dict) -> str:
+    def is_detail_in_outage_ticket(ticket_detail: dict) -> bool:
+        return ticket_detail['ticket_topic'] == 'Service Outage Trouble'
+
+    @staticmethod
+    def was_ticket_created_by_automation_engine(ticket_detail: dict) -> bool:
+        return ticket_detail['ticket_creator'] == 'Intelygenz Ai'
+
+    @staticmethod
+    def build_tnba_note_from_prediction(prediction: dict, serial_number: str) -> str:
         note_lines = [
             '#*Automation Engine*#',
             'TNBA',
             '',
-            f'The next best action for this ticket is: {prediction["name"]}.',
+            f'The next best action for {serial_number} is: {prediction["name"]}.',
+            '',
+            'TNBA is based on AI model designed specifically for MetTel.',
+        ]
+        return os.linesep.join(note_lines)
+
+    @staticmethod
+    def build_tnba_note_from_request_or_repair_completed_prediction(prediction: dict, serial_number: str) -> str:
+        pred_name = prediction["name"]
+        note_lines = [
+            '#*Automation Engine*#',
+            'TNBA',
+            '',
+            f'The next best action for {serial_number} is: {pred_name}. Since it is a high confidence prediction',
+            'the task has been automatically transitioned.',
             '',
             'TNBA is based on AI model designed specifically for MetTel.',
         ]

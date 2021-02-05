@@ -27,9 +27,12 @@ MONITOR_CONFIG = {
     },
     'tnba_notes_age_for_new_appends_in_minutes': 30,
     'last_outage_seconds': 60 * 60,
+    'request_repair_completed_confidence_threshold': 0.75,
 }
 
 ENVIRONMENT = 'dev'
+
+ENVIRONMENT_NAME = "dev"
 
 TIMEZONE = 'US/Eastern'
 

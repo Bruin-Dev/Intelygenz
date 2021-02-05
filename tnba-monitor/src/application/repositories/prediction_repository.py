@@ -5,12 +5,12 @@ from functools import partial
 from typing import List
 
 
-TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The next best action for this ticket is: '
-                                             r'(?P<prediction_name>.*)\.$')
+TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The next best action for .* is: (?P<prediction_name>.*?)\.')
 
 
 class PredictionRepository:
-    def __init__(self, utils_repository):
+    def __init__(self, config, utils_repository):
+        self._config = config
         self._utils_repository = utils_repository
 
     @staticmethod
@@ -54,3 +54,10 @@ class PredictionRepository:
         best_prediction_name = best_prediction['name']
 
         return not (prediction_name == best_prediction_name)
+
+    @staticmethod
+    def is_request_or_repair_completed_prediction(prediction: dict) -> bool:
+        return prediction['name'] in ['Request Completed', 'Repair Completed']
+
+    def is_prediction_confident_enough(self, prediction: dict) -> bool:
+        return prediction['probability'] >= self._config.MONITOR_CONFIG['request_repair_completed_confidence_threshold']

@@ -23,7 +23,7 @@ REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
 
 class TNBAMonitor:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                 customer_cache_repository, bruin_repository, prediction_repository,
+                 customer_cache_repository, bruin_repository, velocloud_repository, prediction_repository,
                  notifications_repository, utils_repository):
         self._event_bus = event_bus
         self._logger = logger
@@ -33,6 +33,7 @@ class TNBAMonitor:
         self._ticket_repository = ticket_repository
         self._customer_cache_repository = customer_cache_repository
         self._bruin_repository = bruin_repository
+        self._velocloud_repository = velocloud_repository
         self._prediction_repository = prediction_repository
         self._notifications_repository = notifications_repository
         self._utils_repository = utils_repository
@@ -42,6 +43,7 @@ class TNBAMonitor:
 
     def __reset_state(self):
         self._customer_cache_by_serial = {}
+        self._edge_status_by_serial = {}
         self._tnba_notes_to_append = []
 
     async def start_tnba_automated_process(self, exec_on_start=False):
@@ -62,6 +64,8 @@ class TNBAMonitor:
             self._logger.info(f'Skipping start of TNBA automated process job. Reason: {conflict}')
 
     async def _run_tickets_polling(self):
+        start_time = time.time()
+
         self.__reset_state()
 
         self._logger.info('Starting TNBA process...')
@@ -70,13 +74,29 @@ class TNBAMonitor:
         if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
             return
 
+        edges_statuses = await self._velocloud_repository.get_edges_for_tnba_monitoring()
+        if not edges_statuses:
+            err_msg = 'No edges statuses were received from VeloCloud. Aborting TNBA monitoring...'
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            return
+
         customer_cache = customer_cache_response['body']
+
+        self._logger.info('Keeping serials that exist in both the customer cache and the set of edges statuses...')
+        customer_cache, edges_statuses = self._filter_edges_in_customer_cache_and_edges_statuses(
+            customer_cache, edges_statuses
+        )
+
+        self._logger.info('Loading customer cache and edges statuses by serial into the monitor instance...')
         self._customer_cache_by_serial = {
             cached_info['serial_number']: cached_info
             for cached_info in customer_cache
         }
-
-        start_time = time.time()
+        self._edge_status_by_serial = {
+            edge_status['edgeSerialNumber']: edge_status
+            for edge_status in edges_statuses
+        }
 
         self._logger.info('Getting all open tickets for all customers...')
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
@@ -136,6 +156,17 @@ class TNBAMonitor:
         end_time = time.time()
         self._logger.info(f'TNBA process finished! Took {round((end_time - start_time) / 60, 2)} minutes.')
 
+    @staticmethod
+    def _filter_edges_in_customer_cache_and_edges_statuses(customer_cache: list, edges_statuses: list) -> tuple:
+        serials_in_customer_cache = set(edge['serial_number'] for edge in customer_cache)
+        serials_in_edges_statuses = set(edge['edgeSerialNumber'] for edge in edges_statuses)
+        serials_in_both_sets = serials_in_customer_cache & serials_in_edges_statuses
+
+        filtered_customer_cache = [edge for edge in customer_cache if edge['serial_number'] in serials_in_both_sets]
+        filtered_edges_statuses = [edge for edge in edges_statuses if edge['edgeSerialNumber'] in serials_in_both_sets]
+
+        return filtered_customer_cache, filtered_edges_statuses
+
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []
 
@@ -177,6 +208,7 @@ class TNBAMonitor:
                     ticket_id = ticket['ticketID']
                     ticket_creation_date = ticket['createDate']
                     ticket_topic = ticket['topic']
+                    ticket_creator = ticket['createdBy']
 
                     ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                     ticket_details_response_body = ticket_details_response['body']
@@ -197,6 +229,7 @@ class TNBAMonitor:
                         'ticket_id': ticket_id,
                         'ticket_creation_date': ticket_creation_date,
                         'ticket_topic': ticket_topic,
+                        'ticket_creator': ticket_creator,
                         'ticket_details': ticket_details_list,
                         'ticket_notes': ticket_details_response_body['ticketNotes'],
                     })
@@ -233,6 +266,7 @@ class TNBAMonitor:
                 'ticket_id': ticket['ticket_id'],
                 'ticket_creation_date': ticket['ticket_creation_date'],
                 'ticket_topic': ticket['ticket_topic'],
+                'ticket_creator': ticket['ticket_creator'],
                 'ticket_details': relevant_details,
                 'ticket_notes': ticket['ticket_notes'],
             })
@@ -264,6 +298,7 @@ class TNBAMonitor:
                 'ticket_id': ticket['ticket_id'],
                 'ticket_creation_date': ticket['ticket_creation_date'],
                 'ticket_topic': ticket['ticket_topic'],
+                'ticket_creator': ticket['ticket_creator'],
                 'ticket_details': ticket['ticket_details'],
                 'ticket_notes': relevant_notes,
             })
@@ -335,6 +370,7 @@ class TNBAMonitor:
             ticket_id = ticket['ticket_id']
             ticket_creation_date = ticket['ticket_creation_date']
             ticket_topic = ticket['ticket_topic']
+            ticket_creator = ticket['ticket_creator']
             ticket_details = ticket['ticket_details']
             ticket_notes = ticket['ticket_notes']
 
@@ -351,6 +387,7 @@ class TNBAMonitor:
                     'ticket_id': ticket_id,
                     'ticket_creation_date': ticket_creation_date,
                     'ticket_topic': ticket_topic,
+                    'ticket_creator': ticket_creator,
                     'ticket_detail': detail,
                     'ticket_notes': notes_related_to_serial,
                 }
@@ -371,7 +408,7 @@ class TNBAMonitor:
             ticket_notes = detail_object['ticket_notes']
             ticket_creation_date = detail_object['ticket_creation_date']
 
-            if self._is_detail_in_outage_ticket(detail_object):
+            if self._ticket_repository.is_detail_in_outage_ticket(detail_object):
                 if self._was_last_outage_detected_recently(ticket_notes, ticket_creation_date):
                     self._logger.info(
                         f'Last outage detected for serial {serial_number} in Service Outage ticket {ticket_id} is '
@@ -382,10 +419,6 @@ class TNBAMonitor:
             result.append(detail_object)
 
         return result
-
-    @staticmethod
-    def _is_detail_in_outage_ticket(ticket_detail: dict) -> bool:
-        return ticket_detail['ticket_topic'] == 'Service Outage Trouble'
 
     def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
         current_datetime = datetime.now().astimezone(utc)
@@ -505,7 +538,29 @@ class TNBAMonitor:
             f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
             f"and serial {serial_number}..."
         )
-        tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
+        if self._prediction_repository.is_request_or_repair_completed_prediction(best_prediction):
+            self._logger.info(
+                f'Best prediction found for serial {serial_number} of ticket {ticket_id} is '
+                f'{best_prediction["name"]}. Running autoresolve...'
+            )
+            was_detail_autoresolved = await self._autoresolve_ticket_detail(
+                detail_object=detail_object,
+                best_prediction=best_prediction
+            )
+
+            if not was_detail_autoresolved:
+                self._logger.info(
+                    f'Autoresolve was triggered because the best prediction found for serial {serial_number} of '
+                    f'ticket {ticket_id} was {best_prediction["name"]}, but the process failed. No TNBA note will be '
+                    'built nor appended to the ticket.'
+                )
+                return
+
+            tnba_note: str = self._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction(
+                best_prediction, serial_number
+            )
+        else:
+            tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction, serial_number)
 
         if self._config.ENVIRONMENT == 'production':
             self._tnba_notes_to_append.append({
@@ -612,7 +667,29 @@ class TNBAMonitor:
             f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
             f"and serial {serial_number}..."
         )
-        tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
+        if self._prediction_repository.is_request_or_repair_completed_prediction(best_prediction):
+            self._logger.info(
+                f'Best prediction found for serial {serial_number} of ticket {ticket_id} is '
+                f'{best_prediction["name"]}. Running autoresolve...'
+            )
+            was_detail_autoresolved = await self._autoresolve_ticket_detail(
+                detail_object=detail_object,
+                best_prediction=best_prediction
+            )
+
+            if not was_detail_autoresolved:
+                self._logger.info(
+                    f'Autoresolve was triggered because the best prediction found for serial {serial_number} of '
+                    f'ticket {ticket_id} was {best_prediction["name"]}, but the process failed. No TNBA note will be '
+                    'built nor appended to the ticket.'
+                )
+                return
+
+            tnba_note: str = self._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction(
+                best_prediction, serial_number
+            )
+        else:
+            tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction, serial_number)
 
         if self._config.ENVIRONMENT == 'production':
             self._tnba_notes_to_append.append({
@@ -632,6 +709,52 @@ class TNBAMonitor:
         self._logger.info(
             f'Finished processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}!'
         )
+
+    async def _autoresolve_ticket_detail(self, detail_object: dict, best_prediction: dict) -> bool:
+        ticket_id = detail_object['ticket_id']
+        serial_number = detail_object['ticket_detail']['detailValue']
+
+        self._logger.info(f'Running autoresolve for serial {serial_number} of ticket {ticket_id}...')
+
+        if not self._ticket_repository.is_detail_in_outage_ticket(detail_object):
+            self._logger.info(
+                f'Ticket {ticket_id}, where serial {serial_number} is, is not an outage ticket. Skipping '
+                'autoresolve...'
+            )
+            return False
+
+        if not self._ticket_repository.was_ticket_created_by_automation_engine(detail_object):
+            self._logger.info(
+                f'Ticket {ticket_id}, where serial {serial_number} is, was not created by Automation Engine. '
+                'Skipping autoresolve...'
+            )
+            return False
+
+        if not self._prediction_repository.is_prediction_confident_enough(best_prediction):
+            self._logger.info(
+                f'The confidence of the best prediction found for ticket {ticket_id}, where serial {serial_number} is, '
+                f'did not exceed the minimum threshold. Skipping autoresolve...'
+            )
+            return False
+
+        edge_status = self._edge_status_by_serial[serial_number]
+        if self._is_there_an_outage(edge_status):
+            self._logger.info(
+                f'Serial {serial_number} of ticket {ticket_id} is in outage state. Skipping autoresolve...'
+            )
+            return False
+
+        if not self._config.ENVIRONMENT == 'production':
+            self._logger.info(
+                f'Detail related to serial {serial_number} of ticket {ticket_id} was about to be resolved, but the '
+                f'current environment is {self._config.ENVIRONMENT.upper()}. Skipping autoresolve...'
+            )
+            return False
+
+        ticket_detail_id = detail_object['ticket_detail']['detailID']
+        resolve_detail_response = await self._bruin_repository.resolve_ticket_detail(ticket_id, ticket_detail_id)
+
+        return resolve_detail_response['status'] in range(200, 300)
 
     async def _append_tnba_notes(self):
         notes_by_ticket_id = {}
@@ -659,3 +782,20 @@ class TNBAMonitor:
 
             slack_message = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(notes_count=len(notes), ticket_id=ticket_id)
             await self._notifications_repository.send_slack_message(slack_message)
+
+    def _is_there_an_outage(self, edge_status: dict) -> bool:
+        is_faulty_edge = self._is_faulty_edge(edge_status["edgeState"])
+        is_there_any_faulty_link = any(
+            self._is_faulty_link(link_status['linkState'])
+            for link_status in edge_status['links']
+        )
+
+        return is_faulty_edge or is_there_any_faulty_link
+
+    @staticmethod
+    def _is_faulty_edge(edge_state: str) -> bool:
+        return edge_state == 'OFFLINE'
+
+    @staticmethod
+    def _is_faulty_link(link_state: str) -> bool:
+        return link_state == 'DISCONNECTED'
