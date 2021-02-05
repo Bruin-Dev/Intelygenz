@@ -498,8 +498,8 @@ class BruinRepository:
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         task_result_note = os.linesep.join([
             f'#*Automation Engine*#',
-            f'Task result change',
-            f'Changing task result to: {task_result}',
+            f'DiGi reboot failed',
+            f'Moving task to: {task_result}',
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
         return await self.append_note_to_ticket(ticket_id, task_result_note)

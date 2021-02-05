@@ -1880,8 +1880,8 @@ class TestBruinRepository:
         task_result = "Wireless Repair Intervention Needed"
         ticket_note = os.linesep.join([
             f'#*Automation Engine*#',
-            f'Task result change',
-            f'Changing task result to: {task_result}',
+            f'DiGi reboot failed',
+            f'Moving task to: {task_result}',
             f'TimeStamp: {current_datetime}'
         ])
 

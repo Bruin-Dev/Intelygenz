@@ -7337,6 +7337,8 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
         logger = Mock()
         scheduler = Mock()
         event_bus = Mock()
@@ -7352,7 +7354,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.change_detail_work_queue = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
         outage_repository = Mock()
