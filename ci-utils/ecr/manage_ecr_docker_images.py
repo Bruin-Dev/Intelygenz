@@ -5,6 +5,7 @@ import os
 import logging
 import json
 import boto3
+import operator
 from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO)
@@ -17,10 +18,10 @@ class EcrUtil:
 
     @staticmethod
     def _write_to_json_file(filename, content):
-        filepath = f"/tmp/{filename}.json"
-        with open(filepath, 'w+') as f:
+        with open(filename, 'w+') as f:
             f.write(json.dumps(content, indent=4, default=str))
-        return filepath
+        logging.info(f"Successfully write content in file {filename}")
+        return filename
 
     def _get_all_ecr_repositories_from_aws(self):
         repositories_in_ecr = []
@@ -51,6 +52,19 @@ class EcrUtil:
         for repository in docker_images_to_delete_in_repositories:
             total_images_to_delete += len(repository['images_to_delete'])
         return total_images_to_delete
+
+    def _get_repository_uri_of_repository(self, repository):
+        repository_resp = self._client.describe_repositories(
+            repositoryNames=[
+                repository
+            ],
+        )
+        if repository_resp:
+            repository_info = repository_resp.get("repositories")
+            return repository_info[0]['repositoryUri']
+        else:
+            logging.error(f"No information about repository {repository} found")
+            exit(1)
 
     def _get_ecr_images_to_delete_from_environment(self, environment, repositories_to_delete_images):
         docker_images_to_delete_in_repositories = []
@@ -278,64 +292,86 @@ class EcrUtil:
             logging.error(f"There is no image in production environment for the repository {ecr_repository}")
             return None
 
+    def _obtain_images_of_repository_from_environment(self, environment, repository):
+        images_of_environment = []
+        logging.info(f"Obtaining latest Docker image in ECR repository {repository}")
+        docker_images = self._client.list_images(
+            repositoryName=repository,
+        )
+        cont = True
+        while cont:
+            for image in docker_images['imageIds']:
+                image_tag = image.get('imageTag', None)
+                if image_tag is not None:
+                    image_tag_environment = "-".join(image_tag.split("-")[0:2])
+                    if image_tag_environment == environment and 'latest' not in image_tag:
+                        images_of_environment.append(
+                            {
+                                'imageTag': image_tag,
+                                'imagePushedAt': self._obtain_image_pushed_time(repository, image_tag)
+                            }
+                        )
+            if 'nextToken' in docker_images:
+                next_token = docker_images['nextToken']
+                docker_images = self._client.list_images(
+                    repositoryName=repository,
+                    nextToken=next_token
+                )
+            else:
+                cont = False
+        return images_of_environment
+
+    @staticmethod
+    def _add_repository_info_to_latest_docker_images_in_repositories(latest_docker_images_in_repositories,
+                                                                     repository, repository_uri, image_tag,
+                                                                     image_tag_uri, image_pushed_at):
+        return latest_docker_images_in_repositories.append(
+            {
+                'repository': repository,
+                'repositoryUri': repository_uri,
+                'image_tag': image_tag,
+                'image_tag_uri': image_tag_uri,
+                'imagePushedAt': image_pushed_at
+            }
+        )
+
     def _obtain_latest_images_of_repositories_from_environment(self, environment, ecr_repositories):
         logging.info(f'Obtaining latest docker images of repositories {", ".join(ecr_repositories)} '
                      f'for environment {environment}')
         latest_docker_images_in_repositories = []
         for repository in ecr_repositories:
-            images_of_environment = []
+            repository_uri = self._get_repository_uri_of_repository(repository)
             logging.info(f"Obtaining latest Docker image in ECR repository {repository}")
-            docker_images = self._client.list_images(
-                repositoryName=repository,
-            )
-            cont = True
-            while cont:
-                for image in docker_images['imageIds']:
-                    image_tag = image.get('imageTag', None)
-                    if image_tag is not None:
-                        image_tag_environment = "-".join(image_tag.split("-")[0:2])
-                        if image_tag_environment == environment and 'latest' not in image_tag:
-                            images_of_environment.append(
-                                {
-                                    'imageTag': image_tag,
-                                    'imagePushedAt': self._obtain_image_pushed_time(repository, image_tag)
-                                }
-                            )
-                if 'nextToken' in docker_images:
-                    next_token = docker_images['nextToken']
-                    docker_images = self._client.list_images(
-                        repositoryName=repository,
-                        nextToken=next_token
-                    )
-                else:
-                    cont = False
+            images_of_environment = self._obtain_images_of_repository_from_environment(environment, repository)
             if images_of_environment:
                 images_of_environment.sort(key=lambda image: image["imagePushedAt"])
                 latest_image_info = images_of_environment[-1]
-                latest_docker_images_in_repositories.append(
-                    {
-                        'repository': repository,
-                        'image_tag': latest_image_info['imageTag'],
-                        'imagePushedAt': latest_image_info['imagePushedAt']
-                    }
-                )
+                image_tag_uri = repository_uri + ":" + latest_image_info['imageTag']
+                self._add_repository_info_to_latest_docker_images_in_repositories(latest_docker_images_in_repositories,
+                                                                                  repository,
+                                                                                  repository_uri,
+                                                                                  latest_image_info['imageTag'],
+                                                                                  image_tag_uri,
+                                                                                  latest_image_info['imagePushedAt'])
             else:
                 logging.error(f"There isn't a newer image in the repository {repository} for the environment "
                               f"{environment}. Assigning latest from master")
                 latest_image_repository = self._get_latest_images_of_repository_production(repository)
                 if latest_image_repository:
-                    latest_docker_images_in_repositories.append(
-                        {
-                            'repository': repository,
-                            'image_tag': latest_image_repository['imageTag'],
-                            'imagePushedAt': latest_image_repository['imagePushedAt']
-                        }
+                    image_tag_uri = repository_uri + ":" + latest_image_repository['imageTag']
+                    self._add_repository_info_to_latest_docker_images_in_repositories(
+                        latest_docker_images_in_repositories,
+                        repository,
+                        repository_uri,
+                        latest_image_repository['imageTag'],
+                        image_tag_uri,
+                        latest_image_repository['imagePushedAt']
                     )
+        latest_docker_images_in_repositories.sort(key=operator.itemgetter('repository'))
         return ecr_repositories, latest_docker_images_in_repositories, environment
 
     def _print_results(self, latest_images_for_ecr_repositories, print_results, repositories, environment):
         if latest_images_for_ecr_repositories and print_results:
-            self._write_to_json_file('latest_images_for_ecr_repositories', latest_images_for_ecr_repositories)
             logging.info(f'The result of obtaining the latest docker images for the repositories '
                          f'{", ".join(repositories)} in environment {environment} is the following')
             print(f"{json.dumps(latest_images_for_ecr_repositories, indent=4, default=str)}")
@@ -351,6 +387,7 @@ class EcrUtil:
                 repositories, latest_images_for_ecr_repositories, environment = self.\
                     _obtain_latest_images_of_repositories_from_environment(environment,
                                                                            ecr_repositories)
+                self._write_to_json_file(parser.parse_args().file, latest_images_for_ecr_repositories)
                 self._print_results(latest_images_for_ecr_repositories,
                                     parser.parse_args().print_results,
                                     repositories, environment)
@@ -362,13 +399,13 @@ class EcrUtil:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--delete',
-                        type=bool,
+                        action='store_true',
                         help='Boolean flag to indicate whether deleting actions are to be '
                              'performed on ECR repositories',
                         required=False,
                         default=False)
     parser.add_argument('-g', '--get',
-                        type=bool,
+                        action='store_true',
                         help='Boolean flag to get latest image on ECR repositories',
                         required=False,
                         default=False)
@@ -380,23 +417,24 @@ if __name__ == '__main__':
                         type=str,
                         help='flag to indicate the file path where '
                              'the information of the environments actually deployed',
-                        required=False)
+                        required=False,
+                        default="/tmp/latest_images_for_ecr_repositories.json")
     parser.add_argument('-e', '--environment',
                         type=str,
                         help='Name of the environment to delete images',
                         required=True)
     parser.add_argument('-a', '--all_repositories',
-                        type=bool,
+                        action='store_true',
                         help='Indicate if all ECR repositories are going to be explored to delete older images',
                         required=False,
                         default=False)
     parser.add_argument('-o', '--oldest_images',
-                        type=bool,
+                        action='store_true',
                         help='Indicate oldest images is going to be deleted (leaving two always)',
                         required=False,
                         default=False)
     parser.add_argument('-p', '--print_results',
-                        type=bool,
+                        action='store_true',
                         help='Flag to indicate whether the results are to be printed on the screen',
                         required=False,
                         default=False)

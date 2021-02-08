@@ -56,32 +56,32 @@ Once the AWS credentials have been configured, it is possible to use the script 
 - Obtain the most recent Docker images of an environment, there are two possibilities:
    - Get the latest images from a repository for an environment
      ```sh
-     $ python3 manage_ecr_docker_images.py -e <environment_name> -g True -r <docker_repository_name>
+     $ python3 manage_ecr_docker_images.py -e <environment_name> -g -r <docker_repository_name>
      ```
 
    - Get the latest images from all repositories from an environment:
      ```sh
-     $ python3 manage_ecr_docker_images.py -e <environment_name> -g True -a True
+     $ python3 manage_ecr_docker_images.py -e <environment_name> -g -a
      ```
 
 - Delete Docker images of an environment, there are four possibilities:
 
   - Delete the oldest images from a repository for an environment In this case, images will always be deleted, keeping the two most recent ones.
     ```sh
-    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -o True -r <docker_repository_name>
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d -o -r <docker_repository_name>
     ```
 
   - Delete the oldest images from all repositories for an environment In this case, images will always be deleted, keeping the two most recent ones.
     ```sh
-    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -o True -a True
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d -o -a
     ```
 
   - Delete all the images from a repository for an environment:
     ```sh
-    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -r <docker_repository_name>
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d -r <docker_repository_name>
     ```
 
   - Delete all the images from all repositories from an environment:
     ```sh
-    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -a True
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d -a
     ```
