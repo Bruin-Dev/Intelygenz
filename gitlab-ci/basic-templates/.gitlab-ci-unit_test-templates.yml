@@ -4,7 +4,7 @@
 
 .unittest_module_python: &unittest_module_python
   stage: unit_test
-  image: gitlab.intelygenz.com:5001/mettel/docker_images/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
+  image: ${CI_REGISTRY}/mettel/docker_images/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
   before_script:
     - cd ${MODULE}
     - pip install -r requirements.txt
@@ -16,7 +16,7 @@
 
 .unittest_module_python_alpine: &unittest_module_python_alpine
   extends: .unittest_module_python
-  image: gitlab.intelygenz.com:5001/mettel/docker_images/python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
+  image: ${CI_REGISTRY}/mettel/docker_images/python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
 
 .unittest_with_setup_template: &unittest_with_setup_template
   stage: unit_test

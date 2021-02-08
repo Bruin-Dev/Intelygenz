@@ -3,7 +3,7 @@
 #
 .build_app_image: &build_app_image
   image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/docker18_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/docker18_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -29,7 +29,7 @@
   services:
     - docker:18-dind
   image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/docker18_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/docker18_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

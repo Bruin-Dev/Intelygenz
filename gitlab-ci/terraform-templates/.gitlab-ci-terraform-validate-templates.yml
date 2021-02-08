@@ -1,6 +1,6 @@
 .terraform_validate_template: &terraform_validate_template
   image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
