@@ -624,7 +624,12 @@ class OutageMonitor:
                 if digi_note is None:
                     self._logger.info(f'No DiGi note was found for ticket {ticket_id}')
                     return
-
+                if self._was_digi_rebooted_recently(digi_note):
+                    self._logger.info(
+                        f'The last DiGi reboot attempt for Edge {edge_identifier} did not occur '
+                        f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"]/60} or more mins ago.'
+                    )
+                    return
                 task_result = "Wireless Repair Intervention Needed"
                 task_result_note = self._find_note(relevant_notes, 'Wireless Repair Intervention Needed')
 
@@ -643,3 +648,11 @@ class OutageMonitor:
                         slack_message = f'Forwarding ticket {ticket_id} to Wireless team'
                         await self._notifications_repository.send_slack_message(slack_message)
                         return
+
+    def _was_digi_rebooted_recently(self, ticket_note) -> bool:
+        current_datetime = datetime.now(utc)
+        max_seconds_since_last_outage = self._config.MONITOR_CONFIG['last_digi_reboot_seconds']
+
+        note_creation_date = parse(ticket_note['createdDate']).astimezone(utc)
+        seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
+        return seconds_elapsed_since_last_outage < max_seconds_since_last_outage

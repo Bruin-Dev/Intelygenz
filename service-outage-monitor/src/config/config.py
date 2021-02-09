@@ -52,6 +52,7 @@ MONITOR_CONFIG = {
     ],
     'autoresolve_ticket_creation_seconds': 60 * 60,
     'autoresolve_last_outage_seconds': 60 * 60,
+    'last_digi_reboot_seconds': 30 * 60,
     'semaphore': 5,
 }
 
