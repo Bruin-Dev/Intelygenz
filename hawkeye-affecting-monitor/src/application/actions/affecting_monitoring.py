@@ -326,7 +326,7 @@ class AffectingMonitor:
             'to the ticket later on.'
         )
 
-        passed_note = self._build_passed_note(test_result)
+        passed_note = self._build_passed_note(test_result, device_cached_info)
         self._tickets_by_serial[serial_number]['new_notes'].append({
             'text': passed_note,
             'date': datetime.utcnow(),
@@ -381,7 +381,7 @@ class AffectingMonitor:
             )
             await self._notifications_repository.notify_ticket_creation(ticket_id, serial_number)
 
-            failed_note = self._build_failed_note(test_result)
+            failed_note = self._build_failed_note(test_result, device_cached_info)
             self._tickets_by_serial[serial_number] = {
                 'ticket_id': ticket_id,
                 'detail_id': None,
@@ -425,7 +425,7 @@ class AffectingMonitor:
                     await self._notifications_repository.notify_ticket_detail_was_unresolved(ticket_id, serial_number)
                     self._tickets_by_serial[serial_number]['is_detail_resolved'] = False
 
-                failed_note = self._build_failed_note(test_result)
+                failed_note = self._build_failed_note(test_result, device_cached_info)
                 self._tickets_by_serial[serial_number]['new_notes'].append({
                     'text': failed_note,
                     'date': datetime.utcnow(),
@@ -441,7 +441,7 @@ class AffectingMonitor:
                     'to the ticket later on.'
                 )
 
-                failed_note = self._build_failed_note(test_result)
+                failed_note = self._build_failed_note(test_result, device_cached_info)
                 self._tickets_by_serial[serial_number]['new_notes'].append({
                     'text': failed_note,
                     'date': datetime.utcnow(),
@@ -455,7 +455,7 @@ class AffectingMonitor:
                         'type will be built and appended to the ticket later on.'
                     )
 
-                    failed_note = self._build_failed_note(test_result)
+                    failed_note = self._build_failed_note(test_result, device_cached_info)
                     self._tickets_by_serial[serial_number]['new_notes'].append({
                         'text': failed_note,
                         'date': datetime.utcnow(),
@@ -482,12 +482,16 @@ class AffectingMonitor:
         return bool(PASSED_NOTE_REGEX.match(note))
 
     @staticmethod
-    def _build_passed_note(test_result: dict) -> str:
+    def _build_passed_note(test_result: dict, device_cached_info: dict) -> str:
         return os.linesep.join([
             '#*Automation Engine*#',
             'Service Affecting (Ixia)',
             '',
             f'Device Name: {test_result["summary"]["probeFrom"]}',
+            f'Device Type: {device_cached_info["device_type_name"]}',
+            f'Device Group(s): {device_cached_info["probe_group"]}',
+            f'Serial: {device_cached_info["serial_number"]}',
+            f'Hawkeye ID: {device_cached_info["probe_id"]}',
             '',
             f'Test Type: {test_result["summary"]["testType"]}',
             f'Test: {test_result["summary"]["testId"]} - Test Result: {test_result["summary"]["id"]}',
@@ -498,7 +502,7 @@ class AffectingMonitor:
         ])
 
     @staticmethod
-    def _build_failed_note(test_result: dict) -> str:
+    def _build_failed_note(test_result: dict, device_cached_info: dict) -> str:
         failed_metrics = [
             metric
             for metric in test_result['metrics']
@@ -520,6 +524,10 @@ class AffectingMonitor:
             'Service Affecting (Ixia)',
             '',
             f'Device Name: {test_result["summary"]["probeFrom"]}',
+            f'Device Type: {device_cached_info["device_type_name"]}',
+            f'Device Group(s): {device_cached_info["probe_group"]}',
+            f'Serial: {device_cached_info["serial_number"]}',
+            f'Hawkeye ID: {device_cached_info["probe_id"]}',
             '',
             f'Test Type: {test_result["summary"]["testType"]}',
             f'Test: {test_result["summary"]["testId"]} - Test Result: {test_result["summary"]["id"]}',

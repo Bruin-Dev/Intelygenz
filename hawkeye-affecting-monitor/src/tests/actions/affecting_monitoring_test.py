@@ -956,7 +956,10 @@ class TestServiceAffectingMonitor:
 
         affecting_monitor._get_last_note_by_test_type.assert_called_once_with(all_ticket_notes, test_type_network_kpi)
         affecting_monitor._is_passed_note.assert_called_once_with(note_text_about_failed_network_kpi_test)
-        affecting_monitor._build_passed_note.assert_called_once_with(passed_network_kpi_test_result_1_on_2020_01_22)
+        affecting_monitor._build_passed_note.assert_called_once_with(
+            passed_network_kpi_test_result_1_on_2020_01_22,
+            device_cached_info_1,
+        )
 
         updated_new_notes = [
             ticket_new_note_1,
@@ -1006,15 +1009,22 @@ class TestServiceAffectingMonitor:
         result = AffectingMonitor._is_passed_note(note_text_about_failed_icmp_test)
         assert result is False
 
-    def build_passed_note_test(self, passed_network_kpi_test_result_1_on_2020_01_22):
+    def build_passed_note_test(self, passed_network_kpi_test_result_1_on_2020_01_22, device_cached_info_1):
         test_result_id = passed_network_kpi_test_result_1_on_2020_01_22['summary']['id']
 
-        result = AffectingMonitor._build_passed_note(passed_network_kpi_test_result_1_on_2020_01_22)
+        result = AffectingMonitor._build_passed_note(
+            test_result=passed_network_kpi_test_result_1_on_2020_01_22,
+            device_cached_info=device_cached_info_1,
+        )
         expected = (
             '#*Automation Engine*#\n'
             'Service Affecting (Ixia)\n'
             '\n'
-            f'Device Name: Vi_Pi_DRI test\n'
+            'Device Name: Vi_Pi_DRI test\n'
+            'Device Type: xr_pi\n'
+            'Device Group(s): FIS\n'
+            'Serial: B827EB76A8DE\n'
+            'Hawkeye ID: 1\n'
             '\n'
             'Test Type: Network KPI\n'
             f'Test: 335 - Test Result: {test_result_id}\n'
@@ -1025,15 +1035,22 @@ class TestServiceAffectingMonitor:
         )
         assert result == expected
 
-    def build_failed_note_test(self, failed_network_kpi_test_result_2_on_2020_01_23):
+    def build_failed_note_test(self, failed_network_kpi_test_result_2_on_2020_01_23, device_cached_info_1):
         test_result_id = failed_network_kpi_test_result_2_on_2020_01_23['summary']['id']
 
-        result = AffectingMonitor._build_failed_note(failed_network_kpi_test_result_2_on_2020_01_23)
+        result = AffectingMonitor._build_failed_note(
+            test_result=failed_network_kpi_test_result_2_on_2020_01_23,
+            device_cached_info=device_cached_info_1,
+        )
         expected = (
             '#*Automation Engine*#\n'
             'Service Affecting (Ixia)\n'
             '\n'
-            f'Device Name: Vi_Pi_DRI test\n'
+            'Device Name: Vi_Pi_DRI test\n'
+            'Device Type: xr_pi\n'
+            'Device Group(s): FIS\n'
+            'Serial: B827EB76A8DE\n'
+            'Hawkeye ID: 1\n'
             '\n'
             'Test Type: Network KPI\n'
             f'Test: 335 - Test Result: {test_result_id}\n'
@@ -1168,7 +1185,10 @@ class TestServiceAffectingMonitor:
         )
         affecting_monitor._get_last_note_by_test_type.assert_not_called()
         affecting_monitor._is_passed_note.assert_not_called()
-        affecting_monitor._build_failed_note.assert_called_once_with(failed_network_kpi_test_result_2_on_2020_01_23)
+        affecting_monitor._build_failed_note.assert_called_once_with(
+            failed_network_kpi_test_result_2_on_2020_01_23,
+            device_cached_info_1,
+        )
         assert affecting_monitor._tickets_by_serial == {
             serial_number_1: {
                 'ticket_id': ticket_id,
@@ -1234,7 +1254,10 @@ class TestServiceAffectingMonitor:
         affecting_monitor._bruin_repository.create_affecting_ticket.assert_not_awaited()
         affecting_monitor._get_last_note_by_test_type.assert_called_once_with(all_ticket_notes, test_type_network_kpi)
         affecting_monitor._is_passed_note.assert_not_called()
-        affecting_monitor._build_failed_note.assert_called_once_with(failed_network_kpi_test_result_2_on_2020_01_23)
+        affecting_monitor._build_failed_note.assert_called_once_with(
+            failed_network_kpi_test_result_2_on_2020_01_23,
+            device_cached_info_1,
+        )
         updated_new_notes = [
             ticket_new_note_1,
             {
@@ -1303,7 +1326,10 @@ class TestServiceAffectingMonitor:
         affecting_monitor._bruin_repository.create_affecting_ticket.assert_not_awaited()
         affecting_monitor._get_last_note_by_test_type.assert_called_once_with(all_ticket_notes, test_type_network_kpi)
         affecting_monitor._is_passed_note.assert_called_once_with(note_text_about_passed_network_kpi_test)
-        affecting_monitor._build_failed_note.assert_called_once_with(failed_network_kpi_test_result_2_on_2020_01_23)
+        affecting_monitor._build_failed_note.assert_called_once_with(
+            failed_network_kpi_test_result_2_on_2020_01_23,
+            device_cached_info_1,
+        )
         updated_new_notes = [
             ticket_new_note_1,
             {
@@ -1427,7 +1453,10 @@ class TestServiceAffectingMonitor:
         affecting_monitor._get_last_note_by_test_type.assert_not_called()
         affecting_monitor._is_passed_note.assert_not_called()
         affecting_monitor._bruin_repository.unresolve_ticket_detail.assert_awaited_once_with(ticket_id, detail_id)
-        affecting_monitor._build_failed_note.assert_called_once_with(failed_network_kpi_test_result_2_on_2020_01_23)
+        affecting_monitor._build_failed_note.assert_called_once_with(
+            failed_network_kpi_test_result_2_on_2020_01_23,
+            device_cached_info_1,
+        )
         updated_new_notes = [
             ticket_new_note_1,
             {
@@ -1501,7 +1530,10 @@ class TestServiceAffectingMonitor:
         affecting_monitor._notifications_repository.notify_ticket_detail_was_unresolved.assert_awaited_once_with(
             ticket_id, serial_number_1
         )
-        affecting_monitor._build_failed_note.assert_called_once_with(failed_network_kpi_test_result_2_on_2020_01_23)
+        affecting_monitor._build_failed_note.assert_called_once_with(
+            failed_network_kpi_test_result_2_on_2020_01_23,
+            device_cached_info_1,
+        )
         updated_new_notes = [
             ticket_new_note_1,
             {

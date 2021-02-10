@@ -6,9 +6,15 @@ def __generate_cached_device(*, probe_uid: str, serial_number: str, **kwargs):
     last_contact = kwargs.get('last_contact', '2020-01-16T14:59:56.245Z')
     bruin_client_name = kwargs.get('bruin_client_name', 'METTEL/NEW YORK')
     bruin_client_id = kwargs.get('bruin_client_id', 9994)
+    probe_id = kwargs.get('probe_id', 1)
+    probe_group = kwargs.get('probe_group', 'FIS')
+    device_type_name = kwargs.get('device_type_name', 'xr_pi')
 
     return {
+        "probe_id": probe_id,
         "probe_uid": probe_uid,
+        "probe_group": probe_group,
+        "device_type_name": device_type_name,
         "serial_number": serial_number,
         "last_contact": last_contact,
         "bruin_client_info": {
