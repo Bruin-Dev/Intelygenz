@@ -1,17 +1,15 @@
-import asyncio
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch, call
-from dateutil.parser import parse
 
+import asyncio
 import pytest
-
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application.repositories import bruin_repository as bruin_repository_module
-from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories import nats_error_response
+from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
 
@@ -673,7 +671,7 @@ class TestBruinRepository:
                                                      response_bruin_one_tickets):
         response = service_affecting_monitor_reports._bruin_repository.filter_tickets_with_serial_cached(
             response_bruin_one_tickets, ['VC05200085762']
-            )
+        )
 
         assert response == response_bruin_one_tickets
 

@@ -2,7 +2,6 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
@@ -10,7 +9,6 @@ from application.repositories import customer_cache_repository as customer_cache
 from application.repositories import nats_error_response
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from config import testconfig
-
 
 uuid_ = uuid()
 uuid_mock = patch.object(customer_cache_repository_module, 'uuid', return_value=uuid_)
@@ -193,4 +191,3 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository.get_cache_for_affecting_monitoring()
 
         assert result == response
-

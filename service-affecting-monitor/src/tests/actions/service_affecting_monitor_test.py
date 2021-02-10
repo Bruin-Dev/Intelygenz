@@ -1,21 +1,16 @@
-from unittest.mock import call
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import Mock
-from unittest.mock import call
 from unittest.mock import patch
-from shortuuid import uuid
 
-import json
 import pytest
+from apscheduler.util import undefined
+from asynctest import CoroutineMock
+from shortuuid import uuid
 
 from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
-
 from config import testconfig
-
 
 uuid_ = uuid()
 uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_)
@@ -112,9 +107,9 @@ class TestServiceAffectingMonitor:
 
         customer_cache_list = ['edges']
         customer_cache_return = {
-                                    "body": customer_cache_list,
-                                    "status": 200
-                                }
+            "body": customer_cache_list,
+            "status": 200
+        }
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(return_value=customer_cache_return)
 
@@ -271,27 +266,28 @@ class TestServiceAffectingMonitor:
         links_metric_status = 200
 
         link_metrics_return = {
-                                'body': links_metric_body,
-                                'status': links_metric_status
+            'body': links_metric_body,
+            'status': links_metric_status
 
         }
 
         structure_link_1 = {
-                            'edge_status': {
-                                            "host": "mettel.velocloud.net",
-                                            "enterprise_id": 137,
-                                            "edge_id": 1602,
-                                            "name": "TEST",
-                                            "edgeState": "OFFLINE",
-                                            "serialNumber": "VC05200028729",
-                                            "enterprise_name": "Titan America|85940|"},
-                            'link_status': {
-                                            'interface': 'GE1'
-                            },
-                            'link_metrics': {
-                                'bestLatencyMsRx': link_1_best_latency_ms_rx,
-                                'bestLatencyMsTx': link_1_best_latency_ms_tx,
-                            }
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"
+            },
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bestLatencyMsRx': link_1_best_latency_ms_rx,
+                'bestLatencyMsTx': link_1_best_latency_ms_tx,
+            }
         }
         structure_link_2 = {
             'edge_status': {
@@ -301,7 +297,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE2'
             },
@@ -318,7 +315,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE3'
             },
@@ -449,7 +447,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -549,7 +548,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -668,27 +668,28 @@ class TestServiceAffectingMonitor:
         links_metric_status = 200
 
         link_metrics_return = {
-                                'body': links_metric_body,
-                                'status': links_metric_status
+            'body': links_metric_body,
+            'status': links_metric_status
 
         }
 
         structure_link_1 = {
-                            'edge_status': {
-                                            "host": "mettel.velocloud.net",
-                                            "enterprise_id": 137,
-                                            "edge_id": 1602,
-                                            "name": "TEST",
-                                            "edgeState": "OFFLINE",
-                                            "serialNumber": "VC05200028729",
-                                            "enterprise_name": "Titan America|85940|"},
-                            'link_status': {
-                                            'interface': 'GE1'
-                            },
-                            'link_metrics': {
-                                'bestLossPctRx': link_1_best_loss_packets_rx,
-                                'bestLossPctTx': link_1_best_loss_packets_tx,
-                            }
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"
+            },
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bestLossPctRx': link_1_best_loss_packets_rx,
+                'bestLossPctTx': link_1_best_loss_packets_tx,
+            }
         }
         structure_link_2 = {
             'edge_status': {
@@ -698,7 +699,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE2'
             },
@@ -715,7 +717,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE3'
             },
@@ -846,7 +849,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -946,7 +950,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -1062,7 +1067,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -1079,7 +1085,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE2'
             },
@@ -1223,7 +1230,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -1240,7 +1248,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE2'
             },
@@ -1374,29 +1383,30 @@ class TestServiceAffectingMonitor:
         links_metric_status = 200
 
         link_metrics_return = {
-                                'body': links_metric_body,
-                                'status': links_metric_status
+            'body': links_metric_body,
+            'status': links_metric_status
 
         }
 
         structure_link_1 = {
-                            'edge_status': {
-                                            "host": "mettel.velocloud.net",
-                                            "enterprise_id": 137,
-                                            "edge_id": 1602,
-                                            "name": "TEST",
-                                            "edgeState": "OFFLINE",
-                                            "serialNumber": "VC05200028729",
-                                            "enterprise_name": "Titan America|85940|"},
-                            'link_status': {
-                                            'interface': 'GE1'
-                            },
-                            'link_metrics': {
-                                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
-                                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
-                                'bytesTx': link_1_bytes_tx,
-                                'bytesRx': link_1_bytes_rx,
-                            }
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"
+            },
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
         }
         structure_link_2 = {
             'edge_status': {
@@ -1406,7 +1416,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE2'
             },
@@ -1425,7 +1436,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE3'
             },
@@ -1440,12 +1452,18 @@ class TestServiceAffectingMonitor:
                                  structure_link_2,
                                  structure_link_3]
         metrics_with_cache_and_contact_info_return = [
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_1},
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_2},
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_3}]
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_1
+            },
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_2
+            },
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_3
+            }]
 
         logger = Mock()
         metrics_repository = Mock()
@@ -1595,29 +1613,30 @@ class TestServiceAffectingMonitor:
         links_metric_status = 200
 
         link_metrics_return = {
-                                'body': links_metric_body,
-                                'status': links_metric_status
+            'body': links_metric_body,
+            'status': links_metric_status
 
         }
 
         structure_link_1 = {
-                            'edge_status': {
-                                            "host": "mettel.velocloud.net",
-                                            "enterprise_id": 137,
-                                            "edge_id": 1602,
-                                            "name": "TEST",
-                                            "edgeState": "OFFLINE",
-                                            "serialNumber": "VC05200028729",
-                                            "enterprise_name": "Titan America|85940|"},
-                            'link_status': {
-                                            'interface': 'GE1'
-                            },
-                            'link_metrics': {
-                                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
-                                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
-                                'bytesTx': link_1_bytes_tx,
-                                'bytesRx': link_1_bytes_rx,
-                            }
+            'edge_status': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602,
+                "name": "TEST",
+                "edgeState": "OFFLINE",
+                "serialNumber": "VC05200028729",
+                "enterprise_name": "Titan America|85940|"
+            },
+            'link_status': {
+                'interface': 'GE1'
+            },
+            'link_metrics': {
+                'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
+                'bpsOfBestPathRx': link_1_bandwidth_bps_rx,
+                'bytesTx': link_1_bytes_tx,
+                'bytesRx': link_1_bytes_rx,
+            }
         }
         structure_link_2 = {
             'edge_status': {
@@ -1627,7 +1646,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE2'
             },
@@ -1646,7 +1666,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE3'
             },
@@ -1661,12 +1682,18 @@ class TestServiceAffectingMonitor:
                                  structure_link_2,
                                  structure_link_3]
         metrics_with_cache_and_contact_info_return = [
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_1},
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_2},
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_3}]
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_1
+            },
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_2
+            },
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_3
+            }]
 
         logger = Mock()
         metrics_repository = Mock()
@@ -1747,7 +1774,8 @@ class TestServiceAffectingMonitor:
                 "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1',
                 'displayName': 'GE1'
@@ -1762,9 +1790,10 @@ class TestServiceAffectingMonitor:
 
         structure_link_return = [structure_link_1]
         metrics_with_cache_and_contact_info_return = [
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_1}]
-
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_1
+            }]
 
         logger = Mock()
         metrics_repository = Mock()
@@ -1844,7 +1873,8 @@ class TestServiceAffectingMonitor:
                 "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1',
                 'displayName': 'GE1'
@@ -1859,9 +1889,10 @@ class TestServiceAffectingMonitor:
 
         structure_link_return = [structure_link_1]
         metrics_with_cache_and_contact_info_return = [
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_1}]
-
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_1
+            }]
 
         logger = Mock()
         metrics_repository = Mock()
@@ -1941,7 +1972,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -1955,8 +1987,10 @@ class TestServiceAffectingMonitor:
 
         structure_link_return = [structure_link_1]
         metrics_with_cache_and_contact_info_return = [
-            {'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
-             'contact_info': "some_contact_info", **structure_link_1}]
+            {
+                'cached_info': {'edge': device, 'bruin_client_info': {'client_id': 83109}},
+                'contact_info': "some_contact_info", **structure_link_1
+            }]
 
         bandwidth_metrics = {
             'rx_throughput': 88,
@@ -2017,7 +2051,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2025,23 +2060,26 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
-                                "ticket": {
-                                    "email": "fake@gmail.com",
-                                    "phone": "111-111-1111",
-                                    "name": "Fake Guy",
-                                },
-                                "site": {
-                                    "email": "fake@gmail.com",
-                                    "phone": "111-111-1111",
-                                    "name": "Fake Guy",
-                                }
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
             }
         }
 
@@ -2090,7 +2128,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string_without_watermark.assert_called_once()
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once_with(
             ticket_mock['ticketID'], ticket_mock['ticketDetails'][0]['detailID'])
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message.\
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message. \
             assert_awaited_once_with(slack_message_mock)
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_called_once()
 
@@ -2109,7 +2147,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2117,23 +2156,26 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
-                                "ticket": {
-                                    "email": "fake@gmail.com",
-                                    "phone": "111-111-1111",
-                                    "name": "Fake Guy",
-                                },
-                                "site": {
-                                    "email": "fake@gmail.com",
-                                    "phone": "111-111-1111",
-                                    "name": "Fake Guy",
-                                }
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
             }
         }
 
@@ -2177,7 +2219,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._ticket_object_to_string_without_watermark.assert_not_called()
         service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message.\
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message. \
             assert_not_awaited()
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_not_called()
 
@@ -2196,7 +2238,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2204,12 +2247,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2252,8 +2298,8 @@ class TestServiceAffectingMonitor:
             'body': {}
         }
         slack_message = f'Posting JITTER note to ticket id: 3521039\n' \
-                        f'https://app.bruin.com/helpdesk?clientId=85940&'\
-                        f'ticketId=3521039 , in '\
+                        f'https://app.bruin.com/helpdesk?clientId=85940&' \
+                        f'ticketId=3521039 , in ' \
                         f'production'
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -2288,7 +2334,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2296,12 +2343,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2378,7 +2428,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2386,12 +2437,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2467,7 +2521,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2475,12 +2530,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2534,7 +2592,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2542,12 +2601,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2620,7 +2682,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2628,12 +2691,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2682,10 +2748,10 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._ticket_object_to_string.assert_called_once()
         event_bus.rpc_request.assert_awaited_with(
-                                                   "notification.slack.request",
-                                                   slack_message,
-                                                   timeout=10
-                                                 )
+            "notification.slack.request",
+            slack_message,
+            timeout=10
+        )
         metrics_repository.increment_tickets_created.assert_not_called()
 
     @pytest.mark.asyncio
@@ -2710,7 +2776,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2718,12 +2785,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2782,7 +2852,8 @@ class TestServiceAffectingMonitor:
                 "name": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1'
             },
@@ -2790,12 +2861,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': 14,
                 'bestLatencyMsTx': 20,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2852,7 +2926,8 @@ class TestServiceAffectingMonitor:
                 "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1',
                 'displayName': 'Test'
@@ -2861,12 +2936,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': link_1_best_latency_ms_rx,
                 'bestLatencyMsTx': link_1_best_latency_ms_tx,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2901,7 +2979,8 @@ class TestServiceAffectingMonitor:
                 "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1',
                 'displayName': 'Test'
@@ -2910,12 +2989,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': link_2_best_latency_ms_rx,
                 'bestLatencyMsTx': link_2_best_latency_ms_tx,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -2950,7 +3032,8 @@ class TestServiceAffectingMonitor:
                 "edgeName": "TEST",
                 "edgeState": "OFFLINE",
                 "serialNumber": "VC05200028729",
-                "enterprise_name": "Titan America|85940|"},
+                "enterprise_name": "Titan America|85940|"
+            },
             'link_status': {
                 'interface': 'GE1',
                 'displayName': 'Test'
@@ -2959,12 +3042,15 @@ class TestServiceAffectingMonitor:
                 'bestLatencyMsRx': link_3_best_latency_ms_rx,
                 'bestLatencyMsTx': link_3_best_latency_ms_tx,
             },
-            'cached_info': {'edge': {"host": "mettel.velocloud.net",
-                                     "enterprise_id": 137,
-                                     "edge_id": 1651},
-                            'bruin_client_info': {'client_id': 85940},
-                            'serial_number': 'VC05200028729'
-                            },
+            'cached_info': {
+                'edge': {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1651
+                },
+                'bruin_client_info': {'client_id': 85940},
+                'serial_number': 'VC05200028729'
+            },
             'contact_info': {
                 "ticket": {
                     "email": "fake@gmail.com",
@@ -3034,137 +3120,137 @@ class TestServiceAffectingMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         link_metrics = {
-                            'linkId': 12,
-                            'bytesTx': 289334426,
-                            'bytesRx': 164603350,
-                            'packetsTx': 1682073,
-                            'packetsRx': 1610536,
-                            'totalBytes': 453937776,
-                            'totalPackets': 3292609,
-                            'p1BytesRx': 20936271,
-                            'p1BytesTx': 62441238,
-                            'p1PacketsRx': 54742,
-                            'p1PacketsTx': 92015,
-                            'p2BytesRx': 46571112,
-                            'p2BytesTx': 119887124,
-                            'p2PacketsRx': 195272,
-                            'p2PacketsTx': 246338,
-                            'p3BytesRx': 2990392,
-                            'p3BytesTx': 2273566,
-                            'p3PacketsRx': 3054,
-                            'p3PacketsTx': 5523,
-                            'controlBytesRx': 94105575,
-                            'controlBytesTx': 104732498,
-                            'controlPacketsRx': 1357468,
-                            'controlPacketsTx': 1338197,
-                            'bpsOfBestPathRx': 682655000,
-                            'bpsOfBestPathTx': 750187000,
-                            'bestJitterMsRx': 0,
-                            'bestJitterMsTx': 0,
-                            'bestLatencyMsRx': 0,
-                            'bestLatencyMsTx': 0,
-                            'bestLossPctRx': 0,
-                            'bestLossPctTx': 0,
-                            'scoreTx': 4.400000095367432,
-                            'scoreRx': 4.400000095367432,
-                            'signalStrength': 0,
-                            'state': 0,
-                            'name': 'GE1',
-                            'link': {
-                                        'enterpriseName': 'Signet Group Services Inc|86937|',
-                                        'enterpriseId': 2,
-                                        'enterpriseProxyId': None,
-                                        'enterpriseProxyName': None,
-                                        'edgeName': 'LAB09910VC',
-                                        'edgeState': 'CONNECTED',
-                                        'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
-                                        'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
-                                        'edgeLastContact': '2020-09-29T05:09:24.000Z',
-                                        'edgeId': 4,
-                                        'edgeSerialNumber': 'VC05200005831',
-                                        'edgeHASerialNumber': None,
-                                        'edgeModelNumber': 'edge520',
-                                        'edgeLatitude': 41.139999,
-                                        'edgeLongitude': -81.612999,
-                                        'displayName': '198.70.201.220',
-                                        'isp': 'Frontier Communications',
-                                        'interface': 'GE1',
-                                        'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
-                                        'linkState': 'STABLE',
-                                        'linkLastActive': '2020-09-29T05:05:23.000Z',
-                                        'linkVpnState': 'STABLE',
-                                        'linkId': 12,
-                                        'linkIpAddress': '198.70.201.220',
-                                        'host': 'some host'
-                            },
-                        }
+            'linkId': 12,
+            'bytesTx': 289334426,
+            'bytesRx': 164603350,
+            'packetsTx': 1682073,
+            'packetsRx': 1610536,
+            'totalBytes': 453937776,
+            'totalPackets': 3292609,
+            'p1BytesRx': 20936271,
+            'p1BytesTx': 62441238,
+            'p1PacketsRx': 54742,
+            'p1PacketsTx': 92015,
+            'p2BytesRx': 46571112,
+            'p2BytesTx': 119887124,
+            'p2PacketsRx': 195272,
+            'p2PacketsTx': 246338,
+            'p3BytesRx': 2990392,
+            'p3BytesTx': 2273566,
+            'p3PacketsRx': 3054,
+            'p3PacketsTx': 5523,
+            'controlBytesRx': 94105575,
+            'controlBytesTx': 104732498,
+            'controlPacketsRx': 1357468,
+            'controlPacketsTx': 1338197,
+            'bpsOfBestPathRx': 682655000,
+            'bpsOfBestPathTx': 750187000,
+            'bestJitterMsRx': 0,
+            'bestJitterMsTx': 0,
+            'bestLatencyMsRx': 0,
+            'bestLatencyMsTx': 0,
+            'bestLossPctRx': 0,
+            'bestLossPctTx': 0,
+            'scoreTx': 4.400000095367432,
+            'scoreRx': 4.400000095367432,
+            'signalStrength': 0,
+            'state': 0,
+            'name': 'GE1',
+            'link': {
+                'enterpriseName': 'Signet Group Services Inc|86937|',
+                'enterpriseId': 2,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'LAB09910VC',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
+                'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
+                'edgeLastContact': '2020-09-29T05:09:24.000Z',
+                'edgeId': 4,
+                'edgeSerialNumber': 'VC05200005831',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': 41.139999,
+                'edgeLongitude': -81.612999,
+                'displayName': '198.70.201.220',
+                'isp': 'Frontier Communications',
+                'interface': 'GE1',
+                'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T05:05:23.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 12,
+                'linkIpAddress': '198.70.201.220',
+                'host': 'some host'
+            },
+        }
         expected_link_structure = {
-                'edge_status': {
-                    'enterpriseName': link_metrics['link']['enterpriseName'],
-                    'enterpriseId': link_metrics['link']['enterpriseId'],
-                    'enterpriseProxyId': link_metrics['link']['enterpriseProxyId'],
-                    'enterpriseProxyName': link_metrics['link']['enterpriseProxyName'],
-                    'edgeName': link_metrics['link']['edgeName'],
-                    'edgeState': link_metrics['link']['edgeState'],
-                    'edgeSystemUpSince': link_metrics['link']['edgeSystemUpSince'],
-                    'edgeServiceUpSince': link_metrics['link']['edgeServiceUpSince'],
-                    'edgeLastContact': link_metrics['link']['edgeLastContact'],
-                    'edgeId': link_metrics['link']['edgeId'],
-                    'edgeSerialNumber': link_metrics['link']['edgeSerialNumber'],
-                    'edgeHASerialNumber': link_metrics['link']['edgeHASerialNumber'],
-                    'edgeModelNumber': link_metrics['link']['edgeModelNumber'],
-                    'edgeLatitude': link_metrics['link']['edgeLatitude'],
-                    'edgeLongitude': link_metrics['link']['edgeLongitude'],
-                    'host': link_metrics['link']['host'],
-                },
-                'link_status': {
-                    'interface': link_metrics['link']['interface'],
-                    'internalId': link_metrics['link']['internalId'],
-                    'linkState': link_metrics['link']['linkState'],
-                    'linkLastActive': link_metrics['link']['linkLastActive'],
-                    'linkVpnState': link_metrics['link']['linkVpnState'],
-                    'linkId': link_metrics['link']['linkId'],
-                    'linkIpAddress': link_metrics['link']['linkIpAddress'],
-                    'displayName': link_metrics['link']['displayName'],
-                    'isp': link_metrics['link']['isp'],
-                },
-                'link_metrics': {
-                    'bytesTx': link_metrics['bytesTx'],
-                    'bytesRx': link_metrics['bytesRx'],
-                    'packetsTx': link_metrics['packetsTx'],
-                    'packetsRx': link_metrics['packetsRx'],
-                    'totalBytes': link_metrics['totalBytes'],
-                    'totalPackets': link_metrics['totalPackets'],
-                    'p1BytesRx': link_metrics['p1BytesRx'],
-                    'p1BytesTx': link_metrics['p1BytesTx'],
-                    'p1PacketsRx': link_metrics['p1PacketsRx'],
-                    'p1PacketsTx': link_metrics['p1PacketsTx'],
-                    'p2BytesRx': link_metrics['p2BytesRx'],
-                    'p2BytesTx': link_metrics['p2BytesTx'],
-                    'p2PacketsRx': link_metrics['p2PacketsRx'],
-                    'p2PacketsTx': link_metrics['p2PacketsTx'],
-                    'p3BytesRx': link_metrics['p3BytesRx'],
-                    'p3BytesTx': link_metrics['p3BytesTx'],
-                    'p3PacketsRx': link_metrics['p3PacketsRx'],
-                    'p3PacketsTx': link_metrics['p3PacketsTx'],
-                    'controlBytesRx': link_metrics['controlBytesRx'],
-                    'controlBytesTx': link_metrics['controlBytesTx'],
-                    'controlPacketsRx': link_metrics['controlPacketsRx'],
-                    'controlPacketsTx': link_metrics['controlPacketsTx'],
-                    'bpsOfBestPathRx': link_metrics['bpsOfBestPathRx'],
-                    'bpsOfBestPathTx': link_metrics['bpsOfBestPathTx'],
-                    'bestJitterMsRx': link_metrics['bestJitterMsRx'],
-                    'bestJitterMsTx': link_metrics['bestJitterMsTx'],
-                    'bestLatencyMsRx': link_metrics['bestLatencyMsRx'],
-                    'bestLatencyMsTx': link_metrics['bestLatencyMsTx'],
-                    'bestLossPctRx': link_metrics['bestLossPctRx'],
-                    'bestLossPctTx': link_metrics['bestLossPctTx'],
-                    'scoreTx': link_metrics['scoreTx'],
-                    'scoreRx': link_metrics['scoreRx'],
-                    'signalStrength': link_metrics['signalStrength'],
-                    'state': link_metrics['state'],
-                }
+            'edge_status': {
+                'enterpriseName': link_metrics['link']['enterpriseName'],
+                'enterpriseId': link_metrics['link']['enterpriseId'],
+                'enterpriseProxyId': link_metrics['link']['enterpriseProxyId'],
+                'enterpriseProxyName': link_metrics['link']['enterpriseProxyName'],
+                'edgeName': link_metrics['link']['edgeName'],
+                'edgeState': link_metrics['link']['edgeState'],
+                'edgeSystemUpSince': link_metrics['link']['edgeSystemUpSince'],
+                'edgeServiceUpSince': link_metrics['link']['edgeServiceUpSince'],
+                'edgeLastContact': link_metrics['link']['edgeLastContact'],
+                'edgeId': link_metrics['link']['edgeId'],
+                'edgeSerialNumber': link_metrics['link']['edgeSerialNumber'],
+                'edgeHASerialNumber': link_metrics['link']['edgeHASerialNumber'],
+                'edgeModelNumber': link_metrics['link']['edgeModelNumber'],
+                'edgeLatitude': link_metrics['link']['edgeLatitude'],
+                'edgeLongitude': link_metrics['link']['edgeLongitude'],
+                'host': link_metrics['link']['host'],
+            },
+            'link_status': {
+                'interface': link_metrics['link']['interface'],
+                'internalId': link_metrics['link']['internalId'],
+                'linkState': link_metrics['link']['linkState'],
+                'linkLastActive': link_metrics['link']['linkLastActive'],
+                'linkVpnState': link_metrics['link']['linkVpnState'],
+                'linkId': link_metrics['link']['linkId'],
+                'linkIpAddress': link_metrics['link']['linkIpAddress'],
+                'displayName': link_metrics['link']['displayName'],
+                'isp': link_metrics['link']['isp'],
+            },
+            'link_metrics': {
+                'bytesTx': link_metrics['bytesTx'],
+                'bytesRx': link_metrics['bytesRx'],
+                'packetsTx': link_metrics['packetsTx'],
+                'packetsRx': link_metrics['packetsRx'],
+                'totalBytes': link_metrics['totalBytes'],
+                'totalPackets': link_metrics['totalPackets'],
+                'p1BytesRx': link_metrics['p1BytesRx'],
+                'p1BytesTx': link_metrics['p1BytesTx'],
+                'p1PacketsRx': link_metrics['p1PacketsRx'],
+                'p1PacketsTx': link_metrics['p1PacketsTx'],
+                'p2BytesRx': link_metrics['p2BytesRx'],
+                'p2BytesTx': link_metrics['p2BytesTx'],
+                'p2PacketsRx': link_metrics['p2PacketsRx'],
+                'p2PacketsTx': link_metrics['p2PacketsTx'],
+                'p3BytesRx': link_metrics['p3BytesRx'],
+                'p3BytesTx': link_metrics['p3BytesTx'],
+                'p3PacketsRx': link_metrics['p3PacketsRx'],
+                'p3PacketsTx': link_metrics['p3PacketsTx'],
+                'controlBytesRx': link_metrics['controlBytesRx'],
+                'controlBytesTx': link_metrics['controlBytesTx'],
+                'controlPacketsRx': link_metrics['controlPacketsRx'],
+                'controlPacketsTx': link_metrics['controlPacketsTx'],
+                'bpsOfBestPathRx': link_metrics['bpsOfBestPathRx'],
+                'bpsOfBestPathTx': link_metrics['bpsOfBestPathTx'],
+                'bestJitterMsRx': link_metrics['bestJitterMsRx'],
+                'bestJitterMsTx': link_metrics['bestJitterMsTx'],
+                'bestLatencyMsRx': link_metrics['bestLatencyMsRx'],
+                'bestLatencyMsTx': link_metrics['bestLatencyMsTx'],
+                'bestLossPctRx': link_metrics['bestLossPctRx'],
+                'bestLossPctTx': link_metrics['bestLossPctTx'],
+                'scoreTx': link_metrics['scoreTx'],
+                'scoreRx': link_metrics['scoreRx'],
+                'signalStrength': link_metrics['signalStrength'],
+                'state': link_metrics['state'],
             }
+        }
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
@@ -3182,69 +3268,69 @@ class TestServiceAffectingMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         link_metrics = {
-                            'linkId': 12,
-                            'bytesTx': 289334426,
-                            'bytesRx': 164603350,
-                            'packetsTx': 1682073,
-                            'packetsRx': 1610536,
-                            'totalBytes': 453937776,
-                            'totalPackets': 3292609,
-                            'p1BytesRx': 20936271,
-                            'p1BytesTx': 62441238,
-                            'p1PacketsRx': 54742,
-                            'p1PacketsTx': 92015,
-                            'p2BytesRx': 46571112,
-                            'p2BytesTx': 119887124,
-                            'p2PacketsRx': 195272,
-                            'p2PacketsTx': 246338,
-                            'p3BytesRx': 2990392,
-                            'p3BytesTx': 2273566,
-                            'p3PacketsRx': 3054,
-                            'p3PacketsTx': 5523,
-                            'controlBytesRx': 94105575,
-                            'controlBytesTx': 104732498,
-                            'controlPacketsRx': 1357468,
-                            'controlPacketsTx': 1338197,
-                            'bpsOfBestPathRx': 682655000,
-                            'bpsOfBestPathTx': 750187000,
-                            'bestJitterMsRx': 0,
-                            'bestJitterMsTx': 0,
-                            'bestLatencyMsRx': 0,
-                            'bestLatencyMsTx': 0,
-                            'bestLossPctRx': 0,
-                            'bestLossPctTx': 0,
-                            'scoreTx': 4.400000095367432,
-                            'scoreRx': 4.400000095367432,
-                            'signalStrength': 0,
-                            'state': 0,
-                            'name': 'GE1',
-                            'link': {
-                                        'enterpriseName': 'Signet Group Services Inc|86937|',
-                                        'enterpriseId': 2,
-                                        'enterpriseProxyId': None,
-                                        'enterpriseProxyName': None,
-                                        'edgeName': 'LAB09910VC',
-                                        'edgeState': 'CONNECTED',
-                                        'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
-                                        'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
-                                        'edgeLastContact': '2020-09-29T05:09:24.000Z',
-                                        'edgeSerialNumber': 'VC05200005831',
-                                        'edgeHASerialNumber': None,
-                                        'edgeModelNumber': 'edge520',
-                                        'edgeLatitude': 41.139999,
-                                        'edgeLongitude': -81.612999,
-                                        'displayName': '198.70.201.220',
-                                        'isp': 'Frontier Communications',
-                                        'interface': 'GE1',
-                                        'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
-                                        'linkState': 'STABLE',
-                                        'linkLastActive': '2020-09-29T05:05:23.000Z',
-                                        'linkVpnState': 'STABLE',
-                                        'linkId': 12,
-                                        'linkIpAddress': '198.70.201.220',
-                                        'host': 'some host'
-                            },
-                        }
+            'linkId': 12,
+            'bytesTx': 289334426,
+            'bytesRx': 164603350,
+            'packetsTx': 1682073,
+            'packetsRx': 1610536,
+            'totalBytes': 453937776,
+            'totalPackets': 3292609,
+            'p1BytesRx': 20936271,
+            'p1BytesTx': 62441238,
+            'p1PacketsRx': 54742,
+            'p1PacketsTx': 92015,
+            'p2BytesRx': 46571112,
+            'p2BytesTx': 119887124,
+            'p2PacketsRx': 195272,
+            'p2PacketsTx': 246338,
+            'p3BytesRx': 2990392,
+            'p3BytesTx': 2273566,
+            'p3PacketsRx': 3054,
+            'p3PacketsTx': 5523,
+            'controlBytesRx': 94105575,
+            'controlBytesTx': 104732498,
+            'controlPacketsRx': 1357468,
+            'controlPacketsTx': 1338197,
+            'bpsOfBestPathRx': 682655000,
+            'bpsOfBestPathTx': 750187000,
+            'bestJitterMsRx': 0,
+            'bestJitterMsTx': 0,
+            'bestLatencyMsRx': 0,
+            'bestLatencyMsTx': 0,
+            'bestLossPctRx': 0,
+            'bestLossPctTx': 0,
+            'scoreTx': 4.400000095367432,
+            'scoreRx': 4.400000095367432,
+            'signalStrength': 0,
+            'state': 0,
+            'name': 'GE1',
+            'link': {
+                'enterpriseName': 'Signet Group Services Inc|86937|',
+                'enterpriseId': 2,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'LAB09910VC',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
+                'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
+                'edgeLastContact': '2020-09-29T05:09:24.000Z',
+                'edgeSerialNumber': 'VC05200005831',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': 41.139999,
+                'edgeLongitude': -81.612999,
+                'displayName': '198.70.201.220',
+                'isp': 'Frontier Communications',
+                'interface': 'GE1',
+                'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T05:05:23.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 12,
+                'linkIpAddress': '198.70.201.220',
+                'host': 'some host'
+            },
+        }
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
@@ -3263,137 +3349,137 @@ class TestServiceAffectingMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         link_metrics = {
-                            'linkId': 12,
-                            'bytesTx': 289334426,
-                            'bytesRx': 164603350,
-                            'packetsTx': 1682073,
-                            'packetsRx': 1610536,
-                            'totalBytes': 453937776,
-                            'totalPackets': 3292609,
-                            'p1BytesRx': 20936271,
-                            'p1BytesTx': 62441238,
-                            'p1PacketsRx': 54742,
-                            'p1PacketsTx': 92015,
-                            'p2BytesRx': 46571112,
-                            'p2BytesTx': 119887124,
-                            'p2PacketsRx': 195272,
-                            'p2PacketsTx': 246338,
-                            'p3BytesRx': 2990392,
-                            'p3BytesTx': 2273566,
-                            'p3PacketsRx': 3054,
-                            'p3PacketsTx': 5523,
-                            'controlBytesRx': 94105575,
-                            'controlBytesTx': 104732498,
-                            'controlPacketsRx': 1357468,
-                            'controlPacketsTx': 1338197,
-                            'bpsOfBestPathRx': 682655000,
-                            'bpsOfBestPathTx': 750187000,
-                            'bestJitterMsRx': 0,
-                            'bestJitterMsTx': 0,
-                            'bestLatencyMsRx': 0,
-                            'bestLatencyMsTx': 0,
-                            'bestLossPctRx': 0,
-                            'bestLossPctTx': 0,
-                            'scoreTx': 4.400000095367432,
-                            'scoreRx': 4.400000095367432,
-                            'signalStrength': 0,
-                            'state': 0,
-                            'name': 'GE1',
-                            'link': {
-                                        'enterpriseName': 'Signet Group Services Inc|86937|',
-                                        'enterpriseId': 137,
-                                        'enterpriseProxyId': None,
-                                        'enterpriseProxyName': None,
-                                        'edgeName': 'LAB09910VC',
-                                        'edgeState': 'CONNECTED',
-                                        'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
-                                        'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
-                                        'edgeLastContact': '2020-09-29T05:09:24.000Z',
-                                        'edgeId': 1651,
-                                        'edgeSerialNumber': 'VC05200005831',
-                                        'edgeHASerialNumber': None,
-                                        'edgeModelNumber': 'edge520',
-                                        'edgeLatitude': 41.139999,
-                                        'edgeLongitude': -81.612999,
-                                        'displayName': '198.70.201.220',
-                                        'isp': 'Frontier Communications',
-                                        'interface': 'GE1',
-                                        'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
-                                        'linkState': 'STABLE',
-                                        'linkLastActive': '2020-09-29T05:05:23.000Z',
-                                        'linkVpnState': 'STABLE',
-                                        'linkId': 12,
-                                        'linkIpAddress': '198.70.201.220',
-                                        'host': 'mettel.velocloud.net'
-                            },
-                        }
+            'linkId': 12,
+            'bytesTx': 289334426,
+            'bytesRx': 164603350,
+            'packetsTx': 1682073,
+            'packetsRx': 1610536,
+            'totalBytes': 453937776,
+            'totalPackets': 3292609,
+            'p1BytesRx': 20936271,
+            'p1BytesTx': 62441238,
+            'p1PacketsRx': 54742,
+            'p1PacketsTx': 92015,
+            'p2BytesRx': 46571112,
+            'p2BytesTx': 119887124,
+            'p2PacketsRx': 195272,
+            'p2PacketsTx': 246338,
+            'p3BytesRx': 2990392,
+            'p3BytesTx': 2273566,
+            'p3PacketsRx': 3054,
+            'p3PacketsTx': 5523,
+            'controlBytesRx': 94105575,
+            'controlBytesTx': 104732498,
+            'controlPacketsRx': 1357468,
+            'controlPacketsTx': 1338197,
+            'bpsOfBestPathRx': 682655000,
+            'bpsOfBestPathTx': 750187000,
+            'bestJitterMsRx': 0,
+            'bestJitterMsTx': 0,
+            'bestLatencyMsRx': 0,
+            'bestLatencyMsTx': 0,
+            'bestLossPctRx': 0,
+            'bestLossPctTx': 0,
+            'scoreTx': 4.400000095367432,
+            'scoreRx': 4.400000095367432,
+            'signalStrength': 0,
+            'state': 0,
+            'name': 'GE1',
+            'link': {
+                'enterpriseName': 'Signet Group Services Inc|86937|',
+                'enterpriseId': 137,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'LAB09910VC',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
+                'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
+                'edgeLastContact': '2020-09-29T05:09:24.000Z',
+                'edgeId': 1651,
+                'edgeSerialNumber': 'VC05200005831',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': 41.139999,
+                'edgeLongitude': -81.612999,
+                'displayName': '198.70.201.220',
+                'isp': 'Frontier Communications',
+                'interface': 'GE1',
+                'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T05:05:23.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 12,
+                'linkIpAddress': '198.70.201.220',
+                'host': 'mettel.velocloud.net'
+            },
+        }
         link_structure = {
-                'edge_status': {
-                    'enterpriseName': link_metrics['link']['enterpriseName'],
-                    'enterpriseId': link_metrics['link']['enterpriseId'],
-                    'enterpriseProxyId': link_metrics['link']['enterpriseProxyId'],
-                    'enterpriseProxyName': link_metrics['link']['enterpriseProxyName'],
-                    'edgeName': link_metrics['link']['edgeName'],
-                    'edgeState': link_metrics['link']['edgeState'],
-                    'edgeSystemUpSince': link_metrics['link']['edgeSystemUpSince'],
-                    'edgeServiceUpSince': link_metrics['link']['edgeServiceUpSince'],
-                    'edgeLastContact': link_metrics['link']['edgeLastContact'],
-                    'edgeId': link_metrics['link']['edgeId'],
-                    'edgeSerialNumber': link_metrics['link']['edgeSerialNumber'],
-                    'edgeHASerialNumber': link_metrics['link']['edgeHASerialNumber'],
-                    'edgeModelNumber': link_metrics['link']['edgeModelNumber'],
-                    'edgeLatitude': link_metrics['link']['edgeLatitude'],
-                    'edgeLongitude': link_metrics['link']['edgeLongitude'],
-                    'host': link_metrics['link']['host'],
-                },
-                'link_status': {
-                    'interface': link_metrics['link']['interface'],
-                    'internalId': link_metrics['link']['internalId'],
-                    'linkState': link_metrics['link']['linkState'],
-                    'linkLastActive': link_metrics['link']['linkLastActive'],
-                    'linkVpnState': link_metrics['link']['linkVpnState'],
-                    'linkId': link_metrics['link']['linkId'],
-                    'linkIpAddress': link_metrics['link']['linkIpAddress'],
-                    'displayName': link_metrics['link']['displayName'],
-                    'isp': link_metrics['link']['isp'],
-                },
-                'link_metrics': {
-                    'bytesTx': link_metrics['bytesTx'],
-                    'bytesRx': link_metrics['bytesRx'],
-                    'packetsTx': link_metrics['packetsTx'],
-                    'packetsRx': link_metrics['packetsRx'],
-                    'totalBytes': link_metrics['totalBytes'],
-                    'totalPackets': link_metrics['totalPackets'],
-                    'p1BytesRx': link_metrics['p1BytesRx'],
-                    'p1BytesTx': link_metrics['p1BytesTx'],
-                    'p1PacketsRx': link_metrics['p1PacketsRx'],
-                    'p1PacketsTx': link_metrics['p1PacketsTx'],
-                    'p2BytesRx': link_metrics['p2BytesRx'],
-                    'p2BytesTx': link_metrics['p2BytesTx'],
-                    'p2PacketsRx': link_metrics['p2PacketsRx'],
-                    'p2PacketsTx': link_metrics['p2PacketsTx'],
-                    'p3BytesRx': link_metrics['p3BytesRx'],
-                    'p3BytesTx': link_metrics['p3BytesTx'],
-                    'p3PacketsRx': link_metrics['p3PacketsRx'],
-                    'p3PacketsTx': link_metrics['p3PacketsTx'],
-                    'controlBytesRx': link_metrics['controlBytesRx'],
-                    'controlBytesTx': link_metrics['controlBytesTx'],
-                    'controlPacketsRx': link_metrics['controlPacketsRx'],
-                    'controlPacketsTx': link_metrics['controlPacketsTx'],
-                    'bpsOfBestPathRx': link_metrics['bpsOfBestPathRx'],
-                    'bpsOfBestPathTx': link_metrics['bpsOfBestPathTx'],
-                    'bestJitterMsRx': link_metrics['bestJitterMsRx'],
-                    'bestJitterMsTx': link_metrics['bestJitterMsTx'],
-                    'bestLatencyMsRx': link_metrics['bestLatencyMsRx'],
-                    'bestLatencyMsTx': link_metrics['bestLatencyMsTx'],
-                    'bestLossPctRx': link_metrics['bestLossPctRx'],
-                    'bestLossPctTx': link_metrics['bestLossPctTx'],
-                    'scoreTx': link_metrics['scoreTx'],
-                    'scoreRx': link_metrics['scoreRx'],
-                    'signalStrength': link_metrics['signalStrength'],
-                    'state': link_metrics['state'],
-                }
+            'edge_status': {
+                'enterpriseName': link_metrics['link']['enterpriseName'],
+                'enterpriseId': link_metrics['link']['enterpriseId'],
+                'enterpriseProxyId': link_metrics['link']['enterpriseProxyId'],
+                'enterpriseProxyName': link_metrics['link']['enterpriseProxyName'],
+                'edgeName': link_metrics['link']['edgeName'],
+                'edgeState': link_metrics['link']['edgeState'],
+                'edgeSystemUpSince': link_metrics['link']['edgeSystemUpSince'],
+                'edgeServiceUpSince': link_metrics['link']['edgeServiceUpSince'],
+                'edgeLastContact': link_metrics['link']['edgeLastContact'],
+                'edgeId': link_metrics['link']['edgeId'],
+                'edgeSerialNumber': link_metrics['link']['edgeSerialNumber'],
+                'edgeHASerialNumber': link_metrics['link']['edgeHASerialNumber'],
+                'edgeModelNumber': link_metrics['link']['edgeModelNumber'],
+                'edgeLatitude': link_metrics['link']['edgeLatitude'],
+                'edgeLongitude': link_metrics['link']['edgeLongitude'],
+                'host': link_metrics['link']['host'],
+            },
+            'link_status': {
+                'interface': link_metrics['link']['interface'],
+                'internalId': link_metrics['link']['internalId'],
+                'linkState': link_metrics['link']['linkState'],
+                'linkLastActive': link_metrics['link']['linkLastActive'],
+                'linkVpnState': link_metrics['link']['linkVpnState'],
+                'linkId': link_metrics['link']['linkId'],
+                'linkIpAddress': link_metrics['link']['linkIpAddress'],
+                'displayName': link_metrics['link']['displayName'],
+                'isp': link_metrics['link']['isp'],
+            },
+            'link_metrics': {
+                'bytesTx': link_metrics['bytesTx'],
+                'bytesRx': link_metrics['bytesRx'],
+                'packetsTx': link_metrics['packetsTx'],
+                'packetsRx': link_metrics['packetsRx'],
+                'totalBytes': link_metrics['totalBytes'],
+                'totalPackets': link_metrics['totalPackets'],
+                'p1BytesRx': link_metrics['p1BytesRx'],
+                'p1BytesTx': link_metrics['p1BytesTx'],
+                'p1PacketsRx': link_metrics['p1PacketsRx'],
+                'p1PacketsTx': link_metrics['p1PacketsTx'],
+                'p2BytesRx': link_metrics['p2BytesRx'],
+                'p2BytesTx': link_metrics['p2BytesTx'],
+                'p2PacketsRx': link_metrics['p2PacketsRx'],
+                'p2PacketsTx': link_metrics['p2PacketsTx'],
+                'p3BytesRx': link_metrics['p3BytesRx'],
+                'p3BytesTx': link_metrics['p3BytesTx'],
+                'p3PacketsRx': link_metrics['p3PacketsRx'],
+                'p3PacketsTx': link_metrics['p3PacketsTx'],
+                'controlBytesRx': link_metrics['controlBytesRx'],
+                'controlBytesTx': link_metrics['controlBytesTx'],
+                'controlPacketsRx': link_metrics['controlPacketsRx'],
+                'controlPacketsTx': link_metrics['controlPacketsTx'],
+                'bpsOfBestPathRx': link_metrics['bpsOfBestPathRx'],
+                'bpsOfBestPathTx': link_metrics['bpsOfBestPathTx'],
+                'bestJitterMsRx': link_metrics['bestJitterMsRx'],
+                'bestJitterMsTx': link_metrics['bestJitterMsTx'],
+                'bestLatencyMsRx': link_metrics['bestLatencyMsRx'],
+                'bestLatencyMsTx': link_metrics['bestLatencyMsTx'],
+                'bestLossPctRx': link_metrics['bestLossPctRx'],
+                'bestLossPctTx': link_metrics['bestLossPctTx'],
+                'scoreTx': link_metrics['scoreTx'],
+                'scoreRx': link_metrics['scoreRx'],
+                'signalStrength': link_metrics['signalStrength'],
+                'state': link_metrics['state'],
             }
+        }
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -3421,13 +3507,13 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
         service_affecting_monitor._customer_cache = customer_cache_repository
-        map_cached_edges_with_links_metrics = service_affecting_monitor.\
+        map_cached_edges_with_links_metrics = service_affecting_monitor. \
             _map_cached_edges_with_links_metrics_and_contact_info([link_structure])
         assert map_cached_edges_with_links_metrics == [{
-                                                        'cached_info': customer_cache_repository[0],
-                                                        'contact_info': contact_info,
-                                                        **link_structure,
-                                                     }]
+            'cached_info': customer_cache_repository[0],
+            'contact_info': contact_info,
+            **link_structure,
+        }]
 
     def ticket_object_to_string_without_watermark_test(self):
         event_bus = Mock()

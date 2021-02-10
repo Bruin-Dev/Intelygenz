@@ -1,10 +1,10 @@
-import math
-import asyncio
 import os
 import re
-from datetime import datetime
-from dateutil.parser import parse
 from collections import defaultdict
+from datetime import datetime
+
+import asyncio
+from dateutil.parser import parse
 from pytz import timezone
 from shortuuid import uuid
 from tenacity import wait_fixed, retry, stop_after_attempt
@@ -337,6 +337,3 @@ class BruinRepository:
                     'ticket_notes': bandwidth_notes,
                 })
         return ret
-
-
-
