@@ -64,8 +64,8 @@ def service_affecting_monitor_reports(
 @pytest.fixture(scope='function')
 def report():
     return {
-        'name': 'Report - Bandwitdh Over Utilization',
-        'type': 'bandwitdh_utilization',
+        'name': 'Report - Bandwidth Utilization',
+        'type': 'bandwidth_utilization',
         'crontab': '20 16 * * *',
         'threshold': 3,
         'client_id': 83109,

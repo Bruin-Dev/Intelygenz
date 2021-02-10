@@ -165,7 +165,7 @@ class TestTemplateRenderer:
         template_renderer = TemplateRenderer(config)
 
         report = {
-            'name': 'Report - Bandwitdh Over Utilization', 'type': 'bandwitdh_over_utilization',
+            'name': 'Report - Bandwidth Utilization', 'type': 'bandwidth_utilization',
             'crontab': '20 16 * * *',
             'threshold': 3, 'client_id': 83109, 'trailing_days': 14, 'recipient': 'mettel@intelygenz.com'
         }
@@ -180,7 +180,7 @@ class TestTemplateRenderer:
         email_obj = {
             'request_id': 'CV6J8M2b6cpMtrMNij43Hc',
             'email_data': {
-                'subject': 'Service affecting bandwidth over utilization for 14 days',
+                'subject': 'Service affecting bandwidth utilization for 14 days',
                 'recipient': 'mettel@intelygenz.com', 'text': 'this is the accessible text for the email',
                 'html': '<!DOCTYPE html>\n<html\n  xmlns="http://www.w3.org/1999/xhtml"\n  '
                         'xmlns:v="urn:schemas-microsoft-com:vml"\n  '
@@ -319,7 +319,7 @@ class TestTemplateRenderer:
                         'style="cursor:auto;color:#FFFFFF;font-family:\'Roboto\', Helvetica, Arial, sans-serif; '
                         'font-size: 14px; line-height: 20px; text-align:center;">\n                          \t<h2 '
                         'style="color:#47B585;letter-spacing:0.25em; font-size: 18px; line-height: 25px;">Service '
-                        'Affecting trouble: Report - Bandwitdh Over Utilization</h2>\n\t\t\t\t\t\t\t<p class="intro" '
+                        'Affecting trouble: Report - Bandwidth Utilization</h2>\n\t\t\t\t\t\t\t<p class="intro" '
                         'style="color:#596872; font-size: 16px; line-height: 22px; font-family:\'Roboto\', Helvetica, '
                         'Arial, sans-serif; letter-spacing: 0.05em;"> in edges (1) VC05200085762</p>\n                '
                         '          </div>\n                        </td>\n                      </tr>\n               '
@@ -368,7 +368,7 @@ class TestTemplateRenderer:
                         'style="vertical-align:top;" width="100%" '
                         'border="0">\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<h2 '
                         'style="color:#263640;letter-spacing:0.25em; font-size: 18px; line-height: 25px; text-align: '
-                        'center;">Report - Bandwitdh Over Utilization '
+                        'center;">Report - Bandwidth Utilization '
                         'report</h2>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</table>\n\t\t\t\t\t'
                         '</div>\n\t\t\t\t\t<!--[if mso | IE]></td></tr></table><![endif]-->\n\t\t\t\t</td>\n          '
                         '\t<tr>\n              <td '

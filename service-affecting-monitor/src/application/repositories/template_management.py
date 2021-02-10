@@ -80,7 +80,7 @@ class TemplateRenderer:
         return {
             'request_id': uuid(),
             'email_data': {
-                'subject': f"Service affecting bandwidth over utilization for {report['trailing_days']} days",
+                'subject': f"Service affecting bandwidth utilization for {report['trailing_days']} days",
                 'recipient': report['recipient'],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,

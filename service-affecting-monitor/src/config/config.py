@@ -41,8 +41,8 @@ MONITOR_REPORT_CONFIG = {
     'stop_after_attempt': 3,
     'reports': [
         {
-            'name': 'Report - Bandwitdh Over Utilization',
-            'type': 'bandwitdh_utilization',
+            'name': 'Report - Bandwidth Utilization',
+            'type': 'bandwidth_utilization',
             'crontab': '0 8 * * *',
             'threshold': 3,  # Number of tickets to include in the report
             'client_id': 83109,
