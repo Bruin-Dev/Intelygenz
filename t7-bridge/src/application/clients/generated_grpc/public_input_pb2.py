@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax='proto3',
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"\xf4\x03\n\tTicketRow\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x0f\n\x07product\x18\x02 \x01(\t\x12\x14\n\x0c\x65ntered_date\x18\x03 \x01(\t\x12\r\n\x05notes\x18\x04 \x01(\t\x12\x13\n\x0btask_result\x18\x05 \x01(\t\x12\x13\n\x0b\x63lient_name\x18\x06 \x01(\t\x12\x0c\n\x04\x63ity\x18\x07 \x01(\t\x12\r\n\x05state\x18\x08 \x01(\t\x12\x16\n\x0e\x65ntered_date_n\x18\t \x01(\t\x12\x17\n\x0fnote_entered_by\x18\n \x01(\t\x12\x1b\n\x13ticket_entered_date\x18\x0b \x01(\t\x12\x16\n\x0e\x63\x61ll_ticket_id\x18\x0c \x01(\x03\x12$\n\x1cinitial_note_ticket_creation\x18\r \x01(\t\x12\x11\n\tdetail_id\x18\x0e \x01(\x03\x12\x10\n\x08\x61\x64\x64ress1\x18\x0f \x01(\t\x12\x10\n\x08\x61\x64\x64ress2\x18\x10 \x01(\t\x12\x0b\n\x03zip\x18\x11 \x01(\t\x12\x11\n\tsite_name\x18\x12 \x01(\t\x12\x11\n\tnote_type\x18\x13 \x01(\t\x12\x19\n\x11note_entered_date\x18\x14 \x01(\t\x12\x18\n\x10task_assigned_to\x18\x15 \x01(\t\x12\x0c\n\x04task\x18\x16 \x01(\t\x12\x0b\n\x03sla\x18\x17 \x01(\x05\x12\x15\n\rticket_status\x18\x18 \x01(\t\"/\n\nTaskResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"&\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"p\n\x0f\x41ssetPrediction\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12,\n\x0ctask_results\x18\x02 \x03(\x0b\x32\x16.entrypoint.TaskResult\x12 \n\x05\x65rror\x18\x03 \x01(\x0b\x32\x11.entrypoint.Error\"A\n\x15\x41ssetAvailableOptions\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x19\n\x11\x61vailable_options\x18\x02 \x03(\t\"Q\n\x17\x41ssetSuggestionFeedback\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x16\n\x0esuggested_note\x18\x02 \x01(\t\x12\x0f\n\x07\x64\x65tails\x18\x03 \x01(\t\"R\n\x11PredictionRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\"\x81\x01\n\x12PredictionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x11\n\tticket_id\x18\x03 \x01(\x03\x12\x36\n\x11\x61sset_predictions\x18\x04 \x03(\x0b\x32\x1b.entrypoint.AssetPrediction\"\x9b\x02\n\x15SavePredictionRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\x12\x36\n\x11\x61sset_predictions\x18\x03 \x03(\x0b\x32\x1b.entrypoint.AssetPrediction\x12\x42\n\x17\x61sset_available_options\x18\x04 \x03(\x0b\x32!.entrypoint.AssetAvailableOptions\x12G\n\x1a\x61sset_suggestions_feedback\x18\x05 \x03(\x0b\x32#.entrypoint.AssetSuggestionFeedback\")\n\x16SavePredictionResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"S\n\x12SaveMetricsRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\"&\n\x13SaveMetricsResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\x88\x02\n\nEntrypoint\x12M\n\nPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12Y\n\x0eSavePrediction\x12!.entrypoint.SavePredictionRequest\x1a\".entrypoint.SavePredictionResponse\"\x00\x12P\n\x0bSaveMetrics\x12\x1e.entrypoint.SaveMetricsRequest\x1a\x1f.entrypoint.SaveMetricsResponse\"\x00\x62\x06proto3'  # noqa
+    serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"\xf4\x03\n\tTicketRow\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x0f\n\x07product\x18\x02 \x01(\t\x12\x14\n\x0c\x65ntered_date\x18\x03 \x01(\t\x12\r\n\x05notes\x18\x04 \x01(\t\x12\x13\n\x0btask_result\x18\x05 \x01(\t\x12\x13\n\x0b\x63lient_name\x18\x06 \x01(\t\x12\x0c\n\x04\x63ity\x18\x07 \x01(\t\x12\r\n\x05state\x18\x08 \x01(\t\x12\x16\n\x0e\x65ntered_date_n\x18\t \x01(\t\x12\x17\n\x0fnote_entered_by\x18\n \x01(\t\x12\x1b\n\x13ticket_entered_date\x18\x0b \x01(\t\x12\x16\n\x0e\x63\x61ll_ticket_id\x18\x0c \x01(\x03\x12$\n\x1cinitial_note_ticket_creation\x18\r \x01(\t\x12\x11\n\tdetail_id\x18\x0e \x01(\x03\x12\x10\n\x08\x61\x64\x64ress1\x18\x0f \x01(\t\x12\x10\n\x08\x61\x64\x64ress2\x18\x10 \x01(\t\x12\x0b\n\x03zip\x18\x11 \x01(\t\x12\x11\n\tsite_name\x18\x12 \x01(\t\x12\x11\n\tnote_type\x18\x13 \x01(\t\x12\x19\n\x11note_entered_date\x18\x14 \x01(\t\x12\x18\n\x10task_assigned_to\x18\x15 \x01(\t\x12\x0c\n\x04task\x18\x16 \x01(\t\x12\x0b\n\x03sla\x18\x17 \x01(\x05\x12\x15\n\rticket_status\x18\x18 \x01(\t\"/\n\nTaskResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"&\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"p\n\x0f\x41ssetPrediction\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12,\n\x0ctask_results\x18\x02 \x03(\x0b\x32\x16.entrypoint.TaskResult\x12 \n\x05\x65rror\x18\x03 \x01(\x0b\x32\x11.entrypoint.Error\"m\n\x11PredictionRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\x12\x19\n\x11\x61ssets_to_predict\x18\x03 \x03(\t\"\x81\x01\n\x12PredictionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x11\n\tticket_id\x18\x03 \x01(\x03\x12\x36\n\x11\x61sset_predictions\x18\x04 \x03(\x0b\x32\x1b.entrypoint.AssetPrediction\"S\n\x12SaveMetricsRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\"&\n\x13SaveMetricsResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\xad\x01\n\nEntrypoint\x12M\n\nPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveMetrics\x12\x1e.entrypoint.SaveMetricsRequest\x1a\x1f.entrypoint.SaveMetricsResponse\"\x00\x62\x06proto3'  # noqa
 )
 
 _TICKETROW = _descriptor.Descriptor(
@@ -334,89 +334,6 @@ _ASSETPREDICTION = _descriptor.Descriptor(
     serialized_end=738,
 )
 
-_ASSETAVAILABLEOPTIONS = _descriptor.Descriptor(
-    name='AssetAvailableOptions',
-    full_name='entrypoint.AssetAvailableOptions',
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name='asset', full_name='entrypoint.AssetAvailableOptions.asset', index=0,
-            number=1, type=9, cpp_type=9, label=1,
-            has_default_value=False, default_value=b"".decode('utf-8'),
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='available_options', full_name='entrypoint.AssetAvailableOptions.available_options', index=1,
-            number=2, type=9, cpp_type=9, label=3,
-            has_default_value=False, default_value=[],
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-    ],
-    extensions=[
-    ],
-    nested_types=[],
-    enum_types=[
-    ],
-    serialized_options=None,
-    is_extendable=False,
-    syntax='proto3',
-    extension_ranges=[],
-    oneofs=[
-    ],
-    serialized_start=740,
-    serialized_end=805,
-)
-
-_ASSETSUGGESTIONFEEDBACK = _descriptor.Descriptor(
-    name='AssetSuggestionFeedback',
-    full_name='entrypoint.AssetSuggestionFeedback',
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name='asset', full_name='entrypoint.AssetSuggestionFeedback.asset', index=0,
-            number=1, type=9, cpp_type=9, label=1,
-            has_default_value=False, default_value=b"".decode('utf-8'),
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='suggested_note', full_name='entrypoint.AssetSuggestionFeedback.suggested_note', index=1,
-            number=2, type=9, cpp_type=9, label=1,
-            has_default_value=False, default_value=b"".decode('utf-8'),
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='details', full_name='entrypoint.AssetSuggestionFeedback.details', index=2,
-            number=3, type=9, cpp_type=9, label=1,
-            has_default_value=False, default_value=b"".decode('utf-8'),
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-    ],
-    extensions=[
-    ],
-    nested_types=[],
-    enum_types=[
-    ],
-    serialized_options=None,
-    is_extendable=False,
-    syntax='proto3',
-    extension_ranges=[],
-    oneofs=[
-    ],
-    serialized_start=807,
-    serialized_end=888,
-)
-
 _PREDICTIONREQUEST = _descriptor.Descriptor(
     name='PredictionRequest',
     full_name='entrypoint.PredictionRequest',
@@ -439,6 +356,13 @@ _PREDICTIONREQUEST = _descriptor.Descriptor(
             message_type=None, enum_type=None, containing_type=None,
             is_extension=False, extension_scope=None,
             serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
+        _descriptor.FieldDescriptor(
+            name='assets_to_predict', full_name='entrypoint.PredictionRequest.assets_to_predict', index=2,
+            number=3, type=9, cpp_type=9, label=3,
+            has_default_value=False, default_value=[],
+            message_type=None, enum_type=None, containing_type=None,
+            is_extension=False, extension_scope=None,
+            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
     ],
     extensions=[
     ],
@@ -451,8 +375,8 @@ _PREDICTIONREQUEST = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[
     ],
-    serialized_start=890,
-    serialized_end=972,
+    serialized_start=740,
+    serialized_end=849,
 )
 
 _PREDICTIONRESPONSE = _descriptor.Descriptor(
@@ -503,100 +427,8 @@ _PREDICTIONRESPONSE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[
     ],
-    serialized_start=975,
-    serialized_end=1104,
-)
-
-_SAVEPREDICTIONREQUEST = _descriptor.Descriptor(
-    name='SavePredictionRequest',
-    full_name='entrypoint.SavePredictionRequest',
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name='ticket_id', full_name='entrypoint.SavePredictionRequest.ticket_id', index=0,
-            number=1, type=3, cpp_type=2, label=1,
-            has_default_value=False, default_value=0,
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='ticket_rows', full_name='entrypoint.SavePredictionRequest.ticket_rows', index=1,
-            number=2, type=11, cpp_type=10, label=3,
-            has_default_value=False, default_value=[],
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='asset_predictions', full_name='entrypoint.SavePredictionRequest.asset_predictions', index=2,
-            number=3, type=11, cpp_type=10, label=3,
-            has_default_value=False, default_value=[],
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='asset_available_options', full_name='entrypoint.SavePredictionRequest.asset_available_options',
-            index=3,
-            number=4, type=11, cpp_type=10, label=3,
-            has_default_value=False, default_value=[],
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-        _descriptor.FieldDescriptor(
-            name='asset_suggestions_feedback', full_name='entrypoint.SavePredictionRequest.asset_suggestions_feedback',
-            index=4,
-            number=5, type=11, cpp_type=10, label=3,
-            has_default_value=False, default_value=[],
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-    ],
-    extensions=[
-    ],
-    nested_types=[],
-    enum_types=[
-    ],
-    serialized_options=None,
-    is_extendable=False,
-    syntax='proto3',
-    extension_ranges=[],
-    oneofs=[
-    ],
-    serialized_start=1107,
-    serialized_end=1390,
-)
-
-_SAVEPREDICTIONRESPONSE = _descriptor.Descriptor(
-    name='SavePredictionResponse',
-    full_name='entrypoint.SavePredictionResponse',
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    create_key=_descriptor._internal_create_key,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name='message', full_name='entrypoint.SavePredictionResponse.message', index=0,
-            number=1, type=9, cpp_type=9, label=1,
-            has_default_value=False, default_value=b"".decode('utf-8'),
-            message_type=None, enum_type=None, containing_type=None,
-            is_extension=False, extension_scope=None,
-            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
-    ],
-    extensions=[
-    ],
-    nested_types=[],
-    enum_types=[
-    ],
-    serialized_options=None,
-    is_extendable=False,
-    syntax='proto3',
-    extension_ranges=[],
-    oneofs=[
-    ],
-    serialized_start=1392,
-    serialized_end=1433,
+    serialized_start=852,
+    serialized_end=981,
 )
 
 _SAVEMETRICSREQUEST = _descriptor.Descriptor(
@@ -633,8 +465,8 @@ _SAVEMETRICSREQUEST = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[
     ],
-    serialized_start=1435,
-    serialized_end=1518,
+    serialized_start=983,
+    serialized_end=1066,
 )
 
 _SAVEMETRICSRESPONSE = _descriptor.Descriptor(
@@ -664,29 +496,21 @@ _SAVEMETRICSRESPONSE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[
     ],
-    serialized_start=1520,
-    serialized_end=1558,
+    serialized_start=1068,
+    serialized_end=1106,
 )
 
 _ASSETPREDICTION.fields_by_name['task_results'].message_type = _TASKRESULT
 _ASSETPREDICTION.fields_by_name['error'].message_type = _ERROR
 _PREDICTIONREQUEST.fields_by_name['ticket_rows'].message_type = _TICKETROW
 _PREDICTIONRESPONSE.fields_by_name['asset_predictions'].message_type = _ASSETPREDICTION
-_SAVEPREDICTIONREQUEST.fields_by_name['ticket_rows'].message_type = _TICKETROW
-_SAVEPREDICTIONREQUEST.fields_by_name['asset_predictions'].message_type = _ASSETPREDICTION
-_SAVEPREDICTIONREQUEST.fields_by_name['asset_available_options'].message_type = _ASSETAVAILABLEOPTIONS
-_SAVEPREDICTIONREQUEST.fields_by_name['asset_suggestions_feedback'].message_type = _ASSETSUGGESTIONFEEDBACK
 _SAVEMETRICSREQUEST.fields_by_name['ticket_rows'].message_type = _TICKETROW
 DESCRIPTOR.message_types_by_name['TicketRow'] = _TICKETROW
 DESCRIPTOR.message_types_by_name['TaskResult'] = _TASKRESULT
 DESCRIPTOR.message_types_by_name['Error'] = _ERROR
 DESCRIPTOR.message_types_by_name['AssetPrediction'] = _ASSETPREDICTION
-DESCRIPTOR.message_types_by_name['AssetAvailableOptions'] = _ASSETAVAILABLEOPTIONS
-DESCRIPTOR.message_types_by_name['AssetSuggestionFeedback'] = _ASSETSUGGESTIONFEEDBACK
 DESCRIPTOR.message_types_by_name['PredictionRequest'] = _PREDICTIONREQUEST
 DESCRIPTOR.message_types_by_name['PredictionResponse'] = _PREDICTIONRESPONSE
-DESCRIPTOR.message_types_by_name['SavePredictionRequest'] = _SAVEPREDICTIONREQUEST
-DESCRIPTOR.message_types_by_name['SavePredictionResponse'] = _SAVEPREDICTIONRESPONSE
 DESCRIPTOR.message_types_by_name['SaveMetricsRequest'] = _SAVEMETRICSREQUEST
 DESCRIPTOR.message_types_by_name['SaveMetricsResponse'] = _SAVEMETRICSRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -719,20 +543,6 @@ AssetPrediction = _reflection.GeneratedProtocolMessageType('AssetPrediction', (_
 })
 _sym_db.RegisterMessage(AssetPrediction)
 
-AssetAvailableOptions = _reflection.GeneratedProtocolMessageType('AssetAvailableOptions', (_message.Message,), {
-    'DESCRIPTOR': _ASSETAVAILABLEOPTIONS,
-    '__module__': 'public_input_pb2'
-    # @@protoc_insertion_point(class_scope:entrypoint.AssetAvailableOptions)
-})
-_sym_db.RegisterMessage(AssetAvailableOptions)
-
-AssetSuggestionFeedback = _reflection.GeneratedProtocolMessageType('AssetSuggestionFeedback', (_message.Message,), {
-    'DESCRIPTOR': _ASSETSUGGESTIONFEEDBACK,
-    '__module__': 'public_input_pb2'
-    # @@protoc_insertion_point(class_scope:entrypoint.AssetSuggestionFeedback)
-})
-_sym_db.RegisterMessage(AssetSuggestionFeedback)
-
 PredictionRequest = _reflection.GeneratedProtocolMessageType('PredictionRequest', (_message.Message,), {
     'DESCRIPTOR': _PREDICTIONREQUEST,
     '__module__': 'public_input_pb2'
@@ -746,20 +556,6 @@ PredictionResponse = _reflection.GeneratedProtocolMessageType('PredictionRespons
     # @@protoc_insertion_point(class_scope:entrypoint.PredictionResponse)
 })
 _sym_db.RegisterMessage(PredictionResponse)
-
-SavePredictionRequest = _reflection.GeneratedProtocolMessageType('SavePredictionRequest', (_message.Message,), {
-    'DESCRIPTOR': _SAVEPREDICTIONREQUEST,
-    '__module__': 'public_input_pb2'
-    # @@protoc_insertion_point(class_scope:entrypoint.SavePredictionRequest)
-})
-_sym_db.RegisterMessage(SavePredictionRequest)
-
-SavePredictionResponse = _reflection.GeneratedProtocolMessageType('SavePredictionResponse', (_message.Message,), {
-    'DESCRIPTOR': _SAVEPREDICTIONRESPONSE,
-    '__module__': 'public_input_pb2'
-    # @@protoc_insertion_point(class_scope:entrypoint.SavePredictionResponse)
-})
-_sym_db.RegisterMessage(SavePredictionResponse)
 
 SaveMetricsRequest = _reflection.GeneratedProtocolMessageType('SaveMetricsRequest', (_message.Message,), {
     'DESCRIPTOR': _SAVEMETRICSREQUEST,
@@ -782,8 +578,8 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
     index=0,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_start=1561,
-    serialized_end=1825,
+    serialized_start=1109,
+    serialized_end=1282,
     methods=[
         _descriptor.MethodDescriptor(
             name='Prediction',
@@ -796,19 +592,9 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
             create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
-            name='SavePrediction',
-            full_name='entrypoint.Entrypoint.SavePrediction',
-            index=1,
-            containing_service=None,
-            input_type=_SAVEPREDICTIONREQUEST,
-            output_type=_SAVEPREDICTIONRESPONSE,
-            serialized_options=None,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.MethodDescriptor(
             name='SaveMetrics',
             full_name='entrypoint.Entrypoint.SaveMetrics',
-            index=2,
+            index=1,
             containing_service=None,
             input_type=_SAVEMETRICSREQUEST,
             output_type=_SAVEMETRICSRESPONSE,

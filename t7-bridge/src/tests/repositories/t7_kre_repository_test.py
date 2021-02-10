@@ -5,6 +5,7 @@ from application.repositories.t7_kre_repository import T7KRERepository
 
 class TestT7KRERepository:
     valid_ticket_id = 123
+    valid_assets_to_predict = ["asset1"]
     valid_ticket_rows = [
         {
             "Asset": "asset1",
@@ -101,11 +102,12 @@ class TestT7KRERepository:
         t7_kre_repository = T7KRERepository(logger, t7_kre_client)
         predictions = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
-            ticket_rows=self.valid_ticket_rows
+            ticket_rows=self.valid_ticket_rows,
+            assets_to_predict=self.valid_assets_to_predict
         )
 
         t7_kre_repository._t7_kre_client.get_prediction.assert_called_once_with(
-            self.valid_ticket_id, self.expected_ticket_rows
+            self.valid_ticket_id, self.expected_ticket_rows, self.valid_assets_to_predict
         )
         assert predictions == expected_predictions
 
@@ -123,11 +125,12 @@ class TestT7KRERepository:
         t7_kre_repository = T7KRERepository(logger, t7_kre_client)
         response = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
-            ticket_rows=self.valid_ticket_rows
+            ticket_rows=self.valid_ticket_rows,
+            assets_to_predict=self.valid_assets_to_predict
         )
 
         t7_kre_repository._t7_kre_client.get_prediction.assert_called_once_with(
-            self.valid_ticket_id, self.expected_ticket_rows
+            self.valid_ticket_id, self.expected_ticket_rows, self.valid_assets_to_predict
         )
         assert response == expected_response
 

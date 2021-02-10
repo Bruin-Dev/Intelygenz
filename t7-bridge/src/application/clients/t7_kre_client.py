@@ -32,14 +32,15 @@ class T7KREClient:
         else:
             return 500
 
-    def get_prediction(self, ticket_id: int, ticket_rows: List[dict]) -> dict:
+    def get_prediction(self, ticket_id: int, ticket_rows: List[dict], assets_to_predict: List[str]) -> dict:
         try:
             stub = self._create_stub()
 
             save_prediction_response = stub.Prediction(Parse(
                 json.dumps({
                     "ticket_id": ticket_id,
-                    "ticket_rows": ticket_rows
+                    "ticket_rows": ticket_rows,
+                    "assets_to_predict": assets_to_predict
                 }).encode('utf8'),
                 pb2.PredictionRequest(),
                 ignore_unknown_fields=True

@@ -9,13 +9,13 @@ class T7KRERepository:
         self._logger = logger
         self._t7_kre_client = t7_kre_client
 
-    def get_prediction(self, ticket_id: int, ticket_rows: List[dict]) -> dict:
+    def get_prediction(self, ticket_id: int, ticket_rows: List[dict], assets_to_predict: List[str]) -> dict:
         camel_ticket_rows = list(map(
             self.__row_dict_to_camel,
             ticket_rows
         ))
 
-        prediction = self._t7_kre_client.get_prediction(ticket_id, camel_ticket_rows)
+        prediction = self._t7_kre_client.get_prediction(ticket_id, camel_ticket_rows, assets_to_predict)
 
         if prediction["status"] in range(200, 300):
             predictions = prediction["body"]["asset_predictions"]

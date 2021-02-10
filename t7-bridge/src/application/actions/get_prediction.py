@@ -18,7 +18,7 @@ class GetPrediction:
             'status': None
         }
 
-        err_body = 'You must specify {.."body": {"ticket_id", "ticket_rows"}..} in the request'
+        err_body = 'You must specify {.."body": {"ticket_id", "ticket_rows", "assets_to_predict"}..} in the request'
         msg_body = msg.get('body')
         if not msg_body:
             self._logger.error(f'Cannot get prediction using {json.dumps(msg)}. JSON malformed')
@@ -29,16 +29,19 @@ class GetPrediction:
 
         ticket_id = msg_body.get('ticket_id')
         ticket_rows = msg_body.get('ticket_rows')
-        if not (ticket_id and ticket_rows):
+        assets_to_predict = msg_body.get('assets_to_predict')
+
+        if not (ticket_id and ticket_rows and assets_to_predict):
             self._logger.error(
-                f'Cannot get prediction using {json.dumps(msg_body)}. Need parameters "ticket_id" and "ticket_rows"'
+                f'Cannot get prediction using {json.dumps(msg_body)}. '
+                f'Need parameters "ticket_id", "ticket_rows" and "assets_to_predict"'
             )
             response["body"] = err_body
             response["status"] = 400
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        prediction = self._t7_kre_repository.get_prediction(ticket_id, ticket_rows)
+        prediction = self._t7_kre_repository.get_prediction(ticket_id, ticket_rows, assets_to_predict)
 
         response = {
             'request_id': msg['request_id'],

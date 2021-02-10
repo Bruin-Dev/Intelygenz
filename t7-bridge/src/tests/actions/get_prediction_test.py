@@ -62,7 +62,8 @@ class TestGetPrediction:
             response_topic,
             {
                 'request_id': request_id,
-                'body': 'You must specify {.."body": {"ticket_id", "ticket_rows"}..} in the request',
+                'body': 'You must specify {.."body": {"ticket_id", "ticket_rows", "assets_to_predict"}..} '
+                        'in the request',
                 'status': 400,
             }
         )
@@ -78,6 +79,7 @@ class TestGetPrediction:
 
         request_id = 123
         ticket_id = 321
+        assets_to_predict = ["asset1"]
         ticket_rows = [
             {
                 "Asset": "asset1",
@@ -103,7 +105,8 @@ class TestGetPrediction:
             'request_id': request_id,
             'body': {
                 'ticket_id': ticket_id,
-                'ticket_rows': ticket_rows
+                'ticket_rows': ticket_rows,
+                'assets_to_predict': assets_to_predict
             },
             'response_topic': response_topic,
         }
@@ -134,7 +137,9 @@ class TestGetPrediction:
         await prediction_action.get_prediction(msg_published_in_topic)
 
         logger.error.assert_not_called()
-        prediction_action._t7_kre_repository.get_prediction.assert_called_once_with(ticket_id, ticket_rows)
+        prediction_action._t7_kre_repository.get_prediction.assert_called_once_with(
+            ticket_id, ticket_rows, assets_to_predict
+        )
         prediction_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {

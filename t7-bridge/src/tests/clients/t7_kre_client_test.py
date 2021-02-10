@@ -12,6 +12,7 @@ from application.clients.t7_kre_client import T7KREClient
 
 class TestT7KREClient:
     valid_ticket_id = 123
+    valid_assets_to_predict = ["asset1"]
     valid_ticket_rows = [
         {
             "asset": "asset1",
@@ -110,7 +111,8 @@ class TestT7KREClient:
                 self.__data_to_grpc_message(
                     {
                         "ticket_id": self.valid_ticket_id,
-                        "ticket_rows": self.valid_ticket_rows
+                        "ticket_rows": self.valid_ticket_rows,
+                        "assets_to_predict": self.valid_assets_to_predict
                     },
                     pb2.PredictionRequest()
                 ),
@@ -123,7 +125,8 @@ class TestT7KREClient:
         with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
             prediction_response = t7_kre_client.get_prediction(
                 ticket_id=self.valid_ticket_id,
-                ticket_rows=self.valid_ticket_rows
+                ticket_rows=self.valid_ticket_rows,
+                assets_to_predict=self.valid_assets_to_predict
             )
 
         assert logger.info.call_count == 1
@@ -153,7 +156,8 @@ class TestT7KREClient:
                 self.__data_to_grpc_message(
                     {
                         "ticket_id": self.valid_ticket_id,
-                        "ticket_rows": self.valid_ticket_rows
+                        "ticket_rows": self.valid_ticket_rows,
+                        "assets_to_predict": self.valid_assets_to_predict
                     },
                     pb2.PredictionRequest()
                 ),
@@ -166,7 +170,8 @@ class TestT7KREClient:
         with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
             prediction_response = t7_kre_client.get_prediction(
                 ticket_id=self.valid_ticket_id,
-                ticket_rows=self.valid_ticket_rows
+                ticket_rows=self.valid_ticket_rows,
+                assets_to_predict=self.valid_assets_to_predict
             )
 
         assert logger.info.call_count == 0
@@ -194,7 +199,8 @@ class TestT7KREClient:
                 self.__data_to_grpc_message(
                     {
                         "ticket_id": self.valid_ticket_id,
-                        "ticket_rows": self.valid_ticket_rows
+                        "ticket_rows": self.valid_ticket_rows,
+                        "assets_to_predict": self.valid_assets_to_predict
                     },
                     pb2.PredictionRequest()
                 ),
@@ -207,7 +213,8 @@ class TestT7KREClient:
         with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
             prediction_response = t7_kre_client.get_prediction(
                 ticket_id=self.valid_ticket_id,
-                ticket_rows=self.valid_ticket_rows
+                ticket_rows=self.valid_ticket_rows,
+                assets_to_predict=self.valid_assets_to_predict
             )
 
         assert logger.info.call_count == 0
