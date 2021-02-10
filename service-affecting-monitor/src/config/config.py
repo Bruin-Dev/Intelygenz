@@ -42,7 +42,7 @@ MONITOR_REPORT_CONFIG = {
     'reports': [
         {
             'name': 'Report - Bandwitdh Over Utilization',
-            'type': 'bandwitdh_over_utilization',
+            'type': 'bandwitdh_utilization',
             'crontab': '0 8 * * *',
             'threshold': 3,  # Number of tickets to include in the report
             'client_id': 83109,

@@ -65,7 +65,7 @@ def service_affecting_monitor_reports(
 def report():
     return {
         'name': 'Report - Bandwitdh Over Utilization',
-        'type': 'bandwitdh_over_utilization',
+        'type': 'bandwitdh_utilization',
         'crontab': '20 16 * * *',
         'threshold': 3,
         'client_id': 83109,

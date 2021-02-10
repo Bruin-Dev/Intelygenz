@@ -32,7 +32,7 @@ class ServiceAffectingMonitorReports:
 
     def _get_report_function(self, report):
         switcher = {
-            'bandwitdh_over_utilization': self._service_affecting_monitor_report_bandwidth_over_utilization
+            'bandwitdh_utilization': self._service_affecting_monitor_report_bandwidth_over_utilization
         }
         return switcher.get(report.get('type'), None)
 
