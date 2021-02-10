@@ -322,7 +322,13 @@ class TNBAMonitor:
                 self._logger.info(f"Task history of ticket {ticket_id} doesn't have any asset. Skipping...")
                 continue
 
-            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id, task_history)
+            assets_to_predict = [td['detailValue'] for td in ticket['ticket_details']]
+
+            t7_prediction_response = await self._t7_repository.get_prediction(
+                ticket_id,
+                task_history,
+                assets_to_predict
+            )
             if t7_prediction_response['status'] not in range(200, 300):
                 continue
 

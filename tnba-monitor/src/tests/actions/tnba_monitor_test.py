@@ -2510,6 +2510,8 @@ class TestTNBAMonitor:
             'status': 200,
         }
 
+        assets_to_predict = ['VC1234567', 'VC7654321', 'VC1111111']
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -2534,7 +2536,7 @@ class TestTNBAMonitor:
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
         bruin_repository.get_ticket_task_history.assert_awaited_once_with(ticket_id)
-        t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history)
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history, assets_to_predict)
 
         expected = {
             ticket_id: ticket_predictions,
@@ -2744,6 +2746,8 @@ class TestTNBAMonitor:
             'status': 200,
         }
 
+        assets_to_predict = ['VC1234567', 'VC7654321', 'VC1111111']
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -2768,7 +2772,7 @@ class TestTNBAMonitor:
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
         bruin_repository.get_ticket_task_history.assert_awaited_once_with(ticket_id)
-        t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history)
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history, assets_to_predict)
 
         expected = {}
         assert result == expected
@@ -2828,6 +2832,8 @@ class TestTNBAMonitor:
             'status': 200,
         }
 
+        assets_to_predict = ['VC1234567', 'VC7654321', 'VC1111111']
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -2852,7 +2858,7 @@ class TestTNBAMonitor:
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
         bruin_repository.get_ticket_task_history.assert_awaited_once_with(ticket_id)
-        t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history)
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history, assets_to_predict)
 
         expected = {}
         assert result == expected

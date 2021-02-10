@@ -1,4 +1,5 @@
 from shortuuid import uuid
+from typing import List
 
 from application.repositories import nats_error_response
 
@@ -10,7 +11,7 @@ class T7Repository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_prediction(self, ticket_id: int, ticket_rows):
+    async def get_prediction(self, ticket_id: int, ticket_rows: List[dict], assets_to_predict: List[str]) -> dict:
         err_msg = None
 
         request = {
@@ -18,6 +19,7 @@ class T7Repository:
             'body': {
                 'ticket_id': ticket_id,
                 'ticket_rows': ticket_rows,
+                'assets_to_predict': assets_to_predict,
             },
         }
 
