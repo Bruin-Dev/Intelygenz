@@ -283,8 +283,8 @@ class BruinRepository:
             self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
             item_report = {
                 'customer': {
-                    'clientID': ticket_details[0]['ticket']['clientID'],
-                    'clientName': ticket_details[0]['ticket']['clientName'],
+                    'client_id': ticket_details[0]['ticket']['clientID'],
+                    'client_name': ticket_details[0]['ticket']['clientName'],
                 },
                 'location': ticket_details[0]['ticket']['address'],
                 'serial_number': serial,

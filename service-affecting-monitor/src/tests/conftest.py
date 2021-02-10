@@ -881,3 +881,193 @@ def response_prepare_items_for_report(ticket_1, ticket_2, ticket_3, ticket_4, ti
             'interfaces': ['GE1']
         }
     ]
+
+
+@pytest.fixture(scope='function')
+def filtered_affecting_tickets(ticket_1, ticket_2, ticket_3, ticket_4):
+    return [{'ticket_id': 5081250,
+             'ticket': ticket_1,
+             'ticket_detail': {'detailID': 5583073, 'detailType': 'Repair_WTN', 'detailStatus': 'C',
+                               'detailValue': 'VC05200085762', 'assignedToName': '0', 'currentTaskID': None,
+                               'currentTaskName': None, 'lastUpdatedBy': 385677,
+                               'lastUpdatedAt': '2021-01-07T17:59:12.523-05:00'},
+             'ticket_notes': [{'noteId': 77127156,
+                               'noteValue': '#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: '
+                                            'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M '
+                                            '(MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: '
+                                            '2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 Kbps \n'
+                                            'Bandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps)'
+                                            ' \nLinks:  '
+                                            '[Edge|https://metvco03.mettel.net/#!/operator'
+                                            '/customer/124/monitor/edge/2044/]  -  '
+                                            '[QoE|https://metvco03.mettel.net/#!/'
+                                            'operator/customer/124/monitor/edge/2044/qoe/]  -  '
+                                            '[Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/links/]  \n \n',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-07T15:34:26.48-05:00',
+                               'creator': 'api_1@bruin.com'},
+                              {'noteId': 77128126,
+                               'noteValue': '#*Automation Engine*#\nRe-opening ticket.\n \nEdge '
+                                            'Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization \n'
+                                            'Interface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \n'
+                                            'Interval for Scan: 20 \nScan Time: 2021-01-07 15:54:08.913048-05:00 \n'
+                                            'Throughput (Receive): 9274.063 Kbps \nBandwidth (Receive): 9893.0 Kbps \n'
+                                            'Threshold (Receive): 90% (8903.7 Kbps) \nLinks:  '
+                                            '[Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/]  -  '
+                                            '[QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/qoe/]  -  '
+                                            '[Transport|https://metvco03.mettel.net/#!/operator/customer/124'
+                                            '/monitor/edge/2044/links/]  \n \n\n'
+                                            'TimeStamp: 2021-01-07 15:54:44.279607-05:00',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-07T15:54:47.443-05:00',
+                               'creator': 'api_1@bruin.com'}]},
+            {'ticket_id': 5075176,
+             'ticket': ticket_2,
+             'ticket_detail': {'detailID': 5576149, 'detailType': 'Repair_WTN', 'detailStatus': 'C',
+                               'detailValue': 'VC05200085762', 'assignedToName': '0', 'currentTaskID': None,
+                               'currentTaskName': None, 'lastUpdatedBy': 385677,
+                               'lastUpdatedAt': '2021-01-06T17:35:10.317-05:00'},
+             'ticket_notes': [{'noteId': 77051080,
+                               'noteValue': '#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: '
+                                            'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M '
+                                            '(MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: '
+                                            '2021-01-05 16:22:09.661410-05:00 \nThroughput (Receive): 8150.85 Kbps \n'
+                                            'Bandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% (7914.4 Kbps)'
+                                            ' \nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/'
+                                            'monitor/edge/2044/]  -  [QoE|https://metvco03.mettel.net/#!/operator/'
+                                            'customer/124/monitor/edge/2044/qoe/]  -  '
+                                            '[Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/links/]  \n \n',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-05T16:22:24.03-05:00',
+                               'creator': 'api_1@bruin.com'},
+                              {'noteId': 77076719,
+                               'noteValue': '#*Automation Engine*#\nRe-opening ticket.\n \nEdge Name: '
+                                            'TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization \nInterface: '
+                                            'GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \n'
+                                            'Interval for Scan: 20 \nScan Time: 2021-01-06 08:57:09.372295-05:00 \n'
+                                            'Throughput (Receive): 9196.147 Kbps \nBandwidth (Receive): 9893.0 Kbps '
+                                            '\nThreshold (Receive): 80% (7914.4 Kbps) \nLinks:  '
+                                            '[Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/'
+                                            'edge/2044/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer'
+                                            '/124/monitor/edge/2044/qoe/]  -  '
+                                            '[Transport|https://metvco03.mettel.net/#!/operator/customer/124'
+                                            '/monitor/edge/2044/links/]  \n \n\n'
+                                            'TimeStamp: 2021-01-06 08:57:36.651254-05:00',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-06T08:58:04.083-05:00',
+                               'creator': 'api_1@bruin.com'},
+                              {'noteId': 77076720,
+                               'noteValue': '#*Automation Engine*#\nRe-opening ticket.\n \nEdge Name: '
+                                            'TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization \n'
+                                            'Interface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \n'
+                                            'Interval for Scan: 20 \nScan Time: 2021-01-06 08:57:09.372295-05:00 \n'
+                                            'Throughput (Receive): 9196.147 Kbps \n'
+                                            'Bandwidth (Receive): 9893.0 Kbps \n'
+                                            'Threshold (Receive): 80% (7914.4 Kbps) \nLinks:  '
+                                            '[Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/]  -  '
+                                            '[QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/qoe/]  -  ['
+                                            'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/links/]  \n \n\nTimeStamp: 2021-01-06 08:57:36.651254-05:00',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-06T08:58:04.177-05:00',
+                               'creator': 'api_1@bruin.com'}]},
+            {'ticket_id': 5074441,
+             'ticket': ticket_3,
+             'ticket_detail': {'detailID': 5575534, 'detailType': 'Repair_WTN', 'detailStatus': 'C',
+                               'detailValue': 'VC05200085762', 'assignedToName': '0', 'currentTaskID': None,
+                               'currentTaskName': None, 'lastUpdatedBy': 385676,
+                               'lastUpdatedAt': '2021-01-05T14:34:23.72-05:00'},
+             'ticket_notes': [{'noteId': 77043439,
+                               'noteValue': '#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: '
+                                            'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M '
+                                            '(MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: '
+                                            '2021-01-05 13:49:21.416728-05:00 \nThroughput (Receive): 8271.982 Kbps \n'
+                                            'Bandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): '
+                                            '80% (7914.4 Kbps) \nLinks:  [Edge|https://metvco03.mettel.net/#!/operator'
+                                            '/customer/124/monitor/edge/2044/]  -  '
+                                            '[QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                                            '/2044/qoe/]  -  [Transport|https://metvco03.mettel.net/#!/operator'
+                                            '/customer/124/monitor/edge/2044/links/]  \n \n',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-05T13:49:27.65-05:00',
+                               'creator': 'api_1@bruin.com'}]},
+            {'ticket_id': 5073652,
+             'ticket': ticket_4,
+             'ticket_detail': {'detailID': 5574754, 'detailType': 'Repair_WTN', 'detailStatus': 'C',
+                               'detailValue': 'VC05200085762', 'assignedToName': '0', 'currentTaskID': None,
+                               'currentTaskName': None, 'lastUpdatedBy': 385676,
+                               'lastUpdatedAt': '2021-01-05T12:07:31.707-05:00'},
+             'ticket_notes': [{'noteId': 77034460,
+                               'noteValue': '#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: '
+                                            'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M (MetTel '
+                                            'CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: 2021-01-05 '
+                                            '10:29:22.043598-05:00 \nThroughput (Receive): 8365.164 Kbps \n'
+                                            'Bandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% '
+                                            '(7914.4 Kbps) \nLinks:  [Edge|https://metvco03.mettel.net/#!/operator'
+                                            '/customer/124/monitor/edge/2044/]  -  [QoE|https://metvco03.mettel.net'
+                                            '/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  [Transport|https:'
+                                            '//metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links/]'
+                                            '  \n \n',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-05T10:30:21.64-05:00',
+                               'creator': 'api_1@bruin.com'},
+                              {'noteId': 77039080,
+                               'noteValue': '#*Automation Engine*#\nRe-opening ticket.\n \nEdge Name: '
+                                            'TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization \nInterface: '
+                                            'GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for Scan: 20 '
+                                            '\nScan Time: 2021-01-05 11:51:39.347045-05:00 \nThroughput (Receive): '
+                                            '8139.369 Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): '
+                                            '80% (7914.4 Kbps) \nLinks:  [Edge|https://metvco03.mettel.net/#!/operator'
+                                            '/customer/124/monitor/edge/2044/]  -  [QoE|https://metvco03.mettel.net'
+                                            '/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  '
+                                            '[Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor'
+                                            '/edge/2044/links/]  \n \n\nTimeStamp: 2021-01-05 11:52:05.664662-05:00',
+                               'serviceNumber': [
+                                   'VC05200085762'],
+                               'createdDate': '2021-01-05T11:52:05.603-05:00',
+                               'creator': 'api_1@bruin.com'}]}]
+
+
+@pytest.fixture(scope='function')
+def response_mapped_filter_tickets(filtered_affecting_tickets):
+    ret = defaultdict(list)
+    ret[filtered_affecting_tickets[0]['ticket_detail']['detailValue']].append(filtered_affecting_tickets[0])
+    ret[filtered_affecting_tickets[1]['ticket_detail']['detailValue']].append(filtered_affecting_tickets[1])
+    ret[filtered_affecting_tickets[2]['ticket_detail']['detailValue']].append(filtered_affecting_tickets[2])
+    ret[filtered_affecting_tickets[3]['ticket_detail']['detailValue']].append(filtered_affecting_tickets[3])
+    return ret
+
+
+@pytest.fixture(scope='function')
+def response_prepare_items_filtered_for_report(filtered_affecting_tickets):
+    return [
+        {
+            "customer": {
+                "client_id": filtered_affecting_tickets[0]['ticket']['clientID'],
+                "client_name": "RSI"
+            },
+            "location": filtered_affecting_tickets[0]['ticket']['address'],
+            "serial_number": filtered_affecting_tickets[0]['ticket_detail']['detailValue'],
+            "number_of_tickets": 4,
+            "bruin_tickets_id": {
+                filtered_affecting_tickets[0]['ticket_id'],
+                filtered_affecting_tickets[1]['ticket_id'],
+                filtered_affecting_tickets[2]['ticket_id'],
+                filtered_affecting_tickets[3]['ticket_id']
+            },
+            'interfaces': ['GE1']
+        }
+    ]

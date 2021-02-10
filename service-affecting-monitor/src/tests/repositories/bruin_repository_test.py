@@ -309,13 +309,12 @@ class TestBruinRepository:
         assert response is None
 
     def find_bandwidth_over_utilization_tickets_test(self,
-                                                     response_bruin_with_all_tickets,
-                                                     list_customer_cache_serials,
+                                                     filtered_affecting_tickets,
                                                      filter_response_bruin_with_all_tickets):
         response = BruinRepository.filter_bandwidth_notes(
-            response_bruin_with_all_tickets)
+            filtered_affecting_tickets)
 
-        assert response == filter_response_bruin_with_all_tickets
+        assert response == filtered_affecting_tickets
 
     @pytest.mark.asyncio
     async def get_affecting_ticket_by_trouble_ok_test(self):
@@ -652,34 +651,25 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def map_tickets_with_serial_numbers_test(self, service_affecting_monitor_reports,
-                                                   response_bruin_with_all_tickets, response_mapped_tickets):
-        response = service_affecting_monitor_reports._bruin_repository.group_by_serial_tickets(
-            response_bruin_with_all_tickets)
+                                                   filtered_affecting_tickets, response_mapped_filter_tickets):
+        response = service_affecting_monitor_reports._bruin_repository.group_ticket_details_by_serial(
+            filtered_affecting_tickets)
 
-        assert response == response_mapped_tickets
+        assert response == response_mapped_filter_tickets
 
     @pytest.mark.asyncio
-    async def prepare_items_for_report_test(self, service_affecting_monitor_reports, response_mapped_tickets,
-                                            response_prepare_items_for_report):
+    async def prepare_items_for_report_test(self, service_affecting_monitor_reports, response_mapped_filter_tickets,
+                                            response_prepare_items_filtered_for_report):
         response = service_affecting_monitor_reports._bruin_repository.prepare_items_for_report(
-            response_mapped_tickets)
+            response_mapped_filter_tickets)
 
-        assert response == response_prepare_items_for_report
+        assert response == response_prepare_items_filtered_for_report
 
     @pytest.mark.asyncio
     async def filter_tickets_with_serial_cached_test(self, service_affecting_monitor_reports,
-                                                     response_bruin_one_tickets):
+                                                     filtered_affecting_tickets):
         response = service_affecting_monitor_reports._bruin_repository.filter_tickets_with_serial_cached(
-            response_bruin_one_tickets, ['VC05200085762']
+            filtered_affecting_tickets, ['VC05200085762']
         )
 
-        assert response == response_bruin_one_tickets
-
-    @pytest.mark.asyncio
-    async def filter_tickets_with_serial_cached_without_details_test(self, service_affecting_monitor_reports,
-                                                                     response_bruin_one_tickets_no_details):
-        response = service_affecting_monitor_reports._bruin_repository.filter_bandwidth_notes(
-            response_bruin_one_tickets_no_details
-        )
-
-        assert response == {}
+        assert response == filtered_affecting_tickets

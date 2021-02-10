@@ -90,7 +90,7 @@ class TestCustomerCacheRepository:
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await customer_cache_repository.get_cache(filter_)
+            result = await customer_cache_repository.get_cache(velo_filter=filter_)
 
         event_bus.rpc_request.assert_awaited_once_with("customer.cache.get", request, timeout=60)
         assert result == response
@@ -118,7 +118,7 @@ class TestCustomerCacheRepository:
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await customer_cache_repository.get_cache(filter_)
+            result = await customer_cache_repository.get_cache(velo_filter=filter_)
 
         event_bus.rpc_request.assert_awaited_once_with("customer.cache.get", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -158,7 +158,7 @@ class TestCustomerCacheRepository:
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await customer_cache_repository.get_cache(filter_)
+            result = await customer_cache_repository.get_cache(velo_filter=filter_)
 
         event_bus.rpc_request.assert_awaited_once_with("customer.cache.get", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
