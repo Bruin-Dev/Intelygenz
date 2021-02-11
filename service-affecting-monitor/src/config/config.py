@@ -71,6 +71,17 @@ MONITOR_REPORT_CONFIG = {
             'trailing_days': 14,
             'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
                          'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, ' #TODO: CHANGE?
+        },
+        {
+            'name': 'Report - Packet Loss',
+            'type': 'packet_loss',
+            'value': 'Packet Loss',
+            'crontab': '0 8 * * *',  # TODO: The same for all reports?
+            'threshold': 3,  # Number of tickets to include in the report
+            'client_id': 83109,  # TODO: NEED?
+            'trailing_days': 14,
+            'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
+                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '  # TODO: CHANGE?
         }
     ]
 }
