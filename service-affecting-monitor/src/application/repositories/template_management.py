@@ -49,13 +49,13 @@ class TemplateRenderer:
             }
         }
 
-    def compose_email_bandwidth_over_utilization_report_object(
+    def compose_email_report_object(
             self, report: dict, report_items: list, **kwargs):
         logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
         template_vars = {}
         template = "src/templates/{}".format(
-            kwargs.get("template", "service_affecting_monitor_bandwidth_over_utilization_report.html"))
+            kwargs.get("template", "service_affecting_monitor_report.html"))
         templateLoader = jinja2.FileSystemLoader(searchpath=".")
         templateEnv = jinja2.Environment(loader=templateLoader)
         templ = templateEnv.get_template(template)
@@ -72,7 +72,7 @@ class TemplateRenderer:
                 "__LOCATION__": f"{'<br>'.join(list(value['location'].values()))}",
                 "__NUMBER_OF_TICKETS__": f"{value['number_of_tickets']}",
                 "__BRUIN_TICKETS_ID__": f"{',<br>'.join([str(i) for i in value['bruin_tickets_id']])}",
-                "__INTERFACES__": f"{',<br>'.join([str(i) for i in value['interfaces']])}",
+                "__INTERFACES__": str(value['interfaces']),
             })
         template_vars["__OVERVIEW_ROWS__"] = rows
         email_html = templ.render(**template_vars)

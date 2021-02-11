@@ -254,6 +254,19 @@ class BruinRepository:
         return list(interfaces)
 
     @staticmethod
+    def search_interfaces_and_count_in_details(ticket_details):
+        interfaces = dict()
+        for detail_object in ticket_details:
+            for note in detail_object['ticket_notes']:
+                interface = INTERFACE_NOTE_REGEX.search(note['noteValue'])
+                if interface:
+                    if interface['interface_name'] in interfaces:
+                        interfaces[interface['interface_name']] += 1
+                    else:
+                        interfaces[interface['interface_name']] = 0
+        return interfaces
+
+    @staticmethod
     def transform_tickets_into_ticket_details(tickets: dict) -> list:
         result = []
         for ticket_id, ticket_details in tickets.items():
@@ -299,6 +312,31 @@ class BruinRepository:
 
         return items_for_report
 
+    def prepare_items_for_report_by_interface(self, all_serials):
+        items_for_report = []
+
+        for serial, ticket_details in all_serials.items():
+            interfaces = self.search_interfaces_and_count_in_details(ticket_details)
+            for interface, number_of_tickets in interfaces.items():
+                self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
+                item_report = {
+                    'customer': {
+                        'client_id': ticket_details[0]['ticket']['clientID'],
+                        'client_name': ticket_details[0]['ticket']['clientName'],
+                    },
+                    'location': ticket_details[0]['ticket']['address'],
+                    'serial_number': serial,
+                    'number_of_tickets': number_of_tickets,
+                    'bruin_tickets_id': set(
+                        detail_object['ticket_id']
+                        for detail_object in ticket_details
+                    ),
+                    'interfaces': interface
+                }
+                items_for_report.append(item_report)
+
+        return items_for_report
+
     @staticmethod
     def find_detail_by_serial(ticket, edge_serial_number):
         ticket_details = None
@@ -317,8 +355,7 @@ class BruinRepository:
         ]
 
     @staticmethod
-    def filter_bandwidth_notes(tickets_details):
-        trouble = "Bandwidth Over Utilization"
+    def filter_trouble_notes(tickets_details, trouble):
         ret = []
         for detail_object in tickets_details:
             bandwidth_notes = [
