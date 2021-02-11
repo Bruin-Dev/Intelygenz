@@ -32,8 +32,9 @@ class ServiceAffectingMonitorReports:
 
     def _get_report_function(self, report):
         switcher = {
-            # 'bandwidth_utilization': self._service_affecting_monitor_report_bandwidth_over_utilization,
-            'jitter': self._service_affecting_monitor_report_jitter
+            'bandwidth_utilization': self._service_affecting_monitor_report_bandwidth_over_utilization,
+            'jitter': self._service_affecting_monitor_report_by_serial,
+            'latency': self._service_affecting_monitor_report_by_serial
         }
         return switcher.get(report.get('type'), None)
 
@@ -114,7 +115,7 @@ class ServiceAffectingMonitorReports:
 
         self._logger.info(f"[service-affecting-monitor-reports] Report finished took {end}")
 
-    async def _service_affecting_monitor_report_jitter(self, report):
+    async def _service_affecting_monitor_report_by_serial(self, report):
         self._logger.info(f"Running report: {report}")
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
@@ -158,4 +159,3 @@ class ServiceAffectingMonitorReports:
                 f"[service-affecting-monitor-reports] Report {report['value']} not needed to send, there are no items")
 
         self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} finished took {end}")
-        return
