@@ -62,7 +62,7 @@
     - export TF_VAR_DOCDB_CLUSTER_MASTER_PASSWORD=${DOCDB_CLUSTER_MASTER_PASSWORD}
     - apk add zip
     - pip3 install -r ci-utils/ecr/requirements.txt
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -g True -a True -e ${TF_VAR_ENVIRONMENT} -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -g -a -e ${TF_VAR_ENVIRONMENT} -p
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf

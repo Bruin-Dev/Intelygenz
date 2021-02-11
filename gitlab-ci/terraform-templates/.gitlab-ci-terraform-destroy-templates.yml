@@ -45,7 +45,7 @@
       fi
     - python3 ci-utils/delete-environments-aws-resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
     - pip3 install -r ci-utils/ecr/requirements.txt
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -e ${TF_VAR_ENVIRONMENT} -a True -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -e ${TF_VAR_ENVIRONMENT} -a -p
   tags:
     - kubernetes
 

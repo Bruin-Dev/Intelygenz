@@ -75,7 +75,7 @@
     - python3 ci-utils/aws-nuke/aws_nuke_conf_generator.py -e $ENVIRONMENT
     - aws-nuke -c ${AWS_NUKE_CONFIG_FILE} --profile default --force ${AWS_NUKE_OPTS}
     - python3 ci-utils/delete-environments-aws-resources/main.py -e $ENVIRONMENT -z -b
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -e ${ENVIRONMENT} -a True -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -e ${ENVIRONMENT} -a -p
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
     - if: $CI_COMMIT_BRANCH == "master"

@@ -12,7 +12,7 @@ grafana-build:
     - docker build --build-arg IGZ_PACKAGES_REPOSITORY_URL --build-arg IGZ_PACKAGES_VERSION --build-arg GRAFANA_ADMIN_USER
       --build-arg GRAFANA_ADMIN_PASSWORD --build-arg GRAFANA_USER_PASSWORD --build-arg GRAFANA_USER_COMPANY --build-arg GRAFANA_USER_ROLE --build-arg GRAFANA_USER_NAME --build-arg GRAFANA_USER_LOGIN
       --build-arg GRAFANA_USER_EMAIL --build-arg GRAFANA_PORT -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   rules:
@@ -31,7 +31,7 @@ prometheus-build:
   script:
     - source ci-utils/environments/environment_assign.sh
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   rules:
@@ -84,7 +84,7 @@ thanos-querier-build:
     HTTP_PORT: 19091
   script:
     - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile-thanos_querier .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:

@@ -15,7 +15,7 @@
     - pip3 install -r ci-utils/ecr/requirements.txt
   script:
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg REPOSITORY_URL=${REPOSITORY_URL} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
@@ -40,7 +40,7 @@
   script:
     - source ci-utils/environments/environment_assign.sh
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p True
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:

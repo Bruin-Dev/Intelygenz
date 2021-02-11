@@ -38,7 +38,7 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-cts-bridge"
                 },
                 {
-                    "query": f"customer-cache AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "query": f"customer-cache AND {ENVIRONMENT_ID} AND <BUILD_NUMBER> AND -\"-customer-cache\"",
                     "search_name": f"[customer-cache] - logs",
                     "repository": "automation-customer-cache"
                 },
