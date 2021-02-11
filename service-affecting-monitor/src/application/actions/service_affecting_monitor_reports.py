@@ -34,7 +34,8 @@ class ServiceAffectingMonitorReports:
         switcher = {
             'bandwidth_utilization': self._service_affecting_monitor_report_bandwidth_over_utilization,
             'jitter': self._service_affecting_monitor_report_by_serial,
-            'latency': self._service_affecting_monitor_report_by_serial
+            'latency': self._service_affecting_monitor_report_by_serial,
+            'packet_loss': self._service_affecting_monitor_report_by_serial
         }
         return switcher.get(report.get('type'), None)
 
