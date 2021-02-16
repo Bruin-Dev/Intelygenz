@@ -178,7 +178,7 @@ class TNBAMonitor:
             self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
         ]
-        await asyncio.gather(*tasks, return_exceptions=True)
+        await asyncio.gather(*tasks)
         return open_tickets
 
     async def _get_open_tickets_with_details_by_client_id(self, client_id, open_tickets):

@@ -11,6 +11,8 @@ omit =
     *__init__.py**
     *_test.py
     *app.py
+    */tests/fixtures/*
+    */tests/conftest.py
 [paths]
 source =
     src/application/

@@ -13,34 +13,18 @@ from shortuuid import uuid
 
 from application.actions.tnba_monitor import TNBAMonitor
 from application.actions import tnba_monitor as tnba_monitor_module
-from application.repositories.utils_repository import UtilsRepository
 from config import testconfig
 
 
 class TestTNBAMonitor:
 
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        t7_repository = Mock()
-        ticket_repository = Mock()
-        customer_cache_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        prediction_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                                   customer_cache_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository, notifications_repository, utils_repository)
-
+    def instance_test(self, tnba_monitor, event_bus, logger, scheduler, t7_repository, customer_cache_repository,
+                      bruin_repository, velocloud_repository, ticket_repository, prediction_repository,
+                      notifications_repository, utils_repository):
         assert tnba_monitor._event_bus is event_bus
         assert tnba_monitor._logger is logger
         assert tnba_monitor._scheduler is scheduler
-        assert tnba_monitor._config is config
+        assert tnba_monitor._config is testconfig
         assert tnba_monitor._t7_repository is t7_repository
         assert tnba_monitor._ticket_repository is ticket_repository
         assert tnba_monitor._customer_cache_repository is customer_cache_repository
@@ -48,6 +32,7 @@ class TestTNBAMonitor:
         assert tnba_monitor._velocloud_repository is velocloud_repository
         assert tnba_monitor._prediction_repository is prediction_repository
         assert tnba_monitor._notifications_repository is notifications_repository
+        assert tnba_monitor._utils_repository is utils_repository
 
         assert tnba_monitor._customer_cache_by_serial == {}
         assert tnba_monitor._edge_status_by_serial == {}
@@ -84,34 +69,13 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def run_tickets_polling_with_get_cache_request_having_202_status_test(self, tnba_monitor,
-                                                                                make_structure_response):
-        get_cache_response = make_structure_response(202,
-                                                     'Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net')
+                                                                                make_rpc_response):
+        get_cache_response = make_rpc_response(
+            body='Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net',
+            status=202,
+        )
 
-        tnba_monitor._process_ticket_details_with_tnba = CoroutineMock()
-        tnba_monitor._process_ticket_details_without_tnba = CoroutineMock()
-        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(
-            return_value=get_cache_response)
-
-        await tnba_monitor._run_tickets_polling()
-
-        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
-        tnba_monitor._process_ticket_details_with_tnba.assert_not_awaited()
-        tnba_monitor._process_ticket_details_without_tnba.assert_not_awaited()
-        assert tnba_monitor._customer_cache_by_serial == {}
-
-    @pytest.mark.asyncio
-    async def run_tickets_polling_with_get_cache_request_having_non_2xx_status_and_different_from_202_test(self,
-                                                                                                           tnba_monitor,
-                                                                                                           make_structure_response):
-        get_cache_response = make_structure_response(404,
-                                                     'No edges were found for the specified filters')
-
-        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(
-            return_value=get_cache_response)
-
-        tnba_monitor._process_ticket_details_with_tnba = CoroutineMock()
-        tnba_monitor._process_ticket_details_without_tnba = CoroutineMock()
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
 
         await tnba_monitor._run_tickets_polling()
 
@@ -121,22 +85,39 @@ class TestTNBAMonitor:
         assert tnba_monitor._customer_cache_by_serial == {}
 
     @pytest.mark.asyncio
-    async def run_tickets_polling_with_empty_list_of_edges_statuses_test(self, tnba_monitor, customer_cache_1,
-                                                                         make_structure_response):
-        customer_cache = customer_cache_1
-        get_cache_response = make_structure_response(200,
-                                                     customer_cache)
+    async def run_tickets_polling_with_get_cache_request_having_non_2xx_status_and_different_from_202_test(
+            self, tnba_monitor, make_rpc_response):
+        get_cache_response = make_rpc_response(
+            body='No edges were found for the specified filters',
+            status=404,
+        )
+
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
+
+        await tnba_monitor._run_tickets_polling()
+
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
+        tnba_monitor._process_ticket_details_with_tnba.assert_not_awaited()
+        tnba_monitor._process_ticket_details_without_tnba.assert_not_awaited()
+        assert tnba_monitor._customer_cache_by_serial == {}
+
+    @pytest.mark.asyncio
+    async def run_tickets_polling_with_empty_list_of_edges_statuses_test(self, tnba_monitor, make_rpc_response,
+                                                                         edge_cached_info_1, edge_cached_info_2):
+        customer_cache = [
+            edge_cached_info_1,
+            edge_cached_info_2,
+        ]
+        get_cache_response = make_rpc_response(
+            body=customer_cache,
+            status=200,
+        )
+
         edges_statuses = []
 
-        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(
-            return_value=get_cache_response)
-
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
+        tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
         tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
-
-        tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring = CoroutineMock(return_value=edges_statuses)
-
-        tnba_monitor._process_ticket_details_with_tnba = CoroutineMock()
-        tnba_monitor._process_ticket_details_without_tnba = CoroutineMock()
 
         await tnba_monitor._run_tickets_polling()
 
@@ -482,1434 +463,376 @@ class TestTNBAMonitor:
         assert tnba_monitor._customer_cache_by_serial == customer_cache_by_serial
         assert tnba_monitor._edge_status_by_serial == edge_status_by_serial
 
-    def filter_edges_in_customer_cache_and_edges_statuses_test(self, customer_cache_1, edge_status_2):
-        customer_cache = customer_cache_1
+    def filter_edges_in_customer_cache_and_edges_statuses_test(self, make_edge_with_links_info, edge_cached_info_1,
+                                                               edge_cached_info_2, edge_1_connected, link_1_stable):
+        customer_cache = [
+            edge_cached_info_1,
+            edge_cached_info_2,
+        ]
 
-        edges_statuses = edge_status_2
+        edge_1_with_links_info = make_edge_with_links_info(edge_info=edge_1_connected, links_info=[link_1_stable])
+        edges_statuses = [
+            edge_1_with_links_info,
+        ]
 
         filtered_customer_cache, filtered_edges_statuses = \
             TNBAMonitor._filter_edges_in_customer_cache_and_edges_statuses(customer_cache, edges_statuses)
 
-        assert filtered_customer_cache == [
-            customer_cache_1[1],
-            customer_cache_1[2],
-        ]
-        assert filtered_edges_statuses == [
-            edge_status_2[0],
-            edge_status_2[1],
-        ]
+        assert filtered_customer_cache == [edge_cached_info_1]
+        assert filtered_edges_statuses == [edge_1_with_links_info]
 
     @pytest.mark.asyncio
-    async def start_tnba_automated_process_with_no_exec_on_start_test(self, tnba_monitor):
-        await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
+    async def get_open_tickets_with_details_for_monitored_companies_test(self, tnba_monitor, edge_cached_info_1,
+                                                                         edge_cached_info_2, serial_number_1,
+                                                                         serial_number_2):
+        customer_cache_by_serial = {
+            serial_number_1: edge_cached_info_1,
+            serial_number_2: edge_cached_info_2,
+        }
+        tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
+        tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock()
 
-        tnba_monitor._scheduler.add_job.assert_called_once_with(
-            tnba_monitor._run_tickets_polling, 'interval',
-            seconds=testconfig.MONITORING_INTERVAL_SECONDS,
-            next_run_time=undefined,
-            replace_existing=False,
-            id='_run_tickets_polling',
+        await tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies()
+
+        bruin_client_ids = set(
+            cached_info['bruin_client_info']['client_id']
+            for cached_info in customer_cache_by_serial.values()
         )
+        initial_tickets = []
+        for client_id in bruin_client_ids:
+            tnba_monitor._get_open_tickets_with_details_by_client_id.assert_any_await(client_id, initial_tickets)
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_for_monitored_companies_test(self, tnba_monitor,
-                                                                         customer_cache_by_serial_1):
-        ticket_with_details_1_for_bruin_client_1 = {
-            'ticket_id': 12345,
-            'ticket_details': [
-                {
-                    "detailID": 2746937,
-                    "detailValue": 'VC1234567890',
-                },
-            ],
-            'ticket_notes': [
-                {
-                    "noteId": 41894041,
-                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                    "createdDate": "2020-02-24T10:07:13.503-05:00",
-                }
-            ],
-        }
-        ticket_with_details_2_for_bruin_client_1 = {
-            'ticket_id': 11223,
-            'ticket_details': [
-                {
-                    "detailID": 2746938,
-                    "detailValue": 'VC1234567890',
-                },
-            ],
-            'ticket_notes': [
-                {
-                    "noteId": 41894042,
-                    "noteValue": 'There were some troubles with this service number',
-                    "createdDate": "2020-02-24T10:08:13.503-05:00",
-                }
-            ],
-        }
-        ticket_with_details_1_for_bruin_client_2 = {
-            'ticket_id': 67890,
-            'ticket_details': [
-                {
-                    "detailID": 2746937,
-                    "detailValue": 'VC0987654321',
-                },
-            ],
-            'ticket_notes': [
-                {
-                    "noteId": 41894042,
-                    "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                    "createdDate": "2020-02-24T10:07:13.503-05:00",
-                }
-            ],
-        }
-
-        tickets_with_details_for_bruin_client_1 = [
-            ticket_with_details_1_for_bruin_client_1,
-            ticket_with_details_2_for_bruin_client_1,
-        ]
-        tickets_with_details_for_bruin_client_2 = [
-            ticket_with_details_1_for_bruin_client_2,
-        ]
-
-        bruin_client_1_id = 12345
-        bruin_client_2_id = 67890
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-
-        customer_cache_by_serial = {
-            edge_1_serial: {
-                'edge': edge_1_full_id,
-                'serial_number': edge_1_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_1_id,
-                    'client_name': 'Aperture Science',
-                }
-            },
-            edge_2_serial: {
-                'edge': edge_2_full_id,
-                'serial_number': edge_2_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_2_id,
-                    'client_name': 'Sarif Industries',
-                }
-            },
-            edge_3_serial: {
-                'edge': edge_3_full_id,
-                'serial_number': edge_3_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_2_id,
-                    'client_name': 'Sarif Industries',
-                }
-            },
-        }
-
-        tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
-        tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
-            tickets_with_details_for_bruin_client_1,
-            tickets_with_details_for_bruin_client_2,
-        ])
-
-        await tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies()
-
-        tnba_monitor._get_open_tickets_with_details_by_client_id.assert_has_awaits([
-            call(bruin_client_1_id, []), call(bruin_client_2_id, [])
-        ], any_order=True)
-
-    @pytest.mark.asyncio
-    async def get_all_open_tickets_with_details_for_monitored_companies_with_some_requests_failing_test(self,
-                                                                                                        tnba_monitor):
-        tickets_with_details_for_bruin_client_1 = [
-            {
-                'ticket_id': 12345,
-                'ticket_details': [
-                    {
-                        "detailID": 2746937,
-                        "detailValue": 'VC1234567890',
-                    },
-                ],
-                'ticket_notes': [
-                    {
-                        "noteId": 41894041,
-                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                        "createdDate": "2020-02-24T10:07:13.503-05:00",
-                    }
-                ],
-            }
-        ]
-        tickets_with_details_for_bruin_client_3 = [
-            {
-                'ticket_id': 67890,
-                'ticket_details': [
-                    {
-                        "detailID": 2746937,
-                        "detailValue": 'VC0987654321',
-                    },
-                ],
-                'ticket_notes': [
-                    {
-                        "noteId": 41894042,
-                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                        "createdDate": "2020-02-24T10:07:13.503-05:00",
-                    }
-                ],
-            }
-        ]
-
-        bruin_client_1_id = 12345
-        bruin_client_2_id = 67890
-        bruin_client_3_id = 11223
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-
-        customer_cache_by_serial = {
-            edge_1_serial: {
-                'edge': edge_1_full_id,
-                'serial_number': edge_1_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_1_id,
-                    'client_name': 'Aperture Science',
-                }
-            },
-            edge_2_serial: {
-                'edge': edge_2_full_id,
-                'serial_number': edge_2_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_2_id,
-                    'client_name': 'Sarif Industries',
-                }
-            },
-            edge_3_serial: {
-                'edge': edge_3_full_id,
-                'serial_number': edge_3_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_3_id,
-                    'client_name': 'Rupture Farms',
-                }
-            },
-        }
-
-        tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
-        tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
-            tickets_with_details_for_bruin_client_1,
-            Exception,
-            tickets_with_details_for_bruin_client_3,
-        ])
-
-        await tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies()
-
-        tnba_monitor._get_open_tickets_with_details_by_client_id.assert_has_awaits([
-            call(bruin_client_1_id, []), call(bruin_client_2_id, []), call(bruin_client_3_id, [])
-        ], any_order=True)
-
-    @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_test(self, tnba_monitor):
-        uuid_ = uuid()
-        bruin_client_id = 12345
-
-        affecting_topic = 'Service Affecting Trouble'
-        outage_topic = 'Service Outage Trouble'
-
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_id = 11111
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-
-        ticket_2_id = 22222
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-
-        ticket_3_id = 33333
-        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
-
+    async def get_open_tickets_with_details_by_client_id_test(self, tnba_monitor, make_in_progress_ticket_detail,
+                                                              make_details_of_ticket, make_ticket_object,
+                                                              make_rpc_response, open_affecting_ticket,
+                                                              open_outage_ticket, serial_number_1, serial_number_2,
+                                                              bruin_client_id):
         outage_tickets = [
-            {
-                'ticketID': ticket_1_id,
-                'createDate': ticket_1_creation_date,
-                'topic': outage_topic,
-                'createdBy': tickets_creator,
-            },
-            {
-                'ticketID': ticket_2_id,
-                'createDate': ticket_2_creation_date,
-                'topic': outage_topic,
-                'createdBy': tickets_creator,
-            },
+            open_outage_ticket,
         ]
         affecting_tickets = [
-            {
-                'ticketID': ticket_3_id,
-                'createDate': ticket_3_creation_date,
-                'topic': affecting_topic,
-                'createdBy': tickets_creator,
-            },
+            open_affecting_ticket,
         ]
 
-        outage_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        outage_ticket_1_details_items = [outage_ticket_1_details_item_1]
-        outage_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        outage_ticket_1_details = {
-            'ticketDetails': outage_ticket_1_details_items,
-            'ticketNotes': outage_ticket_1_notes,
-        }
+        outage_ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        outage_ticket_1_details = make_details_of_ticket(
+            ticket_details=[outage_ticket_1_detail_1],
+            ticket_notes=[],
+        )
 
-        outage_ticket_2_details_item_1 = {
-            "detailID": 2746938,
-            "detailValue": 'VC1234567890',
-        }
-        outage_ticket_2_details_items = [outage_ticket_2_details_item_1]
-        outage_ticket_2_notes = [
-            {
-                "noteId": 41894043,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894044,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        outage_ticket_2_details = {
-            'ticketDetails': outage_ticket_2_details_items,
-            'ticketNotes': outage_ticket_2_notes,
-        }
+        affecting_ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        affecting_ticket_1_details = make_details_of_ticket(
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
 
-        affecting_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        affecting_ticket_1_details_items = [affecting_ticket_1_details_item_1]
-        affecting_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        affecting_ticket_1_details = {
-            'ticketDetails': affecting_ticket_1_details_items,
-            'ticketNotes': affecting_ticket_1_notes,
-        }
+        get_open_outage_tickets_response = make_rpc_response(body=outage_tickets, status=200)
+        get_open_affecting_tickets_response = make_rpc_response(body=affecting_tickets, status=200)
 
-        get_open_outage_tickets_response = {
-            'request_id': uuid_,
-            'body': outage_tickets,
-            'status': 200,
-        }
-        get_open_affecting_tickets_response = {
-            'request_id': uuid_,
-            'body': affecting_tickets,
-            'status': 200,
-        }
+        get_ticket_1_details_response = make_rpc_response(body=outage_ticket_1_details, status=200)
+        get_ticket_2_details_response = make_rpc_response(body=affecting_ticket_1_details, status=200)
 
-        get_ticket_1_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_1_details,
-            'status': 200,
-        }
-
-        get_ticket_2_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_2_details,
-            'status': 200,
-        }
-
-        get_ticket_3_details_response = {
-            'request_id': uuid_,
-            'body': affecting_ticket_1_details,
-            'status': 200,
-        }
-
-        tnba_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(
-            return_value=get_open_outage_tickets_response)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets = CoroutineMock(
-            return_value=get_open_affecting_tickets_response)
-        tnba_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+        tnba_monitor._bruin_repository.get_open_outage_tickets.return_value = get_open_outage_tickets_response
+        tnba_monitor._bruin_repository.get_open_affecting_tickets.return_value = get_open_affecting_tickets_response
+        tnba_monitor._bruin_repository.get_ticket_details.side_effect = [
             get_ticket_1_details_response,
             get_ticket_2_details_response,
-            get_ticket_3_details_response,
-        ])
+        ]
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
         tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id)
-        ])
+            call(open_outage_ticket['ticketID']), call(open_affecting_ticket['ticketID'])
+        ], any_order=True)
 
+        expected_outage_ticket_object = make_ticket_object(
+            ticket_id=open_outage_ticket['ticketID'],
+            ticket_creation_date=open_outage_ticket['createDate'],
+            ticket_topic=open_outage_ticket['topic'],
+            ticket_creator=open_outage_ticket['createdBy'],
+            ticket_details=[outage_ticket_1_detail_1],
+            ticket_notes=[],
+        )
+        expected_affecting_ticket_object = make_ticket_object(
+            ticket_id=open_affecting_ticket['ticketID'],
+            ticket_creation_date=open_affecting_ticket['createDate'],
+            ticket_topic=open_affecting_ticket['topic'],
+            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': outage_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': outage_ticket_1_details_items,
-                'ticket_notes': outage_ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': outage_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': outage_ticket_2_details_items,
-                'ticket_notes': outage_ticket_2_notes,
-            },
-            {
-                'ticket_id': ticket_3_id,
-                'ticket_creation_date': ticket_3_creation_date,
-                'ticket_topic': affecting_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': affecting_ticket_1_details_items,
-                'ticket_notes': affecting_ticket_1_notes,
-            },
+            expected_outage_ticket_object,
+            expected_affecting_ticket_object,
         ]
         assert result == expected
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_with_open_outage_tickets_request_not_having_2xx_status_test(
-            self, tnba_monitor):
-        bruin_client_id = 12345
-
-        uuid_ = uuid()
-
-        affecting_topic = 'Service Affecting Trouble'
-
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_id = 11111
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-
-        ticket_2_id = 22222
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-
-        get_open_outage_tickets_response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
-        get_open_affecting_tickets_response = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'ticketID': ticket_1_id,
-                    'createDate': ticket_1_creation_date,
-                    'topic': affecting_topic,
-                    'createdBy': tickets_creator,
-                },
-                {
-                    'ticketID': ticket_2_id,
-                    'createDate': ticket_2_creation_date,
-                    'topic': affecting_topic,
-                    'createdBy': tickets_creator,
-                },
-            ],
-            'status': 200,
-        }
-
-        affecting_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        affecting_ticket_1_details_items = [affecting_ticket_1_details_item_1]
-        affecting_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
+            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
+            make_rpc_response, open_affecting_ticket, serial_number_1, bruin_client_id):
+        affecting_tickets = [
+            open_affecting_ticket,
         ]
-        affecting_ticket_1_details = {
-            'ticketDetails': affecting_ticket_1_details_items,
-            'ticketNotes': affecting_ticket_1_notes,
-        }
 
-        affecting_ticket_2_details_item_1 = {
-            "detailID": 2746938,
-            "detailValue": 'VC1234567890',
-        }
-        affecting_ticket_2_details_items = [affecting_ticket_2_details_item_1]
-        affecting_ticket_2_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-31 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-31 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        affecting_ticket_2_details = {
-            'ticketDetails': affecting_ticket_2_details_items,
-            'ticketNotes': affecting_ticket_2_notes,
-        }
+        affecting_ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        affecting_ticket_1_details = make_details_of_ticket(
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
 
-        get_ticket_1_details_response = {
-            'request_id': uuid_,
-            'body': affecting_ticket_1_details,
-            'status': 200,
-        }
-        get_ticket_2_details_response = {
-            'request_id': uuid_,
-            'body': affecting_ticket_2_details,
-            'status': 200,
-        }
-        tnba_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(
-            return_value=get_open_outage_tickets_response)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets = CoroutineMock(
-            return_value=get_open_affecting_tickets_response)
-        tnba_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+        get_open_outage_tickets_response = make_rpc_response(
+            body='Got internal error from Bruin',
+            status=500,
+        )
+        get_open_affecting_tickets_response = make_rpc_response(body=affecting_tickets, status=200)
+
+        get_ticket_1_details_response = make_rpc_response(body=affecting_ticket_1_details, status=200)
+
+        tnba_monitor._bruin_repository.get_open_outage_tickets.return_value = get_open_outage_tickets_response
+        tnba_monitor._bruin_repository.get_open_affecting_tickets.return_value = get_open_affecting_tickets_response
+        tnba_monitor._bruin_repository.get_ticket_details.side_effect = [
             get_ticket_1_details_response,
-            get_ticket_2_details_response,
-        ])
+        ]
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id),
-        ])
+        tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_affecting_ticket['ticketID'])
 
+        expected_affecting_ticket_object = make_ticket_object(
+            ticket_id=open_affecting_ticket['ticketID'],
+            ticket_creation_date=open_affecting_ticket['createDate'],
+            ticket_topic=open_affecting_ticket['topic'],
+            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': affecting_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': affecting_ticket_1_details_items,
-                'ticket_notes': affecting_ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': affecting_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': affecting_ticket_2_details_items,
-                'ticket_notes': affecting_ticket_2_notes,
-            },
+            expected_affecting_ticket_object,
         ]
         assert result == expected
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_with_open_affecting_tickets_request_not_having_2xx_status_test(
-            self, tnba_monitor):
-        bruin_client_id = 12345
-
-        uuid_ = uuid()
-
-        outage_topic = 'Service Outage Trouble'
-
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_id = 11111
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-
-        ticket_2_id = 22222
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-
-        get_open_outage_tickets_response = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'ticketID': ticket_1_id,
-                    'createDate': ticket_1_creation_date,
-                    'topic': outage_topic,
-                    'createdBy': tickets_creator,
-                },
-                {
-                    'ticketID': ticket_2_id,
-                    'createDate': ticket_2_creation_date,
-                    'topic': outage_topic,
-                    'createdBy': tickets_creator,
-                },
-            ],
-            'status': 200,
-        }
-        get_open_affecting_tickets_response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
-
-        outage_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        outage_ticket_1_details_items = [outage_ticket_1_details_item_1]
-        outage_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
+            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
+            make_rpc_response, open_outage_ticket, serial_number_1, bruin_client_id):
+        outage_tickets = [
+            open_outage_ticket,
         ]
-        outage_ticket_1_details = {
-            'ticketDetails': outage_ticket_1_details_items,
-            'ticketNotes': outage_ticket_1_notes,
-        }
 
-        outage_ticket_2_details_item_1 = {
-            "detailID": 2746938,
-            "detailValue": 'VC1234567890',
-        }
-        outage_ticket_2_details_items = [outage_ticket_2_details_item_1]
-        outage_ticket_2_notes = [
-            {
-                "noteId": 41894043,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894044,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        outage_ticket_2_details = {
-            'ticketDetails': outage_ticket_2_details_items,
-            'ticketNotes': outage_ticket_2_notes,
-        }
+        outage_ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        outage_ticket_1_details = make_details_of_ticket(
+            ticket_details=[outage_ticket_1_detail_1],
+            ticket_notes=[],
+        )
 
-        get_ticket_1_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_1_details,
-            'status': 200,
-        }
-        get_ticket_2_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_2_details,
-            'status': 200,
-        }
+        get_open_outage_tickets_response = make_rpc_response(body=outage_tickets, status=200)
+        get_open_affecting_tickets_response = make_rpc_response(
+            body='Got internal error from Bruin',
+            status=500,
+        )
 
-        tnba_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(
-            return_value=get_open_outage_tickets_response)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets = CoroutineMock(
-            return_value=get_open_affecting_tickets_response)
-        tnba_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+        get_ticket_1_details_response = make_rpc_response(body=outage_ticket_1_details, status=200)
+
+        tnba_monitor._bruin_repository.get_open_outage_tickets.return_value = get_open_outage_tickets_response
+        tnba_monitor._bruin_repository.get_open_affecting_tickets.return_value = get_open_affecting_tickets_response
+        tnba_monitor._bruin_repository.get_ticket_details.side_effect = [
             get_ticket_1_details_response,
-            get_ticket_2_details_response,
-        ])
+        ]
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id),
-        ])
+        tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_outage_ticket['ticketID'])
 
+        expected_affecting_ticket_object = make_ticket_object(
+            ticket_id=open_outage_ticket['ticketID'],
+            ticket_creation_date=open_outage_ticket['createDate'],
+            ticket_topic=open_outage_ticket['topic'],
+            ticket_creator=open_outage_ticket['createdBy'],
+            ticket_details=[outage_ticket_1_detail_1],
+            ticket_notes=[],
+        )
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': outage_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': outage_ticket_1_details_items,
-                'ticket_notes': outage_ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': outage_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': outage_ticket_2_details_items,
-                'ticket_notes': outage_ticket_2_notes,
-            },
+            expected_affecting_ticket_object,
         ]
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_with_ticket_details_request_not_having_2xx_status_test(self,
-                                                                                                                tnba_monitor):
-        uuid_ = uuid()
-        bruin_client_id = 12345
-
-        affecting_topic = 'Service Affecting Trouble'
-        outage_topic = 'Service Outage Trouble'
-
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_id = 11111
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-
-        ticket_2_id = 22222
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-
-        ticket_3_id = 33333
-        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
-
+    async def get_open_tickets_with_details_by_client_id_with_ticket_details_request_not_having_2xx_status_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
+            make_rpc_response, open_affecting_ticket, open_outage_ticket, serial_number_1, bruin_client_id):
         outage_tickets = [
-            {
-                'ticketID': ticket_1_id,
-                'createDate': ticket_1_creation_date,
-                'topic': outage_topic,
-                'createdBy': tickets_creator,
-            },
-            {
-                'ticketID': ticket_2_id,
-                'createDate': ticket_2_creation_date,
-                'topic': outage_topic,
-                'createdBy': tickets_creator,
-            },
+            open_outage_ticket,
         ]
         affecting_tickets = [
-            {
-                'ticketID': ticket_3_id,
-                'createDate': ticket_3_creation_date,
-                'topic': affecting_topic,
-                'createdBy': tickets_creator,
-            },
+            open_affecting_ticket,
         ]
 
-        outage_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        outage_ticket_1_details_items = [outage_ticket_1_details_item_1]
-        outage_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        outage_ticket_1_details = {
-            'ticketDetails': outage_ticket_1_details_items,
-            'ticketNotes': outage_ticket_1_notes,
-        }
+        affecting_ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        affecting_ticket_1_details = make_details_of_ticket(
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
 
-        affecting_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        affecting_ticket_1_details_items = [affecting_ticket_1_details_item_1]
-        affecting_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        affecting_ticket_1_details = {
-            'ticketDetails': affecting_ticket_1_details_items,
-            'ticketNotes': affecting_ticket_1_notes,
-        }
+        get_open_outage_tickets_response = make_rpc_response(body=outage_tickets, status=200)
+        get_open_affecting_tickets_response = make_rpc_response(body=affecting_tickets, status=200)
 
-        get_open_outage_tickets_response = {
-            'request_id': uuid_,
-            'body': outage_tickets,
-            'status': 200,
-        }
-        get_open_affecting_tickets_response = {
-            'request_id': uuid_,
-            'body': affecting_tickets,
-            'status': 200,
-        }
+        get_ticket_1_details_response = make_rpc_response(
+            body='Got internal error from Bruin',
+            status=500,
+        )
+        get_ticket_2_details_response = make_rpc_response(body=affecting_ticket_1_details, status=200)
 
-        get_ticket_1_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_1_details,
-            'status': 200,
-        }
-
-        get_ticket_2_details_response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
-
-        get_ticket_3_details_response = {
-            'request_id': uuid_,
-            'body': affecting_ticket_1_details,
-            'status': 200,
-        }
-
-        tnba_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(
-            return_value=get_open_outage_tickets_response)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets = CoroutineMock(
-            return_value=get_open_affecting_tickets_response)
-        tnba_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+        tnba_monitor._bruin_repository.get_open_outage_tickets.return_value = get_open_outage_tickets_response
+        tnba_monitor._bruin_repository.get_open_affecting_tickets.return_value = get_open_affecting_tickets_response
+        tnba_monitor._bruin_repository.get_ticket_details.side_effect = [
             get_ticket_1_details_response,
             get_ticket_2_details_response,
-            get_ticket_3_details_response,
-        ])
+        ]
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
         tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id)
-        ])
+            call(open_outage_ticket['ticketID']), call(open_affecting_ticket['ticketID'])
+        ], any_order=True)
 
+        expected_affecting_ticket_object = make_ticket_object(
+            ticket_id=open_affecting_ticket['ticketID'],
+            ticket_creation_date=open_affecting_ticket['createDate'],
+            ticket_topic=open_affecting_ticket['topic'],
+            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': outage_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': outage_ticket_1_details_items,
-                'ticket_notes': outage_ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_3_id,
-                'ticket_creation_date': ticket_3_creation_date,
-                'ticket_topic': affecting_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': affecting_ticket_1_details_items,
-                'ticket_notes': affecting_ticket_1_notes,
-            }
+            expected_affecting_ticket_object,
         ]
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_with_ticket_details_not_having_details_actually_test(self,
-                                                                                                              tnba_monitor):
-        uuid_ = uuid()
-        bruin_client_id = 12345
-
-        affecting_topic = 'Service Affecting Trouble'
-        outage_topic = 'Service Outage Trouble'
-
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_id = 11111
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-
-        ticket_2_id = 22222
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-
-        ticket_3_id = 33333
-        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
-
+    async def get_open_tickets_with_details_by_client_id_with_ticket_details_not_having_details_actually_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
+            make_rpc_response, open_affecting_ticket, open_outage_ticket, serial_number_1, bruin_client_id):
         outage_tickets = [
-            {
-                'ticketID': ticket_1_id,
-                'createDate': ticket_1_creation_date,
-                'topic': outage_topic,
-                'createdBy': tickets_creator,
-            },
-            {
-                'ticketID': ticket_2_id,
-                'createDate': ticket_2_creation_date,
-                'topic': outage_topic,
-                'createdBy': tickets_creator,
-            },
+            open_outage_ticket,
         ]
         affecting_tickets = [
-            {
-                'ticketID': ticket_3_id,
-                'createDate': ticket_3_creation_date,
-                'topic': affecting_topic,
-                'createdBy': tickets_creator,
-            },
+            open_affecting_ticket,
         ]
 
-        outage_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        outage_ticket_1_details_items = [outage_ticket_1_details_item_1]
-        outage_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        outage_ticket_1_details = {
-            'ticketDetails': outage_ticket_1_details_items,
-            'ticketNotes': outage_ticket_1_notes,
-        }
+        outage_ticket_1_details = make_details_of_ticket(
+            ticket_details=[],
+            ticket_notes=[],
+        )
 
-        outage_ticket_2_details_items = []
-        outage_ticket_2_notes = []
-        outage_ticket_2_details = {
-            'ticketDetails': outage_ticket_2_details_items,
-            'ticketNotes': outage_ticket_2_notes,
-        }
+        affecting_ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        affecting_ticket_1_details = make_details_of_ticket(
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
 
-        affecting_ticket_1_details_item_1 = {
-            "detailID": 2746937,
-            "detailValue": 'VC1234567890',
-        }
-        affecting_ticket_1_details_items = [affecting_ticket_1_details_item_1]
-        affecting_ticket_1_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        affecting_ticket_1_details = {
-            'ticketDetails': affecting_ticket_1_details_items,
-            'ticketNotes': affecting_ticket_1_notes,
-        }
+        get_open_outage_tickets_response = make_rpc_response(body=outage_tickets, status=200)
+        get_open_affecting_tickets_response = make_rpc_response(body=affecting_tickets, status=200)
 
-        get_open_outage_tickets_response = {
-            'request_id': uuid_,
-            'body': outage_tickets,
-            'status': 200,
-        }
-        get_open_affecting_tickets_response = {
-            'request_id': uuid_,
-            'body': affecting_tickets,
-            'status': 200,
-        }
+        get_ticket_1_details_response = make_rpc_response(body=outage_ticket_1_details, status=200)
+        get_ticket_2_details_response = make_rpc_response(body=affecting_ticket_1_details, status=200)
 
-        get_ticket_1_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_1_details,
-            'status': 200,
-        }
-
-        get_ticket_2_details_response = {
-            'request_id': uuid_,
-            'body': outage_ticket_2_details,
-            'status': 200,
-        }
-
-        get_ticket_3_details_response = {
-            'request_id': uuid_,
-            'body': affecting_ticket_1_details,
-            'status': 200,
-        }
-
-        tnba_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(
-            return_value=get_open_outage_tickets_response)
-        tnba_monitor._bruin_repository.get_open_affecting_tickets = CoroutineMock(
-            return_value=get_open_affecting_tickets_response)
-        tnba_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+        tnba_monitor._bruin_repository.get_open_outage_tickets.return_value = get_open_outage_tickets_response
+        tnba_monitor._bruin_repository.get_open_affecting_tickets.return_value = get_open_affecting_tickets_response
+        tnba_monitor._bruin_repository.get_ticket_details.side_effect = [
             get_ticket_1_details_response,
             get_ticket_2_details_response,
-            get_ticket_3_details_response,
-        ])
+        ]
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
         tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id)
-        ])
+            call(open_outage_ticket['ticketID']), call(open_affecting_ticket['ticketID'])
+        ], any_order=True)
 
+        expected_affecting_ticket_object = make_ticket_object(
+            ticket_id=open_affecting_ticket['ticketID'],
+            ticket_creation_date=open_affecting_ticket['createDate'],
+            ticket_topic=open_affecting_ticket['topic'],
+            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_details=[affecting_ticket_1_detail_1],
+            ticket_notes=[],
+        )
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': outage_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': outage_ticket_1_details_items,
-                'ticket_notes': outage_ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_3_id,
-                'ticket_creation_date': ticket_3_creation_date,
-                'ticket_topic': affecting_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': affecting_ticket_1_details_items,
-                'ticket_notes': affecting_ticket_1_notes,
-            }
+            expected_affecting_ticket_object,
         ]
         assert result == expected
 
-    def filter_tickets_related_to_edges_under_monitoring_test(self, tnba_monitor):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1112223'
-        edge_4_serial = 'VC3344455'
-        edge_5_serial = 'VC5666777'
-
-        bruin_client_1_id = 12345
-        bruin_client_2_id = 67890
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_4_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 4}
-        edge_5_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 5}
-
+    def filter_tickets_and_details_related_to_edges_under_monitoring_test(self, tnba_monitor, make_ticket_object,
+                                                                          make_in_progress_ticket_detail,
+                                                                          edge_cached_info_1, edge_cached_info_2,
+                                                                          serial_number_1, serial_number_2,
+                                                                          serial_number_3):
         customer_cache_by_serial = {
-            edge_1_serial: {
-                'edge': edge_1_full_id,
-                'serial_number': edge_1_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_1_id,
-                    'client_name': 'Aperture Science',
-                }
-            },
-            edge_2_serial: {
-                'edge': edge_2_full_id,
-                'serial_number': edge_2_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_1_id,
-                    'client_name': 'Aperture Science',
-                }
-            },
-            edge_3_serial: {
-                'edge': edge_3_full_id,
-                'serial_number': edge_3_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_1_id,
-                    'client_name': 'Aperture Science',
-                }
-            },
-            edge_4_serial: {
-                'edge': edge_4_full_id,
-                'serial_number': edge_4_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_2_id,
-                    'client_name': 'Sarif Industries',
-                }
-            },
-            edge_5_serial: {
-                'edge': edge_5_full_id,
-                'serial_number': edge_5_serial,
-                'last_contact': '2020-08-27T15:25:42.000',
-                'bruin_client_info': {
-                    'client_id': bruin_client_2_id,
-                    'client_name': 'Sarif Industries',
-                }
-            },
+            serial_number_1: edge_cached_info_1,
+            serial_number_2: edge_cached_info_2,
         }
 
-        ticket_topic = 'Service Outage Trouble'
-        tickets_creator = 'Intelygenz Ai'
+        ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_1_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+        ticket_1 = make_ticket_object(ticket_details=[ticket_1_detail_1, ticket_1_detail_2])
 
-        ticket_1_id = 12345
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-        ticket_1_detail_1 = {
-            "detailID": 2746930,
-            "detailValue": edge_1_serial,
-        }
-        ticket_1_detail_2 = {
-            "detailID": 2746931,
-            "detailValue": 'VC9999999',
-        }
-        ticket_1_notes = [
-            {
-                "noteId": 41894040,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-        ]
-        ticket_1 = {
-            'ticket_id': ticket_1_id,
-            'ticket_creation_date': ticket_1_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': [
-                ticket_1_detail_1,
-                ticket_1_detail_2,
-            ],
-            'ticket_notes': ticket_1_notes,
-        }
+        ticket_2_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+        ticket_2 = make_ticket_object(ticket_details=[ticket_2_detail_1])
 
-        ticket_2_id = 67890
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-        ticket_2_detail_1 = {
-            "detailID": 2746932,
-            "detailValue": edge_3_serial,
-        }
-        ticket_2_detail_2 = {
-            "detailID": 2746933,
-            "detailValue": 'VC1111111',
-        }
-        ticket_2_detail_3 = {
-            "detailID": 2746934,
-            "detailValue": edge_4_serial,
-        }
-        ticket_2_notes = [
-            {
-                "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-        ]
-        ticket_2 = {
-            'ticket_id': ticket_2_id,
-            'ticket_creation_date': ticket_2_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': [
-                ticket_2_detail_1,
-                ticket_2_detail_2,
-                ticket_2_detail_3,
-            ],
-            'ticket_notes': ticket_2_notes,
-        }
-
-        ticket_3_id = 22222
-        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
-        ticket_3_detail_1 = {
-            "detailID": 2746932,
-            "detailValue": 'VC9992221',
-        }
-        ticket_3_notes = [
-            {
-                "noteId": 41894042,
-                "noteValue": f"This note was posted by a member of Bruin's support team",
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-        ]
-        ticket_3 = {
-            'ticket_id': ticket_3_id,
-            'ticket_creation_date': ticket_3_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': [
-                ticket_3_detail_1,
-            ],
-            'ticket_notes': ticket_3_notes,
-        }
-
-        ticket_4_id = 11111
-        ticket_4_creation_date = "1/05/2021 10:08:13 AM"
-        ticket_4_detail_1 = {
-            "detailID": 2746935,
-            "detailValue": edge_5_serial,
-        }
-        ticket_4_notes = [
-            {
-                "noteId": 41894042,
-                "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-        ]
-        ticket_4 = {
-            'ticket_id': ticket_4_id,
-            'ticket_creation_date': ticket_4_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': [
-                ticket_4_detail_1,
-            ],
-            'ticket_notes': ticket_4_notes,
-        }
+        ticket_3_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_3_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_3_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+        ticket_3 = make_ticket_object(ticket_details=[ticket_3_detail_1, ticket_3_detail_2, ticket_3_detail_3])
 
         tickets = [
             ticket_1,
             ticket_2,
             ticket_3,
-            ticket_4,
         ]
 
         tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
 
         result = tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring(tickets)
 
+        expected_ticket_1 = make_ticket_object(ticket_details=[ticket_1_detail_1])
+        expected_ticket_3 = make_ticket_object(ticket_details=[ticket_3_detail_1, ticket_3_detail_2])
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': [
-                    ticket_1_detail_1,
-                ],
-                'ticket_notes': ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': [
-                    ticket_2_detail_1,
-                    ticket_2_detail_3,
-                ],
-                'ticket_notes': ticket_2_notes,
-            },
-            {
-                'ticket_id': ticket_4_id,
-                'ticket_creation_date': ticket_4_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': [
-                    ticket_4_detail_1,
-                ],
-                'ticket_notes': ticket_4_notes,
-            },
+            expected_ticket_1,
+            expected_ticket_3,
         ]
         assert result == expected
 
-    def filter_irrelevant_notes_in_tickets_test(self, tnba_monitor):
-        service_number_1 = 'VC1234567'
-        service_number_2 = 'VC8901234'
-        service_number_3 = '20.RBDB.872345'
-        service_number_4 = 'VC1112223'
-        service_number_5 = '18.RBDB.105641'
-        service_number_6 = 'VC3344455'
-
+    def filter_irrelevant_notes_in_tickets_test(self, tnba_monitor, make_ticket_object, make_ticket_note,
+                                                edge_cached_info_1, edge_cached_info_2, serial_number_1,
+                                                serial_number_2, serial_number_3):
         customer_cache_by_serial = {
-            service_number_1: {
-                'edge': {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                'last_contact': '2020-09-17T02:23:59',
-                'serial_number': service_number_1,
-                'bruin_client_info': {
-                    'client_id': 9994,
-                    'client_name': 'EVIL-CORP'
-                },
-            },
-            service_number_2: {
-                'edge': {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
-                'last_contact': '2020-09-17T02:23:59',
-                'serial_number': service_number_2,
-                'bruin_client_info': {
-                    'client_id': 9994,
-                    'client_name': 'EVIL-CORP'
-                },
-            },
-            service_number_4: {
-                'edge': {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3},
-                'last_contact': '2020-09-17T02:23:59',
-                'serial_number': service_number_4,
-                'bruin_client_info': {
-                    'client_id': 9994,
-                    'client_name': 'EVIL-CORP'
-                },
-            },
-            service_number_6: {
-                'edge': {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 4},
-                'last_contact': '2020-09-17T02:23:59',
-                'serial_number': service_number_6,
-                'bruin_client_info': {
-                    'client_id': 9994,
-                    'client_name': 'EVIL-CORP'
-                },
-            },
+            serial_number_1: edge_cached_info_1,
+            serial_number_2: edge_cached_info_2,
         }
 
-        ticket_topic = 'Service Outage Trouble'
-        tickets_creator = 'Intelygenz Ai'
+        ticket_1_note_1 = make_ticket_note(serial_number=serial_number_1, text=None)
+        ticket_1_note_2 = make_ticket_note(serial_number=serial_number_2, text='This is a note')
+        ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
+        ticket_1 = make_ticket_object(ticket_notes=[ticket_1_note_1, ticket_1_note_2, ticket_1_note_3])
 
-        ticket_1_id = 12345
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-        ticket_1_details = [
-            {
-                "detailID": 2746937,
-                "detailValue": service_number_1,
-            },
-        ]
-        ticket_1_note_1 = {
-            "noteId": 41894040,
-            "noteValue": None,
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-            "serviceNumber": [
-                service_number_1,
-            ],
-        }
-        ticket_1_note_2 = {
-            "noteId": 41894041,
-            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-            "serviceNumber": [
-                service_number_1,
-                service_number_3,
-            ],
-        }
-        ticket_1_note_3 = {
-            "noteId": 41894042,
-            "noteValue": None,
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-            "serviceNumber": [
-                service_number_3,
-            ],
-        }
-        ticket_1_note_4 = {
-            "noteId": 41894042,
-            "noteValue": None,
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-            "serviceNumber": [
-                service_number_1,
-            ],
-        }
-        ticket_1_note_5 = {
-            "noteId": 41894042,
-            "noteValue": None,
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-            "serviceNumber": [
-                service_number_1,
-            ],
-        }
-        ticket_1 = {
-            'ticket_id': ticket_1_id,
-            'ticket_creation_date': ticket_1_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_1_details,
-            'ticket_notes': [
-                ticket_1_note_1,
-                ticket_1_note_2,
-                ticket_1_note_3,
-                ticket_1_note_4,
-                ticket_1_note_5,
-            ],
-        }
+        ticket_2_note_1 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
+        ticket_2 = make_ticket_object(ticket_notes=[ticket_2_note_1])
 
-        ticket_2_id = 11223
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-        ticket_2_details = [
-            {
-                "detailID": 2746938,
-                "detailValue": service_number_2,
-            },
-            {
-                "detailID": 2746938,
-                "detailValue": service_number_4,
-            },
-        ]
-        ticket_2_note_1 = {
-            "noteId": 41894042,
-            "noteValue": 'There were some troubles with this service number',
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                service_number_2,
-            ],
-        }
-        ticket_2_note_2 = {
-            "noteId": 41894042,
-            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                service_number_2,
-                service_number_4,
-            ],
-        }
-        ticket_2_note_3 = {
-            "noteId": 41894042,
-            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                service_number_3,
-                service_number_5,
-            ],
-        }
-        ticket_2 = {
-            'ticket_id': ticket_2_id,
-            'ticket_creation_date': ticket_2_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_2_details,
-            'ticket_notes': [
-                ticket_2_note_1,
-                ticket_2_note_2,
-                ticket_2_note_3,
-            ],
-        }
-
-        ticket_3_id = 67890
-        ticket_3_creation_date = "1/04/2021 10:08:13 AM"
-        ticket_3_details = [
-            {
-                "detailID": 2746937,
-                "detailValue": service_number_6,
-            },
-        ]
-        ticket_3_note_1 = {
-            "noteId": 41894042,
-            "noteValue": None,
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                service_number_5,
-                service_number_6,
-            ],
-        }
-        ticket_3_note_2 = {
-            "noteId": 41894042,
-            "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                service_number_5,
-                service_number_6,
-            ],
-        }
-        ticket_3 = {
-            'ticket_id': ticket_3_id,
-            'ticket_creation_date': ticket_3_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_3_details,
-            'ticket_notes': [
-                ticket_3_note_1,
-                ticket_3_note_2,
-            ],
-        }
+        ticket_3_note_1 = make_ticket_note(serial_number=serial_number_1, text='This is a note')
+        ticket_3_note_2 = make_ticket_note(serial_number=serial_number_2, text='This is a note')
+        ticket_3 = make_ticket_object(ticket_notes=[ticket_3_note_1, ticket_3_note_2])
 
         tickets = [
             ticket_1,
@@ -1920,193 +843,99 @@ class TestTNBAMonitor:
 
         result = tnba_monitor._filter_irrelevant_notes_in_tickets(tickets)
 
+        expected_ticket_1 = make_ticket_object(ticket_notes=[ticket_1_note_2])
+        expected_ticket_2 = make_ticket_object(ticket_notes=[])
+        expected_ticket_3 = make_ticket_object(ticket_notes=[ticket_3_note_1, ticket_3_note_2])
         expected = [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': ticket_1_details,
-                'ticket_notes': [
-                    {
-                        "noteId": 41894041,
-                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                        "createdDate": "2020-02-24T10:07:13.503-05:00",
-                        "serviceNumber": [
-                            service_number_1,
-                        ],
-                    },
-                ],
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': ticket_2_details,
-                'ticket_notes': [
-                    ticket_2_note_1,
-                    ticket_2_note_2,
-                ],
-            },
-            {
-                'ticket_id': ticket_3_id,
-                'ticket_creation_date': ticket_3_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_details': ticket_3_details,
-                'ticket_notes': [
-                    {
-                        "noteId": 41894042,
-                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
-                        "createdDate": "2020-02-24T10:08:13.503-05:00",
-                        "serviceNumber": [
-                            service_number_6,
-                        ],
-                    }
-                ],
-            },
+            expected_ticket_1,
+            expected_ticket_2,
+            expected_ticket_3,
         ]
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_predictions_by_ticket_id_ok_test(self, tnba_monitor):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
+    async def get_predictions_by_ticket_id_ok_test(self, tnba_monitor, make_in_progress_ticket_detail,
+                                                   make_ticket_object, make_task_history_item, make_task_history,
+                                                   make_rpc_response, make_prediction_object,
+                                                   make_predictions_by_ticket_id_object, serial_number_1,
+                                                   serial_number_2, serial_number_3, holmdel_noc_prediction):
         ticket_id = 12345
 
-        ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_3_serial,
-        }
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_details = [
             ticket_detail_1,
             ticket_detail_2,
             ticket_detail_3,
         ]
-        ticket_with_details = {
-            'ticket_id': ticket_id,
-            'ticket_details': ticket_details,
-            'ticket_notes': [],
-        }
+        ticket_with_details = make_ticket_object(ticket_details=ticket_details)
 
         tickets = [
             ticket_with_details,
         ]
 
-        ticket_predictions_for_serial_1 = {
-            'assetId': edge_1_serial,
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
-        ticket_predictions_for_serial_2 = {
-            'assetId': edge_2_serial,
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
+        task_history_item_1 = make_task_history_item(serial_number=serial_number_1)
+        task_history = make_task_history(task_history_item_1)
+        get_task_history_response = make_rpc_response(body=task_history, status=200)
+
+        ticket_predictions_for_serial_1 = make_prediction_object(
+            serial_number=serial_number_1,
+            predictions=[holmdel_noc_prediction],
+        )
+        ticket_predictions_for_serial_2 = make_prediction_object(
+            serial_number=serial_number_2,
+            predictions=[holmdel_noc_prediction],
+        )
         ticket_predictions = [
             ticket_predictions_for_serial_1,
             ticket_predictions_for_serial_2,
         ]
+        get_predictions_response = make_rpc_response(body=ticket_predictions, status=200)
 
-        get_predictions_response = {
-            'body': ticket_predictions,
-            'status': 200,
-        }
-
-        task_history = [
-            {
-                "Initial Note @ Ticket Creation": "Automation Engine -- Service Outage Trouble",
-                "DetailID": 5672725,
-                "Product": "SD-WAN",
-                "Asset": edge_1_serial,
-                "Ticket Status": "In Progress",
-                # Rest of fields omitted for simplicity
-            }
+        assets_to_predict = [
+            serial_number_1,
+            serial_number_2,
+            serial_number_3,
         ]
-        get_task_history_response = {
-            'body': task_history,
-            'status': 200,
-        }
 
-        assets_to_predict = ['VC1234567', 'VC7654321', 'VC1111111']
-
-        tnba_monitor._bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
-
-        tnba_monitor._t7_repository.get_prediction = CoroutineMock(return_value=get_predictions_response)
+        tnba_monitor._bruin_repository.get_ticket_task_history.return_value = get_task_history_response
+        tnba_monitor._t7_repository.get_prediction.return_value = get_predictions_response
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
         tnba_monitor._bruin_repository.get_ticket_task_history.assert_awaited_once_with(ticket_id)
         tnba_monitor._t7_repository.get_prediction.assert_awaited_once_with(ticket_id, task_history, assets_to_predict)
 
-        expected = {
-            ticket_id: ticket_predictions,
-        }
+        expected = make_predictions_by_ticket_id_object(ticket_id=ticket_id, predictions=ticket_predictions)
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_predictions_by_ticket_id_with_retrieval_of_task_history_returning_non_2xx_status_test(self,
-                                                                                                        tnba_monitor):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
+    async def get_predictions_by_ticket_id_with_retrieval_of_task_history_returning_non_2xx_status_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_rpc_response,
+            serial_number_1, serial_number_2, serial_number_3):
         ticket_id = 12345
 
-        ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_3_serial,
-        }
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_details = [
             ticket_detail_1,
             ticket_detail_2,
             ticket_detail_3,
         ]
-        ticket_with_details = {
-            'ticket_id': ticket_id,
-            'ticket_details': ticket_details,
-            'ticket_notes': [],
-        }
+        ticket_with_details = make_ticket_object(ticket_details=ticket_details)
 
         tickets = [
             ticket_with_details,
         ]
 
-        get_task_history_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
+        get_task_history_response = make_rpc_response(
+            body='Got internal error from Bruin',
+            status=500,
+        )
 
-        tnba_monitor._bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
-
-        tnba_monitor._t7_repository.get_prediction = CoroutineMock()
+        tnba_monitor._bruin_repository.get_ticket_task_history.return_value = get_task_history_response
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2117,58 +946,30 @@ class TestTNBAMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_predictions_by_ticket_id_with_not_a_single_valid_asset_in_task_history_test(self, tnba_monitor):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
+    async def get_predictions_by_ticket_id_with_not_a_single_valid_asset_in_task_history_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_task_history_item,
+            make_task_history, make_rpc_response, serial_number_1, serial_number_2, serial_number_3):
         ticket_id = 12345
 
-        ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_3_serial,
-        }
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_details = [
             ticket_detail_1,
             ticket_detail_2,
             ticket_detail_3,
         ]
-        ticket_with_details = {
-            'ticket_id': ticket_id,
-            'ticket_details': ticket_details,
-            'ticket_notes': [],
-        }
+        ticket_with_details = make_ticket_object(ticket_details=ticket_details)
 
         tickets = [
             ticket_with_details,
         ]
 
-        task_history = [
-            {
-                "Initial Note @ Ticket Creation": "Automation Engine -- Service Outage Trouble",
-                "DetailID": 5672725,
-                "Product": "SD-WAN",
-                "Asset": None,
-                "Ticket Status": "In Progress",
-                # Rest of fields omitted for simplicity
-            }
-        ]
-        get_task_history_response = {
-            'body': task_history,
-            'status': 200,
-        }
+        task_history_item_1 = make_task_history_item(serial_number=None)
+        task_history = make_task_history(task_history_item_1)
+        get_task_history_response = make_rpc_response(body=task_history, status=200)
 
-        tnba_monitor._bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
-
-        tnba_monitor._t7_repository.get_prediction = CoroutineMock()
+        tnba_monitor._bruin_repository.get_ticket_task_history.return_value = get_task_history_response
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2179,66 +980,42 @@ class TestTNBAMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_predictions_by_ticket_id_with_retrieval_of_predictions_returning_non_2xx_status_test(self,
-                                                                                                       tnba_monitor):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
+    async def get_predictions_by_ticket_id_with_retrieval_of_predictions_returning_non_2xx_status_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_task_history_item,
+            make_task_history, make_rpc_response, serial_number_1, serial_number_2, serial_number_3):
         ticket_id = 12345
 
-        ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_3_serial,
-        }
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_details = [
             ticket_detail_1,
             ticket_detail_2,
             ticket_detail_3,
         ]
-        ticket_with_details = {
-            'ticket_id': ticket_id,
-            'ticket_details': ticket_details,
-            'ticket_notes': [],
-        }
+        ticket_with_details = make_ticket_object(ticket_details=ticket_details)
 
         tickets = [
             ticket_with_details,
         ]
 
-        get_predictions_response = {
-            'body': 'Got internal error from T7',
-            'status': 500,
-        }
+        task_history_item_1 = make_task_history_item(serial_number=serial_number_1)
+        task_history = make_task_history(task_history_item_1)
+        get_task_history_response = make_rpc_response(body=task_history, status=200)
 
-        task_history = [
-            {
-                "Initial Note @ Ticket Creation": "Automation Engine -- Service Outage Trouble",
-                "DetailID": 5672725,
-                "Product": "SD-WAN",
-                "Asset": edge_1_serial,
-                "Ticket Status": "In Progress",
-                # Rest of fields omitted for simplicity
-            }
+        get_predictions_response = make_rpc_response(
+            body='Got internal error from T7',
+            status=500,
+        )
+
+        assets_to_predict = [
+            serial_number_1,
+            serial_number_2,
+            serial_number_3,
         ]
-        get_task_history_response = {
-            'body': task_history,
-            'status': 200,
-        }
 
-        assets_to_predict = ['VC1234567', 'VC7654321', 'VC1111111']
-
-        tnba_monitor._bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
-
-        tnba_monitor._t7_repository.get_prediction = CoroutineMock(return_value=get_predictions_response)
+        tnba_monitor._bruin_repository.get_ticket_task_history.return_value = get_task_history_response
+        tnba_monitor._t7_repository.get_prediction.return_value = get_predictions_response
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2249,65 +1026,39 @@ class TestTNBAMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_predictions_by_ticket_id_with_no_predictions_found_for_ticket_test(self, tnba_monitor):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
+    async def get_predictions_by_ticket_id_with_no_predictions_found_for_ticket_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_task_history_item,
+            make_task_history, make_rpc_response, serial_number_1, serial_number_2, serial_number_3):
         ticket_id = 12345
 
-        ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_3_serial,
-        }
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_details = [
             ticket_detail_1,
             ticket_detail_2,
             ticket_detail_3,
         ]
-        ticket_with_details = {
-            'ticket_id': ticket_id,
-            'ticket_details': ticket_details,
-            'ticket_notes': [],
-        }
+        ticket_with_details = make_ticket_object(ticket_details=ticket_details)
 
         tickets = [
             ticket_with_details,
         ]
 
-        get_predictions_response = {
-            'body': [],
-            'status': 200,
-        }
+        task_history_item_1 = make_task_history_item(serial_number=serial_number_1)
+        task_history = make_task_history(task_history_item_1)
+        get_task_history_response = make_rpc_response(body=task_history, status=200)
 
-        task_history = [
-            {
-                "Initial Note @ Ticket Creation": "Automation Engine -- Service Outage Trouble",
-                "DetailID": 5672725,
-                "Product": "SD-WAN",
-                "Asset": edge_1_serial,
-                "Ticket Status": "In Progress",
-                # Rest of fields omitted for simplicity
-            }
+        get_predictions_response = make_rpc_response(body=[], status=200)
+
+        assets_to_predict = [
+            serial_number_1,
+            serial_number_2,
+            serial_number_3,
         ]
-        get_task_history_response = {
-            'body': task_history,
-            'status': 200,
-        }
 
-        assets_to_predict = ['VC1234567', 'VC7654321', 'VC1111111']
-
-        tnba_monitor._bruin_repository.get_ticket_task_history = CoroutineMock(return_value=get_task_history_response)
-
-        tnba_monitor._t7_repository.get_prediction = CoroutineMock(return_value=get_predictions_response)
+        tnba_monitor._bruin_repository.get_ticket_task_history.return_value = get_task_history_response
+        tnba_monitor._t7_repository.get_prediction.return_value = get_predictions_response
 
         result = await tnba_monitor._get_predictions_by_ticket_id(tickets)
 
@@ -2318,421 +1069,248 @@ class TestTNBAMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def remove_erroneous_predictions_with_some_predictions_being_erroneous_test(self, tnba_monitor):
+    async def remove_erroneous_predictions_with_some_predictions_being_erroneous_test(
+            self, tnba_monitor, make_prediction_object, make_erroneous_prediction_object,
+            make_predictions_by_ticket_id_object, serial_number_1, serial_number_2, serial_number_3):
         ticket_id = 12345
-        ticket_prediction_object_1 = {
-            'assetId': 'VC1234567',
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
-        ticket_prediction_object_2 = {
-            'assetId': 'VC7654321',
-            'error': {
-                'code': 'error_in_prediction',
-                'message': (
-                    'Error executing prediction: The labels [\'Additional Information Required\'] are not in the '
-                    '"task_result" labels map.'
-                ),
-            },
-        }
-        ticket_prediction_object_3 = {
-            'assetId': 'VC7654321',
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
-        predictions_by_ticket_id = {
-            ticket_id: [
-                ticket_prediction_object_1,
-                ticket_prediction_object_2,
-                ticket_prediction_object_3,
-            ],
-        }
+        ticket_prediction_object_1 = make_prediction_object(serial_number=serial_number_1)
+        ticket_prediction_object_2 = make_erroneous_prediction_object(serial_number=serial_number_2)
+        ticket_prediction_object_3 = make_prediction_object(serial_number=serial_number_3)
+        predictions = [
+            ticket_prediction_object_1,
+            ticket_prediction_object_2,
+            ticket_prediction_object_3,
+        ]
+        predictions_by_ticket_id = make_predictions_by_ticket_id_object(ticket_id=ticket_id, predictions=predictions)
 
         result = tnba_monitor._remove_erroneous_predictions(predictions_by_ticket_id)
 
-        assert result == {
-            ticket_id: [
-                ticket_prediction_object_1,
-                ticket_prediction_object_3,
-            ],
-        }
+        expected = make_predictions_by_ticket_id_object(
+            ticket_id=ticket_id,
+            predictions=[ticket_prediction_object_1, ticket_prediction_object_3],
+        )
+        assert result == expected
 
     @pytest.mark.asyncio
-    async def remove_erroneous_predictions_with_all_predictions_being_erroneous_test(self, tnba_monitor):
+    async def remove_erroneous_predictions_with_all_predictions_being_erroneous_test(
+            self, tnba_monitor, make_predictions_by_ticket_id_object, make_erroneous_prediction_object,
+            serial_number_1, serial_number_2, serial_number_3):
         ticket_id = 12345
-        ticket_prediction_object_1 = {
-            'assetId': 'VC1234567',
-            'error': {
-                'code': 'error_in_prediction',
-                'message': (
-                    'Error executing prediction: The labels [\'Additional Information Required\'] are not in the '
-                    '"task_result" labels map.'
-                ),
-            },
-        }
-        ticket_prediction_object_2 = {
-            'assetId': 'VC7654321',
-            'error': {
-                'code': 'error_in_prediction',
-                'message': (
-                    'Error executing prediction: The labels [\'Additional Information Required\'] are not in the '
-                    '"task_result" labels map.'
-                ),
-            },
-        }
-        ticket_prediction_object_3 = {
-            'assetId': 'VC7654321',
-            'error': {
-                'code': 'error_in_prediction',
-                'message': (
-                    'Error executing prediction: The labels [\'Additional Information Required\'] are not in the '
-                    '"task_result" labels map.'
-                ),
-            },
-        }
-        predictions_by_ticket_id = {
-            ticket_id: [
-                ticket_prediction_object_1,
-                ticket_prediction_object_2,
-                ticket_prediction_object_3,
-            ],
-        }
+        ticket_prediction_object_1 = make_erroneous_prediction_object(serial_number=serial_number_1)
+        ticket_prediction_object_2 = make_erroneous_prediction_object(serial_number=serial_number_2)
+        ticket_prediction_object_3 = make_erroneous_prediction_object(serial_number=serial_number_3)
+        predictions = [
+            ticket_prediction_object_1,
+            ticket_prediction_object_2,
+            ticket_prediction_object_3,
+        ]
+        predictions_by_ticket_id = make_predictions_by_ticket_id_object(ticket_id=ticket_id, predictions=predictions)
 
         result = tnba_monitor._remove_erroneous_predictions(predictions_by_ticket_id)
 
         assert result == {}
 
     @pytest.mark.asyncio
-    async def map_ticket_details_with_predictions_test(self, tnba_monitor):
-        edge_serial_1 = 'VC1234567'
-        edge_serial_2 = 'VC7654321'
-        edge_serial_3 = 'VC7654321'
+    async def map_ticket_details_with_predictions_test(self, tnba_monitor, make_in_progress_ticket_detail,
+                                                       make_detail_object, make_detail_object_with_predictions,
+                                                       make_prediction_object, make_predictions_by_ticket_id_object,
+                                                       serial_number_1, serial_number_2, serial_number_3,
+                                                       holmdel_noc_prediction):
+        ticket_1_id = 12345
+        ticket_2_id = 67890
 
-        ticket_id_1 = 12345
-        ticket_id_2 = 67890
-        ticket_creation_date = "1/02/2021 10:08:13 AM"
-        ticket_topic = "Service Outage Trouble"
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_prediction_object_1_predictions = [
-            {
-                'name': 'Repair Completed',
-                'probability': 0.9484384655952454
-            },
+        prediction_set_1 = [
+            holmdel_noc_prediction,
         ]
-        ticket_prediction_object_1 = {
-            'assetId': edge_serial_1,
-            'predictions': ticket_prediction_object_1_predictions,
-        }
+        prediction_object_1 = make_prediction_object(
+            serial_number=serial_number_1,
+            predictions=prediction_set_1,
+        )
 
-        ticket_prediction_object_2_predictions = [
-            {
-                'name': 'Repair Completed',
-                'probability': 0.9484384655952454
-            },
+        prediction_set_2 = [
+            holmdel_noc_prediction,
         ]
-        ticket_prediction_object_2 = {
-            'assetId': edge_serial_2,
-            'predictions': ticket_prediction_object_2_predictions,
-        }
-        predictions_by_ticket_id = {
-            ticket_id_1: [
-                ticket_prediction_object_1,
-                ticket_prediction_object_2,
-            ],
-        }
+        prediction_object_2 = make_prediction_object(
+            serial_number=serial_number_2,
+            predictions=prediction_set_2,
+        )
+        predictions_by_ticket_id = make_predictions_by_ticket_id_object(
+            ticket_id=ticket_1_id,
+            predictions=[prediction_object_1, prediction_object_2],
+        )
 
-        ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_serial_1,
-        }
-        ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_serial_2,
-        }
-        ticket_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_serial_3,
-        }
-        ticket_detail_4 = {
-            "detailID": 2746940,
-            "detailValue": edge_serial_1,
-        }
+        ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_1_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_1_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+        ticket_2_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
 
-        ticket_detail_object_1 = {
-            'ticket_id': ticket_id_1,
-            'ticket_creation_date': ticket_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_detail_1,
-            'ticket_notes': [],
-        }
-        ticket_detail_object_2 = {
-            'ticket_id': ticket_id_1,
-            'ticket_creation_date': ticket_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_detail_2,
-            'ticket_notes': [],
-        }
-        ticket_detail_object_3 = {
-            'ticket_id': ticket_id_1,
-            'ticket_creation_date': ticket_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_detail_3,
-            'ticket_notes': [],
-        }
-        ticket_detail_object_4 = {
-            'ticket_id': ticket_id_2,
-            'ticket_creation_date': ticket_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_detail': ticket_detail_4,
-            'ticket_notes': [],
-        }
+        ticket_1_detail_object_1 = make_detail_object(ticket_id=ticket_1_id, ticket_detail=ticket_1_detail_1)
+        ticket_1_detail_object_2 = make_detail_object(ticket_id=ticket_1_id, ticket_detail=ticket_1_detail_2)
+        ticket_1_detail_object_3 = make_detail_object(ticket_id=ticket_1_id, ticket_detail=ticket_1_detail_3)
+        ticket_2_detail_object_1 = make_detail_object(ticket_id=ticket_2_id, ticket_detail=ticket_2_detail_1)
         ticket_detail_objects = [
-            ticket_detail_object_1,
-            ticket_detail_object_2,
-            ticket_detail_object_3,
-            ticket_detail_object_4,
+            ticket_1_detail_object_1,
+            ticket_1_detail_object_2,
+            ticket_1_detail_object_3,
+            ticket_2_detail_object_1,
         ]
-
-        tnba_monitor._prediction_repository.find_prediction_object_by_serial = Mock(side_effect=[
-            ticket_prediction_object_1,
-            ticket_prediction_object_2,
-            None,
-        ])
 
         result = tnba_monitor._map_ticket_details_with_predictions(ticket_detail_objects, predictions_by_ticket_id)
 
+        expected_detail_object_1 = make_detail_object_with_predictions(
+            ticket_id=ticket_1_id,
+            ticket_detail=ticket_1_detail_1,
+            ticket_detail_predictions=prediction_set_1,
+        )
+        expected_detail_object_2 = make_detail_object_with_predictions(
+            ticket_id=ticket_1_id,
+            ticket_detail=ticket_1_detail_2,
+            ticket_detail_predictions=prediction_set_2,
+        )
         assert result == [
-            {
-                **ticket_detail_object_1,
-                'ticket_detail_predictions': ticket_prediction_object_1_predictions,
-            },
-            {
-                **ticket_detail_object_2,
-                'ticket_detail_predictions': ticket_prediction_object_2_predictions,
-            }
+            expected_detail_object_1,
+            expected_detail_object_2,
         ]
 
     @pytest.mark.asyncio
-    async def distinguish_ticket_details_with_and_without_tnba_test(self, tnba_monitor, make_ticket_note_for_bruin):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
+    async def distinguish_ticket_details_with_and_without_tnba_test(self, tnba_monitor, make_in_progress_ticket_detail,
+                                                                    make_ticket_object, make_detail_object,
+                                                                    make_ticket_note, make_standard_tnba_note,
+                                                                    serial_number_1, serial_number_2, serial_number_3):
         ticket_1_id = 12345
-        ticket_1_creation_date = "1/02/2021 10:08:13 AM"
-        ticket_topic = "Service Outage Trouble"
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_1_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_1_detail_3 = {
-            "detailID": 2746939,
-            "detailValue": edge_3_serial,
-        }
-        ticket_1_details = [
-            ticket_1_detail_1,
-            ticket_1_detail_2,
-            ticket_1_detail_3,
-        ]
-        ticket_1_note_1 = make_ticket_note_for_bruin(note_id=68246614, created_date="2020-02-24T10:07:13.503-05:00",
-                                                     service_number=[edge_1_serial])
-        ticket_1_note_2 = make_ticket_note_for_bruin(note_id=41894041, created_date="2020-02-24T10:07:13.503-05:00",
-                                                     service_number=[edge_1_serial])
-        ticket_1_note_3 = make_ticket_note_for_bruin(note_id=41894041, created_date="2020-02-24T10:07:13.503-05:00",
-                                                     service_number=[edge_1_serial, edge_2_serial])
-        ticket_1_note_4 = make_ticket_note_for_bruin(note_id=41894044, created_date="2020-02-24T10:07:13.503-05:00",
-                                                     service_number=[edge_2_serial])
-        ticket_1_with_details = {
-            'ticket_id': ticket_1_id,
-            'ticket_creation_date': ticket_1_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_1_details,
-            'ticket_notes': [
-                ticket_1_note_1,
-                ticket_1_note_2,
-                ticket_1_note_3,
-                ticket_1_note_4,
-            ],
-        }
-
         ticket_2_id = 11223
-        ticket_2_creation_date = "1/03/2021 10:08:13 AM"
-        ticket_2_detail_1 = {
-            "detailID": 2746938,
-            "detailValue": edge_1_serial,
-        }
-        ticket_2_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_2_details = [
-            ticket_2_detail_1,
-            ticket_2_detail_2,
-        ]
-        ticket_2_note_1 = make_ticket_note_for_bruin(note_id=41894042, created_date="2020-02-24T10:07:13.503-05:00",
-                                                     service_number=[edge_1_serial],
-                                                     note_value='There were some troubles with this service number')
-        ticket_2_with_details = {
-            'ticket_id': ticket_2_id,
-            'ticket_creation_date': ticket_2_creation_date,
-            'ticket_topic': ticket_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_2_details,
-            'ticket_notes': [
-                ticket_2_note_1,
-            ],
-        }
+
+        ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_1_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_1_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+        ticket_1_note_1 = make_ticket_note(serial_number=serial_number_1, text='This is a note')
+        ticket_1_note_2 = make_standard_tnba_note(serial_number=serial_number_2)
+        ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
+        ticket_1_with_details = make_ticket_object(
+            ticket_id=ticket_1_id,
+            ticket_details=[ticket_1_detail_1, ticket_1_detail_2, ticket_1_detail_3],
+            ticket_notes=[ticket_1_note_1, ticket_1_note_2, ticket_1_note_3],
+        )
+
+        ticket_2_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_2_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_2_note_1 = make_standard_tnba_note(serial_number=serial_number_1)
+        ticket_2_with_details = make_ticket_object(
+            ticket_id=ticket_2_id,
+            ticket_details=[ticket_2_detail_1, ticket_2_detail_2],
+            ticket_notes=[ticket_2_note_1],
+        )
 
         tickets = [
             ticket_1_with_details,
             ticket_2_with_details,
         ]
 
-        tnba_monitor._ticket_repository.has_tnba_note = Mock(side_effect=[
-            True,
-            True,
-            False,
-            False,
-            False,
-        ])
-
         ticket_details_with_tnba, ticket_details_without_tnba = \
             tnba_monitor._distinguish_ticket_details_with_and_without_tnba(tickets)
 
+        expected_ticket_detail_with_tnba_1 = make_detail_object(
+            ticket_id=ticket_1_id,
+            ticket_detail=ticket_1_detail_2,
+            ticket_notes=[ticket_1_note_2],
+        )
+        expected_ticket_detail_with_tnba_2 = make_detail_object(
+            ticket_id=ticket_2_id,
+            ticket_detail=ticket_2_detail_1,
+            ticket_notes=[ticket_2_note_1],
+        )
         assert ticket_details_with_tnba == [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_detail': ticket_1_detail_1,
-                'ticket_notes': [
-                    ticket_1_note_1,
-                    ticket_1_note_2,
-                    ticket_1_note_3,
-                ],
-            },
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_detail': ticket_1_detail_2,
-                'ticket_notes': [
-                    ticket_1_note_3,
-                    ticket_1_note_4,
-                ],
-            }
+            expected_ticket_detail_with_tnba_1,
+            expected_ticket_detail_with_tnba_2,
         ]
+
+        expected_ticket_detail_without_tnba_1 = make_detail_object(
+            ticket_id=ticket_1_id,
+            ticket_detail=ticket_1_detail_1,
+            ticket_notes=[ticket_1_note_1],
+        )
+        expected_ticket_detail_without_tnba_2 = make_detail_object(
+            ticket_id=ticket_1_id,
+            ticket_detail=ticket_1_detail_3,
+            ticket_notes=[ticket_1_note_3],
+        )
+        expected_ticket_detail_without_tnba_3 = make_detail_object(
+            ticket_id=ticket_2_id,
+            ticket_detail=ticket_2_detail_2,
+            ticket_notes=[],
+        )
         assert ticket_details_without_tnba == [
-            {
-                'ticket_id': ticket_1_id,
-                'ticket_creation_date': ticket_1_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_detail': ticket_1_detail_3,
-                'ticket_notes': [],
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_detail': ticket_2_detail_1,
-                'ticket_notes': [
-                    ticket_2_note_1,
-                ],
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_creation_date': ticket_2_creation_date,
-                'ticket_topic': ticket_topic,
-                'ticket_creator': tickets_creator,
-                'ticket_detail': ticket_2_detail_2,
-                'ticket_notes': [],
-            },
+            expected_ticket_detail_without_tnba_1,
+            expected_ticket_detail_without_tnba_2,
+            expected_ticket_detail_without_tnba_3,
         ]
 
-    def filter_outage_ticket_details_based_on_last_outage_with_affecting_ticket_details_test(self, tnba_monitor,
-                                                                                             make_detail_object,
-                                                                                             make_ticket_detail):
-        ticket_detail = make_ticket_detail(1, 'VC1234567')
-        affecting_ticket_detail_1 = make_detail_object(ticket_id=12345, ticket_topic="Service Outage Trouble",
-                                                       ticket_creator='Intelygenz Ai', ticket_detail=ticket_detail,
-                                                       ticket_notes=[],
-                                                       ticket_detail_predictions=[],
-                                                       ticket_creation_date="1/04/2021 10:08:13 AM")
-        affecting_ticket_detail_2 = make_detail_object(ticket_id=67890, ticket_topic="Service Outage Trouble",
-                                                       ticket_creator='Intelygenz Ai', ticket_detail=ticket_detail,
-                                                       ticket_notes=[],
-                                                       ticket_detail_predictions=[],
-                                                       ticket_creation_date="1/04/2021 10:08:13 AM")
+    def filter_outage_ticket_details_based_on_last_outage_with_affecting_ticket_details_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object, serial_number_1, serial_number_2):
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_object_1 = make_detail_object(
+            ticket_topic='Service Affecting Trouble',
+            ticket_detail=ticket_detail_1,
+        )
+
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_object_2 = make_detail_object(
+            ticket_topic='Service Affecting Trouble',
+            ticket_detail=ticket_detail_2,
+        )
+
         ticket_details = [
-            affecting_ticket_detail_1,
-            affecting_ticket_detail_2,
+            ticket_detail_object_1,
+            ticket_detail_object_2,
         ]
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=False)
 
         result = tnba_monitor._filter_outage_ticket_details_based_on_last_outage(ticket_details)
         assert result == ticket_details
 
-    def filter_outage_ticket_details_based_on_last_outage_with_outage_ticket_details_test(self, tnba_monitor,
-                                                                                          make_detail_object,
-                                                                                          make_ticket_detail):
-        ticket_detail = make_ticket_detail(1, 'VC1234567')
-        outage_ticket_detail_1 = make_detail_object(ticket_id=67890, ticket_topic="Service Outage Trouble",
-                                                    ticket_creator='Intelygenz Ai',
-                                                    ticket_detail=ticket_detail,
-                                                    ticket_notes=[],
-                                                    ticket_detail_predictions=[])
-        outage_ticket_detail_2 = make_detail_object(ticket_id=12345, ticket_topic="Service Outage Trouble",
-                                                    ticket_creator='Intelygenz Ai',
-                                                    ticket_detail=ticket_detail,
-                                                    ticket_notes=[],
-                                                    ticket_detail_predictions=[],
-                                                    ticket_creation_date="1/04/2021 10:08:13 AM")
+    def filter_outage_ticket_details_based_on_last_outage_with_outage_ticket_details_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object, serial_number_1, serial_number_2,
+            serial_number_3):
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_object_1 = make_detail_object(
+            ticket_topic='Service Outage Trouble',
+            ticket_detail=ticket_detail_1,
+        )
+
+        ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_object_2 = make_detail_object(
+            ticket_topic='Service Affecting Trouble',
+            ticket_detail=ticket_detail_2,
+        )
+
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+        ticket_detail_object_3 = make_detail_object(
+            ticket_topic='Service Outage Trouble',
+            ticket_detail=ticket_detail_3,
+        )
+
         ticket_details = [
-            outage_ticket_detail_1,
-            outage_ticket_detail_2,
+            ticket_detail_object_1,
+            ticket_detail_object_2,
+            ticket_detail_object_3,
         ]
 
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._was_last_outage_detected_recently = Mock(side_effect=[
-            True,
-            False,
-        ])
+        is_last_outage_in_detail_1_too_recent = True
+        is_last_outage_in_detail_3_too_recent = False
+        tnba_monitor._was_last_outage_detected_recently.side_effect = [
+            is_last_outage_in_detail_1_too_recent,
+            is_last_outage_in_detail_3_too_recent,
+        ]
 
         result = tnba_monitor._filter_outage_ticket_details_based_on_last_outage(ticket_details)
         expected = [
-            outage_ticket_detail_2,
+            ticket_detail_object_2,
+            ticket_detail_object_3,
         ]
         assert result == expected
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self, tnba_monitor):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         ticket_notes = []
-
-        tnba_monitor._utils_repository = UtilsRepository()
 
         new_now = parse(ticket_creation_date) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
@@ -2755,25 +1333,18 @@ class TestTNBAMonitor:
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
-    def was_last_outage_detected_recently_with_reopen_note_found_test(self, tnba_monitor,
-                                                                      make_ticket_note_for_bruin):
+    def was_last_outage_detected_recently_with_reopen_note_found_test(self, tnba_monitor, make_reopen_note,
+                                                                      make_triage_note, serial_number_1):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
         reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
-        ticket_note_1 = make_ticket_note_for_bruin(note_id=68246614, created_date=triage_timestamp,
-                                                   service_number=['VC1234567'],
-                                                   note_value="#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: "
-                                                              "2021-01-02 10:18:16-05:00")
-        ticket_note_2 = make_ticket_note_for_bruin(note_id=68246615, created_date=reopen_timestamp,
-                                                   service_number=['VC1234567'],
-                                                   note_value="#*Automation Engine*#\nRe-opening\nTimeStamp: "
-                                                              "2021-01-03 10:18:16-05:00")
+        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
 
+        reopen_note = make_reopen_note(serial_number=serial_number_1, date=reopen_timestamp)
+        triage_note = make_triage_note(serial_number=serial_number_1, date=triage_timestamp)
         ticket_notes = [
-            ticket_note_1,
-            ticket_note_2,
+            reopen_note,
+            triage_note,
         ]
-        tnba_monitor._utils_repository = UtilsRepository()
 
         datetime_mock = Mock()
 
@@ -2796,20 +1367,15 @@ class TestTNBAMonitor:
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self, tnba_monitor,
-                                                                                                make_ticket_note_for_bruin):
+                                                                                                make_triage_note,
+                                                                                                serial_number_1):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         triage_timestamp = '2021-01-02T10:18:16.71-05:00'
 
-        ticket_note_1 = make_ticket_note_for_bruin(note_id=68246614, created_date=triage_timestamp,
-                                                   service_number=['VC1234567'],
-                                                   note_value="#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: "
-                                                              "2021-01-02 10:18:16-05:00")
-
+        triage_note = make_triage_note(serial_number=serial_number_1, date=triage_timestamp)
         ticket_notes = [
-            ticket_note_1,
+            triage_note,
         ]
-
-        tnba_monitor._utils_repository = UtilsRepository()
 
         datetime_mock = Mock()
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
@@ -3630,100 +2196,75 @@ class TestTNBAMonitor:
         ]
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_ok_test(self, tnba_monitor, make_prediction, make_detail_object,
-                                                make_edge_status, make_ticket_detail):
+    async def autoresolve_ticket_detail_ok_test(self, tnba_monitor, make_in_progress_ticket_detail,
+                                                make_detail_object_with_predictions, make_edge_with_links_info,
+                                                make_rpc_response, edge_1_connected, link_1_stable, link_2_stable,
+                                                serial_number_1, confident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'Service Outage Trouble'
 
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        edge_status = make_edge_status(edge_state='CONNECTED', edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[confident_request_completed_prediction]
+        )
 
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
         edge_status_by_serial = {
-            serial_number: edge_status,
+            serial_number_1: edge_status,
         }
-
-        resolve_detail_response = {
-            'body': 'ok',
-            'status': 200,
-        }
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock(return_value=resolve_detail_response)
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock(return_value=True)
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock(return_value=True)
-
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock(return_value=False)
+
+        resolve_detail_response = make_rpc_response(body='ok', status=200)
+
+        tnba_monitor._bruin_repository.resolve_ticket_detail.return_value = resolve_detail_response
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
             was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
                 detail_object=detail_object,
-                best_prediction=prediction,
+                best_prediction=confident_request_completed_prediction,
             )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(prediction)
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
+            confident_request_completed_prediction
+        )
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_awaited_once_with(ticket_id, ticket_detail_id)
         assert was_detail_autoresolved is True
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_ticket_being_an_affecting_ticket_test(self, tnba_monitor, make_prediction,
-                                                                                   make_detail_object,
-                                                                                   make_edge_status,
-                                                                                   make_ticket_detail):
+    async def autoresolve_ticket_detail_with_ticket_being_an_affecting_ticket_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
+            confident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'Service Affecting Trouble'
 
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        edge_status = make_edge_status(edge_state='CONNECTED', edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
-
-        edge_status_by_serial = {
-            serial_number: edge_status,
-        }
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock()
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=False)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock()
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock()
-
-        tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock()
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[confident_request_completed_prediction]
+        )
 
         was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
             detail_object=detail_object,
-            best_prediction=prediction,
+            best_prediction=confident_request_completed_prediction,
         )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
@@ -3734,46 +2275,27 @@ class TestTNBAMonitor:
         assert was_detail_autoresolved is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_ticket_not_automatically_created_test(self, tnba_monitor, make_prediction,
-                                                                                   make_detail_object,
-                                                                                   make_edge_status,
-                                                                                   make_ticket_detail):
+    async def autoresolve_ticket_detail_with_ticket_not_automatically_created_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
+            confident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Otacon'
         ticket_topic = 'Service Outage Trouble'
 
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        edge_status = make_edge_status(edge_state='CONNECTED', edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
-
-        edge_status_by_serial = {
-            serial_number: edge_status,
-        }
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock()
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock(return_value=False)
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock()
-
-        tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock()
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[confident_request_completed_prediction]
+        )
 
         was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
             detail_object=detail_object,
-            best_prediction=prediction,
+            best_prediction=confident_request_completed_prediction,
         )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
@@ -3784,212 +2306,185 @@ class TestTNBAMonitor:
         assert was_detail_autoresolved is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_prediction_having_insufficient_confidence_level_test(self, tnba_monitor,
-                                                                                                  make_prediction,
-                                                                                                  make_detail_object,
-                                                                                                  make_edge_status,
-                                                                                                  make_ticket_detail):
+    async def autoresolve_ticket_detail_with_prediction_having_insufficient_confidence_level_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
+            unconfident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'Service Outage Trouble'
 
-        serial_number = 'VC1234567'
-
-        prediction = make_prediction(probability=0.5484384655952454)
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        edge_status = make_edge_status(edge_state='CONNECTED', edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
-
-        edge_status_by_serial = {
-            serial_number: edge_status,
-        }
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock()
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock(return_value=True)
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock(return_value=False)
-
-        tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock()
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[unconfident_request_completed_prediction]
+        )
 
         was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
             detail_object=detail_object,
-            best_prediction=prediction,
+            best_prediction=unconfident_request_completed_prediction,
         )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(prediction)
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
+            unconfident_request_completed_prediction
+        )
         tnba_monitor._is_there_an_outage.assert_not_called()
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         assert was_detail_autoresolved is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_edge_in_outage_state_test(self, tnba_monitor, make_prediction,
-                                                                       make_detail_object, make_edge_status,
-                                                                       make_ticket_detail):
+    async def autoresolve_ticket_detail_with_edge_in_outage_state_test(self, tnba_monitor,
+                                                                       make_in_progress_ticket_detail,
+                                                                       make_detail_object_with_predictions,
+                                                                       make_edge_with_links_info,
+                                                                       edge_1_offline, link_1_disconnected,
+                                                                       link_2_disconnected, serial_number_1,
+                                                                       confident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'Service Outage Trouble'
 
-        serial_number = 'VC1234567'
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[confident_request_completed_prediction]
+        )
 
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        edge_status = make_edge_status(edge_state='OFFLINE', edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_offline,
+            links_info=[link_1_disconnected, link_2_disconnected],
+        )
         edge_status_by_serial = {
-            serial_number: edge_status,
+            serial_number_1: edge_status,
         }
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock()
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock(return_value=True)
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock(return_value=True)
-
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock(return_value=True)
 
         was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
             detail_object=detail_object,
-            best_prediction=prediction,
+            best_prediction=confident_request_completed_prediction,
         )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(prediction)
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
+            confident_request_completed_prediction
+        )
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         assert was_detail_autoresolved is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_non_production_environment_test(self, make_prediction, make_edge_status,
-                                                                             make_detail_object, tnba_monitor,
-                                                                             make_ticket_detail):
+    async def autoresolve_ticket_detail_with_non_production_environment_test(self, tnba_monitor,
+                                                                             make_in_progress_ticket_detail,
+                                                                             make_detail_object_with_predictions,
+                                                                             make_edge_with_links_info,
+                                                                             edge_1_connected, link_1_stable,
+                                                                             link_2_stable, serial_number_1,
+                                                                             confident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'Service Outage Trouble'
 
-        serial_number = 'VC1234567'
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[confident_request_completed_prediction]
+        )
 
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        edge_status = make_edge_status(edge_state='OFFLINE', edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
         edge_status_by_serial = {
-            serial_number: edge_status,
+            serial_number_1: edge_status,
         }
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock()
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock(return_value=True)
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock(return_value=True)
-
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock(return_value=False)
 
         with patch.object(testconfig, 'ENVIRONMENT', "dev"):
             was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
                 detail_object=detail_object,
-                best_prediction=prediction,
+                best_prediction=confident_request_completed_prediction,
             )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(prediction)
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
+            confident_request_completed_prediction
+        )
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         assert was_detail_autoresolved is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_failure_in_autoresolve_request_test(self, tnba_monitor, make_edge_status,
-                                                                                 make_structure_response,
-                                                                                 make_detail_object, make_prediction,
-                                                                                 make_ticket_detail):
+    async def autoresolve_ticket_detail_with_failure_in_autoresolve_request_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions,
+            make_edge_with_links_info, make_rpc_response, edge_1_connected, link_1_stable, link_2_stable,
+            serial_number_1, confident_request_completed_prediction):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'Service Outage Trouble'
 
-        serial_number = 'VC1234567'
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[confident_request_completed_prediction]
+        )
 
-        prediction = make_prediction()
-
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic=ticket_topic,
-                                           ticket_creator=ticket_creator,
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-
-        edge_status = make_edge_status(edges_host='mettel.velocloud.net', links=[
-            {
-                'interface': 'REX',
-                'linkState': 'STABLE',
-            },
-        ])
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
         edge_status_by_serial = {
-            serial_number: edge_status,
+            serial_number_1: edge_status,
         }
-
-        resolve_detail_response = make_structure_response(status=500, body='Got internal error from Bruin')
-
-        tnba_monitor._bruin_repository.resolve_ticket_detail = CoroutineMock(return_value=resolve_detail_response)
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket = Mock(return_value=True)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine = Mock(return_value=True)
-
-        tnba_monitor._prediction_repository.is_prediction_confident_enough = Mock(return_value=True)
-
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
-        tnba_monitor._is_there_an_outage = Mock(return_value=False)
+
+        resolve_detail_response = make_rpc_response(
+            body='Got internal error from Bruin',
+            status=500,
+        )
+
+        tnba_monitor._bruin_repository.resolve_ticket_detail.return_value = resolve_detail_response
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
             was_detail_autoresolved = await tnba_monitor._autoresolve_ticket_detail(
                 detail_object=detail_object,
-                best_prediction=prediction,
+                best_prediction=confident_request_completed_prediction,
             )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(prediction)
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
+            confident_request_completed_prediction
+        )
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_awaited_once_with(ticket_id, ticket_detail_id)
         assert was_detail_autoresolved is False
 
     @pytest.mark.asyncio
-    async def append_tnba_notes_test(self, tnba_monitor, make_structure_response, make_tnba_note, make_payload_note):
+    async def append_tnba_notes_test(self, tnba_monitor, make_payload_for_note_append_with_ticket_id,
+                                     make_payload_for_note_append, make_rpc_response, serial_number_1, serial_number_2):
         ticket_1_id = 12345
         ticket_2_id = 67890
 
@@ -3997,69 +2492,97 @@ class TestTNBAMonitor:
         ticket_detail_2_id = 67890
         ticket_detail_3_id = 87654
 
-        service_number_1 = 'VC1234567'
-        service_number_2 = 'VC8901234'
-        service_number_3 = 'VC5678901'
+        tnba_note_1_text = 'This is a TNBA note (1)'
+        tnba_note_2_text = 'This is a TNBA note (2)'
+        tnba_note_3_text = 'This is a TNBA note (3)'
 
-        tnba_note_1 = 'This is a TNBA note (1)'
-        tnba_note_2 = 'This is a TNBA note (2)'
-        tnba_note_3 = 'This is a TNBA note (3)'
+        ticket_1_note_1 = make_payload_for_note_append(
+            serial_number=serial_number_1,
+            detail_id=ticket_detail_1_id,
+            text=tnba_note_1_text,
+        )
+        ticket_1_note_2 = make_payload_for_note_append(
+            serial_number=serial_number_2,
+            detail_id=ticket_detail_2_id,
+            text=tnba_note_2_text,
+        )
+        ticket_2_note_1 = make_payload_for_note_append(
+            serial_number=serial_number_1,
+            detail_id=ticket_detail_3_id,
+            text=tnba_note_3_text,
+        )
 
-        ticket_1_notes_payload = [
-            make_payload_note(text=tnba_note_1, detail_id=ticket_detail_1_id,
-                              service_number=service_number_1),
-            make_payload_note(text=tnba_note_2, detail_id=ticket_detail_2_id,
-                              service_number=service_number_2)
+        ticket_1_notes = [
+            ticket_1_note_1,
+            ticket_1_note_2,
         ]
-        ticket_2_notes_payload = [
-            make_payload_note(text=tnba_note_3, detail_id=ticket_detail_3_id,
-                              service_number=service_number_3)
+        ticket_2_notes = [
+            ticket_2_note_1,
         ]
 
-        append_notes_response = make_structure_response(body='ok', status=200)
+        append_notes_response = make_rpc_response(body='ok', status=200)
 
-        tnba_monitor._bruin_repository.append_multiple_notes_to_ticket = CoroutineMock(
-            return_value=append_notes_response)
-
+        tnba_monitor._bruin_repository.append_multiple_notes_to_ticket.return_value = append_notes_response
         tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
+        ticket_1_note_1_with_ticket_id = make_payload_for_note_append_with_ticket_id(
+            ticket_id=ticket_1_id,
+            serial_number=serial_number_1,
+            detail_id=ticket_detail_1_id,
+            text=tnba_note_1_text,
+        )
+        ticket_1_note_2_with_ticket_id = make_payload_for_note_append_with_ticket_id(
+            ticket_id=ticket_1_id,
+            serial_number=serial_number_2,
+            detail_id=ticket_detail_2_id,
+            text=tnba_note_2_text,
+        )
+        ticket_2_note_1_with_ticket_id = make_payload_for_note_append_with_ticket_id(
+            ticket_id=ticket_2_id,
+            serial_number=serial_number_1,
+            detail_id=ticket_detail_3_id,
+            text=tnba_note_3_text,
+        )
         tnba_monitor._tnba_notes_to_append = [
-            make_tnba_note(ticket_id=ticket_1_id, text=tnba_note_1, detail_id=ticket_detail_1_id,
-                           service_number=service_number_1),
-            make_tnba_note(ticket_id=ticket_1_id, text=tnba_note_2, detail_id=ticket_detail_2_id,
-                           service_number=service_number_2),
-            make_tnba_note(ticket_id=ticket_2_id, text=tnba_note_3, detail_id=ticket_detail_3_id,
-                           service_number=service_number_3)
+            ticket_1_note_1_with_ticket_id,
+            ticket_1_note_2_with_ticket_id,
+            ticket_2_note_1_with_ticket_id,
         ]
 
         await tnba_monitor._append_tnba_notes()
 
         tnba_monitor._bruin_repository.append_multiple_notes_to_ticket.assert_has_awaits([
-            call(ticket_1_id, ticket_1_notes_payload),
-            call(ticket_2_id, ticket_2_notes_payload),
+            call(ticket_1_id, ticket_1_notes),
+            call(ticket_2_id, ticket_2_notes),
         ])
         assert tnba_monitor._notifications_repository.send_slack_message.await_count == 2
 
-    def is_there_an_outage_test(self, tnba_monitor, make_edge_status, make_link):
-        edge_status_1 = make_edge_status(edge_state='CONNECTED', links=[make_link('STABLE'), make_link('STABLE')])
-
-        edge_status_2 = make_edge_status(edge_state='OFFLINE',
-                                         links=[make_link('DISCONNECTED'), make_link('DISCONNECTED')])
-
-        edge_status_3 = make_edge_status(edge_state='OFFLINE', links=[make_link('STABLE'), make_link('DISCONNECTED')])
-
-        result = tnba_monitor._is_there_an_outage(edge_status_1)
+    def is_there_an_outage_test(self, tnba_monitor, make_edge_with_links_info, edge_1_connected, edge_1_offline,
+                                link_1_stable, link_1_disconnected, link_2_stable, link_2_disconnected):
+        edge_with_links_info = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
+        result = tnba_monitor._is_there_an_outage(edge_with_links_info)
         assert result is False
 
-        result = tnba_monitor._is_there_an_outage(edge_status_2)
+        edge_with_links_info = make_edge_with_links_info(
+            edge_info=edge_1_offline,
+            links_info=[link_1_disconnected, link_2_disconnected],
+        )
+        result = tnba_monitor._is_there_an_outage(edge_with_links_info)
         assert result is True
 
-        result = tnba_monitor._is_there_an_outage(edge_status_3)
+        edge_with_links_info = make_edge_with_links_info(
+            edge_info=edge_1_offline,
+            links_info=[link_1_stable, link_2_disconnected],
+        )
+        result = tnba_monitor._is_there_an_outage(edge_with_links_info)
         assert result is True
 
-    def is_faulty_edge_test(self):
-        edge_state_1 = 'CONNECTED'
-        edge_state_2 = 'OFFLINE'
+    def is_faulty_edge_test(self, edge_1_connected, edge_1_offline):
+        edge_state_1 = edge_1_connected['edgeState']
+        edge_state_2 = edge_1_offline['edgeState']
 
         result = TNBAMonitor._is_faulty_edge(edge_state_1)
         assert result is False
@@ -4067,9 +2590,9 @@ class TestTNBAMonitor:
         result = TNBAMonitor._is_faulty_edge(edge_state_2)
         assert result is True
 
-    def is_faulty_link_test(self):
-        link_state_1 = 'STABLE'
-        link_state_2 = 'DISCONNECTED'
+    def is_faulty_link_test(self, link_1_stable, link_1_disconnected):
+        link_state_1 = link_1_stable['linkState']
+        link_state_2 = link_1_disconnected['linkState']
 
         result = TNBAMonitor._is_faulty_link(link_state_1)
         assert result is False

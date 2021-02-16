@@ -1,303 +1,124 @@
-import os
-
 from application.repositories.prediction_repository import PredictionRepository
-from application.repositories.utils_repository import UtilsRepository
-from config import testconfig
 
 
 class TestPredictionRepository:
-    def find_predictions_by_serial_test(self):
-        serial_number = 'VC1234567'
-
-        prediction_1 = {
-            'assetId': serial_number,
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-                {
-                    'name': 'Holmdel NOC Investigate',
-                    'probability': 0.1234567890123456
-                },
-            ]
-        }
-        prediction_2 = {
-            'assetId': 'VC9999999',
-            'predictions': [
-                {
-                    'name': 'Request Completed',
-                    'probability': 0.1111111111111111
-                },
-                {
-                    'name': 'No Trouble Found - Carrier Issue',
-                    'probability': 0.2222222222222222
-                },
-            ]
-        }
-        predictions = [
-            prediction_1,
-            prediction_2,
+    def find_predictions_by_serial_test(self, prediction_repository, make_prediction_object, serial_number_1,
+                                        serial_number_2, holmdel_noc_prediction):
+        prediction_object_1 = make_prediction_object(
+            serial_number=serial_number_1,
+            predictions=[holmdel_noc_prediction],
+        )
+        prediction_object_2 = make_prediction_object(
+            serial_number=serial_number_2,
+            predictions=[holmdel_noc_prediction],
+        )
+        prediction_objects = [
+            prediction_object_1,
+            prediction_object_2,
         ]
 
-        utils_repository = UtilsRepository()
+        result = prediction_repository.find_prediction_object_by_serial(prediction_objects, serial_number_1)
+        assert result == prediction_object_1
 
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
-
-        result = prediction_repository.find_prediction_object_by_serial(predictions, serial_number)
-        assert result == prediction_1
-
-    def filter_predictions_in_next_results_test(self):
-        prediction_1 = {
-            'name': 'Repair Completed',
-            'probability': 0.9484384655952454
-        }
-        prediction_2 = {
-            'name': 'Holmdel NOC Investigate',
-            'probability': 0.1234567890123456
-        }
-        prediction_3 = {
-            'name': 'Request Completed',
-            'probability': 0.1111111111111111
-        }
+    def filter_predictions_in_next_results_test(self, make_next_result, holmdel_noc_prediction,
+                                                confident_request_completed_prediction,
+                                                confident_repair_completed_prediction):
         predictions = [
-            prediction_1,
-            prediction_2,
-            prediction_3,
+            confident_repair_completed_prediction,
+            holmdel_noc_prediction,
+            confident_request_completed_prediction,
         ]
 
+        next_result_request_completed = make_next_result(result_name='Request Completed')
+        next_result_holmdel_noc = make_next_result(result_name='Holmdel NOC Investigate ')
         next_results = [
-            {
-                "resultTypeId": 620,
-                "resultName": "Request Completed",
-                "notes": [],
-            },
-            {
-                "resultTypeId": 621,
-                "resultName": "Holmdel NOC Investigate ",
-                "notes": [],
-            },
+            next_result_request_completed,
+            next_result_holmdel_noc,
         ]
 
         result = PredictionRepository.filter_predictions_in_next_results(predictions, next_results)
         expected = [
-            prediction_2,
-            prediction_3,
+            holmdel_noc_prediction,
+            confident_request_completed_prediction,
         ]
         assert result == expected
 
-    def get_best_prediction_test(self):
-        prediction_1 = {
-            'name': 'Repair Completed',
-            'probability': 0.9484384655952454
-        }
-        prediction_2 = {
-            'name': 'Holmdel NOC Investigate',
-            'probability': 0.1234567890123456
-        }
+    def get_best_prediction_test(self, prediction_repository, confident_request_completed_prediction,
+                                 unconfident_request_completed_prediction):
         predictions = [
-            prediction_1,
-            prediction_2,
+            unconfident_request_completed_prediction,
+            confident_request_completed_prediction,
         ]
 
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
-
         result = prediction_repository.get_best_prediction(predictions)
-        assert result == prediction_1
+        assert result == confident_request_completed_prediction
 
-    def is_best_prediction_different_from_prediction_in_tnba_note_with_no_prediction_found_in_note_test(self):
-        tnba_note = {
-            "noteId": 41894040,
-            "noteValue": os.linesep.join([
-                '#*Automation Engine*#,'
-                'TNBA',
-                '',
-                'The note was written with a wrong format just to test this edge case',
-            ]),
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-        }
-
-        best_prediction = {
-            'name': 'Repair Completed',
-            'probability': 0.9484384655952454
-        }
-
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
+    def is_best_prediction_different_from_prediction_in_tnba_note_with_no_prediction_found_in_note_test(
+            self, prediction_repository, make_ticket_note, serial_number_1, holmdel_noc_prediction):
+        note_text = (
+            '#*Automation Engine*#\n'
+            'TNBA\n\n'
+            'The note was written with a wrong format just to test this edge case'
+        )
+        tnba_note = make_ticket_note(serial_number=serial_number_1, text=note_text)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-            tnba_note, best_prediction)
-
+            tnba_note, holmdel_noc_prediction
+        )
         assert result is True
 
     def is_best_prediction_different_from_prediction_in_tnba_note_with_no_changes_in_prediction_name_test(
-            self):
-        tnba_note = {
-            "noteId": 41894040,
-            "noteValue": os.linesep.join([
-                '#*Automation Engine*#,'
-                'TNBA',
-                '',
-                'The next best action for VC1234567 is: No Trouble Found - Carrier Issue.',
-                '',
-                'TNBA is based on AI model designed specifically for MetTel.',
-            ]),
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-        }
-
-        best_prediction = {
-            'name': 'No Trouble Found - Carrier Issue',
-            'probability': 0.9484384655952454
-        }
-
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
+            self, prediction_repository, make_standard_tnba_note, serial_number_1, holmdel_noc_prediction):
+        prediction_name = holmdel_noc_prediction['name']
+        tnba_note = make_standard_tnba_note(serial_number=serial_number_1, prediction_name=prediction_name)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-            tnba_note, best_prediction)
-
+            tnba_note, holmdel_noc_prediction)
         assert result is False
 
     def is_best_prediction_different_from_prediction_in_request_repair_tnba_note_with_no_changes_in_prediction_test(
-            self):
-        tnba_note = {
-            "noteId": 41894040,
-            "noteValue": os.linesep.join([
-                '#*Automation Engine*#,'
-                'TNBA',
-                '',
-                (
-                    'The next best action for VC1234567 is: No Trouble Found - Carrier Issue. '
-                    'Since is a high confidence prediction the task has been automatically transitioned.'
-                ),
-                '',
-                'TNBA is based on AI model designed specifically for MetTel.',
-            ]),
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-        }
-
-        best_prediction = {
-            'name': 'No Trouble Found - Carrier Issue',
-            'probability': 0.9484384655952454
-        }
-
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
+            self, prediction_repository, make_request_completed_tnba_note, serial_number_1,
+            confident_request_completed_prediction):
+        tnba_note = make_request_completed_tnba_note(serial_number=serial_number_1)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-            tnba_note, best_prediction)
-
+            tnba_note, confident_request_completed_prediction)
         assert result is False
 
-    def is_best_prediction_different_from_prediction_in_tnba_note_with_changes_in_prediction_name_test(self):
-        tnba_note = {
-            "noteId": 41894040,
-            "noteValue": os.linesep.join([
-                '#*Automation Engine*#,'
-                'TNBA',
-                '',
-                'The next best action for VC1234567 is: No Trouble Found - Carrier Issue.',
-                '',
-                'TNBA is based on AI model designed specifically for MetTel.',
-            ]),
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-        }
-
-        best_prediction = {
-            'name': 'Wireless Repair Intervention Needed',
-            'probability': 0.9484384655952454
-        }
-
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
+    def is_best_prediction_different_from_prediction_in_tnba_note_with_changes_in_prediction_name_test(
+            self, prediction_repository, make_standard_tnba_note, serial_number_1, holmdel_noc_prediction):
+        prediction_name = 'No Trouble Found'
+        tnba_note = make_standard_tnba_note(serial_number=serial_number_1, prediction_name=prediction_name)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-            tnba_note, best_prediction)
-
+            tnba_note, holmdel_noc_prediction)
         assert result is True
 
     def is_best_prediction_different_from_prediction_in_request_repair_tnba_note_with_changes_in_prediction_name_test(
-            self):
-        tnba_note = {
-            "noteId": 41894040,
-            "noteValue": os.linesep.join([
-                '#*Automation Engine*#,'
-                'TNBA',
-                '',
-                (
-                    'The next best action for VC1234567 is: No Trouble Found - Carrier Issue. '
-                    'Since is a high confidence prediction the task has been automatically transitioned.'
-                ),
-                '',
-                'TNBA is based on AI model designed specifically for MetTel.',
-            ]),
-            "createdDate": "2020-02-24T10:07:13.503-05:00",
-        }
-
-        best_prediction = {
-            'name': 'Wireless Repair Intervention Needed',
-            'probability': 0.9484384655952454
-        }
-
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
+            self, prediction_repository, make_request_completed_tnba_note, serial_number_1,
+            holmdel_noc_prediction):
+        tnba_note = make_request_completed_tnba_note(serial_number=serial_number_1)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-            tnba_note, best_prediction)
-
+            tnba_note, holmdel_noc_prediction)
         assert result is True
 
-    def is_request_or_repair_completed_prediction_test(self):
-        prediction = {
-            'name': 'Request Completed',
-            'probability': 0.9484384655952454
-        }
-        result = PredictionRepository.is_request_or_repair_completed_prediction(prediction)
+    def is_request_or_repair_completed_prediction_test(self, holmdel_noc_prediction,
+                                                       confident_request_completed_prediction,
+                                                       confident_repair_completed_prediction):
+        result = PredictionRepository.is_request_or_repair_completed_prediction(confident_request_completed_prediction)
         assert result is True
 
-        prediction = {
-            'name': 'Repair Completed',
-            'probability': 0.9484384655952454
-        }
-        result = PredictionRepository.is_request_or_repair_completed_prediction(prediction)
+        result = PredictionRepository.is_request_or_repair_completed_prediction(confident_repair_completed_prediction)
         assert result is True
 
-        prediction = {
-            'name': 'ASR Issue Resolved',
-            'probability': 0.9484384655952454
-        }
-        result = PredictionRepository.is_request_or_repair_completed_prediction(prediction)
+        result = PredictionRepository.is_request_or_repair_completed_prediction(holmdel_noc_prediction)
         assert result is False
 
-    def is_prediction_confident_enough_test(self):
-        utils_repository = UtilsRepository()
-
-        prediction_repository = PredictionRepository(testconfig, utils_repository)
-
-        prediction = {
-            'name': 'Request Completed',
-            'probability': 0.74
-        }
-        result = prediction_repository.is_prediction_confident_enough(prediction)
+    def is_prediction_confident_enough_test(self, prediction_repository, confident_request_completed_prediction,
+                                            unconfident_repair_completed_prediction):
+        result = prediction_repository.is_prediction_confident_enough(unconfident_repair_completed_prediction)
         assert result is False
 
-        prediction = {
-            'name': 'Request Completed',
-            'probability': 0.75
-        }
-        result = prediction_repository.is_prediction_confident_enough(prediction)
-        assert result is True
-
-        prediction = {
-            'name': 'Request Completed',
-            'probability': 0.76
-        }
-        result = prediction_repository.is_prediction_confident_enough(prediction)
+        result = prediction_repository.is_prediction_confident_enough(confident_request_completed_prediction)
         assert result is True
