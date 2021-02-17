@@ -54,34 +54,30 @@ MONITOR_REPORT_CONFIG = {
             'name': 'Report - Jitter',
             'type': 'jitter',
             'value': 'Jitter',
-            'crontab': '0 8 * * *', #TODO: The same for all reports?
+            'crontab': '0 8 * * *',
             'threshold': 3,  # Number of tickets to include in the report
-            'client_id': 83109, #TODO: NEED?
             'trailing_days': 14,
             'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, ' #TODO: CHANGE?
+                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
         },
         {
             'name': 'Report - Latency',
             'type': 'latency',
             'value': 'Latency',
-            'crontab': '0 8 * * *', #TODO: The same for all reports?
+            'crontab': '0 8 * * *',
             'threshold': 3,  # Number of tickets to include in the report
-            'client_id': 83109, #TODO: NEED?
             'trailing_days': 14,
             'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, ' #TODO: CHANGE?
+                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
         },
         {
-            'name': 'Report - Packet Loss',
+            'name': 'Packet Loss',
             'type': 'packet_loss',
             'value': 'Packet Loss',
-            'crontab': '0 8 * * *',  # TODO: The same for all reports?
-            'threshold': 3,  # Number of tickets to include in the report
-            'client_id': 83109,  # TODO: NEED?
+            'crontab': '0 8 * * *',
             'trailing_days': 14,
             'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '  # TODO: CHANGE?
+                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
         }
     ]
 }

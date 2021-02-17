@@ -263,7 +263,7 @@ class BruinRepository:
                     if interface['interface_name'] in interfaces:
                         interfaces[interface['interface_name']] += 1
                     else:
-                        interfaces[interface['interface_name']] = 0
+                        interfaces[interface['interface_name']] = 1
         return interfaces
 
     @staticmethod
