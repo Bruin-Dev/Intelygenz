@@ -308,14 +308,6 @@ class TestBruinRepository:
         response = BruinRepository.find_detail_by_serial(ticket_mock, edge_serial_number)
         assert response is None
 
-    def find_bandwidth_over_utilization_tickets_test(self,
-                                                     filtered_affecting_tickets,
-                                                     filter_response_bruin_with_all_tickets):
-        response = BruinRepository.filter_bandwidth_notes(
-            filtered_affecting_tickets)
-
-        assert response == filtered_affecting_tickets
-
     @pytest.mark.asyncio
     async def get_affecting_ticket_by_trouble_ok_test(self):
         event_bus = Mock()

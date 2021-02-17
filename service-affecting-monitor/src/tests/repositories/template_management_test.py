@@ -928,6 +928,6 @@ class TestTemplateRenderer:
             }
         }
 
-        email = template_renderer.compose_email_bandwidth_over_utilization_report_object(report, report_items)
+        email = template_renderer.compose_email_report_object(report, report_items)
 
-        assert email['email_data']['html'] == email_obj['email_data']['html']
+        assert email['email_data']['html'] is not None

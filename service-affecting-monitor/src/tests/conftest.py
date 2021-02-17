@@ -75,6 +75,19 @@ def report():
 
 
 @pytest.fixture(scope='function')
+def report_jitter():
+    return {
+        'name': 'Jitter',
+        'type': 'jitter',
+        'value': 'Jitter',
+        'crontab': '20 16 * * *',
+        'threshold': 1,
+        'trailing_days': 14,
+        'recipient': 'mettel@intelygenz.com'
+    }
+
+
+@pytest.fixture(scope='function')
 def ticket_1():
     return {
         'clientID': 83109, 'clientName': 'RSI', 'ticketID': 5081250, 'category': 'SD-WAN',
@@ -146,7 +159,18 @@ def ticket_details_1():
                 'serviceNumber': ['VC05200085762'],
                 'createdDate': '2021-01-07T15:54:47.443-05:00',
                 'creator': 'api_1@bruin.com'
-            }]  # noqa
+            },
+            {
+                'noteId': 77128127,
+                'noteValue': '#*Automation Engine*#\nEdge Name: CA-HEALDSBURG-3871B-TS-DI\nTrouble: Jitter\nInterface: '
+                             'GE2\nName: 170.39.161.40\nThreshold: 30\nInterval for Scan: 20\n'
+                             'Scan Time: 2021-02-17 00:45:41.092507-05:00\nTransfer: 54.5\n'
+                             'Links: Edge  - QoE  - Transport ',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
+                'creator': 'api_1@bruin.com'
+            }
+            ]  # noqa
     }
 
 
@@ -183,6 +207,16 @@ def filter_ticket_details_1():
                              'QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  ['
                              'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links'
                              '/]  \n \n\nTimeStamp: 2021-01-07 15:54:44.279607-05:00',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 77128127,
+                'noteValue': '#*Automation Engine*#\nEdge Name: CA-HEALDSBURG-3871B-TS-DI\nTrouble: Jitter\nInterface: '
+                             'GE2\nName: 170.39.161.40\nThreshold: 30\nInterval for Scan: 20\n'
+                             'Scan Time: 2021-02-17 00:45:41.092507-05:00\nTransfer: 54.5\n'
+                             'Links: Edge  - QoE  - Transport ',
                 'serviceNumber': ['VC05200085762'],
                 'createdDate': '2021-01-07T15:54:47.443-05:00',
                 'creator': 'api_1@bruin.com'
@@ -264,6 +298,16 @@ def ticket_details_2():
                 'serviceNumber': [
                     'VC05200085762'],
                 'createdDate': '2021-01-06T08:58:04.177-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 77128129,
+                'noteValue': '#*Automation Engine*#\nEdge Name: CA-HEALDSBURG-3871B-TS-DI\nTrouble: Jitter\nInterface: '
+                             'GE2\nName: 170.39.161.40\nThreshold: 30\nInterval for Scan: 20\n'
+                             'Scan Time: 2021-02-17 00:45:41.092507-05:00\nTransfer: 54.5\n'
+                             'Links: Edge  - QoE  - Transport ',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
                 'creator': 'api_1@bruin.com'
             }]
         # noqa

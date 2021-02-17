@@ -117,46 +117,50 @@ class ServiceAffectingMonitorReports:
         self._logger.info(f"[service-affecting-monitor-reports] Report finished took {end}")
 
     async def _service_affecting_monitor_report_by_serial(self, report):
-        self._logger.info(f"Running report: {report}")
+        self._logger.info(f"Running report: {report['value']}")
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         start_date_str = start_date.strftime(self._ISO_8601_FORMAT_UTC)
         end_date_str = end_date.strftime(self._ISO_8601_FORMAT_UTC)
         start = datetime.now()
+        set_cache_clients_id = set(edge['bruin_client_info']['client_id'] for edge in self._customer_cache)
+        for client_id in list(set_cache_clients_id):
+            report['client_id'] = client_id
+            affecting_tickets = await self._bruin_repository.get_affecting_ticket_for_report(report, start_date_str,
+                                                                                             end_date_str)
+            if not affecting_tickets:
+                self._logger.error(f"[service-affecting-monitor-reports] Report could not be generated."
+                                   f"We could not retrieve all tickets.")
+                continue
 
-        affecting_tickets = await self._bruin_repository.get_affecting_ticket_for_report(report, start_date_str,
-                                                                                         end_date_str)
-        if not affecting_tickets:
-            self._logger.error(f"[service-affecting-monitor-reports] Report could not be generated."
-                               f"We could not retrieve all tickets.")
-            return
+            set_cache_serials = set(edge['serial_number'] for edge in self._customer_cache)
 
-        set_cache_serials = set(edge['serial_number'] for edge in self._customer_cache)
+            transformed_tickets = BruinRepository.transform_tickets_into_ticket_details(affecting_tickets)
 
-        transformed_tickets = BruinRepository.transform_tickets_into_ticket_details(affecting_tickets)
+            filtered_affecting_tickets = BruinRepository.filter_tickets_with_serial_cached(transformed_tickets,
+                                                                                           set_cache_serials)
 
-        filtered_affecting_tickets = BruinRepository.filter_tickets_with_serial_cached(transformed_tickets,
-                                                                                       set_cache_serials)
+            filtered_affecting_tickets = BruinRepository.filter_trouble_notes(filtered_affecting_tickets,
+                                                                              report['value'])
 
-        filtered_affecting_tickets = BruinRepository.filter_trouble_notes(filtered_affecting_tickets, report['value'])
+            mapped_serials_tickets = self._bruin_repository.group_ticket_details_by_serial(filtered_affecting_tickets)
 
-        mapped_serials_tickets = self._bruin_repository.group_ticket_details_by_serial(filtered_affecting_tickets)
+            report_list = self._bruin_repository.prepare_items_for_report_by_interface(mapped_serials_tickets)
 
-        report_list = self._bruin_repository.prepare_items_for_report_by_interface(mapped_serials_tickets)
+            self._logger.info(f"[service-affecting-monitor-reports] Starting {report['value']} report")
 
-        self._logger.info(f"[service-affecting-monitor-reports] Starting {report['value']} report")
+            final_report_list = [item for item in report_list if item['number_of_tickets'] > report['threshold']]
 
-        final_report_list = [item for item in report_list if item['number_of_tickets'] > report['threshold']]
+            end = datetime.now() - start
+            if len(final_report_list) > 0:
+                email_object = self._template_renderer.compose_email_report_object(
+                    report=report, report_items=final_report_list)
+                await self._notifications_repository.send_email(email_object=email_object)
+                self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} sended by email")
+            else:
+                self._logger.info(
+                    f"[service-affecting-monitor-reports] Report {report['value']} "
+                    f"not needed to send, there are no items")
 
-        end = datetime.now() - start
-        if len(final_report_list) > 0:
-            email_object = self._template_renderer.compose_email_report_object(
-                report=report, report_items=final_report_list)
-            await self._notifications_repository.send_email(email_object=email_object)
-            self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} sended by email")
-        else:
-            self._logger.info(
-                f"[service-affecting-monitor-reports] Report {report['value']} not needed to send, there are no items")
-
-        self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} finished took {end}")
+            self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} finished took {end}")
