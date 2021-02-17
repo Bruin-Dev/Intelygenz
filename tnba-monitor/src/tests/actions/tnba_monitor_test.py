@@ -80,8 +80,7 @@ class TestTNBAMonitor:
         await tnba_monitor._run_tickets_polling()
 
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
-        tnba_monitor._process_ticket_details_with_tnba.assert_not_awaited()
-        tnba_monitor._process_ticket_details_without_tnba.assert_not_awaited()
+        tnba_monitor._process_ticket_detail.assert_not_awaited()
         assert tnba_monitor._customer_cache_by_serial == {}
 
     @pytest.mark.asyncio
@@ -97,8 +96,7 @@ class TestTNBAMonitor:
         await tnba_monitor._run_tickets_polling()
 
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
-        tnba_monitor._process_ticket_details_with_tnba.assert_not_awaited()
-        tnba_monitor._process_ticket_details_without_tnba.assert_not_awaited()
+        tnba_monitor._process_ticket_detail.assert_not_awaited()
         assert tnba_monitor._customer_cache_by_serial == {}
 
     @pytest.mark.asyncio
@@ -124,344 +122,105 @@ class TestTNBAMonitor:
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.assert_awaited_once()
         tnba_monitor._notifications_repository.send_slack_message.assert_awaited_once()
-        tnba_monitor._process_ticket_details_with_tnba.assert_not_awaited()
-        tnba_monitor._process_ticket_details_without_tnba.assert_not_awaited()
+        tnba_monitor._process_ticket_detail.assert_not_awaited()
         assert tnba_monitor._customer_cache_by_serial == {}
         assert tnba_monitor._edge_status_by_serial == {}
 
     @pytest.mark.asyncio
     async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_no_notes_to_append_test(
-            self, tnba_monitor, customer_cache_1, customer_cache_by_serial_1, edge_status_1, edge_status_by_serial_1,
-            make_structure_response, make_ticket_note_for_bruin):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        affecting_topic = 'Service Affecting Trouble'
-        outage_topic = 'Service Outage Trouble'
-
-        customer_cache = customer_cache_1
-
-        get_cache_response = make_structure_response(200, customer_cache)
-
-        customer_cache_by_serial = customer_cache_by_serial_1
-
-        edges_statuses = edge_status_1
-        edge_status_by_serial = edge_status_by_serial_1
-
-        tickets_creator = 'Intelygenz Ai'
-
-        ticket_1_for_bruin_client_1_id = 12345
-        ticket_1_for_bruin_client_1_creation_date = '1/02/2021 10:08:13 AM'
-        ticket_1_for_bruin_client_1_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_1_serial,
-        }
-        ticket_1_for_bruin_client_1_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": edge_2_serial,
-        }
-        ticket_1_for_bruin_client_1_details = [
-            ticket_1_for_bruin_client_1_detail_1,
+            self, tnba_monitor, make_edge_with_links_info, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
+            edge_1_connected, link_1_stable):
+        customer_cache = [
+            edge_cached_info_1,
+            edge_cached_info_2,
         ]
-        ticket_1_note_1_for_bruin_client_1 = make_ticket_note_for_bruin(note_id=41894040, note_value=None,
-                                                                        created_date="2020-02-24T10:07:13.503-05:00",
-                                                                        service_number=[
-                                                                            'VC1234567',
-                                                                        ])
-        ticket_1_note_2_for_bruin_client_1 = make_ticket_note_for_bruin(note_id=41894041,
-                                                                        note_value=f'#*Automation Engine*#\nTNBA\n'
-                                                                                   f'TimeStamp: 2019-07-30 '
-                                                                                   f'06:38:00+00:00',
-                                                                        created_date="2020-02-24T10:07:13.503-05:00",
-                                                                        service_number=[
-                                                                            'VC1234567',
-                                                                        ])
-        ticket_1_note_3_for_bruin_client_1 = make_ticket_note_for_bruin(note_id=41894042, note_value=None,
-                                                                        created_date="2020-02-24T10:07:13.503-05:00",
-                                                                        service_number=[
-                                                                            'VC1234567',
-                                                                        ])
-        ticket_1_note_4_for_bruin_client_1 = make_ticket_note_for_bruin(note_id=41894043, note_value=None,
-                                                                        created_date="2020-02-24T10:07:13.503-05:00",
-                                                                        service_number=[
-                                                                            'VC1234567',
-                                                                            'VC7654321',
-                                                                        ])
-        ticket_1_note_5_for_bruin_client_1 = make_ticket_note_for_bruin(note_id=41894044, note_value=None,
-                                                                        created_date="2020-02-24T10:07:13.503-05:00",
-                                                                        service_number=[
-                                                                            'VC7654321',
-                                                                        ])
-        ticket_1_with_details_for_bruin_client_1 = {
-            'ticket_id': ticket_1_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
-            'ticket_topic': outage_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_1_for_bruin_client_1_details,
-            'ticket_notes': [
-                ticket_1_note_1_for_bruin_client_1,
-                ticket_1_note_2_for_bruin_client_1,
-                ticket_1_note_3_for_bruin_client_1,
-                ticket_1_note_4_for_bruin_client_1,
-                ticket_1_note_5_for_bruin_client_1
-            ],
-        }
-
-        ticket_2_for_bruin_client_1_id = 11223
-        ticket_2_for_bruin_client_1_creation_date = '1/03/2021 10:08:13 AM'
-        ticket_2_for_bruin_client_1_detail_1 = {
-            "detailID": 2746938,
-            "detailValue": 'VC999999999',
-        }
-        ticket_2_for_bruin_client_1_details = [
-            ticket_2_for_bruin_client_1_detail_1,
-        ]
-        ticket_2_note_1_for_bruin_client_1 = {
-            "noteId": 41894042,
-            "noteValue": 'There were some troubles with this service number',
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                'VC999999999',
-            ]
-        }
-        ticket_2_with_details_for_bruin_client_1 = {
-            'ticket_id': ticket_2_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_2_for_bruin_client_1_creation_date,
-            'ticket_topic': affecting_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_2_for_bruin_client_1_details,
-            'ticket_notes': [
-                ticket_2_note_1_for_bruin_client_1,
-            ],
-        }
-
-        ticket_1_for_bruin_client_2_id = 67890
-        ticket_1_for_bruin_client_2_creation_date = '1/04/2021 10:08:13 AM'
-        ticket_1_for_bruin_client_2_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_3_serial,
-        }
-        ticket_1_for_bruin_client_2_details = [
-            ticket_1_for_bruin_client_2_detail_1,
-        ]
-        ticket_1_note_1_for_bruin_client_2 = {
-            "noteId": 41894042,
-            "noteValue": None,
-            "createdDate": "2020-02-24T10:08:13.503-05:00",
-            "serviceNumber": [
-                edge_3_serial,
-            ]
-        }
-        ticket_1_with_details_for_bruin_client_2 = {
-            'ticket_id': ticket_1_for_bruin_client_2_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_2_creation_date,
-            'ticket_topic': outage_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_details': ticket_1_for_bruin_client_2_details,
-            'ticket_notes': [
-                ticket_1_note_1_for_bruin_client_2,
-            ],
-        }
-
-        predictions_for_serial_1_of_ticket_1_of_bruin_client_1 = {
-            'assetId': edge_1_serial,
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
-        predictions_for_serial_2_of_ticket_1_of_bruin_client_1 = {
-            'assetId': edge_2_serial,
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
-        predictions_for_ticket_1_of_bruin_client_1 = [
-            predictions_for_serial_1_of_ticket_1_of_bruin_client_1,
-            predictions_for_serial_2_of_ticket_1_of_bruin_client_1,
-        ]
-
-        predictions_for_serial_3_of_ticket_1_of_bruin_client_2 = {
-            'assetId': edge_3_serial,
-            'predictions': [
-                {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
-                },
-            ],
-        }
-        predictions_for_ticket_1_of_bruin_client_2 = [
-            predictions_for_serial_3_of_ticket_1_of_bruin_client_2,
-        ]
-
-        ticket_1_with_details_for_bruin_client_1_notes_filtered = {
-            'ticket_id': ticket_1_for_bruin_client_1_id,
-            'ticket_details': ticket_1_for_bruin_client_1_details,
-            'ticket_notes': [
-                ticket_1_note_2_for_bruin_client_1,
-                ticket_1_note_4_for_bruin_client_1,
-                ticket_1_note_5_for_bruin_client_1,
-            ]
-        }
-        ticket_1_with_details_for_bruin_client_2_notes_filtered = {
-            'ticket_id': ticket_1_for_bruin_client_2_id,
-            'ticket_details': ticket_1_for_bruin_client_2_details,
-            'ticket_notes': []
-        }
-
-        open_tickets_with_details = [
-            ticket_1_with_details_for_bruin_client_1,
-            ticket_2_with_details_for_bruin_client_1,
-            ticket_1_with_details_for_bruin_client_2,
-        ]
-        relevant_open_tickets = [
-            ticket_1_with_details_for_bruin_client_1,
-            ticket_1_with_details_for_bruin_client_2,
-        ]
-        relevant_open_tickets_with_notes_filtered = [
-            ticket_1_with_details_for_bruin_client_1_notes_filtered,
-            ticket_1_with_details_for_bruin_client_2_notes_filtered,
-        ]
-
-        predictions_by_ticket_id = {
-            ticket_1_for_bruin_client_1_id: predictions_for_ticket_1_of_bruin_client_1,
-            ticket_1_for_bruin_client_2_id: predictions_for_ticket_1_of_bruin_client_2,
-        }
-
-        ticket_1_for_client_1_detail_object_1 = {
-            'ticket_id': ticket_1_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
-            'ticket_topic': outage_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_1_for_bruin_client_1_detail_1,
-            'ticket_notes': [
-                ticket_1_note_2_for_bruin_client_1,
-                ticket_1_note_4_for_bruin_client_1,
-            ],
-        }
-        ticket_1_for_client_1_detail_object_2 = {
-            'ticket_id': ticket_1_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
-            'ticket_topic': affecting_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_1_for_bruin_client_1_detail_2,
-            'ticket_notes': [
-                ticket_1_note_4_for_bruin_client_1,
-                ticket_1_note_5_for_bruin_client_1,
-            ],
-        }
-        ticket_1_for_client_2_detail_object_1 = {
-            'ticket_id': ticket_2_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_2_creation_date,
-            'ticket_topic': outage_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_2_for_bruin_client_1_detail_1,
-            'ticket_notes': [],
-        }
-        ticket_details_with_tnba = [
-            ticket_1_for_client_1_detail_object_1,
-            ticket_1_for_client_1_detail_object_2,
-        ]
-        ticket_details_without_tnba = [
-            ticket_1_for_client_2_detail_object_1,
-        ]
-
-        ticket_details_with_tnba_with_outage_details_filtered = [
-            ticket_1_for_client_1_detail_object_2,
-        ]
-        ticket_details_without_tnba_with_outage_details_filtered = [
-            ticket_1_for_client_2_detail_object_1,
-        ]
-
-        ticket_1_for_client_1_detail_object_2_with_predictions = {
-            'ticket_id': ticket_1_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_1_creation_date,
-            'ticket_topic': affecting_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_1_for_bruin_client_1_detail_2,
-            'ticket_notes': [
-                ticket_1_note_4_for_bruin_client_1,
-                ticket_1_note_5_for_bruin_client_1,
-            ],
-            'ticket_detail_predictions': [
-                predictions_for_serial_2_of_ticket_1_of_bruin_client_1,
-            ]
-        }
-        ticket_1_for_client_2_detail_object_1_with_predictions = {
-            'ticket_id': ticket_2_for_bruin_client_1_id,
-            'ticket_creation_date': ticket_1_for_bruin_client_2_creation_date,
-            'ticket_topic': outage_topic,
-            'ticket_creator': tickets_creator,
-            'ticket_detail': ticket_2_for_bruin_client_1_detail_1,
-            'ticket_notes': [],
-            'ticket_detail_predictions': [
-                predictions_for_serial_3_of_ticket_1_of_bruin_client_2,
-            ]
-        }
-        ticket_details_with_tnba_with_predictions = [
-            ticket_1_for_client_1_detail_object_2_with_predictions,
-        ]
-        ticket_details_without_tnba_with_predictions = [
-            ticket_1_for_client_2_detail_object_1_with_predictions,
-        ]
-
-        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring = CoroutineMock(
-            return_value=get_cache_response)
-
-        tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring = CoroutineMock(return_value=edges_statuses)
-
-        tnba_monitor._tnba_notes_to_append = []
-        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(
-            return_value=(customer_cache, edges_statuses)
+        get_cache_response = make_rpc_response(
+            body=customer_cache,
+            status=200,
         )
-        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(
-            return_value=open_tickets_with_details)
-        tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring = Mock(
-            return_value=relevant_open_tickets)
-        tnba_monitor._filter_irrelevant_notes_in_tickets = Mock(return_value=relevant_open_tickets_with_notes_filtered)
-        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock(return_value=predictions_by_ticket_id)
-        tnba_monitor._remove_erroneous_predictions = Mock(return_value=predictions_by_ticket_id)
-        tnba_monitor._distinguish_ticket_details_with_and_without_tnba = Mock(
-            return_value=(ticket_details_with_tnba, ticket_details_without_tnba)
-        )
-        tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock(side_effect=[
-            ticket_details_with_tnba_with_outage_details_filtered,
-            ticket_details_without_tnba_with_outage_details_filtered,
-        ])
-        tnba_monitor._map_ticket_details_with_predictions = Mock(side_effect=[
-            ticket_details_with_tnba_with_predictions,
-            ticket_details_without_tnba_with_predictions,
-        ])
-        tnba_monitor._process_ticket_details_with_tnba = CoroutineMock()
-        tnba_monitor._process_ticket_details_without_tnba = CoroutineMock()
+
+        edge_with_links = make_edge_with_links_info(edge_info=edge_1_connected, links_info=[link_1_stable])
+        edges_statuses = [
+            edge_with_links,
+        ]
+
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
+        tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
+        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
+            customer_cache, edges_statuses
+        ))
+        tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
+        tnba_monitor._map_ticket_details_with_predictions.return_value = []
+
+        # Skip most of the logic, since the relevant part is to check if TNBA notes are appended or not
+        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
+        tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
+        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
+        tnba_monitor._remove_erroneous_predictions = Mock()
+        tnba_monitor._transform_tickets_into_detail_objects = Mock()
+        tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
+        tnba_monitor._process_ticket_detail = CoroutineMock()
         tnba_monitor._append_tnba_notes = CoroutineMock()
 
         await tnba_monitor._run_tickets_polling()
 
-        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.assert_awaited_once()
-        tnba_monitor._filter_outage_ticket_details_based_on_last_outage.assert_has_calls([
-            call(ticket_details_with_tnba),
-            call(ticket_details_without_tnba),
-        ])
-        tnba_monitor._map_ticket_details_with_predictions.assert_has_calls([
-            call(ticket_details_with_tnba_with_outage_details_filtered, predictions_by_ticket_id),
-            call(ticket_details_without_tnba_with_outage_details_filtered, predictions_by_ticket_id),
-        ])
-        tnba_monitor._process_ticket_details_with_tnba.assert_awaited_once_with(
-            ticket_details_with_tnba_with_predictions
-        )
-        tnba_monitor._process_ticket_details_without_tnba.assert_awaited_once_with(
-            ticket_details_without_tnba_with_predictions
-        )
         tnba_monitor._append_tnba_notes.assert_not_awaited()
-        assert tnba_monitor._customer_cache_by_serial == customer_cache_by_serial
-        assert tnba_monitor._edge_status_by_serial == edge_status_by_serial
+
+    @pytest.mark.asyncio
+    async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_notes_to_append_test(
+            self, tnba_monitor, make_edge_with_links_info, make_detail_object_with_predictions,
+            make_payload_for_note_append_with_ticket_id, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
+            edge_1_connected, link_1_stable):
+        customer_cache = [
+            edge_cached_info_1,
+            edge_cached_info_2,
+        ]
+        get_cache_response = make_rpc_response(
+            body=customer_cache,
+            status=200,
+        )
+
+        edge_with_links = make_edge_with_links_info(edge_info=edge_1_connected, links_info=[link_1_stable])
+        edges_statuses = [
+            edge_with_links,
+        ]
+
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
+        tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
+        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
+            customer_cache, edges_statuses
+        ))
+        tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
+
+        # Skip most of the logic, since the relevant part is to check if TNBA notes are appended or not
+        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
+        tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
+        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
+        tnba_monitor._remove_erroneous_predictions = Mock()
+        tnba_monitor._transform_tickets_into_detail_objects = Mock()
+        tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
+        tnba_monitor._append_tnba_notes = CoroutineMock()
+
+        # Let's simulate that, after processing some details, a few TNBA notes were created to be appended to a ticket
+        detail_object = make_detail_object_with_predictions()
+        tnba_monitor._map_ticket_details_with_predictions.return_value = [detail_object]
+
+        tnba_note_1 = make_payload_for_note_append_with_ticket_id(ticket_id=1, text='This is TNBA note #1')
+        tnba_note_2 = make_payload_for_note_append_with_ticket_id(ticket_id=2, text='This is TNBA note #2')
+        tnba_notes = [
+            tnba_note_1,
+            tnba_note_2,
+        ]
+
+        def __fake_process_ticket_detail(*args, **kwargs):
+            for note in tnba_notes:
+                tnba_monitor._tnba_notes_to_append.append(note)
+
+        tnba_monitor._process_ticket_detail = CoroutineMock(side_effect=__fake_process_ticket_detail)
+
+        await tnba_monitor._run_tickets_polling()
+
+        tnba_monitor._append_tnba_notes.assert_awaited_once()
 
     def filter_edges_in_customer_cache_and_edges_statuses_test(self, make_edge_with_links_info, edge_cached_info_1,
                                                                edge_cached_info_2, edge_1_connected, link_1_stable):
@@ -1173,10 +932,10 @@ class TestTNBAMonitor:
         ]
 
     @pytest.mark.asyncio
-    async def distinguish_ticket_details_with_and_without_tnba_test(self, tnba_monitor, make_in_progress_ticket_detail,
-                                                                    make_ticket_object, make_detail_object,
-                                                                    make_ticket_note, make_standard_tnba_note,
-                                                                    serial_number_1, serial_number_2, serial_number_3):
+    async def transform_tickets_into_detail_objects_test(self, make_in_progress_ticket_detail,
+                                                         make_ticket_object, make_detail_object,
+                                                         make_ticket_note, make_standard_tnba_note,
+                                                         serial_number_1, serial_number_2, serial_number_3):
         ticket_1_id = 12345
         ticket_2_id = 11223
 
@@ -1206,43 +965,39 @@ class TestTNBAMonitor:
             ticket_2_with_details,
         ]
 
-        ticket_details_with_tnba, ticket_details_without_tnba = \
-            tnba_monitor._distinguish_ticket_details_with_and_without_tnba(tickets)
+        detail_objects = TNBAMonitor._transform_tickets_into_detail_objects(tickets)
 
-        expected_ticket_detail_with_tnba_1 = make_detail_object(
-            ticket_id=ticket_1_id,
-            ticket_detail=ticket_1_detail_2,
-            ticket_notes=[ticket_1_note_2],
-        )
-        expected_ticket_detail_with_tnba_2 = make_detail_object(
-            ticket_id=ticket_2_id,
-            ticket_detail=ticket_2_detail_1,
-            ticket_notes=[ticket_2_note_1],
-        )
-        assert ticket_details_with_tnba == [
-            expected_ticket_detail_with_tnba_1,
-            expected_ticket_detail_with_tnba_2,
-        ]
-
-        expected_ticket_detail_without_tnba_1 = make_detail_object(
+        expected_ticket_detail_1 = make_detail_object(
             ticket_id=ticket_1_id,
             ticket_detail=ticket_1_detail_1,
             ticket_notes=[ticket_1_note_1],
         )
-        expected_ticket_detail_without_tnba_2 = make_detail_object(
+        expected_ticket_detail_2 = make_detail_object(
+            ticket_id=ticket_1_id,
+            ticket_detail=ticket_1_detail_2,
+            ticket_notes=[ticket_1_note_2],
+        )
+        expected_ticket_detail_3 = make_detail_object(
             ticket_id=ticket_1_id,
             ticket_detail=ticket_1_detail_3,
             ticket_notes=[ticket_1_note_3],
         )
-        expected_ticket_detail_without_tnba_3 = make_detail_object(
+        expected_ticket_detail_4 = make_detail_object(
+            ticket_id=ticket_2_id,
+            ticket_detail=ticket_2_detail_1,
+            ticket_notes=[ticket_2_note_1],
+        )
+        expected_ticket_detail_5 = make_detail_object(
             ticket_id=ticket_2_id,
             ticket_detail=ticket_2_detail_2,
             ticket_notes=[],
         )
-        assert ticket_details_without_tnba == [
-            expected_ticket_detail_without_tnba_1,
-            expected_ticket_detail_without_tnba_2,
-            expected_ticket_detail_without_tnba_3,
+        assert detail_objects == [
+            expected_ticket_detail_1,
+            expected_ticket_detail_2,
+            expected_ticket_detail_3,
+            expected_ticket_detail_4,
+            expected_ticket_detail_5,
         ]
 
     def filter_outage_ticket_details_based_on_last_outage_with_affecting_ticket_details_test(
@@ -1397,802 +1152,349 @@ class TestTNBAMonitor:
             assert result is False
 
     @pytest.mark.asyncio
-    async def process_ticket_details_without_tnba_ok_test(self, tnba_monitor, make_prediction, make_detail_object,
-                                                          make_ticket_detail):
-        ticket_id = 12345
-        prediction = make_prediction()
-        detail_object_1 = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                             ticket_creator='Intelygenz Ai',
-                                             ticket_detail=make_ticket_detail(1, 'VC1234567'),
-                                             ticket_notes=[],
-                                             ticket_detail_predictions=[prediction])
-        detail_object_2 = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                             ticket_detail=make_ticket_detail(2, 'VC8909876'),
-                                             ticket_creator='Intelygenz Ai', ticket_notes=[],
-                                             ticket_detail_predictions=[prediction])
-        ticket_details = [
-            detail_object_1,
-            detail_object_2,
-        ]
-
-        tnba_monitor._process_ticket_detail_without_tnba = CoroutineMock()
-
-        await tnba_monitor._process_ticket_details_without_tnba(ticket_details)
-
-        tnba_monitor._process_ticket_detail_without_tnba.assert_has_awaits([
-            call(detail_object_1),
-            call(detail_object_2),
-        ], any_order=True)
-
-    @pytest.mark.asyncio
-    async def process_ticket_details_without_tnba_with_empty_list_of_ticket_details_test(self, tnba_monitor):
-        ticket_details = []
-
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock()
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
-        tnba_monitor._bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
-
-        tnba_monitor._t7_repository.get_prediction = CoroutineMock()
-
-        tnba_monitor._process_ticket_detail_without_tnba = CoroutineMock()
-
-        await tnba_monitor._process_ticket_details_without_tnba(ticket_details)
-
-        tnba_monitor._process_ticket_detail_without_tnba.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_retrieval_of_next_results_returning_non_2xx_status_test(self,
-                                                                                                              tnba_monitor,
-                                                                                                              make_prediction,
-                                                                                                              make_detail_object,
-                                                                                                              make_structure_response,
-                                                                                                              make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number), ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=500, body='Got internal error from Bruin')
-
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock()
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
+    async def process_ticket_detail_with_tnba_note_found_and_tnba_note_being_too_recent_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail,
+            make_standard_tnba_note, serial_number_1):
+        tnba_note = make_standard_tnba_note(serial_number=serial_number_1)
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        detail_object = make_detail_object_with_predictions(
+            ticket_detail=ticket_detail,
+            ticket_notes=[tnba_note],
         )
+
+        tnba_monitor._ticket_repository.is_tnba_note_old_enough.return_value = False
+
+        await tnba_monitor._process_ticket_detail(detail_object)
+
+        tnba_monitor._ticket_repository.is_tnba_note_old_enough.assert_called_once_with(tnba_note)
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         assert tnba_monitor._tnba_notes_to_append == []
 
     @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_no_predictions_after_filtering_with_next_results_test(self,
-                                                                                                            tnba_monitor,
-                                                                                                            make_prediction,
-                                                                                                            make_detail_object,
-                                                                                                            make_structure_response,
-                                                                                                            make_next_results,
-                                                                                                            make_ticket_detail):
+    async def process_ticket_detail_with_retrieval_of_next_results_returning_non_2xx_status_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            serial_number_1):
         ticket_id = 12345
-        ticket_detail_id = 1
-        serial_number = 'VC1234567'
+        ticket_detail_id = 67890
 
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number), ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        detail_object = make_detail_object_with_predictions(ticket_id=ticket_id, ticket_detail=ticket_detail,)
 
-        filtered_predictions = []
+        next_results_response = make_rpc_response(
+            body='Got internal error from Bruin',
+            status=500,
+        )
 
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
+        await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
+            ticket_id, ticket_detail_id, serial_number_1
         )
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         assert tnba_monitor._tnba_notes_to_append == []
 
     @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_dev_env_test(self,
-                                                                   tnba_monitor,
-                                                                   make_prediction,
-                                                                   make_detail_object,
-                                                                   make_structure_response,
-                                                                   make_next_results,
-                                                                   make_ticket_detail):
+    async def process_ticket_detail_with_no_predictions_after_filtering_with_next_results_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            make_next_result_item, make_next_results, holmdel_noc_prediction, confident_request_completed_prediction,
+            serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
-        serial_number = 'VC1234567'
-        prediction = make_prediction(name='ASR Issue Resolved')
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number), ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
 
-        filtered_predictions = [
-            prediction,
-        ]
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        ticket_detail_predictions = [confident_request_completed_prediction]
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_detail=ticket_detail,
+            ticket_detail_predictions=ticket_detail_predictions,
+        )
 
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=False)
+        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
+        next_results = make_next_results(next_result_item_1)
+        next_results_list = next_results['nextResults']
+        next_results_response = make_rpc_response(
+            body=next_results,
+            status=200,
+        )
 
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
-        tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        await tnba_monitor._process_ticket_detail(detail_object)
+
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
+            ticket_id, ticket_detail_id, serial_number_1
+        )
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
+            ticket_detail_predictions, next_results_list
+        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_not_called()
+        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        assert tnba_monitor._tnba_notes_to_append == []
+
+    @pytest.mark.asyncio
+    async def process_ticket_detail_with_tnba_note_found_and_no_changes_since_the_last_best_prediction_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            make_next_result_item, make_next_results, make_standard_tnba_note, holmdel_noc_prediction, serial_number_1):
+        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        ticket_id = 12345
+        ticket_detail_id = 1
+
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        ticket_detail_predictions = [holmdel_noc_prediction]
+        tnba_note = make_standard_tnba_note(serial_number=serial_number_1, prediction_name=holmdel_noc_prediction_name)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_detail=ticket_detail,
+            ticket_notes=[tnba_note],
+            ticket_detail_predictions=ticket_detail_predictions,
+        )
+
+        next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
+        next_results = make_next_results(next_result_item_1)
+        next_results_list = next_results['nextResults']
+        next_results_response = make_rpc_response(
+            body=next_results,
+            status=200,
+        )
+
+        tnba_monitor._ticket_repository.is_tnba_note_old_enough.return_value = True
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
+
+        await tnba_monitor._process_ticket_detail(detail_object)
+
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
+            ticket_id, ticket_detail_id, serial_number_1
+        )
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
+            ticket_detail_predictions, next_results_list
+        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
+            ticket_detail_predictions
+        )
+        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note.\
+            assert_called_once_with(tnba_note, holmdel_noc_prediction)
+        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_not_called()
+        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        assert tnba_monitor._tnba_notes_to_append == []
+
+    @pytest.mark.asyncio
+    async def process_ticket_detail_with_standard_prediction_and_dev_env_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            make_next_result_item, make_next_results, holmdel_noc_prediction, serial_number_1):
+        ticket_id = 12345
+        ticket_detail_id = 1
+
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        ticket_detail_predictions = [holmdel_noc_prediction]
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_detail=ticket_detail,
+            ticket_detail_predictions=ticket_detail_predictions,
+        )
+
+        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
+        next_results = make_next_results(next_result_item_1)
+        next_results_list = next_results['nextResults']
+        next_results_response = make_rpc_response(
+            body=next_results,
+            status=200,
+        )
+
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
         with patch.object(testconfig, 'ENVIRONMENT', "dev"):
-            await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
+            await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
+            ticket_id, ticket_detail_id, serial_number_1
+        )
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
+            ticket_detail_predictions, next_results_list
+        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
+            ticket_detail_predictions
         )
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
-            prediction, serial_number
+            holmdel_noc_prediction, serial_number_1
         )
         tnba_monitor._notifications_repository.send_slack_message.assert_awaited_once()
         assert tnba_monitor._tnba_notes_to_append == []
 
     @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_non_request_or_repair_completed_prediction_test(self,
-                                                                                                      tnba_monitor,
-                                                                                                      make_tnba_note,
-                                                                                                      make_prediction,
-                                                                                                      make_detail_object,
-                                                                                                      make_structure_response,
-                                                                                                      make_next_results,
-                                                                                                      make_ticket_detail):
+    async def process_ticket_detail_with_standard_prediction_and_prod_env_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
+            holmdel_noc_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number), ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
 
-        filtered_predictions = [
-            prediction,
-        ]
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        ticket_detail_predictions = [holmdel_noc_prediction]
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_detail=ticket_detail,
+            ticket_detail_predictions=ticket_detail_predictions,
+        )
 
-        tnba_note = 'This is a TNBA note'
+        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
+        next_results = make_next_results(next_result_item_1)
+        next_results_list = next_results['nextResults']
+        next_results_response = make_rpc_response(
+            body=next_results,
+            status=200,
+        )
 
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=False)
+        built_tnba_note = 'This is a TNBA note'
 
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock(return_value=tnba_note)
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction = Mock()
-
-        tnba_monitor._autoresolve_ticket_detail = CoroutineMock()
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
+        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
+            await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
+            ticket_id, ticket_detail_id, serial_number_1
         )
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
+            ticket_detail_predictions, next_results_list
         )
-        tnba_monitor._autoresolve_ticket_detail.assert_not_awaited()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
-            prediction, serial_number
-        )
-        assert tnba_monitor._tnba_notes_to_append == [
-            make_tnba_note(ticket_id=ticket_id, text=tnba_note, detail_id=ticket_detail_id,
-                           service_number=serial_number)
-        ]
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_request_repair_completed_prediction_and_autoresolve_failed_test(
-            self, tnba_monitor, make_prediction, make_detail_object, make_structure_response, make_next_results,
-            make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        serial_number = 'VC1234567'
-
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=12345, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number), ticket_notes=[],
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
-
-        filtered_predictions = [
-            prediction,
-        ]
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction = Mock()
-
-        tnba_monitor._autoresolve_ticket_detail = CoroutineMock(return_value=False)
-
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction
-        )
-        tnba_monitor._autoresolve_ticket_detail.assert_awaited_once_with(
-            detail_object=detail_object,
-            best_prediction=prediction,
-        )
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_request_repair_completed_prediction_and_autoresolve_ok_test(self,
-                                                                                                                  tnba_monitor,
-                                                                                                                  make_prediction,
-                                                                                                                  make_detail_object,
-                                                                                                                  make_ticket_note_for_bruin,
-                                                                                                                  make_structure_response,
-                                                                                                                  make_next_results,
-                                                                                                                  make_tnba_note,
-                                                                                                                  make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        serial_number = 'VC1234567'
-        ticket_note_1 = make_ticket_note_for_bruin()
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=12345, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number),
-                                           ticket_notes=[ticket_note_1],
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
-
-        filtered_predictions = [
-            prediction,
-        ]
-
-        tnba_note = 'This is a TNBA note'
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction = Mock(
-            return_value=tnba_note)
-
-        tnba_monitor._autoresolve_ticket_detail = CoroutineMock(return_value=True)
-
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail_without_tnba(detail_object)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction
-        )
-        tnba_monitor._autoresolve_ticket_detail.assert_awaited_once_with(
-            detail_object=detail_object,
-            best_prediction=prediction,
-        )
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction, serial_number
-        )
-        assert tnba_monitor._tnba_notes_to_append == [
-            make_tnba_note(ticket_id=ticket_id, text=tnba_note, detail_id=ticket_detail_id,
-                           service_number=serial_number)
-        ]
-
-    @pytest.mark.asyncio
-    async def process_ticket_details_with_tnba_ok_test(self, tnba_monitor, make_prediction, make_detail_object,
-                                                       make_ticket_note_for_bruin, make_ticket_detail):
-        ticket_note_1 = make_ticket_note_for_bruin()
-        prediction = make_prediction()
-        detail_object_1 = make_detail_object(ticket_id=12345, ticket_topic="Service Affecting Trouble",
-                                             ticket_creator='Intelygenz Ai',
-                                             ticket_detail=make_ticket_detail(1, 'VC1234567'),
-                                             ticket_notes=[ticket_note_1],
-                                             ticket_detail_predictions=[prediction])
-        detail_object_2 = make_detail_object(ticket_id=12345, ticket_topic="Service Affecting Trouble",
-                                             ticket_creator='Intelygenz Ai',
-                                             ticket_detail=make_ticket_detail(2, 'VC8909876'),
-                                             ticket_notes=[ticket_note_1],
-                                             ticket_detail_predictions=[prediction])
-        ticket_details = [
-            detail_object_1,
-            detail_object_2,
-        ]
-
-        tnba_monitor._process_ticket_detail_with_tnba = CoroutineMock()
-
-        await tnba_monitor._process_ticket_details_with_tnba(ticket_details)
-
-        tnba_monitor._process_ticket_detail_with_tnba.assert_has_awaits([
-            call(detail_object_1),
-            call(detail_object_2),
-        ], any_order=True)
-
-    @pytest.mark.asyncio
-    async def process_ticket_details_with_tnba_with_empty_list_of_ticket_details_test(self, tnba_monitor):
-        ticket_details = []
-
-        tnba_monitor._process_ticket_detail_with_tnba = CoroutineMock()
-
-        await tnba_monitor._process_ticket_details_with_tnba(ticket_details)
-
-        tnba_monitor._process_ticket_detail_with_tnba.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_tnba_note_too_recent_for_a_new_append_test(self,
-                                                                                              tnba_monitor,
-                                                                                              make_ticket_note_for_bruin,
-                                                                                              make_prediction,
-                                                                                              make_detail_object,
-                                                                                              make_ticket_detail):
-        ticket_note_1 = make_ticket_note_for_bruin()
-        ticket_notes = [
-            ticket_note_1,
-        ]
-
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=12345, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(1, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=False)
-
-        await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number.assert_called_once_with(ticket_notes,
-                                                                                                        serial_number)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough.assert_called_once_with(ticket_note_1)
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_retrieval_of_next_results_returning_non_2xx_status_test(self,
-                                                                                                           tnba_monitor,
-                                                                                                           make_ticket_note_for_bruin,
-                                                                                                           make_prediction,
-                                                                                                           make_detail_object,
-                                                                                                           make_structure_response,
-                                                                                                           make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin()
-        ticket_notes = [
-            ticket_note_1,
-        ]
-
-        serial_number = 'VC1234567'
-
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=500, body='Got internal error from Bruin')
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number.assert_called_once_with(ticket_notes,
-                                                                                                        serial_number)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough.assert_called_once_with(ticket_note_1)
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_no_predictions_after_filtering_with_next_results_test(self,
-                                                                                                         tnba_monitor,
-                                                                                                         make_ticket_note_for_bruin,
-                                                                                                         make_prediction,
-                                                                                                         make_detail_object,
-                                                                                                         make_next_results,
-                                                                                                         make_structure_response,
-                                                                                                         make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin()
-        ticket_notes = [
-            ticket_note_1,
-        ]
-
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
-
-        filtered_predictions = []
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number.assert_called_once_with(ticket_notes,
-                                                                                                        serial_number)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough.assert_called_once_with(ticket_note_1)
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_no_changes_since_last_prediction_test(self, tnba_monitor,
-                                                                                         make_ticket_note_for_bruin,
-                                                                                         make_prediction,
-                                                                                         make_detail_object,
-                                                                                         make_next_results,
-                                                                                         make_structure_response,
-                                                                                         make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin()
-        ticket_notes = [
-            ticket_note_1,
-        ]
-
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
-
-        filtered_predictions = [
-            prediction,
-        ]
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(
-            return_value=False)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number.assert_called_once_with(ticket_notes,
-                                                                                                        serial_number)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough.assert_called_once_with(ticket_note_1)
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(filtered_predictions)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note.assert_called_once_with(
-            ticket_note_1, prediction
-        )
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_changes_since_last_prediction_and_dev_env_test(self, tnba_monitor,
-                                                                                                  make_ticket_note_for_bruin,
-                                                                                                  make_prediction,
-                                                                                                  make_detail_object,
-                                                                                                  make_next_results,
-                                                                                                  make_structure_response,
-                                                                                                  make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin()
-        ticket_notes = [
-            ticket_note_1,
-        ]
-
-        serial_number = 'VC1234567'
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
-
-        filtered_predictions = [
-            prediction
-        ]
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(
-            return_value=True)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=False)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
-
-        with patch.object(testconfig, 'ENVIRONMENT', "dev"):
-            await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number.assert_called_once_with(ticket_notes,
-                                                                                                        serial_number)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough.assert_called_once_with(ticket_note_1)
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(filtered_predictions)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note.assert_called_once_with(
-            ticket_note_1, prediction
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
+            ticket_detail_predictions
         )
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
-            prediction, serial_number
+            holmdel_noc_prediction, serial_number_1
         )
-        tnba_monitor._notifications_repository.send_slack_message.assert_awaited()
-        assert tnba_monitor._tnba_notes_to_append == []
 
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_non_request_or_repair_completed_prediction_test(self, tnba_monitor,
-                                                                                                   make_prediction,
-                                                                                                   make_detail_object,
-                                                                                                   make_structure_response,
-                                                                                                   make_next_results,
-                                                                                                   make_ticket_note_for_bruin,
-                                                                                                   make_tnba_note,
-                                                                                                   make_ticket_detail):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin()
-        ticket_notes = [
-            ticket_note_1,
-        ]
-
-        serial_number = 'VC1234567'
-
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
-
-        filtered_predictions = [
-            prediction,
-        ]
-
-        tnba_note = 'This is a TNBA note'
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(
-            return_value=True)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=False)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock(return_value=tnba_note)
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction = Mock()
-
-        tnba_monitor._autoresolve_ticket_detail = CoroutineMock()
-
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
-        )
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction
-        )
-        tnba_monitor._autoresolve_ticket_detail.assert_not_awaited()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
-            prediction, serial_number
+        expected_note_for_append = make_payload_for_note_append_with_ticket_id(
+            ticket_id=ticket_id,
+            detail_id=ticket_detail_id,
+            serial_number=serial_number_1,
+            text=built_tnba_note,
         )
         assert tnba_monitor._tnba_notes_to_append == [
-            make_tnba_note(ticket_id=ticket_id, text=tnba_note, detail_id=ticket_detail_id,
-                           service_number=serial_number)
+            expected_note_for_append,
         ]
 
     @pytest.mark.asyncio
-    async def process_ticket_detail_with_tnba_with_request_repair_completed_prediction_and_autoresolve_failed_test(
-            self, tnba_monitor, make_ticket_note_for_bruin, make_prediction, make_detail_object,
-            make_structure_response, make_next_results, make_ticket_detail):
+    async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_failed_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            make_next_result_item, make_next_results, unconfident_request_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin(note_id=41894040)
-        ticket_notes = [
-            ticket_note_1,
-        ]
 
-        serial_number = 'VC1234567'
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        ticket_detail_predictions = [unconfident_request_completed_prediction]
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_detail=ticket_detail,
+            ticket_detail_predictions=ticket_detail_predictions,
+        )
 
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id, serial_number),
-                                           ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
-        next_results_response = make_structure_response(status=200, body=make_next_results())
+        request_completed_prediction_name = unconfident_request_completed_prediction['name']
+        next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
+        next_results = make_next_results(next_result_item_1)
+        next_results_list = next_results['nextResults']
+        next_results_response = make_rpc_response(
+            body=next_results,
+            status=200,
+        )
 
-        filtered_predictions = [
-            prediction,
-        ]
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(
-            return_value=True)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction = Mock()
-
-        tnba_monitor._autoresolve_ticket_detail = CoroutineMock(return_value=False)
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
+        tnba_monitor._autoresolve_ticket_detail.return_value = False
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
+            await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
+            ticket_id, ticket_detail_id, serial_number_1
+        )
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
+            ticket_detail_predictions, next_results_list
+        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
+            ticket_detail_predictions
         )
         tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction
+            unconfident_request_completed_prediction
         )
         tnba_monitor._autoresolve_ticket_detail.assert_awaited_once_with(
             detail_object=detail_object,
-            best_prediction=prediction,
+            best_prediction=unconfident_request_completed_prediction,
         )
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_not_called()
         assert tnba_monitor._tnba_notes_to_append == []
 
     @pytest.mark.asyncio
-    async def process_ticket_detail_without_tnba_with_request_repair_completed_prediction_and_autoresolve_ok_test(self,
-                                                                                                                  tnba_monitor,
-                                                                                                                  make_ticket_note_for_bruin,
-                                                                                                                  make_prediction,
-                                                                                                                  make_detail_object,
-                                                                                                                  make_structure_response,
-                                                                                                                  make_next_results,
-                                                                                                                  make_ticket_detail):
+    async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_ok_test(
+            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
+            make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
+            confident_request_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_note_1 = make_ticket_note_for_bruin(note_id=41894040)
-        ticket_notes = [
-            ticket_note_1
-        ]
 
-        serial_number = 'VC1234567'
+        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
+        ticket_detail_predictions = [confident_request_completed_prediction]
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_detail=ticket_detail,
+            ticket_detail_predictions=ticket_detail_predictions,
+        )
 
-        prediction = make_prediction()
-        detail_object = make_detail_object(ticket_id=ticket_id, ticket_topic="Service Affecting Trouble",
-                                           ticket_creator='Intelygenz Ai',
-                                           ticket_detail=make_ticket_detail(ticket_detail_id,
-                                                                            serial_number), ticket_notes=ticket_notes,
-                                           ticket_detail_predictions=[prediction])
+        request_completed_prediction_name = confident_request_completed_prediction['name']
+        next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
+        next_results = make_next_results(next_result_item_1)
+        next_results_list = next_results['nextResults']
+        next_results_response = make_rpc_response(
+            body=next_results,
+            status=200,
+        )
 
-        next_results_response = make_structure_response(status=200, body=make_next_results())
+        built_tnba_note = 'This is a TNBA note'
 
-        filtered_predictions = [
-            prediction
-        ]
-
-        tnba_note = 'This is a TNBA note'
-
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results = Mock(return_value=filtered_predictions)
-        tnba_monitor._prediction_repository.get_best_prediction = Mock(return_value=prediction)
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(
-            return_value=True)
-        tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction = Mock(return_value=True)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(
-            return_value=next_results_response)
-
-        tnba_monitor._ticket_repository.find_newest_tnba_note_by_service_number = Mock(return_value=ticket_note_1)
-        tnba_monitor._ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction = Mock()
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction = Mock(
-            return_value=tnba_note)
-
-        tnba_monitor._autoresolve_ticket_detail = CoroutineMock(return_value=True)
+        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
+        tnba_monitor._autoresolve_ticket_detail.return_value = True
+        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.return_value = \
+            built_tnba_note
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail_with_tnba(detail_object)
+            await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number
+            ticket_id, ticket_detail_id, serial_number_1
+        )
+        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
+            ticket_detail_predictions, next_results_list
+        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
+            ticket_detail_predictions
         )
         tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction
+            confident_request_completed_prediction
         )
         tnba_monitor._autoresolve_ticket_detail.assert_awaited_once_with(
             detail_object=detail_object,
-            best_prediction=prediction,
-        )
-        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.assert_called_once_with(
-            prediction, serial_number
+            best_prediction=confident_request_completed_prediction,
         )
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        tnba_monitor._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction.\
+            assert_called_once_with(confident_request_completed_prediction, serial_number_1)
+
+        expected_note_for_append = make_payload_for_note_append_with_ticket_id(
+            ticket_id=ticket_id,
+            detail_id=ticket_detail_id,
+            serial_number=serial_number_1,
+            text=built_tnba_note,
+        )
         assert tnba_monitor._tnba_notes_to_append == [
-            {
-                'ticket_id': ticket_id,
-                'text': tnba_note,
-                'detail_id': ticket_detail_id,
-                'service_number': serial_number,
-            }
+            expected_note_for_append,
         ]
 
     @pytest.mark.asyncio

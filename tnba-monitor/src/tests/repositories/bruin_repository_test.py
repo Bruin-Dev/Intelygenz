@@ -247,7 +247,7 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_next_results_for_ticket_detail_test(self, bruin_repository, make_rpc_request, make_rpc_response,
-                                                      make_next_result, serial_number_1):
+                                                      make_next_result_item, make_next_results, serial_number_1):
         ticket_id = 12345
         detail_id = 67890
 
@@ -258,9 +258,10 @@ class TestBruinRepository:
             service_number=serial_number_1
         )
 
-        next_result_1 = make_next_result(result_name='Holmdel NOC Investigate')
-        next_result_2 = make_next_result(result_name='No Trouble Found')
-        response = make_rpc_response(request_id=uuid_, body=[next_result_1, next_result_2], status=200)
+        next_result_1 = make_next_result_item(result_name='Holmdel NOC Investigate')
+        next_result_2 = make_next_result_item(result_name='No Trouble Found')
+        next_results = make_next_results(next_result_1, next_result_2)
+        response = make_rpc_response(request_id=uuid_, body=next_results, status=200)
 
         bruin_repository._event_bus.rpc_request.return_value = response
 

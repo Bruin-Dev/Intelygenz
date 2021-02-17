@@ -59,7 +59,7 @@ def __generate_payload_for_note_append(*, detail_id: int = None, serial_number: 
     return payload
 
 
-def __generate_next_result(*, result_name: str):
+def __generate_next_result_item(*, result_name: str):
     return {
         "resultTypeId": 620,
         "resultName": result_name,
@@ -72,6 +72,15 @@ def __generate_next_result(*, result_name: str):
                 "required": False,
             }
         ]
+    }
+
+
+def __generate_next_results(*next_result_items: List[dict]):
+    return {
+        "currentTaskId": 10683187,
+        "currentTaskKey": "344",
+        "currentTaskName": "Holmdel NOC Investigate ",
+        "nextResults": next_result_items,
     }
 
 
@@ -202,9 +211,17 @@ def make_in_progress_ticket_detail():
 
 
 @pytest.fixture(scope='session')
-def make_next_result():
+def make_next_result_item():
     def _inner(*, result_name: str):
-        return __generate_next_result(result_name=result_name)
+        return __generate_next_result_item(result_name=result_name)
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_next_results():
+    def _inner(*next_result_item: List[dict]):
+        return __generate_next_results(*next_result_item)
 
     return _inner
 

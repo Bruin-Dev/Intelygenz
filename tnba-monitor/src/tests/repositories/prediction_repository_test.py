@@ -20,7 +20,7 @@ class TestPredictionRepository:
         result = prediction_repository.find_prediction_object_by_serial(prediction_objects, serial_number_1)
         assert result == prediction_object_1
 
-    def filter_predictions_in_next_results_test(self, make_next_result, holmdel_noc_prediction,
+    def filter_predictions_in_next_results_test(self, make_next_result_item, holmdel_noc_prediction,
                                                 confident_request_completed_prediction,
                                                 confident_repair_completed_prediction):
         predictions = [
@@ -29,14 +29,14 @@ class TestPredictionRepository:
             confident_request_completed_prediction,
         ]
 
-        next_result_request_completed = make_next_result(result_name='Request Completed')
-        next_result_holmdel_noc = make_next_result(result_name='Holmdel NOC Investigate ')
-        next_results = [
+        next_result_request_completed = make_next_result_item(result_name='Request Completed')
+        next_result_holmdel_noc = make_next_result_item(result_name='Holmdel NOC Investigate ')
+        next_results_list = [
             next_result_request_completed,
             next_result_holmdel_noc,
         ]
 
-        result = PredictionRepository.filter_predictions_in_next_results(predictions, next_results)
+        result = PredictionRepository.filter_predictions_in_next_results(predictions, next_results_list)
         expected = [
             holmdel_noc_prediction,
             confident_request_completed_prediction,
