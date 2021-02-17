@@ -42,18 +42,17 @@ class DiGiClient:
             self._logger.error("An error occurred while trying to login to DiGi")
             self._logger.error(f"Error: {err}")
 
-    def _get_request_headers(self, request_id, params):
+    def _get_request_headers(self, params):
         if not self._bearer_token:
             raise Exception("Missing BEARER token")
 
         headers = {
             "authorization": f"Bearer {self._bearer_token}",
-            'igzID': request_id,
             **params
         }
         return headers
 
-    async def reboot(self, request_id, params):
+    async def reboot(self, params):
         try:
             parsed_params = humps.pascalize(params)
 
@@ -61,7 +60,7 @@ class DiGiClient:
 
             response = await self._session.post(
                 f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
-                headers=self._get_request_headers(request_id, parsed_params),
+                headers=self._get_request_headers(parsed_params),
                 ssl=False,
             )
             return_response = dict.fromkeys(["body", "status"])
@@ -86,6 +85,40 @@ class DiGiClient:
             if len(response_message) > 0:
                 self._logger.error(f"DiGi reboot aborted with message returning: {response_message}")
                 return_response["status"] = 400
+
+            return return_response
+
+        except Exception as e:
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
+
+    async def get_digi_recovery_logs(self, params):
+        try:
+            parsed_params = humps.pascalize(params)
+
+            self._logger.info(f'Rebooting DiGi device with params {json.dumps(parsed_params)}')
+
+            response = await self._session.get(
+                f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/Logs",
+                headers=self._get_request_headers(parsed_params),
+                ssl=False,
+            )
+            return_response = dict.fromkeys(["body", "status"])
+
+            return_response["body"] = await response.json()
+            return_response["status"] = 200
+
+            if "Error" in return_response["body"].keys():
+                self._logger.error(f"Got an error of {return_response['body']}")
+                return_response["status"] = 400
+                return return_response
+
+            if response.status not in range(200, 300):
+                self._logger.error(f"Got {response.status}. Response returned {return_response['body']}")
+                return_response["status"] = 500
+                return return_response
 
             return return_response
 

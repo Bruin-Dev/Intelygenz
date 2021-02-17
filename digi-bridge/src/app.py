@@ -2,6 +2,7 @@ import redis
 
 from config import config
 from application.actions.digi_reboot import DiGiReboot
+from application.actions.get_digi_recovery_logs import DiGiRecoveryLogs
 from application.repositories.digi_repository import DiGiRepository
 from application.clients.digi_client import DiGiClient
 from igz.packages.Logger.logger_client import LoggerClient
@@ -34,19 +35,23 @@ class Container:
         # NATS client
         self._publisher = NATSClient(config, logger=self._logger)
         self._subscriber_digi_reboot = NATSClient(config, logger=self._logger)
+        self._subscriber_digi_recovery_logs = NATSClient(config, logger=self._logger)
 
         # event bus
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
         self._event_bus.add_consumer(self._subscriber_digi_reboot, consumer_name="digi_reboot")
+        self._event_bus.add_consumer(self._subscriber_digi_recovery_logs, consumer_name="digi_recovery_logs")
 
         # actions
         self._digi_reboot = DiGiReboot(self._logger, self._event_bus, self._digi_repository)
+        self._digi_recovery_logs = DiGiRecoveryLogs(self._logger, self._event_bus, self._digi_repository)
 
         # action wrappers
         self._action_digi_reboot = ActionWrapper(self._digi_reboot, "digi_reboot",
                                                  is_async=True, logger=self._logger)
-
+        self._action_digi_recovery_logs = ActionWrapper(self._digi_recovery_logs, "get_digi_recovery_logs",
+                                                        is_async=True, logger=self._logger)
         self._server = QuartServer(config)
 
     async def start(self):
@@ -56,6 +61,9 @@ class Container:
 
         await self._event_bus.subscribe_consumer(consumer_name="digi_reboot", topic="digi.reboot",
                                                  action_wrapper=self._action_digi_reboot,
+                                                 queue="digi_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="digi_recovery_logs", topic="get.digi.recovery.logs",
+                                                 action_wrapper=self._action_digi_recovery_logs,
                                                  queue="digi_bridge")
 
     async def start_server(self):

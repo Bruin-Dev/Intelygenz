@@ -81,9 +81,26 @@ class TestDiGiRepository:
 
         request_id = 'test_id'
 
-        payload = {"velo_serial": 123, "ticket": 321}
+        payload = {"igzID": request_id, "velo_serial": 123, "ticket": 321}
         digi_repository = DiGiRepository(config, logger, scheduler, digi_client)
 
-        reboot_return = await digi_repository.reboot(request_id, payload)
+        reboot_return = await digi_repository.reboot(payload)
 
-        digi_client.reboot.assert_awaited_once_with(request_id, payload)
+        digi_client.reboot.assert_awaited_once_with(payload)
+
+    @pytest.mark.asyncio
+    async def get_digi_recovery_logs_test(self):
+        logger = Mock()
+        scheduler = Mock()
+
+        digi_client = Mock()
+        digi_client.get_digi_recovery_logs = CoroutineMock()
+
+        request_id = 'test_id'
+
+        payload = {"igzID": request_id}
+        digi_repository = DiGiRepository(config, logger, scheduler, digi_client)
+
+        recovery_logs = await digi_repository.get_digi_recovery_logs(payload)
+
+        digi_client.get_digi_recovery_logs(payload)

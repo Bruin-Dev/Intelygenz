@@ -27,7 +27,7 @@ class TestDiGiReboot:
                         'ticket': '3574667',
                         'MAC': '00:04:2d:0b:cf:7f:0000'}
                }
-
+        payload = {**msg['body'], 'igzID': msg["request_id"]}
         reboot_return = {
                           'body': [{'Message': 'Success'}],
                           'status': 200
@@ -44,7 +44,7 @@ class TestDiGiReboot:
 
         await digi_reboot.digi_reboot(msg)
 
-        digi_repository.reboot.assert_awaited_once_with(msg['request_id'], msg['body'])
+        digi_repository.reboot.assert_awaited_once_with(payload)
         event_bus.publish_message.assert_awaited_once_with(msg['response_topic'], dict(request_id=msg['request_id'],
                                                                                        body=reboot_return['body'],
                                                                                        status=reboot_return['status']))
