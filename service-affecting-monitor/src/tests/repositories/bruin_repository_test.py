@@ -519,7 +519,7 @@ class TestBruinRepository:
         with uuid_mock:
             with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
                 response = await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
-                    report, start_date, end_date)
+                    report['client_id'], start_date, end_date)
 
         assert response == response_bruin_with_all_tickets
 
@@ -552,7 +552,7 @@ class TestBruinRepository:
         with uuid_mock:
             with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
                 response = await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
-                    report, start_date, end_date)
+                    report['client_id'], start_date, end_date)
 
         assert response == {}
 
@@ -598,7 +598,7 @@ class TestBruinRepository:
                 with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
                     response = \
                         await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
-                            report, start_date, end_date)
+                            report['client_id'], start_date, end_date)
 
         assert response is None
 
@@ -633,7 +633,8 @@ class TestBruinRepository:
 
         with uuid_mock:
             with patch.object(asyncio, 'gather', new=CoroutineMock(side_effect=[responses_get_ticket_details])):
-                response = await bruin_repository.get_affecting_ticket_for_report(report, start_date, end_date)
+                response = await bruin_repository.get_affecting_ticket_for_report(report['client_id'], start_date,
+                                                                                  end_date)
 
         assert response == expected_response
 

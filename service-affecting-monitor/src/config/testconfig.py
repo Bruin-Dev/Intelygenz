@@ -36,10 +36,13 @@ MONITOR_REPORT_CONFIG = {
     "semaphore": 5,
     'wait_fixed': 1,
     'stop_after_attempt': 2,
+    'trailing_days': 14,
+    'client_id_bandwidth': 83109,
     'reports': [
         {
             'name': 'Report - Bandwidth Utilization',
             'type': 'bandwidth_utilization',
+            'value': 'Bandwidth Over Utilization',
             'crontab': '20 16 * * *',
             'threshold': 3,  # Number of tickets to include in the report
             'client_id': 83109,

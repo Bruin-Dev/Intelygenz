@@ -27,140 +27,100 @@ class ServiceAffectingMonitorReports:
 
         self.__reset_state()
 
-    def __reset_state(self):
-        self._customer_cache = []
+    async def monitor_reports(self):
+        await self.__reset_state()
+        if len(self._affecting_tickets.keys()) > 0 and len(self._customer_cache) > 0:
+            for report in self._config.MONITOR_REPORT_CONFIG['reports']:
+                await self._service_affecting_monitor_report(report)
 
-    def _get_report_function(self, report):
-        switcher = {
-            'bandwidth_utilization': self._service_affecting_monitor_report_bandwidth_over_utilization,
-            'jitter': self._service_affecting_monitor_report_by_serial,
-            'latency': self._service_affecting_monitor_report_by_serial,
-            'packet_loss': self._service_affecting_monitor_report_by_serial
-        }
-        return switcher.get(report.get('type'), None)
+    async def __reset_state(self):
+        self._customer_cache = []
+        self._affecting_tickets = {}
+        customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
+        response_status = customer_cache_response['status']
+        if response_status not in range(200, 300) or response_status == 202:
+            err_msg = f"[service-affecting-monitor-reports] status {response_status} calling customer cache. " \
+                      f"Can't continue creating report"
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            return
+        self._customer_cache: list = customer_cache_response['body']
+        if not self._customer_cache:
+            err_msg = '[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.'
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            return
+        set_cache_clients_id = set(edge['bruin_client_info']['client_id'] for edge in self._customer_cache)
+        end_date = datetime.utcnow().replace(tzinfo=tz.utc)
+        start_date = end_date - timedelta(days=self._config.MONITOR_REPORT_CONFIG['trailing_days'])
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        start_date_str = start_date.strftime(self._ISO_8601_FORMAT_UTC)
+        end_date_str = end_date.strftime(self._ISO_8601_FORMAT_UTC)
+        for client_id in list(set_cache_clients_id):
+            tickets = await self._bruin_repository.get_affecting_ticket_for_report(client_id,
+                                                                                   start_date_str,
+                                                                                   end_date_str)
+            if not tickets:
+                err_msg = f"[service-affecting-monitor-reports] Report could not be generated fot one client."
+                f"We could not retrieve all tickets for client_id: {client_id}"
+                self._logger.error(err_msg)
+                await self._notifications_repository.send_slack_message(err_msg)
+                continue
+            self._affecting_tickets[client_id] = tickets
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting')
-        self.__reset_state()
-        customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
-        if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
-            return
 
-        self._customer_cache: list = customer_cache_response['body']
-        if not self._customer_cache:
-            self._logger.info('Got an empty customer cache. Process cannot keep going.')
-            return
         if exec_on_start:
-            for report in self._config.MONITOR_REPORT_CONFIG['reports']:
-                next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-                self._logger.info(f'It will be executed now')
-                self._scheduler.add_job(self._get_report_function(report), 'interval',
-                                        minutes=self._config.MONITOR_CONFIG["monitoring_minutes_interval"],
-                                        next_run_time=next_run_time,
-                                        replace_existing=True,
-                                        args=[report],
-                                        id=f"_monitor_reports_{report['type']}")
+            next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+            self._logger.info(f'It will be executed now the process of creation reports')
+            self._scheduler.add_job(self.monitor_reports, 'interval',
+                                    minutes=self._config.MONITOR_CONFIG["monitoring_minutes_interval"],
+                                    next_run_time=next_run_time,
+                                    replace_existing=True,
+                                    id=f"_monitor_reports")
         else:
-            for report in self._config.MONITOR_REPORT_CONFIG['reports']:
-                self._logger.info(f"It will be executed at {report['crontab']}")
-                self._logger.info(f"- Setting up report '{report['name']}' of type '{report['type']}'"
-                                  f" with params: \n {report}")
-                self._scheduler.add_job(self._get_report_function(report),
-                                        CronTrigger.from_crontab(report['crontab'], timezone=timezone('UTC')),
-                                        args=[report], id=f"_monitor_reports_{report['type']}")
+            self._scheduler.add_job(self.monitor_reports,
+                                    CronTrigger.from_crontab('0 8 * * *', timezone=timezone('UTC')),
+                                    id=f"_monitor_reports")
 
-    async def _service_affecting_monitor_report_bandwidth_over_utilization(self, report):
-        self._logger.info(f"Running report: {report}")
-        end_date = datetime.utcnow().replace(tzinfo=tz.utc)
-        start_date = end_date - timedelta(days=report['trailing_days'])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        start_date_str = start_date.strftime(self._ISO_8601_FORMAT_UTC)
-        end_date_str = end_date.strftime(self._ISO_8601_FORMAT_UTC)
-        start = datetime.now()
-
-        self._logger.info(f"Processing all links of {len(self._config.MONITOR_CONFIG['device_by_id'])} edges...")
-
-        self._logger.info(f"[service-affecting-monitor-reports] Starting bandwidth report")
-
-        affecting_tickets = await self._bruin_repository.get_affecting_ticket_for_report(report, start_date_str,
-                                                                                         end_date_str)
-        if not affecting_tickets:
-            self._logger.error(f"[service-affecting-monitor-reports] Report could not be generated."
-                               f"We could not retrieve all tickets.")
-            return
-
-        set_cache_serials = set(edge['serial_number'] for edge in self._customer_cache)
-
-        transformed_tickets = BruinRepository.transform_tickets_into_ticket_details(affecting_tickets)
-
-        filtered_affecting_tickets = BruinRepository.filter_tickets_with_serial_cached(transformed_tickets,
-                                                                                       set_cache_serials)
-
-        filtered_affecting_tickets = BruinRepository.filter_trouble_notes(filtered_affecting_tickets,
-                                                                          "Bandwidth Over Utilization")
-
-        mapped_serials_tickets = self._bruin_repository.group_ticket_details_by_serial(filtered_affecting_tickets)
-
-        report_list = self._bruin_repository.prepare_items_for_report(mapped_serials_tickets)
-        # Last filter - number of tickets greater than 3
-        final_report_list = [item for item in report_list if item['number_of_tickets'] > report['threshold']]
-
-        end = datetime.now() - start
-        if len(final_report_list) > 0:
-            email_object = self._template_renderer.compose_email_report_object(
-                report=report, report_items=final_report_list)
-            await self._notifications_repository.send_email(email_object=email_object)
-            self._logger.info(f"[service-affecting-monitor-reports] Report sended by email")
-        else:
-            self._logger.info(f"[service-affecting-monitor-reports] Report not needed to send, there are no items")
-
-        self._logger.info(f"[service-affecting-monitor-reports] Report finished took {end}")
-
-    async def _service_affecting_monitor_report_by_serial(self, report):
+    async def _service_affecting_monitor_report(self, report):
         self._logger.info(f"Running report: {report['value']}")
-        end_date = datetime.utcnow().replace(tzinfo=tz.utc)
-        start_date = end_date - timedelta(days=report['trailing_days'])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        start_date_str = start_date.strftime(self._ISO_8601_FORMAT_UTC)
-        end_date_str = end_date.strftime(self._ISO_8601_FORMAT_UTC)
+
         start = datetime.now()
+        set_cache_serials = set(edge['serial_number'] for edge in self._customer_cache)
         set_cache_clients_id = set(edge['bruin_client_info']['client_id'] for edge in self._customer_cache)
         for client_id in list(set_cache_clients_id):
-            report['client_id'] = client_id
-            affecting_tickets = await self._bruin_repository.get_affecting_ticket_for_report(report, start_date_str,
-                                                                                             end_date_str)
-            if not affecting_tickets:
-                self._logger.error(f"[service-affecting-monitor-reports] Report could not be generated."
-                                   f"We could not retrieve all tickets.")
-                continue
+            if client_id in self._affecting_tickets:
+                self._logger.info(f"[service-affecting-monitor-reports] Starting {report['value']} report")
+                transformed_tickets = BruinRepository.transform_tickets_into_ticket_details(
+                    self._affecting_tickets[client_id])
 
-            set_cache_serials = set(edge['serial_number'] for edge in self._customer_cache)
+                filtered_affecting_tickets = BruinRepository.filter_tickets_with_serial_cached(transformed_tickets,
+                                                                                               set_cache_serials)
 
-            transformed_tickets = BruinRepository.transform_tickets_into_ticket_details(affecting_tickets)
+                filtered_affecting_tickets = BruinRepository.filter_trouble_notes(filtered_affecting_tickets,
+                                                                                  report['value'])
 
-            filtered_affecting_tickets = BruinRepository.filter_tickets_with_serial_cached(transformed_tickets,
-                                                                                           set_cache_serials)
+                mapped_serials_tickets = self._bruin_repository.group_ticket_details_by_serial(
+                    filtered_affecting_tickets)
 
-            filtered_affecting_tickets = BruinRepository.filter_trouble_notes(filtered_affecting_tickets,
-                                                                              report['value'])
+                if report['type'] == 'bandwidth_utilization':
+                    report_list = self._bruin_repository.prepare_items_for_report(mapped_serials_tickets)
+                else:
+                    report_list = self._bruin_repository.prepare_items_for_report_by_interface(mapped_serials_tickets)
 
-            mapped_serials_tickets = self._bruin_repository.group_ticket_details_by_serial(filtered_affecting_tickets)
+                final_report_list = [item for item in report_list if item['number_of_tickets'] > report['threshold']]
 
-            report_list = self._bruin_repository.prepare_items_for_report_by_interface(mapped_serials_tickets)
+                end = datetime.now() - start
+                if len(final_report_list) > 0:
+                    email_object = self._template_renderer.compose_email_report_object(
+                        report=report, report_items=final_report_list)
+                    await self._notifications_repository.send_email(email_object=email_object)
+                    self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} sended by email")
+                else:
+                    self._logger.info(
+                        f"[service-affecting-monitor-reports] Report {report['value']} "
+                        f"not needed to send, there are no items")
 
-            self._logger.info(f"[service-affecting-monitor-reports] Starting {report['value']} report")
-
-            final_report_list = [item for item in report_list if item['number_of_tickets'] > report['threshold']]
-
-            end = datetime.now() - start
-            if len(final_report_list) > 0:
-                email_object = self._template_renderer.compose_email_report_object(
-                    report=report, report_items=final_report_list)
-                await self._notifications_repository.send_email(email_object=email_object)
-                self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} sended by email")
-            else:
-                self._logger.info(
-                    f"[service-affecting-monitor-reports] Report {report['value']} "
-                    f"not needed to send, there are no items")
-
-            self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} finished took {end}")
+                self._logger.info(f"[service-affecting-monitor-reports] Report {report['value']} finished took {end}")
