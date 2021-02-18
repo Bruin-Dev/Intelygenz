@@ -16,46 +16,27 @@ class TestTemplateRenderer:
         template_renderer = TemplateRenderer(config)
 
         edges_to_report = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [
-                    {
-                        'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
-                        "link": {
-                            "interface": "GE1",
-                            "displayName": "Test1",
-                            "state": "DISCONNECTED",
-                        }
-                    },
-                    {
-                        'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
-                        "link": {
-                            "interface": "GE2",
-                            "displayName": "Test2",
-                            "state": "DISCONNECTED",
-                        }
-                    }
-                ]
-            }
+            'name': 'Report - Bandwidth Utilization',
+            'type': 'bandwidth_utilization',
+            'value': 'Bandwidth Over Utilization',
+            'crontab': '20 16 * * *',
+            'threshold': 3,  # Number of tickets to include in the report
+            'client_id': 83109,
+            'trailing_days': 14,
+            'recipient': 'some.recipient@email.com'
         }
-        test_dict = {'test_key': 'test_value'}
+        test_dict = [{
+            'customer': {'client_id': 83109, 'client_name': 'RSI'},
+            'location': {
+                'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+                'country': 'USA'
+            }, 'serial_number': 'VC05200085762', 'number_of_tickets': 4,
+            'bruin_tickets_id': [5081250, 5075176, 5074441, 5073652], 'interfaces': ['GE1']
+        }]
 
-        email = template_renderer.compose_email_object(edges_to_report, 'Latency', test_dict)
+        email = template_renderer.compose_email_report_object(edges_to_report, test_dict)
 
-        assert 'Service affecting trouble detected: ' in email["email_data"]["subject"]
+        assert 'Service affecting trouble ' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
@@ -66,44 +47,25 @@ class TestTemplateRenderer:
         config = testconfig
         template_renderer = TemplateRenderer(config)
         edges_to_report = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [
-                    {
-                        'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
-                        "link": {
-                            "interface": "GE1",
-                            "displayName": "Test1",
-                            "state": "DISCONNECTED",
-                        }
-                    },
-                    {
-                        'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
-                        "link": {
-                            "interface": "GE2",
-                            "displayName": "Test2",
-                            "state": "DISCONNECTED",
-                        }
-                    }
-                ]
-            }
+            'name': 'Report - Bandwidth Utilization',
+            'type': 'bandwidth_utilization',
+            'value': 'Bandwidth Over Utilization',
+            'crontab': '20 16 * * *',
+            'threshold': 3,  # Number of tickets to include in the report
+            'client_id': 83109,
+            'trailing_days': 14,
+            'recipient': 'some.recipient@email.com'
         }
-        test_dict = {'test_key': 'test_value'}
+        test_dict = [{
+            'customer': {'client_id': 83109, 'client_name': 'RSI'},
+            'location': {
+                'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+                'country': 'USA'
+            }, 'serial_number': 'VC05200085762', 'number_of_tickets': 4,
+            'bruin_tickets_id': [5081250, 5075176, 5074441, 5073652], 'interfaces': ['GE1']
+        }]
 
-        email = template_renderer.compose_email_object(edges_to_report, 'LATENCY', test_dict)
+        email = template_renderer.compose_email_report_object(edges_to_report, test_dict)
 
         assert email["email_data"]["images"][0]["data"] == base64.b64encode(open(base.format(kwargs["logo"]), 'rb')
                                                                             .read()).decode('utf-8')
@@ -116,46 +78,27 @@ class TestTemplateRenderer:
         template_renderer = TemplateRenderer(config)
 
         edges_to_report = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [
-                    {
-                        'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
-                        "link": {
-                            "interface": "GE1",
-                            "displayName": "Test1",
-                            "state": "DISCONNECTED",
-                        }
-                    },
-                    {
-                        'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
-                        "link": {
-                            "interface": "GE2",
-                            "displayName": "Test2",
-                            "state": "DISCONNECTED",
-                        }
-                    }
-                ]
-            }
+            'name': 'Report - Bandwidth Utilization',
+            'type': 'bandwidth_utilization',
+            'value': 'Bandwidth Over Utilization',
+            'crontab': '20 16 * * *',
+            'threshold': 3,  # Number of tickets to include in the report
+            'client_id': 83109,
+            'trailing_days': 14,
+            'recipient': 'some.recipient@email.com'
         }
-        test_dict = {'test_key': 'test_value'}
+        test_dict = [{
+            'customer': {'client_id': 83109, 'client_name': 'RSI'},
+            'location': {
+                'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+                'country': 'USA'
+            }, 'serial_number': 'VC05200085762', 'number_of_tickets': 4,
+            'bruin_tickets_id': [5081250, 5075176, 5074441, 5073652], 'interfaces': ['GE1']
+        }]
 
-        email = template_renderer.compose_email_object(edges_to_report, 'LATENCY', test_dict)
+        email = template_renderer.compose_email_report_object(edges_to_report, test_dict)
 
-        assert 'Service affecting trouble detected: ' in email["email_data"]["subject"]
+        assert 'Service affecting trouble ' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 

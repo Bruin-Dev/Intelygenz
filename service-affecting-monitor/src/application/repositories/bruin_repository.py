@@ -182,7 +182,7 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(msg)
             return None
 
-    async def get_affecting_ticket_for_report(self, report, start_date, end_date):
+    async def get_affecting_ticket_for_report(self, client_id, start_date, end_date):
         @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
                stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
                reraise=True)
@@ -191,7 +191,7 @@ class BruinRepository:
             ticket_request_msg = {
                 'request_id': uuid(),
                 'body': {
-                    'client_id': report['client_id'],
+                    'client_id': client_id,
                     'category': 'SD-WAN',
                     'ticket_topic': 'VAS',
                     'start_date': start_date,
@@ -199,8 +199,6 @@ class BruinRepository:
                     'ticket_status': ticket_statuses
                 }
             }
-
-            self._logger.info(f"Retrieving affecting tickets for trailing days: {report['trailing_days']}")
 
             all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=90)
 
@@ -221,7 +219,6 @@ class BruinRepository:
                 ret_tickets = {ticket['ticket']['ticketID']: ticket for ticket in ret_tickets if ticket}
 
                 return ret_tickets
-            self._logger.info(f"No service affecting tickets found for trailing days: {report['trailing_days']}")
             return {}
 
         try:

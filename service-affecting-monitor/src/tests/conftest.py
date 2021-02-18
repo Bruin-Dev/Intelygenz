@@ -66,6 +66,7 @@ def report():
     return {
         'name': 'Report - Bandwidth Utilization',
         'type': 'bandwidth_utilization',
+        'value': 'Bandwidth Over Utilization',
         'crontab': '20 16 * * *',
         'threshold': 3,
         'client_id': 83109,
