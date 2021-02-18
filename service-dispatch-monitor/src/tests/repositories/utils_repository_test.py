@@ -110,7 +110,7 @@ class TestUtilsRepository:
     def find_note_test(self, lit_dispatch_monitor, ticket_details):
         expected_note_found = {
             "noteId": 70805300,
-            "noteValue": "#*Automation Engine*# DIS37405\nDispatch Management - Dispatch Requested\n\n"
+            "noteValue": "#*MetTel's IPA*# DIS37405\nDispatch Management - Dispatch Requested\n\n"
                          "Please see the summary below.\n--\n"
                          "Dispatch Number:  "
                          "[DIS37405|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37405] "
@@ -138,7 +138,7 @@ class TestUtilsRepository:
 
     def find_dispatch_number_watermark_ok_test(self, ticket_details):
         dispatch_number = "DIS37405"
-        watermark = '#*Automation Engine*#'
+        watermark = "#*MetTel's IPA*#"
         dispatch_note = ticket_details['body']["ticketNotes"][1]
 
         result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
@@ -147,7 +147,7 @@ class TestUtilsRepository:
 
     def find_dispatch_number_watermark_ko_test(self, ticket_details):
         dispatch_number = "DIS37405"
-        watermark = '#*Automation Engine*#'
+        watermark = "#*MetTel's IPA*#"
         dispatch_note = ticket_details['body']["ticketNotes"][2]
 
         result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)

@@ -39,7 +39,8 @@ class CtsRepository:
         self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
 
         # Dispatch Notes watermarks
-        self.MAIN_WATERMARK = '#*Automation Engine*#'
+        self.OLD_WATERMARK = '#*Automation Engine*#'
+        self.MAIN_WATERMARK = "#*MetTel's IPA*#"
         self.IGZ_DN_WATERMARK = 'IGZ'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
 
@@ -258,7 +259,7 @@ class CtsRepository:
         # Filter tech on site dispatches
         # Dispatch Confirmed --> Field Engineer On Site:
         # Status__c and Check_In_Date__c is not None
-        # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
+        # Bruin Note:*#MetTel's IPA#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
         return all([dispatch is not None,
                     dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
                     dispatch.get("Check_In_Date__c") is not None])
@@ -680,10 +681,14 @@ class CtsRepository:
     def filter_ticket_notes_by_dispatch_number(self, ticket_notes, dispatch_number):
         filtered_ticket_notes = []
         for note in ticket_notes:
+            # TODO: Get rid of this watermark lookup when the new one becomes the standard watermark
+            note_dispatch_number_old_watermark = UtilsRepository.find_dispatch_number_watermark(note,
+                                                                                                dispatch_number,
+                                                                                                self.OLD_WATERMARK)
             note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
                                                                                   dispatch_number,
                                                                                   self.MAIN_WATERMARK)
-            if len(note_dispatch_number) == 0:
+            if len(note_dispatch_number) == 0 and len(note_dispatch_number_old_watermark) == 0:
                 continue
             filtered_ticket_notes.append(note)
 
@@ -696,9 +701,17 @@ class CtsRepository:
         for ticket_note in filtered_ticket_notes:
             if ticket_note and ticket_note.get('noteValue') and \
                     self.DISPATCH_REQUESTED_WATERMARK in ticket_note.get('noteValue'):
-                _igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(ticket_note,
-                                                                                      self.IGZ_DN_WATERMARK,
-                                                                                      self.MAIN_WATERMARK)
+                # TODO: Get rid of this watermark lookup when the new one becomes the standard watermark
+                _igz_dispatch_number_old_watermark = UtilsRepository.find_dispatch_number_watermark(
+                    ticket_note, self.IGZ_DN_WATERMARK, self.OLD_WATERMARK
+                )
+
+                _igz_dispatch_number_new_watermark = UtilsRepository.find_dispatch_number_watermark(
+                    ticket_note, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK
+                )
+
+                _igz_dispatch_number = _igz_dispatch_number_new_watermark or _igz_dispatch_number_old_watermark
+
                 if _igz_dispatch_number and _igz_dispatch_number not in splitted_ticket_notes:
                     splitted_ticket_notes[_igz_dispatch_number] = []
                     igz_dispatch_numbers.add(_igz_dispatch_number)

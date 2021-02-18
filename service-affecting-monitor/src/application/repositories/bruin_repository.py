@@ -98,7 +98,7 @@ class BruinRepository:
     async def append_reopening_note_to_ticket(self, ticket_id: int, affecting_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         reopening_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'Re-opening ticket.',
             f'{affecting_causes}',
             f'TimeStamp: {current_datetime_tz_aware}',
@@ -322,11 +322,11 @@ class BruinRepository:
         ret = []
         for detail_object in tickets_details:
             bandwidth_notes = [
-                ticket_note
-                for ticket_note in detail_object['ticket_notes']
-                if ticket_note["noteValue"]
-                if '#*Automation Engine*#' in ticket_note["noteValue"]
-                if trouble in ticket_note["noteValue"]
+                note
+                for note in detail_object['ticket_notes']
+                if note["noteValue"]
+                if ('#*Automation Engine*#' in note["noteValue"] or "#*MetTel's IPA*#" in note["noteValue"])
+                if trouble in note["noteValue"]
             ]
 
             if bandwidth_notes:

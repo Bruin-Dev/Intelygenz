@@ -209,12 +209,12 @@ class TestBruinRepository:
                 'ticketNotes': [
                     {
                         "noteId": 41894043,
-                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
                     },
                     {
                         "noteId": 41894044,
-                        "noteValue": f'#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
                     }
                 ]
@@ -1201,7 +1201,7 @@ class TestBruinRepository:
         current_datetime = datetime.now()
         ticket_id = 11111
         ticket_note = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             f'Auto-resolving detail for serial: {serial_number}\n'
             f'TimeStamp: {current_datetime}'
         )
@@ -1238,7 +1238,7 @@ class TestBruinRepository:
         service_number = 'VC1234567'
         outage_causes = "Some causes of the outage"
         ticket_note = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             f'Re-opening ticket.\n'
             f'{outage_causes}\n'
             f'TimeStamp: {current_datetime}'
@@ -1554,7 +1554,7 @@ class TestBruinRepository:
             },
         }
 
-        ticket_note = "#Automation Engine#\n" \
+        ticket_note = "#MetTel's IPA#\n" \
                       "Triage (VeloCloud)\n" \
                       "Orchestrator Instance: mettel.velocloud.net\n" \
                       "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
@@ -1706,7 +1706,7 @@ class TestBruinRepository:
             },
         }
 
-        ticket_note = "#Automation Engine#\n" \
+        ticket_note = "#MetTel's IPA#\n" \
                       "Triage (VeloCloud)\n" \
                       "Orchestrator Instance: mettel.velocloud.net\n" \
                       "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
@@ -1778,7 +1778,7 @@ class TestBruinRepository:
             },
         }
 
-        ticket_note = "#Automation Engine#\n" \
+        ticket_note = "#MetTel's IPA#\n" \
                       "Triage (VeloCloud)\n" \
                       "Orchestrator Instance: mettel.velocloud.net\n" \
                       "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
@@ -1845,7 +1845,7 @@ class TestBruinRepository:
         outage_causes = "Some causes of the outage"
         interface = 'GE1'
         ticket_note = os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             f'Offline DiGi interface identified for serial: {service_number}',
             f'Interface: {interface}',
             f'Automatic reboot attempt started.',
@@ -1879,7 +1879,7 @@ class TestBruinRepository:
         ticket_id = 11111
         task_result = "Wireless Repair Intervention Needed"
         ticket_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'DiGi reboot failed',
             f'Moving task to: {task_result}',
             f'TimeStamp: {current_datetime}'

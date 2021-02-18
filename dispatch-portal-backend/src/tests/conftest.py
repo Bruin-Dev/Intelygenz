@@ -460,7 +460,7 @@ def cts_all_dispatches_mapped(cts_dispatch_mapped):
 
 @pytest.fixture(scope='function')
 def simple_ticket_note():
-    return "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n" \
+    return "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n" \
            "Please see the summary below.\n--\n" \
            "Dispatch Number:  " \
            "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/S-12345] " \
@@ -546,7 +546,30 @@ def ticket_details():
                     ],
                     "createdDate": "2020-05-28T06:05:54.987-04:00",
                     "creator": None
-                }
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*MetTel's IPA*# DIS37561\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
             ]
         },
         'status': 200
@@ -646,7 +669,7 @@ def ticket_details_1_with_cancel_requested_watermark():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# DIS37405\n"
+                    "noteValue": "#*MetTel's IPA*# DIS37405\n"
                                  "Dispatch Management - Dispatch Cancel Requested\n\n"
                                  "The rest of the note\n--\n",
                     "serviceNumber": [
@@ -725,7 +748,7 @@ def cts_ticket_details():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] "
@@ -798,7 +821,7 @@ def cts_ticket_details_2():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# NOT_FOUND\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# NOT_FOUND\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] "
@@ -907,7 +930,7 @@ def cts_ticket_details_1_with_cancel_requested_watermark():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# IGZ_0001\n"
+                    "noteValue": "#*MetTel's IPA*# IGZ_0001\n"
                                  "Dispatch Management - Dispatch Cancel Requested\n\n"
                                  "The rest of the note\n--\n",
                     "serviceNumber": [

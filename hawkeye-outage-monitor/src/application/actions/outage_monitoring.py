@@ -14,8 +14,8 @@ from pytz import timezone
 from pytz import utc
 
 
-TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(Ixia\)')
-REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
+TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(Ixia\)")
+REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
 
 class OutageMonitor:
@@ -193,7 +193,7 @@ class OutageMonitor:
 
     @staticmethod
     def is_outage_ticket_auto_resolvable(ticket_notes: list, max_autoresolves: int) -> bool:
-        regex = re.compile(r"^#\*Automation Engine\*#\nAuto-resolving detail for serial")
+        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving detail for serial")
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:
@@ -464,7 +464,7 @@ class OutageMonitor:
         real_service_status: str = 'DOWN' if device_info['realservice']['status'] == 0 else 'UP'
 
         triage_note = os.linesep.join([
-            "#*Automation Engine*#",
+            "#*MetTel's IPA*#",
             "Triage (Ixia)",
             "",
             "Hawkeye Instance: https://ixia.metconnect.net/",

@@ -1,4 +1,4 @@
-LIT_DISPATCH_REPAIR_COMPLETED = """#*Automation Engine*# {dispatch_number}
+LIT_DISPATCH_REPAIR_COMPLETED = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Repair Completed
 
 Dispatch request for {date_of_dispatch} @ {time_of_dispatch} {time_zone} has been completed.

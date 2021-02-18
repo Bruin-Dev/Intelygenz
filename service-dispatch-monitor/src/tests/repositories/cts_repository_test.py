@@ -126,7 +126,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to(updated_dispatch) == expected_phone
 
     def get_sms_to_from_note_test(self):
-        note = "#*Automation Engine*# IGZ57079\n" \
+        note = "#*MetTel's IPA*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -150,7 +150,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to_from_note(note) == expected_phone
 
     def get_sms_to_from_note_error_no_contact_test(self):
-        note = "#*Automation Engine*# IGZ57079\n" \
+        note = "#*MetTel's IPA*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -174,7 +174,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to_from_note(note) == expected_phone
 
     def get_sms_to_from_note_error_number_test(self):
-        note = "#*Automation Engine*# IGZ57079\n" \
+        note = "#*MetTel's IPA*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -198,7 +198,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to_from_note(note) == expected_phone
 
     def get_sms_to_from_note_error_not_phone_lines_test(self):
-        note = "#*Automation Engine*# IGZ57079\n" \
+        note = "#*MetTel's IPA*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -236,7 +236,7 @@ class TestCtsRepository:
         assert CtsRepository.get_onsite_contact(updated_dispatch) == expected_phone
 
     def get_onsite_contact_from_note_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+        note = "#*MetTel's IPA*# DIS57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -265,7 +265,7 @@ class TestCtsRepository:
         assert CtsRepository.get_onsite_contact_from_note(note) == expected_name
 
     def get_onsite_contact_from_note_no_contact_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+        note = "#*MetTel's IPA*# DIS57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -299,7 +299,7 @@ class TestCtsRepository:
         assert CtsRepository.get_location(updated_dispatch) == expected_phone
 
     def get_location_from_note_with_address_test(self):
-        note = "#*Automation Engine*# IGZ_0001\n" \
+        note = "#*MetTel's IPA*# IGZ_0001\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -328,7 +328,7 @@ class TestCtsRepository:
         assert CtsRepository.get_location_from_note(note) == expected
 
     def get_location_from_note_with_no_address_test(self):
-        note = "#*Automation Engine*# IGZ_0001\n" \
+        note = "#*MetTel's IPA*# IGZ_0001\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -585,7 +585,7 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = f'#*Automation Engine*# {igz_dispatch_number}\nDispatch Management - Field Engineer On Site\n' \
+        sms_note = f"#*MetTel's IPA*# {igz_dispatch_number}\nDispatch Management - Field Engineer On Site\n" \
                    f'SMS notification sent to +1987654327\n\n' \
                    f'The field engineer, Michael J. Fox has arrived.\n'
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
@@ -611,7 +611,7 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = f'#*Automation Engine*# {igz_dispatch_number}\n' \
+        sms_note = f"#*MetTel's IPA*# {igz_dispatch_number}\n" \
                    f'Dispatch Management - Field Engineer On Site\n' \
                    f'SMS notification sent to +1987654327\n\nThe field engineer, Michael J. Fox has arrived.\n'
 
@@ -647,7 +647,7 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = f'#*Automation Engine*# {igz_dispatch_number}\nDispatch Management - Dispatch Cancelled\n' \
+        sms_note = f"#*MetTel's IPA*# {igz_dispatch_number}\nDispatch Management - Dispatch Cancelled\n" \
                    f'Dispatch for {date_of_dispatch} has been cancelled.\n'
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
@@ -676,7 +676,7 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = f'#*Automation Engine*# {igz_dispatch_number}\nDispatch Management - Dispatch Cancelled\n' \
+        sms_note = f"#*MetTel's IPA*# {igz_dispatch_number}\nDispatch Management - Dispatch Cancelled\n" \
                    f'Dispatch for {date_of_dispatch} has been cancelled.\n'
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- Cancelled note not appended'
@@ -1010,7 +1010,7 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = f'#*Automation Engine*# {dispatch_number}\n' \
+        sms_note = f"#*MetTel's IPA*# {dispatch_number}\n" \
                    f'The Field Engineer assigned to this dispatch has changed.\n' \
                    f'Reference: {ticket_id}\n\n' \
                    f'Field Engineer\n{tech_name}\n{tech_phone}\n'
@@ -1043,7 +1043,7 @@ class TestCtsRepository:
             'tech_name': cts_dispatch_confirmed.get('API_Resource_Name__c'),
             'tech_phone': cts_dispatch_confirmed.get('Resource_Phone_Number__c')
         }
-        sms_note = f'#*Automation Engine*# {dispatch_number}\n' \
+        sms_note = f"#*MetTel's IPA*# {dispatch_number}\n" \
                    f'The Field Engineer assigned to this dispatch has changed.\n' \
                    f'Reference: {ticket_id}\n\n' \
                    f'Field Engineer\n{tech_name}\n{tech_phone}\n'

@@ -176,11 +176,11 @@ class TestCtsDispatchMonitor:
             Mock(side_effect=[igz_dispatch_number_1, igz_dispatch_number_2, None, None])
 
         ticket_notes_1 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'noteValue': "#*MetTel's IPA*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care",  # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
         ticket_notes_2 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'noteValue': "#*MetTel's IPA*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care",  # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]  # noqa
 
@@ -268,7 +268,7 @@ class TestCtsDispatchMonitor:
             Mock(side_effect=[igz_dispatch_number_1, None, igz_dispatch_number_2])
 
         ticket_notes_1 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n'
+                           'noteValue': "#*MetTel's IPA*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
                                         'Please see the summary below.\n--\n'
                                         'Dispatch Number:  [IGZ_0001|'
                                         'https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \n'
@@ -288,7 +288,7 @@ class TestCtsDispatchMonitor:
                            'creator': None}]
         ticket_notes_2 = [{'noteId': 70805300,
                            'noteValue':
-                               '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n'
+                               "#*MetTel's IPA*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
                                'Please see the summary below.\n--\nDispatch Number:  '
                                '[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \n'
                                'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
@@ -455,9 +455,9 @@ class TestCtsDispatchMonitor:
 
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -465,7 +465,7 @@ class TestCtsDispatchMonitor:
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -574,13 +574,13 @@ class TestCtsDispatchMonitor:
 
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                      f'Dispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_tech_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -597,11 +597,11 @@ class TestCtsDispatchMonitor:
         datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
         datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        confirmed_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -750,13 +750,13 @@ class TestCtsDispatchMonitor:
         }
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                      f'Dispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_tech_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -773,11 +773,11 @@ class TestCtsDispatchMonitor:
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
         datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        confirmed_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -960,9 +960,9 @@ class TestCtsDispatchMonitor:
         }
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -973,7 +973,7 @@ class TestCtsDispatchMonitor:
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1066,9 +1066,9 @@ class TestCtsDispatchMonitor:
         }
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -1079,7 +1079,7 @@ class TestCtsDispatchMonitor:
         time_2 = cts_dispatch_confirmed_skipped_datetime.get('Local_Site_Time__c')
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         tech_name_2 = cts_dispatch_confirmed_skipped_datetime.get('API_Resource_Name__c')
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1161,9 +1161,9 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
 
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -1175,7 +1175,7 @@ class TestCtsDispatchMonitor:
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         tech_name_2 = cts_dispatch_confirmed_skipped_bad_phone.get('API_Resource_Name__c')
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1260,9 +1260,9 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
 
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -1278,7 +1278,7 @@ class TestCtsDispatchMonitor:
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
         datetime_2_str = 'Jun 23, 2020 @ 10:00 PM UTC'
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1356,9 +1356,9 @@ class TestCtsDispatchMonitor:
         }
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -1372,7 +1372,7 @@ class TestCtsDispatchMonitor:
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1611,13 +1611,13 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
-        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_tech_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         igz_dispatch_number_1 = 'IGZ_0001'
@@ -1631,11 +1631,11 @@ class TestCtsDispatchMonitor:
         tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        confirmed_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1797,22 +1797,22 @@ class TestCtsDispatchMonitor:
         datetime_1_str = 'Jun 23, 2020 @ 10:00 PM UTC'
         datetime_2_str = 'Jun 23, 2020 @ 10:00 AM UTC'
 
-        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        confirmed_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        confirmed_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
 
-        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+        sms_tech_note_1 = f"#*MetTel's IPA*# {igz_dispatch_number_1}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
-        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                      f'Dispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_tech_note_2 = f"#*MetTel's IPA*# {igz_dispatch_number_2}\n" \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         responses_details_mock = [
@@ -2352,8 +2352,8 @@ class TestCtsDispatchMonitor:
                         'You have a dispatch coming up in 12 hours, Jun 23, 2020 @ 10:00 PM UTC.\n'
                         'For Premier Financial Bancorp at 1501 K St NW\n'
         }
-        sms_note = f'#*Automation Engine*# IGZ_0001\nDispatch 12h prior reminder SMS sent to +12027723610\n'
-        sms_note_tech = f'#*Automation Engine*# IGZ_0001\nDispatch 12h prior reminder tech SMS sent to +12123595129\n'
+        sms_note = f"#*MetTel's IPA*# IGZ_0001\nDispatch 12h prior reminder SMS sent to +12027723610\n"
+        sms_note_tech = f"#*MetTel's IPA*# IGZ_0001\nDispatch 12h prior reminder tech SMS sent to +12123595129\n"
 
         cts_dispatch_monitor._cts_repository.send_sms = CoroutineMock(side_effect=send_sms_mock)
         cts_dispatch_monitor._cts_repository.append_note = CoroutineMock(side_effect=append_note_mock)

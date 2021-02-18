@@ -116,7 +116,7 @@ class TriageRepository:
                     tz_object)
 
         ticket_note_lines = [
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
         ]
 
@@ -135,7 +135,7 @@ class TriageRepository:
         tz_object = timezone(self._config.TRIAGE_CONFIG["timezone"])
 
         triage_note_fragments = [
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
             '',
         ]

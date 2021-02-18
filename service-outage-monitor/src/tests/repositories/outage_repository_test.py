@@ -181,14 +181,14 @@ class TestOutageRepository:
         serial_number_1 = 'VC1234567'
         serial_number_2 = 'VC7654321'
 
-        text_identifier = ("#*Automation Engine*#\n"
+        text_identifier = ("#*MetTel's IPA*#\n"
                            "Auto-resolving detail for serial\n")
 
         note_value1 = f"{text_identifier}TimeStamp: 2021-01-02 10:18:16-05:00"
         note_value2 = f"{text_identifier}TimeStamp: 2020-01-02 10:18:16-05:00"
         note_value3 = f"{text_identifier}TimeStamp: 2022-01-02 10:18:16-05:00"
 
-        note_value4 = ("#*Automation Engine*#\n"
+        note_value4 = ("#*MetTel's IPA*#\n"
                        "Just another kind of note\n")
 
         ticket_notes1 = [

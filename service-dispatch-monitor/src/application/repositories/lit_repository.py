@@ -250,7 +250,7 @@ class LitRepository:
         # Filter tech on site dispatches
         # Dispatch Confirmed --> Field Engineer On Site:
         # Tech_Arrived_On_Site is set to true and Time_of_Check_In is set.
-        # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
+        # Bruin Note:*#MetTel's IPA#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
         return all([dispatch is not None,
                     dispatch.get('Dispatch_Status') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
                     dispatch.get("Tech_Arrived_On_Site") is not None,
@@ -260,7 +260,7 @@ class LitRepository:
     def is_repair_completed(self, dispatch):
         # Field Engineer On Site --> Repair Completed: Tech_Off_Site is set to true and Time_of_Check_Out is set.
         # Bruin Note:
-        # *#Automation Engine#*
+        # *#MetTel's IPA#*
         # Dispatch Management - Repair Completed
         #
         # Dispatch request for Mar 16, 2020 @ 07:00 AM Eastern has been completed.

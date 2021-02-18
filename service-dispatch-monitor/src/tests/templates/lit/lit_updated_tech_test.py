@@ -1,6 +1,6 @@
 from application.templates.lit.lit_updated_tech import lit_get_updated_tech_note
 
-expected_updated_tech_note = """#*Automation Engine*# DIS37266
+expected_updated_tech_note = """#*MetTel's IPA*# DIS37266
 The Field Engineer assigned to this dispatch has changed.
 Reference: 12345
 

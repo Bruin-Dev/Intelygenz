@@ -3428,7 +3428,7 @@ class TestServiceOutageMonitor:
         ticket_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00',
+                "noteValue": f"#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
                     serial_number,
@@ -3592,7 +3592,7 @@ class TestServiceOutageMonitor:
         ticket_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2020-02-24 10:07:12+00:00',
+                "noteValue": f"#*MetTel's IPA*#\nTNBA\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -3605,7 +3605,7 @@ class TestServiceOutageMonitor:
         ticket_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f'#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00',
+                "noteValue": f"#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -3691,7 +3691,7 @@ class TestServiceOutageMonitor:
             triage_note = outage_monitor._build_triage_note(device_info)
 
         expected_note = os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Triage (Ixia)',
             '',
             'Hawkeye Instance: https://ixia.metconnect.net/',
@@ -4355,7 +4355,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4369,7 +4369,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4527,7 +4527,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4541,14 +4541,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
         }
         ticket_note_4 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4710,7 +4710,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4724,14 +4724,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
         }
         ticket_note_4 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4895,7 +4895,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -4909,14 +4909,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
         }
         ticket_note_4 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -5084,7 +5084,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -5098,14 +5098,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
         }
         ticket_note_4 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -5280,7 +5280,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia).\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -5294,14 +5294,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
         }
         ticket_note_4 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number,
             ],
@@ -5418,7 +5418,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894040,
                 "noteValue": (
-                    '#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00'
+                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5427,7 +5427,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894041,
                 "noteValue": (
-                    '#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00'
+                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5441,7 +5441,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894040,
                 "noteValue": (
-                    '#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00'
+                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5450,7 +5450,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894041,
                 "noteValue": (
-                    '#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00'
+                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5459,7 +5459,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894042,
                 "noteValue": (
-                    '#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-04 10:18:16-05:00'
+                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-04 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5539,7 +5539,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 'B827EB92EB72',
             ],
@@ -5547,7 +5547,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 'B827EB92EB72',
             ],
@@ -5597,7 +5597,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 'B827EB92EB72',
             ],

@@ -149,7 +149,7 @@ class TestTicketRepository:
         result = TicketRepository.build_tnba_note_from_prediction(holmdel_noc_prediction, serial_number_1)
 
         assert result == os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'TNBA',
             '',
             'The next best action for VC1234567 is: Holmdel NOC Investigate.',
@@ -164,7 +164,7 @@ class TestTicketRepository:
         )
 
         assert result == os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'TNBA',
             '',
             'The next best action for VC1234567 is: Repair Completed. Since it is a high confidence prediction',

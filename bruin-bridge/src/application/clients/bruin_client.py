@@ -457,7 +457,7 @@ class BruinClient:
             payload = {
                 "ClientID": client_id,
                 "WTNs": [service_number],
-                "RequestDescription": "Automation Engine -- Service Outage Trouble"
+                "RequestDescription": "MetTel's IPA -- Service Outage Trouble"
             }
             self._logger.info(f'Posting payload {json.dumps(payload)} to create new outage ticket...')
 

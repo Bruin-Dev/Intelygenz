@@ -244,7 +244,7 @@ class TestBruinRepository:
         ticket_id = 11111
         outage_causes = "Some causes of the outage"
         ticket_note = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             f'Re-opening ticket.\n'
             f'{outage_causes}\n'
             f'TimeStamp: {current_datetime}'
@@ -282,7 +282,7 @@ class TestBruinRepository:
             "ticketDetails": ticket_details,
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -298,7 +298,7 @@ class TestBruinRepository:
             "ticketDetails": ticket_details,
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -344,7 +344,7 @@ class TestBruinRepository:
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026138'}],
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'

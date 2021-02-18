@@ -1,4 +1,4 @@
-CTS_UPDATED_TECH = """#*Automation Engine*# {dispatch_number}
+CTS_UPDATED_TECH = """#*MetTel's IPA*# {dispatch_number}
 The Field Engineer assigned to this dispatch has changed.
 Reference: {ticket_id}
 

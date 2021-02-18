@@ -72,7 +72,7 @@ class TestUtilsRepository:
 
         assert result == fallback_value
 
-    def find_dispatch_number_watermark_ok_test(self, ticket_details):
+    def find_dispatch_number_watermark_ok_old_watermark_test(self, ticket_details):
         dispatch_number = "DIS37561"
         watermark = '#*Automation Engine*#'
         dispatch_note = ticket_details['body']["ticketNotes"][1]
@@ -81,7 +81,7 @@ class TestUtilsRepository:
 
         assert result == dispatch_number
 
-    def find_dispatch_number_watermark_ko_test(self, ticket_details):
+    def find_dispatch_number_watermark_ko_old_watermark_test(self, ticket_details):
         dispatch_number = "DIS37405"
         watermark = '#*Automation Engine*#'
         dispatch_note = ticket_details['body']["ticketNotes"][2]
@@ -90,10 +90,37 @@ class TestUtilsRepository:
 
         assert result == ''
 
-    def find_dispatch_number_wrong_dispatch_number_ko_test(self, ticket_details):
+    def find_dispatch_number_wrong_dispatch_number_ko_old_watermark_test(self, ticket_details):
         dispatch_number = "DIS123"
         watermark = '#*Automation Engine*#'
         dispatch_note = ticket_details['body']["ticketNotes"][1]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == ''
+
+    def find_dispatch_number_watermark_ok_test(self, ticket_details):
+        dispatch_number = "DIS37561"
+        watermark = "#*MetTel's IPA*#"
+        dispatch_note = ticket_details['body']["ticketNotes"][3]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == dispatch_number
+
+    def find_dispatch_number_watermark_ko_test(self, ticket_details):
+        dispatch_number = "DIS37405"
+        watermark = "#*MetTel's IPA*#"
+        dispatch_note = ticket_details['body']["ticketNotes"][2]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == ''
+
+    def find_dispatch_number_wrong_dispatch_number_ko_test(self, ticket_details):
+        dispatch_number = "DIS123"
+        watermark = "#*MetTel's IPA*#"
+        dispatch_note = ticket_details['body']["ticketNotes"][3]
 
         result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
 

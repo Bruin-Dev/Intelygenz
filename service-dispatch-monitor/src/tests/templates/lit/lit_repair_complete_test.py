@@ -1,6 +1,6 @@
 from application.templates.lit.lit_repair_completed import lit_get_repair_completed_note
 
-expected_repair_completed_note = """#*Automation Engine*# DIS37266
+expected_repair_completed_note = """#*MetTel's IPA*# DIS37266
 Dispatch Management - Repair Completed
 
 Dispatch request for 2019-11-14 @ 6PM-8PM Pacific Time has been completed.

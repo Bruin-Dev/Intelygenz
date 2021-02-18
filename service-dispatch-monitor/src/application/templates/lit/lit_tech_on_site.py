@@ -1,4 +1,4 @@
-LIT_TECH_ON_SITE = """#*Automation Engine*# {dispatch_number}
+LIT_TECH_ON_SITE = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Field Engineer On Site
 SMS notification sent to {phone}
 

@@ -213,7 +213,7 @@ class TestBruinRepository:
                     "Ticket Entered Date": "202008242225",
                     "EnteredDate": "2020-08-24T22:25:09.953-04:00",
                     "CallTicketID": 4774915,
-                    "Initial Note @ Ticket Creation": "Automation Engine -- Service Outage Trouble",
+                    "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
                     "DetailID": None,
                     "Product": None,
                     "Asset": None,

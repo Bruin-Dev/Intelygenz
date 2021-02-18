@@ -166,7 +166,7 @@ class TestDiGiRepository:
         expected_interface = 'GE2'
 
         digi_reboot_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'Offline DiGi interface identified for serial: VCO',
             f'Interface: {expected_interface}',
             f'Automatic reboot attempt started.',
@@ -188,7 +188,7 @@ class TestDiGiRepository:
         notifications_repository = Mock()
 
         digi_reboot_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'Offline DiGi interface identified for serial: VCO',
             f'Automatic reboot attempt started.',
             f'TimeStamp: '

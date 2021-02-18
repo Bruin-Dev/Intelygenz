@@ -656,7 +656,7 @@ class TestApiServer:
 
         expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
-        ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
+        ticket_note = "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n" \
                       'Please see the summary below.\n' \
                       '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
                       'Time Zone (Local): Pacific Time\n' \
@@ -673,7 +673,7 @@ class TestApiServer:
             'request_id': uuid_,
             'body': {
                 'ticket_id': 'T-12345',
-                'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                'note': "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n"
                         'Please see the summary below.\n'
                         '--\n'
                         f'Dispatch Number: [{dispatch_number}|'
@@ -857,7 +857,7 @@ class TestApiServer:
             'request_id': uuid_,
             'body': {
                 'ticket_id': 'T-12345',
-                'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                'note': "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n"
                         'Please see the summary below.\n'
                         f'--\nDispatch Number: '
                         f'[{dispatch_number}|'
@@ -971,7 +971,7 @@ class TestApiServer:
             "body": {
                 'NOT ticketNotes field': [
                     {
-                        'noteValue': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                        'noteValue': "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n"
                                      'Please see the summary below.\n'
                                      f'--\nDispatch Number: '
                                      f'[{dispatch_number}|'
@@ -1052,7 +1052,7 @@ class TestApiServer:
 
         expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
-        ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
+        ticket_note = "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n" \
                       'Please see the summary below.\n' \
                       '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
                       'Time Zone (Local): Pacific Time\n' \
@@ -1069,7 +1069,7 @@ class TestApiServer:
             'request_id': uuid_,
             'body': {
                 'ticket_id': ticket_id,
-                'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                'note': "#*MetTel's IPA*#\nDispatch Management - Dispatch Requested\n\n"
                         'Please see the summary below.\n--\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
                         'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
@@ -3536,8 +3536,8 @@ class TestApiServer:
 
         api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id, f"{note_1}Triage note: 1/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_2}Triage note: 2/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_3}{note_4}\nTriage note: 3/4"),
+            call(ticket_id, f"#*MetTel's IPA*#\nTriage (VeloCloud)\n{note_2}Triage note: 2/4"),
+            call(ticket_id, f"#*MetTel's IPA*#\nTriage (VeloCloud)\n{note_3}{note_4}\nTriage note: 3/4"),
         ])
 
     @pytest.mark.asyncio
@@ -3585,8 +3585,8 @@ class TestApiServer:
 
         api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id, f"{note_1}Triage note: 1/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_2}Triage note: 2/4"),
-            call(ticket_id, f"#*Automation Engine*#\nTriage (VeloCloud)\n{note_3}{note_4}\nTriage note: 3/4"),
+            call(ticket_id, f"#*MetTel's IPA*#\nTriage (VeloCloud)\n{note_2}Triage note: 2/4"),
+            call(ticket_id, f"#*MetTel's IPA*#\nTriage (VeloCloud)\n{note_3}{note_4}\nTriage note: 3/4"),
         ])
 
     @pytest.mark.asyncio

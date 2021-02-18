@@ -1,4 +1,4 @@
-LIT_DISPATCH_CONFIRMED = """#*Automation Engine*# {dispatch_number}
+LIT_DISPATCH_CONFIRMED = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Dispatch Confirmed
 Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}
 """
@@ -13,7 +13,7 @@ def lit_get_dispatch_confirmed_note(body):
     )
 
 
-LIT_FIELD_ENGINEER_CONFIRMED = """#*Automation Engine*# {dispatch_number}
+LIT_FIELD_ENGINEER_CONFIRMED = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Field Engineer Confirmed
 
 Field Engineer
@@ -30,7 +30,7 @@ def lit_get_field_engineer_confirmed_note(body):
     )
 
 
-LIT_DISPATCH_CONFIRMED_SMS = """#*Automation Engine*# {dispatch_number}
+LIT_DISPATCH_CONFIRMED_SMS = """#*MetTel's IPA*# {dispatch_number}
 Dispatch confirmation SMS sent to {phone_number}
 """
 
@@ -42,7 +42,7 @@ def lit_get_dispatch_confirmed_sms_note(body):
     )
 
 
-LIT_DISPATCH_CONFIRMED_SMS_TECH = """#*Automation Engine*# {dispatch_number}
+LIT_DISPATCH_CONFIRMED_SMS_TECH = """#*MetTel's IPA*# {dispatch_number}
 Dispatch confirmation SMS tech sent to {phone_number}
 """
 
@@ -54,7 +54,7 @@ def lit_get_dispatch_confirmed_sms_tech_note(body):
     )
 
 
-LIT_TECH_X_HOURS_BEFORE_SMS_NOTE = """#*Automation Engine*# {dispatch_number}
+LIT_TECH_X_HOURS_BEFORE_SMS_NOTE = """#*MetTel's IPA*# {dispatch_number}
 Dispatch {hours}h prior reminder SMS sent to {phone_number}
 """
 
@@ -68,7 +68,7 @@ def lit_get_tech_x_hours_before_sms_note(body):
     )
 
 
-LIT_TECH_X_HOURS_BEFORE_SMS_TECH_NOTE = """#*Automation Engine*# {dispatch_number}
+LIT_TECH_X_HOURS_BEFORE_SMS_TECH_NOTE = """#*MetTel's IPA*# {dispatch_number}
 Dispatch {hours}h prior reminder tech SMS sent to {phone_number}
 """
 

@@ -1,7 +1,7 @@
 from application.templates.cts.cts_dispatch_cancel import cts_get_dispatch_cancel_note
 
 
-expected_dispatch_confirmed_note = """#*Automation Engine*# S-12345
+expected_dispatch_confirmed_note = """#*MetTel's IPA*# S-12345
 Dispatch Management - Dispatch Cancelled
 Dispatch for 2020-03-16 16:00:00 PDT has been cancelled.
 """

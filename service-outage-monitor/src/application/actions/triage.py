@@ -18,7 +18,7 @@ from application.repositories import EdgeIdentifier
 
 
 class Triage:
-    __triage_note_regex = re.compile(r'#\*Automation Engine\*#\nTriage \(VeloCloud\)')
+    __triage_note_regex = re.compile(r"#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, outage_repository,
                  customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,

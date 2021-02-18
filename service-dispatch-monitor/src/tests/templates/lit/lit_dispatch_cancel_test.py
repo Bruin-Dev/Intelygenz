@@ -1,7 +1,7 @@
 from application.templates.lit.lit_dispatch_cancel import lit_get_dispatch_cancel_note
 
 
-expected_dispatch_confirmed_note = """#*Automation Engine*# DIS12345
+expected_dispatch_confirmed_note = """#*MetTel's IPA*# DIS12345
 Dispatch Management - Dispatch Cancelled
 Dispatch for 2019-11-14 @ 6PM-8PM Pacific Time has been cancelled.
 """

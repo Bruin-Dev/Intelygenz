@@ -17,8 +17,8 @@ TNBA_NOTE_APPENDED_SUCCESS_MSG = (
     '{notes_count} TNBA note(s) were appended to ticket {ticket_id}: app.bruin.com/t/{ticket_id}'
 )
 
-TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(VeloCloud\)')
-REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
+TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
+REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
 
 class TNBAMonitor:

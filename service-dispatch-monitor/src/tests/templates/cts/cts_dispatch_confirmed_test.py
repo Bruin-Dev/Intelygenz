@@ -1,7 +1,7 @@
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_sms_note
 
-expected_dispatch_confirmed_note = """#*Automation Engine*# S-12345
+expected_dispatch_confirmed_note = """#*MetTel's IPA*# S-12345
 Dispatch Management - Dispatch Confirmed
 Dispatch scheduled for 2020-06-23T14:00:00.000+0000
 
@@ -23,7 +23,7 @@ def cts_get_dispatch_requested_note_test():
     assert dispatch_confirmed_note == expected_dispatch_confirmed_note
 
 
-expected_cts_dispatch_confirmed_sms = """#*Automation Engine*# S-12345
+expected_cts_dispatch_confirmed_sms = """#*MetTel's IPA*# S-12345
 Dispatch confirmation SMS sent to +16666666666
 """
 

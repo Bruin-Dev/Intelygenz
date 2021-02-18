@@ -1,4 +1,4 @@
-CTS_DISPATCH_CANCEL_REQUEST = """#*Automation Engine*# {dispatch_number}
+CTS_DISPATCH_CANCEL_REQUEST = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Dispatch Cancel Requested
 
 A request to cancel the dispatch for {date_of_dispatch} has been sent.

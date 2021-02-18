@@ -1350,7 +1350,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         logger = Mock()
@@ -1386,7 +1386,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         ticket_data = {
@@ -1434,7 +1434,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         ticket_data = {
@@ -1486,7 +1486,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         ticket_data = {
@@ -1535,7 +1535,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         ticket_data = {
@@ -1584,7 +1584,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         ticket_data = {
@@ -1633,7 +1633,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         bruin_response_body = {
@@ -1682,7 +1682,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         bruin_response_status = 401
@@ -1723,7 +1723,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         bruin_response_status = 403
@@ -1763,7 +1763,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         bruin_response_status = 404
@@ -1801,7 +1801,7 @@ class TestPostOutageTicket:
         request_params = {
             'ClientID': client_id,
             'WTNs': [service_number],
-            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
         bruin_response_status = 500

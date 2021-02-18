@@ -1,4 +1,4 @@
-LIT_DISPATCH_REQUESTED = """#*Automation Engine*# {dispatch_number}
+LIT_DISPATCH_REQUESTED = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Dispatch Requested
 
 Please see the summary below.

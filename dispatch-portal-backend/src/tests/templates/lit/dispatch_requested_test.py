@@ -1,6 +1,6 @@
 from application.templates.lit.dispatch_requested import get_dispatch_requested_note
 
-expected_dispatch_request_note = """#*Automation Engine*# DIS37266
+expected_dispatch_request_note = """#*MetTel's IPA*# DIS37266
 Dispatch Management - Dispatch Requested
 
 Please see the summary below.

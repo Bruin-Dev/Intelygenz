@@ -128,7 +128,7 @@ def ticket_note_for_serial_1_and_2_posted_on_2020_01_17(serial_number_1, serial_
 @pytest.fixture(scope='session')
 def note_text_about_passed_icmp_test(test_type_icmp_test):
     return (
-        '#*Automation Engine*#\n'
+        "#*MetTel's IPA*#\n"
         'Service Affecting (Ixia)\n'
         'Device Name: ATL_XR2000_1\n'
         '\n'
@@ -143,7 +143,7 @@ def note_text_about_passed_icmp_test(test_type_icmp_test):
 @pytest.fixture(scope='session')
 def note_text_about_failed_icmp_test(test_type_icmp_test):
     return (
-        '#*Automation Engine*#\n'
+        "#*MetTel's IPA*#\n"
         'Service Affecting (Ixia)\n'
         'Device Name: ATL_XR2000_1\n'
         '\n'
@@ -160,7 +160,7 @@ def note_text_about_failed_icmp_test(test_type_icmp_test):
 @pytest.fixture(scope='session')
 def note_text_about_passed_network_kpi_test(test_type_network_kpi):
     return (
-        '#*Automation Engine*#\n'
+        "#*MetTel's IPA*#\n"
         'Service Affecting (Ixia)\n'
         'Device Name: ATL_XR2000_1\n'
         '\n'
@@ -175,7 +175,7 @@ def note_text_about_passed_network_kpi_test(test_type_network_kpi):
 @pytest.fixture(scope='session')
 def note_text_about_failed_network_kpi_test(test_type_network_kpi):
     return (
-        '#*Automation Engine*#\n'
+        "#*MetTel's IPA*#\n"
         'Service Affecting (Ixia)\n'
         'Device Name: ATL_XR2000_1\n'
         '\n'

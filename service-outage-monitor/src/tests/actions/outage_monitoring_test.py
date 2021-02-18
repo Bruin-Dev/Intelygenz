@@ -2109,21 +2109,21 @@ class TestServiceOutageMonitor:
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -2284,21 +2284,21 @@ class TestServiceOutageMonitor:
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -2464,14 +2464,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -2641,21 +2641,21 @@ class TestServiceOutageMonitor:
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -2830,21 +2830,21 @@ class TestServiceOutageMonitor:
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -3026,21 +3026,21 @@ class TestServiceOutageMonitor:
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -3217,7 +3217,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 'VC1234567',
             ],
@@ -3225,7 +3225,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 'VC1234567',
             ],
@@ -3279,7 +3279,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": "#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 'VC1234567',
             ],
@@ -7285,7 +7285,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -7297,14 +7297,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -7466,7 +7466,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -7478,14 +7478,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -7655,7 +7655,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -7667,14 +7667,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -7842,7 +7842,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -7854,14 +7854,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -8020,7 +8020,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -8032,14 +8032,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -8199,7 +8199,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -8211,14 +8211,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -8378,7 +8378,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -8390,14 +8390,14 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -8543,14 +8543,14 @@ class TestServiceOutageMonitor:
 
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -8700,7 +8700,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -8712,7 +8712,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Task result change\n"
                          f"Changing task result to: {task_result}\n"
                          f"TimeStamp: 2021-01-03 10:18:16-05:00",
@@ -8722,7 +8722,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -8873,7 +8873,7 @@ class TestServiceOutageMonitor:
 
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Offline DiGi interface identified for serial: {serial_number_1}\n"
                          f'Interface: GE1\n'
                          f'Automatic reboot attempt started.\n'
@@ -8886,7 +8886,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": f"#*Automation Engine*#\n"
+            "noteValue": f"#*MetTel's IPA*#\n"
                          f"Task result change\n"
                          f"Changing task result to: {task_result}\n"
                          f"TimeStamp: 2021-01-03 10:18:16-05:00",
@@ -8896,7 +8896,7 @@ class TestServiceOutageMonitor:
         }
         ticket_note_3 = {
             "noteId": 68246616,
-            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
             "serviceNumber": [
                 serial_number_1,
             ],

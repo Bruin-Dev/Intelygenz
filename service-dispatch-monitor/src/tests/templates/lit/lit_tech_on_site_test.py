@@ -1,6 +1,6 @@
 from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 
-expected_tech_on_site_note_note = """#*Automation Engine*# DIS37266
+expected_tech_on_site_note_note = """#*MetTel's IPA*# DIS37266
 Dispatch Management - Field Engineer On Site
 SMS notification sent to +12123595129
 

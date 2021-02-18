@@ -27,7 +27,7 @@ class CtsDispatchMonitor:
         self._notifications_repository = notifications_repository
 
         # Dispatch Notes watermarks
-        self.MAIN_WATERMARK = '#*Automation Engine*#'
+        self.MAIN_WATERMARK = "#*MetTel's IPA*#"
         self.IGZ_DN_WATERMARK = 'IGZ'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
         self.DISPATCH_CONFIRMED_WATERMARK = 'Dispatch Management - Dispatch Confirmed'

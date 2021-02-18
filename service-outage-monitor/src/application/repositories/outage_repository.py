@@ -35,7 +35,7 @@ class OutageRepository:
     def is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
                                                 serial_number: str,
                                                 max_autoresolves: int) -> bool:
-        regex = re.compile(r"^#\*Automation Engine\*#\nAuto-resolving detail for serial")
+        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving detail for serial")
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:

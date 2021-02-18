@@ -15,8 +15,8 @@ from pytz import utc
 
 from application.repositories import EdgeIdentifier
 
-TRIAGE_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTriage \(VeloCloud\)')
-REOPEN_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nRe-opening')
+TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
+REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
 
 class OutageMonitor:

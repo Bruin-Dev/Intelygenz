@@ -2099,7 +2099,7 @@ class TestServiceAffectingMonitor:
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "R"}],
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -2195,7 +2195,7 @@ class TestServiceAffectingMonitor:
             "ticketDetails": [{"detailID": 5217537, "detailValue": '', "detailStatus": "R"}],
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -2286,7 +2286,7 @@ class TestServiceAffectingMonitor:
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "O"}],
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -2382,7 +2382,7 @@ class TestServiceAffectingMonitor:
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "O"}],
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -2475,7 +2475,7 @@ class TestServiceAffectingMonitor:
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "R"}],
             "ticketNotes": [
                 {
-                    "noteValue": '#*Automation Engine*# \n '
+                    "noteValue": "#*MetTel's IPA*# \n "
                                  'Trouble: LATENCY\n '
                                  'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                     'createdDate': '2019-09-10 10:34:00-04:00'
@@ -3089,7 +3089,7 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)
-        assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
+        assert ticket_note == "#*MetTel's IPA*# \nEdgeName: Test \nEdge Status: ok \n"
 
     def ticket_object_to_string_watermark_given_test(self):
         event_bus = Mock()

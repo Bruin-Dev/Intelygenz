@@ -42,7 +42,8 @@ class DispatchServer:
         self._event_bus = event_bus
         self._logger = logger
         self._status = HTTPStatus.OK
-        self.MAIN_WATERMARK = '#*Automation Engine*#'
+        self.OLD_WATERMARK = '#*Automation Engine*#'
+        self.MAIN_WATERMARK = "#*MetTel's IPA*#"
         self.IGZ_DN_WATERMARK = 'IGZ'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
         self.DISPATCH_CANCEL_WATERMARK = 'Dispatch Management - Dispatch Cancel Requested'
@@ -791,7 +792,7 @@ class DispatchServer:
                                            f"Status: {append_note_response['status']}")
 
                     counter = counter + 1
-                    accumulator = "#*Automation Engine*#\n" \
+                    accumulator = "#*MetTel's IPA*#\n" \
                                   "Triage (VeloCloud)\n"
 
     async def _process_note(self, dispatch_number, body):
@@ -806,10 +807,14 @@ class DispatchServer:
     def _filter_ticket_note_by_dispatch_number(self, ticket_notes, dispatch_number, ticket_id):
         filtered_ticket_notes = []
         for note in ticket_notes:
+            # TODO: Get rid of this watermark lookup when the new one becomes the standard watermark
+            note_dispatch_number_old_watermark = UtilsRepository.find_dispatch_number_watermark(note,
+                                                                                                dispatch_number,
+                                                                                                self.OLD_WATERMARK)
             note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
                                                                                   dispatch_number,
                                                                                   self.MAIN_WATERMARK)
-            if len(note_dispatch_number) == 0:
+            if len(note_dispatch_number_old_watermark) == 0 and len(note_dispatch_number) == 0:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"dispatch number not found found in ticket note")
                 continue

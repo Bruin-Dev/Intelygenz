@@ -142,7 +142,7 @@ class TestTriageRepository:
             triage_note = triage_repository.build_triage_note(edge_full_id, edge_status_1, events)
 
         assert triage_note == os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
             'Orchestrator Instance: some-host',
             'Edge Name: Travis Touchdown',
@@ -228,7 +228,7 @@ class TestTriageRepository:
             events_note = triage_repository.build_events_note(events)
 
         assert events_note == os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
             '',
             'New event: EDGE_NEW_DEVICE',

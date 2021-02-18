@@ -23,7 +23,8 @@ class LitDispatchMonitor:
         self._notifications_repository = notifications_repository
 
         # Dispatch Notes watermarks
-        self.MAIN_WATERMARK = '#*Automation Engine*#'
+        self.OLD_WATERMARK = "#*Automation Engine*#"
+        self.MAIN_WATERMARK = "#*MetTel's IPA*#"
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
         self.DISPATCH_CONFIRMED_WATERMARK = 'Dispatch Management - Dispatch Confirmed'
         self.DISPATCH_FIELD_ENGINEER_CONFIRMED_WATERMARK = 'Dispatch Management - Field Engineer Confirmed'
@@ -634,7 +635,9 @@ class LitDispatchMonitor:
                     self._logger.info(
                         f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
-                    watermark_found = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
+                    watermark_found_main_wm = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
+                    watermark_found_old_wm = UtilsRepository.find_note(filtered_ticket_notes, self.OLD_WATERMARK)
+                    watermark_found = watermark_found_main_wm or watermark_found_old_wm
 
                     requested_watermark_found = UtilsRepository.find_note(
                         filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
@@ -680,10 +683,16 @@ class LitDispatchMonitor:
     def _filter_ticket_note_by_dispatch_number(self, ticket_notes, dispatch_number, ticket_id):
         filtered_ticket_notes = []
         for note in ticket_notes:
+            # TODO: Get rid of this watermark lookup when the new one becomes the standard watermark
+            note_dispatch_number_old_watermark = UtilsRepository.find_dispatch_number_watermark(note,
+                                                                                                dispatch_number,
+                                                                                                self.OLD_WATERMARK)
+
             note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
                                                                                   dispatch_number,
                                                                                   self.MAIN_WATERMARK)
-            if len(note_dispatch_number) == 0:
+
+            if len(note_dispatch_number) == 0 and len(note_dispatch_number_old_watermark) == 0:
                 continue
             filtered_ticket_notes.append(note)
 

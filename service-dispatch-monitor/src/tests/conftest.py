@@ -421,7 +421,7 @@ def ticket_details():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# DIS37405\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# DIS37405\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[DIS37405|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37405] "
@@ -493,7 +493,7 @@ def ticket_details_2():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# DIS37406\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# DIS37406\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[DIS37406|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37406] "
@@ -559,7 +559,7 @@ def ticket_details_3():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# DIS37407\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# DIS37407\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[DIS37407|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37407] "
@@ -699,7 +699,7 @@ def ticket_details_2_no_ticket_id_in_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine*# XX\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*MetTel's IPA*# XX\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -742,7 +742,7 @@ def ticket_details_2_no_requested_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine*# DIS37406\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*MetTel's IPA*# DIS37406\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -761,7 +761,7 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
     dispatch_number = dispatch_confirmed.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
                                            date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
@@ -775,7 +775,7 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -783,7 +783,7 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
     }
     confirmed_field_engineer_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      f"Dispatch Management - Field Engineer Confirmed\n\n"
                      "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
                                            tech_name=dispatch_confirmed.get('Tech_First_Name'),
@@ -794,7 +794,7 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -813,7 +813,7 @@ def ticket_details_1_without_field_engineer_note(ticket_details_1, dispatch_conf
     dispatch_number = dispatch_confirmed.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
                                            date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
@@ -827,7 +827,7 @@ def ticket_details_1_without_field_engineer_note(ticket_details_1, dispatch_conf
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -846,7 +846,7 @@ def ticket_details_1_with_confirmation_note_but_not_tech(ticket_details_1, dispa
     dispatch_number = dispatch_confirmed.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
                      "Field Engineer\n"
@@ -862,7 +862,7 @@ def ticket_details_1_with_confirmation_note_but_not_tech(ticket_details_1, dispa
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -878,7 +878,7 @@ def ticket_details_1_with_cancelled_note(ticket_details_1, dispatch_confirmed):
     updated_ticket_details = copy.deepcopy(ticket_details_1)
     note_cancelled_note = {
         "noteId": 70805315,
-        "noteValue": "#*Automation Engine*# DIS37405\n"
+        "noteValue": "#*MetTel's IPA*# DIS37405\n"
                      "Dispatch Management - Dispatch Cancelled\n\n"
                      "Dispatch for {date_of_dispatch} has been cancelled.\n".format(date_of_dispatch='AAA'),
         "serviceNumber": ["4664325"],
@@ -895,7 +895,7 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
     dispatch_number = dispatch_confirmed.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
                                            date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
@@ -907,7 +907,7 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -915,7 +915,7 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
     }
     confirmed_field_engineer_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      f"Dispatch Management - Field Engineer Confirmed\n\n"
                      "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
                                            tech_name="Test TechName",
@@ -926,7 +926,7 @@ def ticket_details_1_with_confirmation_and_outdated_tech_note(ticket_details_1, 
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -945,7 +945,7 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
     dispatch_number = dispatch_confirmed_2.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n".format(
                                            date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
@@ -957,7 +957,7 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -965,7 +965,7 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
     }
     confirmed_field_engineer_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      f"Dispatch Management - Field Engineer Confirmed\n\n"
                      "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
                                            tech_name="Test TechName",
@@ -976,7 +976,7 @@ def ticket_details_2_with_confirmation_and_outdated_tech_note(ticket_details_2, 
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -996,7 +996,7 @@ def ticket_details_1_with_confirmation_and_multiple_outdated_tech_note(
     dispatch_number = dispatch_confirmed.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "The Field Engineer assigned to this dispatch has changed.\n"
                      "Reference: {ticket_id}\n\n"
                      "Field Engineer\n"
@@ -1010,7 +1010,7 @@ def ticket_details_1_with_confirmation_and_multiple_outdated_tech_note(
     }
     confirmed_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "The Field Engineer assigned to this dispatch has changed.\n"
                      "Reference: {ticket_id}\n\n"
                      "Field Engineer\n".format(ticket_id=dispatch_confirmed.get('MetTel_Bruin_TicketID')),
@@ -1029,7 +1029,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
     dispatch_number = dispatch_confirmed_2.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805303,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
                      "Field Engineer\n"
@@ -1045,7 +1045,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805304,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595126"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1053,7 +1053,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
     }
     confirmed_field_engineer_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      f"Dispatch Management - Field Engineer Confirmed\n\n"
                      "Field Engineer\n{tech_name}\n{tech_phone}\n".format(
                                            tech_name=dispatch_confirmed_2.get('Tech_First_Name'),
@@ -1064,7 +1064,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805304,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595126"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1083,7 +1083,7 @@ def ticket_details_2_with_confirmation_note_but_not_tech(ticket_details_2, dispa
     dispatch_number = dispatch_confirmed_2.get('Dispatch_Number')
     confirmed_ticket_note = {
         "noteId": 70805303,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
                      "Field Engineer\n"
@@ -1099,7 +1099,7 @@ def ticket_details_2_with_confirmation_note_but_not_tech(ticket_details_2, dispa
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805304,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595126"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1117,7 +1117,7 @@ def ticket_details_1_with_12h_sms_note(ticket_details_1_with_confirmation_note, 
     sms_to = "+12123595129"
     note_12h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1125,7 +1125,7 @@ def ticket_details_1_with_12h_sms_note(ticket_details_1_with_confirmation_note, 
     }
     note_12h_sms_ticket_tech_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1143,7 +1143,7 @@ def ticket_details_2_with_12h_sms_note(ticket_details_2_with_confirmation_note, 
     sms_to = "+12123595126"
     note_12h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1151,7 +1151,7 @@ def ticket_details_2_with_12h_sms_note(ticket_details_2_with_confirmation_note, 
     }
     note_12h_sms_ticket_tech_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}"
                      "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1169,7 +1169,7 @@ def ticket_details_1_with_2h_sms_note(ticket_details_1_with_12h_sms_note, dispat
     sms_to = "+12123595129"
     note_2h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1186,7 +1186,7 @@ def ticket_details_2_with_2h_sms_note(ticket_details_2_with_12h_sms_note, dispat
     sms_to = "+12123595126"
     note_2h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1203,7 +1203,7 @@ def ticket_detail_1_with_2h_tech_sms_note(ticket_details_1_with_2h_sms_note, dis
     sms_to = "+12123595129"
     note_2h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch 2h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1220,7 +1220,7 @@ def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_not
     field_engineer_name = dispatch_confirmed.get('Tech_First_Name')
     note_tech_sms_ticket_note = {
         "noteId": 70805315,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": ["4664325"],
@@ -1238,7 +1238,7 @@ def ticket_details_2_with_tech_on_site_sms_note(ticket_details_2_with_2h_sms_not
     field_engineer_name = dispatch_confirmed_2.get('Tech_First_Name')
     note_tech_sms_ticket_note = {
         "noteId": 70805316,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": ["4664325"],
@@ -1279,7 +1279,7 @@ def append_note_response():
 def append_note_response_2(append_note_response):
     updated_note = copy.deepcopy(append_note_response)
     updated_note["ticketNotes"][0]["noteID"] = 70897912
-    updated_note["ticketNotes"][0]["noteValue"] = '#*Automation Engine*#\n' \
+    updated_note["ticketNotes"][0]["noteValue"] = "#*MetTel's IPA*#\n" \
                                                   'Dispatch Management - Dispatch Confirmed\n' \
                                                   'Dispatch scheduled for 2020-03-16 @ None None\n'
     return updated_note
@@ -1735,7 +1735,7 @@ def cts_ticket_details():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] "
@@ -1807,7 +1807,7 @@ def cts_ticket_details_2():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] "
@@ -1873,7 +1873,7 @@ def cts_ticket_details_no_dispatch_2():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# \nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# \nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] "
@@ -1939,7 +1939,7 @@ def cts_ticket_details_3():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# IGZ_0003\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*MetTel's IPA*# IGZ_0003\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0003|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0003] "
@@ -2145,7 +2145,7 @@ def cts_ticket_details_2_no_ticket_id_in_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine* # IGZ_0002\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*MetTel's IPA* # IGZ_0002\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -2188,7 +2188,7 @@ def cts_ticket_details_2_no_requested_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine*# IGZ_0002\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*MetTel's IPA*# IGZ_0002\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -2206,7 +2206,7 @@ def cts_ticket_details_1_with_confirmation_note(cts_ticket_details_1, cts_dispat
     updated_ticket_details = copy.deepcopy(cts_ticket_details_1)
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": "#*Automation Engine*# IGZ_0001\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
@@ -2220,7 +2220,7 @@ def cts_ticket_details_1_with_confirmation_note(cts_ticket_details_1, cts_dispat
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": "#*Automation Engine*# IGZ_0001\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2228,7 +2228,7 @@ def cts_ticket_details_1_with_confirmation_note(cts_ticket_details_1, cts_dispat
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
-        "noteValue": "#*Automation Engine*# IGZ_0001\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2245,7 +2245,7 @@ def cts_ticket_details_1_with_confirmation_note_but_not_tech(cts_ticket_details_
     updated_ticket_details = copy.deepcopy(cts_ticket_details_1)
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": "#*Automation Engine*# IGZ_0001\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
@@ -2259,7 +2259,7 @@ def cts_ticket_details_1_with_confirmation_note_but_not_tech(cts_ticket_details_
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": "#*Automation Engine*# IGZ_0001\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2275,7 +2275,7 @@ def cts_ticket_details_2_with_confirmation_note(cts_ticket_details_2, cts_dispat
     updated_ticket_details = copy.deepcopy(cts_ticket_details_2)
     confirmed_ticket_note = {
         "noteId": 70805303,
-        "noteValue": "#*Automation Engine*# IGZ_0002\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
@@ -2289,7 +2289,7 @@ def cts_ticket_details_2_with_confirmation_note(cts_ticket_details_2, cts_dispat
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805304,
-        "noteValue": "#*Automation Engine*# IGZ_0002\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595126"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2297,7 +2297,7 @@ def cts_ticket_details_2_with_confirmation_note(cts_ticket_details_2, cts_dispat
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805304,
-        "noteValue": "#*Automation Engine*# IGZ_0002\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595126"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2314,7 +2314,7 @@ def cts_ticket_details_2_with_confirmation_note_but_not_tech(cts_ticket_details_
     updated_ticket_details = copy.deepcopy(cts_ticket_details_2)
     confirmed_ticket_note = {
         "noteId": 70805303,
-        "noteValue": "#*Automation Engine*# IGZ_0002\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
@@ -2328,7 +2328,7 @@ def cts_ticket_details_2_with_confirmation_note_but_not_tech(cts_ticket_details_
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805304,
-        "noteValue": "#*Automation Engine*# IGZ_0002\n"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595126"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2345,7 +2345,7 @@ def cts_ticket_details_1_with_12h_sms_note(cts_ticket_details_1_with_confirmatio
     sms_to = "+12123595129"
     note_12h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001"
                      "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2353,7 +2353,7 @@ def cts_ticket_details_1_with_12h_sms_note(cts_ticket_details_1_with_confirmatio
     }
     note_12h_sms_ticket_tech_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001"
                      "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2370,7 +2370,7 @@ def cts_ticket_details_2_with_12h_sms_note(cts_ticket_details_2_with_confirmatio
     sms_to = "+12123595126"
     note_12h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0002"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002"
                      "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2378,7 +2378,7 @@ def cts_ticket_details_2_with_12h_sms_note(cts_ticket_details_2_with_confirmatio
     }
     note_12h_sms_ticket_tech_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0002"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002"
                      "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2395,7 +2395,7 @@ def cts_ticket_details_1_with_2h_sms_note(cts_ticket_details_1_with_12h_sms_note
     sms_to = "+12123595129"
     note_2h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2411,7 +2411,7 @@ def cts_ticket_details_2_with_2h_sms_note(cts_ticket_details_2_with_12h_sms_note
     sms_to = "+12123595126"
     note_2h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0002"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2427,7 +2427,7 @@ def cts_ticket_details_1_with_2h_sms_tech_note(cts_ticket_details_1_with_2h_sms_
     sms_to = "+12123595129"
     note_2h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001"
                      "Dispatch 2h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2443,7 +2443,7 @@ def cts_ticket_details_1_with_tech_on_site_sms_note(cts_ticket_details_1_with_2h
     field_engineer_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
     note_tech_sms_ticket_note = {
         "noteId": 70805315,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": ["4664325"],
@@ -2460,7 +2460,7 @@ def cts_ticket_details_2_with_tech_on_site_sms_note(cts_ticket_details_2_with_2h
     field_engineer_name = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
     note_tech_sms_ticket_note = {
         "noteId": 70805316,
-        "noteValue": "#*Automation Engine*# IGZ_0002"
+        "noteValue": "#*MetTel's IPA*# IGZ_0002"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": ["4664325"],
@@ -2478,7 +2478,7 @@ def cts_ticket_details_1_with_cancelled_note(cts_ticket_details_1, cts_dispatch_
     field_engineer_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
     note_cancelled_note = {
         "noteId": 70805315,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*MetTel's IPA*# IGZ_0001"
                      "Dispatch Management - Dispatch Cancelled\n\n"
                      "Dispatch for {date_of_dispatch} has been cancelled.\n".format(date_of_dispatch=date_of_dispatch),
         "serviceNumber": ["4664325"],
@@ -2496,7 +2496,7 @@ def cts_ticket_details_1_with_confirmation_and_outdated_tech_note(cts_ticket_det
     dispatch_number = 'IGZ_0001'
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
@@ -2510,7 +2510,7 @@ def cts_ticket_details_1_with_confirmation_and_outdated_tech_note(cts_ticket_det
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2518,7 +2518,7 @@ def cts_ticket_details_1_with_confirmation_and_outdated_tech_note(cts_ticket_det
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2537,7 +2537,7 @@ def cts_ticket_details_2_with_confirmation_and_outdated_tech_note(cts_ticket_det
     dispatch_number = 'IGZ_0002'
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
@@ -2551,7 +2551,7 @@ def cts_ticket_details_2_with_confirmation_and_outdated_tech_note(cts_ticket_det
     }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2559,7 +2559,7 @@ def cts_ticket_details_2_with_confirmation_and_outdated_tech_note(cts_ticket_det
     }
     confirmed_sms_ticket_note_3 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -2579,7 +2579,7 @@ def cts_ticket_details_1_with_confirmation_and_multiple_outdated_tech_note(
     dispatch_number = 'IGZ_0001'
     confirmed_ticket_note = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "The Field Engineer assigned to this dispatch has changed.\n"
                      "Reference: {ticket_id}\n\n"
                      "Field Engineer\n"
@@ -2594,7 +2594,7 @@ def cts_ticket_details_1_with_confirmation_and_multiple_outdated_tech_note(
     }
     confirmed_ticket_note_2 = {
         "noteId": 70805301,
-        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+        "noteValue": f"#*MetTel's IPA*# {dispatch_number}\n"
                      "The Field Engineer assigned to this dispatch has changed.\n"
                      "Reference: {ticket_id}\n\n"
                      "Field Engineer\n".format(ticket_id=cts_dispatch_confirmed.get('Ext_Ref_Num__c')),
@@ -2647,7 +2647,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72287442,
-              "noteValue": "#*Automation Engine*# DIS57079\n"
+              "noteValue": "#*MetTel's IPA*# DIS57079\n"
                            "Dispatch Management - Dispatch Requested\n\n"
                            "Please see the summary below.\n--\n"
                            "Dispatch Number:  "
@@ -2676,7 +2676,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72342652,
-              "noteValue": "#*Automation Engine*# DIS57135\n"
+              "noteValue": "#*MetTel's IPA*# DIS57135\n"
                            "Dispatch Management - Dispatch Requested\n\n"
                            "Please see the summary below.\n--\n"
                            "Dispatch Number:  "
@@ -2705,7 +2705,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72342989,
-              "noteValue": "#*Automation Engine*# DIS57135\n"
+              "noteValue": "#*MetTel's IPA*# DIS57135\n"
                            "Dispatch Management - Dispatch Confirmed\n"
                            "Dispatch scheduled for 2020-08-11 @ 9.00AM Eastern Time\n\n"
                            "Field Engineer\nJohn\n(954) 557-3956\n",
@@ -2718,7 +2718,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72342991,
-              "noteValue": "#*Automation Engine*# DIS57135\nDispatch confirmation SMS sent to +19546180440\n",
+              "noteValue": "#*MetTel's IPA*# DIS57135\nDispatch confirmation SMS sent to +19546180440\n",
               "serviceNumber": [
                 "16.RBCB.126453",
                 "20302019050959"
@@ -2728,7 +2728,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72365685,
-              "noteValue": "#*Automation Engine*# DIS57135\nDispatch confirmation SMS tech sent to +19545573956\n",
+              "noteValue": "#*MetTel's IPA*# DIS57135\nDispatch confirmation SMS tech sent to +19545573956\n",
               "serviceNumber": [
                 "16.RBCB.126453",
                 "20302019050959"
@@ -2738,7 +2738,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72365686,
-              "noteValue": "#*Automation Engine*# DIS57135\nDispatch 12h prior reminder SMS sent to +19546180440\n",
+              "noteValue": "#*MetTel's IPA*# DIS57135\nDispatch 12h prior reminder SMS sent to +19546180440\n",
               "serviceNumber": [
                 "16.RBCB.126453",
                 "20302019050959"
@@ -2748,7 +2748,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72365687,
-              "noteValue": "#*Automation Engine*# DIS57135\n"
+              "noteValue": "#*MetTel's IPA*# DIS57135\n"
                            "Dispatch 12h prior reminder tech SMS sent to +19545573956\n",
               "serviceNumber": [
                 "16.RBCB.126453",
@@ -2759,7 +2759,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72366659,
-              "noteValue": "#*Automation Engine*# DIS57135\nDispatch 2h prior reminder SMS sent to +19546180440\n",
+              "noteValue": "#*MetTel's IPA*# DIS57135\nDispatch 2h prior reminder SMS sent to +19546180440\n",
               "serviceNumber": [
                 "16.RBCB.126453",
                 "20302019050959"
@@ -2769,7 +2769,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72366660,
-              "noteValue": "#*Automation Engine*# DIS57135\n"
+              "noteValue": "#*MetTel's IPA*# DIS57135\n"
                            "Dispatch 2h prior reminder tech SMS sent to +19545573956\n",
               "serviceNumber": [
                 "16.RBCB.126453",
@@ -2780,7 +2780,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72369442,
-              "noteValue": "#*Automation Engine*# DIS57135\n"
+              "noteValue": "#*MetTel's IPA*# DIS57135\n"
                            "Dispatch Management - Field Engineer On Site\n"
                            "SMS notification sent to +19546180440\n\n"
                            "The field engineer, John has arrived.\n",
@@ -2793,7 +2793,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72666025,
-              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+              "noteValue": "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\n"
                            "Dispatch Management - Dispatch Requested\n\n"
                            "Please see the summary below.\n--\n"
                            "Dispatch Number:  [IGZTqSAzuvj2wehMXzqYxixxd|https://master.mettel-automation.net/"
@@ -2824,7 +2824,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72666100,
-              "noteValue": "#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\n"
+              "noteValue": "#*MetTel's IPA*# IGZWtpGZCJopULhsiUhbWjUYf\n"
                            "Dispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\n"
                            "Dispatch Number:  [IGZWtpGZCJopULhsiUhbWjUYf|https://master.mettel-automation.net/"
                            "dispatch_portal/dispatch/IGZWtpGZCJopULhsiUhbWjUYf] \n"
@@ -2855,7 +2855,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72667158,
-              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+              "noteValue": "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\n"
                            "Dispatch Management - Dispatch Confirmed\n"
                            "Dispatch scheduled for 2020-08-24T18:00:00.000+0000\n\n"
                            "Field Engineer\nGreen, Jeffrey\n267-670-1876\n",
@@ -2868,7 +2868,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72667159,
-              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+              "noteValue": "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\n"
                            "Dispatch confirmation SMS sent to +17542223314\n",
               "serviceNumber": [
                 "16.RBCB.126453",
@@ -2879,7 +2879,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72667160,
-              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+              "noteValue": "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\n"
                            "Dispatch confirmation SMS tech sent to +12676701876\n",
               "serviceNumber": [
                 "16.RBCB.126453",
@@ -2890,7 +2890,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
               "noteId": 72667273,
-              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+              "noteValue": "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\n"
                            "The Field Engineer assigned to this dispatch has changed.\n"
                            "Reference: 4746812\n\n"
                            "Field Engineer\nBerge, Keith\n651-302-4429\n",
@@ -2903,7 +2903,7 @@ def cts_ticket_notes_with_2_dispatches():
             },
             {
                 'noteId': 72667158,
-                'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\n'
+                'noteValue': "#*MetTel's IPA*# IGZWtpGZCJopULhsiUhbWjUYf\n"
                              'Dispatch Management - Dispatch Confirmed\n'
                              'Dispatch scheduled for 2020-08-24T18:00:00.000+0000\n\n'
                              'Field Engineer\nGreen, Jeffrey\n267-670-1876\n',
@@ -2919,16 +2919,16 @@ def cts_ticket_notes_with_2_dispatches():
 @pytest.fixture(scope='function')
 def cts_filtered_tickets_1():
     igz_id_1 = 'IGZTqSAzuvj2wehMXzqYxixxd'
-    return [{'noteId': 72666025, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZTqSAzuvj2wehMXzqYxixxd|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZTqSAzuvj2wehMXzqYxixxd] \nDate of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\nTime Zone (Local): Eastern Time\nSLA Level: Pre-planned\n\nLocation Owner/Name: Marine Max\nAddress: 20300 County Road 81 , Rogers, Florida, 55374\nOn-Site Contact: Manager on Duty\nPhone: 763-428-4126\n\nIssues Experienced:\nsite is still experiencing speed issues on the wireless. And sometimes service even bounces.  \nArrival Instructions: Please call into the bridge (872)-240-3311 Bridge 341801069 access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \ntuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \ninternet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\nRequester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T18:11:33.227-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667158, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667159, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch confirmation SMS sent to +17542223314\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:17.147-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667160, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch confirmation SMS tech sent to +12676701876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:18.037-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667273, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nThe Field Engineer assigned to this dispatch has changed.\nReference: 4746812\n\nField Engineer\nBerge, Keith\n651-302-4429\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:48:05.32-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
+    return [{'noteId': 72666025, 'noteValue': "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZTqSAzuvj2wehMXzqYxixxd|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZTqSAzuvj2wehMXzqYxixxd] \nDate of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\nTime Zone (Local): Eastern Time\nSLA Level: Pre-planned\n\nLocation Owner/Name: Marine Max\nAddress: 20300 County Road 81 , Rogers, Florida, 55374\nOn-Site Contact: Manager on Duty\nPhone: 763-428-4126\n\nIssues Experienced:\nsite is still experiencing speed issues on the wireless. And sometimes service even bounces.  \nArrival Instructions: Please call into the bridge (872)-240-3311 Bridge 341801069 access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \ntuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \ninternet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\nRequester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T18:11:33.227-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667158, 'noteValue': "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667159, 'noteValue': "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch confirmation SMS sent to +17542223314\n", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:17.147-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667160, 'noteValue': "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch confirmation SMS tech sent to +12676701876\n", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:18.037-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667273, 'noteValue': "#*MetTel's IPA*# IGZTqSAzuvj2wehMXzqYxixxd\nThe Field Engineer assigned to this dispatch has changed.\nReference: 4746812\n\nField Engineer\nBerge, Keith\n651-302-4429\n", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:48:05.32-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
 
 
 @pytest.fixture(scope='function')
 def cts_filtered_tickets_2():
     igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
-    return [{'noteId': 72666100, 'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZWtpGZCJopULhsiUhbWjUYf|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZWtpGZCJopULhsiUhbWjUYf] \nDate of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\nTime Zone (Local): Eastern Time\nSLA Level: Pre-planned\n\nLocation Owner/Name: Marine Max\nAddress: 750 Federal Hwy, Pompano Beach, Florida, 33062\nOn-Site Contact: Paul \nPhone: 754-222-3314\n\nIssues Experienced:\nsite is still experiencing speed issues on the wireless. And sometimes service even bounces.  \nArrival Instructions: call into the bridge (872)-240-3311 Bridge 341801069 access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \ntuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \ninternet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\nRequester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T18:15:38.997-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667158, 'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
+    return [{'noteId': 72666100, 'noteValue': "#*MetTel's IPA*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZWtpGZCJopULhsiUhbWjUYf|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZWtpGZCJopULhsiUhbWjUYf] \nDate of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\nTime Zone (Local): Eastern Time\nSLA Level: Pre-planned\n\nLocation Owner/Name: Marine Max\nAddress: 750 Federal Hwy, Pompano Beach, Florida, 33062\nOn-Site Contact: Paul \nPhone: 754-222-3314\n\nIssues Experienced:\nsite is still experiencing speed issues on the wireless. And sometimes service even bounces.  \nArrival Instructions: call into the bridge (872)-240-3311 Bridge 341801069 access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \ntuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \ninternet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\nRequester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T18:15:38.997-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667158, 'noteValue': "#*MetTel's IPA*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
 
 
 @pytest.fixture(scope='function')
 def cts_filtered_tickets_2_no_requested_note():
     igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
-    return [{'noteId': 72667158, 'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
+    return [{'noteId': 72667158, 'noteValue': "#*MetTel's IPA*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n", 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}]  # noqa

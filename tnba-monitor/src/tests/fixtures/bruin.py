@@ -112,7 +112,7 @@ def make_standard_tnba_note():
         prediction_name = prediction_name or constants.HOLMDEL_NOC_PREDICTION_NAME
 
         text = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'TNBA\n\n'
             f'The next best action for {serial_number} is: {prediction_name}.\n\n'
             'TNBA is based on AI model designed specifically for MetTel.'
@@ -126,7 +126,7 @@ def make_standard_tnba_note():
 def make_request_completed_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'TNBA\n\n'
             f'The next best action for {serial_number} is: Request Completed. Since it is a high confidence prediction '
             'the task has been automatically transitioned.\n\n'
@@ -141,7 +141,7 @@ def make_request_completed_tnba_note():
 def make_repair_completed_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'TNBA\n\n'
             f'The next best action for {serial_number} is: Repair Completed. Since it is a high confidence prediction '
             'the task has been automatically transitioned.\n\n'
@@ -156,7 +156,7 @@ def make_repair_completed_tnba_note():
 def make_reopen_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'Re-opening ticket.'
         )
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
@@ -168,7 +168,7 @@ def make_reopen_note():
 def make_triage_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'Triage (VeloCloud)'
         )
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)

@@ -12,8 +12,12 @@ from pytz import timezone
 from pytz import utc
 
 
-TEST_TYPE_REGEX_TEMPLATE = r'^#\*Automation Engine\*#\nService Affecting \(Ixia\).*Test Type: {test_type}'
-TEST_STATUS_REGEX_TEMPLATE = r'^#\*Automation Engine\*#\nService Affecting \(Ixia\).*Test Status: {test_status}'
+TEST_TYPE_REGEX_TEMPLATE = (
+    r"^#\*(Automation Engine|MetTel's IPA)\*#\nService Affecting \(Ixia\).*Test Type: {test_type}"
+)
+TEST_STATUS_REGEX_TEMPLATE = (
+    r"^#\*(Automation Engine|MetTel's IPA)\*#\nService Affecting \(Ixia\).*Test Status: {test_status}"
+)
 
 PASSED_NOTE_REGEX = re.compile(TEST_STATUS_REGEX_TEMPLATE.format(test_status='PASSED'), re.DOTALL)
 FAILED_NOTE_REGEX = re.compile(TEST_STATUS_REGEX_TEMPLATE.format(test_status='FAILED'), re.DOTALL)
@@ -484,7 +488,7 @@ class AffectingMonitor:
     @staticmethod
     def _build_passed_note(test_result: dict, device_cached_info: dict) -> str:
         return os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Service Affecting (Ixia)',
             '',
             f'Device Name: {test_result["summary"]["probeFrom"]}',
@@ -520,7 +524,7 @@ class AffectingMonitor:
         metrics_for_note = f'{os.linesep}{os.linesep}'.join(metrics_subnotes)
 
         return os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'Service Affecting (Ixia)',
             '',
             f'Device Name: {test_result["summary"]["probeFrom"]}',

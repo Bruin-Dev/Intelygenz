@@ -1,6 +1,6 @@
 from application.templates.cts.cts_tech_on_site import cts_get_tech_on_site_note
 
-expected_tech_on_site_note_note = """#*Automation Engine*# S-12345
+expected_tech_on_site_note_note = """#*MetTel's IPA*# S-12345
 Dispatch Management - Field Engineer On Site
 SMS notification sent to +12142288983
 

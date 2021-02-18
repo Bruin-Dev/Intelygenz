@@ -249,7 +249,7 @@ class BruinRepository:
         if len(note) < 1500:
             return await self.append_note_to_ticket(ticket_id, note, service_numbers=[service_number])
         else:
-            watermark = '#*Automation Engine*#\nTriage (Ixia)\n\n'
+            watermark = "#*MetTel's IPA*#\nTriage (Ixia)\n\n"
 
             # Let's remove the watermark to ease chunking the note
             note = note.replace(watermark, '')
@@ -297,7 +297,7 @@ class BruinRepository:
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             f'Auto-resolving detail for serial: {serial_number}',
             f'Real service status is UP.',
             f'Node to node status is UP.',
@@ -348,7 +348,7 @@ class BruinRepository:
     async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, affecting_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         reopening_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'Re-opening detail for serial: {service_number}.',
             f'{affecting_causes}',
             f'TimeStamp: {current_datetime_tz_aware}',

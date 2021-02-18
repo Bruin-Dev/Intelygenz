@@ -1017,7 +1017,7 @@ class TestServiceAffectingMonitor:
             device_cached_info=device_cached_info_1,
         )
         expected = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'Service Affecting (Ixia)\n'
             '\n'
             'Device Name: Vi_Pi_DRI test\n'
@@ -1043,7 +1043,7 @@ class TestServiceAffectingMonitor:
             device_cached_info=device_cached_info_1,
         )
         expected = (
-            '#*Automation Engine*#\n'
+            "#*MetTel's IPA*#\n"
             'Service Affecting (Ixia)\n'
             '\n'
             'Device Name: Vi_Pi_DRI test\n'

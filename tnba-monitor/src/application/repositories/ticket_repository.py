@@ -10,7 +10,7 @@ from dateutil.parser import parse
 from pytz import utc
 
 
-TNBA_NOTE_REGEX = re.compile(r'^#\*Automation Engine\*#\nTNBA')
+TNBA_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTNBA")
 
 
 class TicketRepository:
@@ -61,7 +61,7 @@ class TicketRepository:
     @staticmethod
     def build_tnba_note_from_prediction(prediction: dict, serial_number: str) -> str:
         note_lines = [
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'TNBA',
             '',
             f'The next best action for {serial_number} is: {prediction["name"]}.',
@@ -74,7 +74,7 @@ class TicketRepository:
     def build_tnba_note_from_request_or_repair_completed_prediction(prediction: dict, serial_number: str) -> str:
         pred_name = prediction["name"]
         note_lines = [
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             'TNBA',
             '',
             f'The next best action for {serial_number} is: {pred_name}. Since it is a high confidence prediction',

@@ -399,7 +399,7 @@ class BruinRepository:
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
-            '#*Automation Engine*#',
+            "#*MetTel's IPA*#",
             f'Auto-resolving detail for serial: {serial_number}',
             f'TimeStamp: {current_datetime_tz_aware}',
         ])
@@ -409,7 +409,7 @@ class BruinRepository:
     async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, outage_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         reopening_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'Re-opening ticket.',
             f'{outage_causes}',
             f'TimeStamp: {current_datetime_tz_aware}',
@@ -478,7 +478,7 @@ class BruinRepository:
                         if append_note_response['status'] not in range(200, 300):
                             return None
                         counter = counter + 1
-                        accumulator = "#*Automation Engine*#\n" \
+                        accumulator = "#*MetTel's IPA*#\n" \
                                       "Triage (VeloCloud)\n"
             return 200
 
@@ -486,7 +486,7 @@ class BruinRepository:
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
 
         digi_reboot_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'Offline DiGi interface identified for serial: {serial_number}',
             f'Interface: {interface}',
             f'Automatic reboot attempt started.',
@@ -497,7 +497,7 @@ class BruinRepository:
     async def append_task_result_change_note(self, ticket_id, task_result):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         task_result_note = os.linesep.join([
-            f'#*Automation Engine*#',
+            f"#*MetTel's IPA*#",
             f'DiGi reboot failed',
             f'Moving task to: {task_result}',
             f'TimeStamp: {current_datetime_tz_aware}'

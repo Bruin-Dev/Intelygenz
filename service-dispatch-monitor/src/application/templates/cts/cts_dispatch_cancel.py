@@ -1,4 +1,4 @@
-CTS_DISPATCH_CANCEL = """#*Automation Engine*# {dispatch_number}
+CTS_DISPATCH_CANCEL = """#*MetTel's IPA*# {dispatch_number}
 Dispatch Management - Dispatch Cancelled
 Dispatch for {date_of_dispatch} has been cancelled.
 """
