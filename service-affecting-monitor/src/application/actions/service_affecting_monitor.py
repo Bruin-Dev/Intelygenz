@@ -499,7 +499,7 @@ class ServiceAffectingMonitor:
 
     @staticmethod
     def _is_rep_services_client_id(client_id: int):
-        return client_id == 83109
+        return client_id == 83109 or client_id == 85940
 
     def _compose_ticket_dict(self, link_info, input, output, trouble, threshold):
         edge_overview = OrderedDict()
