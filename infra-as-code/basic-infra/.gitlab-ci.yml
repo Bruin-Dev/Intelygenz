@@ -1,0 +1,29 @@
+# ===========================================================
+# Linter validation jobs for infra-as-code/basic-infra module
+# ============================================================
+terraform-validate-basic-infra:
+  stage: validation
+  extends: .terraform_basic_template
+  script:
+    - terraform init infra-as-code/basic-infra
+    - terraform validate infra-as-code/basic-infra
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/basic-infra/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+
+# ==============================================================
+# Terraform deployment jobs for infra-as-code/basic-infra module
+# ==============================================================
+basic-infra:
+  stage: basic_infra
+  extends: .terraform_basic_template
+  script:
+    - terraform init infra-as-code/basic-infra
+    - terraform apply -auto-approve infra-as-code/basic-infra
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+

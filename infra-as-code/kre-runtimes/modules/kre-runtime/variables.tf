@@ -15,7 +15,12 @@ variable "CURRENT_ENVIRONMENT" {
   type = string
 }
 
-variable "AWS_SECRET_ACCESS_KEY" {
+variable "HOSTED_ZONE_DOMAIN_NAME" {
+  default = "mettel-automation.net"
+  description = "Name of the commmon domain name used in the project"
+}
+
+variable "RUNTIME_NAME" {
   default     = ""
-  description = "AWS Secret Access Key credentials"
+  description = "Name of the runtime to create in KRE"
 }

@@ -92,6 +92,9 @@ You will need to add/modify files in the folders of the
 Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
 specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
 
+**It's necessary run the `basic-infra` job the first time a new microservice is created in the project**
+> This has been done because ECR repositories are global resources and are stored in the same tfstate file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added
+
 ### automation-engine
 In the automation-engine root folder it is necessary update the following files:
 - [.gitlab-ci.yml](.gitlab-ci.yml)
@@ -527,7 +530,7 @@ The following steps must be followed to set up the configuration to access any o
 
    ```
    [profile devops-role-kre]
-   role_arn = arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-xoan.mallon.devops
+   role_arn = arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias
    source_profile = mettel-automation
    region=us-east-1
    output=json
@@ -536,7 +539,7 @@ The following steps must be followed to set up the configuration to access any o
 3. Add to the Kubernetes kubeconfig file the EKS cluster to which the user wants to connect. This can be done through the following `awscli` command:
 
     ```sh
-    $ aws eks update-kubeconfig --name <kre_eks_cluster_name> -p <aws_role_profile_name>
+    $ aws eks update-kubeconfig --name <kre_eks_cluster_name> --profile devops-role-kre
     ```
 
    > The name of the EKS cluster for production is `mettel-automation-kre` and for development is `mettel-automation-kre-dev`.

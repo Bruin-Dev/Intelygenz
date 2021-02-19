@@ -90,6 +90,21 @@ In this stage there is also a job that must be executed manually if necessary, t
 
 In this stage is also checked whether there are enough free resources in ECS to carry out the deployment with success or not.
 
+**It's necessary run the `basic-infra` job the first time a new microservice is created in the project**
+> This has been done because ECR repositories are global resources and are stored in the same `tfstate` file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added.
+
+## Basic_infra_kre steps
+
+This stage covers the checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
+
+## Deploy_kre_runtimes steps
+
+In this stage the KRE runtimes will be deployed in the corresponding environment, creating the necessary infrastructure and resources:
+
+* A Hosted Zone in Route53 for the runtime in the specified environment
+
+* The kre helm chart with the necessary values for the environment
+
 ## Build steps
 
 This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It's typical to build the docker images and push to the repository in this step.

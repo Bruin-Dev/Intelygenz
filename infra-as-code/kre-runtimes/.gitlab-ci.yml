@@ -1,0 +1,158 @@
+# =============================================================
+# Linter validation jobs for infra-as-code/kre-runtimes module
+# =============================================================
+validate-runtime-tnba-dev:
+  stage: validation
+  extends: .kre_template_validate_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    KRE_RUNTIME_NAME: kre-tnba
+    CURRENT_ENVIRONMENT: dev
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+
+validate-runtime-email-tagger-dev:
+  stage: validation
+  extends: .kre_template_validate_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-email-tagger
+    KRE_RUNTIME_NAME: kre-email-tagger
+    CURRENT_ENVIRONMENT: dev
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/kre-runtimes/runtimes/kre-email-tagger/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+
+# ================================================================
+# Terraform deployment jobs for infra-as-code/kre-runtimes module
+# ================================================================
+deploy-runtime-tnba-dev:
+  stage: deploy_kre_runtimes
+  extends: .kre_template_deploy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    KRE_RUNTIME_NAME: kre-tnba
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    BASE_DOMAIN_NAME: "kre-tnba-dev.mettel-automation.net"
+    KRE_HELM_CHART_V: ${KRE_TNBA_HELM_CHART_V_DEV}
+    CURRENT_ENVIRONMENT: dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+deploy-runtime-tnba-production:
+  stage: deploy_kre_runtimes
+  extends: .kre_template_deploy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    KRE_RUNTIME_NAME: kre-tnba
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    BASE_DOMAIN_NAME: "kre-tnba.mettel-automation.net"
+    KRE_HELM_CHART_V: ${KRE_TNBA_HELM_CHART_V_PRO}
+    CURRENT_ENVIRONMENT: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
+deploy-runtime-email-tagger-dev:
+  stage: deploy_kre_runtimes
+  extends: .kre_template_deploy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-email-tagger
+    KRE_RUNTIME_NAME: kre-email-tagger
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    BASE_DOMAIN_NAME: "kre-email-tagger-dev.mettel-automation.net"
+    KRE_HELM_CHART_V: ${KRE_EMAIL_TAGGER_HELM_CHART_V_DEV}
+    CURRENT_ENVIRONMENT: dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+deploy-runtime-email-tagger-production:
+  stage: deploy_kre_runtimes
+  extends: .kre_template_deploy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-email-tagger
+    KRE_RUNTIME_NAME: kre-email-tagger
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    BASE_DOMAIN_NAME: "kre-email-tagger.mettel-automation.net"
+    KRE_HELM_CHART_V: ${KRE_EMAIL_TAGGER_HELM_CHART_V_PRO}
+    CURRENT_ENVIRONMENT: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
+# ================================================================
+# Terraform destroy jobs for infra-as-code/kre-runtimes module
+# ================================================================
+destroy-runtime-tnba-dev:
+  stage: destroy
+  extends: .kre_template_destroy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    KRE_RUNTIME_NAME: kre-tnba
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    CURRENT_ENVIRONMENT: dev
+    HOSTED_ZONE_NAME: "kre-tnba-dev.mettel-automation.net."
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+destroy-runtime-tnba-production:
+  stage: destroy
+  extends: .kre_template_destroy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    KRE_RUNTIME_NAME: kre-tnba
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    CURRENT_ENVIRONMENT: production
+    HOSTED_ZONE_NAME: "kre-tnba.mettel-automation.net."
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
+destroy-runtime-email-tagger-dev:
+  stage: destroy
+  extends: .kre_template_destroy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-email-tagger
+    KRE_RUNTIME_NAME: kre-email-tagger
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    CURRENT_ENVIRONMENT: dev
+    HOSTED_ZONE_NAME: "kre-email-tagger-dev.mettel-automation.net."
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+destroy-runtime-email-tagger-production:
+  stage: destroy
+  extends: .kre_template_destroy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-email-tagger
+    KRE_RUNTIME_NAME: kre-email-tagger
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    CURRENT_ENVIRONMENT: production
+    HOSTED_ZONE_NAME: "kre-email-tagger.mettel-automation.net"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true

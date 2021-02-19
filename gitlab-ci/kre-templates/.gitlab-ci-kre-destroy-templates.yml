@@ -1,0 +1,69 @@
+.kre_template_destroy_basic_infra: &kre_template_destroy_basic_infra
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DELETE INSTALLED HELM CHARTS
+    - >
+      for i in $(helm list -aA | tail -n+2 | awk '{print $1 "|" $2}'); do
+        (
+          helm_release_name=$(echo "${i}" | cut -d '|' -f1)
+          helm_release_namespace=$(echo "${i}" | cut -d '|' -f2)
+          echo "It's going to delete helm release ${helm_release_name} in namespace ${helm_release_namespace}"
+          helm -n "${helm_release_namespace}" uninstall "${helm_release_name}"
+        )
+      done
+    # DELETE AWS RESOURCES WITH TERRAFORM
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | sort -r | cut -d " " -f10); do
+        (
+          echo "The current Workdir is $i"
+          cd "${i}" || exit
+          terraform init -backend=true -get=true -input=false
+          if [[ "$i" != "1-eks-roles/" && "$i" != "3-smtp/" ]]; then
+            terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+            terraform refresh
+            terraform destroy -auto-approve
+          fi
+          cd ..
+        )
+      done
+  tags:
+    - kubernetes
+
+.kre_template_destroy_runtime: &kre_template_destroy_runtime
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DELETE HELM RELEASE FOR RUNTIME AND ASSOCIATED RESOURCES
+    - helm -n ${KRE_RUNTIME_NAME} uninstall ${KRE_RUNTIME_NAME}
+    - >
+      for i in $(kubectl -n kre-tnba get pvc -o=jsonpath='{.items[*].metadata.name}'); do
+        (
+          echo "It's going to delete pvc ${i} in namespace ${KRE_RUNTIME_NAME}"
+          kubectl -n ${KRE_RUNTIME_NAME} delete pvc ${i} || true
+        )
+      done
+    - kubectl delete ns ${KRE_RUNTIME_NAME}
+    - python3 ci-utils/route53/delete_hosted_zones.py -n "${HOSTED_ZONE_NAME}"
+    # assign terraform variables
+    - export TF_VAR_CURRENT_ENVIRONMENT=${CURRENT_ENVIRONMENT}
+    - export TF_VAR_RUNTIME_NAME=${KRE_RUNTIME_NAME}
+    # DELETE AWS RESOURCES WITH TERRAFORM
+    - cd ${MODULE} || exit 1
+    - terraform init -backend=true -get=true -input=false
+    - terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+    - terraform refresh
+    - terraform destroy -auto-approve
+  tags:
+    - kubernetes

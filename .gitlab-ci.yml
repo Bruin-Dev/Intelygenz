@@ -2,6 +2,8 @@ stages:
   - validation
   - unit_test
   - basic_infra
+  - basic_infra_kre
+  - deploy_kre_runtimes
   - build
   - deploy
   - destroy
@@ -57,6 +59,10 @@ include:
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-validate-templates.yml'
+  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-basic-templates.yml'
+  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-deploy-templates.yml'
+  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-destroy-templates.yml'
+  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-validate-templates.yml'
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
   - local: 'cts-bridge/.gitlab-ci.yml'
@@ -69,7 +75,11 @@ include:
   - local: 'hawkeye-bridge/.gitlab-ci.yml'
   - local: 'hawkeye-customer-cache/.gitlab-ci.yml'
   - local: 'hawkeye-outage-monitor/.gitlab-ci.yml'
-  - local: 'infra-as-code/.gitlab-ci.yml'
+  - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
+  - local: 'infra-as-code/dev/.gitlab-ci.yml'
+  - local: 'infra-as-code/kre/.gitlab-ci.yml'
+  - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
+  - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'lit-bridge/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'

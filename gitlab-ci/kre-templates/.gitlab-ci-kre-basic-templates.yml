@@ -1,14 +1,11 @@
-#
-# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
-#
-
-.terraform_basic_template: &terraform_basic_template
+.terraform_basic_template_kre: &kre_basic_template_kre
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   before_script:
+    - apk --upgrade --no-cache add bash gettext
     - terraform init -backend=true -get=true -input=false
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/

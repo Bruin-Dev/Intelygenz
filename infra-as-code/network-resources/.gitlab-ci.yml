@@ -1,0 +1,48 @@
+# ===============================================
+# Linter validation jobs for infra-as-code module
+# ===============================================
+
+terraform-validate-network-resources:
+  stage: validation
+  extends: .terraform_validate_template
+  script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
+    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
+    - terraform init infra-as-code/network-resources
+    - terraform validate infra-as-code/network-resources
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/network-resources/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+
+# ==================================================
+# Terraform deployment jobs for infra-as-code module
+# ==================================================
+
+network-resources-infra-branches:
+  stage: basic_infra
+  extends: .terraform_template_deploy_network-resources
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - mkdir -p output
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+network-resources-infra-master:
+  stage: basic_infra
+  extends: .terraform_template_deploy_network-resources
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+

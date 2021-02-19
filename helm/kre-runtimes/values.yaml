@@ -1,0 +1,52 @@
+mongodb:
+  storage:
+    className: hostpath
+  persistentVolume:
+    storageClass: hostpath
+
+prometheus-operator:
+  enabled: false
+
+adminApi:
+  storage:
+    class: hostpath
+  tls:
+    enabled: true
+
+nats_streaming:
+  storage:
+    className: hostpath
+
+chronograf:
+  persistence:
+    storageClass: "hostpath"
+
+influxdb:
+  persistence:
+    storageClass: "hostpath"
+
+config:
+  auth:
+    verificationCodeDurationInMinutes: 5
+    jwtSignSecret: int_jwt_secret
+    secureCookie: true
+  admin:
+    # IMPORTANT: userEmail is used as the system admin user.
+    # Use this for first login and create new users.
+    userEmail: "mettel@intelygenz.com"
+
+adminUI:
+  tls:
+    enabled: true
+
+certManager:
+  enabled: true
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: mettel@intelygenz.com
+  dns01:
+    route53:
+      region: "us-east-1"
+
+entrypoint:
+  tls: true

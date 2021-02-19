@@ -16,5 +16,5 @@ module "ses_domain" {
 
   ses_rule_set = aws_ses_receipt_rule_set.main.rule_set_name
 
-  version = "3.0.0"
+  version = "3.2.0"
 }

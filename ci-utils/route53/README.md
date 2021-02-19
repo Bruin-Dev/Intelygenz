@@ -6,6 +6,11 @@ A number of scripts developed in *Python* for working with [Route53](https://aws
 - [nginx_ingress_route53_util](#nginx_ingress_route53_util-cli)
   - [Description](#description)
   - [Usage](#usage)
+  - [Execution example](#execution-example)
+- [delete_hosted_zones](#delete_hosted_zones)
+  - [Description](#description-1)
+  - [Usage](#usage-1)
+  - [Execution example](#execution-example-1)
 
 ## nginx_ingress_route53_util cli
 
@@ -78,4 +83,44 @@ The following is an example of the execution of this cli:
 
 ```sh
 $ python3 nginx_ingress_route53_util.py -a "*.kre-dev.mettel-automation.net." -n "kre-dev.mettel-automation.net." -u True
+```
+
+## delete_hosted_zones
+
+### Description
+This [cli](./delete_hosted_zones.py) has been developed in python for delete all records with different type of NS and SOA in a specific hosted zone of Route53
+
+### Usage
+
+In order to use this [script](./delete_hosted_zones.py) it is necessary to perform the following steps previously:
+
+- Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` in the following way:
+
+    ```sh
+    $ export AWS_ACCESS_KEY_ID=<access_key>
+    $ export AWS_SECRET_ACCESS_KEY=<secret_key>
+    $ export AWS_DEFAULT_REGION=<aws_region>
+    ```
+    > The default AWS region used in the project is us-east-1
+
+- Install the python packages required by the cli, these are specified in the `requirements.txt` file and are installed through the following command:
+
+  ```sh
+  $ pip3 install -r requirements.txt
+  ```
+
+- Once the previous steps has been followed, it is possible to use the cli in the following way:
+
+  ```sh
+  $ python3 nginx_ingress_route53_util.py -a/--record_alias_name <record_alias_name> -n/--hosted_zone_name <hosted_zone_name> -u/--update <update_value> -d/--delete <delete_value>
+  ```
+
+  - `-n/--hosted_zone_name`: Parameter used to indicate the name of the hosted zone in Route53 where the alias of the ELB will be created
+
+### Execution example
+
+The following is an example of the execution of this cli:
+
+```sh
+$ python3 delete_hosted_zones.py -n "kre-dev.mettel-automation.net."
 ```

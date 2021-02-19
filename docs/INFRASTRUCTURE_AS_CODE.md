@@ -36,6 +36,9 @@ infra-as-code/
   └── 0-create-bucket       # bucket to store EKS information
   └── 1-eks-roles           # IAM roles infrastructure for EKS cluster
   └── 2-smtp                # SES infrastructure folder
+└── kre-runtimes            # kre runtimes infrastructure
+  └── modules               # custom terraform modules folders used for create KRE infrastructure
+  └── runtimes              # KRE runtimes folders
 └── network-resources       # network resources infrastructure in AWS
 ````
 
@@ -95,7 +98,13 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
     - `3-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it.
 
-5. `network-resources`: there are the necessary terraform files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
+5. `kre-runtimes`: there are the necessary terraform files for create the infrastructure needed by a KRE runtime:
+    - `modules`: Contains the terraform code for custom modules created for provision a KRE runtimes. It will create the following for each KRE runtime:
+        - A Route53 Hosted Zone in `mettel-automation.net` domain.
+
+    - `runtimes`: Contains the terraform code files for deploy KRE runtimes used the custom module located in `modules` folder.
+
+6. `network-resources`: there are the necessary terraform files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 
     * [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
 

@@ -1,0 +1,99 @@
+# ====================================================
+# Linter validation jobs for infra-as-code/kre module
+# ====================================================
+terraform-validate-basic-infra-kre:
+  stage: validation
+  extends: .kre_template_validate_basic_infra
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+  before_script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/kre/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+
+# =======================================================
+# Terraform deployment jobs for infra-as-code/kre module
+# =======================================================
+basic-infra-kre-dev:
+  stage: basic_infra_kre
+  extends: .kre_template_deploy_basic_infra
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_DEV}
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
+    EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_DEV}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_DEV}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
+    IAM_TO_EKS_ROLES: developer, devops
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+basic-infra-kre-production:
+  stage: basic_infra_kre
+  extends: .kre_template_deploy_basic_infra
+  variables:
+    MODULE: infra-as-code/kre
+    MODULE_EKS: 2-create-eks-cluster
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_PRO}
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_PRO}
+    EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_PRO}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PRO}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_PRO}
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PRO}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PRO}
+    IAM_TO_EKS_ROLES: developer, devops
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
+# ===================================================
+# Terraform destroy jobs for infra-as-code/kre module
+# ===================================================
+
+destroy-basic-infra-kre-dev:
+  stage: destroy
+  extends: .kre_template_destroy_basic_infra
+  variables:
+    MODULE: infra-as-code/kre
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
+destroy-basic-infra-kre-production:
+  stage: destroy
+  extends: .kre_template_destroy_basic_infra
+  variables:
+    MODULE: infra-as-code/kre
+    EKS_CLUSTER_NAME: mettel-automation-kre
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true

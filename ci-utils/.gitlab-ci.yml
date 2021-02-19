@@ -10,3 +10,22 @@ ci-utils-linter:
         - ci-utils/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
+
+# ==========================================
+# utils jobs used for deployment
+# ==========================================
+check-ecs-resources-branches:
+  extends: .check_ecs_resources_template
+  before_script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+
+check-ecs-resources-master:
+  extends: .check_ecs_resources_template
+  before_script:
+    - export ENVIRONMENT_SLUG=master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"

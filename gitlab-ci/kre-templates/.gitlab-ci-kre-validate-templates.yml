@@ -1,0 +1,45 @@
+.kre_template_validate_basic_infra: &kre_template_validate_basic_infra
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+        echo "Terraform directory basic code: $i"
+      done
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+        echo "The current Workdir is $i"
+        terraform init -backend=false $i
+        terraform validate
+      done
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+  tags:
+    - kubernetes
+
+.kre_template_validate_runtime: &kre_template_validate_runtime
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # assign terraform variables
+    - export TF_VAR_CURRENT_ENVIRONMENT=${CURRENT_ENVIRONMENT}
+    - export TF_VAR_RUNTIME_NAME=${KRE_RUNTIME_NAME}
+    - cd ${MODULE} || exit 1
+    - terraform init -backend=true -get=true -input=false
+    - terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+    - terraform validate
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+  tags:
+    - kubernetes
