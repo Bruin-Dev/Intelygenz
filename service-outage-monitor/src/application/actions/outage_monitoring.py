@@ -630,22 +630,36 @@ class OutageMonitor:
                         f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"]/60} or more mins ago.'
                     )
                     return
-                task_result = "Wireless Repair Intervention Needed"
-                task_result_note = self._find_note(relevant_notes, 'Wireless Repair Intervention Needed')
-
-                if task_result_note is not None:
-                    self._logger.info(f'Task results has already been changed to "{task_result}"')
-                    return
 
                 digi_note_interface_name = self._digi_repository.get_interface_name_from_digi_note(digi_note)
 
                 if digi_note_interface_name == link_status['interface']:
+                    task_result = "Wireless Repair Intervention Needed"
+                    task_result_note = self._find_note(relevant_notes, 'Wireless Repair Intervention Needed')
+
+                    if task_result_note is not None:
+                        self._logger.info(f'Task results has already been changed to "{task_result}"')
+                        return
                     self._logger.info(f'DiGi reboot attempt failed. Forwarding ticket {ticket_id} to Wireless team')
                     change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
                         serial_number, ticket_id, ticket_detail_id, task_result)
                     if change_detail_work_queue_response['status'] in range(200, 300):
                         await self._bruin_repository.append_task_result_change_note(ticket_id, task_result)
                         slack_message = f'Forwarding ticket {ticket_id} to Wireless team'
+                        await self._notifications_repository.send_slack_message(slack_message)
+                        return
+                else:
+                    reboot = await self._digi_repository.reboot_link(serial_number, ticket_id, digi_link['logical_id'])
+                    if reboot['status'] in range(200, 300):
+                        self._logger.info(
+                            f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
+                            f'in edge {edge_identifier}')
+                        await self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
+                                                                             digi_link['interface_name'])
+                        slack_message = (
+                            f'DiGi reboot started for faulty edge {edge_identifier}. Ticket '
+                            f'details at https://app.bruin.com/t/{ticket_id}.'
+                        )
                         await self._notifications_repository.send_slack_message(slack_message)
                         return
 

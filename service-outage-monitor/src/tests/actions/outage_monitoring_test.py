@@ -7364,7 +7364,7 @@ class TestServiceOutageMonitor:
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_repository.is_faulty_link = Mock(return_value=True)
+        outage_repository.is_faulty_link = Mock(side_effect=[False, True])
 
         digi_repository = Mock()
         digi_repository.get_digi_links = Mock(return_value=digi_list)
@@ -7383,14 +7383,391 @@ class TestServiceOutageMonitor:
                                                                new_links_grouped_by_edge_1, edge_1_full_id)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
-        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1), call(ticket_note_1)])
+        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
 
-        bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id), call(ticket_id)])
+        bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(edge_1_serial, ticket_id,
                                                                            outage_ticket_detail_1['detailID'],
                                                                            task_result)
         bruin_repository.append_task_result_change_note.assert_awaited_once_with(ticket_id, task_result)
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+
+    @pytest.mark.asyncio
+    async def check_for_failed_digi_reboot_wrong_interface_test(self):
+        serial_number_1 = 'VC1234567'
+        serial_number_2 = 'VC9999999'
+        logical_id_list = [{'interface_name': 'test', 'logical_id': '123'},
+                           {'interface_name': 'GE1', 'logical_id': '00:27:04:123'},
+                           {'interface_name': 'GE3', 'logical_id': '00:27:04:122'},
+                           {'interface_name': 'GE2', 'logical_id': '00:04:2d:123'}]
+        digi_list = [logical_id_list[3], logical_id_list[1], logical_id_list[2]]
+
+        ticket_id = 123
+        velocloud_host = 'mettel.velocloud.net'
+
+        edge_1_serial = 'VC1234567'
+
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+        edge_identifier = EdgeIdentifier(**edge_1_full_id)
+
+        new_links_grouped_by_edge_1 = {
+            'host': velocloud_host,
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': edge_1_enterprise_id,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'links': [
+                {
+                    'displayName': '70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'displayName': '70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE3',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                }
+            ]
+        }
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number_1,
+            "detailStatus": "I",
+        }
+
+        current_datetime = datetime.now(utc)
+        ticket_time_stamp = current_datetime - timedelta(minutes=30)
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": f"#*Automation Engine*#\n"
+                         f"Offline DiGi interface identified for serial: {serial_number_1}\n"
+                         f'Interface: GE1\n'
+                         f'Automatic reboot attempt started.\n'
+                         f"TimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+            'createdDate': str(ticket_time_stamp)
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_3 = {
+            "noteId": 68246616,
+            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_4 = {
+            "noteId": 68246617,
+            "noteValue": "Some note",
+            "serviceNumber": [
+                serial_number_2,
+            ],
+        }
+        ticket_note_5 = {
+            "noteId": 68246618,
+            "noteValue": "Some other note",
+            "serviceNumber": [
+                serial_number_1,
+                serial_number_2,
+            ],
+        }
+        outage_ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
+            ticket_note_4,
+            ticket_note_5,
+        ]
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+                'ticketNotes': outage_ticket_notes,
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+        success_reboot = {
+                            'body': 'Success',
+                            'status': 200
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        event_bus = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+        slack_message = f'DiGi reboot started for faulty edge {edge_identifier}. Ticket details ' \
+                        f'at https://app.bruin.com/t/{ticket_id}.'
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_task_result_change_note = CoroutineMock()
+        bruin_repository.append_digi_reboot_note = CoroutineMock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.is_faulty_link = Mock(side_effect=[True, False])
+
+        digi_repository = Mock()
+        digi_repository.reboot_link = CoroutineMock(return_value=success_reboot)
+        digi_repository.get_digi_links = Mock(return_value=digi_list)
+        digi_repository.get_interface_name_from_digi_note = Mock(return_value='GE3')
+
+        task_result = "Wireless Repair Intervention Needed"
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
+                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+
+        digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
+        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
+
+        bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_task_result_change_note.assert_not_awaited()
+        digi_repository.reboot_link.assert_awaited_once(serial_number_1, ticket_id, logical_id_list[1]['logical_id'])
+        bruin_repository.append_digi_reboot_note.assert_awaited_once(ticket_id, serial_number_1,
+                                                                     logical_id_list[1]['interface_name'])
+        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+
+    @pytest.mark.asyncio
+    async def check_for_failed_digi_reboot_wrong_interface_failed_reboot_request_test(self):
+        serial_number_1 = 'VC1234567'
+        serial_number_2 = 'VC9999999'
+        logical_id_list = [{'interface_name': 'test', 'logical_id': '123'},
+                           {'interface_name': 'GE1', 'logical_id': '00:27:04:123'},
+                           {'interface_name': 'GE3', 'logical_id': '00:27:04:122'},
+                           {'interface_name': 'GE2', 'logical_id': '00:04:2d:123'}]
+        digi_list = [logical_id_list[3], logical_id_list[1], logical_id_list[2]]
+
+        ticket_id = 123
+        velocloud_host = 'mettel.velocloud.net'
+
+        edge_1_serial = 'VC1234567'
+
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+        edge_identifier = EdgeIdentifier(**edge_1_full_id)
+
+        new_links_grouped_by_edge_1 = {
+            'host': velocloud_host,
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': edge_1_enterprise_id,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'links': [
+                {
+                    'displayName': '70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'displayName': '70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE3',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                }
+            ]
+        }
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number_1,
+            "detailStatus": "I",
+        }
+
+        current_datetime = datetime.now(utc)
+        ticket_time_stamp = current_datetime - timedelta(minutes=30)
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": f"#*Automation Engine*#\n"
+                         f"Offline DiGi interface identified for serial: {serial_number_1}\n"
+                         f'Interface: GE1\n'
+                         f'Automatic reboot attempt started.\n'
+                         f"TimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+            'createdDate': str(ticket_time_stamp)
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_3 = {
+            "noteId": 68246616,
+            "noteValue": "#*Automation Engine*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_4 = {
+            "noteId": 68246617,
+            "noteValue": "Some note",
+            "serviceNumber": [
+                serial_number_2,
+            ],
+        }
+        ticket_note_5 = {
+            "noteId": 68246618,
+            "noteValue": "Some other note",
+            "serviceNumber": [
+                serial_number_1,
+                serial_number_2,
+            ],
+        }
+        outage_ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
+            ticket_note_4,
+            ticket_note_5,
+        ]
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+                'ticketNotes': outage_ticket_notes,
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+        failed_reboot = {
+            'body': 'Failed',
+            'status': 400
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        event_bus = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+        slack_message = f'DiGi reboot started for faulty edge {edge_identifier}. Ticket details ' \
+                        f'at https://app.bruin.com/t/{ticket_id}.'
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_task_result_change_note = CoroutineMock()
+        bruin_repository.append_digi_reboot_note = CoroutineMock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.is_faulty_link = Mock(side_effect=[True, False])
+
+        digi_repository = Mock()
+        digi_repository.reboot_link = CoroutineMock(return_value=failed_reboot)
+        digi_repository.get_digi_links = Mock(return_value=digi_list)
+        digi_repository.get_interface_name_from_digi_note = Mock(return_value='GE3')
+
+        task_result = "Wireless Repair Intervention Needed"
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
+                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+
+        digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
+        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
+
+        bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_task_result_change_note.assert_not_awaited()
+        digi_repository.reboot_link.assert_awaited_once(serial_number_1, ticket_id, logical_id_list[1]['logical_id'])
+        bruin_repository.append_digi_reboot_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def check_for_failed_digi_reboot_edge_outage_test(self):
@@ -7722,7 +8099,7 @@ class TestServiceOutageMonitor:
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_repository.is_faulty_link = Mock(return_value=True)
+        outage_repository.is_faulty_link = Mock(side_effect=[False, True])
 
         digi_repository = Mock()
         digi_repository.get_digi_links = Mock(return_value=digi_list)
@@ -7741,9 +8118,9 @@ class TestServiceOutageMonitor:
                                                                new_links_grouped_by_edge_1, edge_1_full_id)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
-        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1), call(ticket_note_1)])
+        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
 
-        bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id), call(ticket_id)])
+        bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(edge_1_serial, ticket_id,
                                                                            outage_ticket_detail_1['detailID'],
                                                                            task_result)
@@ -8400,7 +8777,7 @@ class TestServiceOutageMonitor:
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_repository.is_faulty_link = Mock(return_value=True)
+        outage_repository.is_faulty_link = Mock(side_effect=[False, True])
 
         digi_repository = Mock()
         digi_repository.get_digi_links = Mock(return_value=digi_list)
@@ -8419,7 +8796,7 @@ class TestServiceOutageMonitor:
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
 
         bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
-        digi_repository.get_interface_name_from_digi_note.assert_not_called()
+        digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         bruin_repository.append_task_result_change_note.assert_not_awaited()
 
