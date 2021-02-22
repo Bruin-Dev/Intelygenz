@@ -120,6 +120,7 @@ class OutageMonitor:
 
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, links_grouped_by_edge)
+        self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
 
         outage_edges = [edge for edge in edges_full_info if self._outage_repository.is_there_an_outage(edge['status'])]
         healthy_edges = [edge for edge in edges_full_info if edge not in outage_edges]
@@ -143,8 +144,6 @@ class OutageMonitor:
 
         stop = perf_counter()
         self._logger.info(f"Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes")
-
-        self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
 
     def _schedule_recheck_job_for_edges(self, edges: list):
         self._logger.info(f'Scheduling recheck job for {len(edges)} edges in outage state...')
