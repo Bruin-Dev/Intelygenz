@@ -100,6 +100,12 @@ class RefreshCache:
         ]
         self._logger.info(f"Finished filtering edges for host {host}")
 
-        self._logger.info(f"Storing cache of {len(cache)} edges to Redis for host {host}")
-        self._storage_repository.set_cache(host, cache)
-        self._logger.info(f"Finished storing cache for host {host}")
+        if len(cache) == 0:
+            error_msg = f"Cache for host {host} was empty after cross referencing with Bruin." \
+                        f" Check if Bruin is returning errors when asking for management statuses of the host"
+            self._logger.error(error_msg)
+            await self._event_bus.rpc_request("notification.slack.request", error_msg, timeout=10)
+        else:
+            self._logger.info(f"Storing cache of {len(cache)} edges to Redis for host {host}")
+            self._storage_repository.set_cache(host, cache)
+            self._logger.info(f"Finished storing cache for host {host}")
