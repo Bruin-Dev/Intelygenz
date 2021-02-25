@@ -48,7 +48,7 @@ class T7Repository:
 
     def tnba_note_in_task_history(self, task_history):
         task_history_tnba_filter = [task for task in task_history if task["Notes"] is not None
-                                    if "TNBA" in task["Notes"]]
+                                    if ("TNBA" in task["Notes"] or "AI" in task["Notes"])]
         if len(task_history_tnba_filter) > 0:
             return True
 

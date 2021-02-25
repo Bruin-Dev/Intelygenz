@@ -175,7 +175,7 @@ class TestT7Repository:
                           "Zip": "75080-2814",
                           "Site Name": "01106 Coit Campbell",
                           "NoteType": "ADN",
-                          "Notes": "#*MetTel's IPA*#\nTNBA\n\n",
+                          "Notes": "#*MetTel's IPA*#\nAI\n\n",
                           "Note Entered Date": "202008251726",
                           "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
                           "Note Entered By": "Intelygenz Ai",

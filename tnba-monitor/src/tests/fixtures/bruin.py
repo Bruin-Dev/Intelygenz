@@ -113,7 +113,7 @@ def make_standard_tnba_note():
 
         text = (
             "#*MetTel's IPA*#\n"
-            'TNBA\n\n'
+            'AI\n\n'
             f'The next best action for {serial_number} is: {prediction_name}.\n\n'
             'TNBA is based on AI model designed specifically for MetTel.'
         )
@@ -127,7 +127,7 @@ def make_request_completed_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
             "#*MetTel's IPA*#\n"
-            'TNBA\n\n'
+            'AI\n\n'
             f'The next best action for {serial_number} is: Request Completed. Since it is a high confidence prediction '
             'the task has been automatically transitioned.\n\n'
             'TNBA is based on AI model designed specifically for MetTel.'
@@ -142,7 +142,7 @@ def make_repair_completed_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
             "#*MetTel's IPA*#\n"
-            'TNBA\n\n'
+            'AI\n\n'
             f'The next best action for {serial_number} is: Repair Completed. Since it is a high confidence prediction '
             'the task has been automatically transitioned.\n\n'
             'TNBA is based on AI model designed specifically for MetTel.'

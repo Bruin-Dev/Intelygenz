@@ -3592,7 +3592,7 @@ class TestServiceOutageMonitor:
         ticket_notes = [
             {
                 "noteId": 41894041,
-                "noteValue": f"#*MetTel's IPA*#\nTNBA\nTimeStamp: 2020-02-24 10:07:12+00:00",
+                "noteValue": f"#*MetTel's IPA*#\nAI\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
                     'B827EB92EB72',

@@ -57,7 +57,7 @@ class TestPredictionRepository:
             self, prediction_repository, make_ticket_note, serial_number_1, holmdel_noc_prediction):
         note_text = (
             '#*Automation Engine*#\n'
-            'TNBA\n\n'
+            'AI\n\n'
             'The note was written with a wrong format just to test this edge case'
         )
         tnba_note = make_ticket_note(serial_number=serial_number_1, text=note_text)

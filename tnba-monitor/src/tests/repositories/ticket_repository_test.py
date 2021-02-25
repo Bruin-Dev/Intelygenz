@@ -150,7 +150,7 @@ class TestTicketRepository:
 
         assert result == os.linesep.join([
             "#*MetTel's IPA*#",
-            'TNBA',
+            'AI',
             '',
             'The next best action for VC1234567 is: Holmdel NOC Investigate.',
             '',
@@ -165,7 +165,7 @@ class TestTicketRepository:
 
         assert result == os.linesep.join([
             "#*MetTel's IPA*#",
-            'TNBA',
+            'AI',
             '',
             'The next best action for VC1234567 is: Repair Completed. Since it is a high confidence prediction',
             'the task has been automatically transitioned.',

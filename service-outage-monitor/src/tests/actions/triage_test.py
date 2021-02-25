@@ -1321,7 +1321,7 @@ class TestTriage:
         ticket_1_note_4 = {
             "noteId": 41894042,
             "noteValue": None,
-            "createdDate": f"#*MetTel's IPA*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00",
+            "createdDate": f"#*MetTel's IPA*#\nAI\nTimeStamp: 2019-07-30 06:38:00+00:00",
             "serviceNumber": [
                 service_number_1,
             ],
