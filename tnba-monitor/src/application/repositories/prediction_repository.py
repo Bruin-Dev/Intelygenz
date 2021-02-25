@@ -36,6 +36,37 @@ class PredictionRepository:
         return self._utils_repository.get_first_element_matching(predictions, prediction_lookup_fn)
 
     @staticmethod
+    def map_request_and_repair_completed_predictions(predictions: List[dict]) -> List[dict]:
+        predictions_copy = predictions.copy()
+
+        repair_completed_idx, repair_completed = next(
+            ((i, prediction) for i, prediction in enumerate(predictions) if prediction['name'] == 'Repair Completed'),
+            (None, None)
+        )
+        request_completed_idx, request_completed = next(
+            ((i, prediction) for i, prediction in enumerate(predictions) if prediction['name'] == 'Request Completed'),
+            (None, None)
+        )
+
+        if repair_completed and request_completed:
+            if repair_completed['probability'] > request_completed['probability']:
+                predictions_copy[request_completed_idx]['probability'] = repair_completed['probability']
+            else:
+                predictions_copy[repair_completed_idx]['probability'] = request_completed['probability']
+        elif repair_completed:
+            predictions_copy.append({
+                'name': 'Request Completed',
+                'probability': repair_completed['probability']
+            })
+        elif request_completed:
+            predictions_copy.append({
+                'name': 'Repair Completed',
+                'probability': request_completed['probability']
+            })
+
+        return predictions_copy
+
+    @staticmethod
     def filter_predictions_in_next_results(predictions: List[dict], next_results: List[dict]) -> List[dict]:
         next_results_names: List[str] = [result['resultName'].strip() for result in next_results]
         return [

@@ -500,6 +500,8 @@ class TNBAMonitor:
                 self._logger.info(msg)
                 return
 
+            mapped_predictions = self._prediction_repository.map_request_and_repair_completed_predictions(predictions)
+
             next_results_response = await self._bruin_repository.get_next_results_for_ticket_detail(
                 ticket_id, ticket_detail_id, serial_number
             )
@@ -515,7 +517,7 @@ class TNBAMonitor:
             next_results: list = next_results_response_body['nextResults']
 
             relevant_predictions = self._prediction_repository.filter_predictions_in_next_results(
-                predictions, next_results
+                mapped_predictions, next_results
             )
 
             if not relevant_predictions:

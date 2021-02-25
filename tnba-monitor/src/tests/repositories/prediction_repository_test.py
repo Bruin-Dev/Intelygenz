@@ -1,3 +1,5 @@
+import pytest
+
 from application.repositories.prediction_repository import PredictionRepository
 
 
@@ -42,6 +44,59 @@ class TestPredictionRepository:
             confident_request_completed_prediction,
         ]
         assert result == expected
+
+    @pytest.mark.parametrize(
+        'predictions', [
+            (
+                    [
+                        {
+                            'name': 'Repair Completed',
+                            'probability': 0.9484384655952454
+                        },
+                        {
+                            'name': 'Holmdel NOC Investigate',
+                            'probability': 0.1234567890123456
+                        },
+                        {
+                            'name': 'Request Completed',
+                            'probability': 0.1111111111111111
+                        }
+                    ]
+            ),
+            (
+                    [
+                        {
+                            'name': 'Repair Completed',
+                            'probability': 0.9484384655952454
+                        },
+                        {
+                            'name': 'Holmdel NOC Investigate',
+                            'probability': 0.1234567890123456
+                        }
+                    ]
+            )
+        ], ids=[
+            'get_max_value',
+            'add_other_value'
+        ]
+    )
+    def map_request_and_repair_completed_predictions_test(self, predictions):
+        result = PredictionRepository.map_request_and_repair_completed_predictions(predictions)
+
+        assert result == [
+            {
+                'name': 'Repair Completed',
+                'probability': 0.9484384655952454
+            },
+            {
+                'name': 'Holmdel NOC Investigate',
+                'probability': 0.1234567890123456
+            },
+            {
+                'name': 'Request Completed',
+                'probability': 0.9484384655952454
+            }
+        ]
 
     def get_best_prediction_test(self, prediction_repository, confident_request_completed_prediction,
                                  unconfident_request_completed_prediction):

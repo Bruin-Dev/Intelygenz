@@ -1201,7 +1201,7 @@ class TestTNBAMonitor:
     async def process_ticket_detail_with_no_predictions_after_filtering_with_next_results_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, holmdel_noc_prediction, confident_request_completed_prediction,
-            serial_number_1):
+            confident_repair_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
 
@@ -1212,6 +1212,10 @@ class TestTNBAMonitor:
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
+        ticket_detail_predictions_with_mirrored_request_repair_completed = [
+            confident_request_completed_prediction,
+            confident_repair_completed_prediction,
+        ]
 
         holmdel_noc_prediction_name = holmdel_noc_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
@@ -1226,11 +1230,14 @@ class TestTNBAMonitor:
 
         await tnba_monitor._process_ticket_detail(detail_object)
 
+        tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
+            ticket_detail_predictions
+        )
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
             ticket_id, ticket_detail_id, serial_number_1
         )
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
-            ticket_detail_predictions, next_results_list
+            ticket_detail_predictions_with_mirrored_request_repair_completed, next_results_list
         )
         tnba_monitor._prediction_repository.get_best_prediction.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
@@ -1385,7 +1392,8 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_failed_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, unconfident_request_completed_prediction, serial_number_1):
+            make_next_result_item, make_next_results, unconfident_request_completed_prediction,
+            unconfident_repair_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
 
@@ -1396,6 +1404,10 @@ class TestTNBAMonitor:
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
+        ticket_detail_predictions_with_mirrored_request_repair_completed = [
+            unconfident_request_completed_prediction,
+            unconfident_repair_completed_prediction,
+        ]
 
         request_completed_prediction_name = unconfident_request_completed_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
@@ -1412,11 +1424,14 @@ class TestTNBAMonitor:
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
+        tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
+            ticket_detail_predictions
+        )
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
             ticket_id, ticket_detail_id, serial_number_1
         )
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
-            ticket_detail_predictions, next_results_list
+            ticket_detail_predictions_with_mirrored_request_repair_completed, next_results_list
         )
         tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
             ticket_detail_predictions
@@ -1436,7 +1451,7 @@ class TestTNBAMonitor:
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_ok_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
-            confident_request_completed_prediction, serial_number_1):
+            confident_request_completed_prediction, confident_repair_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
 
@@ -1447,6 +1462,10 @@ class TestTNBAMonitor:
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
+        ticket_detail_predictions_with_mirrored_request_repair_completed = [
+            confident_request_completed_prediction,
+            confident_repair_completed_prediction,
+        ]
 
         request_completed_prediction_name = confident_request_completed_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
@@ -1467,11 +1486,14 @@ class TestTNBAMonitor:
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
+        tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
+            ticket_detail_predictions
+        )
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
             ticket_id, ticket_detail_id, serial_number_1
         )
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
-            ticket_detail_predictions, next_results_list
+            ticket_detail_predictions_with_mirrored_request_repair_completed, next_results_list
         )
         tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
             ticket_detail_predictions
