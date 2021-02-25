@@ -1411,7 +1411,7 @@ class TestTriage:
         }
         ticket_3_note_2 = {
             "noteId": 41894042,
-            "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
+            "noteValue": f"#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
             "createdDate": "2020-02-24T10:08:13.503-05:00",
             "serviceNumber": [
                 service_number_5,
@@ -1480,7 +1480,7 @@ class TestTriage:
                 'ticket_notes': [
                     {
                         "noteId": 41894042,
-                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
+                        "noteValue": f"#*Automation Engine*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
                         "createdDate": "2020-02-24T10:08:13.503-05:00",
                         "serviceNumber": [
                             service_number_6,

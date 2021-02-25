@@ -3605,6 +3605,19 @@ class TestServiceOutageMonitor:
         ticket_notes = [
             {
                 "noteId": 41894041,
+                "noteValue": f"#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00",
+                "createdDate": "2020-02-24T10:07:13.503-05:00",
+                "serviceNumber": [
+                    'B827EB92EB72',
+                ],
+            },
+        ]
+        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
+        assert triage_note_exists is True
+
+        ticket_notes = [
+            {
+                "noteId": 41894041,
                 "noteValue": f"#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
@@ -5418,7 +5431,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894040,
                 "noteValue": (
-                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
+                    "#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5441,7 +5454,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894040,
                 "noteValue": (
-                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
+                    "#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5450,7 +5463,7 @@ class TestServiceOutageMonitor:
             {
                 "noteId": 41894041,
                 "noteValue": (
-                    "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00"
+                    "#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00"
                 ),
                 "serviceNumber": [
                     'B827EB92EB72',
@@ -5591,6 +5604,65 @@ class TestServiceOutageMonitor:
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
+    def was_last_outage_detected_recently_with_reopen_note_having_old_watermark_found_test(self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                'B827EB92EB72',
+            ],
+            "createdDate": triage_timestamp,
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*Automation Engine*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                'B827EB92EB72',
+            ],
+            "createdDate": reopen_timestamp,
+        }
+
+        ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+        ]
+
+        logger = Mock()
+        scheduler = Mock()
+        event_bus = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+
+        datetime_mock = Mock()
+
+        new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is False
+
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         triage_timestamp = '2021-01-02T10:18:16.71-05:00'
@@ -5598,6 +5670,56 @@ class TestServiceOutageMonitor:
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                'B827EB92EB72',
+            ],
+            "createdDate": triage_timestamp,
+        }
+
+        ticket_notes = [
+            ticket_note_1,
+        ]
+
+        logger = Mock()
+        scheduler = Mock()
+        event_bus = Mock()
+        config = testconfig
+        hawkeye_repository = Mock()
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
+                                       notifications_repository, customer_cache_repository)
+
+        datetime_mock = Mock()
+
+        new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(triage_timestamp) + timedelta(hours=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is True
+
+        new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            assert result is False
+
+    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_having_old_watermark_found_test(
+            self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 'B827EB92EB72',
             ],

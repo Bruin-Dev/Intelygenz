@@ -105,7 +105,7 @@ def ticket_details_1():
         },
             {
                 'noteId': 77127156,
-                'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
                              'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
                              'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
                              'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
@@ -161,7 +161,7 @@ def filter_ticket_details_1():
             }],  # noqa
         'ticketNotes': [{
             'noteId': 77127156,
-            'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization "
+            'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization "
                          '\nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan '
                          'Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 Kbps \nBandwidth ('
                          'Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) \nLinks:  ['
@@ -221,7 +221,7 @@ def ticket_details_2():
         },
             {
                 'noteId': 77051080,
-                'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
                              'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
                              'Scan: 20 \nScan Time: 2021-01-05 16:22:09.661410-05:00 \nThroughput (Receive): 8150.85 '
                              'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% (7914.4 Kbps) '
@@ -238,7 +238,7 @@ def ticket_details_2():
                 'creator': 'api_1@bruin.com'
             }, {
                 'noteId': 77076719,
-                'noteValue': "#*MetTel's IPA*#\nRe-opening ticket.\n \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                'noteValue': "#*Automation Engine*#\nRe-opening ticket.\n \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
                              'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) '
                              '\nInterval for Scan: 20 \nScan Time: 2021-01-06 08:57:09.372295-05:00 \nThroughput ('
                              'Receive): 9196.147 Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% ('
@@ -282,7 +282,7 @@ def filter_ticket_details_2():
         'ticketNotes': [
             {
                 'noteId': 77051080,
-                'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
                              'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
                              'Scan: 20 \nScan Time: 2021-01-05 16:22:09.661410-05:00 \nThroughput (Receive): 8150.85 '
                              'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% (7914.4 Kbps) '
@@ -295,7 +295,7 @@ def filter_ticket_details_2():
             },
             {
                 'noteId': 77076719,
-                'noteValue': "#*MetTel's IPA*#\nRe-opening ticket.\n \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                'noteValue': "#*Automation Engine*#\nRe-opening ticket.\n \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
                              'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) '
                              '\nInterval for Scan: 20 \nScan Time: 2021-01-06 08:57:09.372295-05:00 \nThroughput ('
                              'Receive): 9196.147 Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% ('
@@ -442,7 +442,7 @@ def ticket_details_4():
         },
             {
                 'noteId': 77034460,
-                'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
                              'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
                              'Scan: 20 \nScan Time: 2021-01-05 10:29:22.043598-05:00 \nThroughput (Receive): 8365.164 '
                              'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 80% (7914.4 Kbps) '
@@ -500,7 +500,7 @@ def filter_ticket_details_4():
             }],  # noqa
         'ticketNotes': [{
             'noteId': 77034460,
-            'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization "
+            'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization "
                          '\nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan '
                          'Time: 2021-01-05 10:29:22.043598-05:00 \nThroughput (Receive): 8365.164 Kbps \nBandwidth ('
                          'Receive): 9893.0 Kbps \nThreshold (Receive): 80% (7914.4 Kbps) \nLinks:  ['
@@ -892,7 +892,7 @@ def filtered_affecting_tickets(ticket_1, ticket_2, ticket_3, ticket_4):
                                'currentTaskName': None, 'lastUpdatedBy': 385677,
                                'lastUpdatedAt': '2021-01-07T17:59:12.523-05:00'},
              'ticket_notes': [{'noteId': 77127156,
-                               'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                               'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
                                             'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M '
                                             '(MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: '
                                             '2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 Kbps \n'
@@ -933,7 +933,7 @@ def filtered_affecting_tickets(ticket_1, ticket_2, ticket_3, ticket_4):
                                'currentTaskName': None, 'lastUpdatedBy': 385677,
                                'lastUpdatedAt': '2021-01-06T17:35:10.317-05:00'},
              'ticket_notes': [{'noteId': 77051080,
-                               'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                               'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
                                             'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M '
                                             '(MetTel CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: '
                                             '2021-01-05 16:22:09.661410-05:00 \nThroughput (Receive): 8150.85 Kbps \n'
@@ -948,7 +948,7 @@ def filtered_affecting_tickets(ticket_1, ticket_2, ticket_3, ticket_4):
                                'createdDate': '2021-01-05T16:22:24.03-05:00',
                                'creator': 'api_1@bruin.com'},
                               {'noteId': 77076719,
-                               'noteValue': "#*MetTel's IPA*#\nRe-opening ticket.\n \nEdge Name: "
+                               'noteValue': "#*Automation Engine*#\nRe-opening ticket.\n \nEdge Name: "
                                             'TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over Utilization \nInterface: '
                                             'GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \n'
                                             'Interval for Scan: 20 \nScan Time: 2021-01-06 08:57:09.372295-05:00 \n'
@@ -1010,7 +1010,7 @@ def filtered_affecting_tickets(ticket_1, ticket_2, ticket_3, ticket_4):
                                'currentTaskName': None, 'lastUpdatedBy': 385676,
                                'lastUpdatedAt': '2021-01-05T12:07:31.707-05:00'},
              'ticket_notes': [{'noteId': 77034460,
-                               'noteValue': "#*MetTel's IPA*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                               'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
                                             'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M (MetTel '
                                             'CID: BBT.113719) \nInterval for Scan: 20 \nScan Time: 2021-01-05 '
                                             '10:29:22.043598-05:00 \nThroughput (Receive): 8365.164 Kbps \n'
