@@ -38,50 +38,26 @@ MONITOR_CONFIG = {
 MONITOR_REPORT_CONFIG = {
     'semaphore': 5,
     'wait_fixed': 15,
+    'environment': os.environ["CURRENT_ENVIRONMENT"],
     'stop_after_attempt': 3,
+    'crontab': '0 8 * * *',
+    'threshold': 3,
+    'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
-    'client_id_bandwidth': 83109,
-    'reports': [
-        {
-            'name': 'Report - Bandwidth Utilization',
-            'type': 'bandwidth_utilization',
-            'value': 'Bandwidth Over Utilization',
-            'crontab': '0 8 * * *',
-            'threshold': 3,  # Number of tickets to include in the report
-            'trailing_days': 14,
-            'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
+    'monitoring_minutes_interval': 10,
+    'timezone': 'US/Eastern',
+    "report_config_by_trouble": {
+        'bandwidth': {
+            'client_ids': [83109],
+            'recipient': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
+                          'mettel.automation@intelygenz.com']
         },
-        {
-            'name': 'Report - Jitter',
-            'type': 'jitter',
-            'value': 'Jitter',
-            'crontab': '0 8 * * *',
-            'threshold': 3,  # Number of tickets to include in the report
-            'trailing_days': 14,
-            'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
+        'default': {
+            'recipient': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
+                          'mettel.automation@intelygenz.com']
         },
-        {
-            'name': 'Report - Latency',
-            'type': 'latency',
-            'value': 'Latency',
-            'crontab': '0 8 * * *',
-            'threshold': 3,  # Number of tickets to include in the report
-            'trailing_days': 14,
-            'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
-        },
-        {
-            'name': 'Packet Loss',
-            'type': 'packet_loss',
-            'value': 'Packet Loss',
-            'crontab': '0 8 * * *',
-            'trailing_days': 14,
-            'recipient': 'bsullivan@mettel.net, jtaylor@mettel.net, '
-                         'HNOCleaderteam@mettel.net, mettel.automation@intelygenz.com, '
-        }
-    ]
+    }
+
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

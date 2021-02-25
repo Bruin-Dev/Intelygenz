@@ -252,16 +252,17 @@ class BruinRepository:
 
     @staticmethod
     def search_interfaces_and_count_in_details(ticket_details):
-        interfaces = dict()
+        interfaces_by_trouble = dict()
         for detail_object in ticket_details:
             for note in detail_object['ticket_notes']:
                 interface = INTERFACE_NOTE_REGEX.search(note['noteValue'])
                 if interface:
-                    if interface['interface_name'] in interfaces:
-                        interfaces[interface['interface_name']] += 1
-                    else:
-                        interfaces[interface['interface_name']] = 1
-        return interfaces
+                    trouble = detail_object['trouble_value']
+                    interface_name = interface['interface_name']
+                    interfaces_by_trouble.setdefault(trouble, {})
+                    interfaces_by_trouble[trouble].setdefault(interface_name, 0)
+                    interfaces_by_trouble[trouble][interface_name] += 1
+        return interfaces_by_trouble
 
     @staticmethod
     def transform_tickets_into_ticket_details(tickets: dict) -> list:
@@ -290,49 +291,45 @@ class BruinRepository:
         items_for_report = []
 
         for serial, ticket_details in all_serials.items():
-            self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
-            item_report = {
-                'customer': {
-                    'client_id': ticket_details[0]['ticket']['clientID'],
-                    'client_name': ticket_details[0]['ticket']['clientName'],
-                },
-                'location': ticket_details[0]['ticket']['address'],
-                'serial_number': serial,
-                'number_of_tickets': len(ticket_details),
-                'bruin_tickets_id': set(
-                    detail_object['ticket_id']
-                    for detail_object in ticket_details
-                ),
-                'interfaces': self.search_interfaces_in_details(ticket_details)
-            }
-            items_for_report.append(item_report)
+            interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
+            for trouble in interfaces_by_trouble.keys():
+                if trouble == 'Bandwidth Over Utilization':
+                    client_id = ticket_details[0]['ticket']['clientID']
+                    bandwidth_config = self._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['bandwidth']
+                    if client_id in bandwidth_config['client_ids']:
+                        item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
+                                                             number_of_tickets=len(ticket_details),
+                                                             interface=self.search_interfaces_in_details(
+                                                                 ticket_details),
+                                                             trouble=trouble)
+                        items_for_report.append(item_report)
+                else:
+                    for interface, number_of_tickets in interfaces_by_trouble[trouble].items():
+                        self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
+                        item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
+                                                             number_of_tickets=number_of_tickets,
+                                                             interface=interface, trouble=trouble)
+                        items_for_report.append(item_report)
 
         return items_for_report
 
-    def prepare_items_for_report_by_interface(self, all_serials):
-        items_for_report = []
-
-        for serial, ticket_details in all_serials.items():
-            interfaces = self.search_interfaces_and_count_in_details(ticket_details)
-            for interface, number_of_tickets in interfaces.items():
-                self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
-                item_report = {
-                    'customer': {
-                        'client_id': ticket_details[0]['ticket']['clientID'],
-                        'client_name': ticket_details[0]['ticket']['clientName'],
-                    },
-                    'location': ticket_details[0]['ticket']['address'],
-                    'serial_number': serial,
-                    'number_of_tickets': number_of_tickets,
-                    'bruin_tickets_id': set(
-                        detail_object['ticket_id']
-                        for detail_object in ticket_details
-                    ),
-                    'interfaces': interface
-                }
-                items_for_report.append(item_report)
-
-        return items_for_report
+    @staticmethod
+    def build_item_report(ticket_details, serial, number_of_tickets, interface, trouble):
+        return {
+            'customer': {
+                'client_id': ticket_details[0]['ticket']['clientID'],
+                'client_name': ticket_details[0]['ticket']['clientName'],
+            },
+            'location': ticket_details[0]['ticket']['address'],
+            'serial_number': serial,
+            'number_of_tickets': number_of_tickets,
+            'bruin_tickets_id': set(
+                detail_object['ticket_id']
+                for detail_object in ticket_details
+            ),
+            'interfaces': interface,
+            'trouble': trouble
+        }
 
     @staticmethod
     def find_detail_by_serial(ticket, edge_serial_number):
@@ -344,7 +341,7 @@ class BruinRepository:
         return ticket_details
 
     @staticmethod
-    def filter_tickets_with_serial_cached(ticket_details, list_cache_serials):
+    def filter_ticket_details_by_serials(ticket_details, list_cache_serials):
         return [
             detail_object
             for detail_object in ticket_details
@@ -352,22 +349,25 @@ class BruinRepository:
         ]
 
     @staticmethod
-    def filter_trouble_notes(tickets_details, trouble):
+    def filter_trouble_notes_in_ticket_details(tickets_details, troubles):
         ret = []
         for detail_object in tickets_details:
-            bandwidth_notes = [
-                note
-                for note in detail_object['ticket_notes']
-                if note["noteValue"]
-                if ('#*Automation Engine*#' in note["noteValue"] or "#*MetTel's IPA*#" in note["noteValue"])
-                if trouble in note["noteValue"]
-            ]
+            for trouble in troubles:
+                trouble_notes = [
+                    ticket_note
+                    for ticket_note in detail_object['ticket_notes']
+                    if ticket_note["noteValue"]
+                    if ('#*Automation Engine*#' in ticket_note["noteValue"] or "#*MetTel's IPA*#" in
+                        ticket_note["noteValue"])
+                    if trouble in ticket_note["noteValue"]
+                ]
 
-            if bandwidth_notes:
-                ret.append({
-                    'ticket_id': detail_object['ticket_id'],
-                    'ticket': detail_object['ticket'],
-                    'ticket_detail': detail_object['ticket_detail'],
-                    'ticket_notes': bandwidth_notes,
-                })
+                if trouble_notes:
+                    ret.append({
+                        'ticket_id': detail_object['ticket_id'],
+                        'ticket': detail_object['ticket'],
+                        'ticket_detail': detail_object['ticket_detail'],
+                        'ticket_notes': trouble_notes,
+                        'trouble_value': trouble,
+                    })
         return ret

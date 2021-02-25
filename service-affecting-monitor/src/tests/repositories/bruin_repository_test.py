@@ -641,28 +641,3 @@ class TestBruinRepository:
         bruin_repository._event_bus.rpc_request.assert_has_awaits([
             call("bruin.ticket.request", ticket_request_msg, timeout=90)
         ])
-
-    @pytest.mark.asyncio
-    async def map_tickets_with_serial_numbers_test(self, service_affecting_monitor_reports,
-                                                   filtered_affecting_tickets, response_mapped_filter_tickets):
-        response = service_affecting_monitor_reports._bruin_repository.group_ticket_details_by_serial(
-            filtered_affecting_tickets)
-
-        assert response == response_mapped_filter_tickets
-
-    @pytest.mark.asyncio
-    async def prepare_items_for_report_test(self, service_affecting_monitor_reports, response_mapped_filter_tickets,
-                                            response_prepare_items_filtered_for_report):
-        response = service_affecting_monitor_reports._bruin_repository.prepare_items_for_report(
-            response_mapped_filter_tickets)
-
-        assert response == response_prepare_items_filtered_for_report
-
-    @pytest.mark.asyncio
-    async def filter_tickets_with_serial_cached_test(self, service_affecting_monitor_reports,
-                                                     filtered_affecting_tickets):
-        response = service_affecting_monitor_reports._bruin_repository.filter_tickets_with_serial_cached(
-            filtered_affecting_tickets, ['VC05200085762']
-        )
-
-        assert response == filtered_affecting_tickets

@@ -260,8 +260,6 @@ font-family: Arial, sans-serif;
       <!--[if mso | IE]></td></tr></table><![endif]-->
 	<!-- END HEADER -->
 
-
-
    	<!-- START INTRO TEXT -->
       <!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width:600px;"><tr><td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]-->
       <div style="margin:0px auto;max-width:765px;background:#ffffff;">
@@ -276,8 +274,16 @@ font-family: Arial, sans-serif;
                       <tr>
                         <td style="word-wrap: break-word; font-size: 0px; padding: 0px 20px 0px 20px;" align="center">
                           <div style="cursor:auto;color:#FFFFFF;font-family:'Roboto', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; text-align:center;">
-                          	<h2 style="color:#47B585;letter-spacing:0.25em; font-size: 18px; line-height: 25px;">Service Affecting trouble: {{ __TROUBLE__ }}</h2>
-							<p class="intro" style="color:#596872; font-size: 16px; line-height: 22px; font-family:'Roboto', Helvetica, Arial, sans-serif; letter-spacing: 0.05em;"> in edges {{ __SERIAL_NUMBERS__ }}</p>
+                            {% if __TROUBLE__ %}
+                          	  <h2 style="color:#47B585;letter-spacing:0.25em; font-size: 18px; line-height: 25px;">Service Affecting trouble: {{ __TROUBLE__ }}</h2>
+                              <p class="intro" style="color:#596872; font-size: 16px; line-height: 22px; font-family:'Roboto', Helvetica, Arial, sans-serif; letter-spacing: 0.05em;"> in edges {{ __SERIAL_NUMBERS__ }}</p>
+                            {% else %}
+                              <h2 style="color:#47B585;letter-spacing:0.25em; font-size: 18px; line-height: 25px;">
+                                {{ __CLIENT_ID__}} | {{ __CLIENT_NAME__ }}</h2>
+                              <h2 style="color:#47B585;letter-spacing:0.25em; font-size: 18px; line-height: 25px;">Reoccurring Service Affecting Trouble Report</h2>
+                              <p class="intro" style="color:#596872; font-size: 16px; line-height: 22px; font-family:'Roboto', Helvetica, Arial, sans-serif; letter-spacing: 0.05em;">{{ __DATE__ }}</p>
+                            {% endif %}
+
                           </div>
                         </td>
                       </tr>
@@ -292,6 +298,7 @@ font-family: Arial, sans-serif;
       </div>
       <!--[if mso | IE]></td></tr></table><![endif]-->
 	<!-- END INTRO TEXT -->
+
 
 
 	<!-- START DIVIDER -->
@@ -330,6 +337,7 @@ font-family: Arial, sans-serif;
       <div style="margin:0px auto;background:#ffffff;">
         <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:#ffffff;max-width:765px" align="center" border="0">
           <tbody>
+            {% if __TROUBLE__ %}
 			<tr>
 				<td style="text-align:center;vertical-align:top;direction:ltr;font-size:0px;padding:20px 20px 10px 20px;">
 					<!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:600px;"><![endif]-->
@@ -345,6 +353,7 @@ font-family: Arial, sans-serif;
 					<!--[if mso | IE]></td></tr></table><![endif]-->
 				</td>
           	<tr>
+            {% endif %}
               <td style="text-align:center;vertical-align:top;direction:ltr;font-size:0px;padding:10px 20px 40px 20px;">
                 <!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:600px;"><![endif]-->
                 <div class="mj-column-per-100 outlook-group-fix" style="vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;">
@@ -353,24 +362,29 @@ font-family: Arial, sans-serif;
                   <table role="presentation" cellpadding="0" cellspacing="0" style="vertical-align:top;" width="100%" border="0">
                     <tbody>
                       <tr>
+                        {% if not __TROUBLE__ %}<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Trouble</th>{% endif %}
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Serial Number</th>
-						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Client ID | Name</th>
+                        {% if __TROUBLE__ %}<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Client ID | Name</th>{% endif %}
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Location</th>
 						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; text-align: center; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Number of tickets</th>
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Tickets</th>
-                        <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Interfaces</th>
+                        <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">{% if __TROUBLE__ %}Interfaces{% else %} Interface {% endif %}</th>
                       </tr>
                       {% for i in __OVERVIEW_ROWS__ %}
                         {% set current_row_bg_color = odd_row_bg_color if i["type"] == "odd" else even_row_bg_color %}
                         <tr>
+                          {% if not __TROUBLE__ %}<td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
+                          color: #596872; font-weight: normal;
+                          font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                          white-space: nowrap">{{ i["__TROUBLE__"] }}</td> {% endif %}
                           <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                           color: #596872; font-weight: normal;
                           font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
                           white-space: nowrap">{{ i["__KEY__"] }}</td>
-                          <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
+                          {% if __TROUBLE__ %}<td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                           color: #596872; font-weight: normal;
                           font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
-                          white-space: nowrap">{{ i["__CLIENT__"] }}</td>
+                          white-space: nowrap">{{ i["__CLIENT__"] }}</td>{% endif %}
                           <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                           color: #596872; font-weight: normal;
                           font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
@@ -439,7 +453,7 @@ font-family: Arial, sans-serif;
                             style="cursor:auto;color:#000000;font-family:'Roboto', Helvetica, Arial, sans-serif;font-size:14px;line-height:1.5;text-align:center;"
                           >
 							  <p style="color:#596872; font-size: 12px;line-height: 18px;"><unsubscribe>To unsubscribe contact mettel@intelygenz.com</unsubscribe></p>
-							  <p style="color:#596872; font-size: 12px;line-height: 18px;">© 2019 Intelygenz Software: All rights reserved</p>
+							  <p style="color:#596872; font-size: 12px;line-height: 18px;">© {{ __YEAR__ }} Intelygenz Software: All rights reserved</p>
                           </div>
                         </td>
                       </tr>

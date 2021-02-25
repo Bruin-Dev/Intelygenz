@@ -16,7 +16,7 @@ NATS_CONFIG = {
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
     'device_by_id': contact_info.devices_by_id,
-    'environment': "dev",
+    'environment': "test",
     'timezone': 'US/Eastern',
     'monitoring_seconds': 600,
     "latency": 120,
@@ -36,20 +36,23 @@ MONITOR_REPORT_CONFIG = {
     "semaphore": 5,
     'wait_fixed': 1,
     'stop_after_attempt': 2,
-    'trailing_days': 14,
+    'environment': "test",
+    'crontab': '0 8 * * *',
     'client_id_bandwidth': 83109,
-    'reports': [
-        {
-            'name': 'Report - Bandwidth Utilization',
-            'type': 'bandwidth_utilization',
-            'value': 'Bandwidth Over Utilization',
-            'crontab': '20 16 * * *',
-            'threshold': 3,  # Number of tickets to include in the report
-            'client_id': 83109,
-            'trailing_days': 14,
-            'recipient': 'mettel@intelygenz.com'
-        }
-    ]
+    'threshold': 3,
+    'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
+    'trailing_days': 14,
+    'monitoring_minutes_interval': 10,
+    'timezone': 'US/Eastern',
+    "report_config_by_trouble": {
+        'bandwidth': {
+            'client_ids': [83109],
+            'recipient': ['mettel@intelygenz.com']
+        },
+        'default': {
+            'recipient': ['mettel@intelygenz.com']
+        },
+    }
 }
 
 ENVIRONMENT_NAME = "dev"

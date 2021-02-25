@@ -46,7 +46,7 @@ class TestServiceAffectingMonitorReports:
             return_value=response_customer_cache)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             with patch.object(service_affecting_monitor_module, 'timezone', new=Mock()):
-                await service_affecting_monitor_reports.start_service_affecting_monitor_job(exec_on_start=True)
+                await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=True)
 
         service_affecting_monitor_reports._scheduler.add_job.assert_called_once_with(
             service_affecting_monitor_reports.monitor_reports, 'interval',
@@ -64,22 +64,17 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
             return_value=response_customer_cache)
         with patch.object(CronTrigger, 'from_crontab', new=crontab_mock):
-            await service_affecting_monitor_reports.start_service_affecting_monitor_job(exec_on_start=False)
+            await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=False)
 
         service_affecting_monitor_reports._scheduler.add_job.assert_called_once_with(
             service_affecting_monitor_reports.monitor_reports, crontab_value,
-            id=f"_monitor_reports")
+            id=f"_monitor_reports", replace_existing=True)
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_report_bandwidth_over_utilization_test(self, service_affecting_monitor_reports,
-                                                                               report, response_bruin_with_all_tickets,
-                                                                               response_mapped_tickets,
-                                                                               response_prepare_items_for_report,
-                                                                               response_customer_cache,
-                                                                               filtered_affecting_tickets):
+                                                                               response_bruin_with_all_tickets,
+                                                                               response_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
-        start_date = end_date - timedelta(days=report['trailing_days'])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
 
         datetime_mock = Mock()
         datetime_mock.utcnow = Mock(return_value=end_date)
@@ -88,31 +83,19 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets, None, None]
         )
-        service_affecting_monitor_reports._bruin_repository.group_ticket_details_by_serial = Mock(
-            return_value=response_mapped_tickets
-        )
-        service_affecting_monitor_reports._bruin_repository.prepare_items_for_report = Mock(
-            return_value=response_prepare_items_for_report)
-        service_affecting_monitor_reports._template_renderer.compose_email_report_object = \
-            Mock()
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
 
         service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
             return_value=response_customer_cache)
 
         service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor_reports._config.MONITOR_REPORT_CONFIG['environment'] = 'production'
 
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             await service_affecting_monitor_reports.monitor_reports()
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_awaited()
-        service_affecting_monitor_reports._bruin_repository.group_ticket_details_by_serial.assert_called_once_with(
-            filtered_affecting_tickets)
-        service_affecting_monitor_reports._bruin_repository.prepare_items_for_report.assert_called_once_with(
-            response_mapped_tickets)
-        service_affecting_monitor_reports._template_renderer.compose_email_report_object. \
-            assert_called_once()
-        service_affecting_monitor_reports._notifications_repository.send_email.assert_awaited_once()
+        service_affecting_monitor_reports._notifications_repository.send_email.assert_awaited()
 
     @pytest.mark.asyncio
     async def report_bandwidth_over_utilization_no_cache_test(self, report,
@@ -128,7 +111,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
             return_value=response_empty_customer_cache)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
-            await service_affecting_monitor_reports.start_service_affecting_monitor_job(True)
+            await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(True)
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -145,7 +128,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
             return_value=response_bad_status_customer_cache)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
-            await service_affecting_monitor_reports.start_service_affecting_monitor_job(True)
+            await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(True)
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -153,7 +136,6 @@ class TestServiceAffectingMonitorReports:
             self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
 
         datetime_mock = Mock()
         datetime_mock.utcnow = Mock(return_value=end_date)
@@ -183,7 +165,6 @@ class TestServiceAffectingMonitorReports:
             response_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
         start_date = end_date - timedelta(days=report['trailing_days'])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
 
         datetime_mock = Mock()
         datetime_mock.utcnow = Mock(return_value=end_date)

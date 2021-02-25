@@ -65,7 +65,7 @@ class Container:
         await self._event_bus.connect()
 
         await self._service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=True)
-        await self._service_affecting_monitor_reports.start_service_affecting_monitor_job(exec_on_start=False)
+        await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=False)
 
         self._scheduler.start()
 
