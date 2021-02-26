@@ -565,8 +565,8 @@ class TNBAMonitor:
                     )
                     return
 
-                tnba_note: str = self._ticket_repository.build_tnba_note_from_request_or_repair_completed_prediction(
-                    best_prediction, serial_number
+                tnba_note: str = self._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction(
+                    serial_number
                 )
             else:
                 tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction, serial_number)

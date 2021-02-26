@@ -114,8 +114,8 @@ def make_standard_tnba_note():
         text = (
             "#*MetTel's IPA*#\n"
             'AI\n\n'
-            f'The next best action for {serial_number} is: {prediction_name}.\n\n'
-            'TNBA is based on AI model designed specifically for MetTel.'
+            f"MetTel's IPA AI indicates that the next best action for {serial_number} is: {prediction_name}.\n\n"
+            "MetTel's IPA is based on an AI model designed specifically for MetTel."
         )
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
 
@@ -123,29 +123,13 @@ def make_standard_tnba_note():
 
 
 @pytest.fixture(scope='session')
-def make_request_completed_tnba_note():
+def make_request_repair_completed_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
             "#*MetTel's IPA*#\n"
             'AI\n\n'
-            f'The next best action for {serial_number} is: Request Completed. Since it is a high confidence prediction '
-            'the task has been automatically transitioned.\n\n'
-            'TNBA is based on AI model designed specifically for MetTel.'
-        )
-        return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
-
-    return _inner
-
-
-@pytest.fixture(scope='session')
-def make_repair_completed_tnba_note():
-    def _inner(*, serial_number: str, date: str = None):
-        text = (
-            "#*MetTel's IPA*#\n"
-            'AI\n\n'
-            f'The next best action for {serial_number} is: Repair Completed. Since it is a high confidence prediction '
-            'the task has been automatically transitioned.\n\n'
-            'TNBA is based on AI model designed specifically for MetTel.'
+            f"MetTel's IPA AI is resolving the task for {serial_number}.\n\n"
+            "MetTel's IPA is based on an AI model designed specifically for MetTel."
         )
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
 

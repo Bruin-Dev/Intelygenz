@@ -1,11 +1,25 @@
-import os
 import re
 
 from functools import partial
 from typing import List
 
 
-TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The next best action for .* is: (?P<prediction_name>.*?)\.')
+TNBA_NOTE_STANDARD_PREDICTION_OLD_WORDING = r'The next best action for .+ is: (?P<prediction_name>.+)\.'
+TNBA_NOTE_STANDARD_PREDICTION_NEW_WORDING = (
+    r"MetTel's IPA AI indicates that the next best action for .+ is: (?P<prediction_name2>.+)\."
+)
+TNBA_NOTE_STANDARD_PREDICTION_REGEX = re.compile(
+    f'{TNBA_NOTE_STANDARD_PREDICTION_OLD_WORDING}|{TNBA_NOTE_STANDARD_PREDICTION_NEW_WORDING}',
+)
+
+TNBA_NOTE_REQUEST_REPAIR_PREDICTION_OLD_WORDING = (
+    r'The next best action for .+ is: .+\. Since it is a high confidence prediction\n'
+    r'the task has been automatically transitioned\.'
+)
+TNBA_NOTE_REQUEST_REPAIR_PREDICTION_NEW_WORDING = r"MetTel's IPA AI is resolving the task for .+\."
+TNBA_NOTE_REQUEST_REPAIR_PREDICTION_REGEX = re.compile(
+    f'{TNBA_NOTE_REQUEST_REPAIR_PREDICTION_OLD_WORDING}|{TNBA_NOTE_REQUEST_REPAIR_PREDICTION_NEW_WORDING}',
+)
 
 
 class PredictionRepository:
@@ -39,21 +53,19 @@ class PredictionRepository:
         )
 
     def is_best_prediction_different_from_prediction_in_tnba_note(self, tnba_note: dict, best_prediction: dict) -> bool:
-        tnba_note_lines = tnba_note['noteValue'].split(os.linesep)
-        tnba_note_prediction_line = self._utils_repository.get_first_element_matching(
-            tnba_note_lines,
-            lambda line: TNBA_NOTE_PREDICTION_LINE_REGEX.match(line) is not None,
-        )
+        tnba_note_text = tnba_note['noteValue']
 
-        if not tnba_note_prediction_line:
-            # Let's consider the prediction has changed if no prediction with the expected format is found in the note
-            return True
+        request_repair_prediction_match = TNBA_NOTE_REQUEST_REPAIR_PREDICTION_REGEX.search(tnba_note_text)
+        if request_repair_prediction_match:
+            return not self.is_request_or_repair_completed_prediction(best_prediction)
 
-        prediction_match = TNBA_NOTE_PREDICTION_LINE_REGEX.match(tnba_note_prediction_line)
-        prediction_name = prediction_match.group('prediction_name')
-        best_prediction_name = best_prediction['name']
+        standard_prediction_match = TNBA_NOTE_STANDARD_PREDICTION_REGEX.search(tnba_note_text)
+        if standard_prediction_match:
+            prediction_name = standard_prediction_match.group('prediction_name') or \
+                              standard_prediction_match.group('prediction_name2')
 
-        return not (prediction_name == best_prediction_name)
+            best_prediction_name = best_prediction['name']
+            return not (prediction_name == best_prediction_name)
 
     @staticmethod
     def is_request_or_repair_completed_prediction(prediction: dict) -> bool:

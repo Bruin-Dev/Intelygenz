@@ -53,20 +53,6 @@ class TestPredictionRepository:
         result = prediction_repository.get_best_prediction(predictions)
         assert result == confident_request_completed_prediction
 
-    def is_best_prediction_different_from_prediction_in_tnba_note_with_no_prediction_found_in_note_test(
-            self, prediction_repository, make_ticket_note, serial_number_1, holmdel_noc_prediction):
-        note_text = (
-            '#*Automation Engine*#\n'
-            'AI\n\n'
-            'The note was written with a wrong format just to test this edge case'
-        )
-        tnba_note = make_ticket_note(serial_number=serial_number_1, text=note_text)
-
-        result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
-            tnba_note, holmdel_noc_prediction
-        )
-        assert result is True
-
     def is_best_prediction_different_from_prediction_in_tnba_note_with_no_changes_in_prediction_name_test(
             self, prediction_repository, make_standard_tnba_note, serial_number_1, holmdel_noc_prediction):
         prediction_name = holmdel_noc_prediction['name']
@@ -77,9 +63,9 @@ class TestPredictionRepository:
         assert result is False
 
     def is_best_prediction_different_from_prediction_in_request_repair_tnba_note_with_no_changes_in_prediction_test(
-            self, prediction_repository, make_request_completed_tnba_note, serial_number_1,
+            self, prediction_repository, make_request_repair_completed_tnba_note, serial_number_1,
             confident_request_completed_prediction):
-        tnba_note = make_request_completed_tnba_note(serial_number=serial_number_1)
+        tnba_note = make_request_repair_completed_tnba_note(serial_number=serial_number_1)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
             tnba_note, confident_request_completed_prediction)
@@ -95,9 +81,9 @@ class TestPredictionRepository:
         assert result is True
 
     def is_best_prediction_different_from_prediction_in_request_repair_tnba_note_with_changes_in_prediction_name_test(
-            self, prediction_repository, make_request_completed_tnba_note, serial_number_1,
+            self, prediction_repository, make_request_repair_completed_tnba_note, serial_number_1,
             holmdel_noc_prediction):
-        tnba_note = make_request_completed_tnba_note(serial_number=serial_number_1)
+        tnba_note = make_request_repair_completed_tnba_note(serial_number=serial_number_1)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
             tnba_note, holmdel_noc_prediction)

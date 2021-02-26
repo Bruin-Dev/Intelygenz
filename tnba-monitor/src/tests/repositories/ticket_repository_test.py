@@ -20,8 +20,8 @@ class TestTicketRepository:
         result = TicketRepository.is_detail_resolved(ticket_detail)
         assert result is True
 
-    def is_tnba_note_test(self, serial_number_1, make_standard_tnba_note, make_request_completed_tnba_note,
-                          make_repair_completed_tnba_note, make_reopen_note, make_triage_note):
+    def is_tnba_note_test(self, serial_number_1, make_standard_tnba_note, make_request_repair_completed_tnba_note,
+                          make_reopen_note, make_triage_note):
         reopen_note = make_reopen_note(serial_number=serial_number_1)
         result = TicketRepository.is_tnba_note(reopen_note)
         assert result is False
@@ -34,11 +34,7 @@ class TestTicketRepository:
         result = TicketRepository.is_tnba_note(tnba_note)
         assert result is True
 
-        tnba_request_completed_note = make_request_completed_tnba_note(serial_number=serial_number_1)
-        result = TicketRepository.is_tnba_note(tnba_request_completed_note)
-        assert result is True
-
-        tnba_repair_completed_note = make_repair_completed_tnba_note(serial_number=serial_number_1)
+        tnba_repair_completed_note = make_request_repair_completed_tnba_note(serial_number=serial_number_1)
         result = TicketRepository.is_tnba_note(tnba_repair_completed_note)
         assert result is True
 
@@ -152,23 +148,19 @@ class TestTicketRepository:
             "#*MetTel's IPA*#",
             'AI',
             '',
-            'The next best action for VC1234567 is: Holmdel NOC Investigate.',
+            "MetTel's IPA AI indicates that the next best action for VC1234567 is: Holmdel NOC Investigate.",
             '',
-            'TNBA is based on AI model designed specifically for MetTel.',
+            "MetTel's IPA is based on an AI model designed specifically for MetTel.",
         ])
 
-    def build_tnba_note_from_request_or_repair_completed_prediction_test(self, serial_number_1,
-                                                                         confident_repair_completed_prediction):
-        result = TicketRepository.build_tnba_note_from_request_or_repair_completed_prediction(
-            confident_repair_completed_prediction, serial_number_1
-        )
+    def build_tnba_note_from_request_or_repair_completed_prediction_test(self, serial_number_1):
+        result = TicketRepository.build_tnba_note_for_request_or_repair_completed_prediction(serial_number_1)
 
         assert result == os.linesep.join([
             "#*MetTel's IPA*#",
             'AI',
             '',
-            'The next best action for VC1234567 is: Repair Completed. Since it is a high confidence prediction',
-            'the task has been automatically transitioned.',
+            "MetTel's IPA AI is resolving the task for VC1234567.",
             '',
-            'TNBA is based on AI model designed specifically for MetTel.',
+            "MetTel's IPA is based on an AI model designed specifically for MetTel.",
         ])

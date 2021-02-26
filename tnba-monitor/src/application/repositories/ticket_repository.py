@@ -64,22 +64,20 @@ class TicketRepository:
             "#*MetTel's IPA*#",
             'AI',
             '',
-            f'The next best action for {serial_number} is: {prediction["name"]}.',
+            f"MetTel's IPA AI indicates that the next best action for {serial_number} is: {prediction['name']}.",
             '',
-            'TNBA is based on AI model designed specifically for MetTel.',
+            "MetTel's IPA is based on an AI model designed specifically for MetTel.",
         ]
         return os.linesep.join(note_lines)
 
     @staticmethod
-    def build_tnba_note_from_request_or_repair_completed_prediction(prediction: dict, serial_number: str) -> str:
-        pred_name = prediction["name"]
+    def build_tnba_note_for_request_or_repair_completed_prediction(serial_number: str) -> str:
         note_lines = [
             "#*MetTel's IPA*#",
             'AI',
             '',
-            f'The next best action for {serial_number} is: {pred_name}. Since it is a high confidence prediction',
-            'the task has been automatically transitioned.',
+            f"MetTel's IPA AI is resolving the task for {serial_number}.",
             '',
-            'TNBA is based on AI model designed specifically for MetTel.',
+            "MetTel's IPA is based on an AI model designed specifically for MetTel.",
         ]
         return os.linesep.join(note_lines)
