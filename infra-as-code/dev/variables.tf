@@ -178,6 +178,26 @@ variable "DISPATCH_PORTAL_SERVER_PORT" {
   default = ""
 }
 
+// email-tagger-kre-bridge environment variables
+
+variable "EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL" {
+  default = ""
+}
+
+// email-tagger-monitor environment variables
+
+variable "EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY" {
+  default = ""
+}
+
+variable "EMAIL_TAGGER_MONITOR_REQUEST_API_KEY" {
+  default = ""
+}
+
+variable "EMAIL_TAGGER_MONITOR_API_SERVER_ENDPOINT_PREFIX" {
+  default = "/api/email-tagger-webhook"
+}
+
 // hawkeye-bridge environment variables
 
 variable "HAWKEYE_CLIENT_USERNAME" {
@@ -452,6 +472,18 @@ variable "dispatch_portal_backend_desired_tasks" {
   description = "Number of desired tasks of microservice dispatch-portal-backend"
 }
 
+variable "email_tagger_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice email-tagger-monitor"
+}
+
+variable "email_tagger_kre_bridge_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice email-tagger-kre-bridge"
+}
+
 variable "hawkeye_affecting_monitor_desired_tasks" {
   default = 1
   type = number
@@ -620,6 +652,18 @@ variable "digi-bridge-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for digi-bridge"
   default = "/tmp/digi-bridge-task-definition.json"
+}
+
+variable "email-tagger-kre-bridge-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for email-tagger-kre-bridge"
+  default = "/tmp/email-tagger-kre-bridge-task-definition.json"
+}
+
+variable "email-tagger-monitor-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for email-tagger-monitor"
+  default = "/tmp/email-tagger-monitor-task-definition.json"
 }
 
 variable "customer-cache-task-definition-json" {

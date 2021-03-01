@@ -1,3 +1,15 @@
+locals {
+  // automation-nats-server local vars
+  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${data.external.nats-server-build_number.result["image_tag"]}"
+  automation-nats-server-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
+  automation-nats-server-task_definition_template-container_name = "nats-server"
+  automation-nats-server-task_definition_template-natscluster = "nats://0.0.0.0:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
+}
+
 data "aws_ecr_repository" "automation-nats-server" {
   name = "automation-nats-server"
 }

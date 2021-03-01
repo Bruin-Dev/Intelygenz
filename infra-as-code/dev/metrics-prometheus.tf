@@ -1,3 +1,46 @@
+locals {
+  // automation-metrics-grafana local vars
+  automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${data.external.grafana-build_number.result["image_tag"]}"
+  automation-grafana-papertrail_prefix = "grafana-${element(split("-", data.external.grafana-build_number.result["image_tag"]),2)}"
+  automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"
+  automation-metrics-grafana-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
+
+  // automation-metrics-prometheus local vars
+  automation-metrics-prometheus-image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${data.external.prometheus-build_number.result["image_tag"]}"
+  automation-metrics-prometheus-ecs_task_definition-family = "${var.ENVIRONMENT}-metrics-prometheus"
+  automation-metrics-prometheus-service-security_group-name = "${var.ENVIRONMENT}-metrics-prometheus"
+  automation-metrics-prometheus-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus"
+  automation-metrics-prometheus-ecs_service-name = "${var.ENVIRONMENT}-metrics-prometheus"
+  automation-metrics-prometheus-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
+  automation-metrics-prometheus-service_discovery_service-name = "prometheus-${var.ENVIRONMENT}"
+  automation-metrics-prometheus-HTTP_PORT = 9090
+  automation-metrics-prometheus-tsdb_path = "/prometheus"
+  automation-metrics-prometheus-volume-container_path = "/prometheus"
+  automation-metrics-prometheus-tsdb_retention_time = "8h"
+  automation-metrics-prometheus-tsdb_block_duration = "1h"
+  automation-metrics-prometheus-volume-name = "prometheus_storage-${var.ENVIRONMENT}"
+  automation-metrics-prometheus-s3-storage-name = "prometheus-storage-${var.ENVIRONMENT}"
+  automation-metrics-prometheus-s3-expiration-days = 14
+  automation-metrics-prometheus-s3-storage-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus-storage"
+
+  // automation-metrics-thanos-sidecar local vars
+  automation-metrics-thanos-sidecar-image = "${data.aws_ecr_repository.automation-metrics-thanos-sidecar.repository_url}:${data.external.thanos-sidecar-build_number.result["image_tag"]}"
+  automation-metrics-thanos-sidecar-GRPC_PORT = 10091
+  automation-metrics-thanos-sidecar-HTTP_PORT = 10902
+  automation-metrics-thanos-sidecar-objstore-config_file = "/tmp/bucket_config.yaml"
+
+  // automation-metrics-thanos-store-gateway local vars
+  automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${data.external.thanos-store-gateway-build_number.result["image_tag"]}"
+  automation-metrics-thanos-store-gateway-GRPC_PORT = 10901
+  automation-metrics-thanos-store-gateway-HTTP_PORT = 19191
+  automation-metrics-thanos-store-gateway-config_file = "/tmp/bucket_config.yaml"
+
+  // automation-metrics-thanos-querier local vars
+  automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${data.external.thanos-querier-build_number.result["image_tag"]}"
+  automation-metrics-thanos-querier-GRPC_PORT = 10999
+  automation-metrics-thanos-querier-HTTP_PORT = 19091
+}
+
 data "aws_ecr_repository" "automation-metrics-prometheus" {
   name = "automation-metrics-dashboard/prometheus"
 }
@@ -137,51 +180,6 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
     Name = local.automation-metrics-prometheus-service-security_group-tag-Name
     Environment = var.ENVIRONMENT
   }
-}
-
-resource "aws_lb_listener" "automation-grafana" {
-  load_balancer_arn = aws_lb.automation-alb.arn
-  port = "443"
-  protocol = "HTTPS"
-  certificate_arn = data.aws_acm_certificate.automation.arn
-
-  default_action {
-    target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
-    type = "forward"
-  }
-}
-
-resource "aws_lb_target_group" "automation-metrics-grafana" {
-  name = local.automation-metrics-grafana-target_group-name
-  port = 3000
-  protocol = "HTTP"
-  vpc_id = data.aws_vpc.mettel-automation-vpc.id
-  target_type = "ip"
-  stickiness {
-    type = "lb_cookie"
-    enabled = false
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    interval            = 90
-    port                = 3000
-    matcher             = 200
-    protocol            = "HTTP"
-    path                = "/api/health"
-  }
-
-  tags = {
-    Name = local.automation-metrics-grafana-target_group-tag-Name
-    Environment = var.ENVIRONMENT
-  }
-  
 }
 
 resource "aws_ecs_service" "automation-metrics-prometheus" {

@@ -1,3 +1,14 @@
+locals {
+  // automation-notifier local vars
+  automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${data.external.notifier-build_number.result["image_tag"]}"
+  automation-notifier-papertrail_prefix = "notifier-${element(split("-", data.external.notifier-build_number.result["image_tag"]),2)}"
+  automation-notifier-ecs_task_definition-family = "${var.ENVIRONMENT}-notifier"
+  automation-notifier-service-security_group-name = "${var.ENVIRONMENT}-notifier"
+  automation-notifier-service-security_group-tag-Name = "${var.ENVIRONMENT}-notifier"
+  automation-notifier-ecs_service-name = "${var.ENVIRONMENT}-notifier"
+  automation-notifier-ecs_service-task_definition = "${aws_ecs_task_definition.automation-notifier.family}:${aws_ecs_task_definition.automation-notifier.revision}"
+}
+
 data "aws_ecr_repository" "automation-notifier" {
   name = "automation-notifier"
 }

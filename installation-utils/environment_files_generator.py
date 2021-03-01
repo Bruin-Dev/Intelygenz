@@ -112,12 +112,17 @@ NATS_CLUSTER_MODE3 = 'n'
 REDIS_HOSTNAME = 'redis'
 REDIS_CUSTOMER_CACHE_HOSTNAME = 'redis-customer-cache'
 REDIS_TNBA_FEEDBACK_HOSTNAME = 'redis-tnba-feedback'
+REDIS_EMAIL_TAGGER_HOSTNAME = 'redis-email-tagger'
 
 # Slack variables
 SLACK_URL = var_dict["SLACK_URL_DEV"]
 
 # T7 variables
 KRE_BASE_URL = var_dict["KRE_BASE_URL_DEV"]
+
+# Email Tagger variables
+EMAIL_TAGGER_KRE_BASE_URL = var_dict["EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL_DEV"]
+
 
 # Velocloud variables
 VELOCLOUD_CREDENTIALS = var_dict["VELOCLOUD_CREDENTIALS_DEV"]
@@ -451,6 +456,26 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'REDIS_TNBA_FEEDBACK_HOSTNAME={REDIS_TNBA_FEEDBACK_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('email-tagger-kre-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'KRE_BASE_URL={EMAIL_TAGGER_KRE_BASE_URL}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('email-tagger-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'REDIS_CACHE_HOSTNAME={REDIS_EMAIL_TAGGER_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'API_SERVER_ENDPOINT_PREFIX=/api/email-tagger-webhook\n'
+        f'REQUEST_SIGNATURE_SECRET_KEY=secret\n'
+        f'REQUEST_API_KEY=123456\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',

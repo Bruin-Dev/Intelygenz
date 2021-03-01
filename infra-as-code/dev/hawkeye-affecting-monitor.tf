@@ -1,3 +1,15 @@
+locals {
+  // automation-hawkeye-affecting-monitor local vars
+  automation-hawkeye-affecting-monitor-image = "${data.aws_ecr_repository.automation-hawkeye-affecting-monitor.repository_url}:${data.external.hawkeye-affecting-monitor-build_number.result["image_tag"]}"
+  automation-hawkeye-affecting-monitor-papertrail_prefix = "hawkeye-affecting-monitor-${element(split("-", data.external.hawkeye-affecting-monitor-build_number.result["image_tag"]),2)}"
+  automation-hawkeye-affecting-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor_service-security_group-name = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor-resource-name = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-hawkeye-affecting-monitor"
+  automation-hawkeye-affecting-monitor-task_definition = "${aws_ecs_task_definition.automation-hawkeye-affecting-monitor.family}:${aws_ecs_task_definition.automation-hawkeye-affecting-monitor.revision}"
+  automation-hawkeye-affecting-monitor-service_discovery_service-name = "hawkeye-affecting-monitor-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-hawkeye-affecting-monitor" {
   name = "automation-hawkeye-affecting-monitor"
 }
@@ -127,10 +139,12 @@ resource "aws_ecs_service" "automation-hawkeye-affecting-monitor" {
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
+                 null_resource.digi-bridge-healthcheck,
+                 null_resource.email-tagger-kre-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
-                 null_resource.velocloud-bridge-healthcheck,
-                 null_resource.hawkeye-bridge-healthcheck,
-                 null_resource.t7-bridge-healthcheck]
+                 null_resource.t7-bridge-healthcheck,
+                 null_resource.velocloud-bridge-healthcheck]
 }

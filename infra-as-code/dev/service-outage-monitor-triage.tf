@@ -1,3 +1,15 @@
+locals {
+  // automation-service-outage-monitor-triage local vars
+  automation-service-outage-monitor-triage-papertrail_prefix = "service-outage-monitor-triage-${element(split("-", data.external.service-outage-monitor-build_number.result["image_tag"]),2)}"
+  automation-service-outage-monitor-triage-container_name = "service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-triage.family}:${aws_ecs_task_definition.automation-service-outage-monitor-triage.revision}"
+  automation-service-outage-monitor-triage-service_discovery_service-name = "service-outage-monitor-triage-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-service-outage-monitor" {
   name = "automation-service-outage-monitor"
 }
@@ -133,10 +145,11 @@ resource "aws_ecs_service" "automation-service-outage-monitor-triage" {
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
                  null_resource.digi-bridge-healthcheck,
+                 null_resource.email-tagger-kre-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
-                 null_resource.velocloud-bridge-healthcheck,
-                 null_resource.hawkeye-bridge-healthcheck,
-                 null_resource.t7-bridge-healthcheck]
+                 null_resource.t7-bridge-healthcheck,
+                 null_resource.velocloud-bridge-healthcheck]
 }

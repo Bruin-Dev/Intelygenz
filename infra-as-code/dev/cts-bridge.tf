@@ -1,3 +1,15 @@
+locals {
+  // automation-cts-bridge local vars
+  automation-cts-bridge-image = "${data.aws_ecr_repository.automation-cts-bridge.repository_url}:${data.external.cts-bridge-build_number.result["image_tag"]}"
+  automation-cts-bridge-papertrail_prefix = "cts-bridge-${element(split("-", data.external.cts-bridge-build_number.result["image_tag"]),2)}"
+  automation-cts-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-cts-bridge"
+  automation-cts-bridge_service-security_group-name = "${var.ENVIRONMENT}-cts-bridge"
+  automation-cts-bridge-resource-name = "${var.ENVIRONMENT}-cts-bridge"
+  automation-cts-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-cts-bridge"
+  automation-cts-bridge-task_definition = "${aws_ecs_task_definition.automation-cts-bridge.family}:${aws_ecs_task_definition.automation-cts-bridge.revision}"
+  automation-cts-bridge-service_discovery_service-name = "cts-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-cts-bridge" {
   name = "automation-cts-bridge"
 }

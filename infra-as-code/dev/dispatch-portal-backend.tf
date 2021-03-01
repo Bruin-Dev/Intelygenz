@@ -1,3 +1,15 @@
+locals {
+  // automation-dispatch-portal-backend local vars
+  automation-dispatch-portal-backend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-image = "${data.aws_ecr_repository.automation-dispatch-portal-backend.repository_url}:${data.external.dispatch-portal-backend-build_number.result["image_tag"]}"
+  automation-dispatch-portal-backend-papertrail_prefix = "dispatch-portal-backend-${element(split("-", data.external.dispatch-portal-backend-build_number.result["image_tag"]),2)}"
+  automation-dispatch-portal-backend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-resource-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-backend.family}:${aws_ecs_task_definition.automation-dispatch-portal-backend.revision}"
+  automation-dispatch-portal-backend-service_discovery_service-name = "dispatch-portal-backend-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-dispatch-portal-backend" {
   name = "automation-dispatch-portal-backend"
 }
@@ -153,6 +165,7 @@ resource "null_resource" "dispatch-portal-backend-healthcheck" {
                 null_resource.bruin-bridge-healthcheck,
                 null_resource.cts-bridge-healthcheck,
                 null_resource.digi-bridge-healthcheck,
+                null_resource.email-tagger-kre-bridge-healthcheck,
                 null_resource.lit-bridge-healthcheck,
                 null_resource.metrics-prometheus-healthcheck,
                 null_resource.notifier-healthcheck,

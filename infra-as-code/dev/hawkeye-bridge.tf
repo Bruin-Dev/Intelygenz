@@ -1,3 +1,15 @@
+locals {
+  // automation-hawkeye-brige local vars
+  automation-hawkeye-bridge-image = "${data.aws_ecr_repository.automation-hawkeye-bridge.repository_url}:${data.external.hawkeye-bridge-build_number.result["image_tag"]}"
+  automation-hawkeye-bridge-papertrail_prefix = "hawkeye-bridge-${element(split("-", data.external.hawkeye-bridge-build_number.result["image_tag"]),2)}"
+  automation-hawkeye-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge_service-security_group-name = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge-resource-name = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-hawkeye-bridge"
+  automation-hawkeye-bridge-task_definition = "${aws_ecs_task_definition.automation-hawkeye-bridge.family}:${aws_ecs_task_definition.automation-hawkeye-bridge.revision}"
+  automation-hawkeye-bridge-service_discovery_service-name = "hawkeye-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-hawkeye-bridge" {
   name = "automation-hawkeye-bridge"
 }

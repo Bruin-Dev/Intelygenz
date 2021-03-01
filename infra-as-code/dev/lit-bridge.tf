@@ -1,3 +1,15 @@
+locals {
+  // automation-lit-bridge local vars
+  automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${data.external.lit-bridge-build_number.result["image_tag"]}"
+  automation-lit-bridge-papertrail_prefix = "lit-bridge-${element(split("-", data.external.lit-bridge-build_number.result["image_tag"]),2)}"
+  automation-lit-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge_service-security_group-name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-resource-name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-task_definition = "${aws_ecs_task_definition.automation-lit-bridge.family}:${aws_ecs_task_definition.automation-lit-bridge.revision}"
+  automation-lit-bridge-service_discovery_service-name = "lit-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-lit-bridge" {
   name = "automation-lit-bridge"
 }

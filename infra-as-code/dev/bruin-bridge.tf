@@ -1,3 +1,15 @@
+locals {
+  // automation-bruin-brige local vars
+  automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${data.external.bruin-bridge-build_number.result["image_tag"]}"
+  automation-bruin-bridge-papertrail_prefix = "bruin-bridge-${element(split("-", data.external.bruin-bridge-build_number.result["image_tag"]),2)}"
+  automation-bruin-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-bruin-bridge"
+  automation-bruin-bridge_service-security_group-name = "${var.ENVIRONMENT}-bruin-bridge"
+  automation-bruin-bridge-resource-name = "${var.ENVIRONMENT}-bruin-bridge"
+  automation-bruin-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-bruin-bridge"
+  automation-bruin-bridge-task_definition = "${aws_ecs_task_definition.automation-bruin-bridge.family}:${aws_ecs_task_definition.automation-bruin-bridge.revision}"
+  automation-bruin-bridge-service_discovery_service-name = "bruin-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-bruin-bridge" {
   name = "automation-bruin-bridge"
 }

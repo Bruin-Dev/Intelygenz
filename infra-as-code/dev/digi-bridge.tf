@@ -1,3 +1,15 @@
+locals {
+  // automation-digi-bridge local vars
+  automation-digi-bridge-image = "${data.aws_ecr_repository.automation-digi-bridge.repository_url}:${data.external.digi-bridge-build_number.result["image_tag"]}"
+  automation-digi-bridge-papertrail_prefix = "digi-bridge-${element(split("-", data.external.digi-bridge-build_number.result["image_tag"]),2)}"
+  automation-digi-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge_service-security_group-name = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge-resource-name = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-digi-bridge"
+  automation-digi-bridge-task_definition = "${aws_ecs_task_definition.automation-digi-bridge.family}:${aws_ecs_task_definition.automation-digi-bridge.revision}"
+  automation-digi-bridge-service_discovery_service-name = "digi-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-digi-bridge" {
   name = "automation-digi-bridge"
 }

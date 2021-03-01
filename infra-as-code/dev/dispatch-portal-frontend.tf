@@ -1,3 +1,20 @@
+locals {
+  // automation-dispatch-portal-frontend local vars
+  automation-dispatch-portal-frontend-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.repository_url}:${data.external.dispatch-portal-frontend-nextjs-build_number.result["image_tag"]}"
+  automation-dispatch-portal-frontend-nginx-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.repository_url}:${data.external.dispatch-portal-frontend-nginx-build_number.result["image_tag"]}"
+  automation-dispatch-portal-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-dispatch-portal-frontend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_task_definition = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_service-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_service-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-frontend.family}:${aws_ecs_task_definition.automation-dispatch-portal-frontend.revision}"
+  automation-dispatch-portal-target_group-name = "${var.ENVIRONMENT}-disp-prtl"
+  automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
+  automation-dispatch-portal-frontend-nginx-run-mode = "aws"
+}
+
 data "aws_ecr_repository" "automation-dispatch-portal-frontend-nextjs" {
   name = "automation-dispatch-portal-frontend"
 }
@@ -78,55 +95,6 @@ resource "aws_security_group" "automation-dispatch-portal-frontend_service" {
   }
 }
 
-resource "aws_lb_target_group" "automation-dispatch-portal" {
-  name = local.automation-dispatch-portal-target_group-name
-  port = 8080
-  protocol = "HTTP"
-  vpc_id = data.aws_vpc.mettel-automation-vpc.id
-  target_type = "ip"
-  stickiness {
-    type = "lb_cookie"
-    enabled = false
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    interval            = 30
-    port                = 8080
-    matcher             = 200
-    protocol            = "HTTP"
-    path                = "/health-check"
-  }
-
-  tags = {
-    Name = local.automation-dispatch-portal-target_group-tag-Name
-    Environment = var.ENVIRONMENT
-  }
-
-}
-
-resource "aws_alb_listener_rule" "automation-dispatch-portal-path" {
-  depends_on   = [ aws_lb_target_group.automation-dispatch-portal ]
-  listener_arn = aws_lb_listener.automation-grafana.arn
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.automation-dispatch-portal.arn
-  }
-  condition {
-    path_pattern {
-      values = [
-        "/dispatch_portal/*",
-        "/dispatch_portal"]
-    }
-  }
-}
-
 resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
   name = local.automation-dispatch-portal-frontend-ecs_service-name
   task_definition = local.automation-dispatch-portal-frontend-ecs_task_definition
@@ -151,6 +119,7 @@ resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
                  null_resource.digi-bridge-healthcheck,
+                 null_resource.email-tagger-kre-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
                  null_resource.hawkeye-bridge-healthcheck,

@@ -1,0 +1,84 @@
+[
+  {
+    "name": "email-tagger-monitor",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 5000,
+        "hostPort": 5000
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:5000/_health || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "environment": [
+      {
+        "name": "ENVIRONMENT_NAME",
+        "value": "${ENVIRONMENT_NAME}"
+      },
+      {
+        "name": "NATS_SERVER1",
+        "value": "${NATS_SERVER1}"
+      },
+      {
+        "name": "REDIS_HOSTNAME",
+        "value": "${REDIS_HOSTNAME}"
+      },
+      {
+        "name": "REDIS_CACHE_HOSTNAME",
+        "value": "${REDIS_CACHE_HOSTNAME}"
+      },
+      {
+        "name": "CURRENT_ENVIRONMENT",
+        "value": "${CURRENT_ENVIRONMENT}"
+      },
+      {
+        "name": "REQUEST_SIGNATURE_SECRET_KEY",
+        "value": "${REQUEST_SIGNATURE_SECRET_KEY}"
+      },
+      {
+        "name": "REQUEST_API_KEY",
+        "value": "${REQUEST_API_KEY}"
+      },{
+        "name": "API_SERVER_ENDPOINT_PREFIX",
+        "value": "${API_SERVER_ENDPOINT_PREFIX}"
+      },
+      {
+        "name": "PYTHONUNBUFFERED",
+        "value": "${PYTHONUNBUFFERED}"
+      },
+      {
+        "name": "PAPERTRAIL_ACTIVE",
+        "value": "${PAPERTRAIL_ACTIVE}"
+      },
+      {
+        "name": "PAPERTRAIL_HOST",
+        "value": "${PAPERTRAIL_HOST}"
+      },
+      {
+        "name": "PAPERTRAIL_PORT",
+        "value": "${PAPERTRAIL_PORT}"
+      },
+      {
+        "name": "PAPERTRAIL_PREFIX",
+        "value": "${PAPERTRAIL_PREFIX}"
+      }
+    ]
+  }
+]

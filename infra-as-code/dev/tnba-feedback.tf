@@ -1,3 +1,16 @@
+locals {
+   // automation-tnba-feedback local vars
+  automation-tnba-feedback-image = "${data.aws_ecr_repository.automation-tnba-feedback.repository_url}:${data.external.tnba-feedback-build_number.result["image_tag"]}"
+  automation-tnba-feedback-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-tnba-feedback-ecs_task_definition-family = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-service-security_group-name = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-service-security_group-tag-Name = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-ecs_service-name = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-ecs_service-task_definition = "${aws_ecs_task_definition.automation-tnba-feedback[0].family}:${aws_ecs_task_definition.automation-tnba-feedback[0].revision}"
+  automation-tnba-feedback-service_discovery_service-name = "tnba-feedback-${var.ENVIRONMENT}"
+  automation-tnba-feedback-papertrail_prefix = "tnba-feedback-${element(split("-", data.external.tnba-feedback-build_number.result["image_tag"]),2)}"
+}
+
 data "aws_ecr_repository" "automation-tnba-feedback" {
   name = "automation-tnba-feedback"
 }
@@ -129,10 +142,11 @@ resource "aws_ecs_service" "automation-tnba-feedback" {
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
                  null_resource.digi-bridge-healthcheck,
+                 null_resource.email-tagger-kre-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
-                 null_resource.velocloud-bridge-healthcheck,
-                 null_resource.hawkeye-bridge-healthcheck,
-                 null_resource.t7-bridge-healthcheck]
+                 null_resource.t7-bridge-healthcheck,
+                 null_resource.velocloud-bridge-healthcheck]
 }

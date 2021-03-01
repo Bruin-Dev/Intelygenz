@@ -1,3 +1,13 @@
+locals {
+  // automation-redis-tnba-feedback-cache local vars
+  automation-redis-tnba-feedback-cluster_id = "${var.ENVIRONMENT}-tnba-feedback-cache-redis"
+  automation-redis-tnba-feedback-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-tnba-feedback-redis"
+  automation-redis-tnba-feedback-subnet_group-name = "${var.ENVIRONMENT}-tnba-feedback-redis-subnet"
+  automation-redis-tnba-feedback-security_group-name = "${var.ENVIRONMENT}-tnba-feedback-redis-sg"
+  automation-redis-tnba-feedback-security_group-tag-Name = "${var.ENVIRONMENT}-tnba-feedback-redis"
+  automation-redis-tnba-feedback-hostname = aws_elasticache_cluster.automation-redis-tnba-feedback[0].cache_nodes[0].address
+}
+
 resource "aws_elasticache_subnet_group" "automation-redis-subnet-tnba-feedback" {
   count = var.tnba_feedback_desired_tasks > 0 ? 1 : 0
 

@@ -1,3 +1,16 @@
+locals {
+  // automation-sites-monitor local vars
+  automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${data.external.sites-monitor-build_number.result["image_tag"]}"
+  automation-sites-monitor-papertrail_prefix = "sites-monitor-${element(split("-", data.external.sites-monitor-build_number.result["image_tag"]),2)}"
+  automation-sites-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-sites-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-service-security_group-name = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-ecs_service-name = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-sites-monitor.family}:${aws_ecs_task_definition.automation-sites-monitor.revision}"
+  automation-sites-monitor-service_discovery_service-name = "sites-monitor-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-sites-monitor" {
   name = "automation-sites-monitor"
 }
@@ -129,10 +142,11 @@ resource "aws_ecs_service" "automation-sites-monitor" {
   depends_on = [ null_resource.bruin-bridge-healthcheck,
                  null_resource.cts-bridge-healthcheck,
                  null_resource.digi-bridge-healthcheck,
+                 null_resource.email-tagger-kre-bridge-healthcheck,
+                 null_resource.hawkeye-bridge-healthcheck,
                  null_resource.lit-bridge-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
-                 null_resource.velocloud-bridge-healthcheck,
-                 null_resource.hawkeye-bridge-healthcheck,
-                 null_resource.t7-bridge-healthcheck]
+                 null_resource.t7-bridge-healthcheck,
+                 null_resource.velocloud-bridge-healthcheck]
 }

@@ -1,3 +1,15 @@
+locals {
+  // automation-t7-brige local vars
+  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${data.external.t7-bridge-build_number.result["image_tag"]}"
+  automation-t7-bridge-papertrail_prefix = "t7-bridge-${element(split("-", data.external.t7-bridge-build_number.result["image_tag"]),2)}"
+  automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge_service-security_group-name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
+  automation-t7-bridge-service_discovery_service-name = "t7-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-t7-bridge" {
   name = "automation-t7-bridge"
 }

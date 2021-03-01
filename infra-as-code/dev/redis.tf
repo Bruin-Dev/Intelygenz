@@ -1,3 +1,11 @@
+locals {
+  // automation-redis local vars
+  automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"
+  automation-redis-security_group-name = "${var.ENVIRONMENT}-redis-sg"
+  automation-redis-security_group-tag-Name = "${var.ENVIRONMENT}-redis"
+  redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
+}
+
 resource "aws_elasticache_cluster" "automation-redis" {
   cluster_id = var.ENVIRONMENT
   engine = "redis"

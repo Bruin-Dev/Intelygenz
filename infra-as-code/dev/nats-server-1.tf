@@ -1,3 +1,16 @@
+locals {
+  // automation-nats-server-1 local vars
+  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${data.external.nats-server-build_number.result["image_tag"]}"
+  automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-ecs_service-name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server-1.family}:${aws_ecs_task_definition.automation-nats-server-1.revision}"
+  automation-nats-server-1-task_definition_template-container_name = "nats-server-1"
+  automation-nats-server-1-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_1_CLUSTER_PORT}"
+  automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
+}
+
 data "template_file" "automation-nats-server-1" {
   template = file("${path.module}/task-definitions/nats_server.json")
 

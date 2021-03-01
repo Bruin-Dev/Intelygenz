@@ -1,3 +1,15 @@
+locals {
+  // automation-lumin-billing-report local vars
+  automation-lumin-billing-report-ecs_task_definition-family = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-image = "${data.aws_ecr_repository.automation-lumin-billing-report.repository_url}:${data.external.lumin-billing-report-build_number.result["image_tag"]}"
+  automation-lumin-billing-report-service-security_group-name = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-resource-name = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-task_definition = "${aws_ecs_task_definition.automation-lumin-billing-report.family}:${aws_ecs_task_definition.automation-lumin-billing-report.revision}"
+  automation-lumin-billing-report-service_discovery_service-name = "lumin-billing-report-${var.ENVIRONMENT}"
+  automation-lumin-billing-report-papertrail_prefix = "lumin-billing-report-${element(split("-", data.external.lumin-billing-report-build_number.result["image_tag"]),2)}"
+}
+
 data "aws_ecr_repository" "automation-lumin-billing-report" {
   name = "automation-lumin-billing-report"
 }

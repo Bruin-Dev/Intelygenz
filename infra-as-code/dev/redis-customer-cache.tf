@@ -1,3 +1,13 @@
+locals {
+  // automation-redis-customer-cache local vars
+  automation-redis-customer-cache-cluster_id = "${var.ENVIRONMENT}-customer-cache-redis"
+  automation-redis-customer-cache-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-customer-cache-redis"
+  automation-redis-customer-cache-subnet_group-name = "${var.ENVIRONMENT}-customer-cache-redis-subnet"
+  automation-redis-customer-cache-security_group-name = "${var.ENVIRONMENT}-customer-cache-redis-sg"
+  automation-redis-customer-cache-security_group-tag-Name = "${var.ENVIRONMENT}-customer-cache-redis"
+  automation-redis-customer-cache-hostname = aws_elasticache_cluster.automation-redis-customer-cache[0].cache_nodes[0].address
+}
+
 resource "aws_elasticache_subnet_group" "automation-redis-subnet-customer-cache" {
   count = var.customer_cache_desired_tasks > 0 ? 1 : 0
 

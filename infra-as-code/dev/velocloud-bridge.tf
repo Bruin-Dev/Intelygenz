@@ -1,3 +1,15 @@
+locals {
+  // automation-velocloud-bridge local vars
+  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${data.external.velocloud-bridge-build_number.result["image_tag"]}"
+  automation-velocloud-bridge-papertrail_prefix = "velocloud-bridge-${element(split("-", data.external.velocloud-bridge-build_number.result["image_tag"]),2)}"
+  automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-velocloud-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-ecs_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
+  automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-velocloud-bridge" {
   name = "automation-velocloud-bridge"
 }

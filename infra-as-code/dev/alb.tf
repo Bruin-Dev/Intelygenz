@@ -153,3 +153,147 @@ resource "aws_lb_target_group" "automation-front_end" {
     Environment = var.ENVIRONMENT
   }
 }
+
+// grafana configuration for ALB
+resource "aws_lb_listener" "automation-grafana" {
+  load_balancer_arn = aws_lb.automation-alb.arn
+  port = "443"
+  protocol = "HTTPS"
+  certificate_arn = data.aws_acm_certificate.automation.arn
+
+  default_action {
+    target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
+    type = "forward"
+  }
+}
+
+resource "aws_lb_target_group" "automation-metrics-grafana" {
+  name = local.automation-metrics-grafana-target_group-name
+  port = 3000
+  protocol = "HTTP"
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
+  target_type = "ip"
+  stickiness {
+    type = "lb_cookie"
+    enabled = false
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 90
+    port                = 3000
+    matcher             = 200
+    protocol            = "HTTP"
+    path                = "/api/health"
+  }
+
+  tags = {
+    Name = local.automation-metrics-grafana-target_group-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+
+}
+
+// dispatch-portal configuration for ALB
+resource "aws_lb_target_group" "automation-dispatch-portal" {
+  name = local.automation-dispatch-portal-target_group-name
+  port = 8080
+  protocol = "HTTP"
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
+  target_type = "ip"
+  stickiness {
+    type = "lb_cookie"
+    enabled = false
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    port                = 8080
+    matcher             = 200
+    protocol            = "HTTP"
+    path                = "/health-check"
+  }
+
+  tags = {
+    Name = local.automation-dispatch-portal-target_group-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+
+}
+
+resource "aws_alb_listener_rule" "automation-dispatch-portal-path" {
+  depends_on   = [ aws_lb_target_group.automation-dispatch-portal ]
+  listener_arn = aws_lb_listener.automation-grafana.arn
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.automation-dispatch-portal.arn
+  }
+  condition {
+    path_pattern {
+      values = [
+        "/dispatch_portal/*",
+        "/dispatch_portal"]
+    }
+  }
+}
+
+// email-tagger-monitor configuration for ALB
+resource "aws_lb_target_group" "automation-email-tagger-monitor" {
+  name = local.automation-email-tagger-monitor-target_group-name
+  port = 5000
+  protocol = "HTTP"
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
+  target_type = "ip"
+  stickiness {
+    type = "lb_cookie"
+    enabled = false
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    port                = 5000
+    matcher             = 200
+    protocol            = "HTTP"
+    path                = "/_health"
+  }
+
+  tags = {
+    Name = local.automation-email-tagger-monitor-target_group-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+
+}
+
+resource "aws_alb_listener_rule" "automation-email-tagger-monitor-path" {
+  depends_on   = [ aws_lb_target_group.automation-email-tagger-monitor ]
+  listener_arn = aws_lb_listener.automation-grafana.arn
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.automation-email-tagger-monitor.arn
+  }
+  condition {
+    path_pattern {
+      values = local.automation-email-tagger-monitor-alb-listener-rules
+    }
+  }
+}

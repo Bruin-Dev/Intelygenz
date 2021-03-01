@@ -1,3 +1,15 @@
+locals {
+  // customer-cache local vars
+  automation-customer-cache-image = "${data.aws_ecr_repository.automation-customer-cache.repository_url}:${data.external.customer-cache-build_number.result["image_tag"]}"
+  automation-customer-cache-papertrail_prefix = "customer-cache-${element(split("-", data.external.customer-cache-build_number.result["image_tag"]),2)}"
+  automation-customer-cache-ecs_task_definition-family = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache_service-security_group-name = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache-resource-name = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache-service-security_group-tag-Name = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache-task_definition = "${aws_ecs_task_definition.automation-customer-cache[0].family}:${aws_ecs_task_definition.automation-customer-cache[0].revision}"
+  automation-customer-cache-service_discovery_service-name = "customer-cache-${var.ENVIRONMENT}"
+}
+
 data "aws_ecr_repository" "automation-customer-cache" {
   name = "automation-customer-cache"
 }
@@ -126,10 +138,13 @@ resource "aws_ecs_service" "automation-customer-cache" {
   }
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
+                 null_resource.cts-bridge-healthcheck,
                  null_resource.digi-bridge-healthcheck,
-                 null_resource.velocloud-bridge-healthcheck,
+                 null_resource.email-tagger-kre-bridge-healthcheck,
                  null_resource.hawkeye-bridge-healthcheck,
-                 null_resource.t7-bridge-healthcheck,
+                 null_resource.lit-bridge-healthcheck,
+                 null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
-                 null_resource.metrics-prometheus-healthcheck ]
+                 null_resource.t7-bridge-healthcheck,
+                 null_resource.velocloud-bridge-healthcheck]
 }
