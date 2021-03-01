@@ -34,7 +34,7 @@ variables:
   nats_server_1_desired_tasks: 1
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
-  service_affecting_monitor_desired_tasks: 1
+  service_affecting_monitor_desired_tasks: 0
   service_dispatch_monitor_desired_tasks: 1
   service_outage_monitor_1_desired_tasks: 1
   service_outage_monitor_2_desired_tasks: 1
