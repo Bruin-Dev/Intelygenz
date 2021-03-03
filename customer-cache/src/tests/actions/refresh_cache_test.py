@@ -37,9 +37,10 @@ class TestRefreshCache:
         storage_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
+        notifications_repository = Mock()
 
         refresh_cache = RefreshCache(config, event_bus, logger, scheduler, storage_repository,
-                                     bruin_repository, velocloud_repository)
+                                     bruin_repository, velocloud_repository, notifications_repository)
 
         assert refresh_cache._config == config
         assert refresh_cache._event_bus == event_bus
@@ -48,6 +49,7 @@ class TestRefreshCache:
         assert refresh_cache._storage_repository == storage_repository
         assert refresh_cache._velocloud_repository == velocloud_repository
         assert refresh_cache._bruin_repository == bruin_repository
+        assert refresh_cache._notifications_repository == notifications_repository
 
     @pytest.mark.asyncio
     async def schedule_cache_refresh_job_test(self, instance_refresh_cache):
@@ -103,26 +105,25 @@ class TestRefreshCache:
                                                                                instance_cache_edges)
 
     @pytest.mark.asyncio
-    async def refresh_cache_edge_list_failed_test(self, instance_refresh_cache, instance_err_msg_refresh_cache):
+    async def refresh_cache_edge_list_failed_test(self, instance_refresh_cache):
         error = "Couldn't find any edge to refresh the cache"
-        instance_err_msg_refresh_cache['request_id'] = uuid_
-        instance_err_msg_refresh_cache[
-            'message'] = f"Maximum retries happened while while refreshing the cache cause of error was {error}"
+        err_msg_refresh_cache = f"Maximum retries happened while while refreshing the cache cause of error was {error}"
         instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
 
         instance_refresh_cache._logger.error = Mock()
         instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(return_value=None)
 
         instance_refresh_cache._partial_refresh_cache = CoroutineMock()
+        instance_refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
 
         tenacity_retry_mock = patch.object(refresh_cache_module, 'retry', side_effect=retry_mock(attempts=1))
         with uuid_mock, tenacity_retry_mock:
             await instance_refresh_cache._refresh_cache()
 
         instance_refresh_cache._partial_refresh_cache.assert_not_awaited()
-        instance_refresh_cache._event_bus.rpc_request.assert_awaited_once_with("notification.slack.request",
-                                                                               instance_err_msg_refresh_cache,
-                                                                               timeout=10)
+        instance_refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(
+            err_msg_refresh_cache
+        )
 
     @pytest.mark.asyncio
     async def refresh_cache_edge_list_failed_with_several_consecutive_failures_test(self, instance_refresh_cache,
@@ -135,6 +136,7 @@ class TestRefreshCache:
         instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(return_value=None)
 
         instance_refresh_cache._partial_refresh_cache = CoroutineMock()
+        instance_refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
 
         retry_mock_fn = retry_mock(attempts=instance_refresh_cache._config.REFRESH_CONFIG['attempts_threshold'])
         tenacity_retry_mock = patch.object(refresh_cache_module, 'retry', side_effect=retry_mock_fn)
@@ -142,9 +144,7 @@ class TestRefreshCache:
             await instance_refresh_cache._refresh_cache()
 
         instance_refresh_cache._partial_refresh_cache.assert_not_awaited()
-        instance_refresh_cache._event_bus.rpc_request.assert_any_await("notification.slack.request",
-                                                                       instance_err_msg_refresh_cache,
-                                                                       timeout=10)
+        instance_refresh_cache._notifications_repository.send_slack_message.assert_awaited()
 
     @pytest.mark.asyncio
     async def partial_refresh_cache_with_edges_and_not_invalid_edges_test(self, instance_refresh_cache):

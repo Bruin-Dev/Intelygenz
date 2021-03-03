@@ -21,12 +21,14 @@ class TestVelocloudRepository:
         event_bus = Mock()
         logger = Mock()
         config = testconfig
+        notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(config, logger, event_bus)
+        velocloud_repository = VelocloudRepository(config, logger, event_bus, notifications_repository)
 
         assert velocloud_repository._event_bus is event_bus
         assert velocloud_repository._logger is logger
         assert velocloud_repository._config is config
+        assert velocloud_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
     async def get_edges_with_default_rpc_timeout_test(self, instance_velocloud_repository, instance_velocloud_request,
@@ -63,14 +65,14 @@ class TestVelocloudRepository:
                                                        instance_enterprise_velocloud_request):
         instance_enterprise_velocloud_request['request_id'] = uuid_
         instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-        instance_velocloud_repository._notify_error = CoroutineMock()
+        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         host = 'mettel.velocloud.net'
         enterprise_id = '123'
         with uuid_mock:
             result = await instance_velocloud_repository._get_all_enterprise_edges(host, enterprise_id)
 
-        instance_velocloud_repository._notify_error.assert_awaited_once()
+        instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
         instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
             "request.enterprises.edges", instance_enterprise_velocloud_request, timeout=300)
         assert result == nats_error_response
@@ -87,28 +89,17 @@ class TestVelocloudRepository:
 
         instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(
             return_value=instance_enterprise_edge_response)
-        instance_velocloud_repository._notify_error = CoroutineMock()
+        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         host = 'mettel.velocloud.net'
         enterprise_id = '123'
         with uuid_mock:
             result = await instance_velocloud_repository._get_all_enterprise_edges(host, enterprise_id)
 
-        instance_velocloud_repository._notify_error.assert_awaited_once()
+        instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
         instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
             "request.enterprises.edges", instance_enterprise_velocloud_request, timeout=300)
         assert result == instance_enterprise_edge_response
-
-    @pytest.mark.asyncio
-    async def notify_error_test(self, instance_velocloud_repository):
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock()
-        error_dict = {'request_id': uuid_,
-                      'message': 'Failed'}
-        with uuid_mock:
-            await instance_velocloud_repository._notify_error('Failed')
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with("notification.slack.request",
-                                                                                      error_dict,
-                                                                                      timeout=10)
 
     @pytest.mark.asyncio
     async def get_all_velo_test(self, instance_velocloud_repository, instance_velocloud_response,
@@ -121,7 +112,7 @@ class TestVelocloudRepository:
         host2 = testconfig.VELOCLOUD_HOST[1]
         host3 = testconfig.VELOCLOUD_HOST[2]
         host4 = testconfig.VELOCLOUD_HOST[3]
-        instance_velocloud_repository._notify_error = CoroutineMock()
+        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
         instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(
             side_effect=[instance_velocloud_response, wrong_request, wrong_request, wrong_request,
                          instance_enterprise_edge_response])
@@ -149,7 +140,7 @@ class TestVelocloudRepository:
         host2 = testconfig.VELOCLOUD_HOST[1]
         host3 = testconfig.VELOCLOUD_HOST[2]
         host4 = testconfig.VELOCLOUD_HOST[3]
-        instance_velocloud_repository._notify_error = CoroutineMock()
+        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
         instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(
             side_effect=[instance_special_velocloud_response, wrong_request, wrong_request, Exception,
                          instance_enterprise_edge_response])

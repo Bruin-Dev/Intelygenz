@@ -10,10 +10,11 @@ from application.repositories import nats_error_response
 
 class VelocloudRepository:
 
-    def __init__(self, config, logger, event_bus):
+    def __init__(self, config, logger, event_bus, notifications_repository):
         self._config = config
         self._logger = logger
         self._event_bus = event_bus
+        self._notifications_repository = notifications_repository
 
     async def get_all_velo_edges(self):
         start_time = time.time()
@@ -98,7 +99,8 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            await self._notify_error(err_msg)
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
         return response
 
@@ -132,7 +134,8 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            await self._notify_error(err_msg)
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
         return response
 
@@ -227,8 +230,3 @@ class VelocloudRepository:
     async def get_edges(self):
         edge_links_list = await self.get_all_edges_links()
         return self.extract_edge_info(edge_links_list['body'])
-
-    async def _notify_error(self, err_msg):
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)

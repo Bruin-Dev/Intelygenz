@@ -10,6 +10,7 @@ from igz.packages.server.api import QuartServer
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from application.repositories.storage_repository import StorageRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from application.actions.refresh_cache import RefreshCache
 from application.actions.get_customers import GetCustomers
 
@@ -48,13 +49,18 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_get_customers, "get_customers")
 
         # REPOSITORIES
-        self._bruin_repository = BruinRepository(config, self._logger, self._event_bus)
-        self._velocloud_repository = VelocloudRepository(config, self._logger, self._event_bus)
-        self._storage_repository = StorageRepository(config, self._logger, self._redis_customer_cache_client)
+        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
+        self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                 notifications_repository=self._notifications_repository)
+        self._velocloud_repository = VelocloudRepository(config=config, logger=self._logger, event_bus=self._event_bus,
+                                                         notifications_repository=self._notifications_repository)
+        self._storage_repository = StorageRepository(config=config, logger=self._logger,
+                                                     redis=self._redis_customer_cache_client)
 
         # ACTIONS
         self._refresh_cache = RefreshCache(config, self._event_bus, self._logger, self._scheduler,
-                                           self._storage_repository, self._bruin_repository, self._velocloud_repository)
+                                           self._storage_repository, self._bruin_repository, self._velocloud_repository,
+                                           self._notifications_repository)
         self._get_customers = GetCustomers(config, self._logger, self._storage_repository, self._event_bus)
 
         # ACTION WRAPPER

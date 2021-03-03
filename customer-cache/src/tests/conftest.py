@@ -9,6 +9,7 @@ from application.actions.refresh_cache import RefreshCache
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from config import testconfig as config
 
 
@@ -55,13 +56,18 @@ def mock_velocloud_repository():
 
 
 @pytest.fixture(scope='function')
-def instance_velocloud_repository(mock_logger, mock_event_bus, ):
-    return VelocloudRepository(config, mock_logger, mock_event_bus)
+def instance_notifications_repository(mock_event_bus):
+    return NotificationsRepository(mock_event_bus, config)
 
 
 @pytest.fixture(scope='function')
-def instance_bruin_repository(mock_logger, mock_event_bus):
-    return BruinRepository(config, mock_logger, mock_event_bus)
+def instance_velocloud_repository(mock_logger, mock_event_bus, instance_notifications_repository):
+    return VelocloudRepository(config, mock_logger, mock_event_bus, instance_notifications_repository)
+
+
+@pytest.fixture(scope='function')
+def instance_bruin_repository(mock_logger, mock_event_bus, instance_notifications_repository):
+    return BruinRepository(config, mock_logger, mock_event_bus, instance_notifications_repository)
 
 
 @pytest.fixture(scope='function')
@@ -71,9 +77,9 @@ def instance_storage_repository(mock_logger, mock_redis):
 
 @pytest.fixture(scope='function')
 def instance_refresh_cache(mock_logger, mock_event_bus, mock_scheduler, mock_storage_repository,
-                           instance_bruin_repository, mock_velocloud_repository):
+                           instance_bruin_repository, mock_velocloud_repository, instance_notifications_repository):
     return RefreshCache(config, mock_event_bus, mock_logger, mock_scheduler, mock_storage_repository,
-                        instance_bruin_repository, mock_velocloud_repository)
+                        instance_bruin_repository, mock_velocloud_repository, instance_notifications_repository)
 
 
 @pytest.fixture(scope='function')
@@ -106,20 +112,22 @@ def instance_response_message():
 
 @pytest.fixture(scope='function')
 def instance_cache_edges():
-    return [{
-        'edge': {'host': 'some host', 'enterprise_id': 123, 'edge_id': 321},
-        'last_contact': str(datetime.now()),
-        'logical_ids': ['list of logical ids'],
-        'serial_number': "VC01",
-        'bruin_client_info': {'client_id': 'some client info'}
-    },
+    return [
+        {
+            'edge': {'host': 'some host', 'enterprise_id': 123, 'edge_id': 321},
+            'last_contact': str(datetime.now()),
+            'logical_ids': ['list of logical ids'],
+            'serial_number': "VC01",
+            'bruin_client_info': {'client_id': 'some client info'}
+        },
         {
             'edge': {'host': 'some host', 'enterprise_id': 1, 'edge_id': 321},
             'last_contact': str(datetime.now()),
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC02",
             'bruin_client_info': {'client_id': 'some client info'}
-        }]
+        }
+    ]
 
 
 @pytest.fixture(scope='function')
@@ -129,16 +137,18 @@ def example_response_velo_host():
 
 @pytest.fixture(scope='function')
 def instance_edges_refresh_cache():
-    return [{
-        'edge': {'host': 'metvco02.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
-        'logical_ids': ['list of logical ids'],
-        'serial_number': "VC01"
-    },
+    return [
+        {
+            'edge': {'host': 'metvco02.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
+            'logical_ids': ['list of logical ids'],
+            'serial_number': "VC01"
+        },
         {
             'edge': {'host': 'metvco04.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC02"
-        }]
+        }
+    ]
 
 
 @pytest.fixture(scope='function')

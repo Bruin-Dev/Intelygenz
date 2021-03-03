@@ -21,12 +21,14 @@ class TestBruinRepository:
         event_bus = Mock()
         logger = Mock()
         config = testconfig
+        notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(config, logger, event_bus)
+        bruin_repository = BruinRepository(config, logger, event_bus, notifications_repository)
 
         assert bruin_repository._event_bus is event_bus
         assert bruin_repository._logger is logger
         assert bruin_repository._config is config
+        assert bruin_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
     async def get_client_info_test(self, instance_bruin_repository, instance_request_message_without_topic,
@@ -60,12 +62,12 @@ class TestBruinRepository:
 
         instance_bruin_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
 
-        instance_bruin_repository._notify_error = CoroutineMock()
+        instance_bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         with uuid_mock:
             result = await instance_bruin_repository.get_client_info(service_number)
 
-        instance_bruin_repository._notify_error.assert_awaited_once()
+        instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         instance_bruin_repository._event_bus. \
             rpc_request.assert_awaited_once_with("bruin.customer.get.info", instance_request_message_without_topic,
                                                  timeout=30)
@@ -83,7 +85,7 @@ class TestBruinRepository:
         instance_response_message['status'] = 500
         instance_bruin_repository._event_bus.rpc_request = CoroutineMock(return_value=instance_response_message)
 
-        instance_bruin_repository._notify_error = CoroutineMock()
+        instance_bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         with uuid_mock:
             result = await instance_bruin_repository.get_client_info(service_number)
@@ -91,7 +93,7 @@ class TestBruinRepository:
         instance_bruin_repository._event_bus. \
             rpc_request.assert_awaited_once_with("bruin.customer.get.info", instance_request_message_without_topic,
                                                  timeout=30)
-        instance_bruin_repository._notify_error.assert_awaited_once()
+        instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == instance_response_message
 
     @pytest.mark.asyncio
@@ -132,7 +134,7 @@ class TestBruinRepository:
 
         instance_bruin_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
 
-        instance_bruin_repository._notify_error = CoroutineMock()
+        instance_bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         with uuid_mock:
             result = await instance_bruin_repository.get_management_status(client_id, service_number)
@@ -140,7 +142,7 @@ class TestBruinRepository:
         instance_bruin_repository._event_bus. \
             rpc_request.assert_awaited_once_with("bruin.inventory.management.status",
                                                  instance_request_message_without_topic, timeout=30)
-        instance_bruin_repository._notify_error.assert_awaited_once()
+        instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -159,7 +161,7 @@ class TestBruinRepository:
         instance_response_message['body'] = 'Got internal error from Bruin'
         instance_response_message['status'] = 500
         instance_bruin_repository._event_bus.rpc_request = CoroutineMock(return_value=instance_response_message)
-        instance_bruin_repository._notify_error = CoroutineMock()
+        instance_bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         with uuid_mock:
             result = await instance_bruin_repository.get_management_status(client_id, service_number)
@@ -167,7 +169,7 @@ class TestBruinRepository:
         instance_bruin_repository._event_bus. \
             rpc_request.assert_awaited_once_with("bruin.inventory.management.status",
                                                  instance_request_message_without_topic, timeout=30)
-        instance_bruin_repository._notify_error.assert_awaited_once()
+        instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == instance_response_message
 
     def is_management_status_active_test(self, instance_bruin_repository):
@@ -186,15 +188,3 @@ class TestBruinRepository:
         management_status = "Fake status"
         result = instance_bruin_repository.is_management_status_active(management_status)
         assert result is False
-
-    @pytest.mark.asyncio
-    async def notify_error_test(self, instance_bruin_repository):
-        instance_bruin_repository._event_bus.rpc_request = CoroutineMock()
-        error_message = 'Failed'
-        error_dict = {'request_id': uuid_,
-                      'message': error_message}
-        with uuid_mock:
-            await instance_bruin_repository._notify_error(error_message)
-        instance_bruin_repository._event_bus.rpc_request.assert_awaited_once_with("notification.slack.request",
-                                                                                  error_dict,
-                                                                                  timeout=10)

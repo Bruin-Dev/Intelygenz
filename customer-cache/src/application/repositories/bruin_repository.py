@@ -5,10 +5,11 @@ from application.repositories import nats_error_response
 
 class BruinRepository:
 
-    def __init__(self, config, logger, event_bus):
+    def __init__(self, config, logger, event_bus, notifications_repository):
         self._config = config
         self._logger = logger
         self._event_bus = event_bus
+        self._notifications_repository = notifications_repository
 
     async def get_client_info(self, service_number: str):
         err_msg = None
@@ -40,7 +41,8 @@ class BruinRepository:
                 )
 
         if err_msg:
-            await self._notify_error(err_msg)
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
         return response
 
@@ -80,15 +82,10 @@ class BruinRepository:
                 )
 
         if err_msg:
-            await self._notify_error(err_msg)
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
         return response
 
     def is_management_status_active(self, management_status) -> bool:
         return management_status in self._config.REFRESH_CONFIG["monitorable_management_statuses"]
-
-    # Maybe we can implement this function in IGZ packages
-    async def _notify_error(self, err_msg):
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
