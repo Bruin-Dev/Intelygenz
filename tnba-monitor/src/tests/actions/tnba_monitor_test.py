@@ -158,6 +158,7 @@ class TestTNBAMonitor:
         tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
         tnba_monitor._transform_tickets_into_detail_objects = Mock()
+        tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
         tnba_monitor._process_ticket_detail = CoroutineMock()
         tnba_monitor._append_tnba_notes = CoroutineMock()
@@ -198,6 +199,7 @@ class TestTNBAMonitor:
         tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
         tnba_monitor._transform_tickets_into_detail_objects = Mock()
+        tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
         tnba_monitor._append_tnba_notes = CoroutineMock()
 
@@ -931,11 +933,10 @@ class TestTNBAMonitor:
             expected_detail_object_2,
         ]
 
-    @pytest.mark.asyncio
-    async def transform_tickets_into_detail_objects_test(self, make_in_progress_ticket_detail,
-                                                         make_ticket_object, make_detail_object,
-                                                         make_ticket_note, make_standard_tnba_note,
-                                                         serial_number_1, serial_number_2, serial_number_3):
+    def transform_tickets_into_detail_objects_test(self, make_in_progress_ticket_detail,
+                                                   make_ticket_object, make_detail_object,
+                                                   make_ticket_note, make_standard_tnba_note,
+                                                   serial_number_1, serial_number_2, serial_number_3):
         ticket_1_id = 12345
         ticket_2_id = 11223
 
@@ -998,6 +999,29 @@ class TestTNBAMonitor:
             expected_ticket_detail_3,
             expected_ticket_detail_4,
             expected_ticket_detail_5,
+        ]
+
+    def filter_resolved_ticket_details_test(self, tnba_monitor, make_in_progress_ticket_detail,
+                                            make_resolved_ticket_detail, make_detail_object, serial_number_1,
+                                            serial_number_2, serial_number_3):
+        ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
+        ticket_detail_2 = make_resolved_ticket_detail(serial_number=serial_number_2)
+        ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
+
+        ticket_detail_object_1 = make_detail_object(ticket_detail=ticket_detail_1)
+        ticket_detail_object_2 = make_detail_object(ticket_detail=ticket_detail_2)
+        ticket_detail_object_3 = make_detail_object(ticket_detail=ticket_detail_3)
+        detail_objects = [
+            ticket_detail_object_1,
+            ticket_detail_object_2,
+            ticket_detail_object_3,
+        ]
+
+        filtered_detail_objects = tnba_monitor._filter_resolved_ticket_details(detail_objects)
+
+        assert filtered_detail_objects == [
+            ticket_detail_object_1,
+            ticket_detail_object_3,
         ]
 
     def filter_outage_ticket_details_based_on_last_outage_with_affecting_ticket_details_test(

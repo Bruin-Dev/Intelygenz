@@ -121,6 +121,9 @@ class TNBAMonitor:
         self._logger.info('Creating detail objects based on all tickets...')
         ticket_detail_objects = self._transform_tickets_into_detail_objects(relevant_open_tickets)
 
+        self._logger.info('Discarding resolved ticket details...')
+        ticket_detail_objects = self._filter_resolved_ticket_details(ticket_detail_objects)
+
         self._logger.info('Discarding ticket details of outage tickets whose last outage happened too recently...')
         ticket_detail_objects = self._filter_outage_ticket_details_based_on_last_outage(ticket_detail_objects)
 
@@ -393,6 +396,13 @@ class TNBAMonitor:
                 detail_objects.append(detail_object)
 
         return detail_objects
+
+    def _filter_resolved_ticket_details(self, ticket_details: list) -> list:
+        return [
+            detail_object
+            for detail_object in ticket_details
+            if not self._ticket_repository.is_detail_resolved(detail_object['ticket_detail'])
+        ]
 
     def _filter_outage_ticket_details_based_on_last_outage(self, ticket_details: list) -> list:
         result = []
