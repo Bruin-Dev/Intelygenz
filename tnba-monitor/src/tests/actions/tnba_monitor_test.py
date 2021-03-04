@@ -9,7 +9,7 @@ import pytest
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from dateutil.parser import parse
-from shortuuid import uuid
+from pytz import utc
 
 from application.actions.tnba_monitor import TNBAMonitor
 from application.actions import tnba_monitor as tnba_monitor_module
@@ -1091,21 +1091,21 @@ class TestTNBAMonitor:
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         ticket_notes = []
 
-        new_now = parse(ticket_creation_date) + timedelta(minutes=59, seconds=59)
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
-        new_now = parse(ticket_creation_date) + timedelta(hours=1)
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
-        new_now = parse(ticket_creation_date) + timedelta(hours=1, seconds=1)
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):

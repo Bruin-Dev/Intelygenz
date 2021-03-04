@@ -449,7 +449,7 @@ class TNBAMonitor:
             seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
             return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
-        ticket_creation_datetime = parse(ticket_creation_date, ignoretz=True).astimezone(utc)
+        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
         seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
         return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
