@@ -448,6 +448,13 @@ services:
     expose:
       - 6381
 
+  redis-email-tagger:
+    image: redis:5.0.4
+    ports:
+      - 6382:6379
+    expose:
+      - 6382
+
   grafana:
     build:
       # Context must be the root of the monorepo
@@ -597,3 +604,41 @@ services:
     ports:
       - 5607:5000
       - 9270:9090
+
+  email-tagger-monitor:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: email-tagger-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
+        DOCKER_BASE_IMAGE_VERSION: 2.1.0
+    env_file:
+      - email-tagger-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+      - redis-email-tagger
+    ports:
+      - 5055:5000
+
+  email-tagger-kre-bridge:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: email-tagger-kre-bridge/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
+        DOCKER_BASE_IMAGE_VERSION: 2.1.0
+    env_file:
+      - email-tagger-kre-bridge/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5056:5000
+
+    # NOTE: Extra hosts is needed only for local development with a KRE local
+    #       Change to your host IP
+    # extra_hosts:
+    #  - "host.docker.internal:192.168.1.51"

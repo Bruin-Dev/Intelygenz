@@ -25,6 +25,8 @@ variables:
   digi_reboot_report_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
+  email_tagger_monitor_desired_tasks: 1
+  email_tagger_kre_bridge: 1
   hawkeye_affecting_monitor_desired_tasks: 0
   hawkeye_bridge_desired_tasks: 1
   hawkeye_customer_cache_desired_tasks: 1
@@ -73,6 +75,8 @@ include:
   - local: 'digi-reboot-report/.gitlab-ci.yml'
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'
   - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
+  - local: 'email-tagger-monitor/.gitlab-ci.yml'
+  - local: 'email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'hawkeye-affecting-monitor/.gitlab-ci.yml'
   - local: 'hawkeye-bridge/.gitlab-ci.yml'
   - local: 'hawkeye-customer-cache/.gitlab-ci.yml'

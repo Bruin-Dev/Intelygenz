@@ -1,0 +1,24 @@
+{
+  "Id": "3b6a6b4b-9fa7-4013-a4c8-3f0a1ab9be96",
+  "Attempt": 1,
+  "Notification": {
+    "Id": "ce432c87-0ed3-41ce-bf41-0d083b5548df",
+    "ClientId": 0,
+    "EntityId": "73110",
+    "ApplicationName": "NotificationAPI",
+    "Action": "EmailTicketLinked",
+    "Body":  {
+      "EmailId": "70340",
+      "ClientId": "777",
+      "Subject": "Test 15:41\"5@6t<>=se",
+      "Date": "2020-06-26T15:42:42",
+      "Body": "the issue here <strong>\"test\"</strong>",
+      "ParentID": "70213",
+      "PreviousEmailID": "70213",
+      "TagID": [],
+      "Ticket": {
+        "TicketID": "3499114"
+      }
+    }
+  }
+}

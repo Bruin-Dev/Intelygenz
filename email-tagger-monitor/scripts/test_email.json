@@ -1,0 +1,21 @@
+{
+  "Id": "3b6a6b4b-9fa7-4013-a4c8-3f0a1ab9be96",
+  "Attempt": 1,
+  "Notification": {
+    "Id": "ce432c87-0ed3-41ce-bf41-0d083b5548df",
+    "ClientId": 0,
+    "EntityId": "73110",
+    "ApplicationName": "NotificationAPI",
+    "Action": "EmailSent",
+    "Body": {
+      "EmailId": 73110,
+      "ClientId": "777",
+      "Subject": "the title",
+      "Body": "the issue here <strong>test</strong>",
+      "Date": "2021-03-23T16:43:55.493",
+      "ParentID": "73107",
+      "PreviousEmailID": "73107",
+      "TagID": []
+    }
+  }
+}

@@ -1,0 +1,307 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Notifications API",
+    "description": "This document describes the endpoints to be used to receive notifications from Bruin Email Center. \n\nAll endpoints are secured with an unique API KEY that must be present as a header named `api-key` on each call.  \n\nAdditionally, the payloaed would be hashed using HMAC-SHA256 algorithm and a shared secret to validate that the content is un-altered. This signature will be added as a header named `bruing-signature` on each call.\n\n*NOTE*: The urls showed here are just placeholders and will be defined on future releases.\n",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://email-tagger-dev.mettel-automation.net/api/email-tagger-webhook",
+      "description": "Testing environment"
+    },
+    {
+      "url": "https://email-tagger.mettel-automation.net/api/email-tagger-webhook",
+      "description": "Production environment"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyHeader": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Webhooks"
+    }
+  ],
+  "paths": {
+    "/email": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Receives a new email event notifications",
+        "description": "This endpoint is called each time a new email is received in BEC and includes the email data and all previous emails in the current thread.\n",
+        "operationId": "emailNotification",
+        "parameters": [
+          {
+            "name": "x-bruin-webhook-signature",
+            "in": "header",
+            "description": "This header is the result of hashing the payload with a shared secret with HMAC-SHA256 algorithm.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "hmac-sha256",
+              "example": "0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "This requests includes email data as well as all previous emails in the current thread.\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Notification received"
+          },
+          "400": {
+            "description": "Invalid Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                },
+                "example": {
+                  "code": "MissingBody",
+                  "message": "Mandatory Body param missing"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                },
+                "example": {
+                  "code": "MissingAPIKey",
+                  "message": "Missing api-key header"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/ticket": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Receives a new ticket event notifications",
+        "description": "This endpoint is called when a new ticket associated to an email is created. Includes ticket and email data and all previous emails in the thread.\n",
+        "operationId": "ticketNotification",
+        "parameters": [
+          {
+            "name": "x-bruin-webhook-signature",
+            "in": "header",
+            "description": "This header is the result of hashing the payload with a shared secret with HMAC-SHA256 algorithm.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "hmac-sha256",
+              "example": "0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Request body contains data from the email and its thread and from the ticket created.\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailTicketData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Notification received"
+          },
+          "400": {
+            "description": "Invalid Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                },
+                "example": {
+                  "code": "MissingParam",
+                  "message": "Mandatory Body param missing"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                },
+                "example": {
+                  "code": "MissingAPIKey",
+                  "message": "Missing api-key header"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                },
+                "example": {
+                  "code": "InvalidAPIKey",
+                  "message": "The api-key header is invalid"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EmailData": {
+        "required": [
+          "Body",
+          "ClientID",
+          "Date",
+          "EmailID",
+          "Subject"
+        ],
+        "type": "object",
+        "properties": {
+          "EmailID": {
+            "type": "string",
+            "example": "2726244"
+          },
+          "Date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2016-08-29T09:12:33.001Z"
+          },
+          "Subject": {
+            "type": "string",
+            "example": "Email subject"
+          },
+          "Body": {
+            "type": "string",
+            "format": "text",
+            "example": "Email body"
+          },
+          "ParentID": {
+            "type": "string",
+            "nullable": true,
+            "example": "2726243"
+          },
+          "ClientID": {
+            "type": "string",
+            "example": "2726243"
+          },
+          "PreviousEmailID": {
+            "type": "string",
+            "nullable": true,
+            "example": "2726243"
+          },
+          "TagID": {
+            "type": "array",
+            "nullable": true,
+            "example": [
+              "4",
+              "3"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "EmailTicketData": {
+        "required": [
+          "Body",
+          "ClientID",
+          "Date",
+          "EmailID",
+          "Subject",
+          "Ticket"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailData"
+          },
+          {
+            "$ref": "#/components/schemas/TicketData"
+          }
+        ]
+      },
+      "TicketData": {
+        "required": [
+          "Ticket"
+        ],
+        "type": "object",
+        "properties": {
+          "Ticket": {
+            "$ref": "#/components/schemas/TicketData_Ticket"
+          }
+        }
+      },
+      "ResponseError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "MissingParam"
+          },
+          "message": {
+            "type": "string",
+            "example": "Mandatory EmailID is missing"
+          }
+        }
+      },
+      "TicketData_Ticket": {
+        "required": [
+          "TicketID"
+        ],
+        "type": "object",
+        "properties": {
+          "TicketID": {
+            "type": "string",
+            "example": "123456"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyHeader": {
+        "type": "apiKey",
+        "description": "A header containing a valid API Key provided by Intelygenz Team.",
+        "name": "api-key",
+        "in": "header"
+      }
+    }
+  }
+}
