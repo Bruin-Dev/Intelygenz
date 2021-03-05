@@ -2902,3 +2902,164 @@ class TestPostMultipleTicketNotes:
             "status": 500,
         }
         assert result == expected
+
+    @pytest.mark.asyncio
+    async def post_email_tag_test(self):
+        logger = Mock()
+        logger.error = Mock()
+
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = None
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 204
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)) as mock_post:
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+
+            mock_post.assert_called_once()
+            assert post_response["body"] == ""
+            assert post_response["status"] == 204
+
+    @pytest.mark.asyncio
+    async def post_email_tag_400_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = {'response': 'Error 400'}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 400
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+            logger.error.assert_called()
+
+            assert post_response["body"] == expected_post_response
+            assert post_response["status"] == 400
+
+    @pytest.mark.asyncio
+    async def post_email_tag_401_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = {'response': 'Error 401'}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 401
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+            logger.error.assert_called()
+
+            assert post_response["body"] == "Got 401 from Bruin"
+            assert post_response["status"] == 401
+
+    @pytest.mark.asyncio
+    async def post_email_tag_403_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = {'response': 'Error 403'}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 403
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+            logger.error.assert_called()
+
+            assert post_response["body"] == expected_post_response
+            assert post_response["status"] == 403
+
+    @pytest.mark.asyncio
+    async def post_email_tag_404_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = {'response': 'Error 400'}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 404
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+            logger.error.assert_called()
+
+            assert post_response["body"] == "Resource not found"
+            assert post_response["status"] == 404
+
+    @pytest.mark.asyncio
+    async def post_email_tag_409_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = {}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 409
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+            logger.error.assert_called()
+
+            assert post_response["body"] == f"Tag with ID {tag_id} already present in e-mail with ID {email_id}"
+            assert post_response["status"] == 409
+
+    @pytest.mark.asyncio
+    async def post_email_tag_500_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        email_id = "A1234576"
+        tag_id = '1001'
+        expected_post_response = {}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 500
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_response = await bruin_client.post_email_tag(email_id, tag_id)
+            logger.error.assert_called()
+
+            assert post_response["body"] == "Got internal error from Bruin"
+            assert post_response["status"] == 500

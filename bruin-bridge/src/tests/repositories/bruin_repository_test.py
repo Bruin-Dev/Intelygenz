@@ -377,6 +377,90 @@ class TestBruinRepository:
         }
 
     @pytest.mark.asyncio
+    async def get_single_ticket_basic_info_ok_test(self):
+        shared_payload = {
+            'ticket_id': 5678,
+        }
+
+        ticket_response = {
+            "clientID": 30000,
+            "ticketID": 5262293,
+            "ticketStatus": "New",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+
+        ticket_status_1_response = {
+            'body': {
+                'responses': [
+                    ticket_response,
+                ],
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(side_effect=[
+            ticket_status_1_response,
+        ])
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_single_ticket_basic_info(shared_payload['ticket_id'])
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call({'TicketID': shared_payload['ticket_id']}),
+        ], any_order=True)
+
+        assert result == {
+            'body': ticket_response,
+            'status': 200,
+        }
+
+    @pytest.mark.asyncio
+    async def get_single_ticket_basic_info_with_404_status_code_test(self):
+        shared_payload = {
+            'ticket_id': 5678,
+        }
+
+        ticket_status_1_response = {
+            'body': {
+                'responses': [
+                ],
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(side_effect=[
+            ticket_status_1_response,
+        ])
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_single_ticket_basic_info(
+            shared_payload['ticket_id']
+        )
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call({'TicketID': shared_payload['ticket_id']}),
+        ], any_order=True)
+        assert result == {
+            'body': {},
+            'status': 404,
+        }
+
+    @pytest.mark.asyncio
     async def get_ticket_details_test(self):
         logger = Mock()
         ticket_id = 123
@@ -1759,3 +1843,19 @@ class TestBruinRepository:
         result = await bruin_repository.get_ticket_overview(ticket_id)
 
         assert result == {"body": [ticket_123, ticket_123], "status": return_status}
+
+    @pytest.mark.asyncio
+    async def post_email_tag_test(self):
+        logger = Mock()
+        email_id = "A123456"
+        tag_id = "1001"
+        expected_post_response = {'status': 200, 'body': {}}
+
+        bruin_client = Mock()
+        bruin_client.post_email_tag = CoroutineMock(return_value=expected_post_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        post_response = await bruin_repository.post_email_tag(email_id, tag_id)
+
+        bruin_client.post_email_tag.assert_awaited_once_with(email_id, tag_id)
+        assert post_response == expected_post_response

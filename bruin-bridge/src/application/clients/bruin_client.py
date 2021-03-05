@@ -3,6 +3,7 @@ import json
 
 import aiohttp
 import humps
+from typing import List
 
 
 class BruinClient:
@@ -844,6 +845,72 @@ class BruinClient:
             return return_response
 
         except Exception as e:
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
+
+    async def post_email_tag(self, email_id: str, tag_id: str):
+        try:
+            self._logger.info(f'Sending request to /api/Email/{email_id}/tag/{tag_id}')
+
+            response = await self._session.post(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Email/{email_id}/tag/{tag_id}',
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
+
+            self._logger.info(f"Got response from Bruin. Status: {response.status} Response: {response}.")
+
+            return_response = dict.fromkeys(["body", "status"])
+
+            if response.status == 204:
+                return_response["body"] = ""
+                return_response["status"] = response.status
+            elif response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error 400 from Bruin {response_json}")
+
+            if response.status == 401:
+                self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = "Got 401 from Bruin"
+                return_response["status"] = response.status
+
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
+
+            if response.status == 404:
+                self._logger.error(f"Got 404 from Bruin, resource not posted for email_id {email_id} with "
+                                   f"tag_id {tag_id}")
+                return_response["body"] = "Resource not found"
+                return_response["status"] = 404
+
+            if response.status == 409:
+                self._logger.error(f"Got 409 from Bruin, resource not posted for email_id {email_id} with "
+                                   f"tag_id {tag_id}")
+                return_response["body"] = f"Tag with ID {tag_id} already present in e-mail with ID {email_id}"
+                return_response["status"] = 409
+
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}.")
+                return_response["body"] = "Got internal error from Bruin"
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            self._logger.error(f"Exception during call to post_email_tag. Error: {e}.")
             return {
                 'body': e.args[0],
                 'status': 500

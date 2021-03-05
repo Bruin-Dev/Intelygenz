@@ -61,6 +61,29 @@ class BruinRepository:
             'status': 200,
         }
 
+    async def get_single_ticket_basic_info(self, ticket_id: int) -> dict:
+        payload = {
+            'TicketID': ticket_id
+        }
+        ticket_response = await self._bruin_client.get_tickets_basic_info(payload)
+
+        if ticket_response['status'] not in range(200, 300):
+            return ticket_response
+
+        ticket_list = ticket_response['body']['responses']
+
+        if len(ticket_list) == 0:
+            self._logger.error(f'Call to get_tickets_basic_info succeeded, but TicketID {ticket_id} not found.')
+            return {
+                'body': {},
+                'status': 404
+            }
+
+        return {
+            'body': ticket_list[0],
+            'status': ticket_response['status'],
+        }
+
     async def get_ticket_details(self, ticket_id):
         return await self._bruin_client.get_ticket_details(ticket_id)
 
@@ -265,3 +288,6 @@ class BruinRepository:
         if len(ticket_response['body']) > 0:
             ticket_response['body'] = ticket_response['body'][0]
         return ticket_response
+
+    async def post_email_tag(self, email_id: str, tag_id: str):
+        return await self._bruin_client.post_email_tag(email_id, tag_id)
