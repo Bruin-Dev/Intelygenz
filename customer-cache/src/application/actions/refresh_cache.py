@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -106,6 +107,32 @@ class RefreshCache:
             self._logger.error(error_msg)
             await self._event_bus.rpc_request("notification.slack.request", error_msg, timeout=10)
         else:
-            self._logger.info(f"Storing cache of {len(cache)} edges to Redis for host {host}")
-            self._storage_repository.set_cache(host, cache)
+            stored_cache = self._storage_repository.get_cache(host)
+
+            self._logger.info(
+                f'Crossing currently stored cache ({len(stored_cache)} edges) with new one ({len(cache)} edges)...'
+            )
+            crossed_cache = self._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=cache)
+
+            self._logger.info(f"Storing cache of {len(crossed_cache)} edges to Redis for host {host}")
+            self._storage_repository.set_cache(host, crossed_cache)
             self._logger.info(f"Finished storing cache for host {host}")
+
+    @staticmethod
+    def _cross_stored_cache_and_new_cache(stored_cache: List[dict], new_cache: List[dict]) -> List[dict]:
+        stored_devices_by_serial = {
+            edge['serial_number']: edge
+            for edge in stored_cache
+        }
+        new_devices_by_serial = {
+            edge['serial_number']: edge
+            for edge in new_cache
+        }
+
+        # If a device is in both caches, its info in new_cache will overwrite stored_cache's
+        # If a device is only in one of the caches, it will be added to the final cache
+        crossed_cache = {
+            **stored_devices_by_serial,
+            **new_devices_by_serial,
+        }
+        return list(crossed_cache.values())

@@ -148,19 +148,39 @@ class TestRefreshCache:
     @pytest.mark.asyncio
     async def partial_refresh_cache_with_edges_test(self, instance_refresh_cache, instance_err_msg_refresh_cache):
         # Scenario: Bruin returns all(or most) management statuses correctly
-        edge_from_bruin = {
+        edge_from_bruin_1 = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
         }
+        edge_from_bruin_2 = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 2020},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO202020",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
+        }
         edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
-        instance_refresh_cache._bruin_repository.filter_edge_list = CoroutineMock(return_value=edge_from_bruin)
+        stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
+        new_cache = [edge_from_bruin_1, edge_from_bruin_2]
+
+        instance_refresh_cache._bruin_repository.filter_edge_list = CoroutineMock(side_effect=[
+            edge_from_bruin_1,
+            edge_from_bruin_2,
+        ])
+        instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
+        instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=new_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
+
         await instance_refresh_cache._partial_refresh_cache("mettel.velocloud.net", edge_list)
+
         instance_refresh_cache._bruin_repository.filter_edge_list.assert_awaited()
+        instance_refresh_cache._cross_stored_cache_and_new_cache.assert_called_once_with(
+            stored_cache=stored_cache, new_cache=new_cache
+        )
         instance_refresh_cache._storage_repository.set_cache.assert_called_once()
 
     @pytest.mark.asyncio
@@ -170,10 +190,355 @@ class TestRefreshCache:
         edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
         instance_err_msg_refresh_cache['request_id'] = uuid_
+
         instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
         instance_refresh_cache._bruin_repository.filter_edge_list = CoroutineMock(return_value=edge_from_bruin)
+        instance_refresh_cache._storage_repository.get_cache = Mock()
+        instance_refresh_cache._cross_stored_cache_and_new_cache = Mock()
         instance_refresh_cache._storage_repository.set_cache = Mock()
+
         await instance_refresh_cache._partial_refresh_cache("mettel.velocloud.net", edge_list)
+
         instance_refresh_cache._bruin_repository.filter_edge_list.assert_awaited()
+        instance_refresh_cache._cross_stored_cache_and_new_cache.assert_not_called()
         instance_refresh_cache._storage_repository.set_cache.assert_not_called()
         instance_refresh_cache._event_bus.rpc_request.assert_awaited_once()
+
+    def cross_stored_cache_and_new_cache_with_both_caches_empty_test(self):
+        stored_cache = []
+        new_cache = []
+
+        result = RefreshCache._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=new_cache)
+        assert result == []
+
+    def cross_stored_cache_and_new_cache_with_empty_stored_cache_test(self):
+        stored_cache = []
+
+        device_info_1 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VC1919191",
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_2 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2020
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "9567-dh87-teg4-i75k",
+            'serial_number': "VC1919192",
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        new_cache = [
+            device_info_1,
+            device_info_2,
+        ]
+
+        result = RefreshCache._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=new_cache)
+        assert result == new_cache
+
+    def cross_stored_cache_and_new_cache_with_empty_new_cache_test(self):
+        device_info_1 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VC1919191",
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_2 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2020
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "9567-dh87-teg4-i75k",
+            'serial_number': "VC1919192",
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        stored_cache = [
+            device_info_1,
+            device_info_2,
+        ]
+
+        new_cache = []
+
+        result = RefreshCache._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=new_cache)
+        assert result == stored_cache
+
+    def cross_stored_cache_and_new_cache_with_no_common_devices_in_both_caches_test(self):
+        device_info_1 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VC1919191",
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_2 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2020
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "9567-dh87-teg4-i75k",
+            'serial_number': "VC1919192",
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+
+        stored_cache = [
+            device_info_1,
+        ]
+        new_cache = [
+            device_info_2,
+        ]
+
+        result = RefreshCache._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=new_cache)
+        expected = [
+            device_info_1,
+            device_info_2,
+        ]
+        assert result == expected
+
+    def cross_stored_cache_and_new_cache_with_common_devices_in_both_caches_test(self):
+        serial_number_1 = 'VC1919191'
+        serial_number_2 = 'VC1919192'
+        serial_number_3 = 'VC1919193'
+
+        device_info_1_stored_cache = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': serial_number_1,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_1_new_cache = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'last_contact': "2021-03-05 12:35:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': serial_number_1,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_2 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2020
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "9567-dh87-teg4-i75k",
+            'serial_number': serial_number_2,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_3_stored_cache = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2021
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "0678-ei98-ufh5-j86l",
+            'serial_number': serial_number_3,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_3_new_cache = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2021
+            },
+            'last_contact': "2021-03-05 12:35:00",
+            'logical_ids': "0678-ei98-ufh5-j86l",
+            'serial_number': serial_number_3,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+
+        stored_cache = [
+            device_info_1_stored_cache,
+            device_info_2,
+            device_info_3_stored_cache,
+        ]
+        new_cache = [
+            device_info_1_new_cache,
+            device_info_2,
+            device_info_3_new_cache,
+        ]
+
+        result = RefreshCache._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=new_cache)
+        expected = [
+            device_info_1_new_cache,
+            device_info_2,
+            device_info_3_new_cache,
+        ]
+        assert result == expected
+
+    def cross_stored_cache_and_new_cache_with_common_devices_in_both_caches_and_some_devices_only_in_one_cache_test(
+            self):
+        serial_number_1 = 'VC1919191'
+        serial_number_2 = 'VC1919192'
+        serial_number_3 = 'VC1919193'
+        serial_number_4 = 'VC1919194'
+        serial_number_5 = 'VC1919195'
+
+        device_info_1 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': serial_number_1,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_2 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2020
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "9567-dh87-teg4-i75k",
+            'serial_number': serial_number_2,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_3_stored_cache = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2021
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "0678-ei98-ufh5-j86l",
+            'serial_number': serial_number_3,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_3_new_cache = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2021
+            },
+            'last_contact': "2021-03-05 12:35:00",
+            'logical_ids': "0678-ei98-ufh5-j86l",
+            'serial_number': serial_number_3,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_4 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2021
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "1789-hj09-vgi6-k97m",
+            'serial_number': serial_number_4,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_info_5 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2021
+            },
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "2890-ik10-whj7-l08n",
+            'serial_number': serial_number_5,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+
+        stored_cache = [
+            device_info_1,
+            device_info_2,
+            device_info_3_stored_cache,
+            device_info_4,
+        ]
+        new_cache = [
+            device_info_3_new_cache,
+            device_info_4,
+            device_info_5,
+        ]
+
+        result = RefreshCache._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=new_cache)
+        expected = [
+            device_info_1,
+            device_info_2,
+            device_info_3_new_cache,
+            device_info_4,
+            device_info_5,
+        ]
+        assert result == expected
