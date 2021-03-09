@@ -40,7 +40,7 @@ class Container:
         self._template_renderer = TemplateRenderer(config.ALERTS_CONFIG)
 
         self._alert = Alert(self._event_bus, self._scheduler, self._logger,
-                            config, self._velocloud_repository, self._template_renderer)
+                            config, self._velocloud_repository, self._template_renderer, self._notifications_repository)
 
     async def _start(self):
         await self._event_bus.connect()

@@ -104,5 +104,4 @@ class VelocloudRepository:
 
     async def _notify_error(self, err_msg):
         self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+        await self._notifications_repository.send_slack_message(err_msg)

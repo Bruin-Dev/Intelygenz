@@ -159,11 +159,8 @@ class TestVelocloudRepository:
     @pytest.mark.asyncio
     async def notify_error_test(self, velocloud_repository, ):
         slack_message = 'Error last contact notify'
-        response_expected = {'request_id': uuid_, 'message': 'Error last contact notify'}
-        velocloud_repository._event_bus.rpc_request = CoroutineMock(
+        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock(
             return_value=None)
         with uuid_mock:
             await velocloud_repository._notify_error(slack_message)
-        velocloud_repository._event_bus.rpc_request.assert_has_awaits([
-            call('notification.slack.request', response_expected, timeout=10),
-        ])
+        velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)

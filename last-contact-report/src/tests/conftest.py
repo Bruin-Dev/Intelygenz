@@ -30,17 +30,21 @@ def event_bus():
 
 
 @pytest.fixture(scope='function')
-def velocloud_repository(event_bus, logger):
-    notifications_repository = Mock()
+def notifications_repository(event_bus):
+    return NotificationsRepository(event_bus, testconfig)
 
+
+@pytest.fixture(scope='function')
+def velocloud_repository(event_bus, logger, notifications_repository):
     return VelocloudRepository(event_bus, logger, testconfig, notifications_repository)
 
 
 @pytest.fixture(scope='function')
-def alert(event_bus, logger):
+def alert(event_bus, logger, notifications_repository):
     scheduler = Mock()
     template_renderer = TemplateRenderer(testconfig.ALERTS_CONFIG)
-    return Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer)
+    return Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer,
+                 notifications_repository)
 
 
 @pytest.fixture(scope='function')

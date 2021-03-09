@@ -7,18 +7,19 @@ from apscheduler.util import undefined
 from pytz import timezone
 from application import EdgeIdentifier
 
-
 from igz.packages.eventbus.eventbus import EventBus
 
 
 class Alert:
 
-    def __init__(self, event_bus: EventBus, scheduler, logger, config, velocloud_repository, template_renderer):
+    def __init__(self, event_bus: EventBus, scheduler, logger, config, velocloud_repository, template_renderer,
+                 notifications_repository):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
         self._config = config
         self._velocloud_repository = velocloud_repository
+        self._notifications_repository = notifications_repository
         self._template_renderer = template_renderer
 
     async def start_alert_job(self, exec_on_start=False):
@@ -71,6 +72,7 @@ class Alert:
                                     f'{edge["enterpriseId"]}' \
                                     f'/monitor/edge/{edge["edgeId"]}/'
             edges_to_report.append(edge_for_alert)
+
         email_obj = self._template_renderer.compose_email_object(edges_to_report)
-        await self._event_bus.publish_message("notification.email.request", email_obj)
+        await self._notifications_repository.send_email(email_obj)
         self._logger.info("Last Contact Report sent")
