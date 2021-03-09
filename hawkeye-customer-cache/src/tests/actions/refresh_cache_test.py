@@ -37,9 +37,10 @@ class TestRefreshCache:
         storage_repository = Mock()
         bruin_repository = Mock()
         hawkeye_repository = Mock()
+        notifications_repository = Mock()
 
         refresh_cache = RefreshCache(config, event_bus, logger, scheduler, storage_repository,
-                                     bruin_repository, hawkeye_repository)
+                                     bruin_repository, hawkeye_repository, notifications_repository)
 
         assert refresh_cache._config == config
         assert refresh_cache._event_bus == event_bus
@@ -48,6 +49,7 @@ class TestRefreshCache:
         assert refresh_cache._storage_repository == storage_repository
         assert refresh_cache._bruin_repository == bruin_repository
         assert refresh_cache._hawkeye_repository == hawkeye_repository
+        assert refresh_cache._notifications_repository == notifications_repository
 
     @pytest.mark.asyncio
     async def schedule_cache_refresh_job_test(self, refresh_cache):
@@ -107,7 +109,7 @@ class TestRefreshCache:
 
     @pytest.mark.asyncio
     async def refresh_cache_probes_list_500_test(self, refresh_cache, err_msg_refresh_cache, response_500_probes):
-        refresh_cache._event_bus.rpc_request = CoroutineMock()
+        refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
         err_msg_refresh_cache['request_id'] = uuid_
         refresh_cache._logger.error = Mock()
         refresh_cache._hawkeye_repository.get_probes = CoroutineMock(return_value=response_500_probes)
@@ -119,13 +121,12 @@ class TestRefreshCache:
         with uuid_mock, tenacity_retry_mock:
             await refresh_cache._refresh_cache()
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
-        refresh_cache._event_bus.rpc_request.assert_awaited_with("notification.slack.request",
-                                                                 err_msg_refresh_cache,
-                                                                 timeout=10)
+        refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(
+            err_msg_refresh_cache['message'])
 
     @pytest.mark.asyncio
     async def refresh_cache_probes_list_failed_test(self, refresh_cache, err_msg_refresh_cache, response_none_probes):
-        refresh_cache._event_bus.rpc_request = CoroutineMock()
+        refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
         err_msg_refresh_cache['request_id'] = uuid_
         refresh_cache._logger.error = Mock()
         refresh_cache._hawkeye_repository.get_probes = CoroutineMock(return_value=response_none_probes)
@@ -137,16 +138,15 @@ class TestRefreshCache:
         with uuid_mock, tenacity_retry_mock:
             await refresh_cache._refresh_cache()
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
-        refresh_cache._event_bus.rpc_request.assert_awaited_with("notification.slack.request",
-                                                                 err_msg_refresh_cache,
-                                                                 timeout=10)
+        refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(
+            err_msg_refresh_cache['message'])
 
     @pytest.mark.asyncio
     async def refresh_cache_probes_list_failed_with_several_consecutive_failures_test(self, refresh_cache,
                                                                                       err_msg_refresh_cache,
                                                                                       response_none_probes):
         err_msg_refresh_cache['request_id'] = uuid_
-        refresh_cache._event_bus.rpc_request = CoroutineMock()
+        refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
         refresh_cache._logger.error = Mock()
         refresh_cache._hawkeye_repository.get_probes = CoroutineMock(return_value=response_none_probes)
 
@@ -159,6 +159,5 @@ class TestRefreshCache:
             await refresh_cache._refresh_cache()
 
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
-        refresh_cache._event_bus.rpc_request.assert_any_await("notification.slack.request",
-                                                              err_msg_refresh_cache,
-                                                              timeout=10)
+        refresh_cache._notifications_repository.send_slack_message.assert_any_await(
+            err_msg_refresh_cache['message'])

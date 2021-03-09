@@ -20,12 +20,14 @@ class TestBruinRepository:
         event_bus = Mock()
         logger = Mock()
         config = testconfig
+        notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(config, logger, event_bus)
+        bruin_repository = BruinRepository(config, logger, event_bus, notifications_repository)
 
         assert bruin_repository._event_bus is event_bus
         assert bruin_repository._logger is logger
         assert bruin_repository._config is config
+        assert bruin_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
     async def get_client_info_test(self, bruin_repository, request_message_without_topic,
@@ -187,15 +189,12 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def notify_error_test(self, bruin_repository):
-        bruin_repository._event_bus.rpc_request = CoroutineMock()
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
         error_message = 'Failed'
-        error_dict = {'request_id': uuid_,
-                      'message': error_message}
+
         with uuid_mock:
             await bruin_repository._notify_error(error_message)
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with("notification.slack.request",
-                                                                         error_dict,
-                                                                         timeout=10)
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once_with(error_message)
 
     @pytest.mark.asyncio
     async def filter_probes_list_test(self, bruin_repository, probes_example, response_bruin_get_client_ok,

@@ -45,8 +45,8 @@ def scheduler():
 
 
 @pytest.fixture(scope='function')
-def bruin_repository(logger, event_bus):
-    return BruinRepository(config, logger, event_bus)
+def bruin_repository(logger, event_bus, notifications_repository):
+    return BruinRepository(config, logger, event_bus, notifications_repository)
 
 
 @pytest.fixture(scope='function')
@@ -71,9 +71,10 @@ def instance_get_customer(storage_repository, logger, event_bus):
 
 
 @pytest.fixture(scope='function')
-def refresh_cache(logger, event_bus, scheduler, storage_repository, bruin_repository, hawkeye_repository):
+def refresh_cache(logger, event_bus, scheduler, storage_repository, bruin_repository, hawkeye_repository,
+                  notifications_repository):
     return RefreshCache(config, event_bus, logger, scheduler, storage_repository,
-                        bruin_repository, hawkeye_repository)
+                        bruin_repository, hawkeye_repository, notifications_repository)
 
 
 @pytest.fixture(scope='function')

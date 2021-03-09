@@ -10,7 +10,7 @@ from tenacity import wait_random
 class RefreshCache:
 
     def __init__(self, config, event_bus, logger, scheduler, storage_repository, bruin_repository,
-                 hawkeye_repository):
+                 hawkeye_repository, notifications_repository):
         self._config = config
         self._event_bus = event_bus
         self._logger = logger
@@ -18,6 +18,7 @@ class RefreshCache:
         self._storage_repository = storage_repository
         self._bruin_repository = bruin_repository
         self._hawkeye_repository = hawkeye_repository
+        self._notifications_repository = notifications_repository
 
     async def _refresh_cache(self):
         @retry(wait=wait_random(min=120, max=300), reraise=True)
@@ -39,11 +40,7 @@ class RefreshCache:
                 if refresh_attempts_count >= self._config.REFRESH_CONFIG['attempts_threshold']:
                     error_message = "[hawkeye-customer-cache] Too many consecutive failures happened while trying " \
                                     "to claim the list of probes of hawkeye"
-                    msg = {
-                        'request_id': uuid(),
-                        'message': error_message
-                    }
-                    await self._event_bus.rpc_request("notification.slack.request", msg, timeout=10)
+                    await self._notifications_repository.send_slack_message(error_message)
 
                     self._logger.error(
                         f"Couldn't find any probe to refresh the cache. Error: {error_message}. Re-trying job...")
@@ -68,11 +65,7 @@ class RefreshCache:
         except Exception as e:
             self._logger.error(f"An error occurred while refreshing the hawkeye cache -> {e}")
             slack_message = f"Maximum retries happened while while refreshing the cache cause of error was {e}"
-            message = {
-                'request_id': uuid(),
-                'message': slack_message,
-            }
-            await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)
+            await self._notifications_repository.send_slack_message(slack_message)
 
     async def schedule_cache_refresh(self):
         self._logger.info(

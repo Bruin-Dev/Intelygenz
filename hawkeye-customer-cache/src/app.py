@@ -52,15 +52,16 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_get_customers, "get_customers")
 
         # REPOSITORIES
-        self._notifications_repository = NotificationsRepository(self._event_bus)
-        self._bruin_repository = BruinRepository(config, self._logger, self._event_bus)
+        self._notifications_repository = NotificationsRepository(self._event_bus, config)
+        self._bruin_repository = BruinRepository(config, self._logger, self._event_bus, self._notifications_repository)
         self._hawkeye_repository = HawkeyeRepository(self._event_bus, self._logger, config,
                                                      self._notifications_repository)
         self._storage_repository = StorageRepository(config, self._logger, self._redis_customer_cache_client)
 
         # ACTIONS
         self._refresh_cache = RefreshCache(config, self._event_bus, self._logger, self._scheduler,
-                                           self._storage_repository, self._bruin_repository, self._hawkeye_repository)
+                                           self._storage_repository, self._bruin_repository, self._hawkeye_repository,
+                                           self._notifications_repository)
         self._get_customers = GetCustomers(config, self._logger, self._storage_repository, self._event_bus)
 
         # ACTION WRAPPER
