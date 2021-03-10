@@ -98,7 +98,7 @@ class DiGiClient:
         try:
             parsed_params = humps.pascalize(params)
 
-            self._logger.info(f'Rebooting DiGi device with params {json.dumps(parsed_params)}')
+            self._logger.info(f'Getting DiGi recovery logs with params {json.dumps(parsed_params)}')
 
             response = await self._session.get(
                 f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/Logs",

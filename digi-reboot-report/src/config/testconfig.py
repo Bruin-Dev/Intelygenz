@@ -22,7 +22,7 @@ LOG_CONFIG = {
 
 
 DIGI_CONFIG = {
-    'days_of_closed_tickets': 1,
+    'days_of_digi_recovery_log': 2,
     'digi_reboot_report_time': 60 * 24,
     'recipient': "some.recipient@email.com",
     'timezone': 'US/Eastern',

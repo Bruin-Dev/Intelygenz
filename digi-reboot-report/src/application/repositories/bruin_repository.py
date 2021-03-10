@@ -15,55 +15,6 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_closed_tickets(self, client_id):
-        err_msg = None
-
-        start_date = (datetime.now() - timedelta(days=self._config.DIGI_CONFIG['days_of_closed_tickets'])).strftime(
-            "%Y-%m-%dT%H:%M:%SZ")
-        end_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-
-        self._logger.info(
-            f'Getting tickets that belongs to client: {client_id}')
-        request_msg = {
-            "request_id": uuid(),
-            "body": {"client_id": client_id,
-                     "category": "SD-WAN",
-                     "ticket_topic": 'VOO',
-                     "ticket_status": ['Closed'],
-                     "start_date": start_date,
-                     "end_date": end_date,
-                     }
-        }
-        try:
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request_msg, timeout=60)
-            self._logger.info(
-                f'Got all closed tickets with, with ticket topic '
-                f'VOO and belonging to client {client_id} from Bruin!'
-            )
-        except Exception as e:
-            err_msg = (
-                f'An error occurred when requesting closed tickets from Bruin API, '
-                f'with ticket topic VOO and belonging to client {client_id} -> {e}'
-            )
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving closed tickets, with ticket topic '
-                    f'VOO and belonging to client {client_id} in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
-                    f'Error {response_status} - {response_body}'
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
-        return response
-
     async def get_ticket_task_history(self, ticket_id):
         err_msg = None
 

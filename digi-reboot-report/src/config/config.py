@@ -19,7 +19,7 @@ NATS_CONFIG = {
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 DIGI_CONFIG = {
-    'days_of_closed_tickets': 1,
+    'days_of_digi_recovery_log': 3,
     'digi_reboot_report_time': 60 * 24,
     'recipient': os.environ["DIGI_REPORT_RECIPIENT"],
     'timezone': 'US/Eastern',

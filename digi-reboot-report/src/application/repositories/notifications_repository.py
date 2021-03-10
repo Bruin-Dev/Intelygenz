@@ -18,7 +18,7 @@ class NotificationsRepository:
     async def send_email(self, digi_reboot_report, **kwargs):
         csv = "{}".format(kwargs.get("csv", "digi_reboot_report.csv"))
 
-        yesterday_date = datetime.now() - timedelta(days=1)
+        yesterday_date = datetime.now() - timedelta(days=2)
 
         html = f"""\
         <html>
@@ -34,7 +34,7 @@ class NotificationsRepository:
         email_object = {
             'request_id': uuid(),
             'email_data': {
-                'subject': f'DiGi Recovery Report ({datetime.now().strftime("%Y-%m-%d")}) ',
+                'subject': f'DiGi Recovery Report ({(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")}) ',
                 'recipient': self._config.DIGI_CONFIG["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': html,

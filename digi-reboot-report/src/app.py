@@ -10,7 +10,6 @@ from pytz import timezone
 
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.bruin_repository import BruinRepository
-from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.digi_repository import DiGiRepository
 
 from application.actions.digi_reboot_report import DiGiRebootReport
@@ -39,14 +38,12 @@ class Container:
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config,
                                                  self._notifications_repository)
-        self._customer_cache_repository = CustomerCacheRepository(self._event_bus, self._logger, config,
-                                                                  self._notifications_repository)
         self._digi_repository = DiGiRepository(self._event_bus, self._logger, config,
                                                self._notifications_repository)
 
         self._digi_reboot_report = DiGiRebootReport(self._event_bus, self._scheduler, self._logger, config,
                                                     self._bruin_repository, self._digi_repository,
-                                                    self._notifications_repository, self._customer_cache_repository)
+                                                    self._notifications_repository)
 
     async def _start(self):
         await self._event_bus.connect()

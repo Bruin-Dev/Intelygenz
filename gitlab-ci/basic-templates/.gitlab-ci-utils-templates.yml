@@ -17,6 +17,7 @@
     - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
     - export TF_VAR_customer_cache_desired_tasks=${customer_cache_desired_tasks}
     - export TF_VAR_digi_bridge_desired_tasks=${digi_bridge_desired_tasks}
+    - export TF_VAR_digi_reboot_report_desired_tasks=${digi_reboot_report_desired_tasks}
     - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
     - export TF_VAR_hawkeye_affecting_monitor_desired_tasks=${hawkeye_affecting_monitor_desired_tasks}

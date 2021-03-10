@@ -1,6 +1,6 @@
 from shortuuid import uuid
 from datetime import datetime, timedelta
-from pytz import utc
+from pytz import utc, timezone
 from application.repositories import nats_error_response
 
 
@@ -14,19 +14,22 @@ class DiGiRepository:
 
     async def get_digi_recovery_logs(self):
         err_msg = None
-        start_date_time = datetime.now(utc) - timedelta(days=self._config.DIGI_CONFIG['days_of_closed_tickets'])
+        tz = timezone(self._config.DIGI_CONFIG['timezone'])
+        start_date_time = datetime.now(tz) - timedelta(days=self._config.DIGI_CONFIG['days_of_digi_recovery_log'])
         request = {
             'request_id': uuid(),
             'body': {
                 'start_date_time': start_date_time,
+                'size': '999'
             },
         }
 
         try:
-            self._logger.info(f'Getting DiGi recovery logs from {self._config.DIGI_CONFIG["days_of_closed_tickets"]} '
+            self._logger.info(f'Getting DiGi recovery logs from '
+                              f'{self._config.DIGI_CONFIG["days_of_digi_recovery_log"]} '
                               f'day(s) ago')
             response = await self._event_bus.rpc_request("get.digi.recovery.logs", request, timeout=90)
-            self._logger.info(f'Got DiGi recovery logs from {self._config.DIGI_CONFIG["days_of_closed_tickets"]} '
+            self._logger.info(f'Got DiGi recovery logs from {self._config.DIGI_CONFIG["days_of_digi_recovery_log"]} '
                               f'day(s) ago')
         except Exception as e:
             err_msg = f'An error occurred when attempting to get DiGi recovery logs -> {e}'

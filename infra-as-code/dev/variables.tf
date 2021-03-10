@@ -165,6 +165,13 @@ variable "DIGI_RECORD_NAME_TEST" {
   default = ""
 }
 
+// digi-reboot-rebort environment variables
+
+variable "DIGI_REPORT_RECIPIENT" {
+  default = ""
+  description = "Recipient email to send digi report"
+}
+
 // dispatch-portal environment variables
 
 variable "DISPATCH_PORTAL_SERVER_PORT" {
@@ -419,6 +426,12 @@ variable "digi_bridge_desired_tasks" {
   default = 1
   type = number
   description = "Number of desired tasks of microservice digi-bridge"
+}
+
+variable "digi_reboot_report_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice digi-reboot-report"
 }
 
 variable "dispatch_portal_frontend_desired_tasks" {
