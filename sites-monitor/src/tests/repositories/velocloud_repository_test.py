@@ -15,7 +15,6 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from application.repositories import EdgeIdentifier
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(velocloud_repository_module, 'uuid', return_value=uuid_)
 
@@ -95,19 +94,16 @@ class TestVelocloudRepository:
             },
         }
         err_msg = 'An error occurred when requesting edge list from Velocloud -> Failed!'
-        rpc_request_error = {
-            "request_id": uuid_,
-            "message": err_msg
-        }
         instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=rpc_responses_mock)
+        instance_server._velocloud_repository._notify_error = CoroutineMock()
 
         with uuid_mock:
             result = await instance_server._velocloud_repository.get_edges_links_by_host(host)
 
         assert expected == result
+        instance_server._velocloud_repository._notify_error.assert_awaited_once_with(err_msg)
         instance_server._velocloud_repository._event_bus.rpc_request.assert_has_awaits([
             call("get.links.with.edge.info", rpc_request, timeout=300),
-            call("notification.slack.request", rpc_request_error, timeout=10)
         ])
 
     @pytest.mark.asyncio
@@ -129,20 +125,16 @@ class TestVelocloudRepository:
             },
         }
         err_msg = 'Error while retrieving edges links in DEV environment: Error 503 - None'
-        rpc_request_error = {
-            "request_id": uuid_,
-            "message": err_msg
-        }
         instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=rpc_responses_mock)
-
+        instance_server._velocloud_repository._notify_error = CoroutineMock()
         with uuid_mock:
             result = await instance_server._velocloud_repository.get_edges_links_by_host(host)
 
         assert expected == result
         instance_server._velocloud_repository._event_bus.rpc_request.assert_has_awaits([
             call("get.links.with.edge.info", rpc_request, timeout=300),
-            call("notification.slack.request", rpc_request_error, timeout=10)
         ])
+        instance_server._velocloud_repository._notify_error.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def get_all_links_with_edge_info_test(self, instance_server, links_host_1_response,
@@ -220,10 +212,9 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def notify_error_test(self, instance_server):
-        instance_server._velocloud_repository._event_bus.rpc_request = CoroutineMock()
-        error_dict = {'request_id': uuid_,
-                      'message': 'Failed'}
+        instance_server._velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+        error_msg = 'Failed'
         with uuid_mock:
-            await instance_server._velocloud_repository._notify_error('Failed')
-        instance_server._velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "notification.slack.request", error_dict, timeout=10)
+            await instance_server._velocloud_repository._notify_error(error_msg)
+        instance_server._velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once_with(
+            error_msg)
