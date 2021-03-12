@@ -123,7 +123,7 @@ def make_standard_tnba_note():
 
 
 @pytest.fixture(scope='session')
-def make_request_repair_completed_tnba_note():
+def make_AI_autoresolve_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
             "#*MetTel's IPA*#\n"

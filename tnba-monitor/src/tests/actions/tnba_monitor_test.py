@@ -1416,8 +1416,8 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_failed_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, unconfident_request_completed_prediction,
-            unconfident_repair_completed_prediction, serial_number_1):
+            make_next_result_item, make_payload_for_note_append_with_ticket_id, make_next_results,
+            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
 
@@ -1442,8 +1442,11 @@ class TestTNBAMonitor:
             status=200,
         )
 
+        built_tnba_note = 'This is a TNBA note'
+
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = False
+        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
@@ -1467,9 +1470,20 @@ class TestTNBAMonitor:
             detail_object=detail_object,
             best_prediction=unconfident_request_completed_prediction,
         )
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
+        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
+            unconfident_request_completed_prediction, serial_number_1,
+        )
+        tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.assert_not_called()
+
+        expected_note_for_append = make_payload_for_note_append_with_ticket_id(
+            ticket_id=ticket_id,
+            detail_id=ticket_detail_id,
+            serial_number=serial_number_1,
+            text=built_tnba_note,
+        )
+        assert tnba_monitor._tnba_notes_to_append == [
+            expected_note_for_append,
+        ]
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_ok_test(
@@ -1504,8 +1518,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = True
-        tnba_monitor._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction.return_value = \
-            built_tnba_note
+        tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.return_value = built_tnba_note
 
         with patch.object(testconfig, 'ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
@@ -1530,8 +1543,7 @@ class TestTNBAMonitor:
             best_prediction=confident_request_completed_prediction,
         )
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction.\
-            assert_called_once_with(serial_number_1)
+        tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.assert_called_once_with(serial_number_1)
 
         expected_note_for_append = make_payload_for_note_append_with_ticket_id(
             ticket_id=ticket_id,

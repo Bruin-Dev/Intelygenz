@@ -12,13 +12,13 @@ TNBA_NOTE_STANDARD_PREDICTION_REGEX = re.compile(
     f'{TNBA_NOTE_STANDARD_PREDICTION_OLD_WORDING}|{TNBA_NOTE_STANDARD_PREDICTION_NEW_WORDING}',
 )
 
-TNBA_NOTE_REQUEST_REPAIR_PREDICTION_OLD_WORDING = (
+TNBA_NOTE_AI_AUTORESOLVE_OLD_WORDING = (
     r'The next best action for .+ is: .+\. Since it is a high confidence prediction\n'
     r'the task has been automatically transitioned\.'
 )
-TNBA_NOTE_REQUEST_REPAIR_PREDICTION_NEW_WORDING = r"MetTel's IPA AI is resolving the task for .+\."
-TNBA_NOTE_REQUEST_REPAIR_PREDICTION_REGEX = re.compile(
-    f'{TNBA_NOTE_REQUEST_REPAIR_PREDICTION_OLD_WORDING}|{TNBA_NOTE_REQUEST_REPAIR_PREDICTION_NEW_WORDING}',
+TNBA_NOTE_AI_AUTORESOLVE_NEW_WORDING = r"MetTel's IPA AI is resolving the task for .+\."
+TNBA_NOTE_AI_AUTORESOLVE_REGEX = re.compile(
+    f'{TNBA_NOTE_AI_AUTORESOLVE_OLD_WORDING}|{TNBA_NOTE_AI_AUTORESOLVE_NEW_WORDING}',
 )
 
 
@@ -86,8 +86,8 @@ class PredictionRepository:
     def is_best_prediction_different_from_prediction_in_tnba_note(self, tnba_note: dict, best_prediction: dict) -> bool:
         tnba_note_text = tnba_note['noteValue']
 
-        request_repair_prediction_match = TNBA_NOTE_REQUEST_REPAIR_PREDICTION_REGEX.search(tnba_note_text)
-        if request_repair_prediction_match:
+        ai_autoresolve_note_match = TNBA_NOTE_AI_AUTORESOLVE_REGEX.search(tnba_note_text)
+        if ai_autoresolve_note_match:
             return not self.is_request_or_repair_completed_prediction(best_prediction)
 
         standard_prediction_match = TNBA_NOTE_STANDARD_PREDICTION_REGEX.search(tnba_note_text)

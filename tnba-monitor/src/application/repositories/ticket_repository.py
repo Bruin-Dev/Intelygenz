@@ -71,7 +71,7 @@ class TicketRepository:
         return os.linesep.join(note_lines)
 
     @staticmethod
-    def build_tnba_note_for_request_or_repair_completed_prediction(serial_number: str) -> str:
+    def build_tnba_note_for_AI_autoresolve(serial_number: str) -> str:
         note_lines = [
             "#*MetTel's IPA*#",
             'AI',

@@ -20,7 +20,7 @@ class TestTicketRepository:
         result = TicketRepository.is_detail_resolved(ticket_detail)
         assert result is True
 
-    def is_tnba_note_test(self, serial_number_1, make_standard_tnba_note, make_request_repair_completed_tnba_note,
+    def is_tnba_note_test(self, serial_number_1, make_standard_tnba_note, make_AI_autoresolve_tnba_note,
                           make_reopen_note, make_triage_note):
         reopen_note = make_reopen_note(serial_number=serial_number_1)
         result = TicketRepository.is_tnba_note(reopen_note)
@@ -34,7 +34,7 @@ class TestTicketRepository:
         result = TicketRepository.is_tnba_note(tnba_note)
         assert result is True
 
-        tnba_repair_completed_note = make_request_repair_completed_tnba_note(serial_number=serial_number_1)
+        tnba_repair_completed_note = make_AI_autoresolve_tnba_note(serial_number=serial_number_1)
         result = TicketRepository.is_tnba_note(tnba_repair_completed_note)
         assert result is True
 
@@ -154,7 +154,7 @@ class TestTicketRepository:
         ])
 
     def build_tnba_note_from_request_or_repair_completed_prediction_test(self, serial_number_1):
-        result = TicketRepository.build_tnba_note_for_request_or_repair_completed_prediction(serial_number_1)
+        result = TicketRepository.build_tnba_note_for_AI_autoresolve(serial_number_1)
 
         assert result == os.linesep.join([
             "#*MetTel's IPA*#",

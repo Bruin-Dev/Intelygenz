@@ -556,8 +556,8 @@ class TNBAMonitor:
                     return
 
             self._logger.info(
-                f"Building TNBA note from predictions found for ticket {ticket_id}, detail {ticket_detail_id} "
-                f"and serial {serial_number}..."
+                f"Building TNBA note from prediction {best_prediction['name']} for ticket {ticket_id}, "
+                f"detail {ticket_detail_id} and serial {serial_number}..."
             )
             if self._prediction_repository.is_request_or_repair_completed_prediction(best_prediction):
                 self._logger.info(
@@ -569,17 +569,17 @@ class TNBAMonitor:
                     best_prediction=best_prediction
                 )
 
-                if not was_detail_autoresolved:
+                if was_detail_autoresolved:
+                    tnba_note: str = self._ticket_repository.build_tnba_note_for_AI_autoresolve(serial_number)
+                else:
                     self._logger.info(
                         f'Autoresolve was triggered because the best prediction found for serial {serial_number} of '
-                        f'ticket {ticket_id} was {best_prediction["name"]}, but the process failed. No TNBA note will '
-                        'be built nor appended to the ticket.'
+                        f'ticket {ticket_id} was {best_prediction["name"]}, but the process failed. A TNBA note with '
+                        'this prediction will be built and appended to the ticket later on.'
                     )
-                    return
-
-                tnba_note: str = self._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction(
-                    serial_number
-                )
+                    tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(
+                        best_prediction, serial_number
+                    )
             else:
                 tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction, serial_number)
 

@@ -117,10 +117,10 @@ class TestPredictionRepository:
             tnba_note, holmdel_noc_prediction)
         assert result is False
 
-    def is_best_prediction_different_from_prediction_in_request_repair_tnba_note_with_no_changes_in_prediction_test(
-            self, prediction_repository, make_request_repair_completed_tnba_note, serial_number_1,
+    def is_best_prediction_different_from_prediction_in_AI_autoresolve_tnba_note_with_no_changes_in_prediction_test(
+            self, prediction_repository, make_AI_autoresolve_tnba_note, serial_number_1,
             confident_request_completed_prediction):
-        tnba_note = make_request_repair_completed_tnba_note(serial_number=serial_number_1)
+        tnba_note = make_AI_autoresolve_tnba_note(serial_number=serial_number_1)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
             tnba_note, confident_request_completed_prediction)
@@ -135,10 +135,10 @@ class TestPredictionRepository:
             tnba_note, holmdel_noc_prediction)
         assert result is True
 
-    def is_best_prediction_different_from_prediction_in_request_repair_tnba_note_with_changes_in_prediction_name_test(
-            self, prediction_repository, make_request_repair_completed_tnba_note, serial_number_1,
+    def is_best_prediction_different_from_prediction_in_AI_autoresolve_tnba_note_with_changes_in_prediction_name_test(
+            self, prediction_repository, make_AI_autoresolve_tnba_note, serial_number_1,
             holmdel_noc_prediction):
-        tnba_note = make_request_repair_completed_tnba_note(serial_number=serial_number_1)
+        tnba_note = make_AI_autoresolve_tnba_note(serial_number=serial_number_1)
 
         result = prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
             tnba_note, holmdel_noc_prediction)
