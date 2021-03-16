@@ -156,6 +156,227 @@ class TestBruinRepository:
         assert filtered_tickets['status'] == 200
 
     @pytest.mark.asyncio
+    async def get_tickets_basic_info_ok_test(self):
+        shared_payload = {
+            'service_number': 'VC1234567',
+            'product_category': 'SD-WAN',
+        }
+
+        ticket_status_1 = 'New'
+        ticket_status_2 = 'In-Progress'
+        ticket_statuses = [
+            ticket_status_1,
+            ticket_status_2,
+        ]
+
+        ticket_status_1_payload = {
+            **shared_payload.copy(),
+            'ticket_status': ticket_status_1,
+        }
+        ticket_status_2_payload = {
+            **shared_payload.copy(),
+            'ticket_status': ticket_status_2,
+        }
+
+        ticket_1 = {
+            "clientID": 30000,
+            "ticketID": 5262293,
+            "ticketStatus": "New",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+        ticket_2 = {
+            "clientID": 40000,
+            "ticketID": 5262999,
+            "ticketStatus": "In-Progress",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        ticket_status_1_response = {
+            'body': {
+                'responses': [
+                    ticket_1,
+                ],
+            },
+            'status': 200,
+        }
+        ticket_status_2_response = {
+            'body': {
+                'responses': [
+                    ticket_2,
+                ],
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(side_effect=[
+            ticket_status_1_response,
+            ticket_status_2_response,
+        ])
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_tickets_basic_info(
+            params=shared_payload, ticket_statuses=ticket_statuses
+        )
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call(ticket_status_1_payload),
+            call(ticket_status_2_payload),
+        ], any_order=True)
+
+        assert result == {
+            'body': tickets,
+            'status': 200,
+        }
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_some_ticket_statuses_returning_bad_status_code_test(self):
+        shared_payload = {
+            'service_number': 'VC1234567',
+            'product_category': 'SD-WAN',
+        }
+
+        ticket_status_1 = 'New'
+        ticket_status_2 = 'In-Progress'
+        ticket_statuses = [
+            ticket_status_1,
+            ticket_status_2,
+        ]
+
+        ticket_status_1_payload = {
+            **shared_payload.copy(),
+            'ticket_status': ticket_status_1,
+        }
+        ticket_status_2_payload = {
+            **shared_payload.copy(),
+            'ticket_status': ticket_status_2,
+        }
+
+        ticket_1 = {
+            "clientID": 30000,
+            "ticketID": 5262293,
+            "ticketStatus": "New",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+        tickets = [
+            ticket_1,
+        ]
+
+        ticket_status_1_response = {
+            'body': {
+                'responses': [
+                    ticket_1,
+                ],
+            },
+            'status': 200,
+        }
+        ticket_status_2_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(side_effect=[
+            ticket_status_1_response,
+            ticket_status_2_response,
+        ])
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_tickets_basic_info(
+            params=shared_payload, ticket_statuses=ticket_statuses
+        )
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call(ticket_status_1_payload),
+            call(ticket_status_2_payload),
+        ], any_order=True)
+
+        assert result == {
+            'body': tickets,
+            'status': 200,
+        }
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_all_ticket_statuses_returning_bad_status_code_test(self):
+        shared_payload = {
+            'service_number': 'VC1234567',
+            'product_category': 'SD-WAN',
+        }
+
+        ticket_status_1 = 'New'
+        ticket_status_2 = 'In-Progress'
+        ticket_statuses = [
+            ticket_status_1,
+            ticket_status_2,
+        ]
+
+        ticket_status_1_payload = {
+            **shared_payload.copy(),
+            'ticket_status': ticket_status_1,
+        }
+        ticket_status_2_payload = {
+            **shared_payload.copy(),
+            'ticket_status': ticket_status_2,
+        }
+
+        ticket_statuses_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(return_value=ticket_statuses_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_tickets_basic_info(
+            params=shared_payload, ticket_statuses=ticket_statuses
+        )
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call(ticket_status_1_payload),
+            call(ticket_status_2_payload),
+        ], any_order=True)
+
+        assert result == {
+            'body': [],
+            'status': 200,
+        }
+
+    @pytest.mark.asyncio
     async def get_ticket_details_test(self):
         logger = Mock()
         ticket_id = 123

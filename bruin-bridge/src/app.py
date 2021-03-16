@@ -4,6 +4,7 @@ from config import config
 from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
+from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.get_ticket_overview import GetTicketOverview
 from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
@@ -44,6 +45,7 @@ class Container:
         self._publisher = NATSClient(config, logger=self._logger)
 
         self._subscriber_tickets = NATSClient(config, logger=self._logger)
+        self._subscriber_tickets_basic_info = NATSClient(config, logger=self._logger)
         self._subscriber_ticket_overview = NATSClient(config, logger=self._logger)
         self._subscriber_details = NATSClient(config, logger=self._logger)
         self._subscriber_affecting_details_by_edge_serial = NATSClient(config, logger=self._logger)
@@ -62,6 +64,7 @@ class Container:
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
+        self._event_bus.add_consumer(self._subscriber_tickets_basic_info, consumer_name="tickets_basic_info")
         self._event_bus.add_consumer(self._subscriber_ticket_overview, consumer_name="ticket_overview")
         self._event_bus.add_consumer(self._subscriber_details, consumer_name="ticket_details")
         self._event_bus.add_consumer(
@@ -91,6 +94,7 @@ class Container:
 
         self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus,
                                       self._bruin_repository)
+        self._get_tickets_basic_info = GetTicketsBasicInfo(self._logger, self._event_bus, self._bruin_repository)
         self._get_ticket_overview = GetTicketOverview(self._logger, config.BRUIN_CONFIG, self._event_bus,
                                                       self._bruin_repository)
         self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_repository)
@@ -110,6 +114,8 @@ class Container:
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
+        self._action_get_tickets_basic_info = ActionWrapper(self._get_tickets_basic_info, "get_tickets_basic_info",
+                                                            is_async=True, logger=self._logger)
         self._action_get_ticket_detail = ActionWrapper(self._get_ticket_details, "send_ticket_details",
                                                        is_async=True, logger=self._logger)
         self._action_get_ticket_overview = ActionWrapper(self._get_ticket_overview, "get_ticket_overview",
@@ -152,6 +158,9 @@ class Container:
         await self._bruin_client.login()
         await self._event_bus.subscribe_consumer(consumer_name="tickets", topic="bruin.ticket.request",
                                                  action_wrapper=self._report_bruin_ticket,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="tickets_basic_info", topic="bruin.ticket.basic.request",
+                                                 action_wrapper=self._action_get_tickets_basic_info,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="ticket_details", topic="bruin.ticket.details.request",
                                                  action_wrapper=self._action_get_ticket_detail,

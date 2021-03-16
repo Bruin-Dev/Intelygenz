@@ -2574,3 +2574,331 @@ class TestPostMultipleTicketNotes:
             "status": bruin_response_status,
         }
         assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_ok_test(self):
+        service_number = 'VC1234567'
+        product_category = 'SD-WAN'
+        ticket_status = 'Resolved'
+
+        input_payload = {
+            'service_number': service_number,
+            'product_category': product_category,
+            'ticket_status': ticket_status,
+        }
+
+        request_payload = {
+            'ServiceNumber': service_number,
+            'ProductCategory': product_category,
+            'TicketStatus': ticket_status,
+        }
+
+        tickets = [
+            {
+                "clientID": 30000,
+                "ticketID": 5262293,
+                "ticketStatus": "In-Progress",
+                "address": {
+                    "address": "1090 Vermont Ave NW",
+                    "city": "Washington",
+                    "state": "DC",
+                    "zip": "20005-4905",
+                    "country": "USA"
+                },
+                "createDate": "3/13/2021 12:59:36 PM",
+            }
+        ]
+        bruin_response_body = {
+            'responses': tickets,
+        }
+        bruin_response_status = 200
+
+        logger = Mock()
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_400_status_test(self):
+        input_payload = {
+            'unknown_field': 'Fake value',
+        }
+
+        request_payload = {
+            'UnknownField': 'Fake value',
+        }
+
+        bruin_response_body = 'No valid query parameters were sent'
+        bruin_response_status = 400
+
+        logger = Mock()
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_401_status_test(self):
+        service_number = 'VC1234567'
+        product_category = 'SD-WAN'
+        ticket_status = 'Resolved'
+
+        input_payload = {
+            'service_number': service_number,
+            'product_category': product_category,
+            'ticket_status': ticket_status,
+        }
+
+        request_payload = {
+            'ServiceNumber': service_number,
+            'ProductCategory': product_category,
+            'TicketStatus': ticket_status,
+        }
+
+        bruin_response_body = 'Got 401 from Bruin'
+        bruin_response_status = 401
+
+        logger = Mock()
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+            bruin_client.login.assert_awaited_once()
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_403_status_test(self):
+        service_number = 'VC1234567'
+        product_category = 'SD-WAN'
+        ticket_status = 'Resolved'
+
+        input_payload = {
+            'service_number': service_number,
+            'product_category': product_category,
+            'ticket_status': ticket_status,
+        }
+
+        request_payload = {
+            'ServiceNumber': service_number,
+            'ProductCategory': product_category,
+            'TicketStatus': ticket_status,
+        }
+
+        bruin_response_body = 'Access to requested resources is forbidden'
+        bruin_response_status = 403
+
+        logger = Mock()
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_404_status_test(self):
+        service_number = 'VC1234567'
+        product_category = 'SD-WAN'
+        ticket_status = 'Resolved'
+
+        input_payload = {
+            'service_number': service_number,
+            'product_category': product_category,
+            'ticket_status': ticket_status,
+        }
+
+        request_payload = {
+            'ServiceNumber': service_number,
+            'ProductCategory': product_category,
+            'TicketStatus': ticket_status,
+        }
+
+        bruin_response_body = 'Resource not found'
+        bruin_response_status = 404
+
+        logger = Mock()
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_5xx_status_test(self):
+        service_number = 'VC1234567'
+        product_category = 'SD-WAN'
+        ticket_status = 'Resolved'
+
+        input_payload = {
+            'service_number': service_number,
+            'product_category': product_category,
+            'ticket_status': ticket_status,
+        }
+
+        request_payload = {
+            'ServiceNumber': service_number,
+            'ProductCategory': product_category,
+            'TicketStatus': ticket_status,
+        }
+
+        bruin_response_body = 'Got internal error from Bruin'
+        bruin_response_status = 500
+
+        logger = Mock()
+
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info_with_connection_error_test(self):
+        service_number = 'VC1234567'
+        product_category = 'SD-WAN'
+        ticket_status = 'Resolved'
+
+        input_payload = {
+            'service_number': service_number,
+            'product_category': product_category,
+            'ticket_status': ticket_status,
+        }
+
+        request_payload = {
+            'ServiceNumber': service_number,
+            'ProductCategory': product_category,
+            'TicketStatus': ticket_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        err_msg = 'Failed'
+        get_mock = CoroutineMock(side_effect=ClientConnectionError(err_msg))
+        with patch.object(bruin_client._session, 'get', new=get_mock):
+            result = await bruin_client.get_tickets_basic_info(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/basic',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": f"Connection error in Bruin API. Cause: {err_msg}",
+            "status": 500,
+        }
+        assert result == expected

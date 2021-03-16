@@ -37,6 +37,30 @@ class BruinRepository:
 
         return status_ticket_list["body"]
 
+    async def get_tickets_basic_info(self, params: dict, ticket_statuses: List[str]) -> dict:
+        tasks = []
+        for ticket_status in ticket_statuses:
+            payload = {
+                **params.copy(),
+                'ticket_status': ticket_status,
+            }
+
+            get_ticket_task = self._bruin_client.get_tickets_basic_info(payload)
+            tasks.append(get_ticket_task)
+
+        tickets_responses = await asyncio.gather(*tasks)
+        tickets = [
+            ticket_response['body']['responses']
+            for ticket_response in tickets_responses
+            if ticket_response['status'] in range(200, 300)
+        ]
+        tickets = sum(tickets, [])
+
+        return {
+            'body': tickets,
+            'status': 200,
+        }
+
     async def get_ticket_details(self, ticket_id):
         return await self._bruin_client.get_ticket_details(ticket_id)
 
