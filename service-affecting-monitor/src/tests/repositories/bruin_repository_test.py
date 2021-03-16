@@ -331,10 +331,10 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': client_id,
-                'category': 'SD-WAN',
+                'product_category': 'SD-WAN',
                 'ticket_topic': 'VAS',
                 'service_number': serial,
-                'ticket_status': ticket_statuses
+                'ticket_statuses': ticket_statuses
             }
         }
         ticket_details_request = {'request_id': uuid_, 'body': {'ticket_id': 3521039}}
@@ -366,7 +366,7 @@ class TestBruinRepository:
             affecting_ticket = await bruin_repository.get_affecting_ticket(client_id, serial)
 
         event_bus.rpc_request.assert_has_awaits([
-            call("bruin.ticket.request", ticket_request_msg, timeout=90),
+            call("bruin.ticket.basic.request", ticket_request_msg, timeout=90),
             call("bruin.ticket.details.request", ticket_details_request, timeout=15)
         ])
         assert affecting_ticket == ticket_details['body']

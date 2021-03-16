@@ -112,14 +112,14 @@ class BruinRepository:
             'request_id': uuid(),
             'body': {
                 'client_id': client_id,
-                'category': 'SD-WAN',
+                'product_category': 'SD-WAN',
                 'ticket_topic': 'VAS',
                 'service_number': serial,
-                'ticket_status': ticket_statuses
+                'ticket_statuses': ticket_statuses
             }
         }
         self._logger.info(f"Retrieving affecting tickets for serial: {serial}")
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.basic.request",
                                                         ticket_request_msg,
                                                         timeout=90)
         if all_tickets['status'] not in range(200, 300):
