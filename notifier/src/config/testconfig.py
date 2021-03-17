@@ -23,6 +23,10 @@ EMAIL_CONFIG = {
     'recipient_email': 'fake@gmail.com'
 }
 
+EMAIL_ACCOUNTS = {
+    'fake@gmail.com': '456',
+}
+
 TELESTAX_CONFIG = {
     'url': 'https://fake-telestax.com',
     'account_sid': 'ACCOUNT_SID',

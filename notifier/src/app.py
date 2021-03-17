@@ -4,12 +4,16 @@ import redis
 
 from config import config
 from igz.packages.nats.clients import NATSClient
+from application.clients.email_reader_client import EmailReaderClient
 from application.clients.email_client import EmailClient
 from application.clients.slack_client import SlackClient
 from application.clients.telestax_client import TeleStaxClient
+from application.repositories.email_reader_repository import EmailReaderRepository
 from application.repositories.email_repository import EmailRepository
 from application.repositories.slack_repository import SlackRepository
 from application.repositories.telestax_repository import TeleStaxRepository
+from application.actions.get_emails import GetEmails
+from application.actions.mark_email_as_read import MarkEmailAsRead
 from application.actions.send_to_email import SendToEmail
 from application.actions.send_to_slack import SendToSlack
 from application.actions.send_to_sms import SendToSms
@@ -32,10 +36,15 @@ class Container:
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
+        self._subscriber_email_reader = NATSClient(config, logger=self._logger)
+        self._subscriber_email_mark_read = NATSClient(config, logger=self._logger)
         self._subscriber_email = NATSClient(config, logger=self._logger)
         self._subscriber_slack = NATSClient(config, logger=self._logger)
         self._subscriber_telestax = NATSClient(config, logger=self._logger)
         self._publisher = NATSClient(config, logger=self._logger)
+
+        self._email_reader_client = EmailReaderClient(config, self._logger)
+        self._email_reader_repo = EmailReaderRepository(config, self._email_reader_client, self._logger)
 
         self._email_client = EmailClient(config, self._logger)
         self._email_repo = EmailRepository(config, self._email_client, self._logger)
@@ -48,15 +57,28 @@ class Container:
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
 
-        self._event_bus.add_consumer(consumer=self._subscriber_email, consumer_name="notification_email_request")
-        self._event_bus.add_consumer(consumer=self._subscriber_slack, consumer_name="notification_slack_request")
-        self._event_bus.add_consumer(consumer=self._subscriber_telestax, consumer_name="notification_sms_request")
+        self._event_bus.add_consumer(consumer=self._subscriber_email_reader,
+                                     consumer_name="email_reader_request")
+        self._event_bus.add_consumer(consumer=self._subscriber_email_mark_read,
+                                     consumer_name="mark_email_read_request")
+        self._event_bus.add_consumer(consumer=self._subscriber_email,
+                                     consumer_name="notification_email_request")
+        self._event_bus.add_consumer(consumer=self._subscriber_slack,
+                                     consumer_name="notification_slack_request")
+        self._event_bus.add_consumer(consumer=self._subscriber_telestax,
+                                     consumer_name="notification_sms_request")
         self._event_bus.set_producer(producer=self._publisher)
 
+        self._get_emails = GetEmails(config, self._event_bus, self._logger, self._email_reader_repo)
+        self._mark_email_as_read = MarkEmailAsRead(config, self._event_bus, self._logger, self._email_reader_repo)
         self._email_notification = SendToEmail(config, self._event_bus, self._logger, self._email_repo)
         self._slack_notification = SendToSlack(config, self._event_bus, self._slack_repo, self._logger)
         self._telestax_notification = SendToSms(config, self._event_bus, self._logger, self._telestax_repo)
 
+        self._get_email_wrapper = ActionWrapper(self._get_emails, "get_unread_emails", is_async=True,
+                                                logger=self._logger)
+        self._mark_email_read_wrapper = ActionWrapper(self._mark_email_as_read, "mark_email_as_read", is_async=True,
+                                                      logger=self._logger)
         self._send_email_wrapper = ActionWrapper(self._email_notification, "send_to_email", is_async=True,
                                                  logger=self._logger)
         self._send_slack_wrapper = ActionWrapper(self._slack_notification, "send_to_slack", is_async=True,
@@ -67,6 +89,16 @@ class Container:
 
     async def start(self):
         await self._event_bus.connect()
+
+        await self._event_bus.subscribe_consumer(consumer_name="email_reader_request",
+                                                 topic="get.email.request",
+                                                 action_wrapper=self._get_email_wrapper,
+                                                 queue="notifier")
+
+        await self._event_bus.subscribe_consumer(consumer_name="mark_email_read_request",
+                                                 topic="mark.email.read.request",
+                                                 action_wrapper=self._mark_email_read_wrapper,
+                                                 queue="notifier")
 
         await self._event_bus.subscribe_consumer(consumer_name="notification_email_request",
                                                  topic="notification.email.request",
