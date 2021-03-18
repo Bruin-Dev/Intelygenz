@@ -3,13 +3,13 @@ ARG REPOSITORY_URL
 ARG DOCKER_BASE_IMAGE_VERSION
 FROM ${REPOSITORY_URL}-python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
 
-COPY digi-bridge/ /service/app
+RUN apk add bash
 
+COPY digi-bridge/ /service/app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-
 
 ENV PYTHONUNBUFFERED 1
 
 RUN chmod +x ./entrypoint.sh
-ENTRYPOINT [ "/bin/sh", "-c", "./entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "-c", "./entrypoint.sh" ]
