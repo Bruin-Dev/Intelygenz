@@ -24,7 +24,7 @@ MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
     "latency": 120,
     "packet_loss": 8,
-    "jitter": 30,
+    "jitter": 50,
     "bandwidth_percentage": 90,
     'monitoring_minutes_interval': 10,
     "monitoring_minutes_per_trouble": {
