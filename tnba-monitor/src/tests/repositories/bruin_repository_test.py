@@ -12,7 +12,6 @@ from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
 
@@ -489,6 +488,82 @@ class TestBruinRepository:
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         bruin_repository._logger.error.assert_called_once()
         assert result == response
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue_ok_test(self, bruin_repository, make_rpc_request, make_rpc_response,
+                                               serial_number_1):
+        ticket_id = 12345
+        detail_id = 67890
+        task_result = 'Holmdel NOC Investigate'
+        serial_number = serial_number_1
+        request = make_rpc_request(request_id=uuid_, service_number=serial_number, ticket_id=ticket_id,
+                                   detail_id=detail_id, queue_name=task_result)
+        response = make_rpc_response(
+            request_id=uuid_,
+            body='',
+            status=200,
+        )
+
+        bruin_repository._event_bus.rpc_request.return_value = response
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(serial_number, ticket_id, detail_id, task_result)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.change.work", request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_not_awaited()
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue_500_test(self, bruin_repository, make_rpc_request, make_rpc_response,
+                                                serial_number_1):
+        ticket_id = 12345
+        detail_id = 67890
+        task_result = 'Holmdel NOC Investigate'
+        serial_number = serial_number_1
+        request = make_rpc_request(request_id=uuid_, service_number=serial_number, ticket_id=ticket_id,
+                                   detail_id=detail_id, queue_name=task_result)
+        response = make_rpc_response(
+            request_id=uuid_,
+            body='',
+            status=500,
+        )
+
+        bruin_repository._event_bus.rpc_request.return_value = response
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(serial_number, ticket_id, detail_id, task_result)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.change.work", request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited()
+        bruin_repository._logger.error.assert_called()
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue_exception_test(self, bruin_repository, make_rpc_request, serial_number_1):
+        ticket_id = 12345
+        detail_id = 67890
+        task_result = 'Holmdel NOC Investigate'
+        serial_number = serial_number_1
+        request = make_rpc_request(request_id=uuid_, service_number=serial_number, ticket_id=ticket_id,
+                                   detail_id=detail_id, queue_name=task_result)
+
+        bruin_repository._event_bus.rpc_request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(serial_number, ticket_id, detail_id, task_result)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.change.work", request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited()
+        bruin_repository._logger.error.assert_called()
 
     @pytest.mark.asyncio
     async def get_outage_tickets_test(self, bruin_repository):

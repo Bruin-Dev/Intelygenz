@@ -245,6 +245,50 @@ class BruinRepository:
 
         return response
 
+    async def change_detail_work_queue(self, serial_number, ticket_id, ticket_detail_id, task_result):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "service_number": serial_number,
+                "ticket_id": ticket_id,
+                "detail_id": ticket_detail_id,
+                "queue_name": task_result
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Changing task result for ticket {ticket_id} and detail id {ticket_detail_id} for device '
+                f'{serial_number} to {task_result}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when changing task result for ticket {ticket_id} and serial: {serial_number}. '
+                f'Exception: {e}'
+            )
+            self._logger.error(err_msg)
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Ticket {ticket_id} task result changed to  {task_result}')
+            else:
+                err_msg = (
+                    f'Error while changing task result for ticket {ticket_id} and serial: {serial_number} in '
+                    f'environment: {self._config.ENVIRONMENT.upper()}'
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_outage_tickets(self, client_id: int, ticket_statuses: list):
         ticket_topic = 'VOO'
 

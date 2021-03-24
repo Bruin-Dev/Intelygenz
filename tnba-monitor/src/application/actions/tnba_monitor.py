@@ -2,7 +2,7 @@ import asyncio
 import re
 import time
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Set, Dict
 from enum import auto, Enum
 
@@ -205,6 +205,7 @@ class TNBAMonitor:
                     ticket_creation_date = ticket['createDate']
                     ticket_topic = ticket['topic']
                     ticket_creator = ticket['createdBy']
+                    ticket_status = ticket['ticketStatus']
 
                     ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                     ticket_details_response_body = ticket_details_response['body']
@@ -224,6 +225,7 @@ class TNBAMonitor:
                     result.append({
                         'ticket_id': ticket_id,
                         'ticket_creation_date': ticket_creation_date,
+                        'ticket_status': ticket_status,
                         'ticket_topic': ticket_topic,
                         'ticket_creator': ticket_creator,
                         'ticket_details': ticket_details_list,
@@ -261,6 +263,7 @@ class TNBAMonitor:
             relevant_tickets.append({
                 'ticket_id': ticket['ticket_id'],
                 'ticket_creation_date': ticket['ticket_creation_date'],
+                'ticket_status': ticket['ticket_status'],
                 'ticket_topic': ticket['ticket_topic'],
                 'ticket_creator': ticket['ticket_creator'],
                 'ticket_details': relevant_details,
@@ -293,6 +296,7 @@ class TNBAMonitor:
             sanitized_tickets.append({
                 'ticket_id': ticket['ticket_id'],
                 'ticket_creation_date': ticket['ticket_creation_date'],
+                'ticket_status': ticket['ticket_status'],
                 'ticket_topic': ticket['ticket_topic'],
                 'ticket_creator': ticket['ticket_creator'],
                 'ticket_details': ticket['ticket_details'],
@@ -375,6 +379,7 @@ class TNBAMonitor:
             ticket_creator = ticket['ticket_creator']
             ticket_details = ticket['ticket_details']
             ticket_notes = ticket['ticket_notes']
+            ticket_status = ticket['ticket_status']
 
             for detail in ticket_details:
                 serial_number = detail['detailValue']
@@ -388,6 +393,7 @@ class TNBAMonitor:
                 detail_object = {
                     'ticket_id': ticket_id,
                     'ticket_creation_date': ticket_creation_date,
+                    'ticket_status': ticket_status,
                     'ticket_topic': ticket_topic,
                     'ticket_creator': ticket_creator,
                     'ticket_detail': detail,
@@ -509,6 +515,18 @@ class TNBAMonitor:
                 )
                 self._logger.info(msg)
                 return
+            ticket_creation_date = detail_object['ticket_creation_date']
+            ticket_status = detail_object['ticket_status']
+            edge_status = self._edge_status_by_serial[serial_number]
+            if self._is_new_ticket(ticket_status) and self._is_ticket_with_more_than_60_min(
+                    ticket_creation_date) and self._is_there_a_faulty_link(edge_status) and newest_tnba_note:
+                msg = (
+                    f"Find the ticket: {ticket_id} with detail_id: {ticket_detail_id} in the edge with serial: "
+                    f"{serial_number} have a note but continue in 'New' status"
+                )
+                self._logger.info(msg)
+                await self._bruin_repository.change_detail_work_queue(serial_number, ticket_id, ticket_detail_id,
+                                                                      'Holmdel NOC Investigate')
 
             mapped_predictions = self._prediction_repository.map_request_and_repair_completed_predictions(predictions)
 
@@ -711,6 +729,12 @@ class TNBAMonitor:
 
         return is_faulty_edge or is_there_any_faulty_link
 
+    def _is_there_a_faulty_link(self, edge_status: dict) -> bool:
+        return any(
+            self._is_faulty_link(link_status['linkState'])
+            for link_status in edge_status['links']
+        )
+
     @staticmethod
     def _is_faulty_edge(edge_state: str) -> bool:
         return edge_state == 'OFFLINE'
@@ -718,3 +742,11 @@ class TNBAMonitor:
     @staticmethod
     def _is_faulty_link(link_state: str) -> bool:
         return link_state == 'DISCONNECTED'
+
+    @staticmethod
+    def _is_new_ticket(ticket_status: str) -> bool:
+        return ticket_status == "New"
+
+    @staticmethod
+    def _is_ticket_with_more_than_60_min(ticket_creation_date) -> bool:
+        return datetime.strptime(ticket_creation_date, "%m/%d/%Y %H:%M:%S %p") + timedelta(minutes=60) < datetime.now()

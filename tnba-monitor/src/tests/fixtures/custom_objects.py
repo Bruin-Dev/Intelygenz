@@ -6,17 +6,19 @@ import pytest
 # Model-as-dict generators
 def __generate_ticket_object(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
                              ticket_creator: str = None, ticket_details: List[dict] = None,
-                             ticket_notes: List[dict] = None):
+                             ticket_notes: List[dict] = None, ticket_status: str = None):
     ticket_id = ticket_id or 12345
     ticket_creation_date = ticket_creation_date or "1/03/2021 10:08:13 AM"
     ticket_topic = ticket_topic or 'Service Outage Trouble'
     ticket_creator = ticket_creator or 'Intelygenz Ai'
     ticket_details = ticket_details or []
     ticket_notes = ticket_notes or []
+    ticket_status = ticket_status or 'In-Progress'
 
     return {
         'ticket_id': ticket_id,
         'ticket_creation_date': ticket_creation_date,
+        'ticket_status': ticket_status,
         'ticket_topic': ticket_topic,
         'ticket_creator': ticket_creator,
         'ticket_details': ticket_details,
@@ -25,17 +27,20 @@ def __generate_ticket_object(*, ticket_id: int = None, ticket_creation_date: str
 
 
 def __generate_detail_object(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-                             ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None):
+                             ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None,
+                             ticket_status: str = None):
     ticket_id = ticket_id or 12345
     ticket_creation_date = ticket_creation_date or "1/03/2021 10:08:13 AM"
     ticket_topic = ticket_topic or 'Service Outage Trouble'
     ticket_creator = ticket_creator or 'Intelygenz Ai'
     ticket_detail = ticket_detail or {}
     ticket_notes = ticket_notes or []
+    ticket_status = ticket_status or 'In-Progress'
 
     return {
         'ticket_id': ticket_id,
         'ticket_creation_date': ticket_creation_date,
+        'ticket_status': ticket_status,
         'ticket_topic': ticket_topic,
         'ticket_creator': ticket_creator,
         'ticket_detail': ticket_detail,
@@ -47,10 +52,12 @@ def __generate_detail_object(*, ticket_id: int = None, ticket_creation_date: str
 @pytest.fixture(scope='session')
 def make_ticket_object():
     def _inner(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-               ticket_creator: str = None, ticket_details: List[dict] = None, ticket_notes: List[dict] = None):
+               ticket_creator: str = None, ticket_details: List[dict] = None, ticket_notes: List[dict] = None,
+               ticket_status: str = None):
         return __generate_ticket_object(
             ticket_id=ticket_id,
             ticket_creation_date=ticket_creation_date,
+            ticket_status=ticket_status,
             ticket_topic=ticket_topic,
             ticket_creator=ticket_creator,
             ticket_details=ticket_details,
@@ -63,10 +70,12 @@ def make_ticket_object():
 @pytest.fixture(scope='session')
 def make_detail_object():
     def _inner(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-               ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None):
+               ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None,
+               ticket_status: str = None):
         return __generate_detail_object(
             ticket_id=ticket_id,
             ticket_creation_date=ticket_creation_date,
+            ticket_status=ticket_status,
             ticket_topic=ticket_topic,
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
@@ -80,12 +89,13 @@ def make_detail_object():
 def make_detail_object_with_predictions(make_detail_object):
     def _inner(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
                ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None,
-               ticket_detail_predictions: List[dict] = None):
+               ticket_detail_predictions: List[dict] = None, ticket_status: str = None):
         ticket_detail_predictions = ticket_detail_predictions or []
 
         detail_object = make_detail_object(
             ticket_id=ticket_id,
             ticket_creation_date=ticket_creation_date,
+            ticket_status=ticket_status,
             ticket_topic=ticket_topic,
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
