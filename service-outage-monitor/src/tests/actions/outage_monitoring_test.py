@@ -18,7 +18,6 @@ from application.actions import outage_monitoring as outage_monitoring_module
 from application.actions.outage_monitoring import OutageMonitor
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(outage_monitoring_module, 'uuid', return_value=uuid_)
 
@@ -4581,6 +4580,22 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
+        ticket_detail_1 = {
+            'detailID': 12345,
+            'detailValue': edge_1_serial,
+        }
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    ticket_detail_1,
+                ],
+                'ticketNotes': [],
+            },
+            'status': 200,
+        }
+        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        outage_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+            return_value={'status': 200, 'body': 'change work'})
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
@@ -7156,12 +7171,12 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
 
         success_reboot = {
-                            'body': 'Success',
-                            'status': 200
+            'body': 'Success',
+            'status': 200
         }
         failed_reboot = {
-                            'body': 'Failed',
-                            'status': 400
+            'body': 'Failed',
+            'status': 400
         }
         logical_id_list = [{'interface_name': 'test', 'logical_id': '123'},
                            {'interface_name': 'GE1', 'logical_id': '00:27:04:123'},
@@ -7643,8 +7658,8 @@ class TestServiceOutageMonitor:
 
         change_detail_work_queue_response = {'body': "Success", 'status': 200}
         success_reboot = {
-                            'body': 'Success',
-                            'status': 200
+            'body': 'Success',
+            'status': 200
         }
 
         logger = Mock()

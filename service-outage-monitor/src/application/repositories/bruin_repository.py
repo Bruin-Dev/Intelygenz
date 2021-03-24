@@ -355,7 +355,8 @@ class BruinRepository:
 
         return response
 
-    async def change_detail_work_queue(self, serial_number, ticket_id, ticket_detail_id, task_result):
+    async def change_detail_work_queue(self, serial_number=None, ticket_id=None, ticket_detail_id=None,
+                                       task_result=None):
         err_msg = None
 
         request = {
@@ -363,11 +364,11 @@ class BruinRepository:
             'body': {
                 "service_number": serial_number,
                 "ticket_id": ticket_id,
-                "detail_id": ticket_detail_id,
                 "queue_name": task_result
             },
         }
-
+        if ticket_detail_id:
+            request['body']["detail_id"] = ticket_detail_id
         try:
             self._logger.info(
                 f'Changing task result for ticket {ticket_id} and detail id {ticket_detail_id} for device '

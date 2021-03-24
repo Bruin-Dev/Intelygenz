@@ -368,13 +368,15 @@ class OutageMonitor:
                     if ticket_creation_response_status in range(200, 300):
                         self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
                         self._metrics_repository.increment_tickets_created()
-
                         slack_message = (
                             f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
                             f'details at https://app.bruin.com/t/{ticket_creation_response_body}.'
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
+                        if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
+                            ticket_id = ticket_creation_response_body
+                            await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 409:
@@ -427,6 +429,18 @@ class OutageMonitor:
             self._logger.info("No edges were detected in healthy state. Autoresolve won't be triggered")
 
         self._logger.info(f'Re-check process finished for {len(outage_edges)} edges')
+
+    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
+        self._logger.info(
+            f"Created ticket: {ticket_id} with offline edge.Send to Holmdel NOC Investigate")
+        task_result = 'Holmdel NOC Investigate'
+        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result=task_result)
+        if change_detail_work_queue_response['status'] in range(200, 300):
+            slack_message = f'[service-outage-monitor] Forwarding ticket {ticket_id} to {task_result}'
+            await self._notifications_repository.send_slack_message(slack_message)
 
     async def _append_triage_note(self, ticket_id, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -626,7 +640,7 @@ class OutageMonitor:
                 if self._was_digi_rebooted_recently(digi_note):
                     self._logger.info(
                         f'The last DiGi reboot attempt for Edge {edge_identifier} did not occur '
-                        f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"]/60} or more mins ago.'
+                        f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"] / 60} or more mins ago.'
                     )
                     return
 
