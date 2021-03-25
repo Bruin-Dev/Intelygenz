@@ -108,3 +108,40 @@ class T7KREClient:
             self._logger.error(f'Got error saving metrics from Konstellation: {response["body"]}')
 
         return response
+
+    def post_live_automation_metrics(self, ticket_id: int, asset_id: str, automated_successfully: bool) -> dict:
+        try:
+            stub = self._create_stub()
+
+            save_live_metrics_response = stub.SaveLiveMetrics(Parse(
+                json.dumps({
+                    "ticket_id": ticket_id,
+                    "asset_id": asset_id,
+                    "automated_successfully": automated_successfully
+                }).encode('utf8'),
+                pb2.SaveLiveMetricsRequest(),
+                ignore_unknown_fields=True
+            ), timeout=120)
+
+            response = {
+                "body": save_live_metrics_response.message,
+                "status": 200
+            }
+
+            self._logger.info(f'Got response saving live metrics from Konstellation: {response["body"]}')
+
+        except grpc.RpcError as grpc_e:
+            response = {
+                "body": f"Grpc error details: {grpc_e.details()}",
+                "status": self.__grpc_to_http_status(grpc_e.code())
+            }
+            self._logger.error(f'Got grpc error saving live metrics from Konstellation: {response["body"]}')
+
+        except Exception as e:
+            response = {
+                "body": f"Error: {e.args[0]}",
+                "status": 500
+            }
+            self._logger.error(f'Got error saving live metrics from Konstellation: {response["body"]}')
+
+        return response

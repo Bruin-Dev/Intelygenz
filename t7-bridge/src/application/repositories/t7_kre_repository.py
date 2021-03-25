@@ -47,6 +47,13 @@ class T7KRERepository:
         post_metrics_response = self._t7_kre_client.post_automation_metrics(ticket_id, camel_ticket_rows)
         return post_metrics_response
 
+    def post_live_automation_metrics(self, ticket_id: int, asset_id: str, automated_successfully: bool) -> dict:
+        post_live_metrics_response = self._t7_kre_client.post_live_automation_metrics(
+            ticket_id, asset_id, automated_successfully
+        )
+
+        return post_live_metrics_response
+
     @staticmethod
     def __row_dict_to_camel(row_input):
         row_output = {}

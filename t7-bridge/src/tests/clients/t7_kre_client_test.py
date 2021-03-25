@@ -347,3 +347,151 @@ class TestT7KREClient:
         assert logger.error.call_count == 1
         assert stub.SaveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
         assert save_metrics_response == exp_save_metric_response
+
+    def post_live_automation_metrics_200_test(self):
+        mock_live_metric_response = "Metric saved successfully"
+
+        valid_ticket_id = 99999999
+        valid_asset_id = "VC0000000"
+        automated_successfully = False
+
+        mock_stub_metric_response = self.__data_to_grpc_message(
+            {"message": mock_live_metric_response},
+            pb2.SaveLiveMetricsResponse()
+        )
+
+        logger = Mock()
+        logger.info = Mock()
+
+        stub = Mock()
+        stub.SaveLiveMetrics = Mock(return_value=mock_stub_metric_response)
+
+        exp_save_metric_response = {
+            "body": mock_live_metric_response,
+            "status": 200,
+        }
+
+        exp_stub_save_metrics_call_args_list = [
+            call(
+                self.__data_to_grpc_message(
+                    {
+                        "ticket_id": valid_ticket_id,
+                        "asset_id": valid_asset_id,
+                        "automated_successfully": automated_successfully,
+                    },
+                    pb2.SaveLiveMetricsRequest()
+                ),
+                timeout=120
+            )
+        ]
+
+        t7_kre_client = T7KREClient(logger, testconfig)
+
+        with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
+            save_metrics_response = t7_kre_client.post_live_automation_metrics(
+                ticket_id=valid_ticket_id,
+                asset_id=valid_asset_id,
+                automated_successfully=automated_successfully,
+            )
+
+            assert logger.info.call_count == 1
+            assert stub.SaveLiveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
+            assert save_metrics_response == exp_save_metric_response
+
+    @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
+    def post_live_automation_metrics_exception_errors_test(self, grpc_code, grpc_detail, expected_status):
+        valid_ticket_id = 99999999
+        valid_asset_id = "VC0000000"
+        automated_successfully = False
+
+        logger = Mock()
+        logger.info = Mock()
+        logger.error = Mock()
+
+        stub = Mock()
+        stub.SaveLiveMetrics = Mock()
+        stub.SaveLiveMetrics.side_effect = self.__mock_grpc_exception(
+            grpc_code,
+            grpc_detail
+        )
+
+        exp_save_metric_response = {
+            "body": f"Grpc error details: {grpc_detail}",
+            "status": expected_status,
+        }
+
+        exp_stub_save_metrics_call_args_list = [
+            call(
+                self.__data_to_grpc_message(
+                    {
+                        "ticket_id": valid_ticket_id,
+                        "asset_id": valid_asset_id,
+                        "automated_successfully": automated_successfully,
+                    },
+                    pb2.SaveLiveMetricsRequest()
+                ),
+                timeout=120
+            )
+        ]
+
+        t7_kre_client = T7KREClient(logger, testconfig)
+
+        with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
+            save_metrics_response = t7_kre_client.post_live_automation_metrics(
+                ticket_id=valid_ticket_id,
+                asset_id=valid_asset_id,
+                automated_successfully=automated_successfully
+            )
+
+        assert logger.info.call_count == 0
+        assert logger.error.call_count == 1
+        assert stub.SaveLiveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
+        assert save_metrics_response == exp_save_metric_response
+
+    def post_live_automation_metrics_exception_test(self):
+        raised_error = 'Error current exception test'
+
+        valid_ticket_id = 99999999
+        valid_asset_id = "VC0000000"
+        automated_successfully = False
+
+        logger = Mock()
+        logger.info = Mock()
+        logger.error = Mock()
+
+        stub = Mock()
+        stub.SaveLiveMetrics = Mock()
+        stub.SaveLiveMetrics.side_effect = Exception(raised_error)
+
+        exp_save_metric_response = {
+            "body": f"Error: {raised_error}",
+            "status": 500,
+        }
+
+        exp_stub_save_metrics_call_args_list = [
+            call(
+                self.__data_to_grpc_message(
+                    {
+                        "ticket_id": valid_ticket_id,
+                        "asset_id": valid_asset_id,
+                        "automated_successfully": automated_successfully,
+                    },
+                    pb2.SaveLiveMetricsRequest()
+                ),
+                timeout=120
+            )
+        ]
+
+        t7_kre_client = T7KREClient(logger, testconfig)
+
+        with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
+            save_metrics_response = t7_kre_client.post_live_automation_metrics(
+                ticket_id=valid_ticket_id,
+                asset_id=valid_asset_id,
+                automated_successfully=automated_successfully,
+            )
+
+        assert logger.info.call_count == 0
+        assert logger.error.call_count == 1
+        assert stub.SaveLiveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
+        assert save_metrics_response == exp_save_metric_response

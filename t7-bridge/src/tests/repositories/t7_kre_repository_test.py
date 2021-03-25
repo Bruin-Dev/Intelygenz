@@ -149,3 +149,26 @@ class TestT7KRERepository:
             self.valid_ticket_id, self.expected_ticket_rows
         )
         assert post_automation_metrics == return_value
+
+    def post_live_automation_metrics_test(self):
+        valid_ticket_id = 99999999
+        valid_asset_id = "VC0000000"
+        automated_successfully = False
+
+        return_value = {"body": "Metric saved successfully", "status": 200}
+
+        logger = Mock()
+        t7_kre_client = Mock()
+        t7_kre_client.post_live_automation_metrics = Mock(return_value=return_value)
+
+        t7_kre_repository = T7KRERepository(logger, t7_kre_client)
+
+        post_automation_metrics = t7_kre_repository.post_live_automation_metrics(
+            ticket_id=valid_ticket_id,
+            asset_id=valid_asset_id,
+            automated_successfully=automated_successfully
+        )
+        t7_kre_repository._t7_kre_client.post_live_automation_metrics.assert_called_once_with(
+            valid_ticket_id, valid_asset_id, automated_successfully
+        )
+        assert post_automation_metrics == return_value

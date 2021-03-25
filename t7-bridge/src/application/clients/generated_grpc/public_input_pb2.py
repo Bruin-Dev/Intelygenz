@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax='proto3',
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"\xf4\x03\n\tTicketRow\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x0f\n\x07product\x18\x02 \x01(\t\x12\x14\n\x0c\x65ntered_date\x18\x03 \x01(\t\x12\r\n\x05notes\x18\x04 \x01(\t\x12\x13\n\x0btask_result\x18\x05 \x01(\t\x12\x13\n\x0b\x63lient_name\x18\x06 \x01(\t\x12\x0c\n\x04\x63ity\x18\x07 \x01(\t\x12\r\n\x05state\x18\x08 \x01(\t\x12\x16\n\x0e\x65ntered_date_n\x18\t \x01(\t\x12\x17\n\x0fnote_entered_by\x18\n \x01(\t\x12\x1b\n\x13ticket_entered_date\x18\x0b \x01(\t\x12\x16\n\x0e\x63\x61ll_ticket_id\x18\x0c \x01(\x03\x12$\n\x1cinitial_note_ticket_creation\x18\r \x01(\t\x12\x11\n\tdetail_id\x18\x0e \x01(\x03\x12\x10\n\x08\x61\x64\x64ress1\x18\x0f \x01(\t\x12\x10\n\x08\x61\x64\x64ress2\x18\x10 \x01(\t\x12\x0b\n\x03zip\x18\x11 \x01(\t\x12\x11\n\tsite_name\x18\x12 \x01(\t\x12\x11\n\tnote_type\x18\x13 \x01(\t\x12\x19\n\x11note_entered_date\x18\x14 \x01(\t\x12\x18\n\x10task_assigned_to\x18\x15 \x01(\t\x12\x0c\n\x04task\x18\x16 \x01(\t\x12\x0b\n\x03sla\x18\x17 \x01(\x05\x12\x15\n\rticket_status\x18\x18 \x01(\t\"/\n\nTaskResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"&\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"p\n\x0f\x41ssetPrediction\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12,\n\x0ctask_results\x18\x02 \x03(\x0b\x32\x16.entrypoint.TaskResult\x12 \n\x05\x65rror\x18\x03 \x01(\x0b\x32\x11.entrypoint.Error\"m\n\x11PredictionRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\x12\x19\n\x11\x61ssets_to_predict\x18\x03 \x03(\t\"\x81\x01\n\x12PredictionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x11\n\tticket_id\x18\x03 \x01(\x03\x12\x36\n\x11\x61sset_predictions\x18\x04 \x03(\x0b\x32\x1b.entrypoint.AssetPrediction\"S\n\x12SaveMetricsRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\"&\n\x13SaveMetricsResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\xad\x01\n\nEntrypoint\x12M\n\nPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveMetrics\x12\x1e.entrypoint.SaveMetricsRequest\x1a\x1f.entrypoint.SaveMetricsResponse\"\x00\x62\x06proto3'  # noqa
+    serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"\xf4\x03\n\tTicketRow\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x0f\n\x07product\x18\x02 \x01(\t\x12\x14\n\x0c\x65ntered_date\x18\x03 \x01(\t\x12\r\n\x05notes\x18\x04 \x01(\t\x12\x13\n\x0btask_result\x18\x05 \x01(\t\x12\x13\n\x0b\x63lient_name\x18\x06 \x01(\t\x12\x0c\n\x04\x63ity\x18\x07 \x01(\t\x12\r\n\x05state\x18\x08 \x01(\t\x12\x16\n\x0e\x65ntered_date_n\x18\t \x01(\t\x12\x17\n\x0fnote_entered_by\x18\n \x01(\t\x12\x1b\n\x13ticket_entered_date\x18\x0b \x01(\t\x12\x16\n\x0e\x63\x61ll_ticket_id\x18\x0c \x01(\x03\x12$\n\x1cinitial_note_ticket_creation\x18\r \x01(\t\x12\x11\n\tdetail_id\x18\x0e \x01(\x03\x12\x10\n\x08\x61\x64\x64ress1\x18\x0f \x01(\t\x12\x10\n\x08\x61\x64\x64ress2\x18\x10 \x01(\t\x12\x0b\n\x03zip\x18\x11 \x01(\t\x12\x11\n\tsite_name\x18\x12 \x01(\t\x12\x11\n\tnote_type\x18\x13 \x01(\t\x12\x19\n\x11note_entered_date\x18\x14 \x01(\t\x12\x18\n\x10task_assigned_to\x18\x15 \x01(\t\x12\x0c\n\x04task\x18\x16 \x01(\t\x12\x0b\n\x03sla\x18\x17 \x01(\x05\x12\x15\n\rticket_status\x18\x18 \x01(\t\"/\n\nTaskResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"&\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"p\n\x0f\x41ssetPrediction\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12,\n\x0ctask_results\x18\x02 \x03(\x0b\x32\x16.entrypoint.TaskResult\x12 \n\x05\x65rror\x18\x03 \x01(\x0b\x32\x11.entrypoint.Error\"m\n\x11PredictionRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\x12\x19\n\x11\x61ssets_to_predict\x18\x03 \x03(\t\"\x81\x01\n\x12PredictionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x11\n\tticket_id\x18\x03 \x01(\x03\x12\x36\n\x11\x61sset_predictions\x18\x04 \x03(\x0b\x32\x1b.entrypoint.AssetPrediction\"S\n\x12SaveMetricsRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12*\n\x0bticket_rows\x18\x02 \x03(\x0b\x32\x15.entrypoint.TicketRow\"&\n\x13SaveMetricsResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"]\n\x16SaveLiveMetricsRequest\x12\x11\n\tticket_id\x18\x01 \x01(\x03\x12\x10\n\x08\x61sset_id\x18\x02 \x01(\t\x12\x1e\n\x16\x61utomated_successfully\x18\x03 \x01(\x08\"*\n\x17SaveLiveMetricsResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\x8b\x02\n\nEntrypoint\x12M\n\nPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveMetrics\x12\x1e.entrypoint.SaveMetricsRequest\x1a\x1f.entrypoint.SaveMetricsResponse\"\x00\x12\\\n\x0fSaveLiveMetrics\x12\".entrypoint.SaveLiveMetricsRequest\x1a#.entrypoint.SaveLiveMetricsResponse\"\x00\x62\x06proto3'  # noqa
 )
 
 _TICKETROW = _descriptor.Descriptor(
@@ -500,6 +500,83 @@ _SAVEMETRICSRESPONSE = _descriptor.Descriptor(
     serialized_end=1106,
 )
 
+_SAVELIVEMETRICSREQUEST = _descriptor.Descriptor(
+    name='SaveLiveMetricsRequest',
+    full_name='entrypoint.SaveLiveMetricsRequest',
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name='ticket_id', full_name='entrypoint.SaveLiveMetricsRequest.ticket_id', index=0,
+            number=1, type=3, cpp_type=2, label=1,
+            has_default_value=False, default_value=0,
+            message_type=None, enum_type=None, containing_type=None,
+            is_extension=False, extension_scope=None,
+            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
+        _descriptor.FieldDescriptor(
+            name='asset_id', full_name='entrypoint.SaveLiveMetricsRequest.asset_id', index=1,
+            number=2, type=9, cpp_type=9, label=1,
+            has_default_value=False, default_value=b"".decode('utf-8'),
+            message_type=None, enum_type=None, containing_type=None,
+            is_extension=False, extension_scope=None,
+            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
+        _descriptor.FieldDescriptor(
+            name='automated_successfully', full_name='entrypoint.SaveLiveMetricsRequest.automated_successfully',
+            index=2,
+            number=3, type=8, cpp_type=7, label=1,
+            has_default_value=False, default_value=False,
+            message_type=None, enum_type=None, containing_type=None,
+            is_extension=False, extension_scope=None,
+            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
+    ],
+    extensions=[
+    ],
+    nested_types=[],
+    enum_types=[
+    ],
+    serialized_options=None,
+    is_extendable=False,
+    syntax='proto3',
+    extension_ranges=[],
+    oneofs=[
+    ],
+    serialized_start=1108,
+    serialized_end=1201,
+)
+
+_SAVELIVEMETRICSRESPONSE = _descriptor.Descriptor(
+    name='SaveLiveMetricsResponse',
+    full_name='entrypoint.SaveLiveMetricsResponse',
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name='message', full_name='entrypoint.SaveLiveMetricsResponse.message', index=0,
+            number=1, type=9, cpp_type=9, label=1,
+            has_default_value=False, default_value=b"".decode('utf-8'),
+            message_type=None, enum_type=None, containing_type=None,
+            is_extension=False, extension_scope=None,
+            serialized_options=None, file=DESCRIPTOR, create_key=_descriptor._internal_create_key),
+    ],
+    extensions=[
+    ],
+    nested_types=[],
+    enum_types=[
+    ],
+    serialized_options=None,
+    is_extendable=False,
+    syntax='proto3',
+    extension_ranges=[],
+    oneofs=[
+    ],
+    serialized_start=1203,
+    serialized_end=1245,
+)
+
 _ASSETPREDICTION.fields_by_name['task_results'].message_type = _TASKRESULT
 _ASSETPREDICTION.fields_by_name['error'].message_type = _ERROR
 _PREDICTIONREQUEST.fields_by_name['ticket_rows'].message_type = _TICKETROW
@@ -513,6 +590,8 @@ DESCRIPTOR.message_types_by_name['PredictionRequest'] = _PREDICTIONREQUEST
 DESCRIPTOR.message_types_by_name['PredictionResponse'] = _PREDICTIONRESPONSE
 DESCRIPTOR.message_types_by_name['SaveMetricsRequest'] = _SAVEMETRICSREQUEST
 DESCRIPTOR.message_types_by_name['SaveMetricsResponse'] = _SAVEMETRICSRESPONSE
+DESCRIPTOR.message_types_by_name['SaveLiveMetricsRequest'] = _SAVELIVEMETRICSREQUEST
+DESCRIPTOR.message_types_by_name['SaveLiveMetricsResponse'] = _SAVELIVEMETRICSRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TicketRow = _reflection.GeneratedProtocolMessageType('TicketRow', (_message.Message,), {
@@ -571,6 +650,20 @@ SaveMetricsResponse = _reflection.GeneratedProtocolMessageType('SaveMetricsRespo
 })
 _sym_db.RegisterMessage(SaveMetricsResponse)
 
+SaveLiveMetricsRequest = _reflection.GeneratedProtocolMessageType('SaveLiveMetricsRequest', (_message.Message,), {
+    'DESCRIPTOR': _SAVELIVEMETRICSREQUEST,
+    '__module__': 'public_input_pb2'
+    # @@protoc_insertion_point(class_scope:entrypoint.SaveLiveMetricsRequest)
+})
+_sym_db.RegisterMessage(SaveLiveMetricsRequest)
+
+SaveLiveMetricsResponse = _reflection.GeneratedProtocolMessageType('SaveLiveMetricsResponse', (_message.Message,), {
+    'DESCRIPTOR': _SAVELIVEMETRICSRESPONSE,
+    '__module__': 'public_input_pb2'
+    # @@protoc_insertion_point(class_scope:entrypoint.SaveLiveMetricsResponse)
+})
+_sym_db.RegisterMessage(SaveLiveMetricsResponse)
+
 _ENTRYPOINT = _descriptor.ServiceDescriptor(
     name='Entrypoint',
     full_name='entrypoint.Entrypoint',
@@ -578,8 +671,8 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
     index=0,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_start=1109,
-    serialized_end=1282,
+    serialized_start=1248,
+    serialized_end=1515,
     methods=[
         _descriptor.MethodDescriptor(
             name='Prediction',
@@ -598,6 +691,16 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
             containing_service=None,
             input_type=_SAVEMETRICSREQUEST,
             output_type=_SAVEMETRICSRESPONSE,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name='SaveLiveMetrics',
+            full_name='entrypoint.Entrypoint.SaveLiveMetrics',
+            index=2,
+            containing_service=None,
+            input_type=_SAVELIVEMETRICSREQUEST,
+            output_type=_SAVELIVEMETRICSRESPONSE,
             serialized_options=None,
             create_key=_descriptor._internal_create_key,
         ),

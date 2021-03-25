@@ -80,26 +80,6 @@ As usual, the response message will have the following fields:
 }
 ```
 
-### Errors received from T7 API
-#### Request
-```json
-{
-    "request_id": "kNxC7FxXpg5ApdgGaX7otC",
-    "body": {
-        "ticket_id": 123
-    }
-}
-```
-
-#### Response
-```json
-{
-    "request_id": "kNxC7FxXpg5ApdgGaX7otC",
-    "body": "Got internal error from T7",
-    "status": 500,
-}
-```
-
 ### Konstellation returning a response with errors
 #### Request
 ```json
