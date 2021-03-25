@@ -45,3 +45,40 @@ class T7Repository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    async def post_live_automation_metrics(self, ticket_id: int, asset_id: str, automated_successfully: bool) -> dict:
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "ticket_id": ticket_id,
+                "asset_id": asset_id,
+                "automated_successfully": automated_successfully
+            },
+        }
+
+        try:
+            self._logger.info(f'Posting live metric for ticket {ticket_id} to T7...')
+            response = await self._event_bus.rpc_request("t7.live.automation.metrics", request, timeout=60)
+        except Exception as e:
+            err_msg = f'An error occurred when posting live metrics for ticket {ticket_id} to T7. Error: {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Live metrics posted for ticket {ticket_id}!')
+            else:
+                err_msg = (
+                        f'Error when posting live metrics for ticket {ticket_id} to T7 in '
+                        f'{self._config.ENVIRONMENT.upper()} '
+                        f'environment. Error: Error {response_status} - {response_body}'
+                    )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response

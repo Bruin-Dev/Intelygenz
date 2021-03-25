@@ -124,3 +124,86 @@ class TestT7Repository:
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
         t7_repository._logger.error.assert_called()
         assert result == response
+
+    @pytest.mark.asyncio
+    async def post_live_automation_metrics_test(self, t7_repository, make_rpc_request, make_rpc_response):
+        ticket_id = 12345
+        asset_id = "VC000TEST"
+        automated_successfully = False
+
+        request = make_rpc_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            asset_id=asset_id,
+            automated_successfully=automated_successfully,
+        )
+
+        response = make_rpc_response(
+            request_id=uuid_,
+            body="Metric saved successfully",
+            status=200,
+        )
+
+        t7_repository._event_bus.rpc_request.return_value = response
+
+        with uuid_mock:
+            result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
+
+        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.live.automation.metrics", request, timeout=60)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def post_live_automation_metrics_with_rpc_request_failing_test(self, t7_repository, make_rpc_request):
+        ticket_id = 12345
+        asset_id = "VC000TEST"
+        automated_successfully = False
+
+        request = make_rpc_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            asset_id=asset_id,
+            automated_successfully=automated_successfully,
+        )
+
+        t7_repository._event_bus.rpc_request.side_effect = Exception
+        t7_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
+
+        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.live.automation.metrics", request, timeout=60)
+        t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        t7_repository._logger.error.assert_called()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def post_live_automation_metrics_with_rpc_request_returning_non_2xx_status_test(
+            self, t7_repository, make_rpc_request, make_rpc_response
+    ):
+        ticket_id = 12345
+        asset_id = "VC000TEST"
+        automated_successfully = False
+
+        request = make_rpc_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            asset_id=asset_id,
+            automated_successfully=automated_successfully,
+        )
+
+        response = make_rpc_response(
+            request_id=uuid_,
+            body='Got internal error from T7',
+            status=500,
+        )
+
+        t7_repository._event_bus.rpc_request.return_value = response
+        t7_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
+
+        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.live.automation.metrics", request, timeout=60)
+        t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        t7_repository._logger.error.assert_called()
+        assert result == response

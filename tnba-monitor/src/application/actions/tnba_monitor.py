@@ -3,8 +3,8 @@ import re
 import time
 
 from datetime import datetime
-from typing import List
-from typing import Set
+from typing import Set, Dict
+from enum import auto, Enum
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -559,19 +559,24 @@ class TNBAMonitor:
                 f"Building TNBA note from prediction {best_prediction['name']} for ticket {ticket_id}, "
                 f"detail {ticket_detail_id} and serial {serial_number}..."
             )
+
+            tnba_note = None
             if self._prediction_repository.is_request_or_repair_completed_prediction(best_prediction):
                 self._logger.info(
                     f'Best prediction found for serial {serial_number} of ticket {ticket_id} is '
                     f'{best_prediction["name"]}. Running autoresolve...'
                 )
-                was_detail_autoresolved = await self._autoresolve_ticket_detail(
+                autoresolve_status = await self._autoresolve_ticket_detail(
                     detail_object=detail_object,
                     best_prediction=best_prediction
                 )
 
-                if was_detail_autoresolved:
+                if autoresolve_status is self.AutoresolveTicketDetailStatus.SUCCESS:
+                    await self._t7_repository.post_live_automation_metrics(
+                        ticket_id, serial_number, automated_successfully=True
+                    )
                     tnba_note: str = self._ticket_repository.build_tnba_note_for_AI_autoresolve(serial_number)
-                else:
+                elif autoresolve_status is self.AutoresolveTicketDetailStatus.SKIPPED:
                     self._logger.info(
                         f'Autoresolve was triggered because the best prediction found for serial {serial_number} of '
                         f'ticket {ticket_id} was {best_prediction["name"]}, but the process failed. A TNBA note with '
@@ -580,8 +585,20 @@ class TNBAMonitor:
                     tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(
                         best_prediction, serial_number
                     )
+                elif autoresolve_status is self.AutoresolveTicketDetailStatus.BAD_PREDICTION:
+                    await self._t7_repository.post_live_automation_metrics(
+                        ticket_id, serial_number, automated_successfully=False
+                    )
+                    self._logger.info(
+                        f'The prediction for serial {serial_number} of ticket {ticket_id} is considered wrong.'
+                    )
+
             else:
                 tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction, serial_number)
+
+            if not tnba_note:
+                self._logger.info(f'No TNBA note will be appended for serial {serial_number} of ticket {ticket_id}.')
+                return
 
             if self._config.ENVIRONMENT == 'production':
                 self._tnba_notes_to_append.append({
@@ -602,7 +619,14 @@ class TNBAMonitor:
                 f'Finished processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}!'
             )
 
-    async def _autoresolve_ticket_detail(self, detail_object: dict, best_prediction: dict) -> bool:
+    class AutoresolveTicketDetailStatus(Enum):
+        SUCCESS = auto()
+        SKIPPED = auto()
+        BAD_PREDICTION = auto()
+
+    async def _autoresolve_ticket_detail(
+            self, detail_object: dict, best_prediction: dict
+    ) -> AutoresolveTicketDetailStatus:
         ticket_id = detail_object['ticket_id']
         serial_number = detail_object['ticket_detail']['detailValue']
 
@@ -613,40 +637,43 @@ class TNBAMonitor:
                 f'Ticket {ticket_id}, where serial {serial_number} is, is not an outage ticket. Skipping '
                 'autoresolve...'
             )
-            return False
+            return self.AutoresolveTicketDetailStatus.SKIPPED
 
         if not self._ticket_repository.was_ticket_created_by_automation_engine(detail_object):
             self._logger.info(
                 f'Ticket {ticket_id}, where serial {serial_number} is, was not created by Automation Engine. '
                 'Skipping autoresolve...'
             )
-            return False
+            return self.AutoresolveTicketDetailStatus.SKIPPED
 
         if not self._prediction_repository.is_prediction_confident_enough(best_prediction):
             self._logger.info(
                 f'The confidence of the best prediction found for ticket {ticket_id}, where serial {serial_number} is, '
                 f'did not exceed the minimum threshold. Skipping autoresolve...'
             )
-            return False
+            return self.AutoresolveTicketDetailStatus.SKIPPED
 
         edge_status = self._edge_status_by_serial[serial_number]
         if self._is_there_an_outage(edge_status):
             self._logger.info(
                 f'Serial {serial_number} of ticket {ticket_id} is in outage state. Skipping autoresolve...'
             )
-            return False
+            return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
         if not self._config.ENVIRONMENT == 'production':
             self._logger.info(
                 f'Detail related to serial {serial_number} of ticket {ticket_id} was about to be resolved, but the '
                 f'current environment is {self._config.ENVIRONMENT.upper()}. Skipping autoresolve...'
             )
-            return False
+            return self.AutoresolveTicketDetailStatus.SKIPPED
 
         ticket_detail_id = detail_object['ticket_detail']['detailID']
         resolve_detail_response = await self._bruin_repository.resolve_ticket_detail(ticket_id, ticket_detail_id)
 
-        return resolve_detail_response['status'] in range(200, 300)
+        if resolve_detail_response['status'] in range(200, 300):
+            return self.AutoresolveTicketDetailStatus.SUCCESS
+        else:
+            return self.AutoresolveTicketDetailStatus.SKIPPED
 
     async def _append_tnba_notes(self):
         notes_by_ticket_id = {}
