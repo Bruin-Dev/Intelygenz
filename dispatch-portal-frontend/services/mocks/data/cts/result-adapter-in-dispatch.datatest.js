@@ -5,7 +5,7 @@ export const ctsDispatchMockGetOne = {
   status: 'Completed',
   dateDispatch: undefined,
   mettelId: '4694961',
-  timeDispatch: '2020-06-22T20:14:00.000+0000',
+  timeDispatch: 'Jun 23, 2020 @ 08:00 AM US/Central',
   timeZone: '',
   turnUp: '',
   hardTimeDispatch: '',

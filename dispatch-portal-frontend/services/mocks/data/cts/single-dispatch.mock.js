@@ -76,6 +76,7 @@ export const mockCtsSingleDispatch = {
     resource_trained__c: false,
     service_type__c: 'a251C000005Ics1QAC',
     zip__c: '20005',
+    date_of_dispatch: 'Jun 23, 2020 @ 08:00 AM US/Central',
     requester_name: 'Brad Gunnell',
     requester_phone: '(877) 515-0911',
     requester_email: 't1repair@mettel.net'

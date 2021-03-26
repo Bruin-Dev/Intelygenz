@@ -8,7 +8,7 @@ export const dispatchCtsInAdapter = data => ({
   status: (data.dispatch && data.dispatch.status__c) || '',
   dateDispatch: data.dateDispatch,
   mettelId: (data.dispatch && data.dispatch.ext_ref_num__c) || '',
-  timeDispatch: (data.dispatch && data.dispatch.open_date__c) || '',
+  timeDispatch: (data.dispatch && data.dispatch.date_of_dispatch) || '',
   timeZone: '',
   turnUp: '',
   hardTimeDispatch: '',
