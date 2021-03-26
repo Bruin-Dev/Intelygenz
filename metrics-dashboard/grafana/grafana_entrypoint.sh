@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 /metrics-dashboard/grafana/app.py
+# python3 /metrics-dashboard/grafana/app.py
 
 rm -rf /metrics-dashboard/dashboards
 rm -rf /metrics-dashboard/dashboards-definitions

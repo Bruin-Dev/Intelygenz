@@ -29,7 +29,7 @@ variables:
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
   lumin_billing_report_desired_tasks: 1
-  metrics_prometheus_desired_tasks: 0
+  metrics_prometheus_desired_tasks: 1
   nats_server_desired_tasks: 1
   nats_server_1_desired_tasks: 1
   nats_server_2_desired_tasks: 1
