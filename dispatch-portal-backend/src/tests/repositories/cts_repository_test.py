@@ -91,7 +91,7 @@ class TestCtsRepository:
         onsite_time_needed = '2020-06-21 16:00'
         time_stamp_string = f'{onsite_time_needed}:00.00'
         date_time_of_dispatch_localized = datetime.strptime(time_stamp_string, '%Y-%m-%d %H:%M:%S.%f')
-        datetime_formatted_str = 'Jun 21, 2020 @ 11:00 PM UTC'
+        datetime_formatted_str = 'Jun 21, 2020 @ 04:00 PM US/Pacific'
         date_time_of_dispatch_localized = tz.localize(date_time_of_dispatch_localized)
         date_time_of_dispatch_localized = date_time_of_dispatch_localized.astimezone(pytz.utc)
 

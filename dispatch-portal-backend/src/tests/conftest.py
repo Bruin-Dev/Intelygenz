@@ -355,7 +355,7 @@ def cts_dispatch_mapped():
             "resource_trained__c": False,
             "service_type__c": "a250n000000PMQ2AAO",
             "zip__c": "94102",
-            'date_of_dispatch': 'Jun 21, 2020 @ 11:00 PM UTC',
+            'date_of_dispatch': 'Jun 21, 2020 @ 04:00 PM US/Pacific',
             'requester_name': 'Karen Doe',
             'requester_phone': '+1 666 666 6666',
             'requester_email': 'karen.doe@mettel.net'

@@ -11,7 +11,7 @@ class CtsRepository:
         self._config = config
         self._event_bus = event_bus
         self._notifications_repository = notifications_repository
-        self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+        self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p {time_zone_of_dispatch}'
         self.DISPATCH_CONFIRMED = 'Scheduled'
 
     def _find_field_in_dispatch_description(self, dispatch, field_name):
@@ -70,16 +70,13 @@ class CtsRepository:
 
         self._logger.info(f"- Time and timezone from description: {onsite_time_needed} - {onsite_timezone}")
 
-        self._logger.info(f"- Converting: {onsite_time_needed} to UTC")
-
         date_time_of_dispatch_localized = onsite_timezone.localize(onsite_time_needed)
-        date_time_of_dispatch_localized = date_time_of_dispatch_localized.astimezone(pytz.utc)
         datetime_formatted_str = date_time_of_dispatch_localized.strftime(self.DATETIME_FORMAT)
 
         response = {
             'date_time_of_dispatch_localized': date_time_of_dispatch_localized,
             'timezone': onsite_timezone,
-            'datetime_formatted_str': datetime_formatted_str
+            'datetime_formatted_str': datetime_formatted_str.format(time_zone_of_dispatch=str(onsite_timezone))
         }
 
         self._logger.info(f"- Converted: {response}")
