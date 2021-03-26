@@ -414,10 +414,11 @@ class TestCtsRepository:
         ticket_id = cts_dispatch_confirmed['Ext_Ref_Num__c']
         dispatch_number = cts_dispatch_confirmed['Name']
         igz_dispatch_number = 'IGZ_0001'
+        date_of_dispatch = 'Jun 23, 2020 @ 03:00 PM US/Pacific'
         note_data = {
             'vendor': 'CTS',
             'dispatch_number': igz_dispatch_number,
-            'date_of_dispatch': cts_dispatch_confirmed.get('Local_Site_Time__c'),
+            'date_of_dispatch': date_of_dispatch,
             'tech_name': cts_dispatch_confirmed.get('API_Resource_Name__c'),
             'tech_phone': cts_dispatch_confirmed.get('Resource_Phone_Number__c')
         }
@@ -429,7 +430,7 @@ class TestCtsRepository:
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_to_ticket_mock])
         response = await cts_dispatch_monitor._cts_repository.append_confirmed_note(
-            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_confirmed)
+            dispatch_number, igz_dispatch_number, ticket_id, date_of_dispatch, cts_dispatch_confirmed)
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, note)
@@ -440,11 +441,12 @@ class TestCtsRepository:
         ticket_id = cts_dispatch_confirmed['Ext_Ref_Num__c']
         dispatch_number = cts_dispatch_confirmed['Name']
         igz_dispatch_number = 'IGZ_0001'
+        date_of_dispatch = 'Jun 23, 2020 @ 03:00 PM US/Pacific'
 
         note_data = {
             'vendor': 'CTS',
             'dispatch_number': igz_dispatch_number,
-            'date_of_dispatch': cts_dispatch_confirmed.get('Local_Site_Time__c'),
+            'date_of_dispatch': date_of_dispatch,
             'tech_name': cts_dispatch_confirmed.get('API_Resource_Name__c'),
             'tech_phone': cts_dispatch_confirmed.get('Resource_Phone_Number__c')
         }
@@ -460,7 +462,7 @@ class TestCtsRepository:
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await cts_dispatch_monitor._cts_repository.append_confirmed_note(
-            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_confirmed)
+            dispatch_number, igz_dispatch_number, ticket_id, date_of_dispatch, cts_dispatch_confirmed)
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, note)

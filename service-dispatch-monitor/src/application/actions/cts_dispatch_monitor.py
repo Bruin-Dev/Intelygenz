@@ -238,7 +238,7 @@ class CtsDispatchMonitor:
             # Check if dispatch has a confirmed note
             if confirmed_note_found is None:
                 result_append_confirmed_note = await self._cts_repository.append_confirmed_note(
-                    dispatch_number, igz_dispatch_number, ticket_id, dispatch)
+                    dispatch_number, igz_dispatch_number, ticket_id, datetime_formatted_str, dispatch)
                 if not result_append_confirmed_note:
                     msg = f"[service-dispatch-monitor] [CTS] " \
                           f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \

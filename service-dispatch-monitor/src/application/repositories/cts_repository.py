@@ -36,7 +36,7 @@ class CtsRepository:
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
 
-        self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+        self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p {time_zone_of_dispatch}'
 
         # Dispatch Notes watermarks
         self.OLD_WATERMARK = '#*Automation Engine*#'
@@ -485,13 +485,14 @@ class CtsRepository:
             f"SMS {current_hour}h Note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_confirmed_note(self, dispatch_number, igz_dispatch_number, ticket_id, dispatch) -> bool:
+    async def append_confirmed_note(self, dispatch_number, igz_dispatch_number, ticket_id, date_of_dispatch,
+                                    dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                           f"- Adding confirm note")
         note_data = {
             'vendor': 'CTS',
             'dispatch_number': igz_dispatch_number,
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'date_of_dispatch': date_of_dispatch,
             'tech_name': dispatch.get('API_Resource_Name__c'),
             'tech_phone': dispatch.get('Resource_Phone_Number__c')
         }
@@ -765,18 +766,13 @@ class CtsRepository:
         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                           f"- Time and timezone from description: {onsite_time_needed} - {onsite_timezone}")
 
-        # Convert date to UTC
-        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                          f"- Converting: {onsite_time_needed} to UTC")
-
         date_time_of_dispatch_localized = onsite_timezone.localize(onsite_time_needed)
-        date_time_of_dispatch_localized = date_time_of_dispatch_localized.astimezone(pytz.utc)
         datetime_formatted_str = date_time_of_dispatch_localized.strftime(self.DATETIME_FORMAT)
 
         response = {
             'date_time_of_dispatch_localized': date_time_of_dispatch_localized,
             'timezone': onsite_timezone,
-            'datetime_formatted_str': datetime_formatted_str
+            'datetime_formatted_str': datetime_formatted_str.format(time_zone_of_dispatch=str(onsite_timezone))
         }
 
         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
