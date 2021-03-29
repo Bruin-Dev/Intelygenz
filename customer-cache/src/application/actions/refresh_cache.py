@@ -1,3 +1,6 @@
+import base64
+import csv
+import json
 from datetime import datetime
 from typing import List
 
@@ -113,6 +116,7 @@ class RefreshCache:
                 f'Crossing currently stored cache ({len(stored_cache)} edges) with new one ({len(cache)} edges)...'
             )
             crossed_cache = self._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=cache)
+            await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
 
             self._logger.info(f"Storing cache of {len(crossed_cache)} edges to Redis for host {host}")
             self._storage_repository.set_cache(host, crossed_cache)
@@ -136,3 +140,52 @@ class RefreshCache:
             **new_devices_by_serial,
         }
         return list(crossed_cache.values())
+
+    async def _send_email_snapshot(self, host, old_cache, new_cache):
+        self._logger.info("Sending email with snapshots of cache...")
+        email_obj = self._format_email_object(host, old_cache, new_cache)
+        response = await self._event_bus.rpc_request("notification.email.request", email_obj, timeout=60)
+        self._logger.info(f"Response from sending email: {json.dumps(response)}")
+
+    def _format_email_object(self, host, old_cache, new_cache):
+        now = datetime.utcnow().strftime('%B %d %Y - %H:%M:%S')
+        old_cache_csv = self._generate_csv_bytes_from_cache("old_cache.csv", old_cache)
+        new_cache_csv = self._generate_csv_bytes_from_cache("new_cache.csv", new_cache)
+        return {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'Customer cache snapshots. Environment: {self._config.ENVIRONMENT_NAME}. Host: {host}. '
+                           f'{now}',
+                'recipient': self._config.REFRESH_CONFIG["email_recipient"],
+                'text': 'this is the accessible text for the email',
+                'html': f"In this email you will see attached 2 CSV files: the prior and current status of the "
+                        f"customer cache for the host {host}. If the environment is not 'production' disregard this."
+                        f"Please note that timestamps in the files and in the subject are in UTC.",
+                'images': [],
+                'attachments': [
+                    {
+                        'name': f"old_customer_cache_{host}_{now}.csv",
+                        'data': old_cache_csv
+                    },
+                    {
+                        'name': f"new_customer_cache_{host}_{now}.csv",
+                        'data': new_cache_csv
+                    }
+                ]
+            }
+        }
+
+    @staticmethod
+    def _generate_csv_bytes_from_cache(file_name, cache):
+        titles = ["Serial Number", "Bruin Client info", "Velo IDs", "Last Contact", "Logical IDs", ]
+        rows = [[item["serial_number"], item["bruin_client_info"], item["edge"], item["last_contact"],
+                 item["logical_ids"]] for item in cache]
+        with open(f'./{file_name}', 'w', encoding='utf-8') as csvfile:
+            filewriter = csv.writer(csvfile, delimiter=',',
+                                    quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            filewriter.writerow(titles)
+            for row in rows:
+                filewriter.writerow(row)
+        with open(f'./{file_name}', 'r', encoding='utf-8') as csvfile:
+            payload = csvfile.read()
+            return base64.b64encode(payload.encode('utf-8')).decode('utf-8')

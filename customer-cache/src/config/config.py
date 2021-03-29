@@ -30,6 +30,7 @@ VELOCLOUD_HOST = [
 
 REFRESH_CONFIG = {
     'timezone': 'US/Eastern',
+    'email_recipient': 'mettel.team@intelygenz.com',
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,

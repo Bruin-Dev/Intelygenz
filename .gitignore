@@ -149,3 +149,7 @@ last_contact.csv
 
 #Local thanos storage files
 metrics-dashboard/thanos/storage
+
+# Generated csv files
+*old_cache.csv
+*new_cache.csv
