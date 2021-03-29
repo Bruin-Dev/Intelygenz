@@ -68,6 +68,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-hawkeye-outage-monitor"
                 },
                 {
+                    "query": f"intermapper-outage-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[hawkeye-outage-monitor] - logs",
+                    "repository": "automation-intermapper-outage-monitor"
+                },
+                {
                     "query": f"last-contact-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[last-contact-report] - logs",
                     "repository": "automation-last-contact-report"

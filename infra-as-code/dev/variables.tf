@@ -508,6 +508,12 @@ variable "hawkeye_outage_monitor_desired_tasks" {
   description = "Number of desired tasks of microservice hawkeye-outage-monitor"
 }
 
+variable "intermapper_outage_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice intermapper-outage-monitor"
+}
+
 variable "last_contact_report_desired_tasks" {
   default = 1
   type = number
