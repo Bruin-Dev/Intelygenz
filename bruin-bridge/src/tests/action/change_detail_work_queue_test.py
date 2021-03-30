@@ -114,7 +114,7 @@ class TestChangeDetailWorkQueue:
         event_bus_response = {
             "request_id": 19,
             "body": (
-                'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
+                'You must specify {.."body": {"service_number" or "detail_id", "ticket_id", "queue_name"}..} '
                 'in the request'
             ),
             'status': 400

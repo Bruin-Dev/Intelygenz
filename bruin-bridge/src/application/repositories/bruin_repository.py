@@ -181,14 +181,17 @@ class BruinRepository:
         return next_results_response
 
     async def change_detail_work_queue(self, ticket_id, filters):
-        service_number = filters["service_number"]
-        ticket_detail_id = filters["detail_id"]
+        get_work_queues_filters = {}
+        put_work_queues_filters = {}
 
-        get_work_queues_filters = {
-            "ServiceNumber": service_number,
-            "DetailId": ticket_detail_id,
-        }
-
+        if "detail_id" in filters:
+            ticket_detail_id = filters["detail_id"]
+            get_work_queues_filters['DetailId'] = ticket_detail_id
+            put_work_queues_filters['detailId'] = ticket_detail_id
+        if "service_number" in filters:
+            service_number = filters["service_number"]
+            get_work_queues_filters['ServiceNumber'] = service_number
+            put_work_queues_filters['serviceNumber'] = service_number
         possible_work_queues_response = await self._bruin_client.get_possible_detail_next_result(
             ticket_id, get_work_queues_filters
         )
@@ -211,7 +214,7 @@ class BruinRepository:
         queue_name = filters["queue_name"]
         work_queue_id = None
         for possible_work_queue in work_queues:
-            if possible_work_queue["resultName"] == queue_name:
+            if possible_work_queue["resultName"].strip() == queue_name:
                 work_queue_id = possible_work_queue["resultTypeId"]
                 break
 
@@ -225,10 +228,7 @@ class BruinRepository:
 
         put_work_queue_payload = {
             "details": [
-                {
-                    "detailId": ticket_detail_id,
-                    "serviceNumber": service_number,
-                }
+                put_work_queues_filters
             ],
             "notes": [],
             "resultTypeId": work_queue_id

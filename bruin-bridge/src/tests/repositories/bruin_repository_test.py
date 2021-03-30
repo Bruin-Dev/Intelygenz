@@ -1123,8 +1123,8 @@ class TestBruinRepository:
         }
 
         work_queue_filters = {
-            "ServiceNumber": service_number,
             "DetailId": detail_id,
+            "ServiceNumber": service_number,
         }
 
         possible_work_queues_response_body = 'Got internal error from Bruin'
@@ -1166,8 +1166,8 @@ class TestBruinRepository:
         }
 
         work_queue_filters = {
-            "ServiceNumber": service_number,
             "DetailId": detail_id,
+            "ServiceNumber": service_number,
         }
 
         possible_work_queues_response = {
@@ -1213,8 +1213,8 @@ class TestBruinRepository:
         }
 
         work_queue_filters = {
-            "ServiceNumber": service_number,
             "DetailId": detail_id,
+            "ServiceNumber": service_number,
         }
 
         work_queue = {

@@ -28,11 +28,12 @@ class ChangeDetailWorkQueue:
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        if not all(key in msg_body.keys() for key in ("service_number", "ticket_id", "detail_id", "queue_name")):
+        if not all(key in msg_body.keys() for key in ("ticket_id", "queue_name")) \
+                or not any(key in msg_body.keys() for key in ("service_number", "detail_id")):
             self._logger.error(f'Cannot change detail work queue using {json.dumps(msg_body)}. '
-                               f'Need all these parameters: "service_number", "ticket_id", "detail_id", "queue_name"')
+                               f'Need all these parameters: "service_number" or "detail_id", "ticket_id", "queue_name"')
             response["body"] = (
-                'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
+                'You must specify {.."body": {"service_number" or "detail_id", "ticket_id", "queue_name"}..} '
                 'in the request'
             )
             response["status"] = 400
