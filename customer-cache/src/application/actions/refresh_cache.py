@@ -149,8 +149,8 @@ class RefreshCache:
 
     def _format_email_object(self, host, old_cache, new_cache):
         now = datetime.utcnow().strftime('%B %d %Y - %H:%M:%S')
-        old_cache_csv = self._generate_csv_bytes_from_cache("old_cache.csv", old_cache)
-        new_cache_csv = self._generate_csv_bytes_from_cache("new_cache.csv", new_cache)
+        old_cache_csv = self._generate_csv_bytes_from_cache(f"old_cache_{host}.csv", old_cache)
+        new_cache_csv = self._generate_csv_bytes_from_cache(f"new_cache_{host}.csv", new_cache)
         return {
             'request_id': uuid(),
             'email_data': {
