@@ -519,7 +519,7 @@ class TNBAMonitor:
             ticket_status = detail_object['ticket_status']
             edge_status = self._edge_status_by_serial[serial_number]
             if self._is_new_ticket(ticket_status) and self._is_ticket_with_more_than_60_min(
-                    ticket_creation_date) and self._is_there_a_faulty_link(edge_status) and newest_tnba_note:
+                    ticket_creation_date) and newest_tnba_note:
                 msg = (
                     f"Find the ticket: {ticket_id} with detail_id: {ticket_detail_id} in the edge with serial: "
                     f"{serial_number} have a note but continue in 'New' status"
@@ -728,12 +728,6 @@ class TNBAMonitor:
         )
 
         return is_faulty_edge or is_there_any_faulty_link
-
-    def _is_there_a_faulty_link(self, edge_status: dict) -> bool:
-        return any(
-            self._is_faulty_link(link_status['linkState'])
-            for link_status in edge_status['links']
-        )
 
     @staticmethod
     def _is_faulty_edge(edge_state: str) -> bool:

@@ -1505,7 +1505,8 @@ class TestTNBAMonitor:
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_failed_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_payload_for_note_append_with_ticket_id, make_next_results,
-            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1):
+            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1,
+            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
         ticket_id = 12345
         ticket_detail_id = 1
 
@@ -1520,6 +1521,13 @@ class TestTNBAMonitor:
             unconfident_request_completed_prediction,
             unconfident_repair_completed_prediction,
         ]
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
+        edge_status_by_serial = {
+            serial_number_1: edge_status,
+        }
 
         request_completed_prediction_name = unconfident_request_completed_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
@@ -1531,7 +1539,7 @@ class TestTNBAMonitor:
         )
 
         built_tnba_note = 'This is a TNBA note'
-
+        tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
@@ -1683,8 +1691,6 @@ class TestTNBAMonitor:
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = True
-        tnba_monitor._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction.return_value = \
-            built_tnba_note
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.SUCCESS
 
         tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.return_value = built_tnba_note
@@ -1712,8 +1718,6 @@ class TestTNBAMonitor:
             best_prediction=confident_request_completed_prediction,
         )
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_for_request_or_repair_completed_prediction. \
-            assert_called_once_with(serial_number_1)
         tnba_monitor._t7_repository.post_live_automation_metrics.assert_called_once_with(
             ticket_id, serial_number_1, automated_successfully=True
         )
