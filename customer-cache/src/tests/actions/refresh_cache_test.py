@@ -171,7 +171,8 @@ class TestRefreshCache:
             edge_from_bruin_1,
             edge_from_bruin_2,
         ])
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
+        send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
+        instance_refresh_cache._event_bus.rpc_request = CoroutineMock(return_value=send_email_res)
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=new_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
