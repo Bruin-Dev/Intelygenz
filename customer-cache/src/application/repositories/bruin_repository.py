@@ -1,11 +1,6 @@
 import asyncio
 from shortuuid import uuid
 from application.repositories import nats_error_response
-from tenacity import stop_after_delay
-from tenacity import wait_exponential
-from tenacity import retry
-
-from application.repositories import EdgeIdentifier
 
 
 class BruinRepository:
@@ -14,7 +9,6 @@ class BruinRepository:
         self._config = config
         self._logger = logger
         self._event_bus = event_bus
-        self._semaphore = asyncio.BoundedSemaphore(self._config.REFRESH_CONFIG['semaphore'])
 
     async def get_client_info(self, service_number: str):
         err_msg = None
@@ -98,55 +92,3 @@ class BruinRepository:
         self._logger.error(err_msg)
         slack_message = {'request_id': uuid(), 'message': err_msg}
         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-
-    async def filter_edge_list(self, edge_with_serial):
-        edge_identifier = EdgeIdentifier(**edge_with_serial['edge'])
-
-        @retry(wait=wait_exponential(multiplier=self._config.REFRESH_CONFIG['multiplier'],
-                                     min=self._config.REFRESH_CONFIG['min']),
-               stop=stop_after_delay(self._config.REFRESH_CONFIG['stop_delay']),
-               reraise=True)
-        async def _filter_edge_list():
-            async with self._semaphore:
-                self._logger.info(f"Checking if edge {edge_identifier} should be monitored...")
-                serial_number = edge_with_serial['serial_number']
-
-                client_info_response = await self.get_client_info(serial_number)
-                client_info_response_status = client_info_response['status']
-                if client_info_response_status not in range(200, 300):
-                    return
-
-                client_info_response_body = client_info_response['body']
-                client_id = client_info_response_body.get("client_id")
-                if not client_id:
-                    self._logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client ID associated")
-                    return
-
-                management_status_response = await self.get_management_status(
-                    client_id, serial_number
-                )
-                management_status_response_status = management_status_response['status']
-                if management_status_response_status not in range(200, 300):
-                    return
-
-                management_status_response_body = management_status_response['body']
-                if not self.is_management_status_active(management_status_response_body):
-                    self._logger.info(f'Management status is not active for {edge_identifier}. Skipping...')
-                    return
-                else:
-                    self._logger.info(f'Management status for {edge_identifier} seems active')
-
-                return {
-                    'edge': edge_with_serial['edge'],
-                    'last_contact': edge_with_serial['last_contact'],
-                    'logical_ids': edge_with_serial['logical_ids'],
-                    'serial_number': serial_number,
-                    'bruin_client_info': client_info_response_body
-                }
-
-        try:
-            return await _filter_edge_list()
-        except Exception as e:
-            self._logger.error(
-                f"An error occurred while checking if edge {edge_identifier} should be cached or not -> {e}"
-            )

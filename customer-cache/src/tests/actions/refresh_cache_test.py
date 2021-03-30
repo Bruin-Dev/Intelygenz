@@ -12,6 +12,7 @@ from tenacity import stop_after_attempt
 
 from application.actions import refresh_cache as refresh_cache_module
 from application.actions.refresh_cache import RefreshCache
+from application.repositories import EdgeIdentifier
 from config import testconfig
 
 uuid_ = uuid()
@@ -146,8 +147,8 @@ class TestRefreshCache:
                                                                        timeout=10)
 
     @pytest.mark.asyncio
-    async def partial_refresh_cache_with_edges_test(self, instance_refresh_cache, instance_err_msg_refresh_cache):
-        # Scenario: Bruin returns all(or most) management statuses correctly
+    async def partial_refresh_cache_with_edges_and_not_invalid_edges_test(self, instance_refresh_cache):
+        # Scenario: Bruin returns all management statuses correctly
         edge_from_bruin_1 = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
             'last_contact': "0000-00-00 00:00:00",
@@ -167,7 +168,10 @@ class TestRefreshCache:
         stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
         new_cache = [edge_from_bruin_1, edge_from_bruin_2]
 
-        instance_refresh_cache._bruin_repository.filter_edge_list = CoroutineMock(side_effect=[
+        instance_refresh_cache._invalid_edges = {
+            'mettel.velocloud.net': []
+        }
+        instance_refresh_cache._filter_edge_list = CoroutineMock(side_effect=[
             edge_from_bruin_1,
             edge_from_bruin_2,
         ])
@@ -179,11 +183,60 @@ class TestRefreshCache:
 
         await instance_refresh_cache._partial_refresh_cache("mettel.velocloud.net", edge_list)
 
-        instance_refresh_cache._bruin_repository.filter_edge_list.assert_awaited()
+        instance_refresh_cache._filter_edge_list.assert_awaited()
         instance_refresh_cache._cross_stored_cache_and_new_cache.assert_called_once_with(
             stored_cache=stored_cache, new_cache=new_cache
         )
         instance_refresh_cache._storage_repository.set_cache.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def partial_refresh_cache_with_edges_and_invalid_edges_test(self, instance_refresh_cache):
+        # Scenario: Bruin returns most management statuses correctly
+        host = "mettel.velocloud.net"
+
+        edge_from_bruin_1 = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO191919",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
+        }
+        edge_from_bruin_2 = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 2020},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO202020",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
+        }
+        edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+                     {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
+        stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
+        new_cache = [edge_from_bruin_1]
+        crossed_cache = [edge_from_bruin_1, edge_from_bruin_2]
+        final_cache = [edge_from_bruin_1]
+
+        instance_refresh_cache._filter_edge_list = CoroutineMock(side_effect=[
+            edge_from_bruin_1,
+            None,
+        ])
+        instance_refresh_cache._invalid_edges = {
+            host: [
+                EdgeIdentifier(**edge_from_bruin_2['edge'])
+            ]
+        }
+        send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
+        instance_refresh_cache._event_bus.rpc_request = CoroutineMock(return_value=send_email_res)
+        instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
+        instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=crossed_cache)
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        await instance_refresh_cache._partial_refresh_cache(host, edge_list)
+
+        instance_refresh_cache._filter_edge_list.assert_awaited()
+        instance_refresh_cache._cross_stored_cache_and_new_cache.assert_called_once_with(
+            stored_cache=stored_cache, new_cache=new_cache
+        )
+        instance_refresh_cache._storage_repository.set_cache.assert_called_once_with(host, final_cache)
 
     @pytest.mark.asyncio
     async def partial_refresh_cache_with_no_edges_test(self, instance_refresh_cache, instance_err_msg_refresh_cache):
@@ -194,14 +247,14 @@ class TestRefreshCache:
         instance_err_msg_refresh_cache['request_id'] = uuid_
 
         instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
-        instance_refresh_cache._bruin_repository.filter_edge_list = CoroutineMock(return_value=edge_from_bruin)
+        instance_refresh_cache._filter_edge_list = CoroutineMock(return_value=edge_from_bruin)
         instance_refresh_cache._storage_repository.get_cache = Mock()
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock()
         instance_refresh_cache._storage_repository.set_cache = Mock()
 
         await instance_refresh_cache._partial_refresh_cache("mettel.velocloud.net", edge_list)
 
-        instance_refresh_cache._bruin_repository.filter_edge_list.assert_awaited()
+        instance_refresh_cache._filter_edge_list.assert_awaited()
         instance_refresh_cache._cross_stored_cache_and_new_cache.assert_not_called()
         instance_refresh_cache._storage_repository.set_cache.assert_not_called()
         instance_refresh_cache._event_bus.rpc_request.assert_awaited_once()
@@ -336,16 +389,28 @@ class TestRefreshCache:
         assert result == expected
 
     def cross_stored_cache_and_new_cache_with_common_devices_in_both_caches_test(self):
+        edge_full_id_1 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 19,
+            "edge_id": 1919,
+        }
+        edge_full_id_2 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 20,
+            "edge_id": 2020,
+        }
+        edge_full_id_3 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 21,
+            "edge_id": 2121,
+        }
+
         serial_number_1 = 'VC1919191'
         serial_number_2 = 'VC1919192'
         serial_number_3 = 'VC1919193'
 
         device_info_1_stored_cache = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 19,
-                "edge_id": 1919
-            },
+            'edge': edge_full_id_1,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
@@ -355,11 +420,7 @@ class TestRefreshCache:
             }
         }
         device_info_1_new_cache = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 19,
-                "edge_id": 1919
-            },
+            'edge': edge_full_id_1,
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
@@ -369,11 +430,7 @@ class TestRefreshCache:
             }
         }
         device_info_2 = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2020
-            },
+            'edge': edge_full_id_2,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': serial_number_2,
@@ -383,11 +440,7 @@ class TestRefreshCache:
             }
         }
         device_info_3_stored_cache = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2021
-            },
+            'edge': edge_full_id_3,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -397,11 +450,7 @@ class TestRefreshCache:
             }
         }
         device_info_3_new_cache = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2021
-            },
+            'edge': edge_full_id_3,
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -432,6 +481,32 @@ class TestRefreshCache:
 
     def cross_stored_cache_and_new_cache_with_common_devices_in_both_caches_and_some_devices_only_in_one_cache_test(
             self):
+        edge_full_id_1 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 19,
+            "edge_id": 1919,
+        }
+        edge_full_id_2 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 20,
+            "edge_id": 2020,
+        }
+        edge_full_id_3 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 21,
+            "edge_id": 2121,
+        }
+        edge_full_id_4 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 22,
+            "edge_id": 2222,
+        }
+        edge_full_id_5 = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 23,
+            "edge_id": 2323,
+        }
+
         serial_number_1 = 'VC1919191'
         serial_number_2 = 'VC1919192'
         serial_number_3 = 'VC1919193'
@@ -439,11 +514,7 @@ class TestRefreshCache:
         serial_number_5 = 'VC1919195'
 
         device_info_1 = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 19,
-                "edge_id": 1919
-            },
+            'edge': edge_full_id_1,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
@@ -453,11 +524,7 @@ class TestRefreshCache:
             }
         }
         device_info_2 = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2020
-            },
+            'edge': edge_full_id_2,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': serial_number_2,
@@ -467,11 +534,7 @@ class TestRefreshCache:
             }
         }
         device_info_3_stored_cache = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2021
-            },
+            'edge': edge_full_id_3,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -481,11 +544,7 @@ class TestRefreshCache:
             }
         }
         device_info_3_new_cache = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2021
-            },
+            'edge': edge_full_id_3,
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -495,11 +554,7 @@ class TestRefreshCache:
             }
         }
         device_info_4 = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2021
-            },
+            'edge': edge_full_id_4,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "1789-hj09-vgi6-k97m",
             'serial_number': serial_number_4,
@@ -509,11 +564,7 @@ class TestRefreshCache:
             }
         }
         device_info_5 = {
-            'edge': {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 20,
-                "edge_id": 2021
-            },
+            'edge': edge_full_id_5,
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "2890-ik10-whj7-l08n",
             'serial_number': serial_number_5,
@@ -544,3 +595,166 @@ class TestRefreshCache:
             device_info_5,
         ]
         assert result == expected
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_ok_test(self, instance_refresh_cache,
+                                       instance_cache_edges, instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+        bruin_client_info = {'client_id': 'some client info'}
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
+        instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
+        instance_cache_edges[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['bruin_client_info'] = bruin_client_info
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': bruin_client_info, 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+
+        assert cache_return == instance_cache_edges[0]
+        assert instance_refresh_cache._invalid_edges == {}
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_exception_test(self, instance_refresh_cache, instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': None, 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_not_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_not_called()
+
+        instance_refresh_cache._logger.error.assert_called_once()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {}
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_no_client_info_test(self, instance_refresh_cache, instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': {}, 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+        instance_refresh_cache._invalid_edges = {
+            instance_edges_refresh_cache[0]['edge']['host']: []
+        }
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_not_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_not_called()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {
+            instance_edges_refresh_cache[0]['edge']['host']: [
+                EdgeIdentifier(**instance_edges_refresh_cache[0]['edge'])
+            ]
+        }
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_client_info_status_non_2XX_test(self, instance_refresh_cache,
+                                                               instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': {'client_id': 'some client info'}, 'status': 400})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_not_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_not_called()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {}
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_no_management_status_test(self, instance_refresh_cache, instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': {'client_id': 'some client info'}, 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 400})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_not_called()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {}
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_unactive_management_status_test(self, instance_refresh_cache,
+                                                               instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': {'client_id': 'some client info'}, 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=False)
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+        instance_refresh_cache._invalid_edges = {
+            instance_edges_refresh_cache[0]['edge']['host']: []
+        }
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {
+            instance_edges_refresh_cache[0]['edge']['host']: [
+                EdgeIdentifier(**instance_edges_refresh_cache[0]['edge'])
+            ]
+        }
