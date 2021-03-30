@@ -116,11 +116,11 @@ class RefreshCache:
                 f'Crossing currently stored cache ({len(stored_cache)} edges) with new one ({len(cache)} edges)...'
             )
             crossed_cache = self._cross_stored_cache_and_new_cache(stored_cache=stored_cache, new_cache=cache)
-            await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
 
             self._logger.info(f"Storing cache of {len(crossed_cache)} edges to Redis for host {host}")
             self._storage_repository.set_cache(host, crossed_cache)
             self._logger.info(f"Finished storing cache for host {host}")
+            await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
 
     @staticmethod
     def _cross_stored_cache_and_new_cache(stored_cache: List[dict], new_cache: List[dict]) -> List[dict]:
@@ -177,9 +177,12 @@ class RefreshCache:
 
     @staticmethod
     def _generate_csv_bytes_from_cache(file_name, cache):
-        titles = ["Serial Number", "Bruin Client info", "Velo IDs", "Last Contact", "Logical IDs", ]
-        rows = [[item["serial_number"], item["bruin_client_info"], item["edge"], item["last_contact"],
-                 item["logical_ids"]] for item in cache]
+        titles = ["Serial Number", "Bruin Client ID", "Bruin Client Name", "Velo Host", "Velo Enterprise ID",
+                  "Velo Edge ID", "Last Contact", "Logical IDs"]
+        rows = [[item["serial_number"], item["bruin_client_info"]["client_id"],
+                 item["bruin_client_info"]["client_name"], item["edge"]["host"], item["edge"]["enterprise_id"],
+                 item["edge"]["edge_id"], item["last_contact"], item["logical_ids"]]
+                for item in cache]
         with open(f'./{file_name}', 'w', encoding='utf-8') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',',
                                     quotechar='"', quoting=csv.QUOTE_MINIMAL)
