@@ -17,6 +17,7 @@ from application.actions.open_ticket import OpenTicket
 from application.actions.post_outage_ticket import PostOutageTicket
 from application.actions.resolve_ticket import ResolveTicket
 from application.actions.get_client_info import GetClientInfo
+from application.actions.unpause_ticket import UnpauseTicket
 from igz.packages.nats.clients import NATSClient
 from application.actions.post_ticket import PostTicket
 from igz.packages.eventbus.eventbus import EventBus
@@ -61,6 +62,7 @@ class Container:
         self._subscriber_change_work_queue = NATSClient(config, logger=self._logger)
         self._subscriber_get_ticket_task_history = NATSClient(config, logger=self._logger)
         self._subscriber_get_next_results_for_ticket_detail = NATSClient(config, logger=self._logger)
+        self._subscriber_unpause_ticket = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -89,6 +91,7 @@ class Container:
             self._subscriber_get_next_results_for_ticket_detail,
             consumer_name="get_next_results_for_ticket_detail",
         )
+        self._event_bus.add_consumer(self._subscriber_unpause_ticket, consumer_name="unpause_ticket")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -111,6 +114,7 @@ class Container:
         self._get_next_results_for_ticket_detail = GetNextResultsForTicketDetail(
             self._logger, self._event_bus, self._bruin_repository
         )
+        self._unpause_ticket = UnpauseTicket(self._logger, self._event_bus, self._bruin_repository)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -150,6 +154,8 @@ class Container:
                                                                         "get_next_results_for_ticket_detail",
                                                                         is_async=True, logger=self._logger,
                                                                         )
+        self._action_unpause_ticket = ActionWrapper(self._unpause_ticket, "unpause_ticket",
+                                                    is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -209,6 +215,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="get_next_results_for_ticket_detail",
                                                  topic="bruin.ticket.detail.get.next.results",
                                                  action_wrapper=self._action_get_next_results_for_ticket_detail,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="unpause_ticket",
+                                                 topic="bruin.ticket.unpause",
+                                                 action_wrapper=self._action_unpause_ticket,
                                                  queue="bruin_bridge")
 
     async def start_server(self):

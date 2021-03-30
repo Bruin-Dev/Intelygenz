@@ -116,6 +116,14 @@ class BruinRepository:
         payload = {"Status": "R"}
         return await self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
 
+    async def unpause_ticket(self, ticket_id, serial_number, detail_id):
+        filters = {}
+        if serial_number:
+            filters['serviceNumber'] = serial_number
+        if detail_id:
+            filters['DetailId'] = detail_id
+        return await self._bruin_client.unpause_ticket(ticket_id, filters)
+
     async def get_management_status(self, filters):
         response = await self._bruin_client.get_management_status(filters)
 

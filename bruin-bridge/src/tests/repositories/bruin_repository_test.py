@@ -485,6 +485,24 @@ class TestBruinRepository:
         assert change_status == successful_status_change
 
     @pytest.mark.asyncio
+    async def unpause_ticket_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        serial_number = 123456789
+        detail_id = 987654321
+        successful_status_change = 'Success'
+
+        bruin_client = Mock()
+        bruin_client.unpause_ticket = CoroutineMock(return_value=successful_status_change)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        change_status = await bruin_repository.unpause_ticket(ticket_id, serial_number, detail_id)
+        bruin_client.unpause_ticket.assert_awaited_once_with(ticket_id,
+                                                             {'serviceNumber': serial_number, 'DetailId': detail_id})
+        assert change_status == successful_status_change
+
+    @pytest.mark.asyncio
     async def get_management_status_ok_test(self):
         logger = Mock()
         filters = {
