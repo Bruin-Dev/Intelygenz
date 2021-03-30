@@ -1586,8 +1586,7 @@ class TestTNBAMonitor:
     async def process_ticket_detail_with_prod_env_and_repair_completed_prediction_and_autoresolve_bad_prediction_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results,
-            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1,
-            edge_1_connected, link_1_stable, link_2_stable, make_edge_with_links_info):
+            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1):
         ticket_id = 12345
         ticket_detail_id = 1
 
@@ -1611,14 +1610,6 @@ class TestTNBAMonitor:
             body=next_results,
             status=200,
         )
-        edge_status = make_edge_with_links_info(
-            edge_info=edge_1_connected,
-            links_info=[link_1_stable, link_2_stable],
-        )
-        edge_status_by_serial = {
-            serial_number_1: edge_status,
-        }
-        tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.BAD_PREDICTION
 

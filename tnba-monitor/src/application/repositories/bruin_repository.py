@@ -245,22 +245,25 @@ class BruinRepository:
 
         return response
 
-    async def change_detail_work_queue(self, serial_number, ticket_id, ticket_detail_id, task_result):
+    async def change_detail_work_queue(self, ticket_id: int, task_result: str, *, serial_number: str = None,
+                                       detail_id: int = None):
         err_msg = None
 
         request = {
             'request_id': uuid(),
             'body': {
-                "service_number": serial_number,
                 "ticket_id": ticket_id,
-                "detail_id": ticket_detail_id,
                 "queue_name": task_result
             },
         }
+        if serial_number:
+            request['body']["service_number"] = serial_number
+        if detail_id:
+            request['body']["detail_id"] = detail_id
 
         try:
             self._logger.info(
-                f'Changing task result for ticket {ticket_id} and detail id {ticket_detail_id} for device '
+                f'Changing task result for ticket {ticket_id} and detail id {detail_id} for device '
                 f'{serial_number} to {task_result}...')
             response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
         except Exception as e:
@@ -275,7 +278,8 @@ class BruinRepository:
             response_status = response['status']
 
             if response_status in range(200, 300):
-                self._logger.info(f'Ticket {ticket_id} task result changed to  {task_result}')
+                self._logger.info(f'Ticket {ticket_id} with serial {serial_number} task result '
+                                  f'changed to  {task_result}')
             else:
                 err_msg = (
                     f'Error while changing task result for ticket {ticket_id} and serial: {serial_number} in '

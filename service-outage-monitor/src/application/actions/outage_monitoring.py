@@ -432,7 +432,8 @@ class OutageMonitor:
 
     async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
         self._logger.info(
-            f"Created ticket: {ticket_id} with offline edge.Send to Holmdel NOC Investigate")
+            f"Created ticket with ticket_id: {ticket_id} and serial number: {serial_number} with offline edge."
+            f"Send to Holmdel NOC Investigate")
         task_result = 'Holmdel NOC Investigate'
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             serial_number=serial_number,

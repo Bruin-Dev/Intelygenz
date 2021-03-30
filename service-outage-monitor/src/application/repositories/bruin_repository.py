@@ -355,38 +355,41 @@ class BruinRepository:
 
         return response
 
-    async def change_detail_work_queue(self, serial_number=None, ticket_id=None, ticket_detail_id=None,
-                                       task_result=None):
+    async def change_detail_work_queue(self, ticket_id: int, task_result: str, *, serial_number: str = None,
+                                       detail_id: int = None):
         err_msg = None
 
         request = {
             'request_id': uuid(),
             'body': {
-                "service_number": serial_number,
                 "ticket_id": ticket_id,
                 "queue_name": task_result
             },
         }
-        if ticket_detail_id:
-            request['body']["detail_id"] = ticket_detail_id
+        if serial_number:
+            request['body']["service_number"] = serial_number
+        if detail_id:
+            request['body']["detail_id"] = detail_id
         try:
             self._logger.info(
-                f'Changing task result for ticket {ticket_id} and detail id {ticket_detail_id} for device '
+                f'Changing task result for ticket {ticket_id} and detail id {detail_id} for device '
                 f'{serial_number} to {task_result}...')
             response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
-            self._logger.info(f'Ticket {ticket_id} task result changed to  {task_result}')
         except Exception as e:
             err_msg = (
-                f'An error occurred when changing task result for ticket {ticket_id}'
+                f'An error occurred when changing task result for ticket {ticket_id} and serial {serial_number}'
             )
             response = nats_error_response
         else:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f'Ticket {ticket_id} and serial {serial_number} task result changed to  {task_result}')
+            else:
                 err_msg = (
-                    f'Error while changing task result for ticket {ticket_id} in '
+                    f'Error while changing task result for ticket {ticket_id} and serial {serial_number} in '
                     f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )

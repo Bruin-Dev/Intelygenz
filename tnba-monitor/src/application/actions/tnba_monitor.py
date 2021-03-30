@@ -495,6 +495,8 @@ class TNBAMonitor:
 
     async def _process_ticket_detail(self, detail_object: dict):
         async with self._semaphore:
+            ticket_creation_date = detail_object['ticket_creation_date']
+            ticket_status = detail_object['ticket_status']
             ticket_id = detail_object['ticket_id']
             ticket_detail_id = detail_object['ticket_detail']['detailID']
             ticket_notes = detail_object['ticket_notes']
@@ -515,14 +517,13 @@ class TNBAMonitor:
                 )
                 self._logger.info(msg)
                 return
-            ticket_creation_date = detail_object['ticket_creation_date']
-            ticket_status = detail_object['ticket_status']
-            edge_status = self._edge_status_by_serial[serial_number]
-            if self._is_new_ticket(ticket_status) and self._is_ticket_with_more_than_60_min(
-                    ticket_creation_date) and newest_tnba_note:
+
+            if self._is_new_ticket(ticket_status) and self._is_ticket_old_enough(ticket_creation_date) and \
+                    newest_tnba_note:
                 msg = (
-                    f"Find the ticket: {ticket_id} with detail_id: {ticket_detail_id} in the edge with serial: "
-                    f"{serial_number} have a note but continue in 'New' status"
+                    f"Automation Engine appended a TNBA note for serial {serial_number} in ticket {ticket_id}, "
+                    "which has been in the IPA Investigate work queue for a while. The ticket is going to be forwarded "
+                    "to the Holmdel NOC Investigate queue."
                 )
                 self._logger.info(msg)
                 await self._bruin_repository.change_detail_work_queue(serial_number, ticket_id, ticket_detail_id,
@@ -741,6 +742,11 @@ class TNBAMonitor:
     def _is_new_ticket(ticket_status: str) -> bool:
         return ticket_status == "New"
 
-    @staticmethod
-    def _is_ticket_with_more_than_60_min(ticket_creation_date) -> bool:
-        return datetime.strptime(ticket_creation_date, "%m/%d/%Y %H:%M:%S %p") + timedelta(minutes=60) < datetime.now()
+    def _is_ticket_old_enough(self, ticket_creation_date: str) -> bool:
+        current_datetime = datetime.now().astimezone(utc)
+        max_seconds_since_creation = self._config.MONITOR_CONFIG['last_outage_seconds']
+
+        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
+        seconds_elapsed_since_creation = (current_datetime - ticket_creation_datetime).total_seconds()
+
+        return seconds_elapsed_since_creation >= max_seconds_since_creation

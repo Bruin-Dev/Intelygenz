@@ -879,7 +879,10 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.change_detail_work_queue(service_number, ticket_id, detail_id, task_result)
+            result = await bruin_repository.change_detail_work_queue(serial_number=service_number,
+                                                                     ticket_id=ticket_id,
+                                                                     detail_id=detail_id,
+                                                                     task_result=task_result)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.change.work", request, timeout=90)
         assert result == response
@@ -912,7 +915,10 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.change_detail_work_queue(service_number, ticket_id, detail_id, task_result)
+            result = await bruin_repository.change_detail_work_queue(serial_number=service_number,
+                                                                     ticket_id=ticket_id,
+                                                                     detail_id=detail_id,
+                                                                     task_result=task_result)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.change.work", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -953,7 +959,10 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.change_detail_work_queue(service_number, ticket_id, detail_id, task_result)
+            result = await bruin_repository.change_detail_work_queue(serial_number=service_number,
+                                                                     ticket_id=ticket_id,
+                                                                     detail_id=detail_id,
+                                                                     task_result=task_result)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.change.work", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
