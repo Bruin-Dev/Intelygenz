@@ -689,6 +689,10 @@ class TNBAMonitor:
             return self.AutoresolveTicketDetailStatus.SKIPPED
 
         ticket_detail_id = detail_object['ticket_detail']['detailID']
+        await self._bruin_repository.unpause_ticket_detail(
+            ticket_id,
+            service_number=serial_number, detail_id=ticket_detail_id
+        )
         resolve_detail_response = await self._bruin_repository.resolve_ticket_detail(ticket_id, ticket_detail_id)
 
         if resolve_detail_response['status'] in range(200, 300):

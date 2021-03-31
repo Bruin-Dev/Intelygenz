@@ -1773,6 +1773,9 @@ class TestTNBAMonitor:
             confident_request_completed_prediction
         )
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
+        tnba_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+            ticket_id, service_number=serial_number_1, detail_id=ticket_detail_id
+        )
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_awaited_once_with(ticket_id, ticket_detail_id)
         assert autoresolved_status == expected_autoresolved_status
 
