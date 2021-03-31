@@ -273,6 +273,10 @@ class OutageMonitor:
                 f'Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge '
                 f'{edge_identifier} with serial number {serial_number}...'
             )
+            await self._bruin_repository.unpause_ticket_detail(
+                outage_ticket_id,
+                service_number=serial_number, detail_id=ticket_detail_id
+            )
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
             if resolve_ticket_response['status'] not in range(200, 300):
                 return
