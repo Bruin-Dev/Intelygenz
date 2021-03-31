@@ -175,6 +175,9 @@ class OutageMonitor:
 
             self._logger.info(
                 f'Autoresolving detail {ticket_detail_id} (serial: {serial_number}) of ticket {outage_ticket_id}...')
+            await self._bruin_repository.unpause_ticket_detail(
+                outage_ticket_id,
+                service_number=serial_number, detail_id=ticket_detail_id)
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(
                 outage_ticket_id, ticket_detail_id
             )

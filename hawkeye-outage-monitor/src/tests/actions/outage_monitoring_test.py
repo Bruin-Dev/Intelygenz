@@ -5162,6 +5162,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
@@ -5184,6 +5185,9 @@ class TestServiceOutageMonitor:
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
         outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
         outage_monitor._is_detail_resolved.assert_called_once_with(ticket_detail_1)
+        bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+            ticket_id, service_number=serial_number, detail_id=ticket_detail_1_id
+        )
         bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
         bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
 
@@ -5358,6 +5362,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
@@ -5381,6 +5386,9 @@ class TestServiceOutageMonitor:
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
         outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
         outage_monitor._is_detail_resolved.assert_called_once_with(ticket_detail_1)
+        bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+            ticket_id, service_number=serial_number, detail_id=ticket_detail_1_id
+        )
         bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
         bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(ticket_id, serial_number)
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
