@@ -50,10 +50,10 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
+    - cd ${MODULE} || exit 1
     # assign terraform variables
     - export TF_VAR_CURRENT_ENVIRONMENT=${CURRENT_ENVIRONMENT}
     - export TF_VAR_RUNTIME_NAME=${KRE_RUNTIME_NAME}
-    - cd ${MODULE} || exit 1
     - terraform init -backend=true -get=true -input=false
     - terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
     - terraform plan && terraform apply -auto-approve
