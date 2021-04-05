@@ -1,6 +1,8 @@
 from config import oreilly_contact_info
+from config import confie_contact_info
 
 oreilly_devices = oreilly_contact_info.devices_by_id
+confie_devices = confie_contact_info.devices_by_id
 
 contact_info = [
     # Titan America edges
@@ -11929,4 +11931,4 @@ contact_info = [
 # When customers wants to reenable O'Reilly monitoring, use this line instead
 # devices_by_id = contact_info + oreilly_devices
 
-devices_by_id = contact_info
+devices_by_id = contact_info + confie_devices
