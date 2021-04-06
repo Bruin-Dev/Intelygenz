@@ -1265,7 +1265,9 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._bruin_repository.change_detail_work_queue = CoroutineMock()
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions = CoroutineMock()
-        await tnba_monitor._process_ticket_detail(detail_object)
+
+        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+            await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
             ticket_id, ticket_detail_id, serial_number_1

@@ -519,7 +519,7 @@ class TNBAMonitor:
                 return
 
             if self._is_new_ticket(ticket_status) and self._is_ticket_old_enough(ticket_creation_date) and \
-                    newest_tnba_note:
+                    self._config.ENVIRONMENT == 'production' and newest_tnba_note:
                 msg = (
                     f"Automation Engine appended a TNBA note for serial {serial_number} in ticket {ticket_id}, "
                     "which has been in the IPA Investigate work queue for a while. The ticket is going to be forwarded "
