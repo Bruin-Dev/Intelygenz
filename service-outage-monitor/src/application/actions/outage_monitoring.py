@@ -374,9 +374,27 @@ class OutageMonitor:
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
+
                         if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
                             ticket_id = ticket_creation_response_body
-                            await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+                            self._logger.info(
+                                f'Edge with serial {serial_number} was detected to be DOWN. Ticket {ticket_id} will '
+                                'be forwarded to the Holmdel NOC Investigate queue shortly.'
+                            )
+
+                            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+                            current_datetime = datetime.now(tz)
+                            forward_task_run_date = current_datetime + timedelta(
+                                seconds=self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc'])
+                            self._scheduler.add_job(
+                                self.forward_ticket_to_hnoc_queue, 'date',
+                                kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+                                run_date=forward_task_run_date,
+                                replace_existing=False,
+                                misfire_grace_time=9999,
+                                id=f'_forward_ticket_{ticket_id}_to_hnoc',
+                            )
+
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 409:

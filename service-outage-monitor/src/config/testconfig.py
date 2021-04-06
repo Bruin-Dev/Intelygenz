@@ -25,7 +25,8 @@ MONITOR_CONFIG = {
     'jobs_intervals': {
         'outage_monitor': 60 * 3,
         'quarantine': quarantine_time,
-        'build_cache': 60 * 60
+        'build_cache': 60 * 60,
+        'forward_to_hnoc': 60,
     },
     'velocloud_instances_filter': {
         "some-host": [],
