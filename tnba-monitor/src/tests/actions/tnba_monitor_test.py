@@ -1243,6 +1243,7 @@ class TestTNBAMonitor:
         detail_object = make_detail_object_with_predictions(
             ticket_id=ticket_id,
             ticket_detail=ticket_detail,
+            ticket_topic='Service Outage Trouble',
             ticket_status="New",
             ticket_notes=[tnba_note],
             ticket_detail_predictions=holmdel_noc_prediction_name,

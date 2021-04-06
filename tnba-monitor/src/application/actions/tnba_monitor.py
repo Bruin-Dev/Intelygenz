@@ -519,6 +519,7 @@ class TNBAMonitor:
                 return
 
             if self._is_new_ticket(ticket_status) and self._is_ticket_old_enough(ticket_creation_date) and \
+                    self._ticket_repository.is_detail_in_outage_ticket(detail_object) and \
                     self._config.ENVIRONMENT == 'production' and newest_tnba_note:
                 msg = (
                     f"Automation Engine appended a TNBA note for serial {serial_number} in ticket {ticket_id}, "
