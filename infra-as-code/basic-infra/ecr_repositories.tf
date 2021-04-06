@@ -113,3 +113,15 @@ resource "aws_ecr_repository" "automation-hawkeye-outage-monitor" {
 resource "aws_ecr_repository" "automation-digi-bridge" {
   name = "automation-digi-bridge"
 }
+
+resource "aws_ecr_repository" "automation-email-tagger-monitor" {
+  name = "automation-email-tagger-monitor"
+}
+
+resource "aws_ecr_repository" "automation-email-tagger-kre-bridge" {
+  name = "automation-email-tagger-kre-bridge"
+}
+
+resource "aws_ecr_repository" "automation-intermapper-outage-monitor" {
+  name = "automation-intermapper-outage-monitor"
+}
