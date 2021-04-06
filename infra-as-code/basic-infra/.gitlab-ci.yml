@@ -21,6 +21,7 @@ basic-infra:
   extends: .terraform_basic_template
   script:
     - terraform init infra-as-code/basic-infra
+    - terraform refresh infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
   rules:
     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
