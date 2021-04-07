@@ -527,8 +527,9 @@ class TNBAMonitor:
                     "to the Holmdel NOC Investigate queue."
                 )
                 self._logger.info(msg)
-                await self._bruin_repository.change_detail_work_queue(serial_number, ticket_id, ticket_detail_id,
-                                                                      'Holmdel NOC Investigate')
+                await self._bruin_repository.change_detail_work_queue(ticket_id, task_result='Holmdel NOC Investigate',
+                                                                      serial_number=serial_number,
+                                                                      detail_id=ticket_detail_id)
 
             mapped_predictions = self._prediction_repository.map_request_and_repair_completed_predictions(predictions)
 
