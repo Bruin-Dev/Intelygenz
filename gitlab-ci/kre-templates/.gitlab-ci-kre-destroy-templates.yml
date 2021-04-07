@@ -5,18 +5,6 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    # INSTALL KUBE CONFIG
-    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
-    # DELETE INSTALLED HELM CHARTS
-    - >
-      for i in $(helm list -aA | tail -n+2 | awk '{print $1 "|" $2}'); do
-        (
-          helm_release_name=$(echo "${i}" | cut -d '|' -f1)
-          helm_release_namespace=$(echo "${i}" | cut -d '|' -f2)
-          echo "It's going to delete helm release ${helm_release_name} in namespace ${helm_release_namespace}"
-          helm -n "${helm_release_namespace}" uninstall "${helm_release_name}"
-        )
-      done
     # DELETE AWS RESOURCES WITH TERRAFORM
     - cd ${MODULE} || exit 1
     - >
