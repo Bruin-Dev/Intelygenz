@@ -125,3 +125,7 @@ resource "aws_ecr_repository" "automation-email-tagger-kre-bridge" {
 resource "aws_ecr_repository" "automation-intermapper-outage-monitor" {
   name = "automation-intermapper-outage-monitor"
 }
+
+resource "aws_ecr_repository" "automation-digi-reboot-report" {
+  name = "automation-digi-reboot-report"
+}
