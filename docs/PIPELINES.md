@@ -13,7 +13,7 @@ We separate the automatation in two parts, [continuous integration](#continuous-
 
 To improve the speed and optimization of the pipelines, **only the jobs and stages will be executed on those modules that change in each commit**.
 
-## How to launch all jobs in a pipeline
+## Launch all jobs in a pipeline
 
 **Exceptionally, it is possible to launch a pipeline with all the jobs and stages on a branch using the web interface, as shown in the following image**. To do so, the following steps must be followed:
 
@@ -28,9 +28,9 @@ To improve the speed and optimization of the pipelines, **only the jobs and stag
 
    > It is important to note that due to the extra time added by the tests of the `dispacth-portal-frontend` microservice, the tests of this one will only be executed when any of the files within it change or a pipeline with the Gitlab variable `TEST_DISPATCH_PORTAL_FRONTEND` with value `true` is executed.
 
-# Environments
+## Environments
 
-## Microservices Environments
+### Microservices Environments
 
 For the microservices there are the following environments
 
@@ -40,7 +40,7 @@ For the microservices there are the following environments
 
 >The name of any environment, regardless of the type, will identify all the resources created in the deployment process. The names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment. These names will identify all the resources created in AWS during the [continuous delivery](#continuous-delivery-cd) process, explained in the following sections.
 
-## KRE Environments
+### KRE Environments
 
 For [KRE](https://konstellation-io.github.io/website/) component there are the following environments: 
 
@@ -48,14 +48,14 @@ For [KRE](https://konstellation-io.github.io/website/) component there are the f
 
 * **production**: This will be used for the different calls made from the project's microservices in the **production environment**, that is, from the microservices deployed in the ECS cluster with the name `automation-master`.
 
-# Continuous integration (CI)
+## Continuous integration (CI)
 
 > Continuous Integration (CI) is a development practice where developers integrate code into a shared repository frequently, preferably several times a day. Each integration can then be verified by an automated build and automated tests. While automated testing is not strictly part of CI it is typically implied.
 > [Codeship](https://codeship.com/continuous-integration-essentials)
 
 ![IMAGE: CI_MetTel_Automation.png](./img/pipelines/CI_MetTel_Automation.png)
 
-## Validation steps
+### Validation steps
 
 This stage checks the following:
 
@@ -65,7 +65,7 @@ This stage checks the following:
 
 * The frontend modules comply with the linter configured for them
 
-## Unit tests steps
+### Unit tests steps
 
 All the available unit tests for each service should be run in this stage of the CI process.
 
@@ -75,14 +75,14 @@ In cases in which a module does not reach the minimum coverage mentioned above, 
 
 ![IMAGE: unit_test_coverage_not_reach_minimum.png](./img/pipelines/unit_test_coverage_not_reach_minimum.png)
 
-# Continuous delivery (CD)
+## Continuous delivery (CD)
 
 > Continuous deployment is the next step of continuous delivery: Every change that passes the automated tests is deployed to production automatically. Continuous deployment should be the goal of most companies that are not constrained by regulatory or other requirements.
 > [Puppet.com](https://puppet.com/blog/continuous-delivery-vs-continuous-deployment-what-s-diff)
 
 ![IMAGE: CD_MetTel_Automation.png](./img/pipelines/CD_MetTel_Automation.png)
 
-## Basic_infra steps
+### Basic_infra steps
 
 This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in [ECR Docker Container Registry](https://aws.amazon.com/ecr), as well as the roles necessary in AWS to be able to display these images in [ECS Container Orchestrator](https://aws.amazon.com/ecs/).
 
@@ -93,27 +93,88 @@ In this stage is also checked whether there are enough free resources in ECS to 
 **It's necessary run the `basic-infra` job the first time a new microservice is created in the project**
 > This has been done because ECR repositories are global resources and are stored in the same `tfstate` file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added.
 
-## Basic_infra_kre steps
+### Basic_infra_kre steps
 
-This stage covers the checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
+In this stage will be the following jobs:
+* `deploy-basic-infra-kre-dev` for ephemeral environments and `deploy-basic-infra-kre-production` for the production environment, **these are executed optionally manually**.
 
-## Deploy_kre_runtimes steps
+  This job is reponsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
+
+  The process followed in this job is as follows:
+
+  1. The necessary infrastructure is created in AWS for KRE, creating for them the following components:
+
+     - An S3 bucket for each environment and save information about the cluster, such as the SSH key to connect to the nodes.
+
+     - An [EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html) to be able to deploy the different KRE components designed for Kubernetes
+
+     - An [AutoScaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) to have the desired number of Kubernetes worker nodes
+
+     - A SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it
+
+     - A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform [output values](https://www.terraform.io/docs/configuration/outputs.html), saving the list of user roles belonging to each role in their corresponding variable.
+     
+       Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:
+
+       ```sh
+       Outputs:
+        eks_developer_ops_privileged_roles = [
+          "arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch",
+          "arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xoan.mallon.developer",
+        ]
+        eks_developer_roles = [
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-sancho.munoz",
+        ]
+        eks_devops_roles = [
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias",
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales",
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero",
+          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-xoan.mallon.devops",
+        ]
+       ```
+    
+      - A set of helm charts necessary for any KRE runtime:
+
+        1. **external-dns**, using the helm chart from [bitnami repository](https://charts.bitnami.com/bitnami)
+
+            `external-dns` is a Kubernetes addon that configures public DNS servers with information about exposed Kubernetes services to make them discoverable. It allows in a simple way that through the creation of an ingress in AWS you can create an entry in Route53 of type alias so that the calls to that ingress redirect to the value configured for the alias, being the most typical the DNS of the balancer created by the ingress.
+        
+        2. **cert-mananger**, using the helm chart from [jetstack repository](https://charts.jetstack.io).
+
+            This component automate the management lifecycle of all required certificates used by the KRE component in each environment.
+
+        3. **nginx ingress controller**, using the helm chart from [ingress-nginx repository](https://kubernetes.github.io/ingress-nginx).
+
+            A series of configurations are provided so that the IP of clients in Kubernetes services can be known, since by default it will always use the internal IP in EKS of the load balancer for requests made from the Internet.
+
+            A list of allowed IPs is also provided in the chart configuration through a specific configuration key, thus restricting access to the cluster's microservices.
+
+            This component will create a [Classic Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/introduction.html) in AWS to expose nginx ingress component.
+
+        4. **hostpath provisioner**, using the helm chart from [rimusz repository](https://charts.rimusz.net) 
+
+  2. Using a *Python* [cli](../ci-utils/eks/iam-to-eks-roles/README.md), permissions are assigned in Kubernetes Cluster created for KRE for each of the IAM roles created in the previous step. 
+
+### Deploy_kre_runtimes steps
 
 In this stage the KRE runtimes will be deployed in the corresponding environment, creating the necessary infrastructure and resources:
 
-* A Hosted Zone in Route53 for the runtime in the specified environment
+- A Hosted Zone in Route53 for the runtime in the specified environment using the `mettel-automation.net` domain name
 
-* The kre helm chart with the necessary values for the environment
+- The kre helm chart with the necessary values for the environment creating a specific namespace in the EKS cluster for deploy the helm chart
 
-## Build steps
+### Build steps
 
 This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It's typical to build the docker images and push to the repository in this step.
 
-## Deploy steps
+### Deploy steps
 
-In this stage there are two jobs:
+In this stage there are one job:
 
-* **One executed automatically**, whose name is `deploy-branches` for ephemeral environments and `deploy-master` for the production environment. In which *MetTel Automation* modules in the monorepo will be deployed to the selected environment, as well as all the resources associated to that environment in AWS. The deploy steps will deploy the following in AWS:
+* `deploy-branches` for ephemeral environments and `deploy-master` for the production environment, **these are executed automatically**. In which *MetTel Automation* modules in the monorepo will be deployed to the selected environment, as well as all the resources associated to that environment in AWS. The deploy steps will deploy the following in AWS:
 
   * An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html) will be created for the environment with a set of resources
 
@@ -276,75 +337,7 @@ In this stage there are two jobs:
 
   5. The provisioning of the different groups and the searches included in each one of them is done through a [python utility](../ci-utils/papertrail-provisioning), this makes calls to the util [go-papertrail-cli](https://github.com/xoanmm/go-papertrail-cli) who is in charge of the provisioning of the elements mentioned in [Papertrail](https://papertrailapp.com/).
 
-* **Another one that can optionally be executed manually**, whose name is `deploy-KRE-dev` for ephemeral environments and `deploy-KRE-production` for the production environment.
-
-  This Gitlab job will deploy the infrastructure and components needed to provide the [KRE](https://github.com/konstellation-io/KRE) component of [konstellation](https://konstellation-io.github.io/website/). For the installation of this component, the [EKS installation guide](https://konstellation-io.github.io/website/docs/KRE/installation/cloud/eks/) provided by the component's provider has been followed.
-
-  The process followed in this job is as follows:
-
-  1. The necessary infrastructure is created in AWS for KRE, creating for them the following components:
-
-     - An S3 bucket for each environment and save information about the cluster, such as the SSH key to connect to the nodes.
-
-     - An [EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html) to be able to deploy the different KRE components designed for Kubernetes
-
-     - An [AutoScaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) to have the desired number of Kubernetes worker nodes
-
-     - A hosted zone on [Route53](https://aws.amazon.com/route53/faqs/?nc1=h_ls) for the corresponding KRE environment
-
-     - A SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it
-
-     - A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform [output values](https://www.terraform.io/docs/configuration/outputs.html), saving the list of user roles belonging to each role in their corresponding variable.
-     
-       Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:
-
-       ```sh
-       Outputs:
-        eks_developer_ops_privileged_roles = [
-          "arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch",
-          "arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xoan.mallon.developer",
-        ]
-        eks_developer_roles = [
-          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio",
-          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez",
-          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega",
-          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-sancho.munoz",
-        ]
-        eks_devops_roles = [
-          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias",
-          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales",
-          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero",
-          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-xoan.mallon.devops",
-        ]
-       ```
-
-  2. Using a *Python* [cli](../ci-utils/eks/iam-to-eks-roles/README.md), permissions are assigned in Kubernetes Cluster created for KRE for each of the IAM roles created in the previous step. 
-
-  3. Once the necessary infrastructure is created and configured, a set of components are installed and configured using [helm charts](https://github.com/helm/charts) in the EKS cluster:
-
-     1. **nginx ingress controller**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
-
-       A series of configurations are provided so that the IP of clients in Kubernetes services can be known, since by default it will always use the internal IP in EKS of the load balancer for requests made from the Internet.
-
-       A list of allowed IPs is also provided in the chart configuration through a specific configuration key, thus restricting access to the cluster's microservices.
-
-       This component will create a [Classic Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/introduction.html) in AWS to expose nginx ingress component.
-
-       After the installation of this helm chart a [custom script](../ci-utils/route53/update_route53_elb_alias.sh) is used to create and update a record set in the hosted created for KRE, as [recommended in the KRE installation guide](https://konstellation-io.github.io/website/docs/KRE/installation/cloud/eks/#create-wildcard-entry-in-your-hosted-zone).
-
-     2. **hostpath provisioner**, using the helm chart from [rimusz repository](https://charts.rimusz.net)
-
-     3. **kube2iam**, using the helm chart from [stable repository](https://kubernetes-charts.storage.googleapis.com).
-
-       This component provides IAM credentials to containers running inside a kubernetes cluster based on annotations.
-
-     4. **cert-mananger**, using the helm chart from [jetstack repository](https://charts.jetstack.io).
-
-       This component automate the management lifecycle of all required certificates used by the KRE component in each environment.
-
-     5. **KRE**, using the helm chart from [KRE repository](https://charts.konstellation.io). This component will install the [KRE](https://github.com/konstellation-io/kre) application.
-
-## Destroy steps
+### Destroy steps
 
 In this stage a series of manual jobs are available to destroy what was created in the previous stage, both for [KRE](https://github.com/konstellation-io/kre) and for the microservices of the repository in AWS. These are detailed below:
 
@@ -352,6 +345,6 @@ In this stage a series of manual jobs are available to destroy what was created 
 
 - `destroy-branches-aws-nuke`: This job is only available for ephemeral environments, it generates a `yml` file using a [specific script](../ci-utils/aws-nuke/aws_nuke_conf_generator.py) to be used by [aws-nuke](https://github.com/rebuy-de/aws-nuke) to destroy all the infrastructure created for an ephemeral environment in AWS. This job should only be used when the `destroy-branches' job fails.
 
-- `destroy-kre-dev` for ephemeral environments or `destroy-kre-production` for the production environment: This job will destroy everything created by Terraform in the previous stage by the job `deploy-kre-dev` or `deploy-kre-production` depending on the environment.
+- `destroy-basic-infra-kre-dev` for ephemeral environments or `destroy-basic-infra-kre-production` for the production environment: This job will destroy everything created by Terraform in the previous stage by the job `deploy-kre-dev` or `deploy-kre-production` depending on the environment.
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

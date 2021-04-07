@@ -8,14 +8,24 @@
     + [System architecture](SYSTEM_OVERVIEW.md#system-architecture)
         + [Monorepo](MONOREPO.md)
         + [Pipelines](PIPELINES.md#pipelines)
+            + [Launch all jobs in a pipeline](PIPELINES.md#launch-all-jobs-in-a-pipeline)
             + [Environments](PIPELINES.md#environments)
             + [CI](PIPELINES.md#continuous-integration-ci)
             + [CD](PIPELINES.md#continuous-delivery-cd)
-            + [Enviroment variables](PIPELINES.md#environment-variables)
         + [Infrastructure as code](INFRASTRUCTURE_AS_CODE.md)
     + [Infrastructure](SYSTEM_OVERVIEW.md#infrastructure)
         + [Environment infrastructure](SYSTEM_OVERVIEW.md#environment-infrastructure)
         + [Network infrastructure](SYSTEM_OVERVIEW.md#network-infrastructure)
+2. [Logging and monitoring](LOGGING_AND_MONITORING.md)
+    + [Cloudwatch](LOGGING_AND_MONITORING.md#cloudwatch)
+        + [Cloudwatch Log Groups](LOGGING_AND_MONITORING#cloudwatch-log-groups)
+        + [Cloudwatch Log Streams](LOGGING_AND_MONITORING#cloudwatch-log-streams)
+        + [Cloudwatch Retention Periord](LOGGING_AND_MONITORING#cloudwatch-retention-period)
+        + [Cloudwatch logs retrieval tool](LOGGING_AND_MONITORING#cloudwatch-logs-retrieval-tool)
+    + [Papertrail](LOGGING_AND_MONITORING#Papertrail)
+        + [Papertrail Dashboards](LOGGING_AND_MONITORING#papertrail-dashboards)
+        + [Papertrail Logging Configuration](LOGGING_AND_MONITORING#papertrail-logging-configuration)
+        + [Papertrail Searches Configuration](LOGGING_AND_MONITORING#papertrail-searches-configuration)
 
 ---
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020
+With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2021

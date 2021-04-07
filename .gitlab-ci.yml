@@ -15,9 +15,9 @@ variables:
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
   IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
-  IGZ_PACKAGES_VERSION: 2.0.3
-  DOCKER_BASE_IMAGE_VERSION: 2.1.2
-  DOCKER_IMAGE_UTILS_VERSION: 1.0.2
+  IGZ_PACKAGES_VERSION: 2.0.4
+  DOCKER_BASE_IMAGE_VERSION: 2.1.3
+  DOCKER_IMAGE_UTILS_VERSION: 1.0.3
   bruin_bridge_desired_tasks: 2
   cts_bridge_desired_tasks: 1
   customer_cache_desired_tasks: 1
