@@ -63,6 +63,7 @@
     - [Process flow](#process-flow)
 - [Good Practices](#good-practices)
 - [Setting up logs with Papertrail](#setting-up-logs-with-papertrail)
+- [Testing device](#testing-device)  
 - [METRICS](#metrics)
 
 # Project structure
@@ -613,6 +614,13 @@ Services involved: sites-monitor, velocloud-bridge, notifier.
 
 [Papertrail](https://papertrailapp.com/) is used as a centralized system of logs, for each microservice a series of predefined searches are used, with the possibility of creating new ones and/or modifying the current ones. It is necessary to use the [papertrail-provisioning](ci-utils/papertrail-provisioning) tool for this purpose.
 
+
+# Testing device
+In order to create a new test ticket for a VCE the following data should be used:
+- Serial: VC05200011984
+- Client ID: 30000
+
+Even if the client ID is Mettel's edge is completely ours, IGZ is physically in possession of the device.
 # METRICS
 
 - [Prometheus](http://localhost:9090) 
