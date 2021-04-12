@@ -1,0 +1,59 @@
+{
+  "name": "automation-engine",
+  "version": "1.0.0",
+  "description": "Lerna automation-engine monorepo configuration",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "bootstrap": "npx lerna bootstrap --use-workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.intelygenz.com:mettel/automation-engine.git"
+  },
+  "keywords": [
+    "lerna",
+    "automation-engine"
+  ],
+  "author": "angel.costales@intelygenz.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "7.12.1",
+    "@babel/core": "7.12.3",
+    "@babel/plugin-proposal-class-properties": "7.12.1",
+    "@babel/plugin-proposal-export-default-from": "7.12.1",
+    "@babel/plugin-transform-react-jsx": "7.12.1",
+    "@babel/preset-env": "7.12.1",
+    "@babel/preset-react": "7.12.1",
+    "@storybook/addon-docs": "6.0.26",
+    "@storybook/react": "6.0.26",
+    "babel-loader": "8.1.0",
+    "babel-plugin-styled-components": "1.11.1",
+    "lerna": "3.22.1",
+    "nodemon": "2.0.4",
+    "plop": "2.7.4",
+    "multi-semantic-release": "*",
+    "semantic-release": "17.3.3",
+    "semantic-release-monorepo": "7.0.4",
+    "@semantic-release/changelog": "5.0.1",
+    "@semantic-release/commit-analyzer": "8.0.1",
+    "@semantic-release/git": "9.0.0",
+    "@semantic-release/release-notes-generator": "9.0.1",
+    "conventional-changelog": "3.1.16",
+    "@semantic-release/gitlab": "6.0.8"
+  },
+  "resolutions": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "workspaces": [
+    "./bruin-bridge",
+    "./customer-cache",
+    "./cts-bridge"
+  ],
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

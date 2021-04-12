@@ -187,30 +187,30 @@ The following example shows how to configure `<service_name>_desired_tasks` vari
 ```sh
 variables:
   . . .
-  bruin_bridge_desired_tasks: 0
-  cts_bridge_desired_tasks: 0
-  customer_cache_desired_tasks: 1
-  dispatch_portal_backend_desired_tasks: 1
-  hawkeye_affecting_monitor_desired_tasks: 0
-  hawkeye_bridge_desired_tasks: 0
-  hawkeye_customer_cache_desired_tasks: 0
-  hawkeye_outage_monitor_desired_tasks: 0
-  last_contact_report_desired_tasks: 1
-  lit_bridge_desired_tasks: 1
-  metrics_prometheus_desired_tasks: 0
-  nats_server_desired_tasks: 0
-  nats_server_1_desired_tasks: 1
-  nats_server_2_desired_tasks: 1
-  notifier_desired_tasks: 1
-  service_affecting_monitor_desired_tasks: 1
-  service_outage_monitor_1_desired_tasks: 0
-  service_outage_monitor_2_desired_tasks: 0
-  service_outage_monitor_3_desired_tasks: 0
-  service_outage_monitor_4_desired_tasks: 0
-  service_outage_monitor_triage_desired_tasks: 0
-  sites_monitor_desired_tasks: 0
-  t7_bridge_desired_tasks: 0
-  velocloud_bridge_desired_tasks: 5
+  BRUIN_BRIDGE_DESIRED_TASKS: 0
+  CTS_BRIDGE_DESIRED_TASKS: 0
+  CUSTOMER_CACHE_DESIRED_TASKS: 1
+  DISPATCH_PORTAL_BACKEND_DESIRED_TASKS: 1
+  HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS: 0
+  HAWKEYE_BRIDGE_DESIRED_TASKS: 0
+  HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS: 0
+  HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS: 0
+  LAST_CONTACT_REPORT_DESIRED_TASKS: 1
+  LIT_BRIDGE_DESIRED_TASKS: 1
+  METRICS_PROMETHEUS_DESIRED_TASKS: 0
+  NATS_SERVER_DESIRED_TASKS: 0
+  NATS_SERVER_1_DESIRED_TASKS: 1
+  NATS_SERVER_2_DESIRED_TASKS: 1
+  NOTIFIER_DESIRED_TASKS: 1
+  SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: 1
+  SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_4_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS: 0
+  SITES_MONITOR_DESIRED_TASKS: 0
+  T7_BRIDGE_DESIRED_TASKS: 0
+  VELOCLOUD_BRIDGE_DESIRED_TASKS: 5
   . . .
 ```
 

@@ -34,27 +34,11 @@ hawkeye-customer-cache-build:
     MODULE_NAME: hawkeye-customer-cache
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $hawkeye_customer_cache_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
 #      changes:
 #        - hawkeye-customer-cache/**/*
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $hawkeye_customer_cache_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^hawkeye-customer-cache-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["hawkeye-customer-cache-test"]
-
-# =====================================
-# release jobs for customer-cache module
-# =====================================
-release-hawkeye-customer-cache:
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix hawkeye-customer-cache
-  script:
-    - cd hawyeke-customer-cache && npx semantic-release -e semantic-release-monorepo
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - hawkeye-customer-cache/**/*

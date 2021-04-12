@@ -87,12 +87,11 @@ dispatch-portal-frontend-build:
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
     - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $dispatch_portal_frontend_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
 #      changes:
 #        - dispatch-portal-frontend/**/*
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $dispatch_portal_frontend_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^dispatch-portal-frontend-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["dispatch-portal-frontend-test", "dispatch-portal-frontend-test-e2e"]

@@ -9,34 +9,30 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
-    - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
-    - cd "${MODULE}" || exit 1
+    - mkdir -p output
+    # Iterate over terraform directories and subdirectories in module
+    - cd ${MODULE} || exit 1
     - >
-      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
+      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
           (
-              echo "Terraform directory $i"
-              if [[ ${i} == "0-elasticaches" ]]; then
-                cd "${i}" || exit 1
-                for j in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
-                    (
-                      cd "${j}" || exit
-                      echo "Terraform module subdirectory ${j}"
-                      terraform init -backend=true -get=true -input=false
-                      terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
-                      terraform refresh
-                      terraform destroy -auto-approve
-                    )
-                done
-              else
-                echo "Module without subdirectories, terraform workspace ${i}"
-                terraform init -backend=true -get=true -input=false
-                terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+              cd "${i}" || exit 1
+              if [[ ${i} != "modules" ]]; then
+                echo "Terraform directory $i"
+                terraform init
+                terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
                 terraform refresh
-                terraform destroy -auto-approve
+                terraform plan && terraform destroy -auto-approve
+                if [[ ${i} == "0-redis" ]]; then
+                  terraform output REDIS_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_hostname.txt
+                elif [[ ${i} == "1-redis-customer-cache" ]]; then
+                  terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
+                elif [[ ${i} == "2-redis-tnba-feedback" ]]; then
+                  terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
+                fi
               fi
           )
       done
+    - cd ${CI_PROJECT_DIR}
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
         apk add zip unzip

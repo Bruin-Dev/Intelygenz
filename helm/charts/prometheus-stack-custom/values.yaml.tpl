@@ -185,7 +185,7 @@ kubeprometheusstack:
     grafana.ini:
       server:
         # The full public facing url you use in browser, used for redirects and emails
-        root_url: ${}
+        root_url: ${GRAFANA_INGRESS_ROOT_URL}
       auth.google:
         enabled: true
         client_id: ${GOOGLE_OAUTH_CLIENT_ID}

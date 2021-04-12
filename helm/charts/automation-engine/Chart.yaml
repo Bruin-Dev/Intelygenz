@@ -48,6 +48,9 @@ dependencies:
   - name: ecr-cred-helper
     version: '*.*.*'
     condition: ecr-cred-helper.enabled
+  - name: hawkeye-affecting-monitor
+    version: '*.*.*'
+    condition: hawkeye-affecting-monitor.enabled
   - name: hawkeye-bridge
     version: '*.*.*'
     condition: hawkeye-bridge.enabled

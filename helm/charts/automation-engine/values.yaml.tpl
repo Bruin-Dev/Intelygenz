@@ -56,7 +56,7 @@ bruin-bridge:
   image:
     # -- Repository image for bruin-bridge module
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/bruin-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${BRUIN_BRIDGE_BUILD_NUMBER}
   # -- Service Configuration
@@ -113,7 +113,7 @@ cts-bridge:
   image:
     # -- cts-bridge
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/cts-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # -- cts-bridge tag of docker image
     tag: ${CTS_BRIDGE_BUILD_NUMBER}
 
@@ -171,7 +171,7 @@ customer-cache:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/customer-cache
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${CUSTOMER_CACHE_BUILD_NUMBER}
 
@@ -217,7 +217,7 @@ digi-bridge:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${DIGI_BRIDGE_BUILD_NUMBER}
 
@@ -270,7 +270,7 @@ dispatch-portal-backend:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-backend
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}
 
@@ -291,7 +291,7 @@ dispatch-portal-frontend:
   replicaCount: ${DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-frontend
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER}
 
@@ -307,6 +307,72 @@ dispatch-portal-frontend:
       cpu: 100m
       memory: 128Mi
 
+# -- hawkeye-affecting-monitor subchart specific configuration
+hawkeye-affecting-monitor:
+  enabled: ${HAWKEYE_AFFECTING_MONITOR_ENABLED}
+  replicaCount: ${HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS}
+
+  config:
+    capabilities_enabled:
+      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # bruin-bridge service responds correctly to healthcheck calls.
+      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
+      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # cts-bridge service responds correctly to healthcheck calls.
+      cts_bridge: ${CTS_BRIDGE_ENABLED}
+      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # hawkeye-bridge service responds correctly to healthcheck calls.
+      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
+      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # lit-bridge service responds correctly to healthcheck calls.
+      lit_bridge: ${LIT_BRIDGE_ENABLED}
+      # -- Indicate is notifier is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # notifier service responds correctly to healthcheck calls.
+      notifier: ${NOTIFIER_ENABLED}
+      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # t7-bridge service responds correctly to healthcheck calls.
+      t7_bridge: ${T7_BRIDGE_ENABLED}
+      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
+      # will be created in the tnba-monitor deployment that will wait until the
+      # velocloud-bridge service responds correctly to healthcheck calls.
+      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-affecting-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${HAWKEYE_AFFECTING_MONITOR_BUILD_NUMBER}
+
+  service:
+    type: ClusterIP
+    port: 5000
+
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
 
 # -- hawkeye-bridge subchart specific configuration
 hawkeye-bridge:
@@ -323,7 +389,7 @@ hawkeye-bridge:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${HAWKEYE_BRIDGE_BUILD_NUMBER}
 
@@ -339,6 +405,7 @@ hawkeye-bridge:
       cpu: 100m
       memory: 128Mi
 
+# -- hawkeye-customer-cache specific configuration
 hawkeye-customer-cache:
   enabled: ${HAWKEYE_CUSTOMER_CACHE_ENABLED}
   replicaCount: ${HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS}
@@ -375,7 +442,7 @@ hawkeye-customer-cache:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-customer-cache
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${HAWKEYE_CUSTOMER_CACHE_BUILD_NUMBER}
 
@@ -427,7 +494,7 @@ hawkeye-outage-monitor:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-outage-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${HAWKEYE_OUTAGE_MONITOR_BUILD_NUMBER}
 
@@ -479,7 +546,7 @@ last-contact-report:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/last-contact-report
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${LAST_CONTACT_REPORT_BUILD_NUMBER}
 
@@ -521,7 +588,7 @@ lit-bridge:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lit-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${LIT_BRIDGE_BUILD_NUMBER}
 
@@ -552,7 +619,7 @@ lumin-billing-report:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lumin-billing-report
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${LUMIN_BILLING_REPORT_BUILD_NUMBER}
 
@@ -583,7 +650,7 @@ notifier:
   image:
     # -- notifier repository for docker images
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # -- notifier tag of docker image
     tag: ${NOTIFIER_BUILD_NUMBER}
   # -- notifier Service Configuration
@@ -660,7 +727,7 @@ service-affecting-monitor:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-affecting-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}
 
@@ -712,7 +779,7 @@ service-dispatch-monitor:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-dispatch-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_DISPATCH_MONITOR_BUILD_NUMBER}
 
@@ -780,7 +847,7 @@ service-outage-monitor-1:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
 
@@ -848,7 +915,7 @@ service-outage-monitor-2:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
 
@@ -916,7 +983,7 @@ service-outage-monitor-3:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
 
@@ -984,7 +1051,7 @@ service-outage-monitor-4:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
 
@@ -1052,7 +1119,7 @@ service-outage-monitor-triage:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
 
@@ -1117,7 +1184,7 @@ sites-monitor:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SITES_MONITOR_BUILD_NUMBER}
 
@@ -1145,7 +1212,7 @@ t7-bridge:
     t7_token: ${T7_TOKEN}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/t7-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${T7_BRIDGE_BUILD_NUMBER}
 
@@ -1201,7 +1268,7 @@ tnba-feedback:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-feedback
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${TNBA_FEEDBACK_BUILD_NUMBER}
 
@@ -1254,7 +1321,7 @@ tnba-monitor:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-monitor
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${TNBA_MONITOR_BUILD_NUMBER}
 
@@ -1282,7 +1349,7 @@ velocloud-bridge:
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-bridge
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${VELOCLOUD_BRIDGE_BUILD_NUMBER}
 

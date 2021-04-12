@@ -12,6 +12,11 @@
   script:
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # CREATE NAMESPACE IF IS NECESSARY
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
+        kubectl create namespace ${ENVIRONMENT_NAME} --dry-run -o yaml | kubectl apply -f -
+      fi
     # INITIALIZE HELM
     - python3 ci-utils/helm/add_helm_repositories.py
     - helm repo update
@@ -24,7 +29,7 @@
     - envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
     # DEPLOY HELM CHART
     - >
-      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+      if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
         helm upgrade --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
           -f values.yaml -n default
       else

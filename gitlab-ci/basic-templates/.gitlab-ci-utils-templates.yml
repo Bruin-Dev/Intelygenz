@@ -90,11 +90,3 @@
       when: never
   tags:
     - kubernetes
-
-.release_template: &release_template
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix ${MODULE_NAME}
-  script:
-    - cd ${MODULE_NAME} && npx semantic-release -e semantic-release-monorepo

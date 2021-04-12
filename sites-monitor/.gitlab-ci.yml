@@ -34,27 +34,11 @@ sites-monitor-build:
     MODULE_NAME: sites-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $sites_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SITES_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
     #      changes:
 #        - sites-monitor/**/*
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $sites_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^sites-monitor-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $SITES_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["sites-monitor-test"]
-
-# =====================================
-# release jobs for sites-monitor module
-# =====================================
-release-sites-monitor:
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix sites-monitor
-  script:
-    - cd sites-monitor && npx semantic-release -e semantic-release-monorepo
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - sites-monitor/**/*

@@ -44,6 +44,15 @@
           python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation --project-role-tag ${i}
         )
       done
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INITIALIZE HELM
+    - python3 ci-utils/helm/add_helm_repositories.py
+    - helm repo update
+    - helm dep up ${HELM_CHART_PROMETHEUS_DIR}
+    # DEPLOY PROMETHEUS HELM CHART
+    - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
+    - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
 
 .terraform_template_deploy_environment: &terraform_template_deploy_environment
   image:
@@ -59,44 +68,40 @@
       for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
           (
               cd "${i}" || exit 1
-              echo "Terraform directory $i"
-              if [[ ${i} == "0-elasticaches" ]]; then
-                for j in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
-                    (
-                      if [[ ${j} != "modules" ]]; then
-                        cd "${j}" || exit
-                        echo "Terraform workspace subdirectory is ${j}"
-                        terraform init
-                        terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
-                        terraform refresh
-                        terraform plan && terraform apply -auto-approve
-                        if [[ ${j} == "0-redis" ]]; then
-                          terraform output REDIS_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_hostname.txt
-                        elif [[ ${j} == "1-redis-customer-cache" ]]; then
-                          terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
-                        elif [[ ${j} == "2-redis-tnba-feedback" ]]; then
-                          terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
-                        fi
-                      fi
-                    )
-                done
-              else
-                echo "Module without subdirectories, Terraform workspace is ${i}"
+              if [[ ${i} != "modules" ]]; then
+                echo "Terraform directory $i"
                 terraform init
-                terraform workspace new ${TF_VAR_ENVIRONMENT} || terraform workspace select ${TF_VAR_ENVIRONMENT}
+                terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
                 terraform refresh
                 terraform plan && terraform apply -auto-approve
+                if [[ ${i} == "0-redis" ]]; then
+                  terraform output REDIS_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_hostname.txt
+                elif [[ ${i} == "1-redis-customer-cache" ]]; then
+                  terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
+                elif [[ ${i} == "2-redis-tnba-feedback" ]]; then
+                  terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
+                fi
               fi
-              cd ..
           )
       done
+    - cd ${CI_PROJECT_DIR}
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+        apk add zip unzip
+        export TF_VAR_REST_API_DATA_COLLECTOR_AUTH_TOKEN=${REST_API_DATA_COLLECTOR_AUTH_TOKEN}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_COLLECTION=${REST_API_DATA_COLLECTOR_MONGODB_COLLECTION}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_DATABASE=${REST_API_DATA_COLLECTOR_MONGODB_DATABASE}
+        envsubst < infra-as-code/data-collector/init.tf > temp_dc.tf
+        envsubst < infra-as-code/data-collector/variables.tf > temp_vars_dc.tf
+        mv temp_dc.tf infra-as-code/data-collector/init.tf
+        mv temp_vars_dc.tf infra-as-code/data-collector/variables.tf
+        cd infra-as-code/data-collector
+        terraform init
+        terraform apply -auto-approve
+        cd ${CI_PROJECT_DIR}
+      fi
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
-    # CREATE NAMESPACE IF IS NECESSARY
-    - >
-      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]; then
-        kubectl create namespace ${TF_VAR_ENVIRONMENT} --dry-run -o yaml | kubectl apply -f -
-      fi
   cache:
     policy: push
     key: "necessary-terraform-vars-${CI_COMMIT_REF_SLUG}"

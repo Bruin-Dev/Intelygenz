@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1592256690014,
+  "id": 21,
+  "iteration": 1618400240088,
   "links": [],
   "panels": [
     {
@@ -29,6 +29,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -60,7 +66,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -83,7 +88,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\"} - min_over_time(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\"} [1h])) + (tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\"}  - min_over_time(tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\"} [1h]))\n\n",
+          "expr": "(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} - min_over_time(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} [1h])) + (tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"}  - min_over_time(tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} [1h]))\n\n",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -112,6 +119,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -143,7 +156,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -166,7 +178,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\"} - min_over_time(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\"} [1h])) ",
+          "expr": "(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} - min_over_time(tickets_with_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} [1h])) ",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -195,6 +209,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -226,7 +246,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -249,7 +268,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "(tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\"}  - min_over_time(tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\"} [1h]))",
+          "expr": "(tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"}  - min_over_time(tickets_without_triage_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} [1h]))",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -278,6 +299,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -309,7 +336,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -332,7 +358,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "triage_note_counter_total{job=\"service-outage-monitor-triage\"} - min_over_time(triage_note_counter_total{job=\"service-outage-monitor-triage\"}[1h]) ",
+          "expr": "triage_note_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} - min_over_time(triage_note_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"}[1h]) ",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -360,7 +388,13 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "ºasource": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -392,7 +426,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -415,7 +448,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "open_ticket_error_counter_total{job=\"service-outage-monitor-triage\"} - min_over_time(open_ticket_error_counter_total{job=\"service-outage-monitor-triage\"}[1h])",
+          "expr": "open_ticket_error_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} - min_over_time(open_ticket_error_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"}[1h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -432,7 +467,8 @@
           "value": "null"
         }
       ],
-      "valueName": "current"
+      "valueName": "current",
+      "ºasource": null
     },
     {
       "cacheTimeout": null,
@@ -444,6 +480,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -475,7 +517,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -498,7 +539,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "monitor_map_error_counter_total{job=\"service-outage-monitor-triage\"} - min_over_time(monitor_map_error_counter_total{job=\"service-outage-monitor-triage\"}[8h])",
+          "expr": "monitor_map_error_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} - min_over_time(monitor_map_error_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"}[8h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -527,6 +570,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -558,7 +607,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -581,7 +629,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "triage_error_note_counter_total{job=\"service-outage-monitor-triage\"} - min_over_time(triage_error_note_counter_total{job=\"service-outage-monitor-triage\"}[1h]) ",
+          "expr": "triage_error_note_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"} - min_over_time(triage_error_note_counter_total{job=\"service-outage-monitor-triage\",namespace=~\"$namespace\"}[1h]) ",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -602,19 +652,58 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 21,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "datasource": null,
+        "description": null,
+        "error": null,
         "filters": [],
         "hide": 0,
         "label": "",
         "name": "Filters",
         "skipUrlSync": false,
         "type": "adhoc"
+      },
+      {
+        "allValue": null,
+        "datasource": null,
+        "definition": "label_values(tickets_with_triage_counter_total, namespace)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "environment_name",
+        "multi": true,
+        "name": "namespace",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "a5c35b84",
+            "value": "a5c35b84"
+          }
+        ],
+        "query": {
+          "query": "label_values(tickets_with_triage_counter_total, namespace)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 0,
+        "regex": ".*",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -638,6 +727,6 @@
   },
   "timezone": "",
   "title": "Triage",
-  "uid": "u3tpYYmGz",
-  "version": 101
+  "uid": "u3tpYYmG1",
+  "version": 9
 }

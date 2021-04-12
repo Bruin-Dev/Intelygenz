@@ -24,6 +24,8 @@ basic-infra-dev:
   variables:
     MODULE: "infra-as-code/basic-infra"
     IAM_TO_EKS_ROLES: developer, devops
+    HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
+    HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
     KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
     EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
     INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}

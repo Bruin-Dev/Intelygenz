@@ -34,27 +34,11 @@ lit-bridge-build:
     MODULE_NAME: lit-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $lit_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LIT_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_PIPELINE_SOURCE == "push"'
 #      changes:
 #        - lit-bridge/**/*
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $lit_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^lit-bridge-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $LIT_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["lit-bridge-test"]
-
-# =====================================
-# release jobs for lit-bridge module
-# =====================================
-release-lit-bridge:
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix lit-bridge
-  script:
-    - cd lit-bridge && npx semantic-release -e semantic-release-monorepo
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - lit-bridge/**/*
