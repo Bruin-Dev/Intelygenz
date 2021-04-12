@@ -34,28 +34,11 @@ tnba-monitor-build:
     MODULE_NAME: tnba-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $tnba_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
 #      changes:
 #        - tnba-monitor/**/*
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $tnba_monitor_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^tnba-monitor-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["tnba-monitor-test"]
-
-# =====================================
-# release jobs for tnba-monitor module
-# =====================================
-release-tnba-monitor:
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix tnba-monitor
-  script:
-    - cd tnba-monitor && npx semantic-release -e semantic-release-monorepo
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - tnba-monitor/**/*
-

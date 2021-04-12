@@ -1,0 +1,60 @@
+{
+    "name": "customer-cache",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {},
+    "devDependencies": {},
+    "release": {
+        "monorepo": {
+            "branch": "develop",
+            "branches": [
+                "feature/migration-to-k8s",
+                {
+                    "name": "develop",
+                    "prerelease": true
+                }
+            ],
+            "analyzeCommits": {
+                "format": "eslint",
+                "preset": "eslint"
+            },
+            "generateNotes": {
+                "preset": "eslint",
+                "changelogFile": "CHANGELOG.md"
+            }
+        },
+        "analyzeCommits": {
+            "format": "eslint",
+            "preset": "eslint"
+        },
+        "generateNotes": {
+            "preset": "eslint",
+            "changelogFile": "CHANGELOG.md"
+        },
+        "branch": "develop",
+        "branches": [
+            "feature/migration-to-k8s",
+            {
+                "name": "develop",
+                "prerelease": true
+            }
+        ],
+        "verifyConditions": [
+            {
+                "path": "@semantic-release/gitlab",
+                "gitlabUrl": "https://gitlab.intelygenz.com",
+                "gitlabApiPathPrefix": "/api/v4"
+            }
+        ],
+        "publish": [
+            {
+                "path": "@semantic-release/gitlab",
+                "gitlabUrl": "https://gitlab.intelygenz.com",
+                "gitlabApiPathPrefix": "/api/v4"
+            }
+        ],
+        "prepare": [],
+        "success": false,
+        "fail": false
+    }
+}

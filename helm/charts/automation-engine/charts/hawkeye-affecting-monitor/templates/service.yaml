@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hawkeye-affecting-monitor.fullname" . }}
+  labels:
+    {{- include "hawkeye-affecting-monitor.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+  selector:
+    {{- include "hawkeye-affecting-monitor.selectorLabels" . | nindent 4 }}

@@ -83,25 +83,3 @@ resource "helm_release" "reloader" {
       data.aws_eks_cluster_auth.cluster,
    ]
 }
-
-//resource "helm_release" "prometheus-stack-custom" {
-//  name = "prometheus"
-//
-//  chart = "helm/charts/prometheus-stack-custom"
-//
-//  values = [
-//    file("${path.module}/helm/charts/prometheus-stack-custom/values.yaml")
-//  ]
-//
-//  wait              = true
-//  create_namespace  = true
-//
-//  depends_on = [
-//    helm_release.external-dns,
-//    helm_release.ingress-nginx,
-//    null_resource.install-metrics-server,
-//    helm_release.reloader,
-//    kubernetes_namespace.prometheus,
-//    kubernetes_secret.grafana_auth
-//  ]
-//}

@@ -34,26 +34,11 @@ cts-bridge-build:
     MODULE_NAME: cts-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $cts_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CTS_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
 #      changes:
 #        - cts-bridge/**/*
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $cts_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^cts-bridge-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CTS_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["cts-bridge-test"]
-# =====================================
-# release jobs for cts-bridge module
-# =====================================
-release-cts-bridge:
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix cts-bridge
-  script:
-    - cd cts-bridge && npx semantic-release -e semantic-release-monorepo
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - cts-bridge/**/*

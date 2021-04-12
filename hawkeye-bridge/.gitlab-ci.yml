@@ -34,28 +34,11 @@ hawkeye-bridge-build:
     MODULE_NAME: hawkeye-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $hawkeye_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
 #      changes:
 #        - hawkeye-bridge/**/*
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $bruin_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG =~ /^hawkeye-bridge-v\d*.\d*.\d*$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $HAWKEYE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["hawkeye-bridge-test"]
-
-# =====================================
-# release jobs for hawkeye-bridge module
-# =====================================
-release-hawkeye-bridge:
-  stage: release
-  image: node:10
-  before_script:
-    - npm install --prefix hawkeye-bridge
-  script:
-    - cd hawkeye-bridge && npx semantic-release -e semantic-release-monorepo
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - hawkeye-bridge/**/*
-

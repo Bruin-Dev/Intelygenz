@@ -15,7 +15,9 @@
 
 ## Providers
 
-No provider.
+| Name | Version |
+|------|---------|
+| aws | = 3.26.0 |
 
 ## Inputs
 

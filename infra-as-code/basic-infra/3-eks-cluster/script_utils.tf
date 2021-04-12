@@ -43,19 +43,3 @@ resource "null_resource" "install-metrics-server" {
     null_resource.update_kube_config
   ]
 }
-
- resource "null_resource" "create_grafana_values" {
-
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/helm/charts/prometheus-stack-custom/values.yaml.tpl > ${path.module}/helm/charts/prometheus-stack-custom/values.yaml"
-  }
-
-  triggers = {
-    always_run = timestamp()
-  }
-
-  depends_on = [
-    module.mettel-automation-eks-cluster,
-    null_resource.update_kube_config
-  ]
-}

@@ -1,0 +1,58 @@
+{
+    "name": "bruin-bridge",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {},
+    "devDependencies": {},
+    "release": {
+        "monorepo": {
+            "branch": "feature/migration-to-k8s",
+            "branches": [
+                "feature/migration-to-k8s",
+                {
+                    "name": "feature/migration-to-k8s"
+                }
+            ],
+            "analyzeCommits": {
+                "format": "eslint",
+                "preset": "eslint"
+            },
+            "generateNotes": {
+                "preset": "eslint",
+                "changelogFile": "CHANGELOG.md"
+            }
+        },
+        "analyzeCommits": {
+            "format": "eslint",
+            "preset": "eslint"
+        },
+        "generateNotes": {
+            "preset": "eslint",
+            "changelogFile": "CHANGELOG.md"
+        },
+        "branch": "feature/migration-to-k8s",
+        "branches": [
+            "feature/migration-to-k8s",
+            {
+                "name": "feature/migration-to-k8s"
+            }
+        ],
+        "verifyConditions": [
+            {
+                "path": "@semantic-release/gitlab",
+                "gitlabUrl": "https://gitlab.intelygenz.com",
+                "gitlabApiPathPrefix": "/api/v4"
+            }
+        ],
+        "publish": [
+            {
+                "path": "@semantic-release/gitlab",
+                "gitlabUrl": "https://gitlab.intelygenz.com",
+                "gitlabApiPathPrefix": "/api/v4"
+            }
+        ],
+        "prepare": [],
+        "success": false,
+        "fail": false
+    }
+}

@@ -9,6 +9,7 @@ stages:
   - deploy
   - helm
   - destroy
+  - release
 
 variables:
   NATS_SERVER1: "nats://nats-server:4222"
@@ -95,7 +96,7 @@ include:
   - local: 'hawkeye-outage-monitor/.gitlab-ci.yml'
   - local: 'helm/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
-  - local: 'infra-as-code/dev/.gitlab-ci.yml'
+  - local: 'infra-as-code/elasticaches/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
   - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
@@ -106,7 +107,6 @@ include:
 #  - local: 'lit-bridge/.gitlab-ci.yml'                #--> disable dispatch portal feature
   - local: 'lumin-billing-report/.gitlab-ci.yml'
   - local: 'metrics-dashboard/.gitlab-ci.yml'
-  - local: 'nats-server/.gitlab-ci.yml'
   - local: 'notifier/.gitlab-ci.yml'
   - local: 'service-affecting-monitor/.gitlab-ci.yml'
 #  - local: 'service-dispatch-monitor/.gitlab-ci.yml'  #--> disable dispatch portal feature
@@ -118,3 +118,17 @@ include:
   - local: 'ticket-statistics/.gitlab-ci.yml'
   - local: 't7-bridge/.gitlab-ci.yml'
   - local: 'velocloud-bridge/.gitlab-ci.yml'
+
+semantic-release:
+  stage: release
+  image: node:15.2-alpine
+  script:
+    - yarn bootstrap
+    - yarn global add multi-semantic-release
+    - apk add --update git bash
+    - multi-semantic-release
+  resource_group: semantic-release
+  rules:
+    - if: $CI_COMMIT_BRANCH == "feature/migration-to-k8s"
+    - if: $CI_COMMIT_TAG
+      when: never

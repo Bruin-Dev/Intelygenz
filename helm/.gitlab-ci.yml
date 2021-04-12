@@ -20,6 +20,6 @@ helm-branches:
     - export EKS_CLUSTER_NAME="mettel-automation-${CURRENT_ENVIRONMENT}"
     - export ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $bruin_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true

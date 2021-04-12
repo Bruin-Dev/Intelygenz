@@ -52,7 +52,7 @@ config:
 image:
   # -- cts-bridge
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/cts-bridge
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # -- cts-bridge tag of docker image
   tag: ""
 

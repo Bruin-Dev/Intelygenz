@@ -47,7 +47,7 @@ config:
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
