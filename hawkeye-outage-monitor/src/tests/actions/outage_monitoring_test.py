@@ -5532,21 +5532,21 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
 
-        new_now = parse(ticket_creation_date) + timedelta(minutes=59, seconds=59)
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
-        new_now = parse(ticket_creation_date) + timedelta(hours=1)
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
-        new_now = parse(ticket_creation_date) + timedelta(hours=1, seconds=1)
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
