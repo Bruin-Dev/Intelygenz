@@ -771,7 +771,12 @@ class OutageMonitor:
                 ticket_detail_id = detail_for_ticket_resolution['detailID']
 
                 notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
-                relevant_notes = [note for note in notes_from_outage_ticket if serial_number in note['serviceNumber']]
+                relevant_notes = [
+                    note
+                    for note in notes_from_outage_ticket
+                    if serial_number in note['serviceNumber']
+                    if note['noteValue'] is not None
+                ]
                 digi_note = self._find_note(relevant_notes, 'DiGi')
 
                 if digi_note is None:
