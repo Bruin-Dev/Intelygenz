@@ -306,7 +306,12 @@ class OutageMonitor:
             ticket_detail_id = detail_for_ticket_resolution['detailID']
 
             notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
-            relevant_notes = [note for note in notes_from_outage_ticket if serial_number in note['serviceNumber']]
+            relevant_notes = [
+                note
+                for note in notes_from_outage_ticket
+                if serial_number in note['serviceNumber']
+                if note['noteValue'] is not None
+            ]
             if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
                 self._logger.info(
                     f'Edge {edge_identifier} has been in outage state for a long time, so detail {ticket_detail_id} '
