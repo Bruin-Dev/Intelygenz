@@ -137,7 +137,12 @@ class OutageMonitor:
                 return
 
             notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
-            relevant_notes = [note for note in notes_from_outage_ticket if serial_number in note['serviceNumber']]
+            relevant_notes = [
+                note
+                for note in notes_from_outage_ticket
+                if serial_number in note['serviceNumber']
+                if note['noteValue'] is not None
+            ]
             if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
                 self._logger.info(
                     f'Device {device} has been in outage state for a long time, so detail {client_id} '
