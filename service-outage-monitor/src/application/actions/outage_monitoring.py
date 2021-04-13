@@ -5,6 +5,9 @@ from datetime import datetime
 from datetime import timedelta
 from time import perf_counter
 from typing import Callable
+from shortuuid import uuid
+import json
+
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -35,6 +38,7 @@ class OutageMonitor:
         self._customer_cache_repository = customer_cache_repository
         self._metrics_repository = metrics_repository
         self._digi_repository = digi_repository
+        self._cached_edges_without_status = []
 
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
 
@@ -120,6 +124,7 @@ class OutageMonitor:
 
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, links_grouped_by_edge)
+        await self._report_cached_edges_without_status()
         self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
 
         outage_edges = [edge for edge in edges_full_info if self._outage_repository.is_there_an_outage(edge['status'])]
@@ -164,6 +169,7 @@ class OutageMonitor:
 
     def _map_cached_edges_with_edges_status(self, customer_cache: list, edges_status: list) -> list:
         result = []
+        self._cached_edges_without_status = []
 
         cached_edges_by_edge_identifier = {
             EdgeIdentifier(**elem['edge']): elem
@@ -178,6 +184,13 @@ class OutageMonitor:
             edge_status = edge_statuses_by_edge_identifier.get(edge_identifier)
             if not edge_status:
                 self._logger.info(f'No edge status was found for cached edge {edge_identifier}. Skipping...')
+                edge = cached_edge["edge"]
+                if edge["host"] == "metvco03.mettel.net" and edge["enterprise_id"] == 124:
+                    self._cached_edges_without_status.append(
+                        f"<br>https://{edge['host']}/#!/operator/customer/"
+                        f"{edge['enterprise_id']}/monitor/edge/{edge['edge_id']}/<br>")
+                    self._logger.info(f"Edge {edge} was appended to the list of edges that have no status but"
+                                      f"are in the customer cache.")
                 continue
 
             result.append({
@@ -186,6 +199,38 @@ class OutageMonitor:
             })
 
         return result
+
+    async def _report_cached_edges_without_status(self):
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if len(self._cached_edges_without_status) == 0:
+            self._logger.info('No RSI edges were found in customer cache but not in Velocloud response'
+                              '. Skipping report...')
+            return
+        if working_environment != 'production':
+            self._logger.info(f'[outage-monitoring] Skipping sending email with edges that are in customer-cache'
+                              f'but not in Velocloud response. Current environment is {working_environment}')
+            return
+        self._logger.info("Sending email with cached edges without status...")
+        email_obj = self._format_edges_to_report_for_email()
+        response = await self._event_bus.rpc_request("notification.email.request", email_obj, timeout=60)
+        self._logger.info(f"Response from sending email: {json.dumps(response)}")
+
+    def _format_edges_to_report_for_email(self):
+        string_edges_without_status = "".join(self._cached_edges_without_status)
+        return {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'Edges present in customer cache that are not returned from velocloud endpoint',
+                'recipient': "ndimuro@mettel.net, bsullivan@mettel.net, mettel.team@intelygenz.com",
+                'text': 'this is the accessible text for the email',
+                'html': f"<br>These are the edges that are present in the customer cache but are not returned from"
+                        f"Velocloud's API endpoint: <br>"
+                        f"{string_edges_without_status}",
+                'images': [],
+                'attachments': [
+                ]
+            }
+        }
 
     async def _run_ticket_autoresolve_for_edge(self, edge: dict):
         async with self._semaphore:
@@ -336,7 +381,6 @@ class OutageMonitor:
         edges_full_info = self._map_cached_edges_with_edges_status(
             customer_cache_for_outage_edges, links_grouped_by_edge
         )
-
         edges_still_in_outage = [
             edge
             for edge in edges_full_info
