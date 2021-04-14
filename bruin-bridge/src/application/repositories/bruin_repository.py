@@ -213,13 +213,18 @@ class BruinRepository:
             }
 
         work_queues = possible_work_queues_response_body['nextResults']
+        queue_name = filters["queue_name"]
+        if possible_work_queues_response_body['currentTaskName'].strip() == queue_name:
+            return {
+                'body': f'Ticket {ticket_id} is already in the queue {queue_name}',
+                'status': 400,
+            }
         if not work_queues:
             return {
                 'body': f'No work queues were found for ticket {ticket_id} and filters {get_work_queues_filters}',
                 'status': 404,
             }
 
-        queue_name = filters["queue_name"]
         work_queue_id = None
         for possible_work_queue in work_queues:
             if possible_work_queue["resultName"].strip() == queue_name:
