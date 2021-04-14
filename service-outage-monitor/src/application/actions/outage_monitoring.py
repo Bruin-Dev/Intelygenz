@@ -1,3 +1,4 @@
+import base64
 import re
 import time
 from collections import defaultdict
@@ -47,6 +48,7 @@ class OutageMonitor:
     def __reset_state(self):
         self._customer_cache = []
         self._autoresolve_serials_whitelist = set()
+        self._velocloud_links_by_host = {}
 
     async def start_service_outage_monitoring(self, exec_on_start):
         self._logger.info('Scheduling Service Outage Monitor job...')
@@ -121,6 +123,7 @@ class OutageMonitor:
             return
 
         links_with_edge_info: list = links_with_edge_info_response['body']
+        self._velocloud_links_by_host[host] = links_with_edge_info
 
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, links_grouped_by_edge)
@@ -217,17 +220,33 @@ class OutageMonitor:
 
     def _format_edges_to_report_for_email(self):
         string_edges_without_status = "".join(self._cached_edges_without_status)
+
+        # Attachment with VCO03's raw JSON response
+        now = datetime.utcnow().strftime('%B %d %Y - %H:%M:%S')
+        host = 'metvco03.mettel.net'
+        attachment_filename = f'raw_response_{host}_{now} (UTC).json'
+        raw_response = self._velocloud_links_by_host[host]
+
         return {
             'request_id': uuid(),
             'email_data': {
                 'subject': f'Edges present in customer cache that are not returned from velocloud endpoint',
-                'recipient': "ndimuro@mettel.net, bsullivan@mettel.net, mettel.team@intelygenz.com",
+                'recipient': (
+                    "ndimuro@mettel.net, bsullivan@mettel.net, mettel.team@intelygenz.com, jsidney@vmware.com, "
+                    "webform@vmware.com, jigeshd@vmware.com"
+                ),
                 'text': 'this is the accessible text for the email',
-                'html': f"<br>These are the edges that are present in the customer cache but are not returned from"
+                'html': f"<br>These are the edges that are present in the customer cache but are not returned from "
                         f"Velocloud's API endpoint: <br>"
-                        f"{string_edges_without_status}",
+                        f"{string_edges_without_status} <br>"
+                        "The attachment included in this e-mail is a JSON file with the raw response returned by "
+                        f"endpoint https://{host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
                 'images': [],
                 'attachments': [
+                    {
+                        'name': attachment_filename,
+                        'data': base64.b64encode(json.dumps(raw_response, indent=4).encode('utf-8')).decode('utf-8')
+                    },
                 ]
             }
         }
