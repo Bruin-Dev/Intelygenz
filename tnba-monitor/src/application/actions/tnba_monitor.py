@@ -524,10 +524,10 @@ class TNBAMonitor:
                 msg = (
                     f"Automation Engine appended a TNBA note for serial {serial_number} in ticket {ticket_id}, "
                     "which has been in the IPA Investigate work queue for a while. The ticket is going to be forwarded "
-                    "to the Holmdel NOC Investigate queue."
+                    "to the HNOC Investigate queue."
                 )
                 self._logger.info(msg)
-                await self._bruin_repository.change_detail_work_queue(ticket_id, task_result='Holmdel NOC Investigate',
+                await self._bruin_repository.change_detail_work_queue(ticket_id, task_result='HNOC Investigate',
                                                                       serial_number=serial_number,
                                                                       detail_id=ticket_detail_id)
 

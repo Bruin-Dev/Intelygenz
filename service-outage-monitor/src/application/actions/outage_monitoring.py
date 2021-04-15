@@ -446,7 +446,7 @@ class OutageMonitor:
                             ticket_id = ticket_creation_response_body
                             self._logger.info(
                                 f'Edge with serial {serial_number} was detected to be DOWN. Ticket {ticket_id} will '
-                                'be forwarded to the Holmdel NOC Investigate queue shortly.'
+                                'be forwarded to the HNOC Investigate queue shortly.'
                             )
 
                             tz = timezone(self._config.MONITOR_CONFIG['timezone'])
@@ -518,8 +518,8 @@ class OutageMonitor:
     async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
         self._logger.info(
             f"Created ticket with ticket_id: {ticket_id} and serial number: {serial_number} with offline edge."
-            f"Send to Holmdel NOC Investigate")
-        task_result = 'Holmdel NOC Investigate'
+            f"Send to HNOC Investigate")
+        task_result = 'HNOC Investigate'
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             serial_number=serial_number,
             ticket_id=ticket_id,

@@ -1274,7 +1274,7 @@ class TestTNBAMonitor:
             ticket_id, ticket_detail_id, serial_number_1
         )
         tnba_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            ticket_id, task_result='Holmdel NOC Investigate', serial_number=serial_number_1, detail_id=ticket_detail_id
+            ticket_id, task_result='HNOC Investigate', serial_number=serial_number_1, detail_id=ticket_detail_id
         )
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
