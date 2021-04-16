@@ -6,7 +6,6 @@ import logging
 import sys
 import json
 
-
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'subscriber': {
@@ -51,6 +50,7 @@ MONITOR_CONFIG = {
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
+    'forward_link_outage_seconds': 60 * 60,
     'autoresolve_ticket_creation_seconds': 60 * 60,
     'autoresolve_last_outage_seconds': 60 * 60,
     'last_digi_reboot_seconds': 30 * 60,

@@ -448,26 +448,9 @@ class OutageMonitor:
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
 
-                        if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
-                            ticket_id = ticket_creation_response_body
-                            self._logger.info(
-                                f'Edge with serial {serial_number} was detected to be DOWN. Ticket {ticket_id} will '
-                                'be forwarded to the HNOC Investigate queue shortly.'
-                            )
-
-                            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
-                            current_datetime = datetime.now(tz)
-                            forward_task_run_date = current_datetime + timedelta(
-                                seconds=self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc'])
-                            self._scheduler.add_job(
-                                self.forward_ticket_to_hnoc_queue, 'date',
-                                kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
-                                run_date=forward_task_run_date,
-                                replace_existing=False,
-                                misfire_grace_time=9999,
-                                id=f'_forward_ticket_{ticket_id}_to_hnoc',
-                            )
-
+                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                            serial_number=serial_number,
+                                                            edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 409:
@@ -483,6 +466,8 @@ class OutageMonitor:
                             f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
+                        await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                                serial_number=serial_number, edge_status=edge_status)
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status, edge_full_id)
@@ -492,6 +477,8 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
+                        await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                                serial_number=serial_number, edge_status=edge_status)
                         await self._post_note_in_outage_ticket(ticket_creation_response_body, edge_status)
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
@@ -500,6 +487,8 @@ class OutageMonitor:
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
+                        await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                                serial_number=serial_number, edge_status=edge_status)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
             else:
                 self._logger.info(
@@ -521,17 +510,61 @@ class OutageMonitor:
 
         self._logger.info(f'Re-check process finished for {len(outage_edges)} edges')
 
-    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
-        self._logger.info(
-            f"Created ticket with ticket_id: {ticket_id} and serial number: {serial_number} with offline edge."
-            f"Send to HNOC Investigate")
+    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
+        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        current_datetime = datetime.now(tz)
+        forward_task_run_date = current_datetime + timedelta(
+            seconds=self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc'])
+
+        self._scheduler.add_job(
+            self.forward_ticket_to_hnoc_queue, 'date',
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'edge_status': edge_status},
+            run_date=forward_task_run_date,
+            replace_existing=False,
+            id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
+        )
+
+    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
+        if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
+            self._logger.info(
+                f'Edge with serial {serial_number} was detected to be DOWN. Ticket {ticket_id} will '
+                'be forwarded to the HNOC Investigate queue.'
+            )
+
+            await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
+        elif self._outage_repository.is_any_link_disconnected(edge_status=edge_status):
+            self._logger.info(f'At least one link of the edge with serial {serial_number} was DISCONNECTED.')
+
+            ticket_data_response = await self._bruin_repository.get_ticket_overview(ticket_id=ticket_id)
+            if ticket_data_response['status'] not in range(200, 300):
+                return
+
+            ticket_creation_date = ticket_data_response['body']['createDate']
+            if not self._is_ticket_old_enough(ticket_creation_date):
+                self._logger.info(
+                    f'Ticket {ticket_id} is too recent, so detail related to serial {serial_number} will not be '
+                    'forwarded to the HNOC Investigate queue'
+                )
+                return
+
+            self._logger.info(
+                f'Ticket {ticket_id} is old enough, so detail related to serial {serial_number} will be forwarded '
+                'to the HNOC Investigate queue'
+            )
+            await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+    async def change_detail_work_queue(self, ticket_id, serial_number):
         task_result = 'HNOC Investigate'
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             serial_number=serial_number,
             ticket_id=ticket_id,
             task_result=task_result)
+
         if change_detail_work_queue_response['status'] in range(200, 300):
-            slack_message = f'[service-outage-monitor] Forwarding ticket {ticket_id} to {task_result}'
+            slack_message = (
+                f'Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded '
+                f'to {task_result} queue!'
+            )
             await self._notifications_repository.send_slack_message(slack_message)
 
     async def _append_triage_note(self, ticket_id, edge_full_id, edge_status):
@@ -775,3 +808,12 @@ class OutageMonitor:
         note_creation_date = parse(ticket_note['createdDate']).astimezone(utc)
         seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
         return seconds_elapsed_since_last_outage < max_seconds_since_last_outage
+
+    def _is_ticket_old_enough(self, ticket_creation_date: str) -> bool:
+        current_datetime = datetime.now().astimezone(utc)
+        max_seconds_since_creation = self._config.MONITOR_CONFIG['forward_link_outage_seconds']
+
+        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
+        seconds_elapsed_since_creation = (current_datetime - ticket_creation_datetime).total_seconds()
+
+        return seconds_elapsed_since_creation >= max_seconds_since_creation
