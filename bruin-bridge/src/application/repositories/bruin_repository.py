@@ -255,7 +255,7 @@ class BruinRepository:
         return ticket_current_task
 
     async def get_ticket_overview(self, ticket_id):
-        if not ticket_id or not ticket_id.isdigit():
+        if not ticket_id or (isinstance(ticket_id, str) and not ticket_id.isdigit()):
             return {'body': 'not ticket id found', 'status': 404}
         params = {'ticket_id': int(ticket_id)}
         self._logger.info(f'Getting ticket overview: {ticket_id} from Bruin...')
