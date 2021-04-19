@@ -747,7 +747,7 @@ class OutageMonitor:
                         return
                     self._logger.info(f'DiGi reboot attempt failed. Forwarding ticket {ticket_id} to Wireless team')
                     change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-                        serial_number, ticket_id, ticket_detail_id, task_result)
+                        ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
                     if change_detail_work_queue_response['status'] in range(200, 300):
                         await self._bruin_repository.append_task_result_change_note(ticket_id, task_result)
                         slack_message = f'Forwarding ticket {ticket_id} to Wireless team'

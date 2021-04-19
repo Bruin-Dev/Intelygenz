@@ -7527,9 +7527,9 @@ class TestServiceOutageMonitor:
         digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
 
         bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
-        bruin_repository.change_detail_work_queue.assert_awaited_once_with(edge_1_serial, ticket_id,
-                                                                           outage_ticket_detail_1['detailID'],
-                                                                           task_result)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, task_result,
+                                                                           serial_number=edge_1_serial,
+                                                                           detail_id=outage_ticket_detail_1['detailID'])
         bruin_repository.append_task_result_change_note.assert_awaited_once_with(ticket_id, task_result)
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
 
@@ -8262,9 +8262,9 @@ class TestServiceOutageMonitor:
         digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
 
         bruin_repository.get_ticket_details.assert_has_awaits([call(ticket_id)])
-        bruin_repository.change_detail_work_queue.assert_awaited_once_with(edge_1_serial, ticket_id,
-                                                                           outage_ticket_detail_1['detailID'],
-                                                                           task_result)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, task_result,
+                                                                           serial_number=edge_1_serial,
+                                                                           detail_id=outage_ticket_detail_1['detailID'])
         bruin_repository.append_task_result_change_note.assert_not_awaited()
         notifications_repository.send_slack_message.assert_not_awaited()
 
