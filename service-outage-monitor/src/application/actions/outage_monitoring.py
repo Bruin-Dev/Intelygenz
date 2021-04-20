@@ -1,4 +1,5 @@
 import base64
+import json
 import re
 import time
 from collections import defaultdict
@@ -6,9 +7,6 @@ from datetime import datetime
 from datetime import timedelta
 from time import perf_counter
 from typing import Callable
-from shortuuid import uuid
-import json
-
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -16,6 +14,7 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
+from shortuuid import uuid
 
 from application.repositories import EdgeIdentifier
 
@@ -83,7 +82,8 @@ class OutageMonitor:
             for elem in customer_cache_response['body']
             if elem['edge'] not in self._config.MONITOR_CONFIG['blacklisted_edges']
         ]
-
+        serials_for_monitoring = [edge["serial_number"] for edge in self._customer_cache]
+        self._logger.info(f"List of serials from customer cache: {serials_for_monitoring}")
         self._logger.info("[outage_monitoring_process] Creating list of whitelisted serials for autoresolve...")
         autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
         autoresolve_filter_enabled = len(autoresolve_filter) > 0
@@ -124,13 +124,19 @@ class OutageMonitor:
 
         links_with_edge_info: list = links_with_edge_info_response['body']
         self._velocloud_links_by_host[host] = links_with_edge_info
-
+        self._logger.info(f"Link status with edge info from Velocloud: {json.dumps(links_with_edge_info, indent=2)}")
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, links_grouped_by_edge)
         self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
+        mapped_serials_w_status = [edge["cached_info"]["serial_number"] for edge in edges_full_info]
+        self._logger.info(f"Mapped cache serials with status: {mapped_serials_w_status}")
 
         outage_edges = [edge for edge in edges_full_info if self._outage_repository.is_there_an_outage(edge['status'])]
+        outage_serials = [edge["cached_info"]["serial_number"] for edge in outage_edges]
         healthy_edges = [edge for edge in edges_full_info if edge not in outage_edges]
+        healthy_serials = [edge["cached_info"]["serial_number"] for edge in healthy_edges]
+        self._logger.info(f"Outage serials: {outage_serials}")
+        self._logger.info(f"Healthy serials: {healthy_serials}")
 
         if outage_edges:
             self._logger.info(
@@ -185,7 +191,8 @@ class OutageMonitor:
         for edge_identifier, cached_edge in cached_edges_by_edge_identifier.items():
             edge_status = edge_statuses_by_edge_identifier.get(edge_identifier)
             if not edge_status:
-                self._logger.info(f'No edge status was found for cached edge {edge_identifier}. Skipping...')
+                self._logger.info(f'No edge status was found for cached edge {edge_identifier} and serial'
+                                  f' {cached_edge["serial_number"]}. Skipping...')
                 edge = cached_edge["edge"]
                 if edge["host"] == "metvco03.mettel.net" and edge["enterprise_id"] == 124:
                     self._cached_edges_without_status.append(
