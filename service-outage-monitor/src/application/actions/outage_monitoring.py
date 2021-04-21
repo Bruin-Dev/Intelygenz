@@ -124,7 +124,7 @@ class OutageMonitor:
 
         links_with_edge_info: list = links_with_edge_info_response['body']
         self._velocloud_links_by_host[host] = links_with_edge_info
-        self._logger.info(f"Link status with edge info from Velocloud: {json.dumps(links_with_edge_info, indent=2)}")
+        self._logger.info(f"Link status with edge info from Velocloud: {links_with_edge_info}")
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, links_grouped_by_edge)
         self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
@@ -391,6 +391,7 @@ class OutageMonitor:
 
     async def _recheck_edges_for_ticket_creation(self, outage_edges: list):
         self._logger.info(f'Re-checking {len(outage_edges)} edges in outage state prior to ticket creation...')
+        self._logger.info(f"[outage-recheck] Edges in outage before quarantine recheck: {outage_edges}")
 
         # This method is never called with an empty outage_edges, so no IndexError should be raised
         host = outage_edges[0]['status']['host']
@@ -398,7 +399,8 @@ class OutageMonitor:
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response['status'] not in range(200, 300):
             return
-
+        self._logger.info(f"[outage-recheck] Velocloud edge status response in quarantine recheck: "
+                          f"{links_with_edge_info_response}")
         links_with_edge_info: list = links_with_edge_info_response['body']
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
 
@@ -406,13 +408,16 @@ class OutageMonitor:
         edges_full_info = self._map_cached_edges_with_edges_status(
             customer_cache_for_outage_edges, links_grouped_by_edge
         )
+        self._logger.info(f"[outage-recheck] Current edge status of edges that were in outage: {edges_full_info}")
+
         edges_still_in_outage = [
             edge
             for edge in edges_full_info
             if self._outage_repository.is_there_an_outage(edge['status'])
         ]
+        self._logger.info(f"[outage-recheck] Edges still in outage after recheck: {edges_still_in_outage}")
         healthy_edges = [edge for edge in edges_full_info if edge not in edges_still_in_outage]
-
+        self._logger.info(f"[outage-recheck] Edges that are healthy after recheck: {healthy_edges}")
         if edges_still_in_outage:
             self._logger.info(
                 f"{len(edges_still_in_outage)} edges were detected as still in outage state after re-check. "
@@ -438,8 +443,10 @@ class OutageMonitor:
                     ticket_creation_response_body = ticket_creation_response['body']
                     ticket_creation_response_status = ticket_creation_response['status']
                     logical_id_list = edge['cached_info']['logical_ids']
+                    self._logger.info(f"[outage-recheck] Bruin response for ticket creation for edge {edge}: "
+                                      f"{ticket_creation_response}")
                     if ticket_creation_response_status in range(200, 300):
-                        self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
+                        self._logger.info(f'[outage-recheck] Successfully created outage ticket for edge {edge}.')
                         self._metrics_repository.increment_tickets_created()
                         slack_message = (
                             f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
@@ -496,19 +503,22 @@ class OutageMonitor:
                     f'edges because the current working environment is {working_environment.upper()}.'
                 )
         else:
-            self._logger.info("No edges were detected in outage state after re-check. Outage tickets won't be created")
+            self._logger.info("[outage-recheck] No edges were detected in outage state after re-check. "
+                              "Outage tickets won't be created")
 
         if healthy_edges:
             self._logger.info(
-                f"{len(healthy_edges)} edges were detected in healthy state after re-check. '"
+                f"[outage-recheck] {len(healthy_edges)} edges were detected in healthy state after re-check. '"
                 "Running autoresolve for all of them..."
             )
+            self._logger.info(f"[outage-recheck] Edges that are going to be attempted to autoresolve: {healthy_edges}")
             autoresolve_tasks = [self._run_ticket_autoresolve_for_edge(edge) for edge in healthy_edges]
             await asyncio.gather(*autoresolve_tasks)
         else:
-            self._logger.info("No edges were detected in healthy state. Autoresolve won't be triggered")
+            self._logger.info("[outage-recheck] No edges were detected in healthy state. "
+                              "Autoresolve won't be triggered")
 
-        self._logger.info(f'Re-check process finished for {len(outage_edges)} edges')
+        self._logger.info(f'[outage-recheck] Re-check process finished for {len(outage_edges)} edges')
 
     def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
