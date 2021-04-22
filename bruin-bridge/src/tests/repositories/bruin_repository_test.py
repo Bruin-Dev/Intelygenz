@@ -1845,6 +1845,24 @@ class TestBruinRepository:
         assert result == {"body": [ticket_123, ticket_123], "status": return_status}
 
     @pytest.mark.asyncio
+    async def get_circuit_id_test(self):
+        params = {'circuit_id': '123', 'client_id': '432'}
+
+        circuit_id_return = {'body': {"clientID": '432', "subAccount": "string", "wtn": "123",
+                                      "inventoryID": 0, "addressID": 0},
+                             'status': 200}
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.get_circuit_id = CoroutineMock(return_value=circuit_id_return)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        circuit_id = await bruin_repository.get_circuit_id(params)
+
+        bruin_client.get_circuit_id.assert_awaited_once_with(params)
+        assert circuit_id == circuit_id_return
+
+    @pytest.mark.asyncio
     async def post_email_tag_test(self):
         logger = Mock()
         email_id = "A123456"

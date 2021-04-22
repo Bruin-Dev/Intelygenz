@@ -54,6 +54,10 @@
     * [Description](#description-14)
     * [Request message](#request-message-13)
     * [Response message](#response-message-13)
+  * [Get circuit id](#get-circuit-id)
+    * [Description](#description-14)
+    * [Request message](#request-message-13)
+    * [Response message](#response-message-13)
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -563,6 +567,39 @@ that was built by NATS under the hood.
     "status": 200
 }
 ```
+# Get Circuit Id
+### Description
+When the bruin bridge receives a request with a request message from topic `bruin.get.circuit.id` it makes a callback
+to function `get_circuit_id`. From the request message, we need the `circuit_id` and `client_id` to get the circuit id
+dict from bruin.
 
+We call the bruin repository with these fields so that it can call the bruin client to get the circuit id dict from bruin.
+The bruin client should return a message having the circuit id(`wtn` is the field name in the dict) along with other fields,
+and then a response message is published to the response topic that was built by NATS under the hood.
+### Request message
+```json
+{
+    "request_id": 123,
+    "body": {
+                "circuit_id": "DS1IT-22880336",
+                "client_id": 83959
+            }
+    
+}
+```
+### Response message
+```json
+{
+  "request_id": 123,
+  "body": {
+              "clientID": 83959,
+              "subAccount": "string",
+              "wtn": "3214",
+              "inventoryID": 0,
+              "addressID": 0
+  },
+  "status": 200
+}
+```
 # Running in docker-compose 
 `docker-compose up --build redis nats-server bruin-bridge`
