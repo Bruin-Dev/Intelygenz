@@ -420,9 +420,19 @@ class OutageMonitor:
             for edge in edges_full_info
             if self._outage_repository.is_there_an_outage(edge['status'])
         ]
+        serials_still_in_outage = [
+            edge['status']['edgeSerialNumber']
+            for edge in edges_still_in_outage
+        ]
         self._logger.info(f"[outage-recheck] Edges still in outage after recheck: {edges_still_in_outage}")
+        self._logger.info(f"[outage-recheck] Serials still in outage after recheck: {serials_still_in_outage}")
         healthy_edges = [edge for edge in edges_full_info if edge not in edges_still_in_outage]
+        healthy_serials = [
+            edge['status']['edgeSerialNumber']
+            for edge in healthy_edges
+        ]
         self._logger.info(f"[outage-recheck] Edges that are healthy after recheck: {healthy_edges}")
+        self._logger.info(f"[outage-recheck] Serials that are healthy after recheck: {healthy_serials}")
         if edges_still_in_outage:
             self._logger.info(
                 f"{len(edges_still_in_outage)} edges were detected as still in outage state after re-check. "
@@ -434,13 +444,13 @@ class OutageMonitor:
                 for edge in edges_still_in_outage:
                     edge_full_id = edge['cached_info']['edge']
                     edge_status = edge['status']
-
-                    edge_identifier = EdgeIdentifier(**edge_full_id)
+                    serial_number = edge['cached_info']['serial_number']
                     self._logger.info(
-                        f'[outage-recheck] Attempting outage ticket creation for faulty edge {edge_identifier}...'
+                        f'[outage-recheck] Attempting outage ticket creation for serial {serial_number}...'
                     )
 
-                    serial_number = edge['cached_info']['serial_number']
+                    edge_identifier = EdgeIdentifier(**edge_full_id)
+
                     bruin_client_id = edge['cached_info']['bruin_client_info']['client_id']
                     ticket_creation_response = await self._bruin_repository.create_outage_ticket(
                         bruin_client_id, serial_number
@@ -771,6 +781,8 @@ class OutageMonitor:
                 ticket_detail_id = detail_for_ticket_resolution['detailID']
 
                 notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+                self._logger.info(f'Notes of ticket {ticket_id}: {notes_from_outage_ticket}')
+
                 relevant_notes = [
                     note
                     for note in notes_from_outage_ticket
