@@ -21,6 +21,12 @@ from asynctest import CoroutineMock
 from quart import Quart
 from hypercorn.config import Config as HyperCornConfig
 import application.server.api_server as api_server_module
+import application.repositories.lit_repository as lit_repository
+import application.repositories.cts_repository as cts_repository
+from shortuuid import uuid
+
+uuid_ = uuid()
+uuid_mock = patch.object(lit_repository, 'uuid', return_value=uuid_)
 
 
 class TestApiServer:
@@ -169,7 +175,7 @@ class TestApiServer:
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/{dispatch_number}')
             data = await response.get_json()
@@ -194,7 +200,8 @@ class TestApiServer:
             "status": 400
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         expected_response = {
             "code": 400,
@@ -208,11 +215,12 @@ class TestApiServer:
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/{dispatch_number}')
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+            api_server_test._lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload,
+                                                                                            timeout=30)
 
             # response = await api_server_test.get_dispatch('DIS37450')
             assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -235,17 +243,19 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         expected_response = {'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]}
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/{dispatch_number}')
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+            api_server_test._lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload,
+                                                                                            timeout=30)
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response
@@ -409,7 +419,7 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/')
             data = await response.get_json()
@@ -433,7 +443,8 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         payload = {"request_id": uuid_, "body": {}}
 
@@ -443,12 +454,12 @@ class TestApiServer:
 
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch', json=payload)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once()
+            api_server_test._lit_repository._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_get_all_dispatches_error
@@ -468,7 +479,8 @@ class TestApiServer:
             "status": 400
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         payload = {"request_id": uuid_, "body": {}}
 
@@ -478,12 +490,12 @@ class TestApiServer:
 
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch', json=payload)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once()
+            api_server_test._lit_repository._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == 400
             assert data == expected_response_get_all_dispatches_error
@@ -585,7 +597,7 @@ class TestApiServer:
             "status": 200
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin,
             expected_response_bruin_append_note
@@ -709,14 +721,15 @@ class TestApiServer:
                     f"with ticket id: {ticket_id}"
         # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
         api_server_test._redis_client.set = Mock()
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_has_awaits([
+            api_server_test._lit_repository._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=60),
             ])
 
@@ -792,7 +805,7 @@ class TestApiServer:
             "status": 404
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin,
             expected_response_bruin_append_note
@@ -897,14 +910,15 @@ class TestApiServer:
                      'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
             'status': 200})
         # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_has_awaits([
+            api_server_test._lit_repository._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=60),
             ])
 
@@ -992,7 +1006,7 @@ class TestApiServer:
             "status": 200
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin
         ])
@@ -1105,14 +1119,15 @@ class TestApiServer:
                      'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
                      'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
             'status': 200})
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_has_awaits([
+            api_server_test._lit_repository._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=60),
             ])
 
@@ -1364,13 +1379,14 @@ class TestApiServer:
                      'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
                      'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
             'status': 200})
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once()
+            api_server_test._lit_repository._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_create_error
@@ -1392,7 +1408,7 @@ class TestApiServer:
             "status": 400
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -1466,13 +1482,14 @@ class TestApiServer:
                      'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
                      'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
             'status': 200})
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+            api_server_test._lit_repository._event_bus.rpc_request.assert_awaited_once_with(
                 "lit.dispatch.post", payload_request, timeout=60)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -1481,11 +1498,10 @@ class TestApiServer:
     @pytest.mark.asyncio
     async def lit_cancel_dispatch_test(
             self, api_server_test, dispatch_confirmed, ticket_details_1_no_requested_watermark):
-        uuid_ = 'UUID1'
+
         dispatch_number = dispatch_confirmed['Dispatch_Number']
         ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
         api_server_test._config.ENVIRONMENT_NAME = 'production'
-        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
         body = {
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
@@ -1520,7 +1536,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=ticket_details_1_no_requested_watermark)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._lit_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -1530,15 +1546,14 @@ class TestApiServer:
             side_effect=[response_send_slack_message_mock])
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email " \
                     f"[{dispatch_number}] with ticket id: {ticket_id}"
-
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'lit.dispatch.get', payload, timeout=30)
-            api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._lit_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
+            api_server_test._notifications_repository.send_email.assert_awaited_once()
             api_server_test._append_note_to_ticket.assert_awaited_once()
             api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
             assert response_data == expected_response
@@ -1583,7 +1598,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=ticket_details_1_no_requested_watermark)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._lit_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -1591,16 +1606,13 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
-        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
-                    f"with ticket id: {ticket_id}"
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 500
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._lit_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
             api_server_test._notifications_repository.send_email.assert_not_awaited()
             api_server_test._append_note_to_ticket.assert_not_awaited()
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
@@ -1645,7 +1657,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=ticket_details_1_no_requested_watermark)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._lit_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -1656,13 +1668,12 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 400
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._lit_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
             api_server_test._notifications_repository.send_email.assert_not_awaited()
             api_server_test._append_note_to_ticket.assert_not_awaited()
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
@@ -1720,7 +1731,7 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
@@ -1766,7 +1777,7 @@ class TestApiServer:
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
@@ -1813,7 +1824,7 @@ class TestApiServer:
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
@@ -1866,7 +1877,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=ticket_details_1_no_requested_watermark)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._lit_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -1877,14 +1888,13 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'lit.dispatch.get', payload, timeout=30)
-            api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._lit_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
+            api_server_test._notifications_repository.send_email.assert_awaited_once()
             api_server_test._append_note_to_ticket.assert_not_awaited()
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
 
@@ -1998,7 +2008,7 @@ class TestApiServer:
 
         expected_response_create = {'id': 'DIS37450', 'vendor': 'lit'}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
@@ -2025,7 +2035,7 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository.update_dispatch = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number": dispatch_number,
@@ -2054,12 +2064,13 @@ class TestApiServer:
             'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        api_server_test._lit_repository._notifications_repository.send_slack_message = CoroutineMock()
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once()
+            api_server_test._lit_repository.update_dispatch.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_create
@@ -2262,7 +2273,7 @@ class TestApiServer:
             "status": 400
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository.update_dispatch = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number": dispatch_number,
@@ -2326,13 +2337,13 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                "lit.dispatch.update", payload_request, timeout=30)
+            api_server_test._lit_repository.update_dispatch.assert_awaited_once_with(
+                dispatch_request=payload_lit_mapped)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create_error
@@ -2340,7 +2351,7 @@ class TestApiServer:
     @pytest.mark.asyncio
     async def lit_upload_file_to_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
-
+        filename = "test.txt"
         dispatch_number = 'DIS37450'
         expected_response = {
             "Status": "Success",
@@ -2354,7 +2365,7 @@ class TestApiServer:
             "status": 200
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository.update_file_to_dispatch = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             'dispatch_number': dispatch_number,
@@ -2373,15 +2384,16 @@ class TestApiServer:
             'file_id': '00P0v000004ti2gEAA'
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            headers = {"Content-Type": "application/octet-stream", "filename": "test.txt"}
+            headers = {"Content-Type": "application/octet-stream", "filename": filename}
             response = await client.post(f'/lit/dispatch/{dispatch_number}/upload-file',
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                "lit.dispatch.upload.file", payload_request, timeout=300)
+            api_server_test._lit_repository.update_file_to_dispatch.assert_awaited_once_with(
+                dispatch_number=dispatch_number, body=b'test',
+                file_name=filename)
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_upload_file
@@ -2594,13 +2606,13 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository.update_file_to_dispatch = CoroutineMock(return_value=expected_response_lit)
 
         expected_response_upload_file = {
             'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             headers = {
                 "Content-Type": "application/octet-stream",
@@ -2611,7 +2623,7 @@ class TestApiServer:
             response = await client.post(f'/lit/dispatch/{dispatch_number}/upload-file',
                                          data=data_payload, headers=headers)
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once()
+            api_server_test._lit_repository.update_file_to_dispatch.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_upload_file
@@ -2619,7 +2631,7 @@ class TestApiServer:
     @pytest.mark.asyncio
     async def lit_upload_file_to_dispatch_response_status_not_200_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-
+        filename = "test.txt"
         dispatch_number = 'DIS37450'
         expected_response = {
             "Status": "error",
@@ -2633,7 +2645,7 @@ class TestApiServer:
             "status": 400
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._lit_repository.update_file_to_dispatch = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             'dispatch_number': dispatch_number,
@@ -2656,15 +2668,16 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            headers = {"Content-Type": "application/octet-stream", "filename": "test.txt"}
+            headers = {"Content-Type": "application/octet-stream", "filename": filename}
             response = await client.post(f'/lit/dispatch/{dispatch_number}/upload-file',
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                "lit.dispatch.upload.file", payload_request, timeout=300)
+            api_server_test._lit_repository.update_file_to_dispatch.assert_awaited_once_with(
+                dispatch_number=dispatch_number, body=b'test',
+                file_name=filename)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_upload_error
@@ -2688,7 +2701,7 @@ class TestApiServer:
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/{dispatch_number}')
             data = await response.get_json()
@@ -2711,15 +2724,15 @@ class TestApiServer:
             'code': 500,
             'message': "ERROR"
         }
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+        api_server_test._cts_repository.get_dispatch = CoroutineMock(return_value=expected_response_cts)
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/{dispatch_number}')
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+            api_server_test._cts_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == cts_expected_response
@@ -2743,7 +2756,7 @@ class TestApiServer:
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/{dispatch_number}')
             data = await response.get_json()
@@ -2771,7 +2784,7 @@ class TestApiServer:
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/{dispatch_number}')
             data = await response.get_json()
@@ -2801,7 +2814,7 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/')
             data = await response.get_json()
@@ -2822,7 +2835,7 @@ class TestApiServer:
             'code': 500,
             'message': "ERROR"
         }
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+        api_server_test._cts_repository.get_dispatch = CoroutineMock(return_value=expected_response_cts)
 
         payload = {
             "request_id": uuid_,
@@ -2831,11 +2844,11 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/')
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+            api_server_test._cts_repository.get_dispatch.assert_awaited_once_with(igz_dispatches_only=True)
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == cts_expected_response
@@ -2853,7 +2866,7 @@ class TestApiServer:
             'code': 500,
             'message': {'done': True}
         }
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+        api_server_test._cts_repository.get_dispatch = CoroutineMock(return_value=expected_response_cts)
 
         payload = {
             "request_id": uuid_,
@@ -2862,11 +2875,11 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/')
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+            api_server_test._cts_repository.get_dispatch.assert_awaited_once_with(igz_dispatches_only=True)
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == cts_expected_response
@@ -2893,7 +2906,7 @@ class TestApiServer:
             }
         }
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/')
             data = await response.get_json()
@@ -3122,7 +3135,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=cts_ticket_details)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._cts_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -3136,14 +3149,13 @@ class TestApiServer:
         redis_data = {"igz_dispatch_number": igz_dispatch_number}
         api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'cts.dispatch.get', payload, timeout=30)
-            api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._cts_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
+            api_server_test._notifications_repository.send_email.assert_awaited_once()
             api_server_test._append_note_to_ticket.assert_awaited_once()
             api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
             assert response_data == expected_response
@@ -3190,7 +3202,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=cts_ticket_details)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._cts_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -3201,13 +3213,12 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 500
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'cts.dispatch.get', payload, timeout=30)
+            api_server_test._cts_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
             api_server_test._notifications_repository.send_email.assert_not_awaited()
             api_server_test._append_note_to_ticket.assert_not_awaited()
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
@@ -3267,7 +3278,7 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
@@ -3315,7 +3326,7 @@ class TestApiServer:
         redis_data = {"igz_dispatch_number": igz_dispatch_number}
         api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
@@ -3364,7 +3375,7 @@ class TestApiServer:
         redis_data = {"igz_dispatch_number": igz_dispatch_number}
         api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
@@ -3383,7 +3394,6 @@ class TestApiServer:
         dispatch_number = dispatch['Name']
         ticket_id = dispatch['Ext_Ref_Num__c']
         api_server_test._config.ENVIRONMENT_NAME = 'production'
-        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
         body = {
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
@@ -3417,7 +3427,7 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             return_value=cts_ticket_details_1_no_requested_watermark)
-        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._cts_repository.get_dispatch = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
         response_send_slack_message_mock = {
@@ -3432,14 +3442,13 @@ class TestApiServer:
         redis_data = {"igz_dispatch_number": igz_dispatch_number}
         api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(cts_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                'cts.dispatch.get', payload, timeout=30)
-            api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._cts_repository.get_dispatch.assert_awaited_once_with(dispatch_number=dispatch_number)
+            api_server_test._notifications_repository.send_email.assert_awaited_once()
             api_server_test._append_note_to_ticket.assert_not_awaited()
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
 
@@ -3780,7 +3789,7 @@ class TestApiServer:
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
     @pytest.mark.asyncio
-    async def lit_get_dispatch_bad_date_time_of_dispatch_test(self, api_server_test, cts_dispatch):
+    async def cts_get_dispatch_bad_date_time_of_dispatch_test(self, api_server_test, cts_dispatch):
         uuid_ = 'UUID1'
         dispatch_number = 'S-147735'
         cts_dispatch['records'][0]['Local_Site_Time__c'] = ''
@@ -3790,15 +3799,13 @@ class TestApiServer:
             "status": 200
         }
 
-        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+        api_server_test._lit_repository._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 
-        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
-
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+        with patch.object(lit_repository, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/cts/dispatch/{dispatch_number}')
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+            api_server_test._lit_repository.get_dispatch(dispatch_number)
 
             assert response.status_code == HTTPStatus.OK
 

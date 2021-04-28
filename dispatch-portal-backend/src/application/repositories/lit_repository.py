@@ -1,8 +1,11 @@
+import base64
 import datetime
 from pytz import timezone
 import re
+from shortuuid import uuid
 
 from application.repositories.utils_repository import UtilsRepository
+from application.repositories import nats_error_response
 
 
 class LitRepository:
@@ -95,3 +98,164 @@ class LitRepository:
             'datetime_formatted_str': return_datetime_localized.strftime(
                 self.DATETIME_FORMAT.format(time_zone_of_dispatch=time_zone_of_dispatch))
         }
+
+    async def get_dispatch(self, dispatch_number=None, igz_dispatches_only=False):
+        err_msg = None
+
+        payload = {
+            "request_id": uuid(),
+            "body": {},
+        }
+
+        if dispatch_number:
+            payload['body']['dispatch_number'] = dispatch_number
+
+        if igz_dispatches_only:
+            payload['body']['igz_dispatches_only'] = igz_dispatches_only
+
+        try:
+            if dispatch_number:
+                self._logger.info(f'Getting dispatch {dispatch_number} from LIT...')
+            else:
+                self._logger.info('Getting all dispatches from LIT...')
+
+            response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
+        except Exception as e:
+            if dispatch_number:
+                err_msg = f'An error occurred when trying to get dispatch {dispatch_number} from LIT -> {e}'
+            else:
+                err_msg = f'An error occurred when trying to get all dispatches from LIT -> {e}'
+
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                if dispatch_number:
+                    err_msg = (
+                        f'Error while trying to get dispatch {dispatch_number} from LIT in environment '
+                        f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                    )
+                else:
+                    err_msg = (
+                        f'Error while trying to get all dispatches from LIT in environment '
+                        f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                    )
+            else:
+                if dispatch_number:
+                    self._logger.info(f"Got dispatch {dispatch_number} from LIT successfully!")
+                else:
+                    self._logger.info(f"Got all dispatches from LIT successfully!")
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def update_dispatch(self, dispatch_request=None):
+        err_msg = None
+
+        payload = {
+            "request_id": uuid(),
+            "body": {
+                'RequestDispatch': dispatch_request,
+            },
+        }
+
+        try:
+            self._logger.info(f'Updating LIT dispatch using payload {dispatch_request}...')
+            response = await self._event_bus.rpc_request("lit.dispatch.update", payload, timeout=30)
+        except Exception as e:
+            err_msg = f'An error occurred when trying to update LIT dispatch using payload {dispatch_request} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while trying to update LIT dispatch using payload {dispatch_request} in environment '
+                    f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                )
+            else:
+                self._logger.info(f"Updated LIT dispatch using payload {dispatch_request} successfully!")
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def create_dispatch(self, dispatch_request=None):
+        err_msg = None
+
+        payload = {
+            "request_id": uuid(),
+            "body": {
+                'RequestDispatch': dispatch_request,
+            },
+        }
+
+        try:
+            self._logger.info(f'Creating LIT dispatch using payload {dispatch_request}...')
+            response = await self._event_bus.rpc_request("lit.dispatch.post", payload, timeout=60)
+        except Exception as e:
+            err_msg = f'An error occurred when trying to create LIT dispatch using payload {dispatch_request} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while trying to create LIT dispatch using payload {dispatch_request} in environment '
+                    f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                )
+            else:
+                self._logger.info(f"Created LIT dispatch using payload {dispatch_request} successfully!")
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def update_file_to_dispatch(self, dispatch_number=None, body=None, file_name=None):
+        err_msg = None
+
+        payload = {
+            "request_id": uuid(),
+            "body": {
+                'dispatch_number': dispatch_number,
+                'payload': base64.b64encode(body).decode('utf-8'),
+                'file_name': file_name,
+            },
+        }
+
+        try:
+            self._logger.info(f'Uploading file {file_name} to LIT dispatch {dispatch_number}...')
+            response = await self._event_bus.rpc_request("lit.dispatch.upload.file", payload, timeout=30)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when trying to upload file {file_name} to LIT dispatch {dispatch_number}" -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while trying to upload file {file_name} to LIT dispatch {dispatch_number} in environment '
+                    f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                )
+            else:
+                self._logger.info(f"Uploaded file {file_name} to LIT dispatch {dispatch_number} successfully!")
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response

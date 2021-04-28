@@ -120,8 +120,7 @@ class DispatchServer:
     async def lit_get_dispatch(self, dispatch_number):
         self._logger.info(f"[LIT] Dispatch [{dispatch_number}] from lit-bridge")
         start_time = time.time()
-        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
-        response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
+        response = await self._lit_repository.get_dispatch(dispatch_number=dispatch_number)
         self._logger.info(f"[LIT] Get dispatch [{dispatch_number}]: {response}")
         response_dispatch = dict()
         if response['status'] == 500:
@@ -158,8 +157,7 @@ class DispatchServer:
         # 6 - Append note to bruin
         self._logger.info(f"[LIT] Cancel Dispatch by email request: [{dispatch_number}]")
         start_time = time.time()
-        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
-        response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
+        response = await self._lit_repository.get_dispatch(dispatch_number=dispatch_number)
         self._logger.info(f"[LIT] Response get dispatch [{dispatch_number}]: {response}")
         response_dispatch = dict()
         if response['status'] == 500:
@@ -266,13 +264,7 @@ class DispatchServer:
     async def lit_get_all_dispatches(self):
         self._logger.info(f"[LIT] Getting all dispatches from lit-bridge")
         start_time = time.time()
-        payload = {
-            "request_id": uuid(),
-            "body": {
-                'igz_dispatches_only': True
-            }
-        }
-        response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
+        response = await self._lit_repository.get_dispatch(igz_dispatches_only=True)
         self._logger.info(f"[LIT] Got all dispatches")
         response_dispatch = dict()
         if response['status'] == 500:
@@ -334,11 +326,7 @@ class DispatchServer:
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
 
         dispatch_request = lit_mapper.map_create_dispatch(body)
-        request_body = dict()
-        request_body['RequestDispatch'] = dispatch_request
-
-        payload = {"request_id": uuid(), "body": request_body}
-        response = await self._event_bus.rpc_request("lit.dispatch.post", payload, timeout=60)
+        response = await  self._lit_repository.create_dispatch(dispatch_request=dispatch_request)
         self._logger.info(f"[LIT] Create dispatch response: {response}")
 
         if response['status'] == 500:
@@ -369,7 +357,6 @@ class DispatchServer:
                               f"Adding to redis lit dispatch")
             self._redis_client.set(dispatch_num, json.dumps(redis_data), ex=self._expires_ttl)
         else:
-            self._logger.info(f"[LIT] Dispatch not created - {payload} - took {time.time() - start_time}")
             error_response = {'code': response['status'], 'message': response['body']}
             return jsonify(error_response), response['status'], None
         return jsonify(response_dispatch), HTTPStatus.OK, None
@@ -392,14 +379,10 @@ class DispatchServer:
         dispatch_request = lit_mapper.map_update_dispatch(body)
         dispatch_number = body['dispatch_number']
 
-        request_body = dict()
-        request_body['RequestDispatch'] = dispatch_request
-
         self._logger.info(f"[LIT] Updating dispatch [{dispatch_number}] from lit-bridge")
         self._logger.info(f"payload: {body}")
 
-        payload = {"request_id": uuid(), "body": request_body}
-        response = await self._event_bus.rpc_request("lit.dispatch.update", payload, timeout=30)
+        response = await self._lit_repository.update_dispatch(dispatch_request=dispatch_request)
         self._logger.info(response)
         if response['status'] == 500:
             error_response = {
@@ -418,7 +401,6 @@ class DispatchServer:
             self._logger.info(
                 f"Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
         else:
-            self._logger.info(f"[LIT] Dispatch not updated - {payload} - took {time.time() - start_time}")
             error_response = {'code': response['status'], 'message': response['body']}
             return jsonify(error_response), response['status'], None
         return jsonify(response_dispatch), HTTPStatus.OK, None
@@ -450,14 +432,8 @@ class DispatchServer:
                 self._logger.error(error_message)
                 error_response = {'code': HTTPStatus.BAD_REQUEST, 'message': error_message}
                 return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
-            body = base64.b64encode(body).decode('utf-8')
-            payload_body = {
-                'dispatch_number': dispatch_number,
-                'payload': body,
-                'file_name': file_name
-            }
-            payload = {"request_id": uuid(), "body": payload_body}
-            response = await self._event_bus.rpc_request("lit.dispatch.upload.file", payload, timeout=300)
+            response = await self._lit_repository.update_file_to_dispatch(dispatch_number=dispatch_number, body=body,
+                                                                          file_name=file_name)
             self._logger.info(response)
             if response['status'] == 500:
                 error_response = {
@@ -487,8 +463,7 @@ class DispatchServer:
     async def cts_get_dispatch(self, dispatch_number):
         self._logger.info(f"[CTS] Dispatch [{dispatch_number}] from cts-bridge")
         start_time = time.time()
-        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
-        response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+        response = await self._cts_repository.get_dispatch(dispatch_number=dispatch_number)
         self._logger.info(f"[CTS] Response get dispatch: {response}")
         response_dispatch = dict()
         if response['status'] == 500:
@@ -525,13 +500,7 @@ class DispatchServer:
     async def cts_get_all_dispatches(self):
         self._logger.info(f"[CTS] Getting all dispatches from cts-bridge")
         start_time = time.time()
-        payload = {
-            "request_id": uuid(),
-            "body": {
-                'igz_dispatches_only': True
-            }
-        }
-        response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+        response = await self._cts_repository.get_dispatch(igz_dispatches_only=True)
         self._logger.info(f"[CTS] Got all dispatches")
         response_dispatch = dict()
         if response['status'] == 500:
@@ -654,8 +623,7 @@ class DispatchServer:
     async def cts_cancel_dispatch(self, dispatch_number):
         self._logger.info(f"[CTS] Cancel Dispatch: {dispatch_number}")
         start_time = time.time()
-        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
-        response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+        response = await self._cts_repository.get_dispatch(dispatch_number=dispatch_number)
         self._logger.info(f"[CTS] Response get dispatch: {response}")
         if response['status'] == 500:
             error_response = {

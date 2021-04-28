@@ -1,8 +1,10 @@
 import re
 from datetime import datetime
+from shortuuid import uuid
 
 import pytz
 from pytz import timezone
+from application.repositories import nats_error_response
 
 
 class CtsRepository:
@@ -80,5 +82,60 @@ class CtsRepository:
         }
 
         self._logger.info(f"- Converted: {response}")
+
+        return response
+
+    async def get_dispatch(self, dispatch_number=None, igz_dispatches_only=False):
+        err_msg = None
+
+        payload = {
+            "request_id": uuid(),
+            "body": {},
+        }
+
+        if dispatch_number:
+            payload['body']['dispatch_number'] = dispatch_number
+
+        if igz_dispatches_only:
+            payload['body']['igz_dispatches_only'] = igz_dispatches_only
+
+        try:
+            if dispatch_number:
+                self._logger.info(f'Getting dispatch {dispatch_number} from CTS...')
+            else:
+                self._logger.info('Getting all dispatches from CTS...')
+
+            response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+        except Exception as e:
+            if dispatch_number:
+                err_msg = f'An error occurred when trying to get dispatch {dispatch_number} from CTS -> {e}'
+            else:
+                err_msg = f'An error occurred when trying to get all dispatches from CTS -> {e}'
+
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                if dispatch_number:
+                    err_msg = (
+                        f'Error while trying to get dispatch {dispatch_number} from CTS in environment '
+                        f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                    )
+                else:
+                    err_msg = (
+                        f'Error while trying to get all dispatches from CTS in environment '
+                        f'{self._config.ENVIRONMENT_NAME.upper()}: Error {response_status} - {response_body}'
+                    )
+            else:
+                if dispatch_number:
+                    self._logger.info(f"Got dispatch {dispatch_number} from CTS successfully!")
+                else:
+                    self._logger.info(f"Got all dispatches from CTS successfully!")
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
         return response
