@@ -372,6 +372,7 @@ class TestBruinRepository:
         notifications_repository = Mock()
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         ticket_list = {
             'body': [{'ticketID': 3521038, "createDate": "11/9/2020 2:15:36 AM"},
@@ -450,6 +451,7 @@ class TestBruinRepository:
         expected_response = None
         service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
             side_effect=[response_ticket_details_1])
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await service_affecting_monitor_reports._bruin_repository._get_ticket_details(ticket_1)
 
@@ -465,8 +467,9 @@ class TestBruinRepository:
                     f"Max retries reached getting ticket details {ticket_1['ticketID']}"
         expected_response = None
         service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
-        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_ticket_details_1])
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await service_affecting_monitor_reports._bruin_repository._get_ticket_details(ticket_1)
 
@@ -484,17 +487,6 @@ class TestBruinRepository:
         start_date = 'start_date'
         end_date = 'end_date'
         ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
-        ticket_request_msg = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': report['client_id'],
-                'category': 'SD-WAN',
-                'ticket_topic': 'VAS',
-                'start_date': start_date,
-                'end_date': end_date,
-                'ticket_status': ticket_statuses
-            }
-        }
         responses_get_ticket_details = [
             {
                 "ticket": ticket_1,
@@ -513,7 +505,7 @@ class TestBruinRepository:
                 "ticket_details": ticket_details_4
             }
         ]
-        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_all_affecting_tickets = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets_without_details])
 
         with uuid_mock:
@@ -523,8 +515,9 @@ class TestBruinRepository:
 
         assert response == response_bruin_with_all_tickets
 
-        service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
-            call("bruin.ticket.request", ticket_request_msg, timeout=90)
+        service_affecting_monitor_reports._bruin_repository.get_all_affecting_tickets.assert_has_awaits([
+            call(client_id=report['client_id'], end_date=end_date, start_date=start_date,
+                 ticket_statuses=ticket_statuses)
         ])
 
     @pytest.mark.asyncio
@@ -554,7 +547,7 @@ class TestBruinRepository:
                 response = await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
                     report['client_id'], start_date, end_date)
 
-        assert response == {}
+        assert response is None
 
         service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
             call("bruin.ticket.request", ticket_request_msg, timeout=90)
@@ -577,16 +570,7 @@ class TestBruinRepository:
                 'ticket_status': ticket_statuses
             }
         }
-        slack_msg = f"[service-affecting-monitor-reports] Max retries reached getting all tickets for the report."
-        slack_call = {
-            'request_id': uuid_,
-            'body': slack_msg
-        }
-        response_slack = {
-            'request_id': uuid_,
-            'body': None,
-            'status': 200
-        }
+        slack_msg = f"Max retries reached getting all tickets for the service affecting monitor process."
 
         responses_get_ticket_details = []
         service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request = CoroutineMock(
@@ -626,7 +610,6 @@ class TestBruinRepository:
                 'ticket_status': ticket_statuses
             }
         }
-        expected_response = None
         responses_get_ticket_details = []
         bruin_repository._event_bus.rpc_request = CoroutineMock(
             side_effect=[response_bruin_with_error])
@@ -636,7 +619,7 @@ class TestBruinRepository:
                 response = await bruin_repository.get_affecting_ticket_for_report(report['client_id'], start_date,
                                                                                   end_date)
 
-        assert response == expected_response
+        assert response is None
 
         bruin_repository._event_bus.rpc_request.assert_has_awaits([
             call("bruin.ticket.request", ticket_request_msg, timeout=90)

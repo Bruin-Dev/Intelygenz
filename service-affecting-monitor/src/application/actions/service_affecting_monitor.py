@@ -17,7 +17,7 @@ from application.repositories.bruin_repository import BruinRepository
 class ServiceAffectingMonitor:
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, metrics_repository,
-                 bruin_repository, velocloud_repository, customer_cache_repository):
+                 bruin_repository, velocloud_repository, customer_cache_repository, notifications_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -27,6 +27,7 @@ class ServiceAffectingMonitor:
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
         self._customer_cache_repository = customer_cache_repository
+        self._notifications_repository = notifications_repository
 
         self.__reset_state()
 
@@ -397,67 +398,23 @@ class ServiceAffectingMonitor:
             if len(ticket) == 0:
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
                 ticket_note = self._ticket_object_to_string(ticket_dict)
-                ticket_details = {
-                    "request_id": uuid(),
-                    "body": {
-                        "clientId": client_id,
-                        "category": "VAS",
-                        "services": [
-                            {
-                                "serviceNumber": edge_serial_number
-                            }
-                        ],
-                        "contacts": [
-                            {
-                                "email": contact_info['site']['email'],
-                                "phone": contact_info['site']['phone'],
-                                "name": contact_info['site']['name'],
-                                "type": "site"
-                            },
-                            {
-                                "email": contact_info['ticket']['email'],
-                                "phone": contact_info['ticket']['phone'],
-                                "name": contact_info['ticket']['name'],
-                                "type": "ticket"
-                            }
-                        ]
-                    }
-                }
-                ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
-                                                              ticket_details, timeout=90)
-                if ticket_id["status"] not in range(200, 300):
-                    err_msg = (f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
-                               f'Error {ticket_id["status"]} - {ticket_id["body"]}')
-
-                    self._logger.error(err_msg)
-                    slack_message = {
-                        'request_id': uuid(),
-                        'message': err_msg
-                    }
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                response = await self._bruin_repository.create_affecting_ticket(client_id, edge_serial_number,
+                                                                                contact_info)
+                if response["status"] not in range(200, 300):
                     return
-
+                ticket_id = response["body"]["ticketIds"][0]
                 self._metrics_repository.increment_tickets_created()
 
-                ticket_append_note_msg = {
-                    'request_id': uuid(),
-                    'body': {
-                        'ticket_id': ticket_id["body"]["ticketIds"][0],
-                        'note': ticket_note
-                    }
-                }
-                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                  ticket_append_note_msg,
-                                                  timeout=45)
+                await self._bruin_repository.append_note_to_ticket(ticket_id=ticket_id,
+                                                                   note=ticket_note)
 
-                slack_message = {'request_id': uuid(),
-                                 'message': f'Ticket created with ticket id: {ticket_id["body"]["ticketIds"][0]}\n'
-                                            f'https://app.bruin.com/helpdesk?clientId={client_id}&'
-                                            f'ticketId={ticket_id["body"]["ticketIds"][0]} , in '
-                                            f'{self._config.MONITOR_CONFIG["environment"]}'}
-                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                slack_message = f'Ticket created with ticket id: {ticket_id}\n' \
+                                f'https://app.bruin.com/helpdesk?clientId={client_id}&' \
+                                f'ticketId={ticket_id} , in ' \
+                                f'{self._config.MONITOR_CONFIG["environment"]}'
+                await self._notifications_repository.send_slack_message(slack_message)
 
-                self._logger.info(f'Ticket created with ticket id: {ticket_id["body"]["ticketIds"][0]}')
+                self._logger.info(f'Ticket created with ticket id: {ticket_id}')
                 return
             else:
                 ticket_details = BruinRepository.find_detail_by_serial(ticket, edge_serial_number)
@@ -474,14 +431,14 @@ class ServiceAffectingMonitor:
                     if open_ticket_response['status'] not in range(200, 300):
                         err_msg = f'[service-affecting-monitor] Error: Could not reopen ticket: {ticket}'
                         self._logger.error(err_msg)
-                        await self._bruin_repository._notifications_repository.send_slack_message(err_msg)
+                        await self._notifications_repository.send_slack_message(err_msg)
                         return
 
                     ticket_note = self._ticket_object_to_string_without_watermark(ticket_dict)
                     slack_message = (
                         f'Affecting ticket {ticket_id} reopened. Details at https://app.bruin.com/t/{ticket_id}'
                     )
-                    await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
+                    await self._notifications_repository.send_slack_message(slack_message)
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note)
                     self._metrics_repository.increment_tickets_reopened()
                 else:
@@ -492,10 +449,10 @@ class ServiceAffectingMonitor:
                     note = self._ticket_object_to_string(ticket_dict)
                     await self._bruin_repository.append_note_to_ticket(ticket_id, note)
 
-                    slack_message = f'Posting {trouble} note to ticket id: {ticket_id}\n'\
-                                    f'https://app.bruin.com/t/{ticket_id} , in '\
+                    slack_message = f'Posting {trouble} note to ticket id: {ticket_id}\n' \
+                                    f'https://app.bruin.com/t/{ticket_id} , in ' \
                                     f'{self._config.MONITOR_CONFIG["environment"]}'
-                    await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
+                    await self._notifications_repository.send_slack_message(slack_message)
 
     @staticmethod
     def _is_rep_services_client_id(client_id: int):

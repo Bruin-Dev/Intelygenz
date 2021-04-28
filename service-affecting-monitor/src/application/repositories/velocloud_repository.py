@@ -46,7 +46,8 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            await self._notify_error(err_msg)
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
         return response
 
@@ -70,11 +71,6 @@ class VelocloudRepository:
             'status': 200,
         }
         return return_response
-
-    async def _notify_error(self, err_msg):
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
     async def get_links_metrics_for_latency_checks(self) -> dict:
         now = datetime.now(utc)

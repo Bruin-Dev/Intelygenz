@@ -28,9 +28,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
 
         assert service_affecting_monitor._event_bus is event_bus
         assert service_affecting_monitor._logger is logger
@@ -40,6 +41,7 @@ class TestServiceAffectingMonitor:
         assert service_affecting_monitor._bruin_repository is bruin_repository
         assert service_affecting_monitor._velocloud_repository is velocloud_repository
         assert service_affecting_monitor._customer_cache_repository is customer_cache_repository
+        assert service_affecting_monitor._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
     async def start_service_affecting_monitor_job_with_exec_on_start_test(self):
@@ -52,9 +54,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -81,9 +84,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         await service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
@@ -104,6 +108,7 @@ class TestServiceAffectingMonitor:
         template_renderer = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
+        notifications_repository = Mock()
 
         customer_cache_list = ['edges']
         customer_cache_return = {
@@ -115,7 +120,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
@@ -139,6 +144,7 @@ class TestServiceAffectingMonitor:
         template_renderer = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
+        notifications_repository = Mock()
 
         customer_cache_list = ['edges']
         customer_cache_return = {
@@ -150,7 +156,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
@@ -174,6 +180,7 @@ class TestServiceAffectingMonitor:
         template_renderer = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
+        notifications_repository = Mock()
 
         customer_cache_list = []
         customer_cache_return = {
@@ -185,7 +192,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
@@ -341,9 +348,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_latency_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -383,9 +391,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_latency_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock()
         service_affecting_monitor._compose_ticket_dict = Mock()
@@ -470,9 +479,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_latency_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -571,9 +581,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_latency_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -743,9 +754,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_packet_loss_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -785,9 +797,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_packet_loss_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock()
         service_affecting_monitor._compose_ticket_dict = Mock()
@@ -872,9 +885,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_packet_loss_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -973,9 +987,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_packet_loss_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -1109,9 +1124,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_jitter_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -1150,9 +1166,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_jitter_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock()
         service_affecting_monitor._compose_ticket_dict = Mock()
@@ -1272,9 +1289,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_jitter_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -1473,9 +1491,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -1516,9 +1535,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock()
         service_affecting_monitor._compose_bandwidth_ticket_dict = Mock()
@@ -1703,9 +1723,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -1803,9 +1824,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -1902,9 +1924,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -2009,9 +2032,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository.get_links_metrics_for_bandwidth_checks = CoroutineMock(return_value=link_metrics_return)
 
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._structure_links_metrics = Mock(return_value=structure_link_return)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
             return_value=metrics_with_cache_and_contact_info_return)
@@ -2091,9 +2115,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {
             "ticketID": 3521039,
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "R"}],
@@ -2118,7 +2143,7 @@ class TestServiceAffectingMonitor:
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
         service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
         service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
         service_affecting_monitor._metrics_repository.increment_tickets_reopened = Mock()
 
@@ -2128,7 +2153,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string_without_watermark.assert_called_once()
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once_with(
             ticket_mock['ticketID'], ticket_mock['ticketDetails'][0]['detailID'])
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message. \
+        service_affecting_monitor._notifications_repository.send_slack_message. \
             assert_awaited_once_with(slack_message_mock)
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_called_once()
 
@@ -2187,9 +2212,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {
             "ticketID": 3521039,
             "ticketDetails": [{"detailID": 5217537, "detailValue": '', "detailStatus": "R"}],
@@ -2278,9 +2304,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {
             "ticketID": 3521039,
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "O"}],
@@ -2306,7 +2333,7 @@ class TestServiceAffectingMonitor:
         bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
         service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
         service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
         service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
         service_affecting_monitor._metrics_repository.increment_tickets_reopened = Mock()
 
@@ -2314,7 +2341,7 @@ class TestServiceAffectingMonitor:
             await service_affecting_monitor._notify_trouble(link_info, 'JITTER', ticket_dict)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once()
-        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        notifications_repository.send_slack_message.assert_awaited_once()
         service_affecting_monitor._ticket_object_to_string_without_watermark.assert_not_called()
         service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_not_called()
@@ -2374,9 +2401,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {
             "ticketID": 3521039,
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "O"}],
@@ -2467,9 +2495,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {
             "ticketID": 3521039,
             "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "R"}],
@@ -2493,8 +2522,8 @@ class TestServiceAffectingMonitor:
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string = Mock()
         service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
         service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._notify_trouble(link_info, 'LATENCY', ticket_dict)
@@ -2502,7 +2531,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string.assert_not_called()
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once_with(
             ticket_mock['ticketID'], ticket_mock['ticketDetails'][0]['detailID'])
-        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message. \
+        service_affecting_monitor._notifications_repository.send_slack_message. \
             assert_awaited_once_with(err_message_mock)
 
     @pytest.mark.asyncio
@@ -2559,9 +2588,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = None
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string = Mock()
@@ -2642,9 +2672,10 @@ class TestServiceAffectingMonitor:
         }
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = None
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
@@ -2670,9 +2701,9 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': 'Failed', 'status': 400},
-                                                           'Note Posted',
-                                                           'Slack Sent'])
+        bruin_repository.create_affecting_ticket = CoroutineMock(side_effect=[{'body': 'Failed', 'status': 400},
+                                                                              'Note Posted',
+                                                                              'Slack Sent'])
 
         link_info = {
             'edge_status': {
@@ -2721,20 +2752,14 @@ class TestServiceAffectingMonitor:
         client_id = 85940
         trouble = 'LATENCY'
 
-        err_msg = ("Outage ticket creation failed for edge host = mettel.velocloud.net, enterprise_id = 137, "
-                   "edge_id = 1651. Reason: "
-                   "Error 400 - Failed")
         uuid_ = uuid()
 
-        slack_message = {
-            'request_id': uuid_,
-            'message': err_msg
-        }
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {}
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
@@ -2747,19 +2772,12 @@ class TestServiceAffectingMonitor:
             client_id, "VC05200028729")
 
         service_affecting_monitor._ticket_object_to_string.assert_called_once()
-        event_bus.rpc_request.assert_awaited_with(
-            "notification.slack.request",
-            slack_message,
-            timeout=10
-        )
         metrics_repository.increment_tickets_created.assert_not_called()
 
     @pytest.mark.asyncio
     async def notify_trouble_pro_ticket_not_exists_success_rpc_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]}, 'status': 200},
-                                                           'Note Posted',
-                                                           'Slack Sent'])
+
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2816,13 +2834,24 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
+        bruin_repository.create_affecting_ticket = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]},
+                                                                               'status': 200},
+                                                                              'Note Posted',
+                                                                              'Slack Sent'])
+        bruin_repository.append_note_to_ticket = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]},
+                                                                             'status': 200},
+                                                                            'Note Posted',
+                                                                            'Slack Sent'])
+
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_mock = {}
         bruin_repository.get_affecting_ticket = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
 
@@ -2832,8 +2861,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string.assert_called_with(ticket_dict)
 
         metrics_repository.increment_tickets_created.assert_called_once()
-        assert event_bus.rpc_request.called
-        assert 'Some string object' == event_bus.rpc_request.mock_calls[1][1][1]['body']['note']
+        assert bruin_repository.create_affecting_ticket.called
+        assert 'Some string object' == bruin_repository.append_note_to_ticket.mock_calls[0][2]['note']
 
     @pytest.mark.asyncio
     async def notify_trouble_with_unknown_config_test(self):
@@ -2891,9 +2920,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._template_renderer.compose_email_object = Mock(return_value='Some email object')
 
@@ -2912,9 +2942,10 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         link_1_best_latency_ms_rx = 14
         link_1_best_latency_ms_tx = 121
 
@@ -3085,9 +3116,10 @@ class TestServiceAffectingMonitor:
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)
         assert ticket_note == "#*MetTel's IPA*# \nEdgeName: Test \nEdge Status: ok \n"
 
@@ -3103,9 +3135,10 @@ class TestServiceAffectingMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         watermark = "Test "
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict, watermark)
         assert ticket_note == f'{watermark} \nEdgeName: Test \nEdge Status: ok \n'
 
@@ -3251,9 +3284,10 @@ class TestServiceAffectingMonitor:
                 'state': link_metrics['state'],
             }
         }
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         structure_links = service_affecting_monitor._structure_links_metrics([link_metrics])
         assert structure_links == [expected_link_structure]
 
@@ -3331,10 +3365,11 @@ class TestServiceAffectingMonitor:
                 'host': 'some host'
             },
         }
+        notifications_repository = Mock()
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         structure_links = service_affecting_monitor._structure_links_metrics([link_metrics])
         assert structure_links == []
 
@@ -3348,6 +3383,7 @@ class TestServiceAffectingMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
+        notifications_repository = Mock()
         link_metrics = {
             'linkId': 12,
             'bytesTx': 289334426,
@@ -3505,7 +3541,7 @@ class TestServiceAffectingMonitor:
         customer_cache_repository = [{'edge': device}, {'edge': device_2}]
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._customer_cache = customer_cache_repository
         map_cached_edges_with_links_metrics = service_affecting_monitor. \
             _map_cached_edges_with_links_metrics_and_contact_info([link_structure])
@@ -3527,9 +3563,10 @@ class TestServiceAffectingMonitor:
         customer_cache_repository = Mock()
         ticket_dict = {'ticket': 'some ticket details'}
 
+        notifications_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository, bruin_repository, velocloud_repository,
-                                                            customer_cache_repository)
+                                                            customer_cache_repository, notifications_repository)
         service_affecting_monitor._ticket_object_to_string = Mock()
 
         service_affecting_monitor._ticket_object_to_string_without_watermark(ticket_dict)

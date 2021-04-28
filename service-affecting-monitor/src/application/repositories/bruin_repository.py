@@ -60,6 +60,67 @@ class BruinRepository:
 
         return response
 
+    async def create_affecting_ticket(self, client_id: int, service_number: str, contact_info: dict):
+        err_msg = None
+        ticket_details = {
+            "request_id": uuid(),
+            "body": {
+                "clientId": client_id,
+                "category": "VAS",
+                "services": [
+                    {
+                        "serviceNumber": service_number
+                    }
+                ],
+                "contacts": [
+                    {
+                        "email": contact_info['site']['email'],
+                        "phone": contact_info['site']['phone'],
+                        "name": contact_info['site']['name'],
+                        "type": "site"
+                    },
+                    {
+                        "email": contact_info['ticket']['email'],
+                        "phone": contact_info['ticket']['phone'],
+                        "name": contact_info['ticket']['name'],
+                        "type": "ticket"
+                    }
+                ]
+            }
+        }
+
+        try:
+            self._logger.info(
+                f'Creating affecting ticket for serial {service_number} belonging to client {client_id}...')
+
+            response = await self._event_bus.rpc_request("bruin.ticket.creation.request",
+                                                         ticket_details, timeout=90)
+
+        except Exception as e:
+            err_msg = (
+                f'An error occurred while creating affecting ticket for client id {client_id} and serial '
+                f'{service_number} -> {e}')
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f'Affecting ticket for client {client_id} and serial {service_number} created successfully!')
+            else:
+                err_msg = (
+                    f'Error while opening affecting ticket for client {client_id} and serial {service_number} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def open_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None
 
@@ -129,10 +190,7 @@ class BruinRepository:
         if len(all_tickets['body']) > 0:
             all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]), reverse=True)
             ticket_id = all_tickets_sorted[0]['ticketID']
-            ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
-            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
-                                                               ticket_details_request,
-                                                               timeout=15)
+            ticket_details = await self.get_ticket_details(ticket_id)
 
             if ticket_details['status'] not in range(200, 300):
                 self._logger.error(f"Error: an error occurred retrieving ticket details for ticket: {ticket_id}")
@@ -147,6 +205,40 @@ class BruinRepository:
         self._logger.info(f'No service affecting tickets found for serial: {serial}')
         return {}
 
+    async def get_ticket_details(self, ticket_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting details of ticket {ticket_id} from Bruin...')
+            response = await self._event_bus.rpc_request("bruin.ticket.details.request", request, timeout=15)
+        except Exception as e:
+            err_msg = f'An error occurred when requesting ticket details from Bruin API for ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving details of ticket {ticket_id} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+            else:
+                self._logger.info(f'Got details of ticket {ticket_id} from Bruin!')
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+        return response
+
     async def _get_ticket_details(self, ticket):
         @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
                stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
@@ -154,10 +246,7 @@ class BruinRepository:
         async def _get_ticket_details():
             async with self._semaphore:
                 ticket_id = ticket['ticketID']
-                ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
-                ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
-                                                                   ticket_details_request,
-                                                                   timeout=15)
+                ticket_details = await self.get_ticket_details(ticket_id)
                 if ticket_details['status'] in [401, 403]:
                     self._logger.exception(f"Error: Retry after few seconds. Status: {ticket_details['status']}")
                     raise Exception(f"Error: Retry after few seconds. Status: {ticket_details['status']}")
@@ -182,35 +271,62 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(msg)
             return None
 
-    async def get_affecting_ticket_for_report(self, client_id, start_date, end_date):
+    async def get_all_affecting_tickets(self, client_id=None, serial=None, start_date=None, end_date=None,
+                                        ticket_statuses=None):
         @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
                stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
                reraise=True)
-        async def get_affecting_ticket_for_report():
-            ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+        async def _get_all_affecting_tickets():
             ticket_request_msg = {
                 'request_id': uuid(),
                 'body': {
                     'client_id': client_id,
                     'category': 'SD-WAN',
                     'ticket_topic': 'VAS',
-                    'start_date': start_date,
-                    'end_date': end_date,
                     'ticket_status': ticket_statuses
                 }
             }
+            if start_date:
+                ticket_request_msg['body']['start_date'] = start_date
+            if end_date:
+                ticket_request_msg['body']['end_date'] = end_date
+            if serial:
+                ticket_request_msg['body']['service_number'] = serial
 
-            all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=90)
+            response_all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg,
+                                                                     timeout=90)
 
-            if all_tickets['status'] in [401, 403]:
-                self._logger.exception(f"Error: Retry after few seconds all tickets. Status: {all_tickets['status']}")
-                raise Exception(f"Error: Retry after few seconds all tickets. Status: {all_tickets['status']}")
+            if response_all_tickets['status'] in [401, 403]:
+                self._logger.exception(
+                    f"Error: Retry after few seconds all tickets. Status: {response_all_tickets['status']}")
+                raise Exception(f"Error: Retry after few seconds all tickets. Status: {response_all_tickets['status']}")
 
-            if all_tickets['status'] not in range(200, 300):
-                self._logger.error(f"Error: an error occurred retrieving affecting tickets for report")
+            if response_all_tickets['status'] not in range(200, 300):
+                self._logger.error(f"Error: an error occurred retrieving affecting tickets")
                 return None
+            return response_all_tickets
 
-            if len(all_tickets['body']) > 0:
+        try:
+            return await _get_all_affecting_tickets()
+        except Exception as e:
+            msg = f"Max retries reached getting all tickets for the service affecting monitor process."
+            self._logger.error(f"{msg} - exception: {e}")
+            await self._notifications_repository.send_slack_message(msg)
+            return None
+
+    async def get_affecting_ticket_for_report(self, client_id, start_date, end_date):
+        @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
+               stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
+               reraise=True)
+        async def get_affecting_ticket_for_report():
+            ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved', 'Closed']
+
+            self._logger.info(f"Retrieving affecting tickets between start date: {start_date} and end date: {end_date}")
+
+            all_tickets = await self.get_all_affecting_tickets(client_id=client_id, start_date=start_date,
+                                                               end_date=end_date, ticket_statuses=ticket_statuses)
+
+            if all_tickets and len(all_tickets['body']) > 0:
                 self._logger.info(f"Getting ticket {len(all_tickets['body'])} details")
                 all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]),
                                             reverse=True)
@@ -219,8 +335,7 @@ class BruinRepository:
                 ret_tickets = {ticket['ticket']['ticketID']: ticket for ticket in ret_tickets if ticket}
 
                 return ret_tickets
-            return {}
-
+            return None
         try:
             return await get_affecting_ticket_for_report()
         except Exception as e:
@@ -262,6 +377,7 @@ class BruinRepository:
                     interfaces_by_trouble.setdefault(trouble, {})
                     interfaces_by_trouble[trouble].setdefault(interface_name, 0)
                     interfaces_by_trouble[trouble][interface_name] += 1
+                    break
         return interfaces_by_trouble
 
     @staticmethod

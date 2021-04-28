@@ -122,6 +122,7 @@ class TestVelocloudRepository:
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
         velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
         with uuid_mock:
             result = await velocloud_repository.get_links_metrics_by_host(host, interval)
 
@@ -138,6 +139,7 @@ class TestVelocloudRepository:
         event_bus.rpc_request = CoroutineMock(side_effect=[Exception, None])
 
         velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
         with uuid_mock:
             result = await velocloud_repository.get_links_metrics_by_host(host, interval)
 
