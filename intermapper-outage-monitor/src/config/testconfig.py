@@ -32,5 +32,7 @@ INTERMAPPER_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_interval': 60 * 10,
     'inbox_email': 'fake@gmail.com',
-    'sender_emails_list': ['fakesender@email.com']
+    'sender_emails_list': ['fakesender@email.com'],
+    'intermapper_events': ['Down', 'Critical', 'Alarm', 'Warning']
+
 }

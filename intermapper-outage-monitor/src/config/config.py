@@ -25,7 +25,8 @@ INTERMAPPER_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_interval': 60 * 10,
     'inbox_email': 'mettel.automation@intelygenz.com',
-    'sender_emails_list': ['noreply@mettel.net']
+    'sender_emails_list': ['noreply@mettel.net'],
+    'intermapper_events': ['Down', 'Critical', 'Alarm', 'Warning']
 }
 LOG_CONFIG = {
     'name': 'intermapper-outage-monitor',
