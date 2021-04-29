@@ -3,10 +3,10 @@ import time
 
 from collections import OrderedDict
 from datetime import datetime
+from datetime import timedelta
 
 from apscheduler.util import undefined
 from pytz import timezone
-from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
 
@@ -415,6 +415,12 @@ class ServiceAffectingMonitor:
                 await self._notifications_repository.send_slack_message(slack_message)
 
                 self._logger.info(f'Ticket created with ticket id: {ticket_id}')
+
+                self._logger.info(
+                    f'Detail related to serial {edge_serial_number} of ticket {ticket_id} will be forwarded to the '
+                    f'HNOC queue shortly'
+                )
+                self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=edge_serial_number)
                 return
             else:
                 ticket_details = BruinRepository.find_detail_by_serial(ticket, edge_serial_number)
@@ -453,6 +459,30 @@ class ServiceAffectingMonitor:
                                     f'https://app.bruin.com/t/{ticket_id} , in ' \
                                     f'{self._config.MONITOR_CONFIG["environment"]}'
                     await self._notifications_repository.send_slack_message(slack_message)
+
+    def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
+        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        current_datetime = datetime.now(tz)
+        forward_task_run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['forward_to_hnoc'])
+
+        self._scheduler.add_job(
+            self._forward_ticket_to_hnoc_queue, 'date',
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            run_date=forward_task_run_date,
+            replace_existing=False,
+            id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
+        )
+
+    async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
+        change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
+            ticket_id=ticket_id, service_number=serial_number
+        )
+        if change_work_queue_response['status'] not in range(200, 300):
+            return
+
+        await self._notifications_repository.notify_successful_ticket_forward(
+            ticket_id=ticket_id, serial_number=serial_number
+        )
 
     @staticmethod
     def _is_rep_services_client_id(client_id: int):

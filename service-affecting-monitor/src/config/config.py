@@ -32,7 +32,8 @@ MONITOR_CONFIG = {
         "packet_loss": 20,
         "jitter": 20,
         "bandwidth": 20,
-    }
+    },
+    'forward_to_hnoc': 60,
 }
 
 MONITOR_REPORT_CONFIG = {

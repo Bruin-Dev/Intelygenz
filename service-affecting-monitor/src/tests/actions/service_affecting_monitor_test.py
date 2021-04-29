@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime
+from datetime import timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -2681,8 +2682,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
-        with patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_):
-            await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
+        await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
 
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(
             client_id, "VC05200028729")
@@ -2765,8 +2765,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
-        with patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_):
-            await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
+        await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
 
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(
             client_id, "VC05200028729")
@@ -2776,6 +2775,8 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def notify_trouble_pro_ticket_not_exists_success_rpc_test(self):
+        serial_number = 'VC05200028729'
+
         event_bus = Mock()
 
         logger = Mock()
@@ -2793,7 +2794,7 @@ class TestServiceAffectingMonitor:
                 "edge_id": 1602,
                 "name": "TEST",
                 "edgeState": "OFFLINE",
-                "serialNumber": "VC05200028729",
+                "serialNumber": serial_number,
                 "enterprise_name": "Titan America|85940|"
             },
             'link_status': {
@@ -2829,13 +2830,14 @@ class TestServiceAffectingMonitor:
         ticket_dict = {'ticket': 'some ticket details'}
 
         client_id = 85940
+        ticket_id = 123
         trouble = 'LATENCY'
 
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         notifications_repository = Mock()
-        bruin_repository.create_affecting_ticket = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]},
+        bruin_repository.create_affecting_ticket = CoroutineMock(side_effect=[{'body': {'ticketIds': [ticket_id]},
                                                                                'status': 200},
                                                                               'Note Posted',
                                                                               'Slack Sent'])
@@ -2852,16 +2854,20 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
         service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         await service_affecting_monitor._notify_trouble(link_info, trouble, ticket_dict)
 
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(
-            client_id, 'VC05200028729')
-
+            client_id, serial_number
+        )
         service_affecting_monitor._ticket_object_to_string.assert_called_with(ticket_dict)
 
         metrics_repository.increment_tickets_created.assert_called_once()
         assert bruin_repository.create_affecting_ticket.called
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id=ticket_id, serial_number=serial_number
+        )
         assert 'Some string object' == bruin_repository.append_note_to_ticket.mock_calls[0][2]['note']
 
     @pytest.mark.asyncio
@@ -2931,6 +2937,119 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._template_renderer.compose_email_object.assert_not_called()
         event_bus.rpc_request.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def schedule_forward_to_hnoc_queue_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        current_datetime = datetime.now()
+        forward_task_run_date = current_datetime + timedelta(seconds=config.MONITOR_CONFIG['forward_to_hnoc'])
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            with patch.object(service_affecting_monitor_module, 'timezone', new=Mock()):
+                service_affecting_monitor._schedule_forward_to_hnoc_queue(
+                    ticket_id=ticket_id, serial_number=serial_number
+                )
+
+        scheduler.add_job.assert_called_once_with(
+            service_affecting_monitor._forward_ticket_to_hnoc_queue, 'date',
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            run_date=forward_task_run_date,
+            replace_existing=False,
+            id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
+        )
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_ok_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345
+
+        change_work_queue_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        velocloud_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.change_detail_work_queue_to_hnoc = CoroutineMock(return_value=change_work_queue_response)
+
+        notifications_repository = Mock()
+        notifications_repository.notify_successful_ticket_forward = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+        bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
+            ticket_id=ticket_id, service_number=serial_number,
+        )
+        notifications_repository.notify_successful_ticket_forward.assert_awaited_once_with(
+            ticket_id=ticket_id, serial_number=serial_number,
+        )
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_with_change_work_queue_rpc_having_non_2xx_status_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345
+
+        change_work_queue_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        velocloud_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.change_detail_work_queue_to_hnoc = CoroutineMock(return_value=change_work_queue_response)
+
+        notifications_repository = Mock()
+        notifications_repository.notify_successful_ticket_forward = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+        bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
+            ticket_id=ticket_id, service_number=serial_number,
+        )
+        notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
 
     def compose_ticket_dict_test(self):
         event_bus = Mock()

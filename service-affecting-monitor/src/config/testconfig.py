@@ -30,6 +30,7 @@ MONITOR_CONFIG = {
         "jitter": 10,
         "bandwidth": 15,
     },
+    'forward_to_hnoc': 60,
 }
 
 MONITOR_REPORT_CONFIG = {

@@ -65,3 +65,23 @@ class TestNotificationsRepository:
         await notifications_repository.send_email(email_data)
 
         event_bus.rpc_request.assert_awaited_once_with("notification.email.request", email_data, timeout=60)
+
+    @pytest.mark.asyncio
+    async def notify_successful_ticket_forward_test(self):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        event_bus = Mock()
+
+        notifications_repository = NotificationsRepository(event_bus)
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        await notifications_repository.notify_successful_ticket_forward(
+            ticket_id=ticket_id, serial_number=serial_number
+        )
+
+        message = (
+            f'Detail related to serial {serial_number} in ticket {ticket_id} was successfully forwarded '
+            'to the HNOC queue'
+        )
+        notifications_repository.send_slack_message.assert_awaited_once_with(message)
