@@ -447,6 +447,12 @@ class ServiceAffectingMonitor:
                     await self._notifications_repository.send_slack_message(slack_message)
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note)
                     self._metrics_repository.increment_tickets_reopened()
+
+                    self._logger.info(
+                        f'Forwarding reopened detail {detail_id} (serial {edge_serial_number}) of ticket {ticket_id} '
+                        'to the HNOC queue...'
+                    )
+                    await self._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=edge_serial_number)
                 else:
                     for ticket_note in ticket['ticketNotes']:
                         if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:
