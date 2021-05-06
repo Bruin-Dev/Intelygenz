@@ -34,6 +34,7 @@ class TicketRepository:
 
     def find_newest_tnba_note_by_service_number(self, ticket_notes: List[dict], service_number: str) -> dict:
         # Ticket notes should have been sorted by "createdDate" already but let's make sure...
+        ticket_notes = [elem for elem in ticket_notes if elem['createdDate']]
         ticket_notes = sorted(ticket_notes, key=lambda note: note['createdDate'])
         lookup_fn = partial(self.__lookup_fn_for_newest_tnba_note, service_number=service_number)
         return self._utils_repository.get_last_element_matching(ticket_notes, lookup_fn)
