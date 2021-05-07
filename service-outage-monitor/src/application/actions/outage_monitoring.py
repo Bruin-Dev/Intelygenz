@@ -488,9 +488,9 @@ class OutageMonitor:
                             f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
-                        await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                                serial_number=serial_number, edge_status=edge_status)
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
+                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                            serial_number=serial_number, edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status, edge_full_id)
                     elif ticket_creation_response_status == 472:
