@@ -1,11 +1,10 @@
-import asyncio
 import re
 import time
-
-from datetime import datetime, timedelta
-from typing import Set, Dict
+from datetime import datetime
 from enum import auto, Enum
+from typing import Set
 
+import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
@@ -519,7 +518,7 @@ class TNBAMonitor:
                     if self._ticket_repository.is_detail_in_outage_ticket(detail_object):
                         self._logger.info(
                             f'Newest note: {newest_tnba_note} (serial: {serial_number} ticket: {ticket_id})')
-                        if newest_tnba_note and self._config.ENVIRONMENT == 'production':
+                        if self._config.ENVIRONMENT == 'production':
                             msg = (
                                 f"Automation Engine appended a TNBA note for serial "
                                 f"{serial_number} in ticket {ticket_id}, "
