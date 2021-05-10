@@ -499,8 +499,8 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
-                        await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                                serial_number=serial_number, edge_status=edge_status)
+                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                            serial_number=serial_number, edge_status=edge_status)
                         await self._post_note_in_outage_ticket(ticket_creation_response_body, edge_status)
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
@@ -509,8 +509,8 @@ class OutageMonitor:
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
-                        await self.forward_ticket_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                                serial_number=serial_number, edge_status=edge_status)
+                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
+                                                            serial_number=serial_number, edge_status=edge_status)
                         await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
             else:
                 self._logger.info(
