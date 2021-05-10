@@ -52,22 +52,23 @@ class InterMapperMonitor:
             body = email['body']
             msg_uid = email['msg_uid']
             if message is None or msg_uid == -1:
-                self._logger.error('Invalid message')
+                self._logger.error(f'Invalid message: {email}')
                 continue
-            self._logger.info(f'Processing email: {msg_uid}')
+            email_subject = self._find_field_in_body(message, "Subject")
 
-            self._logger.info(f"'Parsing through email: {msg_uid}'s body to create a dict'")
+            self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {email_subject}')
 
             parsed_email_dict = self._parse_email_body(body)
 
-            self._logger.info('Grabbing the asset_id from the Intermapper email')
+            self._logger.info('Grabbing the asset_id from the InterMapper email')
             asset_id = self._extract_value_from_field('(', ')', parsed_email_dict['name'])
 
             if asset_id is None or asset_id == 'SD-WAN':
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response['status']
                 if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f'Could not mark email: {msg_uid} as read')
+                    self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and '
+                                       f'subject: {email_subject} as read')
                 continue
 
             circuit_id_response = await self._bruin_repository.get_circuit_id(asset_id)
@@ -80,7 +81,8 @@ class InterMapperMonitor:
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response['status']
                 if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f'Could not mark email: {msg_uid} as read')
+                    self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and '
+                                       f'subject: {email_subject} as read')
                 continue
             circuit_id_body = circuit_id_response['body']
             circuit_id = circuit_id_body['wtn']
@@ -102,11 +104,12 @@ class InterMapperMonitor:
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response['status']
                 if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f'Could not mark email: {msg_uid} as read')
+                    self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and '
+                                       f'subject: {email_subject} as read')
                 self._logger.info(f'Processed email: {msg_uid}')
             else:
                 self._logger.info(f'An error occurred when doing the process related the event. Skipping the process'
-                                  f'to mark email : {msg_uid} as read')
+                                  f'to mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
 
         stop = time.time()
         self._logger.info(f'Finished processing all unread email from {self._config.INTERMAPPER_CONFIG["inbox_email"]}'
@@ -206,8 +209,8 @@ class InterMapperMonitor:
 
             await self._bruin_repository.append_autoresolve_note(ticket_id, circuit_id, intermapper_body)
             slack_message = (
-                f'Outage ticket {ticket_id} for circuit_id {circuit_id} was autoresolved. Ticket '
-                f'details at https://app.bruin.com/t/{ticket_id}.'
+                f'Outage ticket {ticket_id} for circuit_id {circuit_id} was autoresolved through InterMapper emails. '
+                f'Ticket details at https://app.bruin.com/t/{ticket_id}.'
             )
             await self._notifications_repository.send_slack_message(slack_message)
             self._logger.info(

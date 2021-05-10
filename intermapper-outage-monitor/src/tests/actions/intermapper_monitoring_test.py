@@ -145,9 +145,11 @@ class TestInterMapperMonitor:
             "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
         msg_uid = 123
+        email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
+
         intermapper_response = {
-            'body': [{'message': 'msg', 'body': intermapper_body, 'msg_uid': msg_uid},
-                     {'message': 'msg', 'body': intermapper_up_body, 'msg_uid': msg_uid}],
+            'body': [{'message': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid},
+                     {'message': email_msg, 'body': intermapper_up_body, 'msg_uid': msg_uid}],
             'status': 200
         }
         mark_email_as_read_response = {
@@ -294,15 +296,17 @@ class TestInterMapperMonitor:
         msg_uid_5 = 5
         msg_uid_6 = 6
 
+        email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
+
         intermapper_response = {
-            'body': [{'message': 'msg', 'body': 'skipped', 'msg_uid': -1},
-                     {'message': 'msg', 'body': intermapper_sd_wan_body, 'msg_uid': msg_uid_0},
-                     {'message': 'msg', 'body': intermapper_sd_wan_body, 'msg_uid': msg_uid_1},
-                     {'message': 'msg', 'body': intermapper_failed_circuit_id_body, 'msg_uid': msg_uid_2},
-                     {'message': 'msg', 'body': intermapper_failed_to_mark_as_read, 'msg_uid': msg_uid_3},
-                     {'message': 'msg', 'body': intermapper_failed_outage_process, 'msg_uid': msg_uid_4},
-                     {'message': 'msg', 'body': intermapper_204_circuit_id_body, 'msg_uid': msg_uid_5},
-                     {'message': 'msg', 'body': intermapper_204_circuit_id_body, 'msg_uid': msg_uid_6},
+            'body': [{'message': email_msg, 'body': 'skipped', 'msg_uid': -1},
+                     {'message': email_msg, 'body': intermapper_sd_wan_body, 'msg_uid': msg_uid_0},
+                     {'message': email_msg, 'body': intermapper_sd_wan_body, 'msg_uid': msg_uid_1},
+                     {'message': email_msg, 'body': intermapper_failed_circuit_id_body, 'msg_uid': msg_uid_2},
+                     {'message': email_msg, 'body': intermapper_failed_to_mark_as_read, 'msg_uid': msg_uid_3},
+                     {'message': email_msg, 'body': intermapper_failed_outage_process, 'msg_uid': msg_uid_4},
+                     {'message': email_msg, 'body': intermapper_204_circuit_id_body, 'msg_uid': msg_uid_5},
+                     {'message': email_msg, 'body': intermapper_204_circuit_id_body, 'msg_uid': msg_uid_6},
                      ],
 
             'status': 200
@@ -696,8 +700,9 @@ class TestInterMapperMonitor:
         }
 
         slack_message = (
-            f'Outage ticket {outage_ticket_1_id} for circuit_id {circuit_id} was autoresolved. Ticket '
-            f'details at https://app.bruin.com/t/{outage_ticket_1_id}.'
+            f'Outage ticket {outage_ticket_1_id} for circuit_id {circuit_id} '
+            f'was autoresolved through InterMapper emails. '
+            f'Ticket details at https://app.bruin.com/t/{outage_ticket_1_id}.'
         )
         event_bus = Mock()
         logger = Mock()

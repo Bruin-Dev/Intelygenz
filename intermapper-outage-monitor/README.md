@@ -14,14 +14,14 @@ look for emails from senders in the `sender_emails_list` config.
 
 We then loop through each email. If the `msg_uid` is not `None` or `-1` we make another rpc request to mark that email as read.
 Then we parse the `body` of the email to break it down into a dictionary. Breaking it down into a dictionary makes it alot easier to 
-check if the `event` of the InterMapper email is any of the events in the `intermapper_events` list (`['Down', 'Critical', 'Alarm', 'Warning']`),
-then grab the `asset_id` by parsing through the string in the `name` section of the dictionary, and then grab the `client_id` which
-is obtained by parsing through the string connected to the `document` key of the dictionary.
+check if the `event` of the InterMapper email is any of the events in the `intermapper_events` list (`['Down', 'Critical', 'Alarm', 'Warning']`).
+After that we then grab the `asset_id` by parsing through the string in the `name` section of the dictionary.
 
 In order to create a ticket from the InterMapper email we need a `circuit_id` which acts as our service number and the `client_id`.
-And to get our `cicuit_id` we make a rpc call to the bruin bridge to translate the `asset_id` into a usable `circuit_id`.
+And to get our `circuit_id` and `client_id` we make a rpc call to the bruin bridge, with the `asset_id` included in the request message, 
+to return a dict with the `circuit_id` and `client_id`.
 
-Once the ticket has been created we then proceed to send a slack message alerting the notifcations channel we have created a ticket.
+Once the ticket has been created, we then can proceed to send a slack message alerting the notifcations channel we have created a ticket.
 Which is then followed up by appending the full `body` of the InterMapper email as the triage note to this new ticket.
 
 # Capabilities used
