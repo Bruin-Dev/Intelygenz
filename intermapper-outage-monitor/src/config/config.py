@@ -23,10 +23,13 @@ ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 INTERMAPPER_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
-    'monitoring_interval': 60 * 10,
+    'monitoring_interval': 30,
     'inbox_email': 'mettel.automation@intelygenz.com',
     'sender_emails_list': ['noreply@mettel.net'],
-    'intermapper_events': ['Down', 'Critical', 'Alarm', 'Warning']
+    'intermapper_down_events': ['Down', 'Critical', 'Alarm', 'Warning', 'Link Warning'],
+    'intermapper_up_events': ['Up', 'OK'],
+    'autoresolve_last_outage_seconds': 60 * 60,
+
 }
 LOG_CONFIG = {
     'name': 'intermapper-outage-monitor',

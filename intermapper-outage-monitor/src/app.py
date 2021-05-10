@@ -52,8 +52,8 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        if config.INTERMAPPER_CONFIG["environment"] == 'production':
-            await self._intermapper_monitoring.start_intermapper_outage_monitoring(exec_on_start=True)
+        # if config.INTERMAPPER_CONFIG["environment"] == 'production':
+        await self._intermapper_monitoring.start_intermapper_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()
 

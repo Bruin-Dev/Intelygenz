@@ -83,8 +83,8 @@ class EmailReaderClient:
         if search_resp_code != 'OK':
             self._logger.error(f'Unable to access the unread mails')
             return []
-        self._logger.info(f'Messages to process in next batch: {messages[:30]}')
-        return messages[:30]
+        self._logger.info(f'Messages to process in next batch: {messages}')
+        return messages
 
     def _extract_data_from_message(self, num):
 

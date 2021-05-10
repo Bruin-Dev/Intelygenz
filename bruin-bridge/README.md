@@ -582,7 +582,6 @@ and then a response message is published to the response topic that was built by
     "request_id": 123,
     "body": {
                 "circuit_id": "DS1IT-22880336",
-                "client_id": 83959
             }
     
 }

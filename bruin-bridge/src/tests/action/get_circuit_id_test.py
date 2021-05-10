@@ -28,7 +28,6 @@ class TestGetCircuitID:
 
         payload = {
             'circuit_id': circuit_id,
-            'client_id': client_id,
         }
         event_bus_request = {
             "request_id": 19,
@@ -56,14 +55,13 @@ class TestGetCircuitID:
 
     @pytest.mark.asyncio
     async def get_circuit_id_no_body_test(self):
-        circuit_id_return = {'body': 'You must specify {.."body":{"circuit_id", "client_id"}...} in the request',
+        circuit_id_return = {'body': 'You must specify {.."body":{"circuit_id"}...} in the request',
                              'status': 400}
         circuit_id = '123'
         client_id = '321'
 
         payload = {
             'circuit_id': circuit_id,
-            'client_id': client_id,
         }
         event_bus_request = {
             "request_id": 19,
@@ -90,46 +88,10 @@ class TestGetCircuitID:
 
     @pytest.mark.asyncio
     async def get_circuit_id_no_circuit_id_test(self):
-        circuit_id_return = {'body': 'You must specify "circuit_id" and "client_id" in the body',
+        circuit_id_return = {'body': 'You must specify "circuit_id" in the body',
                              'status': 400}
-        client_id = '321'
 
         payload = {
-            'client_id': client_id,
-        }
-
-        event_bus_request = {
-            "request_id": 19,
-            "body": payload,
-            "response_topic": "some.topic"
-        }
-
-        event_bus_response = {
-            "request_id": 19,
-            **circuit_id_return,
-        }
-
-        logger = Mock()
-        logger.error = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=circuit_id_return)
-
-        circuit_id_response = GetCircuitID(logger, event_bus, bruin_repository)
-        await circuit_id_response.get_circuit_id(event_bus_request)
-        bruin_repository.get_circuit_id.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        logger.error.assert_called()
-
-    @pytest.mark.asyncio
-    async def get_circuit_id_no_client_id_test(self):
-        circuit_id_return = {'body': 'You must specify "circuit_id" and "client_id" in the body',
-                             'status': 400}
-        circuit_id = '123'
-
-        payload = {
-            'circuit_id': circuit_id,
         }
 
         event_bus_request = {
