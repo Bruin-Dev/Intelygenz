@@ -510,13 +510,6 @@ class TNBAMonitor:
             newest_tnba_note = self._ticket_repository.find_newest_tnba_note_by_service_number(
                 ticket_notes, serial_number
             )
-            if newest_tnba_note and not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
-                msg = (
-                    f'TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. '
-                    f'Skipping detail...'
-                )
-                self._logger.info(msg)
-                return
 
             self._logger.info(f'Ticket status: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
             if self._is_new_ticket(ticket_status):
@@ -535,10 +528,19 @@ class TNBAMonitor:
                                 "to the HNOC Investigate queue."
                             )
                             self._logger.info(msg)
-                            await self._bruin_repository.change_detail_work_queue(ticket_id,
-                                                                                  task_result='HNOC Investigate',
-                                                                                  serial_number=serial_number,
-                                                                                  detail_id=ticket_detail_id)
+                            await self._bruin_repository.change_detail_work_queue(
+                                ticket_id,
+                                task_result='HNOC Investigate',
+                                serial_number=serial_number,
+                                detail_id=ticket_detail_id
+                            )
+            if newest_tnba_note and not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
+                msg = (
+                    f'TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. '
+                    f'Skipping detail...'
+                )
+                self._logger.info(msg)
+                return
 
             mapped_predictions = self._prediction_repository.map_request_and_repair_completed_predictions(predictions)
 

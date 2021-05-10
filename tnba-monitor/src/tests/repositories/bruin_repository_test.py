@@ -516,7 +516,7 @@ class TestBruinRepository:
         bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
             "bruin.ticket.change.work", request, timeout=90
         )
-        bruin_repository._notifications_repository.send_slack_message.assert_not_awaited()
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited()
         assert result == response
 
     @pytest.mark.asyncio

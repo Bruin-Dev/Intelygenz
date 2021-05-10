@@ -278,8 +278,9 @@ class BruinRepository:
             response_status = response['status']
 
             if response_status in range(200, 300):
-                self._logger.info(f'Ticket {ticket_id} with serial {serial_number} task result '
-                                  f'changed to  {task_result}')
+                msg = f'Ticket {ticket_id} with serial {serial_number} task result changed to  {task_result}'
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
             else:
                 err_msg = (
                     f'Error while changing task result for ticket {ticket_id} and serial: {serial_number} in '
