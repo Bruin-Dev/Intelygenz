@@ -452,7 +452,7 @@ class ServiceAffectingMonitor:
                         f'Forwarding reopened detail {detail_id} (serial {edge_serial_number}) of ticket {ticket_id} '
                         'to the HNOC queue...'
                     )
-                    await self._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=edge_serial_number)
+                    self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=edge_serial_number)
                 else:
                     for ticket_note in ticket['ticketNotes']:
                         if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:

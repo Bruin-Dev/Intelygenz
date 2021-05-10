@@ -2147,7 +2147,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
         service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
         service_affecting_monitor._metrics_repository.increment_tickets_reopened = Mock()
-        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._notify_trouble(link_info, 'LATENCY', ticket_dict)
@@ -2158,7 +2158,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.send_slack_message. \
             assert_awaited_once_with(slack_message_mock)
         service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_called_once()
-        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id=ticket_mock['ticketID'], serial_number=link_info['cached_info']['serial_number']
         )
 
