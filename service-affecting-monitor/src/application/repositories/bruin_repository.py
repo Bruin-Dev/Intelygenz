@@ -465,26 +465,19 @@ class BruinRepository:
 
     def prepare_items_for_report(self, all_serials):
         items_for_report = []
-
+        bandwidth_config = self._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['bandwidth']
         for serial, ticket_details in all_serials.items():
             interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
+            client_id = ticket_details[0]['ticket']['clientID']
             for trouble in interfaces_by_trouble.keys():
-                if trouble == 'Bandwidth Over Utilization':
-                    client_id = ticket_details[0]['ticket']['clientID']
-                    bandwidth_config = self._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['bandwidth']
-                    if client_id in bandwidth_config['client_ids']:
-                        item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
-                                                             number_of_tickets=len(ticket_details),
-                                                             interface=self.search_interfaces_in_details(
-                                                                 ticket_details),
-                                                             trouble=trouble)
-                        items_for_report.append(item_report)
-                else:
-                    for interface, number_of_tickets in interfaces_by_trouble[trouble].items():
-                        self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
-                        item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
-                                                             number_of_tickets=number_of_tickets,
-                                                             interface=interface, trouble=trouble)
+                client_id = ticket_details[0]['ticket']['clientID']
+                for interface, number_of_tickets in interfaces_by_trouble[trouble].items():
+                    self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
+                    item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
+                                                         number_of_tickets=number_of_tickets,
+                                                         interface=interface, trouble=trouble)
+                    if trouble != 'Bandwidth Over Utilization' or \
+                            (client_id in bandwidth_config['client_ids'] and trouble == 'Bandwidth Over Utilization'):
                         items_for_report.append(item_report)
 
         return items_for_report

@@ -125,13 +125,12 @@ class ServiceAffectingMonitorReports:
                     f"{working_environment.upper()}")
                 continue
 
-            list_emails = self._template_renderer.compose_email_report_object(
+            email = self._template_renderer.compose_email_report_object(
                 report_items=final_report_list,
                 client_name=client_name_by_id[client_id],
                 client_id=client_id,
             )
-
-            for email in list_emails:
+            if email:
                 await self._notifications_repository.send_email(email_object=email)
 
             self._logger.info(f"Report for client {client_id} sent via email")

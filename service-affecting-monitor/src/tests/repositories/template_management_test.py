@@ -52,20 +52,16 @@ class TestTemplateRenderer:
             }
         ]
 
-        list_emails = template_renderer.compose_email_report_object(client_name=client_name,
-                                                                    client_id=client_id,
-                                                                    report_items=test_dict)
+        email = template_renderer.compose_email_report_object(client_name=client_name,
+                                                              client_id=client_id,
+                                                              report_items=test_dict)
 
-        assert 'Service affecting trouble ' in list_emails[0]["email_data"]["subject"]
-        assert client_name in list_emails[1]["email_data"]["subject"]
-        assert template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['bandwidth']["recipient"][
+        assert 'Reoccurring Service Affecting Trouble ' in email["email_data"]["subject"]
+        assert client_name in email["email_data"]["subject"]
+        assert template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['default']["recipient"][
                    0] in \
-               list_emails[0]["email_data"]["recipient"]
-        assert template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['default']["recipient"][0] \
-               in list_emails[1]["email_data"][
-                   "recipient"]
-        assert "<!DOCTYPE html" in list_emails[0]["email_data"]["html"]
-        assert "<!DOCTYPE html" in list_emails[1]["email_data"]["html"]
+               email["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def compose_email_object_html_elements_test(self):
         base = "src/templates/images/{}"
@@ -115,10 +111,10 @@ class TestTemplateRenderer:
                                                               client_id=client_id,
                                                               report_items=test_dict)
 
-        assert email[0]["email_data"]["images"][0]["data"] == base64.b64encode(open(base.format(kwargs["logo"]), 'rb')
-                                                                               .read()).decode('utf-8')
-        assert email[0]["email_data"]["images"][1]["data"] == base64.b64encode(open(base.format(kwargs["header"]), 'rb')
-                                                                               .read()).decode('utf-8')
+        assert email["email_data"]["images"][0]["data"] == base64.b64encode(open(base.format(kwargs["logo"]), 'rb')
+                                                                            .read()).decode('utf-8')
+        assert email["email_data"]["images"][1]["data"] == base64.b64encode(open(base.format(kwargs["header"]), 'rb')
+                                                                            .read()).decode('utf-8')
 
     def compose_email_object_empty_html_test(self):
         template_renderer = TemplateRenderer(testconfig)
@@ -126,8 +122,8 @@ class TestTemplateRenderer:
         client_id = 83109
         test_dict = []
 
-        list_emails = template_renderer.compose_email_report_object(client_name=client_name,
-                                                                    client_id=client_id,
-                                                                    report_items=test_dict)
+        email = template_renderer.compose_email_report_object(client_name=client_name,
+                                                              client_id=client_id,
+                                                              report_items=test_dict)
 
-        assert list_emails == []
+        assert email == []
