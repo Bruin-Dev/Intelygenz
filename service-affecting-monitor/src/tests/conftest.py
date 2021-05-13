@@ -118,9 +118,47 @@ def ticket_details_1():
             'createdDate': '2021-01-07T15:34:04.057-05:00', 'creator': 'api_1@bruin.com'
         },
             {
-                'noteId': 77127156,
+                'noteId': 771271561,
                 'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
                              'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 771271562,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 771271563,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 771271574,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE2 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
                              'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
                              'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
                              '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
@@ -171,7 +209,257 @@ def ticket_details_1():
                 'createdDate': '2021-01-07T15:54:47.443-05:00',
                 'creator': 'api_1@bruin.com'
             }
-            ]  # noqa
+        ]  # noqa
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_1_1():
+    return {
+        'clientID': 83109, 'clientName': 'RSI', 'ticketID': 50812501, 'category': 'SD-WAN',
+        'topic': 'Service Affecting Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'Closed',
+        'address': {
+            'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+            'country': 'USA'
+        }, 'createDate': '1/7/2021 8:34:22 PM', 'createdBy': 'Intelygenz Ai',
+        'creationNote': None, 'resolveDate': '1/7/2021 10:58:55 PM', 'resolvedby': None, 'closeDate': None,
+        'closedBy': None, 'lastUpdate': None, 'updatedBy': None,
+        'mostRecentNote': '1/7/2021 8:54:47 PM Intelygenz Ai', 'nextScheduledDate': '1/14/2021 5:00:00 AM',
+        'flags': '', 'severity': '3'
+    }  # noqa
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_1():
+    return {
+        'ticketDetails': [
+            {
+                'detailID': 5583073, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085762',
+                'assignedToName': '0', 'currentTaskID': None, 'currentTaskName': None, 'lastUpdatedBy': 385677,
+                'lastUpdatedAt': '2021-01-07T17:59:12.523-05:00'
+            }],  # noqa
+        'ticketNotes': [{
+            'noteId': 77127141, 'noteValue': '1/7/2021 3:34:01 PM\n', 'serviceNumber': ['VC05200085666'],
+            'createdDate': '2021-01-07T15:34:04.057-05:00', 'creator': 'api_1@bruin.com'
+        },
+            {
+                'noteId': 7712715611,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 7712715621,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 7712715631,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 7712715741,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE2 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 771278771,
+                'noteValue': 'Links\tCloud Status\tVPN Status\tInterface (WAN Type)\tThroughput | '
+                             'Bandwidth\tPre-Notifications\tAlerts\tSignal\tLatency\tJitter\tPacket Loss\t\nComcast '
+                             'Cable (BYOB) \n173.10.211.109\t\t\tGE2 (Ethernet)\t231.36 kbps27.15 Mbps\n20.47 '
+                             'Mbps189.21 Mbps\tEdit\tEdit\tn/a\t18 msec\n9 msec\t0 msec\n0 msec\t0.00%\n0.00%\t\nApex '
+                             '10M (MetTel CID: BBT.113719) \n32.140.174.242\t\t\tGE1 (Ethernet)\t5.83 Mbps9.94 '
+                             'Mbps\n9.32 Mbps9.89 Mbps\tEdit\tEdit\tn/a\t9 msec\n11 msec\t0 msec\n0 '
+                             'msec\t0.00%\n0.00%\t',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:49:19.41-05:00',
+                'creator': 'hchauhan@mettel.net'
+            },
+            {
+                'noteId': 771281201, 'noteValue': 'Unresolve Action: Holmdel NOC Investigate ',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:54:43.647-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 771281261,
+                'noteValue': "#*MetTel's IPA*#\nRe-opening ticket.\n \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                             'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) '
+                             '\nInterval for Scan: 20 \nScan Time: 2021-01-07 15:54:08.913048-05:00 \nThroughput ('
+                             'Receive): 9274.063 Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% ('
+                             '8903.7 Kbps) \nLinks:  ['
+                             'Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/]  -  ['
+                             'QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  ['
+                             'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links'
+                             '/]  \n \n\nTimeStamp: 2021-01-07 15:54:44.279607-05:00',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 771281271,
+                'noteValue': '#*Automation Engine*#\nEdge Name: CA-HEALDSBURG-3871B-TS-DI\nTrouble: Jitter\nInterface: '
+                             'GE2\nName: 170.39.161.40\nThreshold: 30\nInterval for Scan: 20\n'
+                             'Scan Time: 2021-02-17 00:45:41.092507-05:00\nTransfer: 54.5\n'
+                             'Links: Edge  - QoE  - Transport ',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
+                'creator': 'api_1@bruin.com'
+            }
+        ]  # noqa
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_1_2():
+    return {
+        'clientID': 83109, 'clientName': 'RSI', 'ticketID': 50812502, 'category': 'SD-WAN',
+        'topic': 'Service Affecting Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'Closed',
+        'address': {
+            'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+            'country': 'USA'
+        }, 'createDate': '1/7/2021 8:34:22 PM', 'createdBy': 'Intelygenz Ai',
+        'creationNote': None, 'resolveDate': '1/7/2021 10:58:55 PM', 'resolvedby': None, 'closeDate': None,
+        'closedBy': None, 'lastUpdate': None, 'updatedBy': None,
+        'mostRecentNote': '1/7/2021 8:54:47 PM Intelygenz Ai', 'nextScheduledDate': '1/14/2021 5:00:00 AM',
+        'flags': '', 'severity': '3'
+    }  # noqa
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_2():
+    return {
+        'ticketDetails': [
+            {
+                'detailID': 5583073, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085762',
+                'assignedToName': '0', 'currentTaskID': None, 'currentTaskName': None, 'lastUpdatedBy': 385677,
+                'lastUpdatedAt': '2021-01-07T17:59:12.523-05:00'
+            }],  # noqa
+        'ticketNotes': [{
+            'noteId': 77127141, 'noteValue': '1/7/2021 3:34:01 PM\n', 'serviceNumber': ['VC05200085666'],
+            'createdDate': '2021-01-07T15:34:04.057-05:00', 'creator': 'api_1@bruin.com'
+        },
+            {
+                'noteId': 7712715612,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 7712715622,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 7712715632,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 7712715742,
+                'noteValue': "#*Automation Engine*# \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: Bandwidth Over "
+                             'Utilization \nInterface: GE2 \nName: Apex 10M (MetTel CID: BBT.113719) \nInterval for '
+                             'Scan: 20 \nScan Time: 2021-01-07 15:33:44.229001-05:00 \nThroughput (Receive): 9262.009 '
+                             'Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% (8903.7 Kbps) '
+                             '\nLinks:  [Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044'
+                             '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
+                             '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
+                             '/2044/links/]  \n \n',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:34:26.48-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 771278772,
+                'noteValue': 'Links\tCloud Status\tVPN Status\tInterface (WAN Type)\tThroughput | '
+                             'Bandwidth\tPre-Notifications\tAlerts\tSignal\tLatency\tJitter\tPacket Loss\t\nComcast '
+                             'Cable (BYOB) \n173.10.211.109\t\t\tGE2 (Ethernet)\t231.36 kbps27.15 Mbps\n20.47 '
+                             'Mbps189.21 Mbps\tEdit\tEdit\tn/a\t18 msec\n9 msec\t0 msec\n0 msec\t0.00%\n0.00%\t\nApex '
+                             '10M (MetTel CID: BBT.113719) \n32.140.174.242\t\t\tGE1 (Ethernet)\t5.83 Mbps9.94 '
+                             'Mbps\n9.32 Mbps9.89 Mbps\tEdit\tEdit\tn/a\t9 msec\n11 msec\t0 msec\n0 '
+                             'msec\t0.00%\n0.00%\t',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:49:19.41-05:00',
+                'creator': 'hchauhan@mettel.net'
+            },
+            {
+                'noteId': 771281202, 'noteValue': 'Unresolve Action: Holmdel NOC Investigate ',
+                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-07T15:54:43.647-05:00',
+                'creator': 'api_1@bruin.com'
+            }, {
+                'noteId': 771281262,
+                'noteValue': "#*MetTel's IPA*#\nRe-opening ticket.\n \nEdge Name: TN-NASH-4840-HC-DI \nTrouble: "
+                             'Bandwidth Over Utilization \nInterface: GE1 \nName: Apex 10M (MetTel CID: BBT.113719) '
+                             '\nInterval for Scan: 20 \nScan Time: 2021-01-07 15:54:08.913048-05:00 \nThroughput ('
+                             'Receive): 9274.063 Kbps \nBandwidth (Receive): 9893.0 Kbps \nThreshold (Receive): 90% ('
+                             '8903.7 Kbps) \nLinks:  ['
+                             'Edge|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/]  -  ['
+                             'QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  ['
+                             'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links'
+                             '/]  \n \n\nTimeStamp: 2021-01-07 15:54:44.279607-05:00',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
+                'creator': 'api_1@bruin.com'
+            },
+            {
+                'noteId': 771281272,
+                'noteValue': '#*Automation Engine*#\nEdge Name: CA-HEALDSBURG-3871B-TS-DI\nTrouble: Jitter\nInterface: '
+                             'GE2\nName: 170.39.161.40\nThreshold: 30\nInterval for Scan: 20\n'
+                             'Scan Time: 2021-02-17 00:45:41.092507-05:00\nTransfer: 54.5\n'
+                             'Links: Edge  - QoE  - Transport ',
+                'serviceNumber': ['VC05200085762'],
+                'createdDate': '2021-01-07T15:54:47.443-05:00',
+                'creator': 'api_1@bruin.com'
+            }
+        ]  # noqa
     }
 
 
@@ -246,12 +534,12 @@ def ticket_details_2():
     return {
         'ticketDetails': [
             {
-                'detailID': 5576149, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085762',
+                'detailID': 5576149, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085763',
                 'assignedToName': '0', 'currentTaskID': None, 'currentTaskName': None, 'lastUpdatedBy': 385677,
                 'lastUpdatedAt': '2021-01-06T17:35:10.317-05:00'
             }],  # noqa
         'ticketNotes': [{
-            'noteId': 77051076, 'noteValue': '1/5/2021 4:22:09 PM\n', 'serviceNumber': ['VC05200085762'],
+            'noteId': 77051076, 'noteValue': '1/5/2021 4:22:09 PM\n', 'serviceNumber': ['VC05200085763'],
             'createdDate': '2021-01-05T16:22:11.247-05:00', 'creator': 'api_1@bruin.com'
         },
             {
@@ -264,12 +552,12 @@ def ticket_details_2():
                              '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
                              '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
                              '/2044/links/]  \n \n',
-                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-05T16:22:24.03-05:00',
+                'serviceNumber': ['VC05200085763'], 'createdDate': '2021-01-05T16:22:24.03-05:00',
                 'creator': 'api_1@bruin.com'
             },
             {
                 'noteId': 77076710, 'noteValue': 'Unresolve Action: Holmdel NOC Investigate ',
-                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-06T08:57:35.85-05:00',
+                'serviceNumber': ['VC05200085763'], 'createdDate': '2021-01-06T08:57:35.85-05:00',
                 'creator': 'api_1@bruin.com'
             }, {
                 'noteId': 77076719,
@@ -282,7 +570,7 @@ def ticket_details_2():
                              'QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  ['
                              'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links'
                              '/]  \n \n\nTimeStamp: 2021-01-06 08:57:36.651254-05:00',
-                'serviceNumber': ['VC05200085762'],
+                'serviceNumber': ['VC05200085763'],
                 'createdDate': '2021-01-06T08:58:04.083-05:00',
                 'creator': 'api_1@bruin.com'
             }, {
@@ -297,7 +585,7 @@ def ticket_details_2():
                              'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links'
                              '/]  \n \n\nTimeStamp: 2021-01-06 08:57:36.651254-05:00',
                 'serviceNumber': [
-                    'VC05200085762'],
+                    'VC05200085763'],
                 'createdDate': '2021-01-06T08:58:04.177-05:00',
                 'creator': 'api_1@bruin.com'
             },
@@ -307,7 +595,7 @@ def ticket_details_2():
                              'GE2\nName: 170.39.161.40\nThreshold: 30\nInterval for Scan: 20\n'
                              'Scan Time: 2021-02-17 00:45:41.092507-05:00\nTransfer: 54.5\n'
                              'Links: Edge  - QoE  - Transport ',
-                'serviceNumber': ['VC05200085762'],
+                'serviceNumber': ['VC05200085763'],
                 'createdDate': '2021-01-07T15:54:47.443-05:00',
                 'creator': 'api_1@bruin.com'
             }]
@@ -393,12 +681,12 @@ def ticket_details_3():
     return {
         'ticketDetails': [
             {
-                'detailID': 5575534, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085762',
+                'detailID': 5575534, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085764',
                 'assignedToName': '0', 'currentTaskID': None, 'currentTaskName': None, 'lastUpdatedBy': 385676,
                 'lastUpdatedAt': '2021-01-05T14:34:23.72-05:00'
             }],  # noqa
         'ticketNotes': [{
-            'noteId': 77043435, 'noteValue': '1/5/2021 1:49:21 PM\n', 'serviceNumber': ['VC05200085762'],
+            'noteId': 77043435, 'noteValue': '1/5/2021 1:49:21 PM\n', 'serviceNumber': ['VC05200085764'],
             'createdDate': '2021-01-05T13:49:25.337-05:00', 'creator': 'api_1@bruin.com'
         },
             {
@@ -411,7 +699,7 @@ def ticket_details_3():
                              '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
                              '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
                              '/2044/links/]  \n \n',
-                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-05T13:49:27.65-05:00',
+                'serviceNumber': ['VC05200085764'], 'createdDate': '2021-01-05T13:49:27.65-05:00',
                 'creator': 'api_1@bruin.com'
             }, {
                 'noteId': 77045257,
@@ -421,7 +709,7 @@ def ticket_details_3():
                              '\n173.10.211.109\t\t\tGE2 (Ethernet)\t1.95 Mbps27.15 Mbps\n6.11 Mbps189.21 '
                              'Mbps\tEdit\tEdit\tn/a\t\nApex 10M (MetTel CID: BBT.113719) \n32.140.174.242\t\t\tGE1 ('
                              'Ethernet)\t3.02 Mbps9.94 Mbps\n1.45 Mbps9.89 Mbps\tEdit\tEdit\tn/a\t\n \n',
-                'serviceNumber': ['VC05200085762'],
+                'serviceNumber': ['VC05200085764'],
                 'createdDate': '2021-01-05T14:33:34.623-05:00',
                 'creator': 'dpatel@mettel.net'
             }]  # noqa
@@ -477,12 +765,12 @@ def ticket_details_4():
     return {
         'ticketDetails': [
             {
-                'detailID': 5574754, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085762',
+                'detailID': 5574754, 'detailType': 'Repair_WTN', 'detailStatus': 'C', 'detailValue': 'VC05200085765',
                 'assignedToName': '0', 'currentTaskID': None, 'currentTaskName': None, 'lastUpdatedBy': 385676,
                 'lastUpdatedAt': '2021-01-05T12:07:31.707-05:00'
             }],  # noqa
         'ticketNotes': [{
-            'noteId': 77034430, 'noteValue': '1/5/2021 10:29:37 AM\n', 'serviceNumber': ['VC05200085762'],
+            'noteId': 77034430, 'noteValue': '1/5/2021 10:29:37 AM\n', 'serviceNumber': ['VC05200085765'],
             'createdDate': '2021-01-05T10:29:38.857-05:00', 'creator': 'api_1@bruin.com'
         },
             {
@@ -495,7 +783,7 @@ def ticket_details_4():
                              '/]  -  [QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe'
                              '/]  -  [Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge'
                              '/2044/links/]  \n \n',
-                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-05T10:30:21.64-05:00',
+                'serviceNumber': ['VC05200085765'], 'createdDate': '2021-01-05T10:30:21.64-05:00',
                 'creator': 'api_1@bruin.com'
             },
             {
@@ -507,13 +795,13 @@ def ticket_details_4():
                              'Mbps\tEdit\tEdit\tn/a\t\nApex 10M (MetTel CID: BBT.113719) \n32.140.174.242\t\t\tGE1 ('
                              'Ethernet)\t428.21 kbps9.94 Mbps\n6.59 Mbps9.89 Mbps\tEdit\tEdit\tn/a\t\n \nLink is '
                              'stable.',
-                'serviceNumber': ['VC05200085762'],
+                'serviceNumber': ['VC05200085765'],
                 'createdDate': '2021-01-05T10:39:43.817-05:00',
                 'creator': 'dpatel@mettel.net'
             },
             {
                 'noteId': 77039079, 'noteValue': 'Unresolve Action: Holmdel NOC Investigate ',
-                'serviceNumber': ['VC05200085762'], 'createdDate': '2021-01-05T11:52:05.01-05:00',
+                'serviceNumber': ['VC05200085765'], 'createdDate': '2021-01-05T11:52:05.01-05:00',
                 'creator': 'api_1@bruin.com'
             },
             {
@@ -527,7 +815,7 @@ def ticket_details_4():
                              'QoE|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/qoe/]  -  ['
                              'Transport|https://metvco03.mettel.net/#!/operator/customer/124/monitor/edge/2044/links'
                              '/]  \n \n\nTimeStamp: 2021-01-05 11:52:05.664662-05:00',
-                'serviceNumber': ['VC05200085762'],
+                'serviceNumber': ['VC05200085765'],
                 'createdDate': '2021-01-05T11:52:05.603-05:00',
                 'creator': 'api_1@bruin.com'
             }]  # noqa
@@ -710,7 +998,7 @@ def customer_cache():
         'last_contact': '2021-01-29T11:36:30.000Z',
         'logical_ids': [{'interface_name': 'GE1', 'logical_id': '42:a6:77:be:2f:cc:0000'},
                         {'interface_name': 'GE2', 'logical_id': 'f6:4b:2a:72:0f:72:0000'}],
-        'serial_number': 'VC05200085762',
+        'serial_number': 'VC05200085761',
         'bruin_client_info': {'client_id': 87055, 'client_name': 'Benchmark Senior Living - Network'}
     },
         {
@@ -726,14 +1014,39 @@ def customer_cache():
             'last_contact': '2020-10-15T21:06:31.000Z',
             'logical_ids': [{'interface_name': 'GE1', 'logical_id': '6a:ee:96:dc:43:10:0000'},
                             {'interface_name': 'GE2', 'logical_id': '00:90:1a:a0:01:04:0000'}],
-            'serial_number': 'VC05400003861',
+            'serial_number': 'VC05200085762',
             'bruin_client_info': {'client_id': 85134, 'client_name': 'Benchmark Senior Living - Wireless'}
-        }]
+        },
+        {
+            'edge': {'host': 'mettel.velocloud.net', 'enterprise_id': 100, 'edge_id': 1561},
+            'last_contact': '2020-10-15T21:06:31.000Z',
+            'logical_ids': [{'interface_name': 'GE1', 'logical_id': '6a:ee:96:dc:43:10:0000'},
+                            {'interface_name': 'GE2', 'logical_id': '00:90:1a:a0:01:04:0000'}],
+            'serial_number': 'VC05200085761',
+            'bruin_client_info': {'client_id': 85134, 'client_name': 'Benchmark Senior Living - Wireless'}
+        },
+        {
+            'edge': {'host': 'mettel.velocloud.net', 'enterprise_id': 100, 'edge_id': 1561},
+            'last_contact': '2020-10-15T21:06:31.000Z',
+            'logical_ids': [{'interface_name': 'GE1', 'logical_id': '6a:ee:96:dc:43:10:0000'},
+                            {'interface_name': 'GE2', 'logical_id': '00:90:1a:a0:01:04:0000'}],
+            'serial_number': 'VC05200085763',
+            'bruin_client_info': {'client_id': 85134, 'client_name': 'Benchmark Senior Living - Wireless'}
+        },
+        {
+            'edge': {'host': 'mettel.velocloud.net', 'enterprise_id': 100, 'edge_id': 1561},
+            'last_contact': '2020-10-15T21:06:31.000Z',
+            'logical_ids': [{'interface_name': 'GE1', 'logical_id': '6a:ee:96:dc:43:10:0000'},
+                            {'interface_name': 'GE2', 'logical_id': '00:90:1a:a0:01:04:0000'}],
+            'serial_number': 'VC05200085764',
+            'bruin_client_info': {'client_id': 85134, 'client_name': 'Benchmark Senior Living - Wireless'}
+        },
+    ]
 
 
 @pytest.fixture(scope='function')
 def list_customer_cache_serials():
-    return ['VC05200085762', 'VC05200025943''VC05400003861']
+    return ['VC05200085762', 'VC05200025943', 'VC05400003861', 'VC05400003862', 'VC05400003863', 'VC05400003864']
 
 
 @pytest.fixture(scope='function')
@@ -807,6 +1120,38 @@ def response_bruin_with_all_tickets(ticket_1, ticket_details_1, ticket_2, ticket
         ticket_1['ticketID']: {
             "ticket": ticket_1,
             "ticket_details": ticket_details_1
+        },
+        ticket_2['ticketID']: {
+            "ticket": ticket_2,
+            "ticket_details": ticket_details_2
+        },
+        ticket_3['ticketID']: {
+            "ticket": ticket_3,
+            "ticket_details": ticket_details_3
+        },
+        ticket_4['ticketID']: {
+            "ticket": ticket_4,
+            "ticket_details": ticket_details_4
+        }
+    }
+
+
+@pytest.fixture(scope='function')
+def response_bruin_with_all_tickets_complete(ticket_1, ticket_details_1, ticket_1_1, ticket_details_1_1, ticket_1_2,
+                                             ticket_details_1_2, ticket_2, ticket_details_2, ticket_3, ticket_details_3,
+                                             ticket_4, ticket_details_4):
+    return {
+        ticket_1['ticketID']: {
+            "ticket": ticket_1,
+            "ticket_details": ticket_details_1
+        },
+        ticket_1_1['ticketID']: {
+            "ticket": ticket_1_1,
+            "ticket_details": ticket_details_1_1
+        },
+        ticket_1_2['ticketID']: {
+            "ticket": ticket_1_2,
+            "ticket_details": ticket_details_1_2
         },
         ticket_2['ticketID']: {
             "ticket": ticket_2,

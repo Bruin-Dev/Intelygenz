@@ -72,7 +72,7 @@ class TestServiceAffectingMonitorReports:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_report_bandwidth_over_utilization_test(self, service_affecting_monitor_reports,
-                                                                               response_bruin_with_all_tickets,
+                                                                               response_bruin_with_all_tickets_complete,
                                                                                response_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
 
@@ -81,7 +81,7 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.now = Mock(return_value=end_date)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
-            side_effect=[response_bruin_with_all_tickets, None, None]
+            side_effect=[response_bruin_with_all_tickets_complete, None, None]
         )
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
 
@@ -197,7 +197,7 @@ class TestServiceAffectingMonitorReports:
     @pytest.mark.asyncio
     async def service_affecting_monitor_reports_utilization_with_exception_test(
             self, service_affecting_monitor_reports,
-            response_bruin_with_all_tickets,
+            response_bruin_with_all_tickets_complete,
             response_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
 
@@ -206,7 +206,7 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.now = Mock(return_value=end_date)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
-            return_value=response_bruin_with_all_tickets
+            return_value=response_bruin_with_all_tickets_complete
         )
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
 

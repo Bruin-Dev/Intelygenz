@@ -435,16 +435,14 @@ class BruinRepository:
                     trouble = detail_object['trouble_value']
                     interface_name = interface['interface_name']
                     interfaces_by_trouble.setdefault(trouble, {})
-                    interfaces_by_trouble[trouble].setdefault(interface_name, 0)
-                    interfaces_by_trouble[trouble][interface_name] += 1
-                    break
+                    interfaces_by_trouble[trouble].setdefault(interface_name, set())
+                    interfaces_by_trouble[trouble][interface_name].add(detail_object['ticket_id'])
         return interfaces_by_trouble
 
     @staticmethod
     def transform_tickets_into_ticket_details(tickets: dict) -> list:
         result = []
         for ticket_id, ticket_details in tickets.items():
-            ticket_id = ticket_id
             details = ticket_details['ticket_details']['ticketDetails']
             notes = ticket_details['ticket_details']['ticketNotes']
             ticket = ticket_details['ticket']
@@ -470,11 +468,10 @@ class BruinRepository:
             interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
             client_id = ticket_details[0]['ticket']['clientID']
             for trouble in interfaces_by_trouble.keys():
-                client_id = ticket_details[0]['ticket']['clientID']
-                for interface, number_of_tickets in interfaces_by_trouble[trouble].items():
+                for interface, ticket_ids in interfaces_by_trouble[trouble].items():
                     self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
                     item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
-                                                         number_of_tickets=number_of_tickets,
+                                                         number_of_tickets=len(ticket_ids),
                                                          interface=interface, trouble=trouble)
                     if trouble != 'Bandwidth Over Utilization' or \
                             (client_id in bandwidth_config['client_ids'] and trouble == 'Bandwidth Over Utilization'):
@@ -540,3 +537,11 @@ class BruinRepository:
                         'trouble_value': trouble,
                     })
         return ret
+
+    @staticmethod
+    def filter_trouble_reports(report_list, active_reports, threshold):
+        filter_reports = []
+        for report in report_list:
+            if report['trouble'] in active_reports and report['number_of_tickets'] >= threshold:
+                filter_reports.append(report)
+        return filter_reports
