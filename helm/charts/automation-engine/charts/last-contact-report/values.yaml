@@ -24,6 +24,7 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
+  # -- Contact email address
   last_contact_recipient: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
@@ -33,8 +34,6 @@ global:
     name: "ecr-registry"
 
 config:
-  # -- Email address to send last-contact-report
-  last_contact_recipient: ""
   capabilities_enabled:
     # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the tnba-monitor deployment that will wait until the

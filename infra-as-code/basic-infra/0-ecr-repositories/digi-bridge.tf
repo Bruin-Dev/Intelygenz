@@ -1,4 +1,3 @@
-## digi-bridge ECR repository
 resource "aws_ecr_repository" "digi-bridge-repository" {
   name = "digi-bridge"
   tags = {

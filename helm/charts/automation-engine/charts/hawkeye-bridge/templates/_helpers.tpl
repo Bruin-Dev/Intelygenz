@@ -54,7 +54,7 @@ Configmap name of hawkeye-bridge
 {{- end }}
 
 {{/*
-Secret name of bruin-bridge
+Secret name of hawkeye-bridge
 */}}
 {{- define "hawkeye-bridge.secretName" -}}
 {{ include "hawkeye-bridge.fullname" . }}-secret

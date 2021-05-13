@@ -44,6 +44,57 @@ basic-infra-dev:
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
 
+basic-infra-pro:
+  stage: basic_infra
+  extends: .terraform_template_deploy_basic_infra
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    IAM_TO_EKS_ROLES: developer, devops
+    HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
+    HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PRO}
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_PRO}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_PRO}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PRO}
+    RELOADER_CHART_V: ${RELOADER_CHART_V_PRO}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PRO}
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - source ci-utils/environments/environment_assign.sh
+    - export EKS_CLUSTER_NAME="mettel-automation"
+    - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
 # ===========================================================
 # Terraform destroy jobs for infra-as-code/basic-infra module
 # ===========================================================
+destroy-basic-infra-dev:
+  stage: destroy
+  extends: .terraform_template_destroy_basic_infra
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    EKS_CLUSTER_NAME: "mettel-automation-dev"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+
+destroy-basic-infra-pro:
+  stage: destroy
+  extends: .terraform_template_destroy_basic_infra
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    EKS_CLUSTER_NAME: "mettel-automation"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true

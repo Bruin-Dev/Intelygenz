@@ -54,7 +54,7 @@
     - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
 
-.terraform_template_deploy_environment: &terraform_template_deploy_environment
+.terraform_template_deploy_elastic: &terraform_template_deploy_elastic
   image:
     name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
@@ -80,11 +80,27 @@
                   terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
                 elif [[ ${i} == "2-redis-tnba-feedback" ]]; then
                   terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
+                elif [[ ${i} == "3-redis-email-tagger" ]]; then
+                  terraform output REDIS_EMAIL_TAGGER_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_email_tagger_hostname.txt
                 fi
               fi
           )
       done
-    - cd ${CI_PROJECT_DIR}
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+  cache:
+    policy: push
+    key: "necessary-terraform-vars-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - output
+
+.terraform_template_deploy_data_collector: &terraform_template_deploy_data_collector
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
         apk add zip unzip
@@ -100,10 +116,3 @@
         terraform apply -auto-approve
         cd ${CI_PROJECT_DIR}
       fi
-    # INSTALL KUBE CONFIG
-    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
-  cache:
-    policy: push
-    key: "necessary-terraform-vars-${CI_COMMIT_REF_SLUG}"
-    paths:
-      - output

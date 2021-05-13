@@ -15,6 +15,46 @@ nats:
   # -- override name to use nats as name for svc, deployment and all created by nats helm chart
   nameOverride: "nats"
 
+## YAML anchor to define capabilities_enabled
+.capabilitiesEnabled: &capabilitiesEnabled
+  capabilities_enabled:
+    # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # bruin-bridge service responds correctly to healthcheck calls.
+    bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
+    # -- Indicate if cts-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # cts-bridge service responds correctly to healthcheck calls.
+    cts_bridge: ${CTS_BRIDGE_ENABLED}
+    # -- Indicate if digi-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # digi-bridge service responds correctly to healthcheck calls.
+    digi_bridge: ${DIGI_BRIDGE_ENABLED}
+    # -- Indicate if email-tagger-kre-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # email-tagger-kre-bridge service responds correctly to healthcheck calls.
+    email_tagger_kre_bridge: ${EMAIL_TAGGER_KRE_BRIDGE_ENABLED}
+    # -- Indicate if hawkeye-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-bridge service responds correctly to healthcheck calls.
+    hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
+    # -- Indicate if lit-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # lit-bridge service responds correctly to healthcheck calls.
+    lit_bridge: ${LIT_BRIDGE_ENABLED}
+    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifier service responds correctly to healthcheck calls.
+    notifier: ${NOTIFIER_ENABLED}
+    # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # t7-bridge service responds correctly to healthcheck calls.
+    t7_bridge: ${T7_BRIDGE_ENABLED}
+    # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # velocloud-bridge service responds correctly to healthcheck calls.
+    velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+
 # -- Global configuration for all subcharts
 global:
   # -- Name of environment for EKS cluster and network resources
@@ -26,16 +66,19 @@ global:
   nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: ${REDIS_HOSTNAME}
-  # -- Redis Hostname used to store metrics obtained from tnba-feedback to train the ML model
-  redis_tnba_feedback_hostname: ${REDIS_TNBA_FEEDBACK_HOSTNAME}
   # -- Redis hostname used to store information used by customer-cache
   redis_customer_cache_hostname: ${REDIS_CUSTOMER_CACHE_HOSTNAME}
+  # -- Redis Hostname used to store metrics obtained from tnba-feedback to train the ML model
+  redis_tnba_feedback_hostname: ${REDIS_TNBA_FEEDBACK_HOSTNAME}
+  # -- Redis Hostname used to store information used by email-tagger
+  redis_email_tagger_hostname: ${REDIS_EMAIL_TAGGER_HOSTNAME}
   # -- Indicates if the logs will be sent to papertrail or not.
   papertrail_active: "False"
   # -- Papertrail host to which the logs will be sent
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
+  # -- Contact email address
   last_contact_recipient: ${LAST_CONTACT_RECIPIENT}
   # -- Email account password
   email_acc_pwd: ${EMAIL_ACC_PWD}
@@ -139,35 +182,8 @@ customer-cache:
   enabled: ${CUSTOMER_CACHE_ENABLED}
   replicaCount: ${CUSTOMER_CACHE_DESIRED_TASKS}
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/customer-cache
@@ -190,10 +206,8 @@ customer-cache:
 # -- digi-bridge subchart specific configuration
 digi-bridge:
   replicaCount: ${DIGI_BRIDGE_DESIRED_TASKS}
-
   # -- Field to indicate if the digi-bridge module is going to be deployed
   enabled: ${DIGI_BRIDGE_ENABLED}
-
   # digi-bridge specific configuration variables
   config:
     # -- Client ID credentials for Digi API
@@ -233,40 +247,42 @@ digi-bridge:
       cpu: 100m
       memory: 128Mi
 
+# -- digi-reboot-report subchart specific configuration
+digi-reboot-report:
+  enabled: ${DIGI_REBOOT_REPORT_ENABLED}
+  replicaCount: ${DIGI_REBOOT_REPORT_DESIRED_TASKS}
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    # -- Email address to send digi-reboot-report
+    digi_report_recipient: ${DIGI_REPORT_RECIPIENT}
+
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-reboot-report
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${DIGI_REBOOT_REPORT_BUILD_NUMBER}
+
+  service:
+    type: ClusterIP
+    port: 5000
+
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+# -- dispatch-portal-backend subchart specific configuration
 dispatch-portal-backend:
   enabled: ${DISPATCH_PORTAL_BACKEND_ENABLED}
   replicaCount: ${DISPATCH_PORTAL_BACKEND_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     dispatch_portal_server_port: 5000
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-backend
@@ -286,6 +302,7 @@ dispatch-portal-backend:
       cpu: 100m
       memory: 128Mi
 
+# -- dispatch-portal-frontend subchart specific configuration
 dispatch-portal-frontend:
   enabled: ${DISPATCH_PORTAL_FRONTEND_ENABLED}
   replicaCount: ${DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS}
@@ -307,41 +324,71 @@ dispatch-portal-frontend:
       cpu: 100m
       memory: 128Mi
 
+# -- email-tagger-kre-bridge subchart specific configuration
+email-tagger-kre-bridge:
+  enabled: ${EMAIL_TAGGER_KRE_BRIDGE_ENABLED}
+  replicaCount: ${EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS}
+  config:
+    # -- Base URL for KRE API
+    kre_base_url: ${KRE_BASE_URL}
+
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-kre-bridge
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${EMAIL_TAGGER_KRE_BRIDGE_BUILD_NUMBER}
+
+  service:
+    type: ClusterIP
+    port: 5000
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# -- email-tagger-monitor subchart specific configuration
+email-tagger-monitor:
+  enabled: ${EMAIL_TAGGER_MONITOR_ENABLED}
+  replicaCount: ${EMAIL_TAGGER_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    # -- Signature secret key
+    request_signature_secret_key: ${REQUEST_SIGNATURE_SECRET_KEY}
+    # -- Request api key
+    request_api_key: ${REQUEST_API_KEY}
+    # -- API server endpoint prefix
+    api_server_endpoint_prefix: ${API_SERVER_ENDPOINT_PREFIX}
+
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${EMAIL_TAGGER_MONITOR_BUILD_NUMBER}
+
+  service:
+    type: ClusterIP
+    port: 5000
+
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
 # -- hawkeye-affecting-monitor subchart specific configuration
 hawkeye-affecting-monitor:
   enabled: ${HAWKEYE_AFFECTING_MONITOR_ENABLED}
   replicaCount: ${HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS}
-
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-affecting-monitor
@@ -361,25 +408,10 @@ hawkeye-affecting-monitor:
       cpu: 200m
       memory: 256Mi
 
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-
 # -- hawkeye-bridge subchart specific configuration
 hawkeye-bridge:
   replicaCount: ${HAWKEYE_BRIDGE_DESIRED_TASKS}
-
   enabled: ${HAWKEYE_BRIDGE_ENABLED}
-
   config:
     hawkeye_client_username: ${HAWKEYE_CLIENT_USERNAME}
     # -- Client password credentials for Hawkeye API
@@ -410,35 +442,8 @@ hawkeye-customer-cache:
   enabled: ${HAWKEYE_CUSTOMER_CACHE_ENABLED}
   replicaCount: ${HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS}
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-customer-cache
@@ -458,39 +463,13 @@ hawkeye-customer-cache:
       cpu: 200m
       memory: 256Mi
 
+# -- hawkeye-outage-monitor subchart specific configuration
 hawkeye-outage-monitor:
   enabled: ${HAWKEYE_OUTAGE_MONITOR_ENABLED}
   replicaCount: ${HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS}
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-outage-monitor
@@ -510,39 +489,13 @@ hawkeye-outage-monitor:
       cpu: 100m
       memory: 128Mi
 
+# -- last-contact-report subchart specific configuration
 last-contact-report:
   enabled: ${LAST_CONTACT_REPORT_ENABLED}
   replicaCount: ${LAST_CONTACT_REPORT_DESIRED_TASKS}
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/last-contact-report
@@ -567,9 +520,7 @@ last-contact-report:
 lit-bridge:
   # -- Number of lit-bridge pods to do calls to LIT API.
   replicaCount: ${LIT_BRIDGE_DESIRED_TASKS}
-
   enabled: ${LIT_BRIDGE_ENABLED}
-
   config:
     # -- Client ID credentials for LIT API
     lit_client_id: ${LIT_CLIENT_ID}
@@ -604,6 +555,7 @@ lit-bridge:
       cpu: 100m
       memory: 128Mi
 
+# -- lumin-billing-report subchart specific configuration
 lumin-billing-report:
   enabled: ${LUMIN_BILLING_REPORT_ENABLED}
   replicaCount: ${LUMIN_BILLING_REPORT_DESIRED_TASKS}
@@ -634,12 +586,6 @@ lumin-billing-report:
     requests:
       cpu: 100m
       memory: 128Mi
-
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
 
 # -- notifier subchart specific configuration
 notifier:
@@ -680,10 +626,13 @@ notifier:
       cpu: 100m
       memory: 128Mi
 
+# -- service-affecting-monitor subchart specific configuration
 service-affecting-monitor:
   enabled: ${SERVICE_AFFECTING_MONITOR_ENABLED}
   replicaCount: ${SERVICE_AFFECTING_MONITOR_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -695,35 +644,6 @@ service-affecting-monitor:
       labels: {}
       #labels:
       #  servicediscovery: true
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-affecting-monitor
@@ -743,39 +663,13 @@ service-affecting-monitor:
       cpu: 100m
       memory: 128Mi
 
+# -- service-dispatch-monitor subchart specific configuration
 service-dispatch-monitor:
   enabled: ${SERVICE_DISPATCH_MONITOR_ENABLED}
   replicaCount: ${SERVICE_DISPATCH_MONITOR_DESIRED_TASKS}
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-dispatch-monitor
@@ -795,10 +689,13 @@ service-dispatch-monitor:
       cpu: 100m
       memory: 128Mi
 
+# -- service-outage-monitor-1 subchart specific configuration
 service-outage-monitor-1:
   enabled: ${SERVICE_OUTAGE_MONITOR_1_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -815,35 +712,6 @@ service-outage-monitor-1:
     velocloud_hosts: ${VELOCLOUD_HOST_1}
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ${VELOCLOUD_HOST_1_FILTER}
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
@@ -863,10 +731,13 @@ service-outage-monitor-1:
       cpu: 100m
       memory: 128Mi
 
+# -- service-outage-monitor-2 subchart specific configuration
 service-outage-monitor-2:
-  enabled: true
-  replicaCount: 1
+  enabled: ${SERVICE_OUTAGE_MONITOR_2_ENABLED}
+  replicaCount: ${SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -883,35 +754,6 @@ service-outage-monitor-2:
     velocloud_hosts: ${VELOCLOUD_HOST_2}
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ${VELOCLOUD_HOST_2_FILTER}
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
@@ -931,10 +773,13 @@ service-outage-monitor-2:
       cpu: 100m
       memory: 128Mi
 
+# -- service-outage-monitor-3 subchart specific configuration
 service-outage-monitor-3:
-  enabled: true
-  replicaCount: 1
+  enabled: ${SERVICE_OUTAGE_MONITOR_3_ENABLED}
+  replicaCount: ${SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -951,35 +796,6 @@ service-outage-monitor-3:
     velocloud_hosts: ${VELOCLOUD_HOST_3}
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ${VELOCLOUD_HOST_3_FILTER}
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
@@ -999,10 +815,13 @@ service-outage-monitor-3:
       cpu: 100m
       memory: 128Mi
 
+# -- service-outage-monitor-4 subchart specific configuration
 service-outage-monitor-4:
-  enabled: true
-  replicaCount: 1
+  enabled: ${SERVICE_OUTAGE_MONITOR_4_ENABLED}
+  replicaCount: ${SERVICE_OUTAGE_MONITOR_4_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -1019,35 +838,6 @@ service-outage-monitor-4:
     velocloud_hosts: ${VELOCLOUD_HOST_4}
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ${VELOCLOUD_HOST_4_FILTER}
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
@@ -1067,10 +857,13 @@ service-outage-monitor-4:
       cpu: 100m
       memory: 128Mi
 
+# -- service-outage-monitor-triage subchart specific configuration
 service-outage-monitor-triage:
   enabled: ${SERVICE_OUTAGE_MONITOR_TRIAGE_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -1087,35 +880,6 @@ service-outage-monitor-triage:
     velocloud_hosts: ${VELOCLOUD_HOST_TRIAGE}
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ${VELOCLOUD_HOST_FILTER_TRIAGE}
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
@@ -1135,10 +899,13 @@ service-outage-monitor-triage:
       cpu: 100m
       memory: 128Mi
 
+# -- sites-monitor subchart specific configuration
 sites-monitor:
-  enabled: true
-  replicaCount: 1
+  enabled: ${SITES_MONITOR_ENABLED}
+  replicaCount: ${SITES_MONITOR_DESIRED_TASKS}
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -1152,35 +919,6 @@ sites-monitor:
       #  servicediscovery: true
     # -- Period in second for do monitoring process
     monitoring_seconds: ${MONITORING_SECONDS}
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor
@@ -1202,7 +940,8 @@ sites-monitor:
 
 # -- t7-bridge subchart specific configuration
 t7-bridge:
-  replicaCount: 1
+  enabled: ${T7_BRIDGE_ENABLED}
+  replicaCount: ${T7_BRIDGE_DESIRED_TASKS}
   config:
     # -- KRE Base URL to make calls for get tickets predictions
     kre_base_url: ${KRE_BASE_URL}
@@ -1232,39 +971,13 @@ t7-bridge:
       cpu: 100m
       memory: 128Mi
 
+# -- tnba-feedback subchart specific configuration
 tnba-feedback:
   enabled: ${TNBA_FEEDBACK_ENABLED}
   replicaCount: ${TNBA_FEEDBACK_DESIRED_TASKS}
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-feedback
@@ -1284,40 +997,14 @@ tnba-feedback:
       cpu: 100m
       memory: 128Mi
 
+# -- tnba-monitor subchart specific configuration
 tnba-monitor:
   enabled: ${TNBA_MONITOR_ENABLED}
   replicaCount: ${TNBA_MONITOR_DESIRED_TASKS}
 
   config:
-    capabilities_enabled:
-      # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # bruin-bridge service responds correctly to healthcheck calls.
-      bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-      # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # cts-bridge service responds correctly to healthcheck calls.
-      cts_bridge: ${CTS_BRIDGE_ENABLED}
-      # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # hawkeye-bridge service responds correctly to healthcheck calls.
-      hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-      # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # lit-bridge service responds correctly to healthcheck calls.
-      lit_bridge: ${LIT_BRIDGE_ENABLED}
-      # -- Indicate is notifier is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # notifier service responds correctly to healthcheck calls.
-      notifier: ${NOTIFIER_ENABLED}
-      # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # t7-bridge service responds correctly to healthcheck calls.
-      t7_bridge: ${T7_BRIDGE_ENABLED}
-      # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-      # will be created in the tnba-monitor deployment that will wait until the
-      # velocloud-bridge service responds correctly to healthcheck calls.
-      velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
 
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-monitor
@@ -1339,10 +1026,8 @@ tnba-monitor:
 
 # -- velocloud-bridge subchart specific configuration
 velocloud-bridge:
-  replicaCount: 1
-
-  enabled: true
-
+  enabled: ${VELOCLOUD_BRIDGE_ENABLED}
+  replicaCount: ${VELOCLOUD_BRIDGE_DESIRED_TASKS}
   config:
     # -- Velocloud credentials
     velocloud_credentials: ${VELOCLOUD_CREDENTIALS}
@@ -1364,16 +1049,3 @@ velocloud-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
