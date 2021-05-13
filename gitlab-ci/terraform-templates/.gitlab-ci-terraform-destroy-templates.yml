@@ -1,8 +1,36 @@
-##
-# Using Gitlab-CI extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
+#
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
-.terraform_template_destroy_environment: &terraform_template_destroy_environment
+.terraform_template_destroy_basic_infra: &terraform_template_destroy_basic_infra
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DESTROY PROMETHEUS HELM CHART
+    - helm -n prometheus uninstall prometheus
+    # Iterate over terraform directories in module
+    - cd "${MODULE}" || exit 1
+    - >
+      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
+          (
+              cd "${i}" || exit
+              echo "The current Workdir is $i"
+              terraform init -backend=true -get=true -input=false
+              if [[ ${i} != "0-ecr-repositories" && ${i} != "4-eks-roles" ]]; then
+                  terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                  terraform refresh
+                  terraform DESTROY -auto-approve
+              fi
+              cd ..
+          )
+      done
+
+.terraform_template_destroy_elastic: &terraform_template_destroy_elastic
   image:
     name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
@@ -28,11 +56,23 @@
                   terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
                 elif [[ ${i} == "2-redis-tnba-feedback" ]]; then
                   terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
+                elif [[ ${i} == "3-redis-email-tagger" ]]; then
+                  terraform output REDIS_EMAIL_TAGGER_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_email_tagger_hostname.txt
                 fi
               fi
           )
       done
-    - cd ${CI_PROJECT_DIR}
+    - python3 ci-utils/ecr/ecr_images_util.py -d True -e ${TF_VAR_ENVIRONMENT} -a True -p True
+  tags:
+    - kubernetes
+
+.terraform_template_destroy_data_collector: &terraform_template_destroy_data_collector
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
         apk add zip unzip
@@ -48,6 +88,5 @@
         terraform destroy -auto-approve
         cd ${CI_PROJECT_DIR}
       fi
-    - python3 ci-utils/ecr/ecr_images_util.py -d True -e ${TF_VAR_ENVIRONMENT} -a True -p True
   tags:
     - kubernetes

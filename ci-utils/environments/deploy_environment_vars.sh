@@ -4,9 +4,11 @@ function common_variables_by_environment() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    export KRE_BASE_URL=${KRE_BASE_URL_DEV}
   else
     # common environment variables for production environment
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
+    export KRE_BASE_URL=${KRE_BASE_URL_PRO}
   fi
 }
 
@@ -72,6 +74,30 @@ function digi_bridge_variables() {
   fi
 }
 
+function digi_reboot_report_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # digi-reboot-report environment variables for ephemeral environments
+    export DIGI_REPORT_RECIPIENT=${DIGI_REPORT_RECIPIENT_DEV}
+  else
+    # digi-reboot-report environment variables for production environment
+    export DIGI_REPORT_RECIPIENT=${DIGI_REPORT_RECIPIENT_PRO}
+  fi
+}
+
+function email_tagger_monitor_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # email-tagger-monitor environment variables for ephemeral environments
+    export REQUEST_SIGNATURE_SECRET_KEY=${REQUEST_SIGNATURE_SECRET_KEY_DEV}
+    export REQUEST_API_KEY=${REQUEST_API_KEY_DEV}
+    export API_SERVER_ENDPOINT_PREFIX=${API_SERVER_ENDPOINT_PREFIX_DEV}
+  else
+    # email-tagger-monitor environment variables for production environment
+    export REQUEST_SIGNATURE_SECRET_KEY=${REQUEST_SIGNATURE_SECRET_KEY_PRO}
+    export REQUEST_API_KEY=${REQUEST_API_KEY_PRO}
+    export API_SERVER_ENDPOINT_PREFIX=${API_SERVER_ENDPOINT_PREFIX_PRO}
+  fi
+}
+
 function hawkeye_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # hawkeye-bridge environment variables for ephemeral environments
@@ -117,7 +143,6 @@ function lumin_billing_report_variables() {
     # lumin-billing-report environment variables for production environment
     export BILLING_RECIPIENT=${BILLING_RECIPIENT_REPORT_PROD}
   fi
-
 }
 
 function notifier_variables() {
@@ -135,12 +160,10 @@ function t7_bridge_variables() {
     # t7-bridge environment variables for ephemeral environments
     export T7_BASE_URL=${T7_BASE_URL_DEV}
     export T7_TOKEN=${T7_TOKEN_DEV}
-    export KRE_BASE_URL=${KRE_BASE_URL_DEV}
   else
     # t7-bridge environment variables for production environment
     export T7_BASE_URL=${T7_BASE_URL_PRO}
     export T7_TOKEN=${T7_TOKEN_PRO}
-    export KRE_BASE_URL=${KRE_BASE_URL_PRO}
   fi
 }
 
@@ -177,6 +200,8 @@ function environments_assign() {
   bruin_bridge_variables
   cts_bridge_variables
   digi_bridge_variables
+  digi_reboot_report_variables
+  email_tagger_monitor_variables
   hawkeye_bridge_variables
   lit_bridge_variables
   lumin_billing_report_variables

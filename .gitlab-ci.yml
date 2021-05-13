@@ -9,7 +9,6 @@ stages:
   - deploy
   - helm
   - destroy
-  - release
 
 variables:
   NATS_SERVER1: "nats://nats-server:4222"
@@ -83,19 +82,19 @@ include:
   - local: 'bruin-bridge/.gitlab-ci.yml'
 #  - local: 'cts-bridge/.gitlab-ci.yml'                #--> disable dispatch portal feature
   - local: 'customer-cache/.gitlab-ci.yml'
-  - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'digi-bridge/.gitlab-ci.yml'
   - local: 'digi-reboot-report/.gitlab-ci.yml'
 #  - local: 'dispatch-portal-backend/.gitlab-ci.yml'   #--> disable dispatch portal feature
 #  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'  #--> disable dispatch portal feature
-  - local: 'email-tagger-monitor/.gitlab-ci.yml'
   - local: 'email-tagger-kre-bridge/.gitlab-ci.yml'
+  - local: 'email-tagger-monitor/.gitlab-ci.yml'
   - local: 'hawkeye-affecting-monitor/.gitlab-ci.yml'
   - local: 'hawkeye-bridge/.gitlab-ci.yml'
   - local: 'hawkeye-customer-cache/.gitlab-ci.yml'
   - local: 'hawkeye-outage-monitor/.gitlab-ci.yml'
   - local: 'helm/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
+  - local: 'infra-as-code/data-collector/.gitlab-ci.yml'
   - local: 'infra-as-code/elasticaches/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
@@ -112,11 +111,11 @@ include:
 #  - local: 'service-dispatch-monitor/.gitlab-ci.yml'  #--> disable dispatch portal feature
   - local: 'service-outage-monitor/.gitlab-ci.yml'
   - local: 'sites-monitor/.gitlab-ci.yml'
+  - local: 't7-bridge/.gitlab-ci.yml'
   - local: 'tnba-feedback/.gitlab-ci.yml'
   - local: 'tnba-monitor/.gitlab-ci.yml'
   - local: 'ticket-collector/.gitlab-ci.yml'
   - local: 'ticket-statistics/.gitlab-ci.yml'
-  - local: 't7-bridge/.gitlab-ci.yml'
   - local: 'velocloud-bridge/.gitlab-ci.yml'
 
 semantic-release:
