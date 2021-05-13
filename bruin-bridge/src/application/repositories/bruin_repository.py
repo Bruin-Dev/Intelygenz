@@ -237,7 +237,8 @@ class BruinRepository:
 
         work_queues = possible_work_queues_response_body['nextResults']
         queue_name = filters["queue_name"]
-        if possible_work_queues_response_body['currentTaskName'].strip() == queue_name:
+        current_task_name = possible_work_queues_response_body['currentTaskName']
+        if current_task_name is not None and current_task_name.strip() == queue_name:
             return {
                 'body': f'Ticket {ticket_id} is already in the queue {queue_name}',
                 'status': 400,
@@ -250,7 +251,8 @@ class BruinRepository:
 
         work_queue_id = None
         for possible_work_queue in work_queues:
-            if possible_work_queue["resultName"].strip() == queue_name:
+            result_name = possible_work_queue["resultName"]
+            if result_name is not None and result_name.strip() == queue_name:
                 work_queue_id = possible_work_queue["resultTypeId"]
                 break
 
