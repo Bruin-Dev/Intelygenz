@@ -514,25 +514,21 @@ class TNBAMonitor:
             if self._is_new_ticket(ticket_status):
                 self._logger.info(f'Creation date: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
                 if self._is_ticket_old_enough(ticket_creation_date):
-                    self._logger.info(f'Detail object: {detail_object} (serial: {serial_number} ticket: {ticket_id})')
-                    if self._ticket_repository.is_detail_in_outage_ticket(detail_object):
-                        self._logger.info(
-                            f'Newest note: {newest_tnba_note} (serial: {serial_number} ticket: {ticket_id})')
-                        if self._config.ENVIRONMENT == 'production':
-                            msg = (
-                                f"Automation Engine appended a TNBA note for serial "
-                                f"{serial_number} in ticket {ticket_id}, "
-                                "which has been in the IPA Investigate work queue for a while. "
-                                "The ticket is going to be forwarded "
-                                "to the HNOC Investigate queue."
-                            )
-                            self._logger.info(msg)
-                            await self._bruin_repository.change_detail_work_queue(
-                                ticket_id,
-                                task_result='HNOC Investigate',
-                                serial_number=serial_number,
-                                detail_id=ticket_detail_id
-                            )
+                    if self._config.ENVIRONMENT == 'production':
+                        msg = (
+                            f"Automation Engine appended a TNBA note for serial "
+                            f"{serial_number} in ticket {ticket_id}, "
+                            "which has been in the IPA Investigate work queue for a while. "
+                            "The ticket is going to be forwarded "
+                            "to the HNOC Investigate queue."
+                        )
+                        self._logger.info(msg)
+                        await self._bruin_repository.change_detail_work_queue(
+                            ticket_id,
+                            task_result='HNOC Investigate',
+                            serial_number=serial_number,
+                            detail_id=ticket_detail_id
+                        )
             if newest_tnba_note and not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
                 msg = (
                     f'TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. '
