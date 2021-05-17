@@ -19,9 +19,9 @@ class BruinRepository:
             'request_id': uuid(),
             'body': {
                 'client_id': client_id,
-                'ticket_status': ticket_statuses,
+                'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
-                'category': 'SD-WAN',
+                'product_category': 'SD-WAN',
             },
         }
 
@@ -30,7 +30,7 @@ class BruinRepository:
                 f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
                 f'{ticket_topic} and belonging to client {client_id} from Bruin...'
             )
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
+            response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
             self._logger.info(
                 f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
                 f'{ticket_topic} and belonging to client {client_id} from Bruin!'

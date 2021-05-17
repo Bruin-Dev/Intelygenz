@@ -9,7 +9,7 @@ def __generate_ticket_object(*, ticket_id: int = None, ticket_creation_date: str
                              ticket_notes: List[dict] = None, ticket_status: str = None):
     ticket_id = ticket_id or 12345
     ticket_creation_date = ticket_creation_date or "1/03/2021 10:08:13 AM"
-    ticket_topic = ticket_topic or 'Service Outage Trouble'
+    ticket_topic = ticket_topic or 'VOO'
     ticket_creator = ticket_creator or 'Intelygenz Ai'
     ticket_details = ticket_details or []
     ticket_notes = ticket_notes or []
@@ -31,7 +31,7 @@ def __generate_detail_object(*, ticket_id: int = None, ticket_creation_date: str
                              ticket_status: str = None):
     ticket_id = ticket_id or 12345
     ticket_creation_date = ticket_creation_date or "1/03/2021 10:08:13 AM"
-    ticket_topic = ticket_topic or 'Service Outage Trouble'
+    ticket_topic = ticket_topic or 'VOO'
     ticket_creator = ticket_creator or 'Intelygenz Ai'
     ticket_detail = ticket_detail or {}
     ticket_notes = ticket_notes or []

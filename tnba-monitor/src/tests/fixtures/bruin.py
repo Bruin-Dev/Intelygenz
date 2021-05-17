@@ -258,11 +258,7 @@ def serial_number_3():
 def open_affecting_ticket(bruin_client_id, bruin_client_name):
     return {
         "clientID": bruin_client_id,
-        "clientName": bruin_client_name,
         "ticketID": 5118129,
-        "category": "SD-WAN",
-        "topic": "Service Affecting Trouble",
-        "referenceTicketNumber": 0,
         "ticketStatus": "In-Progress",
         "address": {
             "address": "55 Water St Fl 32",
@@ -273,17 +269,8 @@ def open_affecting_ticket(bruin_client_id, bruin_client_name):
         },
         "createDate": "1/21/2021 4:02:30 PM",
         "createdBy": "Intelygenz Ai",
-        "creationNote": None,
-        "resolveDate": "",
-        "resolvedby": None,
-        "closeDate": None,
-        "closedBy": None,
-        "lastUpdate": None,
-        "updatedBy": None,
-        "mostRecentNote": "1/21/2021 4:06:56 PM Intelygenz Ai",
-        "nextScheduledDate": "1/28/2021 5:00:00 AM",
-        "flags": "",
-        "severity": "2"
+        "callType": "REP",
+        "category": "VAS",
     }
 
 
@@ -291,11 +278,7 @@ def open_affecting_ticket(bruin_client_id, bruin_client_name):
 def open_outage_ticket(bruin_client_id, bruin_client_name):
     return {
         "clientID": bruin_client_id,
-        "clientName": bruin_client_name,
         "ticketID": 5118129,
-        "category": "SD-WAN",
-        "topic": "Service Outage Trouble",
-        "referenceTicketNumber": 0,
         "ticketStatus": "In-Progress",
         "address": {
             "address": "55 Water St Fl 32",
@@ -306,17 +289,8 @@ def open_outage_ticket(bruin_client_id, bruin_client_name):
         },
         "createDate": "1/21/2021 4:02:30 PM",
         "createdBy": "Intelygenz Ai",
-        "creationNote": None,
-        "resolveDate": "",
-        "resolvedby": None,
-        "closeDate": None,
-        "closedBy": None,
-        "lastUpdate": None,
-        "updatedBy": None,
-        "mostRecentNote": "1/21/2021 4:06:56 PM Intelygenz Ai",
-        "nextScheduledDate": "1/28/2021 5:00:00 AM",
-        "flags": "",
-        "severity": "2"
+        "callType": "REP",
+        "category": "VOO",
     }
 
 

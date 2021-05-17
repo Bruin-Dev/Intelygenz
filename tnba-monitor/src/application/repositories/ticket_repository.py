@@ -53,7 +53,7 @@ class TicketRepository:
 
     @staticmethod
     def is_detail_in_outage_ticket(ticket_detail: dict) -> bool:
-        return ticket_detail['ticket_topic'] == 'Service Outage Trouble'
+        return ticket_detail['ticket_topic'] == 'VOO'
 
     @staticmethod
     def was_ticket_created_by_automation_engine(ticket_detail: dict) -> bool:

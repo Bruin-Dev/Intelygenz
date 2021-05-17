@@ -209,7 +209,7 @@ class TNBAMonitor:
                 for ticket in all_open_tickets:
                     ticket_id = ticket['ticketID']
                     ticket_creation_date = ticket['createDate']
-                    ticket_topic = ticket['topic']
+                    ticket_topic = ticket['category']
                     ticket_creator = ticket['createdBy']
                     ticket_status = ticket['ticketStatus']
 

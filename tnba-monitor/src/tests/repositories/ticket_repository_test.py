@@ -124,11 +124,11 @@ class TestTicketRepository:
             assert result is False
 
     def is_detail_in_outage_ticket_test(self, make_detail_object):
-        detail_object = make_detail_object(ticket_topic='Service Outage Trouble')
+        detail_object = make_detail_object(ticket_topic='VOO')
         result = TicketRepository.is_detail_in_outage_ticket(detail_object)
         assert result is True
 
-        detail_object = make_detail_object(ticket_topic='Service Affecting Trouble')
+        detail_object = make_detail_object(ticket_topic='VAS')
         result = TicketRepository.is_detail_in_outage_ticket(detail_object)
         assert result is False
 

@@ -312,7 +312,7 @@ class TestTNBAMonitor:
         expected_outage_ticket_object = make_ticket_object(
             ticket_id=open_outage_ticket['ticketID'],
             ticket_creation_date=open_outage_ticket['createDate'],
-            ticket_topic=open_outage_ticket['topic'],
+            ticket_topic=open_outage_ticket['category'],
             ticket_creator=open_outage_ticket['createdBy'],
             ticket_details=[outage_ticket_1_detail_1],
             ticket_notes=[],
@@ -320,7 +320,7 @@ class TestTNBAMonitor:
         expected_affecting_ticket_object = make_ticket_object(
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['topic'],
+            ticket_topic=open_affecting_ticket['category'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -368,7 +368,7 @@ class TestTNBAMonitor:
         expected_affecting_ticket_object = make_ticket_object(
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['topic'],
+            ticket_topic=open_affecting_ticket['category'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -415,7 +415,7 @@ class TestTNBAMonitor:
         expected_affecting_ticket_object = make_ticket_object(
             ticket_id=open_outage_ticket['ticketID'],
             ticket_creation_date=open_outage_ticket['createDate'],
-            ticket_topic=open_outage_ticket['topic'],
+            ticket_topic=open_outage_ticket['category'],
             ticket_creator=open_outage_ticket['createdBy'],
             ticket_details=[outage_ticket_1_detail_1],
             ticket_notes=[],
@@ -469,7 +469,7 @@ class TestTNBAMonitor:
         expected_affecting_ticket_object = make_ticket_object(
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['topic'],
+            ticket_topic=open_affecting_ticket['category'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -525,7 +525,7 @@ class TestTNBAMonitor:
         expected_affecting_ticket_object = make_ticket_object(
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['topic'],
+            ticket_topic=open_affecting_ticket['category'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -1028,13 +1028,13 @@ class TestTNBAMonitor:
             self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object, serial_number_1, serial_number_2):
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_detail_object_1 = make_detail_object(
-            ticket_topic='Service Affecting Trouble',
+            ticket_topic='VAS',
             ticket_detail=ticket_detail_1,
         )
 
         ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_detail_object_2 = make_detail_object(
-            ticket_topic='Service Affecting Trouble',
+            ticket_topic='VAS',
             ticket_detail=ticket_detail_2,
         )
 
@@ -1051,19 +1051,19 @@ class TestTNBAMonitor:
             serial_number_3):
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_detail_object_1 = make_detail_object(
-            ticket_topic='Service Outage Trouble',
+            ticket_topic='VOO',
             ticket_detail=ticket_detail_1,
         )
 
         ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_detail_object_2 = make_detail_object(
-            ticket_topic='Service Affecting Trouble',
+            ticket_topic='VAS',
             ticket_detail=ticket_detail_2,
         )
 
         ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_detail_object_3 = make_detail_object(
-            ticket_topic='Service Outage Trouble',
+            ticket_topic='VOO',
             ticket_detail=ticket_detail_3,
         )
 
@@ -1683,7 +1683,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'Service Outage Trouble'
+        ticket_topic = 'VOO'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1734,7 +1734,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'Service Affecting Trouble'
+        ticket_topic = 'VAS'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1767,7 +1767,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Otacon'
-        ticket_topic = 'Service Outage Trouble'
+        ticket_topic = 'VOO'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1800,7 +1800,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'Service Outage Trouble'
+        ticket_topic = 'VOO'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1839,7 +1839,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'Service Outage Trouble'
+        ticket_topic = 'VOO'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1887,7 +1887,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'Service Outage Trouble'
+        ticket_topic = 'VOO'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1933,7 +1933,7 @@ class TestTNBAMonitor:
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'Service Outage Trouble'
+        ticket_topic = 'VOO'
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
