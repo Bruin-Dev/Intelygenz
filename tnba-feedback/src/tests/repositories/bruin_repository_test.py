@@ -42,8 +42,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ['Closed'],
-                'category': 'SD-WAN',
+                'ticket_statuses': ['Closed'],
+                'product_category': 'SD-WAN',
                 'ticket_topic': ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -73,7 +73,7 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=60)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
@@ -87,8 +87,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ['Closed'],
-                'category': 'SD-WAN',
+                'ticket_statuses': ['Closed'],
+                'product_category': 'SD-WAN',
                 'ticket_topic': ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -112,7 +112,7 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=60)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == nats_error_response
@@ -128,8 +128,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ['Closed'],
-                'category': 'SD-WAN',
+                'ticket_statuses': ['Closed'],
+                'product_category': 'SD-WAN',
                 'ticket_topic': ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -159,7 +159,7 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=60)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == response

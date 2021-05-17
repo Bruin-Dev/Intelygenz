@@ -26,15 +26,15 @@ class BruinRepository:
         request_msg = {
             "request_id": uuid(),
             "body": {"client_id": client_id,
-                     "category": "SD-WAN",
+                     "product_category": "SD-WAN",
                      "ticket_topic": ticket_topic,
-                     "ticket_status": ['Closed'],
+                     "ticket_statuses": ['Closed'],
                      "start_date": start_date,
                      "end_date": end_date,
                      }
         }
         try:
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request_msg, timeout=60)
+            response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request_msg, timeout=60)
             self._logger.info(
                 f'Got all closed tickets with, with ticket topic '
                 f'{ticket_topic} and belonging to client {client_id} from Bruin!'
