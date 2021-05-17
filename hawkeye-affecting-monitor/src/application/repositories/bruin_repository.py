@@ -21,9 +21,9 @@ class BruinRepository:
             'request_id': uuid(),
             'body': {
                 'client_id': client_id,
-                'ticket_status': ticket_statuses,
+                'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
-                'category': 'Network Scout',
+                'product_category': 'Network Scout',
             },
         }
 
@@ -42,7 +42,7 @@ class BruinRepository:
                     f'{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin...'
                 )
 
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
+            response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
         except Exception as e:
             err_msg = (
                 f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
