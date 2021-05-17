@@ -567,8 +567,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'category': 'Network Scout',
+                'ticket_statuses': ticket_statuses,
+                'product_category': 'Network Scout',
                 'ticket_topic': ticket_topic,
             },
         }
@@ -593,7 +593,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         assert result == response
 
     @pytest.mark.asyncio
@@ -607,8 +607,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'category': 'Network Scout',
+                'ticket_statuses': ticket_statuses,
+                'product_category': 'Network Scout',
                 'ticket_topic': ticket_topic,
                 'service_number': service_number,
             },
@@ -636,7 +636,7 @@ class TestBruinRepository:
                 bruin_client_id, ticket_topic, ticket_statuses, service_number=service_number
             )
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         assert result == response
 
     @pytest.mark.asyncio
@@ -649,8 +649,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'category': 'Network Scout',
+                'ticket_statuses': ticket_statuses,
+                'product_category': 'Network Scout',
                 'ticket_topic': ticket_topic,
             },
         }
@@ -669,7 +669,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == nats_error_response
@@ -684,8 +684,8 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'category': 'Network Scout',
+                'ticket_statuses': ticket_statuses,
+                'product_category': 'Network Scout',
                 'ticket_topic': ticket_topic,
             },
         }
@@ -709,7 +709,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == response
