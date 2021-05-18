@@ -21,6 +21,9 @@ terraform-valite-basic-infra:
 basic-infra-dev:
   stage: basic_infra
   extends: .terraform_template_deploy_basic_infra
+  environment:
+    name: development
+    on_stop: destroy-basic-infra-dev
   variables:
     MODULE: "infra-as-code/basic-infra"
     IAM_TO_EKS_ROLES: developer, devops
@@ -34,6 +37,7 @@ basic-infra-dev:
     HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_DEV}
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - export TF_VAR_ENVIRONMENT="dev"
     - source ci-utils/environments/environment_assign.sh
     - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
@@ -47,6 +51,9 @@ basic-infra-dev:
 basic-infra-pro:
   stage: basic_infra
   extends: .terraform_template_deploy_basic_infra
+  environment:
+    name: production
+    on_stop: destroy-basic-infra-pro
   variables:
     MODULE: "infra-as-code/basic-infra"
     IAM_TO_EKS_ROLES: developer, devops
@@ -60,6 +67,7 @@ basic-infra-pro:
     HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PRO}
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
     - source ci-utils/environments/environment_assign.sh
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
@@ -74,27 +82,39 @@ basic-infra-pro:
 destroy-basic-infra-dev:
   stage: destroy
   extends: .terraform_template_destroy_basic_infra
+  environment:
+    name: development
+    action: stop
   variables:
     MODULE: "infra-as-code/basic-infra"
     EKS_CLUSTER_NAME: "mettel-automation-dev"
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - export TF_VAR_ENVIRONMENT="dev"
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
+  needs:
+    - basic-infra-dev
 
 destroy-basic-infra-pro:
   stage: destroy
   extends: .terraform_template_destroy_basic_infra
+  environment:
+    name: production
+    action: stop
   variables:
     MODULE: "infra-as-code/basic-infra"
     EKS_CLUSTER_NAME: "mettel-automation"
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
       allow_failure: true
+  needs:
+    - basic-infra-pro

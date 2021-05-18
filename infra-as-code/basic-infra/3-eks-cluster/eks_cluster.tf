@@ -24,7 +24,9 @@ module "mettel-automation-eks-cluster" {
   map_users     = var.map_users
 
   tags = merge(local.common_tags, {
-    Name         = local.eks_cluster_tag_name
+    Name         = local.cluster_name
+    "k8s.io/cluster-autoscaler/enabled" = "true"
+    "k8s.io/cluster-autoscaler/${local.cluster_name}" = "true"
   })
 
   version = "14.0.0"

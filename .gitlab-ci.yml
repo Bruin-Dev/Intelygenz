@@ -95,7 +95,6 @@ include:
   - local: 'helm/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
   - local: 'infra-as-code/data-collector/.gitlab-ci.yml'
-  - local: 'infra-as-code/elasticaches/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
   - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
@@ -121,6 +120,8 @@ include:
 semantic-release:
   stage: release
   image: node:15.2-alpine
+  environment:
+    name: production
   script:
     - yarn bootstrap
     - yarn global add multi-semantic-release
@@ -128,6 +129,6 @@ semantic-release:
     - multi-semantic-release
   resource_group: semantic-release
   rules:
-    - if: $CI_COMMIT_BRANCH == "feature/migration-to-k8s"
+    - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_TAG
       when: never

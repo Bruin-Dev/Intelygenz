@@ -88,10 +88,8 @@ dispatch-portal-frontend-build:
     - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - dispatch-portal-frontend/**/*
-      when: manual
-      allow_failure: true
+      changes:
+        - dispatch-portal-frontend/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["dispatch-portal-frontend-test", "dispatch-portal-frontend-test-e2e"]

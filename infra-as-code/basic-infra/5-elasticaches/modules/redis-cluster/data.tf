@@ -17,6 +17,11 @@ data "aws_subnet_ids" "mettel-automation-private-subnets" {
   }
 }
 
+data "aws_route53_zone" "mettel-automation-private-zone" {
+  name         = local.automation-private-zone-Name
+  private_zone = true
+}
+
 data "aws_security_group" "workers_security_group_eks" {
   filter {
     name   = "tag:Name"

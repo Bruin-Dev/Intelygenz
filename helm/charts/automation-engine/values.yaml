@@ -15,6 +15,7 @@ nats:
   # -- override name to use nats as name for svc, deployment and all created by nats helm chart
   nameOverride: "nats"
 
+
 ## YAML anchor to define capabilities_enabled
 .capabilitiesEnabled: &capabilitiesEnabled
   capabilities_enabled:
@@ -55,6 +56,7 @@ nats:
     # velocloud-bridge service responds correctly to healthcheck calls.
     velocloud_bridge: true
 
+
 # -- Global configuration for all subcharts
 global:
   # -- Name of environment for EKS cluster and network resources
@@ -89,6 +91,7 @@ global:
     # -- Name of the imagePullSecret created to access the images stored in ECR.
     name: "ecr-registry"
 
+
 # -- bruin-bridge subchart specific configuration
 bruin-bridge:
   # -- Field to indicate if the bruin-bridge module is going to be deployed
@@ -106,7 +109,7 @@ bruin-bridge:
   service:
     type: ClusterIP
     port: 5000
-  # bruin-bridge specific configuration variables
+  # -- bruin-bridge specific configuration variables
   config:
     # -- Client ID credentials for Bruin API
     bruin_client_id: ""
@@ -120,6 +123,7 @@ bruin-bridge:
     bruin_base_url_ip: ""
     # -- Base URL for Bruin API
     bruin_base_url: ""
+  # -- bruin-bridge resource definition
   resources:
     limits:
       cpu: 200m
@@ -128,14 +132,14 @@ bruin-bridge:
       cpu: 100m
       memory: 128Mi
 
+
 # -- cts-bridge subchart specific configuration
 cts-bridge:
-  replicaCount: 1
-
   # -- Field to indicate if the cts-bridge module is going to be deployed
   enabled: true
-
-  # cts-bridge specific configuration variables
+  # -- Number of replicas of cts-bridge module
+  replicaCount: 1
+  # -- cts-bridge specific configuration variables
   config:
     # -- Client ID credentials for CTS API
     cts_client_id: ""
@@ -151,7 +155,6 @@ cts-bridge:
     cts_login_url: ""
     # -- Domain URL for CTS API
     cts_domain: ""
-
   # -- cts-bridge image details
   image:
     # -- cts-bridge
@@ -159,12 +162,11 @@ cts-bridge:
     pullPolicy: Always
     # -- cts-bridge tag of docker image
     tag: ""
-
   # -- cts-bridge service details
   service:
     type: ClusterIP
     port: 5000
-
+  # -- cts-bridge resource definition
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -176,25 +178,32 @@ cts-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- cts-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- customer-cache subchart specific configuration
 customer-cache:
+  # -- Field to indicate if the customer-cache module is going to be deployed
   enabled: true
+  # -- Number of replicas of customer-cache module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/customer-cache
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 400m
@@ -203,14 +212,14 @@ customer-cache:
       cpu: 200m
       memory: 256Mi
 
+
 # -- digi-bridge subchart specific configuration
 digi-bridge:
-  replicaCount: 1
-
   # -- Field to indicate if the digi-bridge module is going to be deployed
   enabled: true
-
-  # digi-bridge specific configuration variables
+  # -- Number of replicas of digi-bridge module
+  replicaCount: 1
+  # -- digi-bridge specific configuration variables
   config:
     # -- Client ID credentials for Digi API
     digi_client_id: ""
@@ -230,17 +239,18 @@ digi-bridge:
     digi_ip_test: ""
     # -- Record name for Digi Test Environment
     digi_record_name_test: ""
-
+  # -- digi-bridge image details
   image:
+    # -- digi-bridge image image
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
     pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
+    # -- digi-bridge tag of docker image
     tag: ""
-
+  # -- digi-bridge service details
   service:
     type: ClusterIP
     port: 5000
-
+  # -- digi-bridge resource definition
   resources:
     limits:
       cpu: 200m
@@ -248,34 +258,34 @@ digi-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- digi-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- digi-reboot-report subchart specific configuration
 digi-reboot-report:
-  # Default values for digi-reboot-report.
-  # This is a YAML-formatted file.
-  # Declare variables to be passed into your templates.
-
-  # -- Number of digi-reboot-report pods
-  replicaCount: 1
-
+  # -- Field to indicate if the digi-reboot-report module is going to be deployed
   enabled: true
-
+  # -- Number of replicas of digi-reboot-report module
+  replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Email address to send digi-reboot-report
     digi_report_recipient: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-reboot-report
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 400m
@@ -284,26 +294,26 @@ digi-reboot-report:
       cpu: 200m
       memory: 256Mi
 
+
 # -- dispatch-portal-backend subchart specific configuration
 dispatch-portal-backend:
+  # -- Field to indicate if the dispatch-portal-backend module is going to be deployed
   enabled: true
+  # -- Number of replicas of dispatch-portal-backend module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Indicate the port of dispatch portal server
     dispatch_portal_server_port: 5000
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-backend
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -312,20 +322,21 @@ dispatch-portal-backend:
       cpu: 100m
       memory: 128Mi
 
+
 # -- dispatch-portal-frontend subchart specific configuration
 dispatch-portal-frontend:
+  # -- Field to indicate if the dispatch-portal-frontend module is going to be deployed
   enabled: true
+  # -- Number of replicas of dispatch-portal-frontend module
   replicaCount: 1
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-frontend
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 3000
-
   resources:
     limits:
       cpu: 200m
@@ -334,10 +345,10 @@ dispatch-portal-frontend:
       cpu: 100m
       memory: 128Mi
 
+
 # -- ecr-cred-helper subchart specific configuration
 ecr-cred-helper:
   enabled: false
-
   # -- Specific configuration for ecr-cred-helper
   config:
     mode: "aws"
@@ -356,17 +367,14 @@ ecr-cred-helper:
       password: ""
       name: "ecr-registry"
     schedule_expr: "0 */6 * * *"
-
   image:
     repository: alpine
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "3.12.0"
-
   imagePullSecrets: [ ]
   nameOverride: ""
   fullnameOverride: ""
-
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -375,7 +383,6 @@ ecr-cred-helper:
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template
     name: "sa-ecr-cred-helper"
-
   resources:
     limits:
       cpu: 200m
@@ -384,31 +391,24 @@ ecr-cred-helper:
       cpu: 100m
       memory: 128Mi
 
+
 # -- email-tagger-kre-bridge subchart specific configuration
 email-tagger-kre-bridge:
-  # Default values for email-tagger-kre-bridge.
-  # This is a YAML-formatted file.
-  # Declare variables to be passed into your templates.
-
+  # -- Field to indicate if the email-tagger-kre-bridge module is going to be deployed
   enabled: true
-
-  # -- Number of email-tagger-kre-bridge pods to do calls to Hawkeye API.
+  # -- Number of replicas of email-tagger-kre-bridge module
   replicaCount: 1
-
   config:
     # -- Base URL for KRE API
     kre_base_url: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-kre-bridge
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -416,18 +416,21 @@ email-tagger-kre-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- email-tagger-kre-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- email-tagger-monitor subchart specific configuration
 email-tagger-monitor:
-  # Default values for email-tagger-monitor.
-  # This is a YAML-formatted file.
-  # Declare variables to be passed into your templates.
-
-  # -- Number of email-tagger-monitor pods
-  replicaCount: 1
-
+  # -- Field to indicate if the email-tagger-monitor module is going to be deployed
   enabled: true
-
+  # -- Number of replicas of email-tagger-monitor module
+  replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
@@ -438,18 +441,15 @@ email-tagger-monitor:
     # -- Request api key
     request_api_key: ""
     # -- API server endpoint prefix
-    api_server_endpoint_prefix: ""
-
+    api_server_endpoint_prefix: "/api/email-tagger-webhook"
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 400m
@@ -458,31 +458,24 @@ email-tagger-monitor:
       cpu: 200m
       memory: 256Mi
 
+
 # -- hawkeye-affecting-monitor subchart specific configuration
 hawkeye-affecting-monitor:
-  # Default values for hawkeye-affecting-monitor.
-  # This is a YAML-formatted file.
-  # Declare variables to be passed into your templates.
-
-  # -- Number of hawkeye-affecting-monitor pods
-  replicaCount: 1
-
+  # -- Field to indicate if the hawkeye-affecting-monitor module is going to be deployed
   enabled: true
-
+  # -- Number of replicas of hawkeye-affecting-monitor module
+  replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-affecting-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 400m
@@ -491,29 +484,27 @@ hawkeye-affecting-monitor:
       cpu: 200m
       memory: 256Mi
 
+
 # -- hawkeye-bridge subchart specific configuration
 hawkeye-bridge:
-  replicaCount: 1
-
+  # -- Field to indicate if the hawkeye-bridge module is going to be deployed
   enabled: true
-
+  # -- Number of replicas of hawkeye-bridge module
+  replicaCount: 1
   config:
     hawkeye_client_username: ""
     # -- Client password credentials for Hawkeye API
     hawkeye_client_password: ""
     ## -- Base URL for Hawkeye API
     hawkeye_base_url: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-bridge
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -521,25 +512,32 @@ hawkeye-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- hawkeye-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- hawkeye-customer-cache subchart specific configuration
 hawkeye-customer-cache:
+  # -- Field to indicate if the hawkeye-customer-cache module is going to be deployed
   enabled: true
+  # -- Number of replicas of hawkeye-customer-cache module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-customer-cache
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 400m
@@ -548,24 +546,24 @@ hawkeye-customer-cache:
       cpu: 200m
       memory: 256Mi
 
+
 # -- hawkeye-outage-monitor subchart specific configuration
 hawkeye-outage-monitor:
+  # -- Field to indicate if the hawkeye-outage-monitor module is going to be deployed
   enabled: true
+  # -- Number of replicas of hawkeye-outage-monitor module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-outage-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -574,24 +572,24 @@ hawkeye-outage-monitor:
       cpu: 100m
       memory: 128Mi
 
+
 # -- last-contact-report subchart specific configuration
 last-contact-report:
+  # -- Field to indicate if the last-contact-report module is going to be deployed
   enabled: true
+  # -- Number of replicas of last-contact-report module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/last-contact-report
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -600,13 +598,13 @@ last-contact-report:
       cpu: 100m
       memory: 128Mi
 
+
 # -- lit-bridge subchart specific configuration
 lit-bridge:
-  # -- Number of lit-bridge pods to do calls to LIT API.
-  replicaCount: 1
-
+  # -- Field to indicate if the lit-bridge module is going to be deployed
   enabled: true
-
+  # -- Number of replicas of lit-bridge module
+  replicaCount: 1
   config:
     # -- Client ID credentials for LIT API
     lit_client_id: ""
@@ -622,17 +620,14 @@ lit-bridge:
     lit_login_url: ""
     # -- Domain for LIT API
     lit_domain: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lit-bridge
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -640,10 +635,20 @@ lit-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- lit-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- lumin-billing-report subchart specific configuration
 lumin-billing-report:
+  # -- Field to indicate if the lumin-billing-report module is going to be deployed
   enabled: true
+  # -- Number of replicas of lumin-billing-report module
   replicaCount: 1
   config:
     # -- URI of Lumin API
@@ -654,17 +659,14 @@ lumin-billing-report:
     customer_name: ""
     # -- Email address to send lumin-billing-report
     billing_recipient: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lumin-billing-report
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -673,11 +675,13 @@ lumin-billing-report:
       cpu: 100m
       memory: 128Mi
 
+
 # -- notifier subchart specific configuration
 notifier:
-  replicaCount: 1
   # -- Field to indicate if the notifier module is going to be deployed
   enabled: true
+  # -- Number of replicas of notifier module
+  replicaCount: 1
   # -- notifier image details
   image:
     # -- notifier repository for docker images
@@ -689,7 +693,7 @@ notifier:
   service:
     type: ClusterIP
     port: 5000
-  # notifier specific configuration variables
+  # -- notifier specific configuration variables
   config:
     # -- Slack Webhook URL to send messages
     slack_url: ""
@@ -711,10 +715,20 @@ notifier:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- notifier autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- service-affecting-monitor subchart specific configuration
 service-affecting-monitor:
+  # -- Field to indicate if the service-affecting-monitor module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-affecting-monitor module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
@@ -730,17 +744,14 @@ service-affecting-monitor:
       labels: {}
       #labels:
       #  servicediscovery: true
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-affecting-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -749,24 +760,24 @@ service-affecting-monitor:
       cpu: 100m
       memory: 128Mi
 
+
 # -- service-dispatch-monitor subchart specific configuration
 service-dispatch-monitor:
+  # -- Field to indicate if the service-dispatch-monitor module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-dispatch-monitor module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-dispatch-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -775,9 +786,12 @@ service-dispatch-monitor:
       cpu: 100m
       memory: 128Mi
 
+
 # -- service-outage-monitor-1 subchart specific configuration
 service-outage-monitor-1:
+  # -- Field to indicate if the service-outage-monitor-1 module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-outage-monitor-1 module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
@@ -798,17 +812,14 @@ service-outage-monitor-1:
     velocloud_hosts: "host1"
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: "host1_filter"
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -817,9 +828,12 @@ service-outage-monitor-1:
       cpu: 100m
       memory: 128Mi
 
+
 # -- service-outage-monitor-2 subchart specific configuration
 service-outage-monitor-2:
+  # -- Field to indicate if the service-outage-monitor-2 module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-outage-monitor-2 module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
@@ -840,17 +854,14 @@ service-outage-monitor-2:
     velocloud_hosts: "host2"
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: "host2_filter"
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -858,12 +869,14 @@ service-outage-monitor-2:
     requests:
       cpu: 100m
       memory: 128Mi
+
 
 # -- service-outage-monitor-3 subchart specific configuration
 service-outage-monitor-3:
+  # -- Field to indicate if the service-outage-monitor-3 module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-outage-monitor-3 module
   replicaCount: 1
-
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
@@ -883,17 +896,14 @@ service-outage-monitor-3:
     velocloud_hosts: "host1"
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: "host1_filter"
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -901,12 +911,14 @@ service-outage-monitor-3:
     requests:
       cpu: 100m
       memory: 128Mi
+
 
 # -- service-outage-monitor-4 subchart specific configuration
 service-outage-monitor-4:
+  # -- Field to indicate if the service-outage-monitor-4 module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-outage-monitor-4 module
   replicaCount: 1
-
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
@@ -926,17 +938,14 @@ service-outage-monitor-4:
     velocloud_hosts: "host1"
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: "host1_filter"
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -945,9 +954,12 @@ service-outage-monitor-4:
       cpu: 100m
       memory: 128Mi
 
+
 # -- service-outage-monitor-triage subchart specific configuration
 service-outage-monitor-triage:
+  # -- Field to indicate if the service-outage-monitor-triage module is going to be deployed
   enabled: true
+  # -- Number of replicas of service-outage-monitor-triage module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
@@ -968,17 +980,14 @@ service-outage-monitor-triage:
     velocloud_hosts: ""
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -987,9 +996,12 @@ service-outage-monitor-triage:
       cpu: 100m
       memory: 128Mi
 
+
 # -- sites-monitor subchart specific configuration
 sites-monitor:
+  # -- Field to indicate if the sites-monitor module is going to be deployed
   enabled: true
+  # -- Number of replicas of sites-monitor module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
@@ -1002,17 +1014,14 @@ sites-monitor:
         name: metrics
     # -- Period in second for do monitoring process
     monitoring_seconds: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -1021,9 +1030,12 @@ sites-monitor:
       cpu: 100m
       memory: 128Mi
 
+
 # -- t7-bridge subchart specific configuration
 t7-bridge:
+  # -- Field to indicate if the t7-bridge module is going to be deployed
   enabled: true
+  # -- Number of replicas of t7-bridge module
   replicaCount: 1
   config:
     # -- KRE Base URL to make calls for get tickets predictions
@@ -1037,15 +1049,12 @@ t7-bridge:
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   imagePullSecrets: [ ]
   nameOverride: ""
   fullnameOverride: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -1053,25 +1062,32 @@ t7-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- t7-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 
 # -- tnba-feedback subchart specific configuration
 tnba-feedback:
+  # -- Field to indicate if the tnba-feedback module is going to be deployed
   enabled: true
+  # -- Number of replicas of tnba-feedback module
   replicaCount: 1
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-feedback
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -1080,25 +1096,24 @@ tnba-feedback:
       cpu: 100m
       memory: 128Mi
 
+
 # -- tnba-monitor subchart specific configuration
 tnba-monitor:
+  # -- Field to indicate if the tnba-monitor module is going to be deployed
   enabled: true
+  # -- Number of replicas of tnba-monitor module
   replicaCount: 1
-
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -1107,26 +1122,24 @@ tnba-monitor:
       cpu: 100m
       memory: 128Mi
 
+
 # -- velocloud-bridge subchart specific configuration
 velocloud-bridge:
-  replicaCount: 1
-
+  # -- Field to indicate if the velocloud-bridge module is going to be deployed
   enabled: true
-
+  # -- Number of replicas of velocloud-bridge module
+  replicaCount: 2
   config:
     # -- Velocloud credentials
     velocloud_credentials: ""
-
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-bridge
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
   service:
     type: ClusterIP
     port: 5000
-
   resources:
     limits:
       cpu: 200m
@@ -1134,3 +1147,10 @@ velocloud-bridge:
     requests:
       cpu: 100m
       memory: 128Mi
+  # -- velocloud-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80

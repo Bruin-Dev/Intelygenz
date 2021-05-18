@@ -12,11 +12,10 @@ variable "igz_users_email" {
     "gustavo.marin@intelygenz.com",
     "jonas.dacruz@intelygenz.com",
     "joseluis.vega@intelygenz.com",
-    "juancarlos.gomez@intelygenz.com",
+    "alejandro.aceituna@intelygenz.com",
     "julia.hossu@intelygenz.com",
     "mettel@intelygenz.com",
-    "sancho.munoz@intelygenz.com",
-    "xoan.mallon@intelygenz.com"
+    "sancho.munoz@intelygenz.com"
   ]
 }
 

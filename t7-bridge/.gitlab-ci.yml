@@ -35,10 +35,8 @@ t7-bridge-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $T7_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - t7-bridge/**/*
-      when: manual
-      allow_failure: true
+      changes:
+        - t7-bridge/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $T7_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["t7-bridge-test"]

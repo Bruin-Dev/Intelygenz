@@ -4,7 +4,7 @@
 
 .terraform_template_destroy_basic_infra: &terraform_template_destroy_basic_infra
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_TERRAFORM_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -20,55 +20,36 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              terraform init -backend=true -get=true -input=false
-              if [[ ${i} != "0-ecr-repositories" && ${i} != "4-eks-roles" ]]; then
-                  terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
-                  terraform refresh
-                  terraform DESTROY -auto-approve
-              fi
-              cd ..
-          )
-      done
-
-.terraform_template_destroy_elastic: &terraform_template_destroy_elastic
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - mkdir -p output
-    # Iterate over terraform directories and subdirectories in module
-    - cd ${MODULE} || exit 1
-    - >
-      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
-          (
-              cd "${i}" || exit 1
-              if [[ ${i} != "modules" ]]; then
-                echo "Terraform directory $i"
-                terraform init
-                terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
-                terraform refresh
-                terraform plan && terraform destroy -auto-approve
-                if [[ ${i} == "0-redis" ]]; then
-                  terraform output REDIS_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_hostname.txt
-                elif [[ ${i} == "1-redis-customer-cache" ]]; then
-                  terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
-                elif [[ ${i} == "2-redis-tnba-feedback" ]]; then
-                  terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
-                elif [[ ${i} == "3-redis-email-tagger" ]]; then
-                  terraform output REDIS_EMAIL_TAGGER_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_email_tagger_hostname.txt
-                fi
+              if [[ ${i} != "5-elasticaches" ]]; then
+                  terraform init -backend=true -get=true -input=false
+                  if [[ ${i} != "0-ecr-repositories" && ${i} != "4-eks-roles" ]]; then
+                      terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                      terraform refresh
+                      terraform DESTROY -auto-approve
+                  fi
+                  cd ..
+              else
+                  for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
+                      (
+                          cd "${i}" || exit 1
+                          if [[ ${i} != "modules" ]]; then
+                            echo "Terraform directory $i"
+                            terraform init
+                            terraform workspace select "${TF_VAR_ENVIRONMENT}"
+                            terraform refresh
+                            terraform plan && terraform destroy -auto-approve
+                          fi
+                          cd ..
+                      )
+                  done
+                  cd "${CI_PROJECT_DIR}/${MODULE}" || exit 1
               fi
           )
       done
-    - python3 ci-utils/ecr/ecr_images_util.py -d True -e ${TF_VAR_ENVIRONMENT} -a True -p True
-  tags:
-    - kubernetes
 
 .terraform_template_destroy_data_collector: &terraform_template_destroy_data_collector
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_TERRAFORM_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

@@ -14,8 +14,7 @@ variable "eks_devops_users" {
   default = [
     "alberto.iglesias",
     "angel.luis.piquero",
-    "xoan.mallon",
-    "jose.bustos"
+    "alejandro.aceituna"
   ]
 }
 

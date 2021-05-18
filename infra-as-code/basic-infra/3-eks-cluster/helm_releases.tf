@@ -1,3 +1,40 @@
+resource "helm_release" "cluster-autoscaler" {
+  name          = "cluster-autoscaler"
+
+  repository    = "https://kubernetes.github.io/autoscaler"
+  chart         = "cluster-autoscaler"
+
+  version       = var.CLUSTER_AUTOSCALER_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  wait          = true
+  recreate_pods = false
+
+  values = [
+    file("helm/external-charts/cluster-autoscaler-values.yaml")
+  ]
+
+  set {
+    name = "autoDiscovery.clusterName"
+    value = module.mettel-automation-eks-cluster.cluster_id
+    type  = "string"
+  }
+
+  set {
+    name = "rbac.serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.cluster-autoscaler-role-eks.arn
+    type  = "string"
+  }
+
+  depends_on = [
+      aws_iam_role.cluster-autoscaler-role-eks,
+      null_resource.associate-iam-oidc-provider,
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
+   ]
+}
+
 resource "helm_release" "external-dns" {
   name          = "external-dns"
 

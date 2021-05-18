@@ -190,3 +190,4 @@ Response:
 - [Getting started with testing in Python](https://realpython.com/python-testing/#choosing-a-test-runner)
 - [Pytest documentation](https://docs.pytest.org/en/latest/getting-started.html)
 - [SwaggerUI Quart](https://medium.com/@hkaraoguz/using-swaggerui-with-quart-72a3dab19273)
+

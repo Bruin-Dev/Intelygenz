@@ -18,3 +18,4 @@ the task history. If it is then it will send that ticket's task history to T7.
 2. `docker-compose up --build redis nats-server t7-bridge notifier`
 3. Run bruin in pycharm 
 4. `docker-compose up --build tnba-feedback`
+

@@ -8,7 +8,7 @@ resource "aws_vpc" "automation-vpc" {
   enable_dns_support = true
 
   tags = {
-    Name = local.automation-vpc-tag-Name
+    Name         = local.automation-vpc-tag-Name
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -22,8 +22,8 @@ resource "aws_internet_gateway" "automation-igw" {
   vpc_id = aws_vpc.automation-vpc.id
 
   tags = {
-    Name        = local.automation-internet_gateway-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Name         = local.automation-internet_gateway-tag-Name
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -34,8 +34,8 @@ resource "aws_internet_gateway" "automation-igw" {
 resource "aws_eip" "automation-nat_eip-1a" {
   vpc = true
   tags = {
-    Name = local.automation-nat_eip-1a-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Name         = local.automation-nat_eip-1a-tag-Name
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -44,8 +44,8 @@ resource "aws_eip" "automation-nat_eip-1a" {
 resource "aws_eip" "automation-nat_eip-1b" {
   vpc = true
   tags = {
-    Name = local.automation-nat_eip-1b-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Name         = local.automation-nat_eip-1b-tag-Name
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -57,8 +57,8 @@ resource "aws_nat_gateway" "automation-nat-1a" {
   subnet_id = aws_subnet.automation-public_subnet-1a.id
 
   tags = {
-    Name = local.automation-nat_gateway-1a-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Name         = local.automation-nat_gateway-1a-tag-Name
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -69,8 +69,8 @@ resource "aws_nat_gateway" "automation-nat-1b" {
   subnet_id = aws_subnet.automation-public_subnet-1b.id
 
   tags = {
-    Name = local.automation-nat_gateway-1b-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Name         = local.automation-nat_gateway-1b-tag-Name
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -100,12 +100,12 @@ resource "aws_subnet" "automation-public_subnet-1b" {
   map_public_ip_on_launch = true
 
   tags = merge(local.eks_tags, {
-    Name = local.automation-public_subnet-1b-tag-Name
+    Name                     = local.automation-public_subnet-1b-tag-Name
     "kubernetes.io/role/elb" = ""
-    Environment = var.CURRENT_ENVIRONMENT
-    Project      = var.common_info.project
-    Provisioning = var.common_info.provisioning
-    Type         = "Public"
+    Environment              = var.CURRENT_ENVIRONMENT
+    Project                  = var.common_info.project
+    Provisioning             = var.common_info.provisioning
+    Type                     = "Public"
   })
 }
 
@@ -117,11 +117,11 @@ resource "aws_subnet" "automation-private_subnet-1a" {
   map_public_ip_on_launch = false
 
   tags = merge(local.eks_tags, {
-    Name          = local.automation-private_subnet-1a-tag-Name
-    Environment   = var.CURRENT_ENVIRONMENT
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Type          = "Private"
+    Name         = local.automation-private_subnet-1a-tag-Name
+    Environment  = var.CURRENT_ENVIRONMENT
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Type         = "Private"
   })
 }
 
@@ -133,7 +133,7 @@ resource "aws_subnet" "automation-private_subnet-1b" {
 
   tags = merge(local.eks_tags, {
     Name = local.automation-private_subnet-1b-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
     Type         = "Private"
@@ -150,7 +150,7 @@ resource "aws_route_table" "automation-private-1a" {
 
   tags = {
     Name = local.automation-private-route_table-1a-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -165,7 +165,7 @@ resource "aws_route_table" "automation-private-1b" {
 
   tags = {
     Name = local.automation-private-route_table-1b-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -181,7 +181,7 @@ resource "aws_route_table" "automation-public-1a" {
 
   tags = {
     Name = local.automation-public-route_table-1a-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -196,7 +196,7 @@ resource "aws_route_table" "automation-public-1b" {
 
   tags = {
     Name = local.automation-public-route_table-1b-tag-Name
-    Environment = var.CURRENT_ENVIRONMENT
+    Environment  = var.CURRENT_ENVIRONMENT
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }
@@ -270,7 +270,7 @@ resource "aws_security_group" "automation-default" {
   }
 
   tags = {
-    Name = local.automation-default-security_group-tag-Name
+    Name         = local.automation-default-security_group-tag-Name
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }

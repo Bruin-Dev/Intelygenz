@@ -187,3 +187,4 @@ to the action level.
 # Running in docker-compose
 
 `docker-compose up --build redis nats-server notifier`
+

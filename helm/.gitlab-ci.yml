@@ -3,27 +3,26 @@
 # ============================================
 helm-branches:
   stage: helm
+  extends: .helm_template_deploy_chart
+  environment:
+    name: development
+    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
+    on_stop: destroy-helm-branches
   variables:
     DOCKER_IMAGES_FILE: "/tmp/latest_images_for_ecr_repositories.json"
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
     HELM_CHART_RELEASE_NAME: "automation-engine"
     HELM_CHART_DIR: "helm/charts/automation-engine"
-  extends: .helm_template_deploy_chart
-  before_script:
-    # GET REDIS HOSTNAMES FROM CACHE
-    - export REDIS_HOSTNAME=$(cat output/redis_hostname.txt)
-    - export REDIS_CUSTOMER_CACHE_HOSTNAME=$(cat output/redis_customer_cache_hostname.txt)
-    - export REDIS_TNBA_FEEDBACK_HOSTNAME=$(cat output/redis_tnba_feedback_hostname.txt)
-    - export REDIS_EMAIL_TAGGER_HOSTNAME=$(cat output/redis_email_tagger_hostname.txt)    
+    REDIS_HOSTNAME: ${REDIS_HOSTNAME_DEV}
+    REDIS_CUSTOMER_CACHE_HOSTNAME: ${REDIS_CUSTOMER_CACHE_HOSTNAME_DEV}
+    REDIS_TNBA_FEEDBACK_HOSTNAME: ${REDIS_TNBA_FEEDBACK_HOSTNAME_DEV}
+    REDIS_EMAIL_TAGGER_HOSTNAME: ${REDIS_EMAIL_TAGGER_HOSTNAME_DEV}
+  before_script:  
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export CURRENT_ENVIRONMENT=dev
     - export EKS_CLUSTER_NAME="mettel-automation-${CURRENT_ENVIRONMENT}"
     - export ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-helm-branches
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
@@ -33,18 +32,21 @@ helm-branches:
 
 helm-master:
   stage: helm
+  extends: .helm_template_deploy_chart
+  environment:
+    name: production
+    url: http://master.mettel-automation.net/
+    on_stop: destroy-helm-master
   variables:
     DOCKER_IMAGES_FILE: "/tmp/latest_images_for_ecr_repositories.json"
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
     HELM_CHART_RELEASE_NAME: "automation-engine"
     HELM_CHART_DIR: "helm/charts/automation-engine"
-  extends: .helm_template_deploy_chart
-  before_script:
-    # GET REDIS HOSTNAMES FROM CACHE
-    - export REDIS_HOSTNAME=$(cat output/redis_hostname.txt)
-    - export REDIS_CUSTOMER_CACHE_HOSTNAME=$(cat output/redis_customer_cache_hostname.txt)
-    - export REDIS_TNBA_FEEDBACK_HOSTNAME=$(cat output/redis_tnba_feedback_hostname.txt)
-    - export REDIS_EMAIL_TAGGER_HOSTNAME=$(cat output/redis_email_tagger_hostname.txt)    
+    REDIS_HOSTNAME: ${REDIS_HOSTNAME_PRO}
+    REDIS_CUSTOMER_CACHE_HOSTNAME: ${REDIS_CUSTOMER_CACHE_HOSTNAME_PRO}
+    REDIS_TNBA_FEEDBACK_HOSTNAME: ${REDIS_TNBA_FEEDBACK_HOSTNAME_PRO}
+    REDIS_EMAIL_TAGGER_HOSTNAME: ${REDIS_EMAIL_TAGGER_HOSTNAME_PRO}
+  before_script:   
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export CURRENT_ENVIRONMENT=production
@@ -63,30 +65,35 @@ helm-master:
 # ============================================
 destroy-helm-branches:
   stage: destroy
+  extends: .helm_template_destroy_chart
+  environment:
+    name: development
+    action: stop
   variables:
     HELM_CHART_RELEASE_NAME: "automation-engine"
-  extends: .helm_template_destroy_chart
   before_script:  
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export CURRENT_ENVIRONMENT=dev
     - export EKS_CLUSTER_NAME="mettel-automation-${CURRENT_ENVIRONMENT}"
     - export ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
+  needs:
+    - helm-branches
 
 destroy-helm-master:
   stage: destroy
+  extends: .helm_template_destroy_chart
+  environment:
+    name: production
+    action: stop
   variables:
     HELM_CHART_RELEASE_NAME: "automation-engine"
-  extends: .helm_template_destroy_chart
   before_script:  
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export CURRENT_ENVIRONMENT=production
@@ -97,3 +104,5 @@ destroy-helm-master:
     action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
+  needs:
+    - helm-master

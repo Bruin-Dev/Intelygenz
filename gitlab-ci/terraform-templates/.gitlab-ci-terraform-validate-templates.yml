@@ -33,7 +33,7 @@
 
 .terraform_dirs_validate_template: &terraform_dirs_validate_template
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_TERRAFORM_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -44,9 +44,21 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              terraform init -backend=true -get=true -input=false
-              terraform validate
-              cd ..
+              if [[ ${i} != "5-elasticaches" ]]; then
+                  terraform init -backend=true -get=true -input=false
+                  terraform validate
+                  cd ..
+              else
+                  for e in $(ls -d */ | cut -d " " -f10); do
+                      (
+                          cd "${e}" || exit
+                          if [[ ${e} != "modules" ]]; then
+                            terraform init -backend=true -get=true -input=false
+                            terraform validate
+                          fi
+                          cd ..
+                      )
+              fi
           )
       done
   tags:

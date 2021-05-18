@@ -511,3 +511,4 @@ binary data with file content
 
 # Running in docker-compose 
 `docker-compose up --build redis nats-server lit-bridge`
+

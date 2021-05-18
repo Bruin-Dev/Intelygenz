@@ -243,3 +243,4 @@ pip freeze | grep -v "pkg-resources" > requirements.txt #The grep -v is needed o
 # Resources
 
 - [SwaggerUI Quart](https://medium.com/@hkaraoguz/using-swaggerui-with-quart-72a3dab19273)
+

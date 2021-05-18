@@ -28,7 +28,7 @@ deploy-data-collector-master:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
   environment:
     name: $CI_COMMIT_REF_NAME
-    on_stop: destroy-elastic-master
+    on_stop: destroy-data-collector-master
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
