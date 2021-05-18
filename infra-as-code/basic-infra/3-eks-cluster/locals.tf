@@ -3,11 +3,10 @@ locals {
   cluster_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
   k8s_version = "1.18"
   worker_nodes_instance_type = "t3.large"
-  min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 5 : 7
-  max_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 6 : 8
+  min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 4
+  max_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 10 : 10
   eks_worker_ami_name_filter = "amazon-eks-node-${local.k8s_version}-*"
   eks_worker_ami_owner_id = "amazon"
-  eks_cluster_tag_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
   eks_worker_root_volume_type = "gp2"
   eks_cluster_tag_key = "tag:kubernetes.io/cluster/${data.aws_eks_cluster.cluster.name}"
   eks_cluster_tag_value = "owned"

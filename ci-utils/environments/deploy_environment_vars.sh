@@ -77,24 +77,22 @@ function digi_bridge_variables() {
 function digi_reboot_report_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # digi-reboot-report environment variables for ephemeral environments
-    export DIGI_REPORT_RECIPIENT=${DIGI_REPORT_RECIPIENT_DEV}
+    export DIGI_REPORT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
   else
     # digi-reboot-report environment variables for production environment
-    export DIGI_REPORT_RECIPIENT=${DIGI_REPORT_RECIPIENT_PRO}
+    export DIGI_REPORT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
   fi
 }
 
 function email_tagger_monitor_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # email-tagger-monitor environment variables for ephemeral environments
-    export REQUEST_SIGNATURE_SECRET_KEY=${REQUEST_SIGNATURE_SECRET_KEY_DEV}
-    export REQUEST_API_KEY=${REQUEST_API_KEY_DEV}
-    export API_SERVER_ENDPOINT_PREFIX=${API_SERVER_ENDPOINT_PREFIX_DEV}
+    export REQUEST_SIGNATURE_SECRET_KEY=${EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY_DEV}
+    export REQUEST_API_KEY=${EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL_DEV}
   else
     # email-tagger-monitor environment variables for production environment
-    export REQUEST_SIGNATURE_SECRET_KEY=${REQUEST_SIGNATURE_SECRET_KEY_PRO}
-    export REQUEST_API_KEY=${REQUEST_API_KEY_PRO}
-    export API_SERVER_ENDPOINT_PREFIX=${API_SERVER_ENDPOINT_PREFIX_PRO}
+    export REQUEST_SIGNATURE_SECRET_KEY=${EMAIL_TAGGER_MONITOR_REQUEST_SIGNATURE_SECRET_KEY_PRO}
+    export REQUEST_API_KEY=${EMAIL_TAGGER_KRE_BRIDGE_KRE_BASE_URL_PRO}
   fi
 }
 

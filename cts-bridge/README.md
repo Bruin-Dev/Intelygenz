@@ -56,3 +56,4 @@ WHERE Name = 'CTS-DISPATCH-NUMBER'
 
 # Running in docker-compose 
 `docker-compose up --build redis nats-server notifier cts-bridge`
+

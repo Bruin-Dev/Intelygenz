@@ -100,3 +100,4 @@ script which first will modify the /etc/hosts file and then will launch with pyt
 
 # Running in docker-compose 
 `docker-compose up --build redis nats-server digi-bridge`
+

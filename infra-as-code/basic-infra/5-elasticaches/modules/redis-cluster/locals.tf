@@ -5,8 +5,10 @@ locals {
 
   automation-redis-subnet_group-name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.REDIS_CLUSTER_NAME}-${var.ENVIRONMENT}" : var.REDIS_CLUSTER_NAME
 
-  automation-redis-security_group-name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.REDIS_CLUSTER_NAME}-${var.ENVIRONMENT}-sg" : "${var.REDIS_CLUSTER_NAME}-sg"
+  automation-redis-security_group-Name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.REDIS_CLUSTER_NAME}-${var.ENVIRONMENT}-sg" : "${var.REDIS_CLUSTER_NAME}-sg"
   automation-redis-security_group-tag-Name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.REDIS_CLUSTER_NAME}-${var.ENVIRONMENT}" : var.REDIS_CLUSTER_NAME
+
+  automation-private-zone-Name = var.CURRENT_ENVIRONMENT == "dev" ? "dev.mettel-automation.net." : "pro.mettel-automation.net."
 
   redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
 

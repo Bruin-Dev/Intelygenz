@@ -4,15 +4,18 @@
 
 .terraform_template_deploy_basic_infra: &terraform_template_deploy_basic_infra
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_TERRAFORM_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    # Iterate over terraform directories in module
+    # create output folder for cache files between jobs
+    - mkdir -p output
+    # iterate over terraform directories in module
     - cd "${MODULE}" || exit 1
     # assign terraform variables
     - export TF_VAR_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - export TF_VAR_CLUSTER_AUTOSCALER_HELM_CHART_VERSION=${CLUSTER_AUTOSCALER_CHART_V}
     - export TF_VAR_EXTERNAL_DNS_HELM_CHART_VERSION=${EXTERNAL_DNS_CHART_V}
     - export TF_VAR_INGRESS_NGINX_HELM_CHART_VERSION=${INGRESS_NGINX_CHART_V}
     - export TF_VAR_METRICS_SERVER_VERSION=${KUBERNETES_METRICS_SERVER_V}
@@ -25,13 +28,30 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              terraform init -backend=true -get=true -input=false
-              if [[ ${i} != "0-ecr-repositories" && ${i} != "4-eks-roles" ]]; then
-                  terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+              if [[ ${i} != "5-elasticaches" ]]; then
+                  terraform init -backend=true -get=true -input=false
+                  if [[ ${i} != "0-ecr-repositories" && ${i} != "4-eks-roles" ]]; then
+                      terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                  fi
+                  terraform refresh
+                  terraform plan && terraform apply -auto-approve
+                  cd ..
+              else
+                  for e in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
+                      (
+                          cd "${e}" || exit 1
+                          if [[ ${e} != "modules" ]]; then
+                              echo "Start to create elasticache ${e}"
+                              terraform init
+                              terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
+                              terraform refresh
+                              terraform plan && terraform apply -auto-approve
+                          fi
+                          cd ..
+                      )
+                  done
+                  cd "${CI_PROJECT_DIR}/${MODULE}" || exit 1
               fi
-              terraform refresh
-              terraform plan && terraform apply -auto-approve
-              cd ..
           )
       done
     - cd ${CI_PROJECT_DIR}
@@ -54,49 +74,9 @@
     - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
 
-.terraform_template_deploy_elastic: &terraform_template_deploy_elastic
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - mkdir -p output
-    # Iterate over terraform directories and subdirectories in module
-    - cd ${MODULE} || exit 1
-    - >
-      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
-          (
-              cd "${i}" || exit 1
-              if [[ ${i} != "modules" ]]; then
-                echo "Terraform directory $i"
-                terraform init
-                terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
-                terraform refresh
-                terraform plan && terraform apply -auto-approve
-                if [[ ${i} == "0-redis" ]]; then
-                  terraform output REDIS_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_hostname.txt
-                elif [[ ${i} == "1-redis-customer-cache" ]]; then
-                  terraform output REDIS_CUSTOMER_CACHE_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_customer_cache_hostname.txt
-                elif [[ ${i} == "2-redis-tnba-feedback" ]]; then
-                  terraform output REDIS_TNBA_FEEDBACK_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_tnba_feedback_hostname.txt
-                elif [[ ${i} == "3-redis-email-tagger" ]]; then
-                  terraform output REDIS_EMAIL_TAGGER_HOSTNAME > ${CI_PROJECT_DIR}/output/redis_email_tagger_hostname.txt
-                fi
-              fi
-          )
-      done
-    # INSTALL KUBE CONFIG
-    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
-  cache:
-    policy: push
-    key: "necessary-terraform-vars-${CI_COMMIT_REF_SLUG}"
-    paths:
-      - output
-
 .terraform_template_deploy_data_collector: &terraform_template_deploy_data_collector
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_TERRAFORM_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

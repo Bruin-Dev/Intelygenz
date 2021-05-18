@@ -602,3 +602,4 @@ and then a response message is published to the response topic that was built by
 ```
 # Running in docker-compose 
 `docker-compose up --build redis nats-server bruin-bridge`
+

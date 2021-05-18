@@ -196,3 +196,4 @@ Velocloud host #4 -> `docker-compose up --build nats-server redis velocloud-brid
 
 * To run the triage process:
 `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-triage`
+

@@ -1,5 +1,5 @@
 resource "aws_security_group" "automation-redis-sg" {
-  name = local.automation-redis-security_group-name
+  name = local.automation-redis-security_group-Name
   vpc_id = data.aws_vpc.mettel-automation-vpc.id
   description = "Access control to redis cache"
 

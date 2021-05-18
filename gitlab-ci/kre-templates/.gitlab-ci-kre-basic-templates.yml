@@ -1,6 +1,6 @@
 .terraform_basic_template_kre: &kre_basic_template_kre
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_TERRAFORM_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

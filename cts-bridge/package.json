@@ -6,12 +6,11 @@
     "devDependencies": {},
     "release": {
         "monorepo": {
-            "branch": "develop",
+            "branch": "master",
             "branches": [
-                "feature/migration-to-k8s",
+                "master",
                 {
-                    "name": "develop",
-                    "prerelease": true
+                    "name": "master"
                 }
             ],
             "analyzeCommits": {
@@ -31,12 +30,11 @@
             "preset": "eslint",
             "changelogFile": "CHANGELOG.md"
         },
-        "branch": "develop",
+        "branch": "master",
         "branches": [
-            "feature/migration-to-k8s",
+            "master",
             {
-                "name": "develop",
-                "prerelease": true
+                "name": "master"
             }
         ],
         "verifyConditions": [

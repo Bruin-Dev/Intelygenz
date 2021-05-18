@@ -34,3 +34,4 @@ Should look something like this.
 
 # Running in docker-compose 
 `docker-compose up --build redis last-contact-report velocloud-bridge notifier nats-server`
+

@@ -31,6 +31,16 @@ spec:
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://cts-bridge:5000/_health; do echo waiting for cts-bridge; sleep 2; done']
         {{- end }}
+        {{- if  .Values.config.capabilities_enabled.digi_bridge }}
+        - name: wait-digi-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://digi-bridge:5000/_health; do echo waiting for email-tagger-kre-bridge; sleep 2; done']
+        {{- end }}
+        {{- if  .Values.config.capabilities_enabled.email_tagger_kre_bridge }}
+        - name: wait-email-tagger-kre-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://email-tagger-kre-bridge:5000/_health; do echo waiting for email-tagger-kre-bridge; sleep 2; done']
+        {{- end }}
         {{- if .Values.config.capabilities_enabled.hawkeye_bridge }}
         - name: wait-hawkeye-bridge
           image: busybox:1.28

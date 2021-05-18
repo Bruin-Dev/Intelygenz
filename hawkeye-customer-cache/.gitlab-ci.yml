@@ -35,10 +35,8 @@ hawkeye-customer-cache-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - hawkeye-customer-cache/**/*
-      when: manual
-      allow_failure: true
+      changes:
+        - hawkeye-customer-cache/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["hawkeye-customer-cache-test"]

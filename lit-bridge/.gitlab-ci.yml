@@ -35,10 +35,8 @@ lit-bridge-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LIT_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - lit-bridge/**/*
-      when: manual
-      allow_failure: true
+      changes:
+        - lit-bridge/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $LIT_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs: ["lit-bridge-test"]

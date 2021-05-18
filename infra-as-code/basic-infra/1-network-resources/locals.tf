@@ -16,6 +16,10 @@ locals {
   automation-public-route_table-1b-tag-Name = "mettel-automation-public-route-table-1b-${var.CURRENT_ENVIRONMENT}"
   automation-default-security-group-name = "mettel-automation-default-sg-${var.CURRENT_ENVIRONMENT}"
   automation-default-security_group-tag-Name = "mettel-automation-default-${var.CURRENT_ENVIRONMENT}"
+  automation-private-zone-tag-Name = "mettel-automation-private-zone-${var.CURRENT_ENVIRONMENT}"
+
+  // route53 private zone
+  automation-private-zone-Name = var.CURRENT_ENVIRONMENT == "dev" ? "dev.mettel-automation.net." : "pro.mettel-automation.net."
 
   // virtual private gateway local vars
   virtual-private-gateway-tag-Name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-vpg" : "${var.common_info.project}-vpg"

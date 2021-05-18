@@ -368,3 +368,4 @@ import { privateRoute } from '../components/privateRoute/PrivateRoute';
 // ...
 export default privateRoute(Index);
 ```
+

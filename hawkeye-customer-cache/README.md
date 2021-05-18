@@ -84,3 +84,4 @@ Response when no devices satisfy specified filters
     "status": 404
 }
 ```
+
