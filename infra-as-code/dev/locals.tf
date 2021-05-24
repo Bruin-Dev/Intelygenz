@@ -174,7 +174,11 @@ locals {
 
   // alarm running_task_count_email-tagger-monitor local variables
   running_task_count_email-tagger-monitor_alarm-name = "Running tasks count of email-tagger-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_email-tagger-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_digi-bridge"
+  running_task_count_email-tagger-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_email-tagger-monitor"
+
+  // alarm running_task_count_queue-forwarder local variables
+  running_task_count_queue-forwarder_alarm-name = "Running tasks count of queue-forwarder service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_queue-forwarder_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_queue-forwarder"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"

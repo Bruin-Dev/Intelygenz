@@ -166,17 +166,6 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('digi-bridge', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'DIGI_CLIENT_ID={DIGI_CLIENT_ID}\n'
-        f'DIGI_CLIENT_SECRET={DIGI_CLIENT_SECRET}\n'
-        f'DIGI_BASE_URL={DIGI_BASE_URL}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('cts-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -204,6 +193,45 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('digi-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'DIGI_CLIENT_ID={DIGI_CLIENT_ID}\n'
+        f'DIGI_CLIENT_SECRET={DIGI_CLIENT_SECRET}\n'
+        f'DIGI_BASE_URL={DIGI_BASE_URL}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('digi-reboot-report', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'DIGI_REPORT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('email-tagger-kre-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'KRE_BASE_URL={EMAIL_TAGGER_KRE_BASE_URL}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('email-tagger-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'REDIS_CACHE_HOSTNAME={REDIS_EMAIL_TAGGER_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'API_SERVER_ENDPOINT_PREFIX=/api/email-tagger-webhook\n'
+        f'REQUEST_SIGNATURE_SECRET_KEY=secret\n'
+        f'REQUEST_API_KEY=123456\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('dispatch-portal-backend', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -212,24 +240,14 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('hawkeye-customer-cache', 'src', 'config', 'env'):
+    os.path.join('hawkeye-affecting-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'REDIS_CUSTOMER_CACHE_HOSTNAME={REDIS_CUSTOMER_CACHE_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-dispatch-monitor', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
     os.path.join('hawkeye-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -240,17 +258,12 @@ env_dict = {
         f'HAWKEYE_CLIENT_USERNAME={HAWKEYE_CLIENT_USERNAME}\n'
         f'HAWKEYE_CLIENT_PASSWORD={HAWKEYE_CLIENT_PASSWORD}\n'
         f'HAWKEYE_BASE_URL={HAWKEYE_BASE_URL}',
-    os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
+    os.path.join('hawkeye-customer-cache', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
-    os.path.join('hawkeye-affecting-monitor', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'REDIS_CUSTOMER_CACHE_HOSTNAME={REDIS_CUSTOMER_CACHE_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
@@ -298,6 +311,13 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('nats-server', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CLUSTER_MODE={NATS_CLUSTER_MODE1}\n'
@@ -338,6 +358,14 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('queue-forwarder', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('service-affecting-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -348,6 +376,14 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('service-dispatch-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
     os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-1'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -430,13 +466,13 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('velocloud-bridge', 'src', 'config', 'env'):
+    os.path.join('tnba-feedback', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'VELOCLOUD_CREDENTIALS={VELOCLOUD_CREDENTIALS}\n'
-        f'VELOCLOUD_VERIFY_SSL={VELOCLOUD_VERIFY_SSL}\n'
+        f'REDIS_TNBA_FEEDBACK_HOSTNAME={REDIS_TNBA_FEEDBACK_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
@@ -449,33 +485,13 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('tnba-feedback', 'src', 'config', 'env'):
+    os.path.join('velocloud-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'REDIS_TNBA_FEEDBACK_HOSTNAME={REDIS_TNBA_FEEDBACK_HOSTNAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('email-tagger-kre-bridge', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'KRE_BASE_URL={EMAIL_TAGGER_KRE_BASE_URL}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('email-tagger-monitor', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'REDIS_CACHE_HOSTNAME={REDIS_EMAIL_TAGGER_HOSTNAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'API_SERVER_ENDPOINT_PREFIX=/api/email-tagger-webhook\n'
-        f'REQUEST_SIGNATURE_SECRET_KEY=secret\n'
-        f'REQUEST_API_KEY=123456\n'
+        f'VELOCLOUD_CREDENTIALS={VELOCLOUD_CREDENTIALS}\n'
+        f'VELOCLOUD_VERIFY_SSL={VELOCLOUD_VERIFY_SSL}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',

@@ -39,6 +39,7 @@ variables:
   nats_server_1_desired_tasks: 1
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
+  queue_forwarder_desired_tasks: 1
   service_affecting_monitor_desired_tasks: 1
   service_dispatch_monitor_desired_tasks: 1
   service_outage_monitor_1_desired_tasks: 1
@@ -86,6 +87,7 @@ include:
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
   - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
+  - local: 'queue-forwarder/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'lit-bridge/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'

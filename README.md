@@ -13,6 +13,7 @@
 | hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-customer-cache |[![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| queue-forwarder |[![queue-forwarder-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=queue-forwarder-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -190,18 +191,25 @@ variables:
   bruin_bridge_desired_tasks: 0
   cts_bridge_desired_tasks: 0
   customer_cache_desired_tasks: 1
-  dispatch_portal_backend_desired_tasks: 1
+  digi_bridge_desired_tasks: 0
+  digi_reboot_report_desired_tasks: 0
+  dispatch_portal_backend_desired_tasks: 0
+  dispatch_portal_frontend_desired_tasks: 0
+  email_tagger_kre_bridge_desired_tasks: 0
+  email_tagger_monitor_desired_tasks: 0
   hawkeye_affecting_monitor_desired_tasks: 0
   hawkeye_bridge_desired_tasks: 0
   hawkeye_customer_cache_desired_tasks: 0
   hawkeye_outage_monitor_desired_tasks: 0
-  last_contact_report_desired_tasks: 1
-  lit_bridge_desired_tasks: 1
+  last_contact_report_desired_tasks: 0
+  lit_bridge_desired_tasks: 0
+  lumin_billing_report_desired_tasks: 0
   metrics_prometheus_desired_tasks: 0
-  nats_server_desired_tasks: 0
+  nats_server_desired_tasks: 1
   nats_server_1_desired_tasks: 1
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
+  queue_forwarder_desired_tasks: 0
   service_affecting_monitor_desired_tasks: 1
   service_outage_monitor_1_desired_tasks: 0
   service_outage_monitor_2_desired_tasks: 0
@@ -210,7 +218,9 @@ variables:
   service_outage_monitor_triage_desired_tasks: 0
   sites_monitor_desired_tasks: 0
   t7_bridge_desired_tasks: 0
-  velocloud_bridge_desired_tasks: 5
+  tnba_feedback_desired_tasks: 0
+  tnba_monitor_desired_tasks: 0
+  velocloud_bridge_desired_tasks: 2
   . . .
 ```
 
@@ -558,8 +568,12 @@ The following steps must be followed to set up the configuration to access any o
 - [Bruin bridge](bruin-bridge/README.md)
 - [CTS bridge](cts-bridge/README.md)
 - [Customer cache](customer-cache/README.md)
-- [Dispatch portal frontend](dispatch-portal-frontend/README.md)
+- [Digi bridge](digi-bridge/README.md)
+- [Digi reboot report](digi-reboot-report/README.md)
 - [Dispatch portal backend](dispatch-portal-backend/README.md)
+- [Dispatch portal frontend](dispatch-portal-frontend/README.md)
+- [Email Tagger - KRE bridge](email-tagger-kre-bridge/README.md)
+- [Email Tagger - Monitor](email-tagger-monitor/README.md)
 - [Hawkeye affecting monitor](hawkeye-affecting-monitor/README.md)
 - [Hawkeye bridge](hawkeye-bridge/README.md)
 - [Hawkeye customer cache](hawkeye-customer-cache/README.md)
@@ -568,6 +582,7 @@ The following steps must be followed to set up the configuration to access any o
 - [LIT bridge](lit-bridge/README.md)
 - [Lumin billing report](lumin-billing-report/README.md)
 - [Notifier](notifier/README.md)
+- [Queue forwarder](queue-forwarder/README.md)
 - [Service affecting monitor](service-affecting-monitor/README.md)
 - [Service dispatch monitor](service-dispatch-monitor/README.md)
 - [Service outage monitor](service-outage-monitor/README.md)

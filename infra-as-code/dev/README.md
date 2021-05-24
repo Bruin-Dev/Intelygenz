@@ -36,10 +36,27 @@
 | CTS\_LOGIN\_URL | n/a | `string` | `""` | no |
 | CURRENT\_ENVIRONMENT | Name of the environment to identify the network resources to be used | `string` | `"dev"` | no |
 | CUSTOMER\_NAME\_BILLING\_REPORT | n/a | `string` | `""` | no |
+| DIGI\_BASE\_URL | n/a | `string` | `""` | no |
+| DIGI\_CLIENT\_ID | n/a | `string` | `""` | no |
+| DIGI\_CLIENT\_SECRET | n/a | `string` | `""` | no |
+| DIGI\_IP\_DEV | n/a | `string` | `""` | no |
+| DIGI\_IP\_PRO | n/a | `string` | `""` | no |
+| DIGI\_IP\_TEST | n/a | `string` | `""` | no |
+| DIGI\_RECORD\_NAME_\DEV | n/a | `string` | `""` | no |
+| DIGI\_RECORD\_NAME_\PRO | n/a | `string` | `""` | no |
+| DIGI\_RECORD\_NAME_\TEST | n/a | `string` | `""` | no |
+| DIGI\_REPORT\_RECIPIENT | n/a | `string` | `""` | no |
 | DISPATCH\_PORTAL\_SERVER\_PORT | n/a | `string` | `""` | no |
 | EMAIL\_ACC\_PWD | n/a | `string` | `""` | no |
+| EMAIL\_TAGGER\_KRE\_BRIDGE\_KRE\_BASE\_URL | n/a | `string` | `""` | no |
+| EMAIL\_TAGGER\_MONITOR\_API\_SERVER\_ENDPOINT\_PREFIX | n/a | `string` | `"/api/email-tagger-webhook"` | no |
+| EMAIL\_TAGGER\_MONITOR\_REQUEST\_API\_KEY | n/a | `string` | `""` | no |
+| EMAIL\_TAGGER\_MONITOR\_REQUEST\_SIGNATURE\_SECRET\_KEY | n/a | `string` | `""` | no |
 | ENVIRONMENT | Name of current environment | `any` | n/a | yes |
 | ENVIRONMENT\_NAME | Name of current environment without automation prefix | `any` | n/a | yes |
+| HAWKEYE\_BASE\_URL | n/a | `string` | `""` | no |
+| HAWKEYE\_CLIENT\_USERNAME | n/a | `string` | `""` | no |
+| HAWKEYE\_CLIENT\_PASSWORD | n/a | `string` | `""` | no |
 | KRE\_BASE\_URL | n/a | `string` | `""` | no |
 | LAST\_CONTACT\_RECIPIENT | n/a | `string` | `""` | no |
 | LIT\_CLIENT\_ID | n/a | `string` | `""` | no |
@@ -91,10 +108,25 @@
 | cts\_bridge\_desired\_tasks | Number of desired tasks of microservice cts-bridge | `number` | `1` | no |
 | customer-cache-task-definition-json | Task definition arn output in rendered json for customer-cache | `string` | `"/tmp/customer-cache-task-definition.json"` | no |
 | customer\_cache\_desired\_tasks | Number of desired tasks of microservice customer-cache | `number` | `1` | no |
+| digi-bridge-task-definition-json | Task definition arn output in rendered json for digi-bridge | `string` | `"/tmp/digi-bridge-task-definition.json"` | no |
+| digi\_bridge\_desired\_tasks | Number of desired tasks of microservice digi-bridge | `number` | `1` | no |
+| digi\_reboot\_report\_desired\_tasks | Number of desired tasks of microservice digi-reboot-report | `number` | `1` | no |
 | dispatch-portal-backend-task-definition-json | Task definition arn output in rendered json for CTS-bridge | `string` | `"/tmp/dispatch-portal-backend-task-definition.json"` | no |
 | dispatch\_portal\_backend\_desired\_tasks | Number of desired tasks of microservice dispatch-portal-backend | `number` | `1` | no |
 | dispatch\_portal\_frontend\_desired\_tasks | Number of desired tasks of microservice dispatch-portal-frontend | `number` | `1` | no |
 | domain | n/a | `string` | `"mettel-automation.net"` | no |
+| email-tagger-kre-bridge-task-definition-json | Task definition arn output in rendered json for email-tagger-kre-bridge | `string` | `"/tmp/email-tagger-kre-bridge-task-definition.json"` | no |
+| email\_tagger\_kre\_bridge\_desired\_tasks | Number of desired tasks of microservice email-tagger-kre-bridge | `number` | `1` | no |
+| email-tagger-monitor-task-definition-json | Task definition arn output in rendered json for email-tagger-monitor | `string` | `"/tmp/email-tagger-monitor-task-definition.json"` | no |
+| email\_tagger\_monitor\_desired\_tasks | Number of desired tasks of microservice email-tagger-monitor | `number` | `1` | no |
+| hawkeye-affecting-monitor-task-definition-json | Task definition arn output in rendered json for hawkeye-affecting-monitor | `string` | `"/tmp/hawkeye-affecting-monitor-task-definition.json"` | no |
+| hawkeye\_affecting\_monitor\_desired\_tasks | Number of desired tasks of microservice hawkeye-affecting-monitor
+| hawkeye-bridge-task-definition-json | Task definition arn output in rendered json for hawkeye-bridge | `string` | `"/tmp/hawkeye-bridge-task-definition.json"` | no |
+| hawkeye\_bridge\_desired\_tasks | Number of desired tasks of microservice hawkeye-bridge
+| hawkeye-customer-cache-task-definition-json | Task definition arn output in rendered json for hawkeye-customer-cache | `string` | `"/tmp/hawkeye-customer-cache-task-definition.json"` | no |
+| hawkeye\_customer\_cache\_desired\_tasks | Number of desired tasks of microservice hawkeye-customer-cache
+| hawkeye-outage-monitor-task-definition-json | Task definition arn output in rendered json for hawkeye-outage-monitor | `string` | `"/tmp/hawkeye-outage-monitor-task-definition.json"` | no |
+| hawkeye\_outage\_monitor\_desired\_tasks | Number of desired tasks of microservice hawkeye-outage-monitor
 | last\_contact\_report\_desired\_tasks | Number of desired tasks of microservice last-contact-report | `number` | `1` | no |
 | lit-bridge-task-definition-json | Task definition arn output in rendered json for lit-bridge | `string` | `"/tmp/lit-bridge-task-definition.json"` | no |
 | lit\_bridge\_desired\_tasks | Number of desired tasks of microservice lit-bridge | `number` | `1` | no |
@@ -110,6 +142,7 @@
 | notifier\_desired\_tasks | Number of desired tasks of microservice notifier | `number` | `1` | no |
 | redis\_node\_type | n/a | `map` | <pre>{<br>  "dev": "cache.t2.micro",<br>  "production": "cache.m4.large"<br>}</pre> | no |
 | redis\_node\_type\_cache\_for\_microservices | n/a | `map` | <pre>{<br>  "dev": "cache.t2.micro",<br>  "production": "cache.t2.small"<br>}</pre> | no |
+| queue\_forwarder\_desired\_tasks | Number of desired tasks of microservice queue-forwarder | `number` | `1` | no |
 | service\_affecting\_monitor\_desired\_tasks | Number of desired tasks of microservice service-affecting-monitor | `number` | `1` | no |
 | service\_dispatch\_monitor\_desired\_tasks | Number of desired tasks of microservice service-dispatch-monitor | `number` | `1` | no |
 | service\_outage\_monitor\_1\_desired\_tasks | Number of desired tasks of microservice service-outage-monitor # 1 | `number` | `0` | no |

@@ -165,7 +165,7 @@ variable "DIGI_RECORD_NAME_TEST" {
   default = ""
 }
 
-// digi-reboot-rebort environment variables
+// digi-reboot-report environment variables
 
 variable "DIGI_REPORT_RECIPIENT" {
   default = ""
@@ -442,6 +442,12 @@ variable "cts_bridge_desired_tasks" {
   description = "Number of desired tasks of microservice cts-bridge"
 }
 
+variable "customer_cache_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice customer-cache"
+}
+
 variable "digi_bridge_desired_tasks" {
   default = 1
   type = number
@@ -454,34 +460,28 @@ variable "digi_reboot_report_desired_tasks" {
   description = "Number of desired tasks of microservice digi-reboot-report"
 }
 
-variable "dispatch_portal_frontend_desired_tasks" {
-  default = 1
-  type = number
-  description = "Number of desired tasks of microservice dispatch-portal-frontend"
-}
-
-variable "customer_cache_desired_tasks" {
-  default = 1
-  type = number
-  description = "Number of desired tasks of microservice customer-cache"
-}
-
 variable "dispatch_portal_backend_desired_tasks" {
   default = 1
   type = number
   description = "Number of desired tasks of microservice dispatch-portal-backend"
 }
 
-variable "email_tagger_monitor_desired_tasks" {
+variable "dispatch_portal_frontend_desired_tasks" {
   default = 1
   type = number
-  description = "Number of desired tasks of microservice email-tagger-monitor"
+  description = "Number of desired tasks of microservice dispatch-portal-frontend"
 }
 
 variable "email_tagger_kre_bridge_desired_tasks" {
   default = 1
   type = number
   description = "Number of desired tasks of microservice email-tagger-kre-bridge"
+}
+
+variable "email_tagger_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice email-tagger-monitor"
 }
 
 variable "hawkeye_affecting_monitor_desired_tasks" {
@@ -562,6 +562,12 @@ variable "notifier_desired_tasks" {
   description = "Number of desired tasks of microservice notifier"
 }
 
+variable "queue_forwarder_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice queue-forwarder"
+}
+
 variable "service_affecting_monitor_desired_tasks" {
   default = 1
   type = number
@@ -610,16 +616,16 @@ variable "sites_monitor_desired_tasks" {
   description = "Number of desired tasks of microservice sites-monitor"
 }
 
-variable "tnba_monitor_desired_tasks" {
-  default = 1
-  type = number
-  description = "Number of desired tasks of microservice tnba-monitor"
-}
-
 variable "tnba_feedback_desired_tasks" {
   default = 1
   type = number
   description = "Number of desired tasks of microservice tnba-feedback"
+}
+
+variable "tnba_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice tnba-monitor"
 }
 
 variable "t7_bridge_desired_tasks" {
@@ -648,10 +654,22 @@ variable "cts-bridge-task-definition-json" {
   default = "/tmp/cts-bridge-task-definition.json"
 }
 
+variable "customer-cache-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for customer-cache"
+  default = "/tmp/customer-cache-task-definition.json"
+}
+
 variable "digi-bridge-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for digi-bridge"
   default = "/tmp/digi-bridge-task-definition.json"
+}
+
+variable "dispatch-portal-backend-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for CTS-bridge"
+  default = "/tmp/dispatch-portal-backend-task-definition.json"
 }
 
 variable "email-tagger-kre-bridge-task-definition-json" {
@@ -664,18 +682,6 @@ variable "email-tagger-monitor-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for email-tagger-monitor"
   default = "/tmp/email-tagger-monitor-task-definition.json"
-}
-
-variable "customer-cache-task-definition-json" {
-  type = string
-  description = "Task definition arn output in rendered json for customer-cache"
-  default = "/tmp/customer-cache-task-definition.json"
-}
-
-variable "dispatch-portal-backend-task-definition-json" {
-  type = string
-  description = "Task definition arn output in rendered json for CTS-bridge"
-  default = "/tmp/dispatch-portal-backend-task-definition.json"
 }
 
 variable "hawkeye-affecting-monitor-task-definition-json" {
