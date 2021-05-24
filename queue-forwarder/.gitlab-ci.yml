@@ -14,15 +14,15 @@ queue-forwarder-linter:
 # ==========================================
 # Unit tests jobs for queue-forwarder module
 # ==========================================
-queue-forwarder-test:
- variables:
-   MODULE: queue-forwarder
- rules:
-   - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-     changes:
-       - queue-forwarder/**/*
-   - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
- extends: .unittest_module_python
+#queue-forwarder-test:
+# variables:
+#   MODULE: queue-forwarder
+# rules:
+#   - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+#     changes:
+#       - queue-forwarder/**/*
+#   - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+# extends: .unittest_module_python
 
 # =============================================
 # Images builds jobs for queue-forwarder module
