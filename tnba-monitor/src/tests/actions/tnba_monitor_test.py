@@ -157,7 +157,7 @@ class TestTNBAMonitor:
         tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
         tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
-        tnba_monitor._transform_tickets_into_detail_objects = Mock()
+        tnba_monitor._transform_tickets_into_detail_objects = Mock(return_value=[])
         tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
         tnba_monitor._process_ticket_detail = CoroutineMock()
@@ -198,7 +198,7 @@ class TestTNBAMonitor:
         tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
         tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
-        tnba_monitor._transform_tickets_into_detail_objects = Mock()
+        tnba_monitor._transform_tickets_into_detail_objects = Mock(return_value=[])
         tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
         tnba_monitor._append_tnba_notes = CoroutineMock()
@@ -1223,58 +1223,6 @@ class TestTNBAMonitor:
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
             ticket_id, ticket_detail_id, serial_number_1
-        )
-        tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_not_called()
-        tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
-        assert tnba_monitor._tnba_notes_to_append == []
-
-    @pytest.mark.asyncio
-    async def process_ticket_detail_with_change_queue_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            serial_number_1, make_edge_with_links_info, edge_1_connected, link_1_disconnected, link_2_stable,
-            holmdel_noc_prediction, make_standard_tnba_note):
-        ticket_id = 12345
-        ticket_detail_id = 67890
-        holmdel_noc_prediction = holmdel_noc_prediction['name']
-        holmdel_noc_prediction_name = [holmdel_noc_prediction]
-        ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
-        tnba_note = make_standard_tnba_note(serial_number=serial_number_1, prediction_name=holmdel_noc_prediction_name,
-                                            date=(datetime.now() - timedelta(minutes=60)).strftime('%m-%d-%Y %H:%M:%S'))
-        detail_object = make_detail_object_with_predictions(
-            ticket_id=ticket_id,
-            ticket_detail=ticket_detail,
-            ticket_topic='Service Outage Trouble',
-            ticket_status="New",
-            ticket_notes=[tnba_note],
-            ticket_detail_predictions=holmdel_noc_prediction_name,
-        )
-
-        next_results_response = make_rpc_response(
-            body='Got internal error from Bruin',
-            status=500,
-        )
-
-        edge_status = make_edge_with_links_info(
-            edge_info=edge_1_connected,
-            links_info=[link_1_disconnected, link_2_stable],
-        )
-        edge_status_by_serial = {
-            serial_number_1: edge_status,
-        }
-        tnba_monitor._edge_status_by_serial = edge_status_by_serial
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
-        tnba_monitor._bruin_repository.change_detail_work_queue = CoroutineMock()
-        tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions = CoroutineMock()
-
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
-            await tnba_monitor._process_ticket_detail(detail_object)
-
-        tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
-            ticket_id, ticket_detail_id, serial_number_1
-        )
-        tnba_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            ticket_id, task_result='HNOC Investigate', serial_number=serial_number_1, detail_id=ticket_detail_id
         )
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()

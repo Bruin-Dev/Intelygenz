@@ -110,6 +110,13 @@ class TNBAMonitor:
             f'Cleaning them up to exclude all invalid notes...'
         )
         relevant_open_tickets = self._filter_irrelevant_notes_in_tickets(relevant_open_tickets)
+        ticket_details_to_forward = self._transform_tickets_into_detail_objects(relevant_open_tickets)
+
+        forward_tasks = [
+           self._forward_detail_object(detail_object)
+           for detail_object in ticket_details_to_forward
+        ]
+        await asyncio.gather(*forward_tasks)
 
         self._logger.info('Getting T7 predictions for all relevant open tickets...')
         predictions_by_ticket_id = await self._get_predictions_by_ticket_id(relevant_open_tickets)
@@ -128,16 +135,16 @@ class TNBAMonitor:
 
         self._logger.info('Mapping all ticket details with their predictions...')
         ticket_detail_objects = self._map_ticket_details_with_predictions(
-            ticket_detail_objects, predictions_by_ticket_id
+           ticket_detail_objects, predictions_by_ticket_id
         )
 
         self._logger.info(
-            f'{len(ticket_detail_objects)} ticket details were successfully mapped to predictions. '
-            'Processing all details...'
+           f'{len(ticket_detail_objects)} ticket details were successfully mapped to predictions. '
+           'Processing all details...'
         )
         tasks = [
-            self._process_ticket_detail(detail_object)
-            for detail_object in ticket_detail_objects
+           self._process_ticket_detail(detail_object)
+           for detail_object in ticket_detail_objects
         ]
         await asyncio.gather(*tasks)
         self._logger.info('All ticket details were processed.')
@@ -492,24 +499,17 @@ class TNBAMonitor:
 
         return result
 
-    async def _process_ticket_detail(self, detail_object: dict):
+    async def _forward_detail_object(self, detail_object: dict):
         async with self._semaphore:
             ticket_creation_date = detail_object['ticket_creation_date']
             ticket_status = detail_object['ticket_status']
             ticket_id = detail_object['ticket_id']
             ticket_detail_id = detail_object['ticket_detail']['detailID']
-            ticket_notes = detail_object['ticket_notes']
             serial_number = detail_object['ticket_detail']['detailValue']
-            predictions = detail_object['ticket_detail_predictions']
 
             self._logger.info(
-                f'Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}...'
+                f'Trying to forward {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id} to HNOC queue...'
             )
-
-            newest_tnba_note = self._ticket_repository.find_newest_tnba_note_by_service_number(
-                ticket_notes, serial_number
-            )
-
             self._logger.info(f'Ticket status: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
             if self._is_new_ticket(ticket_status):
                 self._logger.info(f'Creation date: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
@@ -529,6 +529,23 @@ class TNBAMonitor:
                             serial_number=serial_number,
                             detail_id=ticket_detail_id
                         )
+
+    async def _process_ticket_detail(self, detail_object: dict):
+        async with self._semaphore:
+            ticket_id = detail_object['ticket_id']
+            ticket_detail_id = detail_object['ticket_detail']['detailID']
+            ticket_notes = detail_object['ticket_notes']
+            serial_number = detail_object['ticket_detail']['detailValue']
+            predictions = detail_object['ticket_detail_predictions']
+
+            self._logger.info(
+                f'Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}...'
+            )
+
+            newest_tnba_note = self._ticket_repository.find_newest_tnba_note_by_service_number(
+                ticket_notes, serial_number
+            )
+
             if newest_tnba_note and not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
                 msg = (
                     f'TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. '
