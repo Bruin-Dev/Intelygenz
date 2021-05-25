@@ -4,7 +4,7 @@
 
 .helm_template_deploy_chart: &helm_template_deploy_chart
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_TERRAFORM_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -40,7 +40,7 @@
 
 .helm_template_destroy_chart: &helm_template_destroy_chart
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_TERRAFORM_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
