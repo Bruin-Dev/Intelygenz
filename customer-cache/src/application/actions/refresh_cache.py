@@ -205,7 +205,8 @@ class RefreshCache:
                     'last_contact': edge_with_serial['last_contact'],
                     'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,
-                    'bruin_client_info': client_info_response_body
+                    'bruin_client_info': client_info_response_body,
+                    'links_configuration': edge_with_serial['links_configuration']
                 }
 
         try:
