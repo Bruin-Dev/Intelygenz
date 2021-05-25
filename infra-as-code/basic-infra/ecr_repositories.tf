@@ -129,3 +129,7 @@ resource "aws_ecr_repository" "automation-intermapper-outage-monitor" {
 resource "aws_ecr_repository" "automation-digi-reboot-report" {
   name = "automation-digi-reboot-report"
 }
+
+resource "aws_ecr_repository" "automation-queue-forwarder" {
+  name = "automation-queue-forwarder"
+}
