@@ -173,6 +173,7 @@ class Triage:
 
         relevant_tickets = []
         for ticket in tickets:
+            self._logger.info(f'Checking ticket_id: {ticket["ticket_id"]} for relevant details')
             ticket_details = ticket['ticket_details']
 
             relevant_details = [
@@ -182,9 +183,12 @@ class Triage:
             ]
 
             if not relevant_details:
+                self._logger.info(f'Ticket with ticket_id: {ticket["ticket_id"]} has no relevant details')
                 # Having no relevant details means the ticket is not relevant either
                 continue
 
+            self._logger.info(f'Ticket with ticket_id: {ticket["ticket_id"]} contains relevant details.'
+                              f'Appending to relevant_tickets list ...')
             relevant_tickets.append({
                 'ticket_id': ticket['ticket_id'],
                 'ticket_details': relevant_details,
@@ -199,6 +203,8 @@ class Triage:
         sanitized_tickets = []
 
         for ticket in tickets:
+            self._logger.info(f'Filtering notes for ticket_id: {ticket["ticket_id"]} to contain relevant notes')
+
             relevant_notes = [
                 note
                 for note in ticket['ticket_notes']
@@ -231,43 +237,33 @@ class Triage:
             ticket_id = ticket['ticket_id']
             ticket_details = ticket['ticket_details']
             ticket_notes = ticket['ticket_notes']
+            self._logger.info(f'Checking details of ticket_id: {ticket_id}')
 
-            if not ticket_notes:
-                ticket_details_without_triage += [
-                    {'ticket_id': ticket_id, 'ticket_detail': detail}
-                    for detail in ticket_details
+            for detail in ticket_details:
+                serial_number = detail['detailValue']
+                self._logger.info(f'Checking for triage notes in ticket_id: {ticket_id} '
+                                  f'relating to serial number: {serial_number}')
+
+                notes_related_to_serial = [
+                    note
+                    for note in ticket_notes
+                    if serial_number in note['serviceNumber']
                 ]
-                continue
-
-            ticket_details_by_service_number = {
-                detail['detailValue']: detail
-                for detail in ticket_details
-            }
-
-            ticket_details_with_triage_by_serial = {}
-            for triage_note in ticket_notes:
-                service_numbers_in_triage_note: list = triage_note['serviceNumber']
-
-                for service_number in service_numbers_in_triage_note:
-                    ticket_detail_associated = ticket_details_by_service_number[service_number]
-
-                    ticket_details_with_triage_by_serial.setdefault(
-                        service_number,
-                        {'ticket_id': ticket_id, 'ticket_detail': ticket_detail_associated, 'ticket_notes': []}
-                    )
-
-                    ticket_details_with_triage_by_serial[service_number]['ticket_notes'].append(triage_note)
-
-            ticket_details_with_triage += list(ticket_details_with_triage_by_serial.values())
-
-            all_service_numbers_in_ticket = set(ticket_details_by_service_number.keys())
-            service_numbers_with_triage = set(ticket_details_with_triage_by_serial.keys())
-            service_numbers_without_triage = all_service_numbers_in_ticket - service_numbers_with_triage
-            if service_numbers_without_triage:
-                ticket_details_without_triage += [
-                    {'ticket_id': ticket_id, 'ticket_detail': ticket_details_by_service_number[service_number]}
-                    for service_number in service_numbers_without_triage
-                ]
+                detail_object = {
+                    'ticket_id': ticket_id,
+                    'ticket_detail': detail,
+                }
+                if not notes_related_to_serial:
+                    self._logger.info(f'No triage notes found in ticket_id: {ticket_id} '
+                                      f'for serial number {serial_number}. '
+                                      f'Adding to ticket_details_without_triage list...')
+                    ticket_details_without_triage.append(detail_object)
+                else:
+                    self._logger.info(f'Triage note found in ticket_id: {ticket_id} '
+                                      f'for serial number {serial_number}. '
+                                      f'Adding to ticket_details_with_triage list...')
+                    detail_object['ticket_notes'] = notes_related_to_serial
+                    ticket_details_with_triage.append(detail_object)
 
         return ticket_details_with_triage, ticket_details_without_triage
 
