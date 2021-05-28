@@ -21,6 +21,8 @@ spec:
     {{- end }}
       labels:
         {{- include "notifier.labels" . | nindent 8 }}
+      annotations:
+        fluentbit.io/parser: mettel_parser_logs
     spec:
       initContainers:
         - name: wait-nats-server

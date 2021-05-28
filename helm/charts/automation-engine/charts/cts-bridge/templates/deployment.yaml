@@ -19,6 +19,8 @@ spec:
     metadata:
       labels:
         {{- include "cts-bridge.labels" . | nindent 8 }}
+      annotations:
+        fluentbit.io/parser: mettel_parser_logs
     spec:
       initContainers:
         - name: wait-nats-server

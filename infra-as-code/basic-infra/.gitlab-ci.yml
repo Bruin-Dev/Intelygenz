@@ -29,6 +29,7 @@ basic-infra-dev:
     IAM_TO_EKS_ROLES: developer, devops
     HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
     HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
+    HELM_CHART_FLUENT_BIT_DIR: "helm/charts/fluent-bit-custom"
     KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
     EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
     INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
@@ -97,8 +98,6 @@ destroy-basic-infra-dev:
       allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
-  needs:
-    - basic-infra-dev
 
 destroy-basic-infra-pro:
   stage: destroy
@@ -116,5 +115,3 @@ destroy-basic-infra-pro:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
       allow_failure: true
-  needs:
-    - basic-infra-pro

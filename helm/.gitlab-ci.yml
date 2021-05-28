@@ -83,8 +83,6 @@ destroy-helm-branches:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
-  needs:
-    - helm-branches
 
 destroy-helm-master:
   stage: destroy
@@ -104,5 +102,3 @@ destroy-helm-master:
     action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
-  needs:
-    - helm-master

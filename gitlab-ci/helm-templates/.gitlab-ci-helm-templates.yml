@@ -31,10 +31,10 @@
     # DEPLOY HELM CHART
     - >
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
+        helm upgrade --wait --force --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
           -f values.yaml -n ${HELM_CHART_RELEASE_NAME}
       else
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
+        helm upgrade --wait --force --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
           -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
       fi
 

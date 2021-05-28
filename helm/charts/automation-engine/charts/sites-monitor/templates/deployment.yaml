@@ -19,47 +19,14 @@ spec:
     metadata:
       labels:
         {{- include "sites-monitor.labels" . | nindent 8 }}
+      annotations:
+        fluentbit.io/parser: mettel_parser_logs
     spec:
       initContainers:
-        {{- if .Values.config.capabilities_enabled.bruin_bridge }}
-        - name: wait-bruin-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://bruin-bridge:5000/_health; do echo waiting for bruin-bridge; sleep 2; done']
-        {{- end }}
-        {{- if .Values.config.capabilities_enabled.cts_bridge }}
-        - name: wait-cts-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://cts-bridge:5000/_health; do echo waiting for cts-bridge; sleep 2; done']
-        {{- end }}
-        {{- if  .Values.config.capabilities_enabled.digi_bridge }}
-        - name: wait-digi-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://digi-bridge:5000/_health; do echo waiting for email-tagger-kre-bridge; sleep 2; done']
-        {{- end }}
-        {{- if  .Values.config.capabilities_enabled.email_tagger_kre_bridge }}
-        - name: wait-email-tagger-kre-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://email-tagger-kre-bridge:5000/_health; do echo waiting for email-tagger-kre-bridge; sleep 2; done']
-        {{- end }}
-        {{- if .Values.config.capabilities_enabled.hawkeye_bridge }}
-        - name: wait-hawkeye-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://hawkeye-bridge:5000/_health; do echo waiting for hawkeye-bridge-bridge; sleep 2; done']
-        {{- end }}
-        {{- if .Values.config.capabilities_enabled.lit_bridge }}
-        - name: wait-lit-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://lit-bridge:5000/_health; do echo waiting for lit-bridge; sleep 2; done']
-        {{- end }}
         {{- if .Values.config.capabilities_enabled.notifier }}
         - name: wait-notifier
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']
-        {{- end }}
-        {{- if .Values.config.capabilities_enabled.t7_bridge }}
-        - name: wait-t7-bridge
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://t7-bridge:5000/_health; do echo waiting for t7-bridge; sleep 2; done']
         {{- end }}
         {{- if  .Values.config.capabilities_enabled.velocloud_bridge }}
         - name: wait-velocloud-bridge
