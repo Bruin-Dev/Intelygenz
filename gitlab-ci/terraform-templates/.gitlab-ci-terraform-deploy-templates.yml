@@ -71,6 +71,8 @@
       done
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INSTALL PRIORITY CLASS
+    - kubectl apply -f helm/priority-class
     # INITIALIZE HELM
     - python3 ci-utils/helm/add_helm_repositories.py
     - helm repo update

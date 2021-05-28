@@ -24,6 +24,7 @@ spec:
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
+      priorityClassName: critical-priority
       initContainers:
         - name: wait-nats-server
           image: busybox:1.28
