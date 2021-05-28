@@ -1,6 +1,7 @@
 locals {
   // EKS cluster local variables
   cluster_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
+  logs_name = var.CURRENT_ENVIRONMENT == "dev" ? "DEV-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-logs" : "PRO-${var.common_info.project}-logs"
   k8s_version = "1.18"
   worker_nodes_instance_type = "t3.large"
   min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 4

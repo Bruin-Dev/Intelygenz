@@ -23,6 +23,7 @@
     - export TF_VAR_WHITELISTED_IPS="[${LOAD_BALANCER_WHITELIST}]"
     - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
     - export TF_VAR_GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    - if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then export TF_VAR_ENABLE_FLUENT_BIT=true; fi
     - >
       for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
           (
@@ -46,6 +47,10 @@
                               terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
                               terraform refresh
                               terraform plan && terraform apply -auto-approve
+                              if [[[ ${e} != "3-eks-cluster" ]] &&  ["$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                                  export FLUENT_BIT_LOG_GROUP_NAME=$(terraform output fluent-bit-role-arn)
+                                  export FLUENT_BIT_IAM_ROLE_ARN=$(terraform output fluent-bit-log-group-name)
+                              fi
                           fi
                           cd ..
                       )
@@ -73,6 +78,12 @@
     # DEPLOY PROMETHEUS HELM CHART
     - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
+    # DEPLOY FLUENT-BIT HELM CHART
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+        envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
+        helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml        
+      fi
 
 .terraform_template_deploy_data_collector: &terraform_template_deploy_data_collector
   image:

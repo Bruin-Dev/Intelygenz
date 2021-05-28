@@ -1,0 +1,263 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fluent-bit-custom.configmapName" . }}
+  labels:
+    {{- include "fluent-bit-custom.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Parsers_File        parsers.conf
+    [INPUT]
+        Name                tail
+        Tag                 kube.*
+        Path                /var/log/containers/*.log
+        Parser              docker
+        DB                  /var/log/flb_kube.db
+        Mem_Buf_Limit       5MB
+        Skip_Long_Lines     Off
+        Refresh_Interval    10
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Merge_JSON_Key      k8s
+        Merge_Log_Trim      On
+        K8S-Logging.Parser  On
+        K8S-Logging.exclude True
+        Keep_Log            Off
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.bruin-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     bruin-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.cts-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     cts-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.customer-cache*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     customer-cache  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.digi-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     digi-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.digi-reboot-report*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     digi-reboot-report  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.dispatch-portal-backend*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     dispatch-portal-backend  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.dispatch-portal-frontend*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     dispatch-portal-frontend  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.email-tagger-kre-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     email-tagger-kre-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.email-tagger-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     email-tagger-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.hawkeye-affecting-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     hawkeye-affecting-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.hawkeye-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     hawkeye-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.hawkeye-customer-cache*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     hawkeye-customer-cache  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.hawkeye-outage-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     hawkeye-outage-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.last-contact-report*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     last-contact-report  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.lit-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     lit-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.lumin-billing-report*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     lumin-billing-report  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.notifier*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     notifier  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-affecting-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-affecting-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-dispatch-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-dispatch-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-outage-monitor-1*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-outage-monitor-1  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-outage-monitor-2*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-outage-monitor-2  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-outage-monitor-3*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-outage-monitor-3  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-outage-monitor-4*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-outage-monitor-4  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.service-outage-monitor-triage*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     service-outage-monitor-triage  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.sites-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     sites-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.t7-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     t7-bridge  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.tnba-feedback*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     tnba-feedback  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.tnba-monitor*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     tnba-monitor  
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.velocloud-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     velocloud-bridge  
+        auto_create_group   true
+
+
+  parsers.conf: |
+    [PARSER]
+        Name   mettel_parser_logs
+        Format regex
+        Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>.*)$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+    [PARSER]
+        Name   json
+        Format json
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+    [PARSER]
+        Name        docker
+        Format      json
+        Time_Key    @timestamp
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep   Off
+    [PARSER]
+        Name        syslog
+        Format      regex
+        Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+        Time_Key    time
+        Time_Format %b %d %H:%M:%S

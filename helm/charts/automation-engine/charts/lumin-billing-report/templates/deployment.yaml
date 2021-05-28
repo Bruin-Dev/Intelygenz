@@ -19,6 +19,8 @@ spec:
     metadata:
       labels:
         {{- include "lumin-billing-report.labels" . | nindent 8 }}
+      annotations:
+        fluentbit.io/parser: mettel_parser_logs
     spec:
       containers:
         - name: {{ .Chart.Name }}

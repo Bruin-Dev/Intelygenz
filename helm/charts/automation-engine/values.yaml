@@ -27,6 +27,10 @@ nats:
     # will be created in the microservice deployment that will wait until the
     # cts-bridge service responds correctly to healthcheck calls.
     cts_bridge: true
+    # -- Indicate if customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # customer-cache service responds correctly to healthcheck calls.
+    customer_cache: true
     # -- Indicate if digi-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # digi-bridge service responds correctly to healthcheck calls.
@@ -39,6 +43,10 @@ nats:
     # will be created in the microservice deployment that will wait until the
     # hawkeye-bridge service responds correctly to healthcheck calls.
     hawkeye_bridge: true
+    # -- Indicate if hawkeye-customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-customer-cache service responds correctly to healthcheck calls.
+    hawkeye_customer_cache: true
     # -- Indicate if lit-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # lit-bridge service responds correctly to healthcheck calls.
