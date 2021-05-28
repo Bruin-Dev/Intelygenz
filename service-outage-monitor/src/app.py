@@ -63,7 +63,8 @@ class Container:
         self._digi_repository = DiGiRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                notifications_repository=self._notifications_repository)
         self._utils_repository = UtilsRepository()
-        self._triage_repository = TriageRepository(config, self._utils_repository)
+        self._triage_repository = TriageRepository(logger=self._logger, config=config,
+                                                   utils_repository=self._utils_repository)
         self._customer_cache_repository = CustomerCacheRepository(
             event_bus=self._event_bus, logger=self._logger, config=config,
             notifications_repository=self._notifications_repository,

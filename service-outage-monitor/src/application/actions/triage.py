@@ -34,8 +34,8 @@ class Triage:
         self._notifications_repository = notifications_repository
         self._triage_repository = triage_repository
         self._metrics_repository = metrics_repository
-        self._edges_data_by_serial = {}
         self._edges_status_by_serial = {}
+        self._cached_info_by_serial = {}
         self.__reset_customer_cache()
         self._semaphore = asyncio.BoundedSemaphore(self._config.TRIAGE_CONFIG['semaphore'])
 
@@ -86,10 +86,11 @@ class Triage:
                           f'Ticket details with triage: {len(details_with_triage)}. '
                           f'Ticket details without triage: {len(details_without_triage)}. '
                           'Processing both sets...')
-        self._edges_data_by_serial: dict = {
-            elem['serial_number']: {'edge_id': elem['edge']}
+        self._cached_info_by_serial: dict = {
+            elem['serial_number']: elem
             for elem in self._customer_cache
         }
+
         await self._build_edges_status_by_serial()
         await asyncio.gather(
             self._process_ticket_details_with_triage(details_with_triage),
@@ -101,7 +102,7 @@ class Triage:
         edge_list = await self._velocloud_repository.get_edges_for_triage()
         for edge in edge_list:
             serial_number = edge["edgeSerialNumber"]
-            if serial_number in self._edges_data_by_serial.keys():
+            if serial_number in self._cached_info_by_serial.keys():
                 self._edges_status_by_serial[serial_number] = edge
                 continue
 
@@ -292,9 +293,10 @@ class Triage:
             self._logger.info(f'Appending events to detail {ticket_detail_id} of ticket {ticket_id}...')
 
             newest_triage_note_timestamp = newest_triage_note['createdDate']
-            edge_data = self._edges_data_by_serial[serial_number]
+            edge_data = self._cached_info_by_serial[serial_number]
 
-            await self._append_new_triage_notes_based_on_recent_events(detail, newest_triage_note_timestamp, edge_data)
+            await self._append_new_triage_notes_based_on_recent_events(detail, newest_triage_note_timestamp,
+                                                                       edge_data['edge'])
             self._logger.info(f'Events appended to detail {ticket_detail_id} of ticket {ticket_id}!')
             self._metrics_repository.increment_tickets_with_triage_processed()
 
@@ -324,7 +326,7 @@ class Triage:
 
         working_environment = self._config.TRIAGE_CONFIG['environment']
 
-        edge_full_id = edge_data['edge_id']
+        edge_full_id = edge_data
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         last_triage_datetime = parse(last_triage_timestamp).astimezone(utc)
@@ -413,9 +415,9 @@ class Triage:
 
             self._logger.info(f'Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...')
 
-            edge_data = self._edges_data_by_serial[serial_number]
+            edge_data = self._cached_info_by_serial[serial_number]
 
-            edge_full_id = edge_data['edge_id']
+            edge_full_id = edge_data['edge']
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
             past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
@@ -443,7 +445,7 @@ class Triage:
 
             recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
-            ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status,
+            ticket_note = self._triage_repository.build_triage_note(edge_data, edge_status,
                                                                     recent_events_response_body)
 
             note_appended = await self._bruin_repository.append_triage_note(detail, ticket_note)
