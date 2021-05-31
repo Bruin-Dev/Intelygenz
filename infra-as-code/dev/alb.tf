@@ -16,7 +16,6 @@ resource "aws_security_group" "automation-dev-inbound" {
       "76.102.161.105/32", // KEKO HOME
       "76.103.237.82/32", // SANCHO HOME
       "73.158.200.161/32", // BRANDON HOME
-      "37.134.83.253/32", // XOAN HOME
       "83.61.20.90/32", // IGZ CALLAO OFFICE 1
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",   // IGZ CALLAO OFFICE 3
@@ -37,14 +36,15 @@ resource "aws_security_group" "automation-dev-inbound" {
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "52.51.50.68/32", // IGZ VPN
-      "37.134.194.81/32", // XOAN HOME
       "79.146.229.176/32",   // JESUS HOME
       "139.47.71.34/32",    // JC HOME
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "216.194.50.82/32", // Brian Sullivan's IP
       "216.194.28.12/32", // Joseph Degeorge's IP
       "216.194.50.83/32",  // MetTel Office IP
-      "216.194.28.132/32" // MetTel Office IP
+      "216.194.28.132/32", // MetTel Office IP
+      "216.194.28.130/32",  // MetTel Cisco VPN
+      "216.194.28.16/32" // MetTel Fortinet VPN     
     ]
   }
 
@@ -65,7 +65,9 @@ resource "aws_security_group" "automation-dev-inbound" {
       "216.194.50.82/32", // Brian Sullivan's IP
       "216.194.28.12/32", // Joseph Degeorge's IP
       "216.194.50.83/32",  // MetTel Office IP
-      "216.194.28.132/32" // MetTel Office IP
+      "216.194.28.132/32", // MetTel Office IP
+      "216.194.28.130/32",  // MetTel Cisco VPN
+      "216.194.28.16/32" // MetTel Fortinet VPN     
     ]
   }
 
