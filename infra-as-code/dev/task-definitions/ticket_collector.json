@@ -1,0 +1,79 @@
+[
+  {
+    "name": "ticket-collector",
+    "image": "${image}",
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:5000/_health || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "environment": [
+      {
+        "name": "MONGODB_USERNAME",
+        "value": "${MONGODB_USERNAME}"
+      },
+      {
+        "name": "MONGODB_PASSWORD",
+        "value": "${MONGODB_PASSWORD}"
+      },
+      {
+        "name": "MONGODB_HOST",
+        "value": "${MONGODB_HOST}"
+      },
+      {
+        "name": "MONGODB_DATABASE",
+        "value": "${MONGODB_DATABASE}"
+      },
+      {
+        "name": "INTERVAL_TASKS_RUN",
+        "value": "${INTERVAL_TASKS_RUN}"
+      },
+      {
+        "name": "BRUIN_CLIENT_ID",
+        "value": "${BRUIN_CLIENT_ID}"
+      },
+      {
+        "name": "BRUIN_CLIENT_SECRET",
+        "value": "${BRUIN_CLIENT_SECRET}"
+      },
+      {
+        "name": "CURRENT_ENVIRONMENT",
+        "value": "${CURRENT_ENVIRONMENT}"
+      },
+      {
+        "name": "PAPERTRAIL_ACTIVE",
+        "value": "${PAPERTRAIL_ACTIVE}"
+      },
+      {
+        "name": "PAPERTRAIL_HOST",
+        "value": "${PAPERTRAIL_HOST}"
+      },
+      {
+        "name": "PAPERTRAIL_PORT",
+        "value": "${PAPERTRAIL_PORT}"
+      },
+      {
+        "name": "PAPERTRAIL_PREFIX",
+        "value": "${PAPERTRAIL_PREFIX}"
+      },
+      {
+        "name": "ENVIRONMENT_NAME",
+        "value": "${ENVIRONMENT_NAME}"
+      }
+    ]
+  }
+]

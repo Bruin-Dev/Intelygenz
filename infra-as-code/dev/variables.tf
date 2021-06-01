@@ -610,6 +610,12 @@ variable "sites_monitor_desired_tasks" {
   description = "Number of desired tasks of microservice sites-monitor"
 }
 
+variable "ticket_collector_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice ticket-collector"
+}
+
 variable "tnba_monitor_desired_tasks" {
   default = 1
   type = number

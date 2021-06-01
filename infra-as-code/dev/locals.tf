@@ -168,6 +168,10 @@ locals {
   running_task_count_digi-bridge_alarm-name = "Running tasks count of digi-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_digi-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_digi-bridge"
 
+  // alarm running_task_count_digi-reboot-report local variables
+  running_task_count_digi-reboot-report_alarm-name = "Running tasks count of digi-reboot-report service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_digi-reboot-report_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_digi-reboot-report"
+
   // alarm running_task_count_email-tagger-kre-bridge local variables
   running_task_count_email-tagger-kre-bridge_alarm-name = "Running tasks count of email-tagger-kre-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_email-tagger-kre-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_email-tagger-kre-bridge"
@@ -175,6 +179,10 @@ locals {
   // alarm running_task_count_email-tagger-monitor local variables
   running_task_count_email-tagger-monitor_alarm-name = "Running tasks count of email-tagger-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_email-tagger-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_digi-bridge"
+
+  // alarm running_task_count_ticket-collector local variables
+  running_task_count_ticket-collector_alarm-name = "Running tasks count of ticket-collector service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_ticket-collector_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_ticket-collector"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"
