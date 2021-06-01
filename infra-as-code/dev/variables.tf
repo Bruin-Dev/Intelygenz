@@ -743,3 +743,9 @@ variable "velocloud-bridge-task-definition-json" {
   description = "Task definition arn output in rendered json for velocloud-bridge"
   default = "/tmp/velocloud-bridge-task-definition.json"
 }
+
+variable "documentdb-username" {
+  type = string
+  default = "admin"
+  description = "DocumentDB main username"
+}

@@ -655,12 +655,29 @@ services:
     env_file:
       - ticket-collector/src/config/env
     depends_on:
-      - redis
       - mongo
     volumes:
     - ./ticket-collector:/service/app
+
+  ticket-statistics:
+    build:
+      context: .
+      dockerfile: ticket-statistics/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
+        DOCKER_BASE_IMAGE_VERSION: 2.1.0
+        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
+        IGZ_PACKAGES_VERSION: 2.0.1
+    env_file:
+      - ticket-statistics/src/config/env
+    depends_on:
+      - ticket-collector
+      - mongo
+    volumes:
+    - ./ticket-statistics:/service/app
     ports:
-      - 9100:9100
+      - 3000:3000
+
   mongo:
     image: mongo:latest
     restart: always
