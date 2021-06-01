@@ -133,3 +133,11 @@ resource "aws_ecr_repository" "automation-digi-reboot-report" {
 resource "aws_ecr_repository" "automation-queue-forwarder" {
   name = "automation-queue-forwarder"
 }
+
+resource "aws_ecr_repository" "automation-ticket-collector" {
+  name = "automation-ticket-collector"
+}
+
+resource "aws_ecr_repository" "automation-ticket-statistics" {
+  name = "automation-ticket-collector"
+}

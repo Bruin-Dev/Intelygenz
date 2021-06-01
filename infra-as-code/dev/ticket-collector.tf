@@ -1,29 +1,32 @@
 ## ticket-collector local variables
 locals {
   // automation-ticket-collector local vars
-  automation-ticket-collector-image = "${data.aws_ecr_repository.automation-ticket-collector.repository_url}:${data.external.ticket-collector-build_number.result["image_tag"]}"
-  automation-ticket-collector-papertrail_prefix = "ticket-collector-${element(split("-", data.external.ticket-collector-build_number.result["image_tag"]),2)}"
+  automation-ticket-collector-image = "${data.aws_ecr_repository.automation-ticket-collector[0].repository_url}:${data.external.ticket-collector-build_number[0].result["image_tag"]}"
+  automation-ticket-collector-papertrail_prefix = "ticket-collector-${element(split("-", data.external.ticket-collector-build_number[0].result["image_tag"]),2)}"
   automation-ticket-collector-ecs_task_definition-family = "${var.ENVIRONMENT}-ticket-collector"
   automation-ticket-collector_service-security_group-name = "${var.ENVIRONMENT}-ticket-collector"
   automation-ticket-collector-resource-name = "${var.ENVIRONMENT}-ticket-collector"
   automation-ticket-collector-service-security_group-tag-Name = "${var.ENVIRONMENT}-ticket-collector"
-  automation-ticket-collector-task_definition = "${aws_ecs_task_definition.automation-ticket-collector.family}:${aws_ecs_task_definition.automation-ticket-collector.revision}"
+  automation-ticket-collector-task_definition = "${aws_ecs_task_definition.automation-ticket-collector[0].family}:${aws_ecs_task_definition.automation-ticket-collector[0].revision}"
   automation-ticket-collector-service_discovery_service-name = "ticket-collector-${var.ENVIRONMENT}"
 }
 
 data "aws_ecr_repository" "automation-ticket-collector" {
-  name = "automation-ticket-collector"
+  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  name  = "automation-ticket-collector"
 }
 
 data "external" "ticket-collector-build_number" {
+  count   = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   program = [
     "bash",
     "${path.module}/scripts/obtain_latest_image_for_repository.sh",
-    data.aws_ecr_repository.automation-ticket-collector.name
+    data.aws_ecr_repository.automation-ticket-collector[0].name
   ]
 }
 
 data "template_file" "automation-ticket-collector" {
+  count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   template = file("${path.module}/task-definitions/ticket_collector.json")
 
   vars = {
@@ -31,9 +34,9 @@ data "template_file" "automation-ticket-collector" {
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
 
-    MONGODB_USERNAME = var.MONGODB_USERNAME
-    MONGODB_PASSWORD = var.MONGODB_PASSWORD
-    MONGODB_HOST = var.MONGODB_HOST
+    MONGODB_USERNAME = var.DOCUMENTDB_USERNAME
+    MONGODB_PASSWORD = aws_docdb_cluster.docdb.master_password
+    MONGODB_HOST = aws_docdb_cluster.docdb.endpoint
     MONGODB_DATABASE = var.MONGODB_DATABASE
     INTERVAL_TASKS_RUN = var.INTERVAL_TASKS_RUN
     BRUIN_CLIENT_ID = var.BRUIN_CLIENT_ID
@@ -48,8 +51,9 @@ data "template_file" "automation-ticket-collector" {
 }
 
 resource "aws_ecs_task_definition" "automation-ticket-collector" {
+  count  = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   family = local.automation-ticket-collector-ecs_task_definition-family
-  container_definitions = data.template_file.automation-ticket-collector.rendered
+  container_definitions = data.template_file.automation-ticket-collector[0].rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -60,6 +64,7 @@ resource "aws_ecs_task_definition" "automation-ticket-collector" {
 }
 
 resource "aws_security_group" "automation-ticket-collector_service" {
+  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   vpc_id = data.aws_vpc.mettel-automation-vpc.id
   name = local.automation-ticket-collector_service-security_group-name
   description = "Allow egress from container"
@@ -87,7 +92,8 @@ resource "aws_security_group" "automation-ticket-collector_service" {
 }
 
 resource "aws_service_discovery_service" "ticket-collector" {
-  name = local.automation-ticket-collector-service_discovery_service-name
+  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  name  = local.automation-ticket-collector-service_discovery_service-name
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
@@ -106,21 +112,21 @@ resource "aws_service_discovery_service" "ticket-collector" {
 }
 
 resource "aws_ecs_service" "automation-ticket-collector" {
+  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   name = local.automation-ticket-collector-resource-name
   task_definition = local.automation-ticket-collector-task_definition
   desired_count = var.ticket_collector_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.ticket_collector_desired_tasks != 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
-      aws_security_group.automation-ticket-collector_service.id]
+      aws_security_group.automation-ticket-collector_service[0].id]
     subnets = data.aws_subnet_ids.mettel-automation-private-subnets.ids
     assign_public_ip = false
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.ticket-collector.arn
+    registry_arn = aws_service_discovery_service.ticket-collector[0].arn
   }
-
+}

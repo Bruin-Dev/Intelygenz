@@ -744,8 +744,44 @@ variable "velocloud-bridge-task-definition-json" {
   default = "/tmp/velocloud-bridge-task-definition.json"
 }
 
-variable "documentdb-username" {
+variable "DOCUMENTDB_USERNAME" {
   type = string
   default = "admin"
   description = "DocumentDB main username"
+}
+
+variable "INTERVAL_TASKS_RUN" {
+  type = number
+  default = "1"
+  description = "interval task run"
+}
+
+variable "MONGODB_DATABASE" {
+  type = string
+  default = "bruin"
+  description = "interval task run"
+}
+
+variable "SERVER_PORT" {
+  type = string
+  default = "bruin"
+  description = "server port"
+}
+
+variable "SERVER_ROOT_PATH" {
+  type = string
+  default = "bruin"
+  description = "server root path"
+}
+
+variable "SERVER_VERSION" {
+  type = string
+  default = "bruin"
+  description = "server version"
+}
+
+variable "SERVER_NAME" {
+  type = string
+  default = "bruin"
+  description = "server name"
 }
