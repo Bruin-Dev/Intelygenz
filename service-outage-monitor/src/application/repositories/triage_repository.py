@@ -28,6 +28,8 @@ class TriageRepository:
         return interface_name == interface_name_found
 
     def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict]) -> str:
+        tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
+
         links_configuration = cached_edge['links_configuration']
         edge_full_id = cached_edge['edge']
         host = edge_full_id['host']
@@ -43,21 +45,42 @@ class TriageRepository:
         velocloud_base_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor'
         velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_id}'
 
-        relevant_data: dict = OrderedDict()
+        ticket_note_lines = [
+            "#*MetTel's IPA*#",
+            'Triage (VeloCloud)',
+            f'Orchestrator Instance: {host}',
+            f'Edge Name: {edge_name}',
+            (
+                'Links: '
+                f'[Edge|{velocloud_edge_base_url}/] - [QoE|{velocloud_edge_base_url}/qoe/] - '
+                f'[Transport|{velocloud_edge_base_url}/links/] - [Events|{velocloud_base_url}/events/]'
+            ),
+            f'Serial: {edge_serial}',
+            '',
+            f'Edge Status: {edge_state}',
+        ]
 
-        relevant_data["Orchestrator Instance"] = host
-        relevant_data["Edge Name"] = edge_name
-        relevant_data["Links"] = {
-            'Edge': f'{velocloud_edge_base_url}/',
-            'QoE': f'{velocloud_edge_base_url}/qoe/',
-            'Transport': f'{velocloud_edge_base_url}/links/',
-            'Events': f'{velocloud_base_url}/events/',
-        }
+        last_online_event_for_edge = self._utils_repository.get_first_element_matching(
+            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_UP'
+        )
+        last_offline_event_for_edge = self._utils_repository.get_first_element_matching(
+            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_DOWN'
+        )
 
-        relevant_data["Edge Status"] = edge_state
-        relevant_data["Serial"] = edge_serial
+        if last_online_event_for_edge is not None:
+            ticket_note_lines.append(
+                f"Last Edge Online: {parse(last_online_event_for_edge['eventTime']).astimezone(tz_object)}"
+            )
+        else:
+            ticket_note_lines.append("Last Edge Online: Unknown")
 
-        links_interface_names = []
+        if last_offline_event_for_edge is not None:
+            ticket_note_lines.append(
+                f"Last Edge Offline: {parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)}\n"
+            )
+        else:
+            ticket_note_lines.append("Last Edge Offline: Unknown\n")
+
         for link in edge_links:
             if not link:
                 continue
@@ -68,41 +91,15 @@ class TriageRepository:
             link_interface_type = "Unknown"
             for link_configuration in links_configuration:
                 if interface_name in link_configuration['interfaces']:
-                    link_interface_type = \
+                    link_interface_type = (
                         f"{link_configuration['mode'].capitalize()} {link_configuration['type'].capitalize()}"
+                    )
                     break
 
-            relevant_data[f'Interface {interface_name}'] = empty_str
-            relevant_data[f'Interface {interface_name} Label'] = link_label
-            relevant_data[f'Interface {interface_name} Type'] = link_interface_type
-            relevant_data[f'Interface {interface_name} Status'] = link_state
-
-            links_interface_names.append(interface_name)
-
-        tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
-
-        relevant_data["Last Edge Online"] = None
-        relevant_data["Last Edge Offline"] = None
-
-        last_online_event_for_edge = self._utils_repository.get_first_element_matching(
-            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_UP'
-        )
-        last_offline_event_for_edge = self._utils_repository.get_first_element_matching(
-            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_DOWN'
-        )
-
-        if last_online_event_for_edge is not None:
-            relevant_data["Last Edge Online"] = parse(last_online_event_for_edge['eventTime']).astimezone(tz_object)
-
-        if last_offline_event_for_edge is not None:
-            relevant_data["Last Edge Offline"] = parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)
-
-        for interface_name in links_interface_names:
-            last_online_key = f'Last {interface_name} Interface Online'
-            last_offline_key = f'Last {interface_name} Interface Offline'
-
-            relevant_data[last_online_key] = None
-            relevant_data[last_offline_key] = None
+            ticket_note_lines.append(f'Interface {interface_name}')
+            ticket_note_lines.append(f'Interface {interface_name} Label: {link_label}')
+            ticket_note_lines.append(f'Interface {interface_name} Type: {link_interface_type}')
+            ticket_note_lines.append(f'Interface {interface_name} Status: {link_state}')
 
             last_online_event_for_current_link = self._utils_repository.get_first_element_matching(
                 iterable=edge_events,
@@ -117,28 +114,22 @@ class TriageRepository:
             )
 
             if last_online_event_for_current_link is not None:
-                relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
-                    tz_object)
+                last_online_event_time = last_online_event_for_current_link['eventTime']
+                ticket_note_lines.append(
+                    f'Last {interface_name} Interface Online: {parse(last_online_event_time).astimezone(tz_object)}'
+                )
+            else:
+                ticket_note_lines.append(f'Last {interface_name} Interface Online: Unknown')
 
             if last_offline_event_for_current_link is not None:
-                relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
-                    tz_object)
-
-        ticket_note_lines = [
-            "#*MetTel's IPA*#",
-            'Triage (VeloCloud)',
-        ]
-
-        for key, value in relevant_data.items():
-            if value is empty_str:
-                ticket_note_lines.append(key)
-            elif key == 'Links':
-                clickable_links = [f'[{name}|{url}]' for name, url in value.items()]
-                ticket_note_lines.append(f"Links: {' - '.join(clickable_links)}")
+                last_offline_event_time = last_offline_event_for_current_link['eventTime']
+                ticket_note_lines.append(
+                    f'Last {interface_name} Interface Offline: {parse(last_offline_event_time).astimezone(tz_object)}\n'
+                )
             else:
-                ticket_note_lines.append(f'{key}: {value}')
+                ticket_note_lines.append(f'Last {interface_name} Interface Offline: Unknown\n')
 
-        return os.linesep.join(ticket_note_lines)
+        return os.linesep.join(ticket_note_lines).strip()
 
     def build_events_note(self, events):
         tz_object = timezone(self._config.TRIAGE_CONFIG["timezone"])
