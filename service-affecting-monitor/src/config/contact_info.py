@@ -1,8 +1,12 @@
-from config import oreilly_contact_info
 from config import confie_contact_info
+from config import oreilly_contact_info
+from config import royal_brass_contact_info
+from config import tenet_contact_info
 
 oreilly_devices = oreilly_contact_info.devices_by_id
 confie_devices = confie_contact_info.devices_by_id
+tenet_devices = tenet_contact_info.devices_by_id
+royal_brass_devices = royal_brass_contact_info.devices_by_id
 
 contact_info = [
     # Titan America edges
@@ -1966,7 +1970,7 @@ contact_info = [
                 "phone": "910.616.3338",
                 "name": "William Keyes"
             }
-                }
+        }
     },
     # Rotech edges
     {
@@ -2093,7 +2097,7 @@ contact_info = [
                 "phone": "(972)256-2030",
                 "name": "Andrade, Esther"
             }
-                }
+        }
     },
     # MarineMax edges
     {
@@ -3264,7 +3268,7 @@ contact_info = [
                 "phone": "770-992-9199",
                 "name": "Blackfin Square Escalations Support Team"
             }
-                }
+        }
     },
     # Benchmark Senior Living
     {
@@ -11928,10 +11932,7 @@ contact_info = [
     }
 ]
 
-# When customers wants to reenable O'Reilly monitoring, use this line instead
-# devices_by_id = contact_info + oreilly_devices
+# When customers wants to reenable Confie Seguros monitoring append it to the existing aggregate list
+# devices_by_id = contact_info + ..... + confie_devices
 
-# When customers wants to reenable Confie Seguros monitoring, use this line instead
-# devices_by_id = contact_info + confie_devices
-
-devices_by_id = contact_info
+devices_by_id = contact_info + oreilly_devices + tenet_devices + royal_brass_devices
