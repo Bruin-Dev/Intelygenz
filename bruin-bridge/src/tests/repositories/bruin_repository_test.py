@@ -973,8 +973,8 @@ class TestBruinRepository:
         }
 
         expected_result = {
-            "body": {"client_id": client_response["body"]["documents"][0]["clientID"],
-                     "client_name": client_response["body"]["documents"][0]["clientName"]},
+            "body": [{"client_id": client_response["body"]["documents"][0]["clientID"],
+                     "client_name": client_response["body"]["documents"][0]["clientName"]}],
             "status": response_status
         }
 
@@ -1006,8 +1006,7 @@ class TestBruinRepository:
         }
 
         expected_result = {
-            "body": {"client_id": None,
-                     "client_name": None},
+            "body": [],
             "status": response_status
         }
 
@@ -1080,8 +1079,7 @@ class TestBruinRepository:
         }
 
         expected_result = {
-            "body": {"client_id": None,
-                     "client_name": None},
+            "body": [],
             "status": response_status
         }
 
