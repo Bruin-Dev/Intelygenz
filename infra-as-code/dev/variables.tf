@@ -616,6 +616,12 @@ variable "ticket_collector_desired_tasks" {
   description = "Number of desired tasks of microservice ticket-collector"
 }
 
+variable "ticket_statistics_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice ticket-statistics"
+}
+
 variable "tnba_monitor_desired_tasks" {
   default = 1
   type = number

@@ -27,7 +27,7 @@ data "external" "ticket-statistics-build_number" {
 
 data "template_file" "automation-ticket-statistics" {
   count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  template = file("${path.module}/task-definitions/ticket_collector.json")
+  template = file("${path.module}/task-definitions/ticket_statistics.json")
 
   vars = {
     image = local.automation-ticket-statistics-image
@@ -127,7 +127,7 @@ resource "aws_ecs_service" "automation-ticket-statistics" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   name = local.automation-ticket-statistics-resource-name
   task_definition = local.automation-ticket-statistics-task_definition
-  desired_count = var.ticket_collector_desired_tasks
+  desired_count = var.ticket_statistics_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 
