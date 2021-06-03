@@ -3,7 +3,6 @@ from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.actions.links_with_edge_info import LinksWithEdgeInfo
 from application.actions.links_metric_info import LinksMetricInfo
 from application.actions.enterprise_edge_list import EnterpriseEdgeList
-from application.actions.links_configuration import LinksConfiguration
 from application.clients.velocloud_client import VelocloudClient
 from application.repositories.velocloud_repository import VelocloudRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -39,23 +38,20 @@ class Container:
         self._subscriber_enterprise_name_list = NATSClient(config, logger=self._logger)
         self._subscriber_links_with_edge_info = NATSClient(config, logger=self._logger)
         self._subscriber_links_metric_info = NATSClient(config, logger=self._logger)
-        self._subscriber_enterprise_edge_list = NATSClient(config, logger=self._logger)
+        self._subsriber_enterprise_edge_list = NATSClient(config, logger=self._logger)
         self._subscriber_event_alert = NATSClient(config, logger=self._logger)
-        self._subscriber_links_configuration = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_enterprise_name_list, consumer_name="enterprise_name_list")
         self._event_bus.add_consumer(self._subscriber_links_with_edge_info, consumer_name="links_with_edge_info")
         self._event_bus.add_consumer(self._subscriber_links_metric_info, consumer_name="links_metric_info")
         self._event_bus.add_consumer(self._subscriber_event_alert, consumer_name="event_alert")
-        self._event_bus.add_consumer(self._subscriber_enterprise_edge_list, consumer_name="enterprise_edge_list")
-        self._event_bus.add_consumer(self._subscriber_links_configuration, consumer_name="links_configuration")
+        self._event_bus.add_consumer(self._subsriber_enterprise_edge_list, consumer_name="enterprise_edge_list")
         self._event_bus.set_producer(self._publisher)
 
         self._edge_events_for_alert = EventEdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
         self._links_with_edge_info_action = LinksWithEdgeInfo(self._event_bus, self._logger, self._velocloud_repository)
         self._links_metric_info_action = LinksMetricInfo(self._event_bus, self._logger, self._velocloud_repository)
-        self._links_configuration_action = LinksConfiguration(self._event_bus, self._velocloud_repository, self._logger)
         self._enterprise_name_list = EnterpriseNameList(self._event_bus, self._velocloud_repository, self._logger)
         self._enterprise_edge_list = EnterpriseEdgeList(self._event_bus, self._velocloud_repository, self._logger)
 
@@ -70,8 +66,6 @@ class Container:
                                                 is_async=True, logger=self._logger)
         self._list_enterprise_edges = ActionWrapper(self._enterprise_edge_list, "enterprise_edge_list",
                                                     is_async=True, logger=self._logger)
-        self._links_configuration = ActionWrapper(self._links_configuration_action, "links_configuration",
-                                                  is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -98,10 +92,6 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="enterprise_edge_list",
                                                  topic="request.enterprises.edges",
                                                  action_wrapper=self._list_enterprise_edges,
-                                                 queue="velocloud_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="links_configuration",
-                                                 topic="request.links.configuration",
-                                                 action_wrapper=self._links_configuration,
                                                  queue="velocloud_bridge")
 
     async def start_server(self):

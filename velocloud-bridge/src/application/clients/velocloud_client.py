@@ -107,8 +107,8 @@ class VelocloudClient:
             return return_response
         except Exception as e:
             return {
-                'body': e.args[0],
-                'status': 500
+                    'body': e.args[0],
+                    'status': 500
             }
 
     def _get_header_by_host(self, host):
@@ -375,61 +375,6 @@ class VelocloudClient:
         result['body'] = response.json()
         result['status'] = response.status_code
 
-        self.__log_result(result)
-
-        return result
-
-    async def get_edge_configuration_stack(self, edge):
-        velocloud_host = edge['host']
-
-        result = dict.fromkeys(["body", "status"])
-
-        request_body = {
-            "enterpriseId": edge["enterprise_id"],
-            "edgeId": edge["edge_id"],
-        }
-        target_host_client = self._get_header_by_host(velocloud_host)
-
-        if target_host_client is None:
-            await self._start_relogin_job(velocloud_host)
-            result["body"] = f'Cannot find a client to connect to host {velocloud_host}'
-            result["status"] = 404
-            self.__log_result(result)
-            return result
-        try:
-            self._logger.info(f'Getting edge configuration stack for edge {edge}...')
-
-            async with self._session:
-                response = await self._session.post(
-                    f"https://{velocloud_host}/portal/rest/edge/getEdgeConfigurationStack",
-                    json=request_body,
-                    headers=target_host_client['headers'],
-                )
-        except httpx.RequestError as e:
-            result["body"] = f'Error while fetching data from Velocloud API -> {e}'
-            result["status"] = 500
-            self.__log_result(result)
-            return result
-
-        if response.status_code in range(500, 513):
-            result["body"] = "Got internal error from Velocloud"
-            result["status"] = 500
-            self.__log_result(result)
-            return result
-
-        if response.status_code == 400:
-            response = response.json()
-            result["body"] = f"Got 400 from Velocloud -> {response['error']['message']} for edge {edge}"
-            result["status"] = 400
-            return result
-
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
-
-        self._logger.info(
-            f'Got HTTP {response.status_code} from Velocloud after claiming edge configuration stack for edge {edge}'
-        )
-        result['body'] = response.json()
-        result['status'] = response.status_code
         self.__log_result(result)
 
         return result

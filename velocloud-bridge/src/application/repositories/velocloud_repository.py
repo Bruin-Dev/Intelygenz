@@ -1,6 +1,3 @@
-from typing import List
-
-
 class VelocloudRepository:
     _config = None
     _clients = None
@@ -77,45 +74,3 @@ class VelocloudRepository:
 
     async def get_enterprise_edges(self, host, enterprise_id):
         return await self._velocloud_client.get_enterprise_edges(host, enterprise_id)
-
-    async def get_links_configuration(self, edge_full_id):
-        config_response = {}
-
-        config_stack_response = await self._velocloud_client.get_edge_configuration_stack(edge_full_id)
-        if config_stack_response['status'] not in range(200, 300):
-            config_response["status"] = config_stack_response['status']
-            config_response["body"] = f'Bad status calling get_edge_configuration_stack. ' \
-                                      f'Response {config_stack_response} for edge {edge_full_id}'
-            return config_response
-
-        config_stack = config_stack_response['body']
-        if not config_stack:
-            config_response["status"] = 404
-            config_response["body"] = f'No config stack was found for edge {edge_full_id}'
-            return config_response
-
-        edge_config = [config for config in config_stack if config['name'] == 'Edge Specific Profile']
-        if not edge_config:
-            config_response["status"] = 404
-            config_response["body"] = f'No specific config was found for edge {edge_full_id}'
-            return config_response
-
-        edge_config = edge_config[0]
-        config_wan_module = [module for module in edge_config['modules'] if module['name'] == 'WAN']
-        if not config_wan_module:
-            config_response["status"] = 404
-            config_response["body"] = f'No WAN module was found for edge {edge_full_id}'
-            return config_response
-
-        config_wan_module = config_wan_module[0]
-        wan_module_data = config_wan_module['data']
-        links_configuration = wan_module_data.get('links')
-        if not links_configuration:
-            config_response["status"] = 404
-            config_response["body"] = f'No links configuration was found in WAN module of edge {edge_full_id}'
-            return config_response
-
-        config_response["status"] = 200
-        config_response["body"] = links_configuration
-
-        return config_response

@@ -217,68 +217,68 @@ class TestVelocloudRepository:
         }
 
         link_1 = {
-            'linkId': 12,
-            'bytesTx': 289334426,
-            'bytesRx': 164603350,
-            'packetsTx': 1682073,
-            'packetsRx': 1610536,
-            'totalBytes': 453937776,
-            'totalPackets': 3292609,
-            'p1BytesRx': 20936271,
-            'p1BytesTx': 62441238,
-            'p1PacketsRx': 54742,
-            'p1PacketsTx': 92015,
-            'p2BytesRx': 46571112,
-            'p2BytesTx': 119887124,
-            'p2PacketsRx': 195272,
-            'p2PacketsTx': 246338,
-            'p3BytesRx': 2990392,
-            'p3BytesTx': 2273566,
-            'p3PacketsRx': 3054,
-            'p3PacketsTx': 5523,
-            'controlBytesRx': 94105575,
-            'controlBytesTx': 104732498,
-            'controlPacketsRx': 1357468,
-            'controlPacketsTx': 1338197,
-            'bpsOfBestPathRx': 682655000,
-            'bpsOfBestPathTx': 750187000,
-            'bestJitterMsRx': 0,
-            'bestJitterMsTx': 0,
-            'bestLatencyMsRx': 0,
-            'bestLatencyMsTx': 0,
-            'bestLossPctRx': 0,
-            'bestLossPctTx': 0,
-            'scoreTx': 4.400000095367432,
-            'scoreRx': 4.400000095367432,
-            'signalStrength': 0,
-            'state': 0,
-            'name': 'GE1',
-            'link': {
-                'enterpriseName': 'Signet Group Services Inc|86937|',
-                'enterpriseId': 2,
-                'enterpriseProxyId': None,
-                'enterpriseProxyName': None,
-                'edgeName': 'LAB09910VC',
-                'edgeState': 'CONNECTED',
-                'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
-                'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
-                'edgeLastContact': '2020-09-29T05:09:24.000Z',
-                'edgeId': 4,
-                'edgeSerialNumber': 'VC05200005831',
-                'edgeHASerialNumber': None,
-                'edgeModelNumber': 'edge520',
-                'edgeLatitude': 41.139999,
-                'edgeLongitude': -81.612999,
-                'displayName': '198.70.201.220',
-                'isp': 'Frontier Communications',
-                'interface': 'GE1',
-                'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
-                'linkState': 'STABLE',
-                'linkLastActive': '2020-09-29T05:05:23.000Z',
-                'linkVpnState': 'STABLE',
                 'linkId': 12,
-                'linkIpAddress': '198.70.201.220',
-            }
+                'bytesTx': 289334426,
+                'bytesRx': 164603350,
+                'packetsTx': 1682073,
+                'packetsRx': 1610536,
+                'totalBytes': 453937776,
+                'totalPackets': 3292609,
+                'p1BytesRx': 20936271,
+                'p1BytesTx': 62441238,
+                'p1PacketsRx': 54742,
+                'p1PacketsTx': 92015,
+                'p2BytesRx': 46571112,
+                'p2BytesTx': 119887124,
+                'p2PacketsRx': 195272,
+                'p2PacketsTx': 246338,
+                'p3BytesRx': 2990392,
+                'p3BytesTx': 2273566,
+                'p3PacketsRx': 3054,
+                'p3PacketsTx': 5523,
+                'controlBytesRx': 94105575,
+                'controlBytesTx': 104732498,
+                'controlPacketsRx': 1357468,
+                'controlPacketsTx': 1338197,
+                'bpsOfBestPathRx': 682655000,
+                'bpsOfBestPathTx': 750187000,
+                'bestJitterMsRx': 0,
+                'bestJitterMsTx': 0,
+                'bestLatencyMsRx': 0,
+                'bestLatencyMsTx': 0,
+                'bestLossPctRx': 0,
+                'bestLossPctTx': 0,
+                'scoreTx': 4.400000095367432,
+                'scoreRx': 4.400000095367432,
+                'signalStrength': 0,
+                'state': 0,
+                'name': 'GE1',
+                'link': {
+                    'enterpriseName': 'Signet Group Services Inc|86937|',
+                    'enterpriseId': 2,
+                    'enterpriseProxyId': None,
+                    'enterpriseProxyName': None,
+                    'edgeName': 'LAB09910VC',
+                    'edgeState': 'CONNECTED',
+                    'edgeSystemUpSince': '2020-09-23T04:59:12.000Z',
+                    'edgeServiceUpSince': '2020-09-23T05:00:03.000Z',
+                    'edgeLastContact': '2020-09-29T05:09:24.000Z',
+                    'edgeId': 4,
+                    'edgeSerialNumber': 'VC05200005831',
+                    'edgeHASerialNumber': None,
+                    'edgeModelNumber': 'edge520',
+                    'edgeLatitude': 41.139999,
+                    'edgeLongitude': -81.612999,
+                    'displayName': '198.70.201.220',
+                    'isp': 'Frontier Communications',
+                    'interface': 'GE1',
+                    'internalId': '00000001-a028-4037-a4bc-4d0488f4c9f9',
+                    'linkState': 'STABLE',
+                    'linkLastActive': '2020-09-29T05:05:23.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 12,
+                    'linkIpAddress': '198.70.201.220',
+                }
         }
         client_result = {
             'body': [
@@ -353,339 +353,3 @@ class TestVelocloudRepository:
 
         velocloud_client.get_enterprise_edges.assert_awaited_once_with(host, enterprise_id)
         assert results == enterprise_list
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        links_configuration = [
-            {
-                "logicalId": "08:bd:43:f8:8a:97:0000",
-                "internalId": "00a0c8dc-5674-0000-0000-000000000000",
-                "discovery": "AUTO_DISCOVERED",
-                "mode": "PUBLIC",
-                "type": "WIRED",
-                "name": "Comcast ( MetTel-BCB.112134 )",
-                "isp": "Comcast Cable",
-                "publicIpAddress": "98.253.7.215",
-                "interfaces": [
-                    "INTERNET2"
-                ],
-                # Some fields omitted for simplicity
-            },
-        ]
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Edge Specific Profile',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [
-                        {
-                            "id": 563,
-                            "created": "2016-03-07T17:52:57.000Z",
-                            "name": "WAN",
-                            "type": "ENTERPRISE",
-                            "description": None,
-                            "schemaVersion": "3.3.2",
-                            "version": "1618589033631",
-                            "configurationId": 157,
-                            "data": {
-                                "links": links_configuration,
-                            },
-                        },
-                    ],
-                },
-            ],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': links_configuration,
-            'status': 200,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_config_stack_response_having_non_2xx_status_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": 'Got internal error from Velocloud',
-            "status": 500,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-        assert response == config_stack_response
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_config_stack_response_having_non_2xx_status_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": 'Got internal error from Velocloud',
-            "status": 500,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': (
-                f'Bad status calling get_edge_configuration_stack. '
-                f'Response {config_stack_response} for edge {edge_full_id}'
-            ),
-            'status': 500,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_config_stack_empty_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": [],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': f'No config stack was found for edge {edge_full_id}',
-            'status': 404,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_edge_specific_config_missing_in_config_stack_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Public_Wired_3_Segmented',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [],
-                },
-            ],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': f'No specific config was found for edge {edge_full_id}',
-            'status': 404,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_WAN_module_missing_in_edge_specific_config_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Edge Specific Profile',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [
-                        {
-                            'id': 16275,
-                            'created': '2020-09-21T18:27:09.000Z',
-                            'name': 'QOS',
-                            'type': 'ENTERPRISE',
-                            'description': None,
-                            'schemaVersion': '3.3.2',
-                            'version': '1600726682905',
-                            'configurationId': 4352,
-                            'data': {
-                                'segments': [
-                                    {
-                                        'segment': {
-                                            'segmentId': 0,
-                                            'name': 'Global Segment',
-                                            'type': 'REGULAR'
-                                        },
-                                        'cosMapping': {
-                                            'lsInputType': 'weight',
-                                            'realtime': {
-                                                'high': {'value': 35, 'ratelimit': False},
-                                                'normal': {'value': 15, 'ratelimit': False},
-                                                'low': {'value': 1, 'ratelimit': False}
-                                            }
-                                        },
-                                    },
-                                ],
-                            },
-                        }
-                    ],
-                },
-            ],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': f'No WAN module was found for edge {edge_full_id}',
-            'status': 404,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_no_links_in_WAN_module_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Edge Specific Profile',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [
-                        {
-                            'id': 16275,
-                            'created': '2020-09-21T18:27:09.000Z',
-                            'name': 'WAN',
-                            'type': 'ENTERPRISE',
-                            'description': None,
-                            'schemaVersion': '3.3.2',
-                            'version': '1600726682905',
-                            'configurationId': 4352,
-                            'data': {},
-                        }
-                    ],
-                },
-            ],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': f'No links configuration was found in WAN module of edge {edge_full_id}',
-            'status': 404,
-        }
-        assert response == expected
