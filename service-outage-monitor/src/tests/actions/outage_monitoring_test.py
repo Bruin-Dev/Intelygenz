@@ -4617,8 +4617,8 @@ class TestServiceOutageMonitor:
             call(client_id, edge_2_serial),
         ])
         outage_monitor._append_triage_note.assert_has_awaits([
-            call(outage_ticket_creation_body_1, cached_edge_1, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, cached_edge_2, new_links_grouped_by_edge_2),
+            call(outage_ticket_creation_body_1, edge_1_full_id, new_links_grouped_by_edge_1),
+            call(outage_ticket_creation_body_2, edge_2_full_id, new_links_grouped_by_edge_2),
         ])
         outage_monitor._check_for_digi_reboot.assert_has_awaits([
             call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1,
@@ -5987,8 +5987,8 @@ class TestServiceOutageMonitor:
             call(client_id, edge_2_serial),
         ])
         outage_monitor._append_triage_note.assert_has_awaits([
-            call(outage_ticket_creation_body_1, cached_edge_1, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, cached_edge_2, new_links_grouped_by_edge_2),
+            call(outage_ticket_creation_body_1, edge_1_full_id, new_links_grouped_by_edge_1),
+            call(outage_ticket_creation_body_2, edge_2_full_id, new_links_grouped_by_edge_2),
         ])
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -6005,19 +6005,6 @@ class TestServiceOutageMonitor:
             "host": velocloud_host,
             "enterprise_id": enterprise_id,
             "edge_id": edge_id,
-        }
-        client_id = 9994
-        bruin_client_info = {
-            'client_id': client_id,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-        cached_edge = {
-            'edge': edge_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
         }
         edge_status = {
             'host': velocloud_host,
@@ -6084,7 +6071,7 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+            await outage_monitor._append_triage_note(ticket_id, edge_full_id, edge_status)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
@@ -6104,19 +6091,6 @@ class TestServiceOutageMonitor:
             "host": velocloud_host,
             "enterprise_id": enterprise_id,
             "edge_id": edge_id,
-        }
-        client_id = 9994
-        bruin_client_info = {
-            'client_id': client_id,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-        cached_edge = {
-            'edge': edge_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
         }
         edge_status = {
             'host': velocloud_host,
@@ -6183,7 +6157,7 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+            await outage_monitor._append_triage_note(ticket_id, edge_full_id, edge_status)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
@@ -6203,19 +6177,6 @@ class TestServiceOutageMonitor:
             "host": velocloud_host,
             "enterprise_id": enterprise_id,
             "edge_id": edge_id,
-        }
-        client_id = 9994
-        bruin_client_info = {
-            'client_id': client_id,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-        cached_edge = {
-            'edge': edge_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
         }
         edge_status = {
             'host': velocloud_host,
@@ -6333,14 +6294,14 @@ class TestServiceOutageMonitor:
         custom_triage_config['environment'] = 'dev'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+                await outage_monitor._append_triage_note(ticket_id, edge_full_id, edge_status)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
-            cached_edge, edge_status, events_sorted_by_event_time
+            edge_full_id, edge_status, events_sorted_by_event_time
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
 
@@ -6356,19 +6317,6 @@ class TestServiceOutageMonitor:
             "host": velocloud_host,
             "enterprise_id": enterprise_id,
             "edge_id": edge_id,
-        }
-        client_id = 9994
-        bruin_client_info = {
-            'client_id': client_id,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-        cached_edge = {
-            'edge': edge_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
         }
         edge_status = {
             'host': velocloud_host,
@@ -6488,14 +6436,14 @@ class TestServiceOutageMonitor:
         custom_triage_config['environment'] = 'dev'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+                await outage_monitor._append_triage_note(ticket_id, edge_full_id, edge_status)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
-            cached_edge, edge_status, events_sorted_by_event_time
+            edge_full_id, edge_status, events_sorted_by_event_time
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
         metrics_repository.increment_first_triage_errors.assert_called_once()

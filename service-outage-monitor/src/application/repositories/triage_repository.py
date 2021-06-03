@@ -7,6 +7,7 @@ from typing import List
 from dateutil.parser import parse
 from pytz import timezone
 
+
 empty_str = str()
 
 EVENT_INTERFACE_NAME_REGEX = re.compile(
@@ -16,8 +17,7 @@ EVENT_INTERFACE_NAME_REGEX = re.compile(
 
 
 class TriageRepository:
-    def __init__(self, logger, config, utils_repository):
-        self._logger = logger
+    def __init__(self, config, utils_repository):
         self._config = config
         self._utils_repository = utils_repository
 
@@ -27,9 +27,7 @@ class TriageRepository:
         interface_name_found = match.group('interface_name') or match.group('interface_name2')
         return interface_name == interface_name_found
 
-    def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict]) -> str:
-        links_configuration = cached_edge['links_configuration']
-        edge_full_id = cached_edge['edge']
+    def build_triage_note(self, edge_full_id: dict, edge_status: dict, edge_events: List[dict]) -> str:
         host = edge_full_id['host']
         enterprise_id = edge_full_id['enterprise_id']
         edge_id = edge_full_id['edge_id']
@@ -65,16 +63,9 @@ class TriageRepository:
             interface_name = link['interface']
             link_state = link['linkState']
             link_label = link['displayName']
-            link_interface_type = "Unknown"
-            for link_configuration in links_configuration:
-                if interface_name in link_configuration['interfaces']:
-                    link_interface_type = \
-                        f"{link_configuration['mode'].capitalize()} {link_configuration['type'].capitalize()}"
-                    break
 
             relevant_data[f'Interface {interface_name}'] = empty_str
             relevant_data[f'Interface {interface_name} Label'] = link_label
-            relevant_data[f'Interface {interface_name} Type'] = link_interface_type
             relevant_data[f'Interface {interface_name} Status'] = link_state
 
             links_interface_names.append(interface_name)
