@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import httpx
+import aiohttp
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
 
@@ -12,7 +12,7 @@ class VelocloudClient:
         self._clients = list()
         self._logger = logger
         self._scheduler = scheduler
-        self._session = httpx.AsyncClient(verify=self._config['verify_ssl'])
+        self._session = aiohttp.ClientSession()
 
     async def instantiate_and_connect_clients(self):
         self._clients = [
@@ -79,13 +79,11 @@ class VelocloudClient:
                     "password": password
                 },
                 'allow_redirects': False,
+                'ssl': self._config['verify_ssl']
             }
-
-            async with self._session:
-                response = await self._session.post(f"https://{host}/portal/rest/login/operatorLogin", **post)
-
+            response = await self._session.post(f"https://{host}/portal/rest/login/operatorLogin", **post)
             return_response = dict.fromkeys(["body", "status"])
-            if response.status_code in range(200, 300):
+            if response.status in range(200, 300):
                 self._logger.info(f'Host: {host} logged in')
                 session_index = response.headers['Set-Cookie'].find("velocloud.session")
                 session_end = response.headers['Set-Cookie'].find(";", session_index)
@@ -96,8 +94,8 @@ class VelocloudClient:
                     "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
                 }
                 return_response["body"] = headers
-                return_response["status"] = response.status_code
-            if response.status_code == 302:
+                return_response["status"] = response.status
+            if response.status == 302:
                 self._logger.error(f"Got 302 from velocloud")
                 return_response["body"] = f"Got an error trying to login"
                 return_response["status"] = 302
@@ -136,23 +134,23 @@ class VelocloudClient:
                     "filter": {"limit": limit},
                     "edgeId": [edge["edge_id"]]}
 
-            async with self._session:
-                response = await self._session.post(f"https://{edge['host']}/portal/rest/event/getEnterpriseEvents",
-                                                    json=body,
-                                                    headers=target_host_client['headers'])
+            response = await self._session.post(f"https://{edge['host']}/portal/rest/event/getEnterpriseEvents",
+                                                json=body,
+                                                headers=target_host_client['headers'],
+                                                ssl=self._config['verify_ssl'])
 
-            if response.status_code in range(200, 300):
-                response_json = response.json()
+            if response.status in range(200, 300):
+                response_json = await response.json()
                 return_response["body"] = await self._json_return(response_json, edge["host"])
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
                 return return_response
-            if response.status_code == 400:
-                response_json = response.json()
+            if response.status == 400:
+                response_json = await response.json()
                 return_response["body"] = response_json
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
 
@@ -165,24 +163,24 @@ class VelocloudClient:
 
     async def get_monitoring_aggregates(self, client):
         try:
-            async with self._session:
-                response = await self._session.post(f"https://{client['host']}/portal/rest/monitoring/getAggregates",
-                                                    json={},
-                                                    headers=client['headers'])
+            response = await self._session.post(f"https://{client['host']}/portal/rest/monitoring/getAggregates",
+                                                json={},
+                                                headers=client['headers'],
+                                                ssl=self._config['verify_ssl'])
 
             return_response = dict.fromkeys(["body", "status"])
-            if response.status_code in range(200, 300):
-                response_json = response.json()
+            if response.status in range(200, 300):
+                response_json = await response.json()
                 return_response["body"] = await self._json_return(response_json, client['host'])
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
                 return return_response
-            if response.status_code == 400:
-                response_json = response.json()
+            if response.status == 400:
+                response_json = await response.json()
                 return_response["body"] = response_json
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
 
@@ -240,19 +238,19 @@ class VelocloudClient:
         try:
             self._logger.info(f'Getting links with edge info from Velocloud host "{velocloud_host}"...')
 
-            async with self._session:
-                response = await self._session.post(
-                    f"https://{velocloud_host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
-                    json=request_body,
-                    headers=target_host_client['headers'],
-                )
-        except httpx.RequestError as e:
-            result["body"] = f'Error while fetching data from Velocloud API -> {e}'
+            response = await self._session.post(
+                f"https://{velocloud_host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
+                json=request_body,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = 'Error while connecting to Velocloud API'
             result["status"] = 500
             self.__log_result(result)
             return result
 
-        if response.status_code in range(500, 513):
+        if response.status in range(500, 513):
             result["body"] = "Got internal error from Velocloud"
             result["status"] = 500
             self.__log_result(result)
@@ -261,12 +259,11 @@ class VelocloudClient:
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
         self._logger.info(
-            f'Got HTTP {response.status_code} from Velocloud after claiming links with edge info for host '
-            f'{velocloud_host}'
+            f'Got HTTP {response.status} from Velocloud after claiming links with edge info for host {velocloud_host}'
         )
 
-        result['body'] = response.json()
-        result['status'] = response.status_code
+        result['body'] = await response.json()
+        result['status'] = response.status
 
         self.__log_result(result)
 
@@ -292,19 +289,19 @@ class VelocloudClient:
         try:
             self._logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
 
-            async with self._session:
-                response = await self._session.post(
-                    f"https://{velocloud_host}/portal/rest/monitoring/getAggregateEdgeLinkMetrics",
-                    json=request_body,
-                    headers=target_host_client['headers'],
-                )
-        except httpx.RequestError as e:
-            result["body"] = f'Error while fetching data from Velocloud API -> {e}'
+            response = await self._session.post(
+                f"https://{velocloud_host}/portal/rest/monitoring/getAggregateEdgeLinkMetrics",
+                json=request_body,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = 'Error while connecting to Velocloud API'
             result["status"] = 500
             self.__log_result(result)
             return result
 
-        if response.status_code in range(500, 513):
+        if response.status in range(500, 513):
             result["body"] = "Got internal error from Velocloud"
             result["status"] = 500
             self.__log_result(result)
@@ -313,11 +310,11 @@ class VelocloudClient:
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
         self._logger.info(
-            f'Got HTTP {response.status_code} from Velocloud after claiming links metric info for host {velocloud_host}'
+            f'Got HTTP {response.status} from Velocloud after claiming links metric info for host {velocloud_host}'
         )
 
-        result['body'] = response.json()
-        result['status'] = response.status_code
+        result['body'] = await response.json()
+        result['status'] = response.status
 
         self.__log_result(result)
 
@@ -345,19 +342,19 @@ class VelocloudClient:
             self._logger.info(f'Getting all enterprise edges from enterprise ID {enterprise_id} and'
                               f' from Velocloud host "{velocloud_host}"...')
 
-            async with self._session:
-                response = await self._session.post(
-                    f"https://{velocloud_host}/portal/rest/enterprise/getEnterpriseEdges",
-                    json=request_body,
-                    headers=target_host_client['headers'],
-                )
-        except httpx.RequestError as e:
-            result["body"] = f'Error while fetching data from Velocloud API -> {e}'
+            response = await self._session.post(
+                f"https://{velocloud_host}/portal/rest/enterprise/getEnterpriseEdges",
+                json=request_body,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = 'Error while connecting to Velocloud API'
             result["status"] = 500
             self.__log_result(result)
             return result
 
-        if response.status_code in range(500, 513):
+        if response.status in range(500, 513):
             result["body"] = "Got internal error from Velocloud"
             result["status"] = 500
             self.__log_result(result)
@@ -366,27 +363,27 @@ class VelocloudClient:
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
         self._logger.info(
-            f'Got HTTP {response.status_code} from Velocloud after getting enterpise edges for enterprise '
-            f'{enterprise_id} and host {velocloud_host}'
+            f'Got HTTP {response.status} from Velocloud after getting enterpise edges for enterprise {enterprise_id}'
+            f'and host {velocloud_host}'
         )
 
-        result['body'] = response.json()
-        result['status'] = response.status_code
+        result['body'] = await response.json()
+        result['status'] = response.status
 
         self.__log_result(result)
 
         return result
 
-    async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: httpx.Response):
+    async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
         if self.__token_expired(response):
             self._logger.info(f'Auth token expired for host {velocloud_host}. Scheduling re-login job...')
             await self._start_relogin_job(velocloud_host)
 
             response._body = f'Auth token expired for host {velocloud_host}'
-            response.status_code = 401
+            response.status = 401
 
     @staticmethod
-    def __token_expired(response: httpx.Response) -> bool:
+    def __token_expired(response: aiohttp.client.ClientResponse) -> bool:
         return response.headers.get('Expires') == '0'
 
     def __log_result(self, result: dict):
