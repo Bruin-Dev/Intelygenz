@@ -22,6 +22,7 @@ class VelocloudRepository:
         self._logger.info("Getting list of all velo edges")
         edge_list = await self.get_edges()
         self._logger.info(f"Got all edges from all velos. Took {(time.time() - start_time) // 60} minutes")
+
         self._logger.info("Getting list of logical IDs by each velo edge")
         logical_ids_by_edge_list = await self._get_logical_id_by_edge_list(edge_list)
         self._logger.info(f"Got all logical IDs by each velo edge. Took {(time.time() - start_time) // 60} minutes")
@@ -29,12 +30,9 @@ class VelocloudRepository:
         self._logger.info(f"Mapping edges to serials...")
         edges_with_serial = await self._get_all_serials(edge_list, logical_ids_by_edge_list)
         self._logger.info(f"Amount of edges: {len(edges_with_serial)}")
-        edges_with_config = []
-        for edge in edges_with_serial:
-            edges_with_config.append(await self.add_edge_config(edge))
         self._logger.info(f"Finished building velos + serials map. Took {(time.time() - start_time) // 60} minutes")
 
-        return edges_with_config
+        return edges_with_serial
 
     async def _get_all_serials(self, edge_list, logical_ids_by_edge_list):
         edges_with_serials = []
@@ -57,9 +55,9 @@ class VelocloudRepository:
                 continue
 
             logical_id_list = next((logical_id_edge for logical_id_edge in logical_ids_by_edge_list
-                                    if logical_id_edge['host'] == edge['host']
-                                    if logical_id_edge['enterprise_id'] == edge['enterpriseId']
-                                    if logical_id_edge['edge_id'] == edge['edgeId']), None)
+                                   if logical_id_edge['host'] == edge['host']
+                                   if logical_id_edge['enterprise_id'] == edge['enterpriseId']
+                                   if logical_id_edge['edge_id'] == edge['edgeId']), None)
             logical_id = []
             if logical_id_list is not None:
                 logical_id = logical_id_list['logical_id']
@@ -134,39 +132,6 @@ class VelocloudRepository:
                     f'Error while retrieving edge list in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
-        return response
-
-    async def get_links_configuration(self, edge):
-        err_msg = None
-
-        request = {
-            "request_id": uuid(),
-            "body": edge
-        }
-
-        try:
-            self._logger.info(f"Getting links configuration for edge {edge}...")
-            response = await self._event_bus.rpc_request("request.links.configuration", request, timeout=30)
-        except Exception as e:
-            err_msg = f'An error occurred when requesting links configuration for edge {edge} -> {e}'
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving links configuration for edge {edge} in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
-
-                )
-            else:
-                self._logger.info(f"Got links configuration for edge {edge}!")
 
         if err_msg:
             self._logger.error(err_msg)
@@ -265,22 +230,3 @@ class VelocloudRepository:
     async def get_edges(self):
         edge_links_list = await self.get_all_edges_links()
         return self.extract_edge_info(edge_links_list['body'])
-
-    async def add_edge_config(self, edge):
-        edge['links_configuration'] = []
-
-        edge_request = edge['edge']
-        configuration_response = await self.get_links_configuration(edge_request)
-        if configuration_response['status'] not in range(200, 300):
-            self._logger.error(f'Error while getting links configuration for edge {edge_request}')
-            return edge
-
-        for link in configuration_response['body']:
-            edge['links_configuration'].append(
-                {
-                    'interfaces': link['interfaces'],
-                    'mode': link['mode'],
-                    'type': link['type'],
-                }
-            )
-        return edge

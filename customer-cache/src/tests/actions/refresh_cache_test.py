@@ -156,23 +156,6 @@ class TestRefreshCache:
             'serial_number': "VCO191919",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
         }
-        edge_from_bruin_1_with_config = {
-            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
-            'last_contact': "0000-00-00 00:00:00",
-            'logical_ids': "8456-cg76-sdf3-h64j",
-            'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
-            'links_configuration':
-                [
-                    {
-                        'interfaces': ['GE1'],
-                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
-                        'mode': 'PUBLIC',
-                        'type': 'WIRED',
-                        'last_active': '2020-09-29T04:45:15.000Z'
-                    }
-                ]
-        }
         edge_from_bruin_2 = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 2020},
             'last_contact': "0000-00-00 00:00:00",
@@ -180,42 +163,23 @@ class TestRefreshCache:
             'serial_number': "VCO202020",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
         }
-        edge_from_bruin_2_with_config = {
-            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
-            'last_contact': "0000-00-00 00:00:00",
-            'logical_ids': "8456-cg76-sdf3-h64j",
-            'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
-            'links_configuration':
-                [
-                    {
-                        'interfaces': ['GE2'],
-                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f485',
-                        'mode': 'PUBLIC',
-                        'type': 'WIRED',
-                        'last_active': '2020-09-29T04:45:15.000Z'
-                    }
-                ]
-        }
         edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
         stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
-        new_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
+        new_cache = [edge_from_bruin_1, edge_from_bruin_2]
 
         instance_refresh_cache._invalid_edges = {
             'mettel.velocloud.net': []
         }
         instance_refresh_cache._filter_edge_list = CoroutineMock(side_effect=[
-            edge_from_bruin_1_with_config,
-            edge_from_bruin_2_with_config,
+            edge_from_bruin_1,
+            edge_from_bruin_2,
         ])
         send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
         instance_refresh_cache._event_bus.rpc_request = CoroutineMock(return_value=send_email_res)
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=new_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
-        instance_refresh_cache._velocloud_repository.add_edge_config = CoroutineMock(
-            side_effect=[edge_from_bruin_1_with_config, edge_from_bruin_2_with_config])
 
         await instance_refresh_cache._partial_refresh_cache("mettel.velocloud.net", edge_list)
 
@@ -230,50 +194,34 @@ class TestRefreshCache:
         # Scenario: Bruin returns most management statuses correctly
         host = "mettel.velocloud.net"
 
-        edge_from_bruin_1_with_config = {
+        edge_from_bruin_1 = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
-            'links_configuration':
-                {
-                    'interfaces': ['GE1'],
-                    'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'mode': 'PUBLIC',
-                    'type': 'WIRED',
-                    'last_active': '2020-09-29T04:45:15.000Z'
-                }
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
         }
-        edge_from_bruin_2_with_config = {
-            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1920},
+        edge_from_bruin_2 = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 2020},
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
-            'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
-            'links_configuration':
-                {
-                    'interfaces': ['GE2'],
-                    'internal_id': '00000001-ac48-47a0-81a7-80c8c320f485',
-                    'mode': 'PUBLIC',
-                    'type': 'WIRED',
-                    'last_active': '2020-09-29T04:45:15.000Z'
-                }
+            'serial_number': "VCO202020",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
         }
         edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
-        stored_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
-        new_cache = [edge_from_bruin_1_with_config]
-        crossed_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
-        final_cache = [edge_from_bruin_1_with_config]
+        stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
+        new_cache = [edge_from_bruin_1]
+        crossed_cache = [edge_from_bruin_1, edge_from_bruin_2]
+        final_cache = [edge_from_bruin_1]
 
         instance_refresh_cache._filter_edge_list = CoroutineMock(side_effect=[
-            edge_from_bruin_1_with_config,
+            edge_from_bruin_1,
             None,
         ])
         instance_refresh_cache._invalid_edges = {
             host: [
-                EdgeIdentifier(**edge_from_bruin_2_with_config['edge'])
+                EdgeIdentifier(**edge_from_bruin_2['edge'])
             ]
         }
         send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
@@ -281,8 +229,6 @@ class TestRefreshCache:
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=crossed_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
-        instance_refresh_cache._velocloud_repository.add_edge_config = CoroutineMock(
-            side_effect=[edge_from_bruin_1_with_config, edge_from_bruin_2_with_config])
 
         await instance_refresh_cache._partial_refresh_cache(host, edge_list)
 
@@ -660,17 +606,6 @@ class TestRefreshCache:
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['bruin_client_info'] = bruin_client_info
-        links_configuration = [
-            {
-                'interfaces': ['GE1'],
-                'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
-                'mode': 'PUBLIC',
-                'type': 'WIRED',
-                'last_active': '2020-09-29T04:45:15.000Z'
-            }
-        ]
-        instance_edges_refresh_cache[0]['links_configuration'] = links_configuration
-        instance_cache_edges[0]['links_configuration'] = links_configuration
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': bruin_client_info, 'status': 200})
