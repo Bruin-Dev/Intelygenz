@@ -139,5 +139,5 @@ resource "aws_ecr_repository" "automation-ticket-collector" {
 }
 
 resource "aws_ecr_repository" "automation-ticket-statistics" {
-  name = "automation-ticket-collector"
+  name = "automation-ticket-statistics"
 }

@@ -9,7 +9,7 @@ locals {
   automation-ticket-statistics-service-security_group-tag-Name = "${var.ENVIRONMENT}-ticket-statistics"
   automation-ticket-statistics-task_definition = "${aws_ecs_task_definition.automation-ticket-statistics[0].family}:${aws_ecs_task_definition.automation-ticket-statistics[0].revision}"
   automation-ticket-statistics-service_discovery_service-name = "ticket-statistics-${var.ENVIRONMENT}"
-  automation-ticket-statistics-target_group-name = "${var.ENVIRONMENT}-ticket-statistics"
+  automation-ticket-statistics-target_group-name = "${var.ENVIRONMENT}-statistics"
   automation-ticket-statistics-target_group-tag-Name = "${var.ENVIRONMENT}-ticket-statistics"
 }
 
