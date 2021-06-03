@@ -1,5 +1,7 @@
 import abc
 import time
+import datetime
+
 from delivery.tasks import get_data_tasks
 
 
@@ -21,19 +23,43 @@ class ITasksServer(metaclass=abc.ABCMeta):
 
 
 class TasksServer(ITasksServer):
+    JOB_ID = 'TICKET_COLLECTOR_JOB'
+    START_HOUR = 22
+    END_HOUR = 4
+
     def initialize(self):
         self.logger.info("Init tasks server")
 
-        self.scheduler.add_job(get_data_tasks.get_data, 'interval',
+        self.scheduler.add_job(get_data_tasks.get_data, 'cron',
                                max_instances=1,
-                               hours=22-6,)
+                               hour=f'{self.START_HOUR}',
+                               id=self.JOB_ID)
 
     def start(self):
         self.logger.info("Starting server")
         self.scheduler.start()
 
         while True:
-            time.sleep(2)
+            time.sleep(60)
+            now = datetime.datetime.now()
+            job = self.scheduler.get_job(job_id=self.JOB_ID)
+
+            self.logger.info(f'Checking job {self.JOB_ID}')
+
+            if self.START_HOUR <= self.END_HOUR:
+                if self.START_HOUR <= now.hour <= self.END_HOUR:
+                    self.logger.info(f'Resume job {self.JOB_ID} at hour {now.hour}')
+                    self.scheduler.resume()
+                else:
+                    self.logger.info(f'Pausing job {self.JOB_ID} at hour {now.hour}')
+                    self.scheduler.pause()
+            else:
+                if self.START_HOUR <= now.hour or now.hour <= self.END_HOUR:
+                    self.logger.info(f'Resume job {self.JOB_ID} at hour {now.hour}')
+                    self.scheduler.resume()
+                else:
+                    self.logger.info(f'Pausing job {self.JOB_ID} at hour {now.hour}')
+                    self.scheduler.pause()
 
     def status(self):
         self.logger.info("Tasks server is up")
