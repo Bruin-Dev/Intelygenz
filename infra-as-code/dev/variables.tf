@@ -753,7 +753,7 @@ variable "velocloud-bridge-task-definition-json" {
 // ticket-collector environment variables
 variable "TICKET_COLLECTOR_DOCUMENTDB_USERNAME" {
   type = string
-  default = "admin"
+  default = "collector"
   description = "DocumentDB main username"
 }
 
