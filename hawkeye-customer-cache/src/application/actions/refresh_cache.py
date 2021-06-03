@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from apscheduler.jobstores.base import ConflictingIdError
@@ -59,13 +60,46 @@ class RefreshCache:
             self._logger.info(f"Finished filtering probes for hawkeye")
             self._logger.info(f"Storing cache of {len(cache)} devices to Redis for hawkeye")
             self._storage_repository.set_hawkeye_cache(cache)
+            await self._send_email_multiple_inventories()
             self._logger.info("Finished refreshing hawkeye cache!")
+
         try:
             await _refresh_cache()
         except Exception as e:
             self._logger.error(f"An error occurred while refreshing the hawkeye cache -> {e}")
             slack_message = f"Maximum retries happened while while refreshing the cache cause of error was {e}"
             await self._notifications_repository.send_slack_message(slack_message)
+
+    async def _send_email_multiple_inventories(self):
+        if self._bruin_repository._serials_with_multiple_inventories:
+            message = f"Alert. Detected some edges with more than one status. " \
+                      f"{self._bruin_repository._serials_with_multiple_inventories}"
+            await self._notifications_repository.send_slack_message(message)
+            self._logger.info(message)
+            email_obj = self._format_alert_email_object()
+            self._logger.info(
+                f"Sending mail with serials having multiples inventories to  {email_obj['email_data']['recipient']}")
+            response = await self._notifications_repository.send_email(email_obj)
+            self._logger.info(
+                f"Response from sending email with serials having multiple inventories: {json.dumps(response)}")
+
+    def _format_alert_email_object(self):
+        now = datetime.utcnow().strftime('%B %d %Y - %H:%M:%S')
+        text = ""
+        for serial in self._bruin_repository._serials_with_multiple_inventories.keys():
+            text += f"Serial: {serial} and items: {self._bruin_repository._serials_with_multiple_inventories[serial]}\n"
+        return {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'Serials with multiple inventory items ({now})',
+                'recipient': self._config.REFRESH_CONFIG["email_recipient"],
+                'text': 'this is the accessible text for the email',
+                'html': f"In this email you will see the serials with more than one inventory items\n"
+                        f"{text}",
+                'images': [],
+                'attachments': []
+            }
+        }
 
     async def schedule_cache_refresh(self):
         self._logger.info(

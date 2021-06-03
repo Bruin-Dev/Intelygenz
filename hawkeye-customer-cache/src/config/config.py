@@ -25,6 +25,7 @@ REFRESH_CONFIG = {
     'timezone': 'US/Eastern',
     'multiplier': 5,
     'min': 5,
+    'email_recipient': 'mettel.alerts@intelygenz.com',
     'stop_delay': 300,
     'refresh_map_minutes': 60 * 4,
     'semaphore': 1,

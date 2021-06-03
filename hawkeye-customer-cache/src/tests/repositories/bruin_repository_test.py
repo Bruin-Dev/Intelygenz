@@ -197,12 +197,11 @@ class TestBruinRepository:
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once_with(error_message)
 
     @pytest.mark.asyncio
-    async def filter_probes_list_test(self, bruin_repository, probes_example, response_bruin_get_client_ok,
+    async def filter_probes_list_test(self, bruin_repository, probes_example, response_bruin_get_client_ok_2,
                                       response_bruin_management_status_ok, cache_probes):
         probe = probes_example[0]
-        bruin_repository.get_client_info = CoroutineMock(return_value=response_bruin_get_client_ok)
+        bruin_repository.get_client_info = CoroutineMock(return_value=response_bruin_get_client_ok_2)
         bruin_repository.get_management_status = CoroutineMock(return_value=response_bruin_management_status_ok)
-
         result = await bruin_repository.filter_probe(probe)
         assert result == cache_probes[0]
 

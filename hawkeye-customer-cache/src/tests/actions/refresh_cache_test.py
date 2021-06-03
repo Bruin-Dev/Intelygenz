@@ -161,3 +161,33 @@ class TestRefreshCache:
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
         refresh_cache._notifications_repository.send_slack_message.assert_any_await(
             err_msg_refresh_cache['message'])
+
+    @pytest.mark.asyncio
+    async def send_mail_alert_test(self, refresh_cache, cache_probes_now, response_get_probes_down_ok,
+                                   bruin_status_more_than_one_configuration):
+
+        refresh_cache._event_bus.rpc_request = CoroutineMock()
+        next_run_time = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+        refresh_cache._logger.error = Mock()
+        refresh_cache._bruin_repository.filter_probe = CoroutineMock(
+            side_effect=[cache_probes_now[0], None])
+        refresh_cache._hawkeye_repository.get_probes = CoroutineMock(
+            return_value=response_get_probes_down_ok)
+        refresh_cache._storage_repository.set_hawkeye_cache = Mock()
+        refresh_cache._partial_refresh_cache = CoroutineMock()
+        refresh_cache._bruin_repository._serials_with_multiple_inventories = bruin_status_more_than_one_configuration
+        refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
+        refresh_cache._event_bus.rpc_request = CoroutineMock()
+
+        tenacity_retry_mock = patch.object(refresh_cache_module, 'retry', side_effect=retry_mock(attempts=1))
+        with patch.object(refresh_cache_module, 'datetime', new=datetime_mock):
+            with uuid_mock, tenacity_retry_mock:
+                await refresh_cache._refresh_cache()
+        refresh_cache._storage_repository.set_hawkeye_cache.assert_called_once()
+        refresh_cache._bruin_repository.filter_probe.assert_called_with(
+            response_get_probes_down_ok['body'][1],
+        )
+        refresh_cache._notifications_repository.send_slack_message.assert_called()
+        refresh_cache._notifications_repository.send_email.assert_called_once()

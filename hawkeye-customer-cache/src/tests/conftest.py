@@ -302,7 +302,16 @@ def response_not_found_message():
 def response_bruin_get_client_ok():
     return {
         'request_id': '1234',
-        'body': {'client_id': 'some client info'},
+        'body': [{'client_id': 'some client info'}],
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def response_bruin_get_client_ok_2():
+    return {
+        'request_id': '1234',
+        'body': [{'client_id': 'some client info'}, {'client_id': 'some client info'}],
         'status': 200
     }
 
@@ -340,4 +349,14 @@ def response_500_probes():
     return {
         'body': None,
         'status': 500
+    }
+
+
+@pytest.fixture(scope='function')
+def bruin_status_more_than_one_configuration():
+    return {
+        'VC05200037714': [
+            {'client_id': 85940, 'client_name': 'Titan America'},
+            {'client_id': 88748, 'client_name': 'FIS-First Hawaiian Bank-7517'}
+        ]
     }

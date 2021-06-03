@@ -14,6 +14,7 @@ class BruinRepository:
         self._event_bus = event_bus
         self._semaphore = asyncio.BoundedSemaphore(self._config.REFRESH_CONFIG['semaphore'])
         self._notifications_repository = notifications_repository
+        self._serials_with_multiple_inventories = {}
 
     async def get_client_info(self, service_number: str):
         err_msg = None
@@ -112,10 +113,13 @@ class BruinRepository:
                     return
 
                 client_info_response_body = client_info_response['body']
-                client_id = client_info_response_body.get("client_id")
-                if not client_id:
-                    self._logger.info(f"Probe with serial {serial_number} doesn't have any Bruin client ID associated")
+                if len(client_info_response_body) > 1:
+                    self._serials_with_multiple_inventories[serial_number] = client_info_response_body
+
+                if not client_info_response_body:
+                    self._logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
                     return
+                client_id = client_info_response_body[0].get("client_id")
 
                 management_status_response = await self.get_management_status(
                     client_id, serial_number
@@ -139,7 +143,7 @@ class BruinRepository:
                     'device_type_name': probe['typeName'],
                     'last_contact': max(probe['nodetonode']['lastUpdate'], probe['realservice']['lastUpdate']),
                     'serial_number': serial_number,
-                    'bruin_client_info': client_info_response_body
+                    'bruin_client_info': client_info_response_body[0]
                 }
 
         try:
