@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
-    'name': 't7-bridge',
+    'name': 'ticket-collector',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
@@ -16,6 +16,11 @@ LOG_CONFIG = {
         'host': os.getenv('PAPERTRAIL_HOST'),
         'port': int(os.getenv('PAPERTRAIL_PORT'))
     },
+}
+
+QUART_CONFIG = {
+    'title': 'ticket-collector',
+    'port': 5000
 }
 
 

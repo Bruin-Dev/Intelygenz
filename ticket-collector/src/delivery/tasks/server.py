@@ -3,6 +3,8 @@ import time
 import datetime
 
 from delivery.tasks import get_data_tasks
+from igz.packages.server.api import QuartServer
+from adapters.config import settings
 
 
 class ITasksServer(metaclass=abc.ABCMeta):
@@ -15,6 +17,7 @@ class ITasksServer(metaclass=abc.ABCMeta):
         self.use_cases = use_cases
         self.scheduler = BackgroundScheduler()
         self.use_cases.wire(modules=[get_data_tasks])
+        self._server = QuartServer(settings)
         self.initialize()
 
     @abc.abstractmethod
@@ -29,15 +32,16 @@ class TasksServer(ITasksServer):
 
     def initialize(self):
         self.logger.info("Init tasks server")
-
         self.scheduler.add_job(get_data_tasks.get_data, 'cron',
                                max_instances=1,
                                hour=f'{self.START_HOUR}',
                                id=self.JOB_ID)
 
-    def start(self):
+    async def start(self):
+
         self.logger.info("Starting server")
         self.scheduler.start()
+        await self._server.run_server()
 
         while True:
             time.sleep(60)

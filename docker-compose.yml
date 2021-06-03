@@ -658,6 +658,8 @@ services:
       - mongo
     volumes:
     - ./ticket-collector:/service/app
+    ports:
+      - 5617:5000
 
   ticket-statistics:
     build:
