@@ -9,10 +9,6 @@ locals {
   automation-ticket-statistics-service-security_group-tag-Name = "${var.ENVIRONMENT}-ticket-statistics"
   automation-ticket-statistics-task_definition = "${aws_ecs_task_definition.automation-ticket-statistics[0].family}:${aws_ecs_task_definition.automation-ticket-statistics[0].revision}"
   automation-ticket-statistics-service_discovery_service-name = "ticket-statistics-${var.ENVIRONMENT}"
-  automation-ticket-statistics-alb-listener-rules = [
-    "${var.TICKET_STATISTICS_SERVER_ROOT_PATH}*",
-    substr(var.TICKET_STATISTICS_SERVER_ROOT_PATH, 0, (length(var.TICKET_STATISTICS_SERVER_ROOT_PATH) - 1))
-  ]
 }
 
 data "aws_ecr_repository" "automation-ticket-statistics" {

@@ -772,7 +772,7 @@ variable "TICKET_STATISTICS_SERVER_PORT" {
 
 variable "TICKET_STATISTICS_SERVER_ROOT_PATH" {
   type = string
-  default = "/api/ticket-statistics"
+  default = "api/"
   description = "server root path"
 }
 

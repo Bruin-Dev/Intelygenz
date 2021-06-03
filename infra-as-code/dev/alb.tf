@@ -343,7 +343,9 @@ resource "aws_alb_listener_rule" "automation-ticket-statistics-path" {
   }
   condition {
     path_pattern {
-      values = local.automation-ticket-statistics-alb-listener-rules
+      values = [
+        "/api/statistics/*",
+        "/api/statistics"]
     }
   }
 }
