@@ -12,7 +12,9 @@ class VelocloudClient:
         self._clients = list()
         self._logger = logger
         self._scheduler = scheduler
-        self._session = httpx.AsyncClient(verify=self._config['verify_ssl'])
+
+        timeout_config = httpx.Timeout(300)
+        self._session = httpx.AsyncClient(timeout=timeout_config, verify=self._config['verify_ssl'])
 
     async def instantiate_and_connect_clients(self):
         self._clients = [
