@@ -100,5 +100,7 @@ include:
   - local: 'sites-monitor/.gitlab-ci.yml'
   - local: 'tnba-feedback/.gitlab-ci.yml'
   - local: 'tnba-monitor/.gitlab-ci.yml'
+  - local: 'ticket-collector/.gitlab-ci.yml'
+  - local: 'ticket-statistics/.gitlab-ci.yml'
   - local: 't7-bridge/.gitlab-ci.yml'
   - local: 'velocloud-bridge/.gitlab-ci.yml'
