@@ -35,8 +35,8 @@ data "template_file" "automation-ticket-collector" {
     log_prefix = local.log_prefix
 
     MONGODB_USERNAME = var.TICKET_COLLECTOR_DOCUMENTDB_USERNAME
-    MONGODB_PASSWORD = aws_docdb_cluster.docdb.master_password
-    MONGODB_HOST = aws_docdb_cluster.docdb.endpoint
+    MONGODB_PASSWORD = aws_docdb_cluster.docdb[0].master_password
+    MONGODB_HOST = aws_docdb_cluster.docdb[0].endpoint
     MONGODB_DATABASE = var.TICKET_COLLECTOR_MONGODB_DATABASE
     INTERVAL_TASKS_RUN = var.TICKET_COLLECTOR_INTERVAL_TASKS_RUN
     BRUIN_CLIENT_ID = var.BRUIN_CLIENT_ID

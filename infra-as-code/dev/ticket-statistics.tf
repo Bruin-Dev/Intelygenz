@@ -9,6 +9,8 @@ locals {
   automation-ticket-statistics-service-security_group-tag-Name = "${var.ENVIRONMENT}-ticket-statistics"
   automation-ticket-statistics-task_definition = "${aws_ecs_task_definition.automation-ticket-statistics[0].family}:${aws_ecs_task_definition.automation-ticket-statistics[0].revision}"
   automation-ticket-statistics-service_discovery_service-name = "ticket-statistics-${var.ENVIRONMENT}"
+  automation-ticket-statistics-target_group-name = "${var.ENVIRONMENT}-ticket-statistics"
+  automation-ticket-statistics-target_group-tag-Name = "${var.ENVIRONMENT}-ticket-statistics"
 }
 
 data "aws_ecr_repository" "automation-ticket-statistics" {
@@ -35,8 +37,8 @@ data "template_file" "automation-ticket-statistics" {
     log_prefix = local.log_prefix
 
     MONGODB_USERNAME = var.TICKET_COLLECTOR_DOCUMENTDB_USERNAME
-    MONGODB_PASSWORD = aws_docdb_cluster.docdb.master_password
-    MONGODB_HOST = aws_docdb_cluster.docdb.endpoint
+    MONGODB_PASSWORD = aws_docdb_cluster.docdb[0].master_password
+    MONGODB_HOST = aws_docdb_cluster.docdb[0].endpoint
     MONGODB_DATABASE = var.TICKET_COLLECTOR_MONGODB_DATABASE
     SERVER_PORT = var.TICKET_STATISTICS_SERVER_PORT
     SERVER_ROOT_PATH = var.TICKET_STATISTICS_SERVER_ROOT_PATH

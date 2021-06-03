@@ -24,7 +24,7 @@ resource "aws_security_group" "docdb_security_group" {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    security_groups = [aws_security_group.automation-ticket-collector_service.id,aws_security_group.automation-ticket-statistics_service.id]
+    security_groups = [aws_security_group.automation-ticket-collector_service[0].id,aws_security_group.automation-ticket-statistics_service[0].id]
   }
 
   egress {
@@ -62,14 +62,14 @@ resource "aws_docdb_cluster" "docdb" {
   count                   = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   cluster_identifier      = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
   engine                  = "docdb"
-  master_username         = var.DOCUMENTDB_USERNAME
+  master_username         = var.TICKET_COLLECTOR_DOCUMENTDB_USERNAME
   master_password         = random_password.documentdb-password[0].result
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   skip_final_snapshot     = true
   db_subnet_group_name    = aws_db_subnet_group.db_subnet_group[0].id
   vpc_security_group_ids  = [aws_security_group.docdb_security_group[0].id]
-  db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group[0].docdb_parameter_group.name
+  db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group.docdb_parameter_group[0].name
 
   tags = {
     Name = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
