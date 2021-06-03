@@ -91,25 +91,25 @@ resource "aws_security_group" "automation-ticket-collector_service" {
   }
 }
 
-resource "aws_service_discovery_service" "ticket-collector" {
-  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  name  = local.automation-ticket-collector-service_discovery_service-name
-
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
-
-    dns_records {
-      ttl = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-
-  health_check_custom_config {
-    failure_threshold = 1
-  }
-}
+//resource "aws_service_discovery_service" "ticket-collector" {
+//  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+//  name  = local.automation-ticket-collector-service_discovery_service-name
+//
+//  dns_config {
+//    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
+//
+//    dns_records {
+//      ttl = 10
+//      type = "A"
+//    }
+//
+//    routing_policy = "MULTIVALUE"
+//  }
+//
+//  health_check_custom_config {
+//    failure_threshold = 1
+//  }
+//}
 
 resource "aws_ecs_service" "automation-ticket-collector" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
@@ -126,7 +126,7 @@ resource "aws_ecs_service" "automation-ticket-collector" {
     assign_public_ip = false
   }
 
-  service_registries {
-    registry_arn = aws_service_discovery_service.ticket-collector[0].arn
-  }
+//  service_registries {
+//    registry_arn = aws_service_discovery_service.ticket-collector[0].arn
+//  }
 }
