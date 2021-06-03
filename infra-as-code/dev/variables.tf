@@ -744,44 +744,40 @@ variable "velocloud-bridge-task-definition-json" {
   default = "/tmp/velocloud-bridge-task-definition.json"
 }
 
-variable "DOCUMENTDB_USERNAME" {
+// ticket-collector environment variables
+variable "TICKET_COLLECTOR_DOCUMENTDB_USERNAME" {
   type = string
   default = "admin"
   description = "DocumentDB main username"
 }
 
-variable "INTERVAL_TASKS_RUN" {
+variable "TICKET_COLLECTOR_MONGODB_DATABASE" {
+  type = string
+  default = "bruin"
+  description = "interval task run"
+}
+
+variable "TICKET_COLLECTOR_INTERVAL_TASKS_RUN" {
   type = number
   default = "1"
   description = "interval task run"
 }
 
-variable "MONGODB_DATABASE" {
+// ticket-statistics environment variables
+variable "TICKET_STATISTICS_SERVER_PORT" {
   type = string
-  default = "bruin"
-  description = "interval task run"
-}
-
-variable "SERVER_PORT" {
-  type = string
-  default = "bruin"
+  default = "5000"
   description = "server port"
 }
 
-variable "SERVER_ROOT_PATH" {
+variable "TICKET_STATISTICS_SERVER_ROOT_PATH" {
   type = string
-  default = "bruin"
+  default = "/api/ticket-statistics"
   description = "server root path"
 }
 
-variable "SERVER_VERSION" {
+variable "TICKET_STATISTICS_SERVER_NAME" {
   type = string
-  default = "bruin"
-  description = "server version"
-}
-
-variable "SERVER_NAME" {
-  type = string
-  default = "bruin"
+  default = "ticket-statistics"
   description = "server name"
 }

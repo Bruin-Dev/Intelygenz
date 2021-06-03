@@ -9,6 +9,10 @@ locals {
   automation-ticket-statistics-service-security_group-tag-Name = "${var.ENVIRONMENT}-ticket-statistics"
   automation-ticket-statistics-task_definition = "${aws_ecs_task_definition.automation-ticket-statistics[0].family}:${aws_ecs_task_definition.automation-ticket-statistics[0].revision}"
   automation-ticket-statistics-service_discovery_service-name = "ticket-statistics-${var.ENVIRONMENT}"
+  automation-ticket-statistics-alb-listener-rules = [
+    "${var.TICKET_STATISTICS_SERVER_ROOT_PATH}*",
+    substr(var.TICKET_STATISTICS_SERVER_ROOT_PATH, 0, (length(var.TICKET_STATISTICS_SERVER_ROOT_PATH) - 1))
+  ]
 }
 
 data "aws_ecr_repository" "automation-ticket-statistics" {
@@ -34,14 +38,14 @@ data "template_file" "automation-ticket-statistics" {
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
 
-    MONGODB_USERNAME = var.DOCUMENTDB_USERNAME
+    MONGODB_USERNAME = var.TICKET_COLLECTOR_DOCUMENTDB_USERNAME
     MONGODB_PASSWORD = aws_docdb_cluster.docdb.master_password
     MONGODB_HOST = aws_docdb_cluster.docdb.endpoint
-    MONGODB_DATABASE = var.MONGODB_DATABASE
-    SERVER_PORT = var.SERVER_PORT
-    SERVER_ROOT_PATH = var.SERVER_ROOT_PATH
-    SERVER_VERSION = var.SERVER_VERSION
-    SERVER_NAME = var.SERVER_NAME
+    MONGODB_DATABASE = var.TICKET_COLLECTOR_MONGODB_DATABASE
+    SERVER_PORT = var.TICKET_STATISTICS_SERVER_PORT
+    SERVER_ROOT_PATH = var.TICKET_STATISTICS_SERVER_ROOT_PATH
+    SERVER_VERSION = var.BUILD_NUMBER
+    SERVER_NAME = var.TICKET_STATISTICS_SERVER_NAME
     BRUIN_CLIENT_ID = var.BRUIN_CLIENT_ID
     BRUIN_CLIENT_SECRET = var.BRUIN_CLIENT_SECRET
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
