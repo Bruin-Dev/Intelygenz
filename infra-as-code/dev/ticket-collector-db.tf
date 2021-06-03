@@ -37,7 +37,7 @@ resource "aws_security_group" "docdb_security_group" {
 
 resource "aws_docdb_cluster_parameter_group" "docdb_parameter_group" {
   count  = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  family = "docdb3.6"
+  family = "docdb4.0"
   name   = "${local.docdb-ticket-collector-cluster}-parameter-group"
 
   parameter {
