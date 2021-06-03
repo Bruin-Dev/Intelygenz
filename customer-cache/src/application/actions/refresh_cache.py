@@ -28,6 +28,7 @@ class RefreshCache:
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
         self._notifications_repository = notifications_repository
+        self._serials_with_multiple_inventories = {}
 
         self._semaphore = asyncio.BoundedSemaphore(self._config.REFRESH_CONFIG['semaphore'])
 
@@ -138,8 +139,9 @@ class RefreshCache:
 
             self._logger.info(f"Storing cache of {len(final_cache)} edges to Redis for host {host}")
             self._storage_repository.set_cache(host, final_cache)
-            self._logger.info(f"Finished storing cache for host {host}")
+            await self._send_email_multiple_inventories()
             await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
+            self._logger.info(f"Finished storing cache for host {host}")
 
     @staticmethod
     def _cross_stored_cache_and_new_cache(stored_cache: List[dict], new_cache: List[dict]) -> List[dict]:
@@ -179,11 +181,13 @@ class RefreshCache:
                     return
 
                 client_info_response_body = client_info_response['body']
-                client_id = client_info_response_body.get("client_id")
-                if not client_id:
-                    self._logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client ID associated")
+                if len(client_info_response_body) > 1:
+                    self._serials_with_multiple_inventories[serial_number] = client_info_response_body
+                if not client_info_response_body:
+                    self._logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
                     self._invalid_edges[host].append(edge_identifier)
                     return
+                client_id = client_info_response_body[0].get("client_id")
 
                 management_status_response = await self._bruin_repository.get_management_status(
                     client_id, serial_number
@@ -205,7 +209,7 @@ class RefreshCache:
                     'last_contact': edge_with_serial['last_contact'],
                     'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,
-                    'bruin_client_info': client_info_response_body,
+                    'bruin_client_info': client_info_response_body[0],
                     'links_configuration': edge_with_serial['links_configuration']
                 }
 
@@ -221,6 +225,18 @@ class RefreshCache:
         email_obj = self._format_email_object(host, old_cache, new_cache)
         response = await self._event_bus.rpc_request("notification.email.request", email_obj, timeout=60)
         self._logger.info(f"Response from sending email: {json.dumps(response)}")
+
+    async def _send_email_multiple_inventories(self):
+        if self._serials_with_multiple_inventories:
+            message = f"Alert. Detected some edges with more than one status. {self._serials_with_multiple_inventories}"
+            await self._notifications_repository.send_slack_message(message)
+            self._logger.info(message)
+            email_obj = self._format_alert_email_object()
+            self._logger.info(
+                f"Sending mail with serials having multiples inventories to  {email_obj['email_data']['recipient']}")
+            response = await self._notifications_repository.send_email(email_obj)
+            self._logger.info(
+                f"Response from sending email with serials having multiple inventories: {json.dumps(response)}")
 
     def _format_email_object(self, host, old_cache, new_cache):
         now = datetime.utcnow().strftime('%B %d %Y - %H:%M:%S')
@@ -247,6 +263,24 @@ class RefreshCache:
                         'data': new_cache_csv
                     }
                 ]
+            }
+        }
+
+    def _format_alert_email_object(self):
+        now = datetime.utcnow().strftime('%B %d %Y - %H:%M:%S')
+        text = ""
+        for serial in self._serials_with_multiple_inventories.keys():
+            text += f"<p>Serial: {serial} and items: {self._serials_with_multiple_inventories[serial]}<p></br>"
+        return {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'Serials with multiple inventory items ({now})',
+                'recipient': self._config.REFRESH_CONFIG["email_recipient"],
+                'text': 'this is the accessible text for the email',
+                'html': f"<p>In this email you will see the serials with more than one inventory items</p></br>"
+                        f"{text}",
+                'images': [],
+                'attachments': []
             }
         }
 

@@ -199,6 +199,12 @@ class TestRefreshCache:
         }
         edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
+        serials_with_more_than_one_status = {
+            'VC05200037714': [
+                {'client_id': 85940, 'client_name': 'Titan America'},
+                {'client_id': 88748, 'client_name': 'FIS-First Hawaiian Bank-7517'}
+            ]
+        }
         stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
         new_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
 
@@ -216,6 +222,7 @@ class TestRefreshCache:
         instance_refresh_cache._storage_repository.set_cache = Mock()
         instance_refresh_cache._velocloud_repository.add_edge_config = CoroutineMock(
             side_effect=[edge_from_bruin_1_with_config, edge_from_bruin_2_with_config])
+        instance_refresh_cache._serials_with_more_than_one_status = serials_with_more_than_one_status
 
         await instance_refresh_cache._partial_refresh_cache("mettel.velocloud.net", edge_list)
 
@@ -659,7 +666,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
-        instance_edges_refresh_cache[0]['bruin_client_info'] = bruin_client_info
+        instance_edges_refresh_cache[0]['bruin_client_info'] = [bruin_client_info]
         links_configuration = [
             {
                 'interfaces': ['GE1'],
@@ -673,9 +680,9 @@ class TestRefreshCache:
         instance_cache_edges[0]['links_configuration'] = links_configuration
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={'body': bruin_client_info, 'status': 200})
+            return_value={'body': [bruin_client_info, bruin_client_info], 'status': 200})
         instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
-            return_value={'body': 'some management status', 'status': 200})
+            return_value={'body': ['some management status'], 'status': 200})
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
 
         instance_refresh_cache._storage_repository.set_cache = Mock()
@@ -723,7 +730,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={'body': {}, 'status': 200})
+            return_value={'body': [], 'status': 200})
         instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
             return_value={'body': 'some management status', 'status': 200})
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
@@ -778,7 +785,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={'body': {'client_id': 'some client info'}, 'status': 200})
+            return_value={'body': [{'client_id': 'some client info'}], 'status': 200})
         instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
             return_value={'body': 'some management status', 'status': 400})
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
@@ -803,7 +810,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={'body': {'client_id': 'some client info'}, 'status': 200})
+            return_value={'body': [{'client_id': 'some client info'}], 'status': 200})
         instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
             return_value={'body': 'some management status', 'status': 200})
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=False)
