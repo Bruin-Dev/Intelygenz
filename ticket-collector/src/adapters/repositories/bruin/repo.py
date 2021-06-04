@@ -40,8 +40,8 @@ class BruinRepository:
     def request_tickets_by_date_range(self, start: datetime, end: datetime) -> Dict:
         """
         Request tickets by date range.
-        :param start: 
-        :param end: 
+        :param start:
+        :param end:
         :return Dict:
         """
         endpoint = 'https://api.bruin.com/api/Ticket/basic'

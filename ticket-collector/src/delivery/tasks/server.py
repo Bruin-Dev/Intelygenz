@@ -1,6 +1,7 @@
 import abc
 import time
 import datetime
+import asyncio
 
 from delivery.tasks import get_data_tasks
 from igz.packages.server.api import QuartServer
@@ -38,13 +39,11 @@ class TasksServer(ITasksServer):
                                id=self.JOB_ID)
 
     async def start(self):
-
         self.logger.info("Starting server")
         self.scheduler.start()
-        await self._server.run_server()
 
         while True:
-            time.sleep(60)
+            await asyncio.sleep(60)
             now = datetime.datetime.now()
             job = self.scheduler.get_job(job_id=self.JOB_ID)
 
@@ -64,6 +63,10 @@ class TasksServer(ITasksServer):
                 else:
                     self.logger.info(f'Pausing job {self.JOB_ID} at hour {now.hour}')
                     self.scheduler.pause()
+
+    async def health(self):
+        self.logger.info("Starting health check endpoint")
+        await self._server.run_server()
 
     def status(self):
         self.logger.info("Tasks server is up")

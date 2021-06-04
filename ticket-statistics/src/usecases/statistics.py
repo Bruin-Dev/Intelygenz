@@ -13,4 +13,3 @@ class StatisticsUseCase:
         """
         self.tickets_repository = tickets_repository
         self.logger = logger
-
