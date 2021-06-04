@@ -28,10 +28,10 @@ MONITOR_CONFIG = {
     "bandwidth_percentage": 90,
     'monitoring_minutes_interval': 10,
     "monitoring_minutes_per_trouble": {
-        "latency": 25,
-        "packet_loss": 25,
-        "jitter": 25,
-        "bandwidth": 25,
+        "latency": 30,
+        "packet_loss": 30,
+        "jitter": 30,
+        "bandwidth": 30,
     },
     'forward_to_hnoc': 60,
 }
