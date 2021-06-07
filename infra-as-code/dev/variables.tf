@@ -775,6 +775,12 @@ variable "TICKET_COLLECTOR_INTERVAL_TASKS_RUN" {
   description = "interval task run"
 }
 
+variable "TICKET_COLLECTOR_CIDR_ACCESS_FROM_VPN" {
+  type = string
+  default = "52.51.50.68/32"
+  description = "Allow connections from Intelygenz vpn"
+}
+
 // ticket-statistics environment variables
 variable "TICKET_STATISTICS_SERVER_PORT" {
   type = string
