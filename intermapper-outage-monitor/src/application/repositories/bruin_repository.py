@@ -28,7 +28,7 @@ class BruinRepository:
         try:
             self._logger.info(f'Appending note for all service number(s) in ticket {ticket_id}...')
 
-            response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=15)
+            response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=60)
         except Exception as e:
             err_msg = (
                 f'An error occurred when appending a ticket note to ticket {ticket_id}. '

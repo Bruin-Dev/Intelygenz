@@ -96,10 +96,15 @@ class InterMapperMonitor:
                 self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]} there is no need to create'
                                   f' a new ticket. Checking for autoresolve ...')
                 event_processed_successfully = await self._autoresolve_ticket(circuit_id, client_id, body)
-            if parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_down_events']:
+            elif parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_down_events']:
                 self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
                                   f'checking for ticket creation ...')
                 event_processed_successfully = await self._create_outage_ticket(circuit_id, client_id, body)
+            else:
+                self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
+                                  f'so no further action is needs to be taken')
+                event_processed_successfully = True
+
             if event_processed_successfully is True:
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response['status']
