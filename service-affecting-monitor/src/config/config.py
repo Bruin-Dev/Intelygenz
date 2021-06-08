@@ -22,7 +22,7 @@ MONITOR_CONFIG = {
     'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
-    "latency": 120,
+    "latency": 140,
     "packet_loss": 8,
     "jitter": 50,
     "bandwidth_percentage": 90,
