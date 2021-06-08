@@ -5,6 +5,7 @@ from application.clients import email_reader_client as email_reader_client_modul
 from application.clients.email_reader_client import EmailReaderClient
 from config import testconfig as config
 
+
 MESSAGE_1 = {
     'message': {
         'From': 'Alerts@ft-sys.com',
@@ -21,6 +22,14 @@ MESSAGE_1 = {
             It is located at LOCATION: zxcv zxcv. It is currently on job 000000.',
     'msg_uid': '1234'
 }
+
+
+class MessageObject:
+    def __init__(self):
+        self._email = MESSAGE_1['message']
+
+    def as_string(self):
+        return str(self._email)
 
 
 class TestEmailReaderClient:
@@ -153,8 +162,8 @@ class TestEmailReaderClient:
         email = 'fake@email.com'
         password = '123'
         email_filter = ['filter@gmail.com']
-
-        with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=MESSAGE_1['message']):
+        message_object = MessageObject()
+        with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=message_object):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
             mail_client._login = Mock()
@@ -171,9 +180,12 @@ class TestEmailReaderClient:
             mail_client._search_messages.assert_called_once_with(email, password, email_filter[0])
             mail_client._extract_data_from_message.assert_called_once_with('1234')
             mail_client._get_message_uid.assert_called_once_with('1234')
-            mail_client._get_body.assert_called_once_with(MESSAGE_1['message'])
+            mail_client._get_body.assert_called_once_with(message_object)
             mail_client._mark_as_unread.assert_called_once_with(MESSAGE_1['msg_uid'], email, password)
-            assert unread_messages == [MESSAGE_1]
+
+            message_1_copy = MESSAGE_1.copy()
+            message_1_copy['message'] = str(MESSAGE_1['message'])
+            assert unread_messages == [message_1_copy]
 
     def get_unread_messages_OK_no_mark_as_read_test(self):
         logger = Mock()
@@ -182,7 +194,8 @@ class TestEmailReaderClient:
         password = '123'
         email_filter = ['filter@gmail.com']
 
-        with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=MESSAGE_1['message']):
+        message_object = MessageObject()
+        with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=message_object):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
             mail_client._login = Mock()
@@ -199,7 +212,7 @@ class TestEmailReaderClient:
             mail_client._search_messages.assert_called_once_with(email, password, email_filter[0])
             mail_client._extract_data_from_message.assert_called_once_with('1234')
             mail_client._get_message_uid.assert_called_once_with('1234')
-            mail_client._get_body.assert_called_once_with(MESSAGE_1['message'])
+            mail_client._get_body.assert_called_once_with(message_object)
             mail_client._mark_as_unread.assert_called_once_with(MESSAGE_1['msg_uid'], email, password)
             assert unread_messages == []
             logger.error.assert_called_with(f'Unable to mark message 1234 as unread')
@@ -212,7 +225,8 @@ class TestEmailReaderClient:
 
         email_filter = ['filter@gmail.com']
 
-        with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=MESSAGE_1['message']):
+        message_object = MessageObject()
+        with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=message_object):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
             mail_client._login = Mock()

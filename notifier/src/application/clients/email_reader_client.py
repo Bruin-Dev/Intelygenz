@@ -1,7 +1,7 @@
 import email
 import email.header
 import imaplib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class EmailReaderClient:
@@ -63,7 +63,7 @@ class EmailReaderClient:
                     self._logger.error(f'Unable to mark message {msg_uid} as unread')
                     continue
 
-                unread_messages.append({'message': msg, 'body': body, 'msg_uid': msg_uid})
+                unread_messages.append({'message': msg.as_string(), 'body': body, 'msg_uid': msg_uid})
 
         self._logout()
         return unread_messages
@@ -71,7 +71,7 @@ class EmailReaderClient:
     def _search_messages(self, email_account, email_password, sender_email):
 
         try:
-            todays_date = datetime.now().strftime("%d-%b-%Y")
+            todays_date = (datetime.now() - timedelta(hours=24)).strftime("%d-%b-%Y")
             search_resp_code, messages = self._email_server.search(None, '(UNSEEN)', f'(SINCE "{todays_date}")',
                                                                    f'(FROM "{sender_email}")')
             messages = messages[0].split()
