@@ -43,6 +43,16 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-customer-cache"
                 },
                 {
+                    "query": f"digi-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[digi-bridge] - logs",
+                    "repository": "automation-digi-bridge"
+                },
+                {
+                    "query": f"digi-reboot-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[digi-reboot-report] - logs",
+                    "repository": "automation-digi-reboot-report"
+                },
+                {
                     "query": f"dispatch-portal-backend AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[dispatch-portal-backend] - logs",
                     "repository": "automation-dispatch-portal-backend"
@@ -53,9 +63,24 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-metrics-dashboard/grafana"
                 },
                 {
+                    "query": f"email-tagger-kre-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[email-tagger-kre-bridge] - logs",
+                    "repository": "automation-email-tagger-kre-bridge"
+                },
+                {
+                    "query": f"email-tagger-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[email-tagger-monitor] - logs",
+                    "repository": "automation-email-tagger-monitor"
+                },
+                {
                     "query": f"hawkeye-affecting-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-affecting-monitor] - logs",
                     "repository": "automation-hawkeye-affecting-monitor"
+                },
+                {
+                    "query": f"hawkeye-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[hawkeye-bridge] - logs",
+                    "repository": "automation-hawkeye-bridge"
                 },
                 {
                     "query": f"hawkeye-customer-cache AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
@@ -69,7 +94,7 @@ PAPERTRAIL_PROVISIONING = {
                 },
                 {
                     "query": f"intermapper-outage-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
-                    "search_name": f"[hawkeye-outage-monitor] - logs",
+                    "search_name": f"[intermapper-outage-monitor] - logs",
                     "repository": "automation-intermapper-outage-monitor"
                 },
                 {
@@ -88,9 +113,9 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-lumin-billing-report"
                 },
                 {
-                    "query": f"hawkeye-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
-                    "search_name": f"[hawkeye-bridge] - logs",
-                    "repository": "automation-hawkeye-bridge"
+                    "query": f"notifier AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[notifier] - logs",
+                    "repository": "automation-notifier"
                 },
                 {
                     "query": f"NGINX AND <BUILD_NUMBER> AND {ENVIRONMENT_ID}",
@@ -143,14 +168,24 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-t7-bridge"
                 },
                 {
-                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
-                    "search_name": f"[tnba-monitor] - logs",
-                    "repository": "automation-tnba-monitor"
+                    "query": f"ticket-collector AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[ticket-collector] - logs",
+                    "repository": "automation-ticket-collector"
+                },
+                {
+                    "query": f"ticket-statistics AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[ticket-statistics] - logs",
+                    "repository": "automation-ticket-statistics"
                 },
                 {
                     "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[tnba-feedback] - logs",
                     "repository": "automation-tnba-feedback"
+                },
+                {
+                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-monitor] - logs",
+                    "repository": "automation-tnba-monitor"
                 },
                 {
                     "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
@@ -195,16 +230,6 @@ PAPERTRAIL_PROVISIONING = {
             "alarms": True,
             "searches": [
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
-                             f"\"Successfully created outage ticket for edge\"",
-                    "search_name": f"[service-outage-monitor] - ticket creation"
-                },
-                {
-                    "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND "
-                             f"\"ERROR:\"",
-                    "search_name": f"[velocloud-bridge] - ERROR messages"
-                },
-                {
                     "query": f"bruin-bridge AND {ENVIRONMENT_ID} AND "
                              f"\"ERROR:\"",
                     "search_name": f"[bruin-bridge] - ERROR messages"
@@ -213,6 +238,26 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
                              f"\"ERROR:\"",
                     "search_name": f"[service-outage-monitor] - ERROR messages"
+                },
+                {
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
+                             f"\"Successfully created outage ticket for edge\"",
+                    "search_name": f"[service-outage-monitor] - ticket creation"
+                },
+                {
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
+                             f"\"Triage process finished!\"",
+                    "search_name": f"[triage] Triage finished"
+                },
+                {
+                    "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[velocloud-bridge] - ERROR messages"
+                },
+                {
+                    "query": f"intermapper-outage-monitor AND {ENVIRONMENT_ID} AND "
+                             f"\"Received the following from the gmail account mettel.automation@intelygenz.com: []\"",
+                    "search_name": f"[intermapper-outage-monitor] - Not receiving emails"
                 }
             ]
         }
