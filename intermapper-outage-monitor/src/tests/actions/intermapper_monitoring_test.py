@@ -148,8 +148,8 @@ class TestInterMapperMonitor:
         email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
 
         intermapper_response = {
-            'body': [{'message': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid},
-                     {'message': email_msg, 'body': intermapper_up_body, 'msg_uid': msg_uid}],
+            'body': [{'message': email_msg, 'subject': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_up_body, 'msg_uid': msg_uid}],
             'status': 200
         }
         mark_email_as_read_response = {
@@ -220,7 +220,7 @@ class TestInterMapperMonitor:
         email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
 
         intermapper_response = {
-            'body': [{'message': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid}],
+            'body': [{'message': email_msg, 'subject': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid}],
             'status': 200
         }
         mark_email_as_read_response = {
@@ -363,14 +363,21 @@ class TestInterMapperMonitor:
         email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
 
         intermapper_response = {
-            'body': [{'message': email_msg, 'body': 'skipped', 'msg_uid': -1},
-                     {'message': email_msg, 'body': intermapper_sd_wan_body, 'msg_uid': msg_uid_0},
-                     {'message': email_msg, 'body': intermapper_sd_wan_body, 'msg_uid': msg_uid_1},
-                     {'message': email_msg, 'body': intermapper_failed_circuit_id_body, 'msg_uid': msg_uid_2},
-                     {'message': email_msg, 'body': intermapper_failed_to_mark_as_read, 'msg_uid': msg_uid_3},
-                     {'message': email_msg, 'body': intermapper_failed_outage_process, 'msg_uid': msg_uid_4},
-                     {'message': email_msg, 'body': intermapper_204_circuit_id_body, 'msg_uid': msg_uid_5},
-                     {'message': email_msg, 'body': intermapper_204_circuit_id_body, 'msg_uid': msg_uid_6},
+            'body': [{'message': email_msg, 'subject': email_msg, 'body': 'skipped', 'msg_uid': -1},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_sd_wan_body,
+                      'msg_uid': msg_uid_0},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_sd_wan_body,
+                      'msg_uid': msg_uid_1},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_failed_circuit_id_body,
+                      'msg_uid': msg_uid_2},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_failed_to_mark_as_read,
+                      'msg_uid': msg_uid_3},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_failed_outage_process,
+                      'msg_uid': msg_uid_4},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_204_circuit_id_body,
+                      'msg_uid': msg_uid_5},
+                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_204_circuit_id_body,
+                      'msg_uid': msg_uid_6},
                      ],
 
             'status': 200

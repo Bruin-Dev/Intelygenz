@@ -54,7 +54,7 @@ class InterMapperMonitor:
             if message is None or msg_uid == -1:
                 self._logger.error(f'Invalid message: {email}')
                 continue
-            email_subject = self._find_field_in_body(message, "Subject")
+            email_subject = email['subject']
 
             self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {email_subject}')
 
