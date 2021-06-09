@@ -2,6 +2,7 @@ import email
 import email.header
 import imaplib
 from datetime import datetime, timedelta
+from email.header import decode_header, make_header
 
 
 class EmailReaderClient:
@@ -57,13 +58,15 @@ class EmailReaderClient:
                 msg = email.message_from_bytes(data[0][1])
                 msg_uid = self._get_message_uid(num)
                 body = self._get_body(msg)
+                subject = str(make_header(decode_header(msg['Subject'])))
 
                 response = self._mark_as_unread(msg_uid, email_account, email_password)
                 if not response:
                     self._logger.error(f'Unable to mark message {msg_uid} as unread')
                     continue
 
-                unread_messages.append({'message': msg.as_string(), 'body': body, 'msg_uid': msg_uid})
+                unread_messages.append({'message': msg.as_string(), 'subject': subject,
+                                        'body': body, 'msg_uid': msg_uid})
 
         self._logout()
         return unread_messages

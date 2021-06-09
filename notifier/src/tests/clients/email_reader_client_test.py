@@ -18,6 +18,7 @@ MESSAGE_1 = {
         'Return-Path': 'Alerts@ft-sys.com',
         'X-CCSI-Disclaimer': 'added'
     },
+    'subject': 'Idling Alert -- TT Bank - wert wert wert',
     'body': 'tt Bank - yuio yuio has been idling for over 15 minute(s) at 04:28 AM 03/20/2020 \
             It is located at LOCATION: zxcv zxcv. It is currently on job 000000.',
     'msg_uid': '1234'
@@ -25,6 +26,9 @@ MESSAGE_1 = {
 
 
 class MessageObject:
+    def __getitem__(self, subject):
+        return 'Idling Alert -- TT Bank - wert wert wert'
+
     def __init__(self):
         self._email = MESSAGE_1['message']
 

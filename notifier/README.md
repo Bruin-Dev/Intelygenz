@@ -145,7 +145,7 @@ by email addresses specified in the `email_filter` and that were sent that the d
 ```json
 {
    'request_id': msg_dict['request_id'], 
-   'body': [{'message': msg, 'body': body, 'msg_uid': msg_uid}] #List of unread emails
+   'body': [{'message': msg, 'subject': subject, 'body': body, 'msg_uid': msg_uid}] #List of unread emails
    'status': 200
 }
 ```
