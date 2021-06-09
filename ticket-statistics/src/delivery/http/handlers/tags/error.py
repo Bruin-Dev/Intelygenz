@@ -7,4 +7,8 @@ ERRORS = {
         'code': 404,
         'message': 'Not found',
     },
+    'DATES_FORMAT': {
+        'code': 404,
+        'message': 'Wrong dates format, the date format must be Y-m-d',
+    },
 }

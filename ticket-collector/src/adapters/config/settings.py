@@ -30,7 +30,9 @@ def get_config():
     load_dotenv(dotenv_path)
 
     mongo_url = f'mongodb://{os.getenv("MONGODB_USERNAME")}:{os.getenv("MONGODB_PASSWORD")}@' \
-                f'{os.getenv("MONGODB_HOST")}/{os.getenv("MONGODB_DATABASE")}'
+                f'{os.getenv("MONGODB_HOST")}/{os.getenv("MONGODB_DATABASE")}' \
+                f'?ssl=true&ssl_ca_certs=/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0' \
+                f'&readPreference=secondaryPreferred&retryWrites=false'
 
     return {
         'sentry': {
