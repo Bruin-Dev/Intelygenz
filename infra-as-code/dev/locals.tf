@@ -20,6 +20,16 @@ locals {
   automation-service-outage-monitor-velocloud_hosts_triage = ""
   automation-service-outage-monitor-velocloud_hosts_filter = "[]"
 
+  // automation-intermapper-outage-monitor local vars
+  automation-intermapper-outage-monitor-image = "${data.aws_ecr_repository.automation-intermapper-outage-monitor.repository_url}:${data.external.intermapper-outage-monitor-build_number.result["image_tag"]}"
+  automation-intermapper-outage-monitor-papertrail_prefix = "intermapper-outage-monitor-${element(split("-", data.external.intermapper-outage-monitor-build_number.result["image_tag"]),2)}"
+  automation-intermapper-outage-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-intermapper-outage-monitor"
+  automation-intermapper-outage-monitor_service-security_group-name = "${var.ENVIRONMENT}-intermapper-outage-monitor"
+  automation-intermapper-outage-monitor-resource-name = "${var.ENVIRONMENT}-intermapper-outage-monitor"
+  automation-intermapper-outage-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-intermapper-outage-monitor"
+  automation-intermapper-outage-monitor-task_definition = "${aws_ecs_task_definition.automation-intermapper-outage-monitor.family}:${aws_ecs_task_definition.automation-intermapper-outage-monitor.revision}"
+  automation-intermapper-outage-monitor-service_discovery_service-name = "intermapper-outage-monitor-${var.ENVIRONMENT}"
+
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
   errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices-${var.ENVIRONMENT}"

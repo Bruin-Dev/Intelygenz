@@ -915,3 +915,64 @@ class BruinClient:
                 'body': e.args[0],
                 'status': 500
             }
+
+    async def get_circuit_id(self, params):
+        try:
+            parsed_params = humps.pascalize(params)
+
+            self._logger.info(f'Getting the circuit id from bruin with params {parsed_params}')
+            return_response = dict.fromkeys(["body", "status"])
+            try:
+                response = await self._session.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                    params=parsed_params,
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status"] = 500
+                return return_response
+
+            if response.status in range(200, 300) and response.status != 204:
+                self._logger.info(f'Got circuit id from bruin with params: {parsed_params}')
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 204:
+                self._logger.error('Got status 204 from Bruin')
+                return_response["body"] = '204 No Content'
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error 400 from Bruin {response_json}")
+
+            if response.status == 401:
+                self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = "Got 401 from Bruin"
+                return_response["status"] = response.status
+
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
+
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}.")
+                return_response["body"] = "Got internal error from Bruin"
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {
+                'body': e.args[0],
+                'status': 500
+            }

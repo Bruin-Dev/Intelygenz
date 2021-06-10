@@ -25,6 +25,9 @@ EMAIL_CONFIG = {
     'sender_email': 'mettel.automation@intelygenz.com',
     'password': os.environ["EMAIL_ACC_PWD"]
 }
+EMAIL_ACCOUNTS = {
+    'mettel.automation@intelygenz.com': 'nwsnllwhalyuypef',
+}
 
 TELESTAX_CONFIG = {
     'url': os.environ['TELESTAX_URL'],

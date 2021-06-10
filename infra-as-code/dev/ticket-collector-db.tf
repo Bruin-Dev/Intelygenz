@@ -25,6 +25,7 @@ resource "aws_security_group" "docdb_security_group" {
     to_port     = 27017
     protocol    = "tcp"
     security_groups = [aws_security_group.automation-ticket-collector_service[0].id,aws_security_group.automation-ticket-statistics_service[0].id]
+    cidr_blocks = [var.TICKET_COLLECTOR_CIDR_ACCESS_FROM_VPN]
   }
 
   egress {

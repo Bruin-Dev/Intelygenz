@@ -291,5 +291,8 @@ class BruinRepository:
             ticket_response['body'] = ticket_response['body'][0]
         return ticket_response
 
+    async def get_circuit_id(self, params):
+        return await self._bruin_client.get_circuit_id(params)
+
     async def post_email_tag(self, email_id: str, tag_id: str):
         return await self._bruin_client.post_email_tag(email_id, tag_id)

@@ -1,5 +1,4 @@
 import abc
-import time
 import datetime
 import asyncio
 
@@ -35,7 +34,7 @@ class TasksServer(ITasksServer):
         self.logger.info("Init tasks server")
         self.scheduler.add_job(get_data_tasks.get_data, 'cron',
                                max_instances=1,
-                               hour=f'{self.START_HOUR}',
+                               hour=self.START_HOUR,
                                id=self.JOB_ID)
 
     async def start(self):
@@ -45,7 +44,6 @@ class TasksServer(ITasksServer):
         while True:
             await asyncio.sleep(60)
             now = datetime.datetime.now()
-            job = self.scheduler.get_job(job_id=self.JOB_ID)
 
             self.logger.info(f'Checking job {self.JOB_ID}')
 

@@ -2904,6 +2904,310 @@ class TestPostMultipleTicketNotes:
         assert result == expected
 
     @pytest.mark.asyncio
+    async def get_circuit_id_2xx_status_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = {"clientID": client_id, "subAccount": "string", "wtn": circuit_id,
+                               "inventoryID": 0, "addressID": 0}
+        bruin_response_status = 200
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_circuit_id_204_status_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = ''
+        bruin_response_status = 204
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+        expected = {
+            "body": '204 No Content',
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_circuit_id_400_status_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = 'Invalid'
+        bruin_response_status = 400
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called_once()
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_circuit_id_401_status_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = '401 error'
+        bruin_response_status = 401
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+            bruin_client.login.assert_awaited_once()
+        expected = {
+            "body": "Got 401 from Bruin",
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called_once()
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_circuit_id_403_status_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = 'Forbidden error'
+        bruin_response_status = 403
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called()
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_circuit_id_5xx_status_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = 'Internal Error'
+        bruin_response_status = 500
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": "Got internal error from Bruin",
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called()
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_circuit_id_connection_error_test(self):
+        circuit_id = '123'
+        client_id = '321'
+
+        input_payload = {
+            'circuit_id': circuit_id,
+            'client_id': client_id,
+        }
+
+        request_payload = {
+            'CircuitId': circuit_id,
+            'ClientId': client_id,
+        }
+
+        bruin_response_body = 'Internal Error'
+        bruin_response_status = 500
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        cause = "ERROR"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(side_effect=ClientConnectionError(cause))):
+            result = await bruin_client.get_circuit_id(input_payload)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/circuit',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": f"Connection error in Bruin API. {cause}",
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called()
+        assert result == expected
+
+    @pytest.mark.asyncio
     async def post_email_tag_test(self):
         logger = Mock()
         logger.error = Mock()

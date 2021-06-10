@@ -86,5 +86,11 @@
       --set certManager.dns01.route53.secretAccessKey=${AWS_SECRET_ACCESS_KEY}
       --set certManager.dns01.route53.hostedZoneID=${KRE_HOSTED_ZONE_ID}
       konstellation-io/kre
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+        cd ${CI_PROJECT_DIR}              
+        envsubst < helm/kre-runtimes/dashboards.yaml > helm/kre-runtimes/dashboards.yaml
+        kubectl apply -f helm/kre-runtimes/dashboards.yaml
+      fi
   tags:
     - kubernetes
