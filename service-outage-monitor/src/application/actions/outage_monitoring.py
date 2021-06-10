@@ -442,7 +442,8 @@ class OutageMonitor:
             working_environment = self._config.MONITOR_CONFIG['environment']
             if working_environment == 'production':
                 for edge in edges_still_in_outage:
-                    edge_full_id = edge['cached_info']['edge']
+                    cached_edge = edge['cached_info']
+                    edge_full_id = cached_edge['edge']
                     edge_status = edge['status']
                     serial_number = edge['cached_info']['serial_number']
                     self._logger.info(
@@ -468,7 +469,7 @@ class OutageMonitor:
                             f'details at https://app.bruin.com/t/{ticket_creation_response_body}.'
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
-                        await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
+                        await self._append_triage_note(ticket_creation_response_body, cached_edge, edge_status)
 
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number,
@@ -511,7 +512,7 @@ class OutageMonitor:
                         )
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
-                        await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_status)
+                        await self._append_triage_note(ticket_creation_response_body, cached_edge, edge_status)
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for {len(edges_still_in_outage)} faulty '
@@ -592,7 +593,8 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
 
-    async def _append_triage_note(self, ticket_id, edge_full_id, edge_status):
+    async def _append_triage_note(self, ticket_id, cached_edge, edge_status):
+        edge_full_id = cached_edge['edge']
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
@@ -623,7 +625,7 @@ class OutageMonitor:
         ticket_detail_id = ticket_detail['detailID']
         service_number = ticket_detail['detailValue']
 
-        ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status, recent_events_response_body)
+        ticket_note = self._triage_repository.build_triage_note(cached_edge, edge_status, recent_events_response_body)
 
         self._logger.info(
             f'Appending triage note to detail {ticket_detail_id} (serial {service_number}) of recently created '

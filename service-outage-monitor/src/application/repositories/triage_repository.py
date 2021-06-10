@@ -7,7 +7,6 @@ from typing import List
 from dateutil.parser import parse
 from pytz import timezone
 
-
 empty_str = str()
 
 EVENT_INTERFACE_NAME_REGEX = re.compile(
@@ -27,9 +26,10 @@ class TriageRepository:
         interface_name_found = match.group('interface_name') or match.group('interface_name2')
         return interface_name == interface_name_found
 
-    def build_triage_note(self, edge_full_id: dict, edge_status: dict, edge_events: List[dict]) -> str:
+    def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict]) -> str:
         tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
 
+        edge_full_id = cached_edge['edge']
         host = edge_full_id['host']
         enterprise_id = edge_full_id['enterprise_id']
         edge_id = edge_full_id['edge_id']
@@ -39,6 +39,7 @@ class TriageRepository:
         edge_serial = edge_status['edgeSerialNumber']
 
         edge_links = edge_status['links']
+        links_configuration = cached_edge['links_configuration']
 
         velocloud_base_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor'
         velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_id}'
@@ -86,9 +87,17 @@ class TriageRepository:
             interface_name = link['interface']
             link_state = link['linkState']
             link_label = link['displayName']
+            link_interface_type = "Unknown"
+            for link_configuration in links_configuration:
+                if interface_name in link_configuration['interfaces']:
+                    link_interface_type = (
+                        f"{link_configuration['mode'].capitalize()} {link_configuration['type'].capitalize()}"
+                    )
+                    break
 
             ticket_note_lines.append(f'Interface {interface_name}')
             ticket_note_lines.append(f'Interface {interface_name} Label: {link_label}')
+            ticket_note_lines.append(f'Interface {interface_name} Type: {link_interface_type}')
             ticket_note_lines.append(f'Interface {interface_name} Status: {link_state}')
 
             last_online_event_for_current_link = self._utils_repository.get_first_element_matching(

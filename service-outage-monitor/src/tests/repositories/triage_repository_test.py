@@ -19,8 +19,44 @@ class TestTriageRepository:
         host = 'some-host'
         enterprise_id = 100
         edge_id = 200
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 100, 'edge_id': 200}
 
+        links_configuration = [
+            {
+                "internalId": "00000201-4c15-4e09-8e0e-a89a395a2aa4",
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "interfaces": [
+                    "GE7"
+                ],
+                "lastActive": 1565622307499,
+            },
+            {
+                "internalId": "00000001-4c15-4e09-8e0e-a89a395a2aa4",
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "interfaces": [
+                    "GE1"
+                ],
+                "lastActive": 1580508612156,
+            },
+            {
+                "internalId": "00000001-4c15-4e09-8e0e-a89a395a2aa4",
+                "mode": "PRIVATE",
+                "type": "WIRED",
+                "interfaces": [
+                    "INTERNET3"
+                ],
+                "lastActive": 1580508612156,
+            }
+        ]
+        cached_edge = {
+            'edge':
+                {
+                    'host': 'some-host',
+                    'enterprise_id': 100,
+                    'edge_id': 200},
+            'links_configuration': links_configuration
+        }
         edge_status_1 = {
             'edgeState': 'OFFLINE',
             'edgeName': 'Travis Touchdown',
@@ -31,10 +67,10 @@ class TestTriageRepository:
             'edgeId': edge_id,
             "links": [
                 {
-                        'linkId': 1234,
-                        'linkState': 'DISCONNECTED',
-                        'interface': 'GE1',
-                        'displayName': 'Solid Snake',
+                    'linkId': 1234,
+                    'linkState': 'DISCONNECTED',
+                    'interface': 'GE1',
+                    'displayName': 'Solid Snake',
 
                 },
                 {
@@ -133,13 +169,13 @@ class TestTriageRepository:
         config = testconfig
         utils_repository = UtilsRepository()
 
-        triage_repository = TriageRepository(config, utils_repository)
+        triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
 
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            triage_note = triage_repository.build_triage_note(edge_full_id, edge_status_1, events)
+            triage_note = triage_repository.build_triage_note(cached_edge, edge_status_1, events)
 
         assert triage_note == os.linesep.join([
             "#*MetTel's IPA*#",
@@ -158,18 +194,21 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
             'Last GE1 Interface Offline: 2019-07-30 01:40:00+00:00',
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: STABLE',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
             'Last GE7 Interface Offline: 2019-07-30 00:40:00+00:00',
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: STABLE',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
             'Last INTERNET3 Interface Offline: Unknown',
@@ -223,7 +262,7 @@ class TestTriageRepository:
         config = testconfig
         utils_repository = UtilsRepository()
 
-        triage_repository = TriageRepository(config, utils_repository)
+        triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
