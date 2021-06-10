@@ -184,6 +184,18 @@ def instance_enterprise_velocloud_request():
 
 
 @pytest.fixture(scope='function')
+def instance_get_configuration_request():
+    return {
+        "request_id": 1234,
+        "body": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 4,
+            "edge_id": 12,
+        }
+    }
+
+
+@pytest.fixture(scope='function')
 def instance_velocloud_response():
     return {
         'request_id': '2222',
@@ -447,4 +459,100 @@ def instance_special_velocloud_response():
             },
         ],
         'status': 200,
+    }
+
+
+@pytest.fixture(scope='function')
+def instance_config_response():
+    return {
+        "request_id": 1234,
+        "body": [
+            {
+                "logicalId": "76:54:7d:99:b3:2e:0000",
+                "internalId": "00000201-4c15-4e09-8e0e-a89a395a2aa4",
+                "discovery": "AUTO_DISCOVERED",
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "name": "69.141.202.71",
+                "isp": None,
+                "publicIpAddress": "69.141.202.71",
+                "sourceIpAddress": None,
+                "nextHopIpAddress": None,
+                "customVlanId": False,
+                "vlanId": 0,
+                "virtualIpAddress": None,
+                "dynamicBwAdjustmentEnabled": False,
+                "bwMeasurement": "SLOW_START",
+                "upstreamMbps": None,
+                "downstreamMbps": None,
+                "backupOnly": False,
+                "udpHolePunching": False,
+                "overheadBytes": 0,
+                "MTU": 1500,
+                "mplsNetwork": "",
+                "dscpTag": "",
+                "staticSlaEnabled": False,
+                "classesofServiceEnabled": False,
+                "encryptOverlay": True,
+                "staticSLA": {
+                    "latencyMs": 0,
+                    "jitterMs": 0,
+                    "lossPct": 0
+                },
+                "classesOfService": {
+                    "classId": None,
+                    "classesOfService": [
+
+                    ]
+                },
+                "interfaces": [
+                    "SFP1"
+                ],
+                "lastActive": 1565622307499
+            },
+            {
+                "logicalId": "90:6c:ac:bb:c9:8c:0000",
+                "internalId": "00000001-4c15-4e09-8e0e-a89a395a2aa4",
+                "discovery": "AUTO_DISCOVERED",
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "name": "96.67.144.85",
+                "isp": None,
+                "publicIpAddress": "96.67.144.85",
+                "sourceIpAddress": None,
+                "nextHopIpAddress": None,
+                "customVlanId": False,
+                "vlanId": 0,
+                "virtualIpAddress": None,
+                "dynamicBwAdjustmentEnabled": False,
+                "bwMeasurement": "SLOW_START",
+                "upstreamMbps": None,
+                "downstreamMbps": None,
+                "backupOnly": False,
+                "udpHolePunching": False,
+                "overheadBytes": 0,
+                "MTU": 1500,
+                "mplsNetwork": "",
+                "dscpTag": "",
+                "staticSlaEnabled": False,
+                "classesofServiceEnabled": False,
+                "encryptOverlay": True,
+                "staticSLA": {
+                    "latencyMs": 0,
+                    "jitterMs": 0,
+                    "lossPct": 0
+                },
+                "classesOfService": {
+                    "classId": None,
+                    "classesOfService": [
+
+                    ]
+                },
+                "interfaces": [
+                    "GE1"
+                ],
+                "lastActive": 1580508612156
+            },
+        ],
+        "status": 200
     }
