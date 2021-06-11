@@ -41,7 +41,7 @@ MONITOR_REPORT_CONFIG = {
     'wait_fixed': 15,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'stop_after_attempt': 3,
-    'crontab': '0 8 * * *',
+    'crontab': '0 8 * * 0',
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
