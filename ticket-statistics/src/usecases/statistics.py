@@ -1,5 +1,5 @@
 import pytz
-
+import re
 from datetime import datetime
 
 from adapters.repositories.tickets.repo import TicketsRepository
@@ -74,7 +74,7 @@ class StatisticsUseCase:
     def get_resolution_date(ticket):
         fmt = '%m/%d/%Y %I:%M:%S %p'
 
-        if ticket['resolveDate']:
+        if 'resolveDate' in ticket:
             create_date = datetime.strptime(ticket['createDate'], fmt)
             resolve_date = datetime.strptime(ticket['resolveDate'], fmt)
             minutes_diff = (resolve_date - create_date).total_seconds() / 60.0
@@ -87,19 +87,25 @@ class StatisticsUseCase:
         return None
 
     @staticmethod
-    def get_acknowledge_date(ticket, event):
+    def parse_time(time):
+        # Bruin is bullshit that puts : in the timezone.
+        if ":" == time[-3:-2]:
+            time = time[:-3] + time[-2:]
+        # Bruin is even bigger bullshit that doesn't have consistency in format.
+        if '.' not in time:
+            note_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%S%z')
+        else:
+            note_time = datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f%z')
+        return note_time
+
+    def get_acknowledge_date(self, ticket, event):
         if event['Note Entered By']:
             format_ticket = '%m/%d/%Y %I:%M:%S %p'
-            format_event = '%Y-%m-%dT%H:%M:%S.%f%z'
 
             if event['EnteredDate']:
                 create_date = datetime.strptime(ticket['createDate'], format_ticket).replace(tzinfo=utc)
-                acknowledge_date = datetime.strptime(event['EnteredDate_N'], format_event)
+                acknowledge_date = self.parse_time(event['EnteredDate_N'])
                 minutes_diff = (acknowledge_date - create_date).total_seconds() / 60
-                print(' -> create date: %s' % create_date)
-                print(' -> acknowledge: %s ' % acknowledge_date)
-                # print(' -> acknowledge: %s ' % event['Notes'])
-                print(minutes_diff)
                 return {
                     'creation': ticket['createDate'],
                     'acknowledge': event['EnteredDate'],
@@ -120,7 +126,11 @@ class StatisticsUseCase:
             i = i + 1
             total += diff_time['diff']
 
-        return total / i
+        try:
+            x = total / i
+        except ZeroDivisionError:
+            x = 0
+        return x
 
     @staticmethod
     def calculate_acknowledge_date_list(times):
@@ -132,7 +142,11 @@ class StatisticsUseCase:
                 i = i + 1
                 total += diff_time['diff']
 
-        return total / i
+        try:
+            x = total / i
+        except ZeroDivisionError:
+            x = 0
+        return x
 
     @staticmethod
     def calculate_ipa_headcount_equivalent(no_touch_resolution, days_time_frame):
@@ -152,7 +166,7 @@ class StatisticsUseCase:
         tasks_resolved_times = []
         tasks_average_times_to_acknowledge = []
 
-        tickets = self.tickets_repository.get_ticket_by_date(start=start, end=end)
+        tickets = self.tickets_repository.get_ticket_by_date(start=start, end=end, status=True)
 
         for key, ticket in enumerate(tickets):
             all_tasks += 1

@@ -11,6 +11,7 @@ WORKDIR /service/app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
 
 ENV PYTHONUNBUFFERED 1
 

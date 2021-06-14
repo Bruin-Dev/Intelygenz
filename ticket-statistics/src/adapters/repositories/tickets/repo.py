@@ -20,22 +20,23 @@ class TicketsRepository(object):
         self.collection = default_database[self.COLLECTION_NAME]
         self.logger.info(f"Initializing {type(self).__name__} REPO")
 
-    def get_ticket_by_date(self, query_date: datetime, status: bool) -> Dict:
+    def get_ticket_by_date(self, start: datetime, end: datetime, status: bool) -> Dict:
         """
         Get tickets by date.
-        :param query_date:
+        :param start:
+        :param end:
         :param status:
         :return Dict:
         """
-        query_start = query_date.replace(hour=0, minute=0, second=0)
-        query_end = query_date.replace(hour=23, minute=59, second=59)
+        query_start = start
+        query_end = end
 
         tickets = self.collection.find({"date": {'$lt': query_end, '$gte': query_start}, 'status': status})
         self.logger.info(f'Number of tickets found: {tickets.count()}')
 
         if tickets.count() == 0:
-            self.logger.info(f'No tickets found in {query_date} on mongodb')
+            self.logger.info(f'No tickets found between {start} and {end} on mongodb')
         else:
-            self.logger.info(f'Found tickets on {query_date} the number of them is {tickets.count()}')
+            self.logger.info(f'Found tickets  between {start} and {end}, the number of them is {tickets.count()}')
 
         return tickets

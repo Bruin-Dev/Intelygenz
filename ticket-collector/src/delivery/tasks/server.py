@@ -1,9 +1,11 @@
 import abc
-import datetime
 import asyncio
+import datetime
 
 from delivery.tasks import get_data_tasks
 from igz.packages.server.api import QuartServer
+from pytz import timezone
+
 from adapters.config import settings
 
 
@@ -27,14 +29,14 @@ class ITasksServer(metaclass=abc.ABCMeta):
 
 class TasksServer(ITasksServer):
     JOB_ID = 'TICKET_COLLECTOR_JOB'
-    START_HOUR = 22
-    END_HOUR = 4
+    START_HOUR = 10
+    END_HOUR = 19
 
     def initialize(self):
         self.logger.info("Init tasks server")
-        self.scheduler.add_job(get_data_tasks.get_data, 'cron',
+        self.scheduler.add_job(get_data_tasks.get_data, 'interval',
                                max_instances=1,
-                               hour=self.START_HOUR,
+                               minutes=1,
                                id=self.JOB_ID)
 
     async def start(self):
@@ -43,24 +45,23 @@ class TasksServer(ITasksServer):
 
         while True:
             await asyncio.sleep(60)
-            now = datetime.datetime.now()
-
-            self.logger.info(f'Checking job {self.JOB_ID}')
+            tz = timezone('EST')
+            now = datetime.datetime.now(tz)
 
             if self.START_HOUR <= self.END_HOUR:
                 if self.START_HOUR <= now.hour <= self.END_HOUR:
                     self.logger.info(f'Resume job {self.JOB_ID} at hour {now.hour}')
-                    self.scheduler.resume()
+                    self.scheduler.resume_job(job_id=self.JOB_ID)
                 else:
                     self.logger.info(f'Pausing job {self.JOB_ID} at hour {now.hour}')
-                    self.scheduler.pause()
+                    self.scheduler.pause_job(job_id=self.JOB_ID)
             else:
                 if self.START_HOUR <= now.hour or now.hour <= self.END_HOUR:
                     self.logger.info(f'Resume job {self.JOB_ID} at hour {now.hour}')
-                    self.scheduler.resume()
+                    self.scheduler.resume_job(job_id=self.JOB_ID)
                 else:
                     self.logger.info(f'Pausing job {self.JOB_ID} at hour {now.hour}')
-                    self.scheduler.pause()
+                    self.scheduler.pause_job(job_id=self.JOB_ID)
 
     async def health(self):
         self.logger.info("Starting health check endpoint")

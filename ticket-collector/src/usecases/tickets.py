@@ -34,8 +34,8 @@ class TicketUseCase:
         """
         self.logger.info('Start getting data')
         # days_per_year = 365.24
-        days_per_year = 14
-        days_to_update = 7
+        days_per_year = 31
+        days_to_update = 1
 
         today = datetime.today()
         range_date_to_force_update = today - timedelta(days=days_to_update)
@@ -85,11 +85,13 @@ class TicketUseCase:
                 self.tickets_repository.save_ticket(ticket=ticket)
 
         for key, ticket in enumerate(tickets):
-            events = self.bruin_repository.request_ticket_events(ticket_id=ticket['ticketID'])
+            try:
+                events = self.bruin_repository.request_ticket_events(ticket_id=ticket['ticketID'])
 
-            if events:
-                self.logger.info(f'Saving events of ticket {ticket["ticketID"]}')
-                self.tickets_repository.save_events(ticket_id=ticket["ticketID"], events=events)
-            else:
-                self.logger.info(f'We don\'t have access to {ticket["ticketID"]}')
-                self.tickets_repository.mark_not_accessible(ticket_id=ticket['ticketID'])
+                if events:
+                    self.tickets_repository.save_events(ticket_id=ticket["ticketID"], events=events)
+                else:
+                    self.logger.info(f'We don\'t have access to {ticket["ticketID"]}')
+                    self.tickets_repository.mark_not_accessible(ticket_id=ticket['ticketID'])
+            except Exception as e:
+                self.logger.info(f'Error: {e}')

@@ -26,15 +26,15 @@ def get_blueprint(statistics_use_case: StatisticsUseCase = Provide[UseCases.stat
             start = to_date(request.args.get('start'))
             end = to_date(request.args.get('end'))
 
-            statistics_use_case.calculate_statistics(start=start, end=end)
+            statistics = statistics_use_case.calculate_statistics(start=start, end=end)
 
-            return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'])
-        except ValueError:
+            return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics)
+        except Exception:
             raise ProjectException('DATES_FORMAT')
 
     def to_date(date_string):
         try:
-            return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+            return datetime.datetime.strptime(date_string, "%Y-%m-%d")
         except ValueError:
             raise ValueError('{} is not valid date in the format YYYY-MM-DD'.format(date_string))
 
