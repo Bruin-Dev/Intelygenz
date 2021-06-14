@@ -39,7 +39,7 @@ class TriageRepository:
         edge_serial = edge_status['edgeSerialNumber']
 
         edge_links = edge_status['links']
-        links_configuration = cached_edge['links_configuration']
+        links_configuration = cached_edge.get('links_configuration', [])
 
         velocloud_base_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor'
         velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_id}'
