@@ -633,6 +633,26 @@ class BruinRepository:
         ])
         return await self.append_note_to_ticket(ticket_id, task_result_note)
 
+    async def append_asr_forwarding_note(self, ticket_id, links, serial_number):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+
+        note_lines = [
+            f"#*MetTel's IPA*#",
+        ]
+
+        for link in links:
+            note_lines.append(
+                f'Status of Wired Link {link["interface"]} ({link["displayName"]}) is {link["linkState"]} after 1 hour.'
+            )
+
+        note_lines += [
+            f'Moving task to: ASR Investigate',
+            f'TimeStamp: {current_datetime_tz_aware}',
+        ]
+
+        task_result_note = os.linesep.join(note_lines)
+        return await self.append_note_to_ticket(ticket_id, task_result_note, service_numbers=[serial_number])
+
     async def change_ticket_severity_for_offline_edge(self, ticket_id: int):
         severity_level = self._config.MONITOR_CONFIG['severity_levels']['medium_high']
         reason_for_change = os.linesep.join([
