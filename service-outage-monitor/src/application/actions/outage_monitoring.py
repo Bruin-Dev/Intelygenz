@@ -515,6 +515,7 @@ class OutageMonitor:
                         await self._check_for_failed_digi_reboot(ticket_creation_response_body,
                                                                  logical_id_list, serial_number, edge_status,
                                                                  edge_full_id)
+                        await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body)
                     elif ticket_creation_response_status == 471:
                         self._logger.info(
                             f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
@@ -881,6 +882,84 @@ class OutageMonitor:
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         return
+
+    async def _attempt_forward_to_asr(self, cached_edge, edge_status, ticket_id):
+        serial_number = cached_edge['serial_number']
+        self._logger.info(
+            f'Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...'
+        )
+
+        links_configuration = cached_edge['links_configuration']
+        if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
+            self._logger.info(
+                f'Outage of serial {serial_number} is caused by a faulty edge. Related detail of ticket {ticket_id} '
+                'will not be forwarded to ASR Investigate.'
+            )
+            return
+
+        links_wired = self._outage_repository.find_disconnected_wired_links(edge_status, links_configuration)
+        if not links_wired:
+            self._logger.info(
+                f'No wired links are disconnected for serial {serial_number}. Related detail of ticket {ticket_id} '
+                'will not be forwarded to ASR Investigate.'
+            )
+            return
+
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details_response_body = ticket_details_response['body']
+        ticket_details_response_status = ticket_details_response['status']
+        if ticket_details_response_status not in range(200, 300):
+            return
+
+        details_from_ticket = ticket_details_response_body['ticketDetails']
+        detail_for_ticket_resolution = self._get_first_element_matching(
+            details_from_ticket,
+            lambda detail: detail['detailValue'] == serial_number,
+        )
+        ticket_detail_id = detail_for_ticket_resolution['detailID']
+
+        notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+        self._logger.info(f'Notes of ticket {ticket_id}: {notes_from_outage_ticket}')
+
+        relevant_notes = [
+            note
+            for note in notes_from_outage_ticket
+            if serial_number in note['serviceNumber']
+            if note['noteValue'] is not None
+        ]
+
+        ticket_data_response = await self._bruin_repository.get_ticket_overview(ticket_id=ticket_id)
+        if ticket_data_response['status'] not in range(200, 300):
+            return
+
+        ticket_creation_date = ticket_data_response['body']['createDate']
+
+        if not self._is_ticket_old_enough(ticket_creation_date):
+            self._logger.info(
+                f'Ticket {ticket_id} is too recent, so detail related to serial {serial_number} will not be '
+                'forwarded to the ASR Investigate queue'
+            )
+            return
+
+        task_result = "ASR Investigate"
+        task_result_note = self._find_note(relevant_notes, 'ASR Investigate')
+
+        if task_result_note is not None:
+            self._logger.info(
+                f'Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to '
+                f'"{task_result}"'
+            )
+            return
+
+        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
+            ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
+        if change_detail_work_queue_response['status'] in range(200, 300):
+            await self._bruin_repository.append_asr_forwarding_note(ticket_id, links_wired, serial_number)
+            slack_message = (
+                f'Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded '
+                f'to {task_result} queue!'
+            )
+            await self._notifications_repository.send_slack_message(slack_message)
 
     def _was_digi_rebooted_recently(self, ticket_note) -> bool:
         current_datetime = datetime.now(utc)

@@ -201,6 +201,122 @@ class TestOutageRepository:
         assert result_1 is True
         assert result_2 is False
 
+    def find_disconnected_wired_links_test(self):
+        edge_status_1 = {
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'ONLINE',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC1234567',
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'links': [
+                {
+                    'interface': 'REX',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'interface': 'RAY',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+            ],
+        }
+        edge_status_2 = {
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'ONLINE',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC1234567',
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'links': [
+                {
+                    'interface': 'REX',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'STABLE',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'interface': 'RAY',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'STABLE',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'interface': 'REZZ',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'STABLE',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'STABLE',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+            ],
+        }
+        links_configuration = [
+            {
+                'interfaces': ['REX'],
+                'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'mode': 'PUBLIC',
+                'type': 'WIRED',
+                'last_active': '2020-09-29T04:45:15.000Z'
+            },
+            {
+                'interfaces': ['RAY'],
+                'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'mode': 'PUBLIC',
+                'type': 'WIRED',
+                'last_active': '2020-09-29T04:45:15.000Z'
+            }
+        ]
+        logger = Mock()
+
+        outage_utils = OutageRepository(logger=logger)
+
+        result_1 = outage_utils.find_disconnected_wired_links(edge_status_1, links_configuration)
+        result_2 = outage_utils.find_disconnected_wired_links(edge_status_2, links_configuration)
+
+        assert result_1 == edge_status_1['links']
+        assert result_2 == []
+
     def is_faulty_edge_test(self):
         edge_state_1 = 'CONNECTED'
         edge_state_2 = 'OFFLINE'
