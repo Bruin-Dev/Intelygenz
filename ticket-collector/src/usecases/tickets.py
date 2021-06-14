@@ -34,7 +34,7 @@ class TicketUseCase:
         """
         self.logger.info('Start getting data')
         # days_per_year = 365.24
-        days_per_year = 31
+        days_per_year = 2
         days_to_update = 1
 
         today = datetime.today()
