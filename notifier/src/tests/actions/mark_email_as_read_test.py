@@ -51,13 +51,13 @@ class TestGetEmails:
         event_bus.publish_message = CoroutineMock()
 
         email_reader_repository = Mock()
-        email_reader_repository.mark_as_read = Mock(return_value=mark_emails_response)
+        email_reader_repository.mark_as_read = CoroutineMock(return_value=mark_emails_response)
 
         mark_emails = MarkEmailAsRead(config, event_bus, logger, email_reader_repository)
 
         await mark_emails.mark_email_as_read(msg_dict)
 
-        email_reader_repository.mark_as_read.assert_called_once_with(msg_uid, email)
+        email_reader_repository.mark_as_read.assert_awaited_once_with(msg_uid, email)
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -87,13 +87,13 @@ class TestGetEmails:
         event_bus.publish_message = CoroutineMock()
 
         email_reader_repository = Mock()
-        email_reader_repository.mark_as_read = Mock()
+        email_reader_repository.mark_as_read = CoroutineMock()
 
         mark_emails = MarkEmailAsRead(config, event_bus, logger, email_reader_repository)
 
         await mark_emails.mark_email_as_read(msg_dict)
 
-        email_reader_repository.mark_as_read.assert_not_called()
+        email_reader_repository.mark_as_read.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -122,11 +122,11 @@ class TestGetEmails:
         event_bus.publish_message = CoroutineMock()
 
         email_reader_repository = Mock()
-        email_reader_repository.mark_as_read = Mock()
+        email_reader_repository.mark_as_read = CoroutineMock()
 
         mark_emails = MarkEmailAsRead(config, event_bus, logger, email_reader_repository)
 
         await mark_emails.mark_email_as_read(msg_dict)
 
-        email_reader_repository.mark_as_read.assert_not_called()
+        email_reader_repository.mark_as_read.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)

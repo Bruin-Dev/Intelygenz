@@ -1,7 +1,10 @@
 from unittest.mock import Mock
 
-from application.repositories.email_reader_repository import EmailReaderRepository
+import pytest
 
+from asynctest import CoroutineMock
+
+from application.repositories.email_reader_repository import EmailReaderRepository
 from config import testconfig as config
 
 
@@ -17,7 +20,8 @@ class TestEmailReaderRepository:
         assert email_reader_repository._email_reader_client == email_reader_client
         assert email_reader_repository._logger == logger
 
-    def get_unread_emails_ok_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_emails_ok_test(self):
         email = 'fake@gmail.com'
         email_filter = ['filter@gmail.com']
         message_1 = {
@@ -56,17 +60,18 @@ class TestEmailReaderRepository:
         }
         logger = Mock()
         email_reader_client = Mock()
-        email_reader_client.get_unread_messages = Mock(return_value=expected_unread_emails)
+        email_reader_client.get_unread_messages = CoroutineMock(return_value=expected_unread_emails)
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        unread_emails = email_reader_repository.get_unread_emails(email, email_filter)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_called_once_with(email, config.EMAIL_ACCOUNTS[email],
-                                                                        email_filter)
+        email_reader_client.get_unread_messages.assert_awaited_once_with(email, config.EMAIL_ACCOUNTS[email],
+                                                                         email_filter)
         assert unread_emails == expected_unread_emails_response
 
-    def get_unread_emails_ko_all_failed_unread_emails_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_emails_ko_all_failed_unread_emails_test(self):
         email = 'fake@gmail.com'
         email_filter = ['filter@gmail.com']
         message_1 = {
@@ -105,17 +110,18 @@ class TestEmailReaderRepository:
         }
         logger = Mock()
         email_reader_client = Mock()
-        email_reader_client.get_unread_messages = Mock(return_value=expected_unread_emails)
+        email_reader_client.get_unread_messages = CoroutineMock(return_value=expected_unread_emails)
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        unread_emails = email_reader_repository.get_unread_emails(email, email_filter)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_called_once_with(email, config.EMAIL_ACCOUNTS[email],
-                                                                        email_filter)
+        email_reader_client.get_unread_messages.assert_awaited_once_with(email, config.EMAIL_ACCOUNTS[email],
+                                                                         email_filter)
         assert unread_emails == expected_unread_emails_response
 
-    def get_unread_emails_ko_no_emails_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_emails_ko_no_emails_test(self):
         email = 'fake@gmail.com'
         email_filter = ['filter@gmail.com']
 
@@ -126,17 +132,18 @@ class TestEmailReaderRepository:
         }
         logger = Mock()
         email_reader_client = Mock()
-        email_reader_client.get_unread_messages = Mock(return_value=expected_unread_emails)
+        email_reader_client.get_unread_messages = CoroutineMock(return_value=expected_unread_emails)
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        unread_emails = email_reader_repository.get_unread_emails(email, email_filter)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_called_once_with(email, config.EMAIL_ACCOUNTS[email],
-                                                                        email_filter)
+        email_reader_client.get_unread_messages.assert_awaited_once_with(email, config.EMAIL_ACCOUNTS[email],
+                                                                         email_filter)
         assert unread_emails == expected_unread_emails_response
 
-    def get_unread_emails_ko_no_password_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_emails_ko_no_password_test(self):
         email = 'fake123@gmail.com'
         email_filter = ['filter@gmail.com']
 
@@ -145,16 +152,19 @@ class TestEmailReaderRepository:
                                     'status': 400
         }
         logger = Mock()
+
         email_reader_client = Mock()
+        email_reader_client.get_unread_messages = CoroutineMock()
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        unread_emails = email_reader_repository.get_unread_emails(email, email_filter)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_not_called()
+        email_reader_client.get_unread_messages.assert_not_awaited()
         assert unread_emails == expected_unread_emails_response
 
-    def mark_as_read_ok_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_read_ok_test(self):
         email = 'fake@gmail.com'
         msg_uid = '123'
 
@@ -166,16 +176,17 @@ class TestEmailReaderRepository:
         logger = Mock()
 
         email_reader_client = Mock()
-        email_reader_client.mark_as_read = Mock(return_value=True)
+        email_reader_client.mark_as_read = CoroutineMock(return_value=True)
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        mark_as_read_response = email_reader_repository.mark_as_read(msg_uid, email)
+        mark_as_read_response = await email_reader_repository.mark_as_read(msg_uid, email)
 
-        email_reader_client.mark_as_read.assert_called_once_with(msg_uid, email, config.EMAIL_ACCOUNTS[email])
+        email_reader_client.mark_as_read.assert_awaited_once_with(msg_uid, email, config.EMAIL_ACCOUNTS[email])
         assert mark_as_read_response == expected_mark_as_read_response
 
-    def mark_as_read_ko_failed_to_mark_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_read_ko_failed_to_mark_test(self):
         email = 'fake@gmail.com'
         msg_uid = '123'
 
@@ -187,16 +198,17 @@ class TestEmailReaderRepository:
         logger = Mock()
 
         email_reader_client = Mock()
-        email_reader_client.mark_as_read = Mock(return_value=False)
+        email_reader_client.mark_as_read = CoroutineMock(return_value=False)
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        mark_as_read_response = email_reader_repository.mark_as_read(msg_uid, email)
+        mark_as_read_response = await email_reader_repository.mark_as_read(msg_uid, email)
 
-        email_reader_client.mark_as_read.assert_called_once_with(msg_uid, email, config.EMAIL_ACCOUNTS[email])
+        email_reader_client.mark_as_read.assert_awaited_once_with(msg_uid, email, config.EMAIL_ACCOUNTS[email])
         assert mark_as_read_response == expected_mark_as_read_response
 
-    def mark_as_read_ko_no_password_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_read_ko_no_password_test(self):
         email = 'fake123@gmail.com'
         msg_uid = '123'
 
@@ -208,10 +220,11 @@ class TestEmailReaderRepository:
         logger = Mock()
 
         email_reader_client = Mock()
+        email_reader_client.mark_as_read = CoroutineMock()
 
         email_reader_repository = EmailReaderRepository(config, email_reader_client, logger)
 
-        mark_as_read_response = email_reader_repository.mark_as_read(msg_uid, email)
+        mark_as_read_response = await email_reader_repository.mark_as_read(msg_uid, email)
 
-        email_reader_client.mark_as_read.assert_not_called()
+        email_reader_client.mark_as_read.assert_not_awaited()
         assert mark_as_read_response == expected_mark_as_read_response

@@ -51,13 +51,13 @@ class TestGetEmails:
         event_bus.publish_message = CoroutineMock()
 
         email_reader_repository = Mock()
-        email_reader_repository.get_unread_emails = Mock(return_value=unread_emails_response)
+        email_reader_repository.get_unread_emails = CoroutineMock(return_value=unread_emails_response)
 
         get_emails = GetEmails(config, event_bus, logger, email_reader_repository)
 
         await get_emails.get_unread_emails(msg_dict)
 
-        email_reader_repository.get_unread_emails.assert_called_once_with(email, email_filter)
+        email_reader_repository.get_unread_emails.assert_awaited_once_with(email, email_filter)
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -81,13 +81,13 @@ class TestGetEmails:
         event_bus.publish_message = CoroutineMock()
 
         email_reader_repository = Mock()
-        email_reader_repository.get_unread_emails = Mock()
+        email_reader_repository.get_unread_emails = CoroutineMock()
 
         get_emails = GetEmails(config, event_bus, logger, email_reader_repository)
 
         await get_emails.get_unread_emails(msg_dict)
 
-        email_reader_repository.get_unread_emails.assert_not_called()
+        email_reader_repository.get_unread_emails.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -113,11 +113,11 @@ class TestGetEmails:
         event_bus.publish_message = CoroutineMock()
 
         email_reader_repository = Mock()
-        email_reader_repository.get_unread_emails = Mock()
+        email_reader_repository.get_unread_emails = CoroutineMock()
 
         get_emails = GetEmails(config, event_bus, logger, email_reader_repository)
 
         await get_emails.get_unread_emails(msg_dict)
 
-        email_reader_repository.get_unread_emails.assert_not_called()
+        email_reader_repository.get_unread_emails.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)

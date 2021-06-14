@@ -1,6 +1,9 @@
 import imaplib
 from unittest.mock import Mock, patch
 
+import pytest
+from asynctest import CoroutineMock
+
 from application.clients import email_reader_client as email_reader_client_module
 from application.clients.email_reader_client import EmailReaderClient
 from config import testconfig as config
@@ -161,7 +164,8 @@ class TestEmailReaderClient:
         mail_client._login.assert_called_once_with(email, password)
         mail_client._logout.assert_called_once()
 
-    def get_unread_messages_OK_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_messages_OK_test(self):
         logger = Mock()
         email = 'fake@email.com'
         password = '123'
@@ -172,26 +176,27 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._login = Mock()
             mail_client._logout = Mock()
-            mail_client._search_messages = Mock(return_value=['1234'])
-            mail_client._extract_data_from_message = Mock(return_value=['1234 2345'])
-            mail_client._get_message_uid = Mock(return_value=MESSAGE_1['msg_uid'])
+            mail_client._search_messages = CoroutineMock(return_value=['1234'])
+            mail_client._extract_data_from_message = CoroutineMock(return_value=['1234 2345'])
+            mail_client._get_message_uid = CoroutineMock(return_value=MESSAGE_1['msg_uid'])
             mail_client._get_body = Mock(return_value=MESSAGE_1['body'])
-            mail_client._mark_as_unread = Mock(return_value=True)
-            unread_messages = mail_client.get_unread_messages(email, password, email_filter)
+            mail_client._mark_as_unread = CoroutineMock(return_value=True)
+            unread_messages = await mail_client.get_unread_messages(email, password, email_filter)
 
             mail_client._login.assert_called_once_with(email, password)
             mail_client._logout.assert_called_once()
-            mail_client._search_messages.assert_called_once_with(email, password, email_filter[0])
-            mail_client._extract_data_from_message.assert_called_once_with('1234')
-            mail_client._get_message_uid.assert_called_once_with('1234')
+            mail_client._search_messages.assert_awaited_once_with(email, password, email_filter[0])
+            mail_client._extract_data_from_message.assert_awaited_once_with('1234')
+            mail_client._get_message_uid.assert_awaited_once_with('1234')
             mail_client._get_body.assert_called_once_with(message_object)
-            mail_client._mark_as_unread.assert_called_once_with(MESSAGE_1['msg_uid'], email, password)
+            mail_client._mark_as_unread.assert_awaited_once_with(MESSAGE_1['msg_uid'], email, password)
 
             message_1_copy = MESSAGE_1.copy()
             message_1_copy['message'] = str(MESSAGE_1['message'])
             assert unread_messages == [message_1_copy]
 
-    def get_unread_messages_OK_no_mark_as_read_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_messages_OK_no_mark_as_read_test(self):
         logger = Mock()
         logger.error = Mock()
         email = 'fake@email.com'
@@ -204,24 +209,25 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._login = Mock()
             mail_client._logout = Mock()
-            mail_client._search_messages = Mock(return_value=['1234'])
-            mail_client._extract_data_from_message = Mock(return_value=['1234 2345'])
-            mail_client._get_message_uid = Mock(return_value=MESSAGE_1['msg_uid'])
+            mail_client._search_messages = CoroutineMock(return_value=['1234'])
+            mail_client._extract_data_from_message = CoroutineMock(return_value=['1234 2345'])
+            mail_client._get_message_uid = CoroutineMock(return_value=MESSAGE_1['msg_uid'])
             mail_client._get_body = Mock(return_value=MESSAGE_1['body'])
-            mail_client._mark_as_unread = Mock(return_value=False)
-            unread_messages = mail_client.get_unread_messages(email, password, email_filter)
+            mail_client._mark_as_unread = CoroutineMock(return_value=False)
+            unread_messages = await mail_client.get_unread_messages(email, password, email_filter)
 
             mail_client._login.assert_called_once_with(email, password)
             mail_client._logout.assert_called_once()
-            mail_client._search_messages.assert_called_once_with(email, password, email_filter[0])
-            mail_client._extract_data_from_message.assert_called_once_with('1234')
-            mail_client._get_message_uid.assert_called_once_with('1234')
+            mail_client._search_messages.assert_awaited_once_with(email, password, email_filter[0])
+            mail_client._extract_data_from_message.assert_awaited_once_with('1234')
+            mail_client._get_message_uid.assert_awaited_once_with('1234')
             mail_client._get_body.assert_called_once_with(message_object)
-            mail_client._mark_as_unread.assert_called_once_with(MESSAGE_1['msg_uid'], email, password)
+            mail_client._mark_as_unread.assert_awaited_once_with(MESSAGE_1['msg_uid'], email, password)
             assert unread_messages == []
             logger.error.assert_called_with(f'Unable to mark message 1234 as unread')
 
-    def get_unread_messages_OK_no_data_in_message_test(self):
+    @pytest.mark.asyncio
+    async def get_unread_messages_OK_no_data_in_message_test(self):
         logger = Mock()
 
         email = 'fake@email.com'
@@ -235,23 +241,24 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._login = Mock()
             mail_client._logout = Mock()
-            mail_client._search_messages = Mock(return_value=['1234'])
-            mail_client._extract_data_from_message = Mock(return_value=None)
-            mail_client._get_message_uid = Mock(return_value=MESSAGE_1['msg_uid'])
+            mail_client._search_messages = CoroutineMock(return_value=['1234'])
+            mail_client._extract_data_from_message = CoroutineMock(return_value=None)
+            mail_client._get_message_uid = CoroutineMock(return_value=MESSAGE_1['msg_uid'])
             mail_client._get_body = Mock(return_value=MESSAGE_1['body'])
-            mail_client._mark_as_unread = Mock(return_value=True)
-            unread_messages = mail_client.get_unread_messages(email, password, email_filter)
+            mail_client._mark_as_unread = CoroutineMock(return_value=True)
+            unread_messages = await mail_client.get_unread_messages(email, password, email_filter)
 
             mail_client._login.assert_called_once_with(email, password)
             mail_client._logout.assert_called_once()
-            mail_client._search_messages.assert_called_once_with(email, password, email_filter[0])
-            mail_client._extract_data_from_message.assert_called_once_with('1234')
-            mail_client._get_message_uid.assert_not_called()
+            mail_client._search_messages.assert_awaited_once_with(email, password, email_filter[0])
+            mail_client._extract_data_from_message.assert_awaited_once_with('1234')
+            mail_client._get_message_uid.assert_not_awaited()
             mail_client._get_body.assert_not_called()
-            mail_client._mark_as_unread.assert_not_called()
+            mail_client._mark_as_unread.assert_not_awaited()
             assert unread_messages == []
 
-    def search_messages_OK_test(self):
+    @pytest.mark.asyncio
+    async def search_messages_OK_test(self):
         logger = Mock()
         email = 'fake@email.com'
         password = '123'
@@ -262,11 +269,12 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._reset_connection = Mock()
 
-            data = mail_client._search_messages(email, password, sender_email)
+            data = await mail_client._search_messages(email, password, sender_email)
             mail_client._reset_connection.assert_not_called()
             assert data == ['mail1', 'mail2']
 
-    def search_messages_KO_test(self):
+    @pytest.mark.asyncio
+    async def search_messages_KO_test(self):
         logger = Mock()
         email = 'fake@email.com'
         password = '123'
@@ -277,11 +285,12 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._reset_connection = Mock()
 
-            data = mail_client._search_messages(email, password, sender_email)
+            data = await mail_client._search_messages(email, password, sender_email)
             mail_client._reset_connection.assert_not_called()
             assert data == []
 
-    def search_messages_with_exception_test(self):
+    @pytest.mark.asyncio
+    async def search_messages_with_exception_test(self):
         logger = Mock()
         logger.error = Mock()
 
@@ -301,23 +310,25 @@ class TestEmailReaderClient:
             mail_client._reset_connection = Mock()
             mail_client._create_connection()
 
-            data = mail_client._search_messages(email, password, sender_email)
+            data = await mail_client._search_messages(email, password, sender_email)
             mail_client._reset_connection.assert_called_once_with(email, password)
             logger.error.assert_called_with(logging_message_1)
             assert data == []
 
-    def extract_data_from_message_OK_test(self):
+    @pytest.mark.asyncio
+    async def extract_data_from_message_OK_test(self):
         logger = Mock()
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, 'fetch', return_value=['OK', 'some data']):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
             mail_client._reset_connection = Mock()
 
-            data = mail_client._extract_data_from_message(b'1')
+            data = await mail_client._extract_data_from_message(b'1')
             mail_client._reset_connection.assert_not_called()
             assert data == 'some data'
 
-    def extract_data_from_message_KO_test(self):
+    @pytest.mark.asyncio
+    async def extract_data_from_message_KO_test(self):
         logger = Mock()
 
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, 'fetch', return_value=['KO', 'some data']):
@@ -325,11 +336,12 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._reset_connection = Mock()
 
-            data = mail_client._extract_data_from_message(b'1')
+            data = await mail_client._extract_data_from_message(b'1')
             mail_client._reset_connection.assert_not_called()
             assert data is None
 
-    def extract_data_from_message_with_exception_test(self):
+    @pytest.mark.asyncio
+    async def extract_data_from_message_with_exception_test(self):
         logger = Mock()
         logger.error = Mock()
 
@@ -343,7 +355,7 @@ class TestEmailReaderClient:
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
 
-            data = mail_client._extract_data_from_message(b'1')
+            data = await mail_client._extract_data_from_message(b'1')
             logger.error.assert_called_with(logging_message_1)
             assert data is None
 
@@ -404,7 +416,8 @@ class TestEmailReaderClient:
         logger.error.assert_called_once()
         assert unread_messages == ''
 
-    def get_message_uuid_ok_test(self):
+    @pytest.mark.asyncio
+    async def get_message_uuid_ok_test(self):
         logger = Mock()
         uid = Mock()
         uid_bytes = Mock()
@@ -413,10 +426,11 @@ class TestEmailReaderClient:
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, 'fetch', return_value=['OK', [uid, uid, uid]]):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
-            message_uid = mail_client._get_message_uid(b'1')
+            message_uid = await mail_client._get_message_uid(b'1')
             assert message_uid == MESSAGE_1['msg_uid']
 
-    def get_message_uuid_with_exception_test(self):
+    @pytest.mark.asyncio
+    async def get_message_uuid_with_exception_test(self):
         logger = Mock()
         logger.error = Mock()
 
@@ -435,31 +449,34 @@ class TestEmailReaderClient:
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
 
-            message_uid = mail_client._get_message_uid(b'1')
+            message_uid = await mail_client._get_message_uid(b'1')
             logger.error.assert_called_once_with(logging_message_1)
             assert message_uid == -1
 
-    def mark_as_unread_OK_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_unread_OK_test(self):
         logger = Mock()
         email = 'fake@email.com'
         password = '123'
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, 'uid', return_value=['OK', 'uid']):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
-            mark_as_unread = mail_client._mark_as_unread(MESSAGE_1['msg_uid'], email, password)
+            mark_as_unread = await mail_client._mark_as_unread(MESSAGE_1['msg_uid'], email, password)
             assert mark_as_unread is True
 
-    def mark_as_unread_KO_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_unread_KO_test(self):
         logger = Mock()
         email = 'fake@email.com'
         password = '123'
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, 'uid', return_value=['KO', 'uid']):
             mail_client = EmailReaderClient(config, logger)
             mail_client._create_connection()
-            mark_as_unread = mail_client._mark_as_unread(MESSAGE_1['msg_uid'], email, password)
+            mark_as_unread = await mail_client._mark_as_unread(MESSAGE_1['msg_uid'], email, password)
             assert mark_as_unread is False
 
-    def mark_as_unread_with_exception_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_unread_with_exception_test(self):
         logger = Mock()
         logger.error = Mock()
 
@@ -476,12 +493,13 @@ class TestEmailReaderClient:
             mail_client._create_connection()
             mail_client._reset_connection = Mock()
 
-            mark_as_unread = mail_client._mark_as_unread(MESSAGE_1['msg_uid'], email, password)
+            mark_as_unread = await mail_client._mark_as_unread(MESSAGE_1['msg_uid'], email, password)
             mail_client._reset_connection.assert_called_once_with(email, password)
             logger.error.assert_called_once_with(logging_message_1)
             assert mark_as_unread is False
 
-    def mark_as_read_OK_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_read_OK_test(self):
         logger = Mock()
         email = 'fake@email.com'
         password = '123'
@@ -493,13 +511,14 @@ class TestEmailReaderClient:
             mail_client._logout = Mock()
             mail_client._reset_connection = Mock()
 
-            mark_as_read = mail_client.mark_as_read(MESSAGE_1['msg_uid'], email, password)
+            mark_as_read = await mail_client.mark_as_read(MESSAGE_1['msg_uid'], email, password)
             mail_client._login.assert_called_once_with(email, password)
             mail_client._logout.assert_called_once()
             mail_client._reset_connection.assert_not_called()
             assert mark_as_read is True
 
-    def mark_as_read_KO_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_read_KO_test(self):
         logger = Mock()
 
         email = 'fake@email.com'
@@ -511,13 +530,14 @@ class TestEmailReaderClient:
             mail_client._logout = Mock()
             mail_client._reset_connection = Mock()
 
-            mark_as_read = mail_client.mark_as_read(MESSAGE_1['msg_uid'], email, password)
+            mark_as_read = await mail_client.mark_as_read(MESSAGE_1['msg_uid'], email, password)
             mail_client._login.assert_called_once_with(email, password)
             mail_client._logout.assert_called_once()
             mail_client._reset_connection.assert_not_called()
             assert mark_as_read is False
 
-    def mark_as_read_with_exception_test(self):
+    @pytest.mark.asyncio
+    async def mark_as_read_with_exception_test(self):
         logger = Mock()
         logger.error = Mock()
 
@@ -536,7 +556,7 @@ class TestEmailReaderClient:
             mail_client._logout = Mock()
             mail_client._reset_connection = Mock()
 
-            mark_as_read = mail_client.mark_as_read(MESSAGE_1['msg_uid'], email, password)
+            mark_as_read = await mail_client.mark_as_read(MESSAGE_1['msg_uid'], email, password)
             mail_client._login.assert_called_once_with(email, password)
             mail_client._logout.assert_not_called()
             mail_client._reset_connection.assert_called_once_with(email, password)

@@ -37,7 +37,7 @@ class MarkEmailAsRead:
 
         self._logger.info(f'Attempting to mark message {msg_uid} from email account {email_account} as read')
 
-        mark_as_read_response = self._email_reader_repository.mark_as_read(msg_uid, email_account)
+        mark_as_read_response = await self._email_reader_repository.mark_as_read(msg_uid, email_account)
         response["body"] = mark_as_read_response["body"]
         response["status"] = mark_as_read_response["status"]
 

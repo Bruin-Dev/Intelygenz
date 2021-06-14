@@ -37,7 +37,7 @@ class GetEmails:
 
         self._logger.info(f'Attempting to get all unread messages from email account {email_account}')
 
-        unread_messages_response = self._email_reader_repository.get_unread_emails(email_account, email_filter)
+        unread_messages_response = await self._email_reader_repository.get_unread_emails(email_account, email_filter)
         response["body"] = unread_messages_response["body"]
         response["status"] = unread_messages_response["status"]
 
