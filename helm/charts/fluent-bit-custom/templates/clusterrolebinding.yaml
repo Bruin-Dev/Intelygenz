@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "fluent-bit-custom.clusterRoleName" . }}-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "fluent-bit-custom.clusterRoleName" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "fluent-bit-custom.serviceAccountName" . }}
+  namespace: kube-system

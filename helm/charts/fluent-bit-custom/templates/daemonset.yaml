@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ include "fluent-bit-custom.fullname" . }}
+  namespace: kube-system
   labels:
     {{- include "fluent-bit-custom.labels" . | nindent 4 }}
 spec:

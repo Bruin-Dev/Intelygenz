@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "fluent-bit-custom.configmapName" . }}
+  namespace: kube-system
   labels:
     {{- include "fluent-bit-custom.labels" . | nindent 4 }}
   annotations:
@@ -9,29 +10,39 @@ metadata:
 data:
   fluent-bit.conf: |
     [SERVICE]
+    #    Log_Level           debug
         Parsers_File        parsers.conf
     [INPUT]
         Name                tail
         Tag                 kube.*
+        Exclude_Path        /var/log/containers/cloudwatch-agent*, /var/log/containers/fluent-bit*, /var/log/containers/aws-node*, /var/log/containers/kube-proxy*
         Path                /var/log/containers/*.log
+        Docker_Mode         On
+        Docker_Mode_Flush   5
+        Docker_Mode_Parser  container_firstline
         Parser              docker
-        DB                  /var/log/flb_kube.db
-        Mem_Buf_Limit       5MB
+        DB                  /var/fluent-bit/state/flb_kube.db
+        Mem_Buf_Limit       10MB
         Skip_Long_Lines     Off
         Refresh_Interval    10
     [FILTER]
-        Name                kubernetes
+        Name                parser
         Match               kube.*
-        Kube_URL            https://kubernetes.default.svc:443
-        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
-        Kube_Tag_Prefix     kube.var.log.containers.
-        Merge_Log           On
-        Merge_JSON_Key      k8s
-        Merge_Log_Trim      On
-        K8S-Logging.Parser  On
-        K8S-Logging.exclude True
-        Keep_Log            Off
+        Key_Name            log
+        Parser              mettel_logs
+    # [FILTER]
+    #     Name                kubernetes
+    #     Match               kube.*
+    #     Kube_URL            https://kubernetes.default.svc:443
+    #     Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    #     Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+    #     Kube_Tag_Prefix     kube.var.log.containers.
+    #     Merge_Log           On
+    #     Merge_Log_Key       k8s
+    #     Merge_Log_Trim      On
+    #     K8S-Logging.Parser  On
+    #     K8S-Logging.exclude True
+    #     Keep_Log            Off
     [OUTPUT]
         Name                cloudwatch
         Match               kube.var.log.containers.bruin-bridge*
@@ -239,16 +250,34 @@ data:
 
   parsers.conf: |
     [PARSER]
-        Name   mettel_parser_logs
+        Name   mettel_logs
         Format regex
         Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>.*)$
         Time_Key time
         Time_Format %d/%b/%Y:%H:%M:%S %z
     [PARSER]
-        Name   json
-        Format json
+        Name   mettel_parser_logs
+        Format regex
+        Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>[a-zA-Z0-9 _.,:()'"!¡]*)$
         Time_Key time
         Time_Format %d/%b/%Y:%H:%M:%S %z
+    [PARSER]
+        Name   mettel_parser_json
+        Format regex
+        Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>[^{]*)(?<message_additional>{.*)$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+        # Command      |  Decoder          | Field              | Optional Action
+        # =============|===================|====================|=================
+        Decode_Field_As   escaped_utf8       message_additional    do_next
+        Decode_Field_As   escaped            message_additional    do_next
+        Decode_Field_As   json               message_additional
+    [PARSER]
+        Name        container_firstline
+        Format      regex
+        Regex       (?<log>(?<="log":")\S(?!\.).*?)(?<!\\)".*(?<stream>(?<="stream":").*?)".*(?<time>\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}\.\w*).*(?=})
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%LZ
     [PARSER]
         Name        docker
         Format      json
@@ -261,3 +290,8 @@ data:
         Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
         Time_Key    time
         Time_Format %b %d %H:%M:%S
+    [PARSER]
+        Name        json
+        Format      json
+        Time_Key    time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
