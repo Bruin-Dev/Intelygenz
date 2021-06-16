@@ -29,8 +29,8 @@ class ITasksServer(metaclass=abc.ABCMeta):
 
 class TasksServer(ITasksServer):
     JOB_ID = 'TICKET_COLLECTOR_JOB'
-    START_HOUR = 10
-    END_HOUR = 19
+    START_HOUR = 9
+    END_HOUR = 13
 
     def initialize(self):
         self.logger.info("Init tasks server")
