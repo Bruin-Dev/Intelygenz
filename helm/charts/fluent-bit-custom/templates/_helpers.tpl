@@ -55,14 +55,21 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Configmap name of bruin-bridge
+Cluster role name
+*/}}
+{{- define "fluent-bit-custom.clusterRoleName" -}}
+{{ include "fluent-bit-custom.fullname" . }}-cluster-role
+{{- end }}
+
+{{/*
+Configmap name
 */}}
 {{- define "fluent-bit-custom.configmapName" -}}
 {{ include "fluent-bit-custom.fullname" . }}-configmap
 {{- end }}
 
 {{/*
-Secret name of bruin-bridge
+Secret name
 */}}
 {{- define "fluent-bit-custom.secretName" -}}
 {{ include "fluent-bit-custom.fullname" . }}-secret
