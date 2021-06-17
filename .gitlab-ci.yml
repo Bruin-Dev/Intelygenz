@@ -65,8 +65,6 @@ include:
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-unit_test-templates.yml'
   # Templates used in Gitlab-CI jobs for build jobs
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-build-image-templates.yml'
-  # Templates used in Gitlab-CI jobs for jobs that uses specific tools
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-utils-templates.yml'
   # Templates used in Gitlab-CI jobs for helm jobs
   - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-templates.yml'
   # Templates used in Gitlab-CI jobs for terraform jobs
@@ -84,8 +82,9 @@ include:
   - local: 'customer-cache/.gitlab-ci.yml'
   - local: 'digi-bridge/.gitlab-ci.yml'
   - local: 'digi-reboot-report/.gitlab-ci.yml'
-#  - local: 'dispatch-portal-backend/.gitlab-ci.yml'   #--> disable dispatch portal feature
-#  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'  #--> disable dispatch portal feature
+#  - local: 'dispatch-portal-backend/.gitlab-ci.yml'
+#  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
+  - local: 'email-tagger-monitor/.gitlab-ci.yml'
   - local: 'email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'email-tagger-monitor/.gitlab-ci.yml'
   - local: 'hawkeye-affecting-monitor/.gitlab-ci.yml'
@@ -97,7 +96,6 @@ include:
   - local: 'infra-as-code/data-collector/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
-  - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
   - local: 'intermapper-outage-monitor/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'links-metrics-api/.gitlab-ci.yml'
