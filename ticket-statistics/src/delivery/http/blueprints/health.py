@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-ENDPOINT = '/health'
+ENDPOINT = '/_health'
 
 
 def construct_health_check_blueprint(version):

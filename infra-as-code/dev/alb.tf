@@ -324,7 +324,7 @@ resource "aws_lb_target_group" "automation-ticket-statistics" {
     port                = 5000
     matcher             = 200
     protocol            = "HTTP"
-    path                = "/_health"
+    path                = "/api/_health"
   }
 
   tags = {
