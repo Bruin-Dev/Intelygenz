@@ -355,7 +355,9 @@ class DispatchServer:
             }
             self._logger.info(f"Dispatch [{dispatch_num}] in ticket_id: {ticket_id} "
                               f"Adding to redis lit dispatch")
-            self._redis_client.set(dispatch_num, json.dumps(redis_data), ex=self._expires_ttl)
+
+            redis_key = f"{self._config.ENVIRONMENT_NAME}-{dispatch_num}"
+            self._redis_client.set(redis_key, json.dumps(redis_data), ex=self._expires_ttl)
         else:
             error_response = {'code': response['status'], 'message': response['body']}
             return jsonify(error_response), response['status'], None
@@ -638,7 +640,9 @@ class DispatchServer:
                 'code': response['status'], 'message': response['body']
             }
             return jsonify(error_response), response['status'], None
-        redis_data = json.loads(self._redis_client.get(dispatch_number))
+
+        redis_key = f"{self._config.ENVIRONMENT_NAME}-{dispatch_number}"
+        redis_data = json.loads(self._redis_client.get(redis_key))
 
         igz_dispatch_number = redis_data['igz_dispatch_number']
         self._logger.info(f"[CTS] Dispatch [{dispatch_number}] - {response['body']} "

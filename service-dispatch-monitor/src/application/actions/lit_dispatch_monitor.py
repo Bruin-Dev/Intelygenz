@@ -142,14 +142,15 @@ class LitDispatchMonitor:
             if requested_watermark_found is None:
                 continue
 
-            if self._redis_client.get(dispatch_number) is None:
+            redis_key = f'{self._config.ENVIRONMENT_NAME}-{dispatch_number}'
+            if self._redis_client.get(redis_key) is None:
                 redis_data = {
                     'ticket_id': ticket_id,
                 }
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"Adding to redis lit dispatch")
                 self._redis_client.set(
-                    dispatch_number, json.dumps(redis_data), ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
+                    redis_key, json.dumps(redis_data), ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
 
             filtered_dispatches.append(dispatch)
         return filtered_dispatches

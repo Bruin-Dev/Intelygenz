@@ -117,6 +117,8 @@ class TNBAFeedback:
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
         async def send_ticket_task_history_to_t7():
             async with self._semaphore:
+                redis_key = f'{self._config.ENVIRONMENT_NAME}-{ticket_id}'
+
                 ticket_task_history = await self._bruin_repository.get_ticket_task_history(ticket_id)
                 ticket_task_history_body = ticket_task_history["body"]
                 ticket_task_history_status = ticket_task_history["status"]
@@ -129,7 +131,8 @@ class TNBAFeedback:
                 if ticket_task_history_tnba_check is False:
                     self._logger.info(f"No TNBA note found in task history of ticket id {ticket_id}. Skipping ...")
                     return
-                if self._redis_client.get(ticket_id) is not None:
+
+                if self._redis_client.get(redis_key) is not None:
                     self._logger.info(f"Task history of ticket id {ticket_id} has already been sent to T7. "
                                       f"Skipping ...")
                     return
@@ -145,7 +148,8 @@ class TNBAFeedback:
                     self._logger.info(f"Posting metrics to T7 status returned {post_metrics_status}"
                                       f" and posting metrics to T7 body returned {post_metrics_body}")
                     return
-                self._redis_client.set(ticket_id, '', ex=self._config.TNBA_FEEDBACK_CONFIG['redis_ttl'])
+
+                self._redis_client.set(redis_key, '', ex=self._config.TNBA_FEEDBACK_CONFIG['redis_ttl'])
 
         try:
             await send_ticket_task_history_to_t7()

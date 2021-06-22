@@ -37,4 +37,5 @@ class TestStorageRepository:
         storage_repository._redis.set = Mock()
         storage_repository.set_hawkeye_cache(cache_probes)
 
-        storage_repository._redis.set.assert_called_with('hawkeye', json.dumps(cache_probes))
+        redis_key = f'{storage_repository._config.ENVIRONMENT_NAME}-hawkeye'
+        storage_repository._redis.set.assert_called_with(redis_key, json.dumps(cache_probes))

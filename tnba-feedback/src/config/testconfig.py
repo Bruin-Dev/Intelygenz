@@ -16,7 +16,10 @@ NATS_CONFIG = {
     'stop_delay': 0.1,
     'reconnects': 0
 }
+
 MONITORING_INTERVAL_SECONDS = 60 * 60
+
+ENVIRONMENT_NAME = 'dev'
 
 TNBA_FEEDBACK_CONFIG = {
     'environment': "dev",

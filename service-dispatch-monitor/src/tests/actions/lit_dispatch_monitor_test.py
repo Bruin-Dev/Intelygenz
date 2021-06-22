@@ -199,6 +199,7 @@ class TestLitDispatchMonitor:
             "ticket_id": ticket_id_1,
         }
         redis_expire_ttl = lit_dispatch_monitor._config.DISPATCH_MONITOR_CONFIG['redis_ttl']
+        redis_key_dispatch = f'{lit_dispatch_monitor._config.ENVIRONMENT_NAME}-{dispatch_number_1}'
 
         lit_dispatch_monitor._redis_client.get = Mock(side_effect=[None, redis_data_1])
         lit_dispatch_monitor._redis_client.set = Mock()
@@ -208,10 +209,10 @@ class TestLitDispatchMonitor:
         filtered_confirmed_dispatches = await lit_dispatch_monitor._filter_dispatches_by_watermark(confirmed_dispatches)
 
         assert filtered_confirmed_dispatches == [dispatch_confirmed, dispatch_confirmed]
-        lit_dispatch_monitor._redis_client.get.assert_has_calls([call(dispatch_number_1), call(dispatch_number_1)],
+        lit_dispatch_monitor._redis_client.get.assert_has_calls([call(redis_key_dispatch), call(redis_key_dispatch)],
                                                                 any_order=False)
         lit_dispatch_monitor._redis_client.set.assert_called_once_with(
-            dispatch_number_1, json.dumps(redis_data_1), ex=redis_expire_ttl)
+            redis_key_dispatch, json.dumps(redis_data_1), ex=redis_expire_ttl)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2,

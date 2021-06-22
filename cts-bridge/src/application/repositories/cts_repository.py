@@ -272,7 +272,8 @@ class CtsRepository:
         for dispatch in dispatches.get('records', []):
             dispatch_number = dispatch.get('Name')
             # ticket_id = dispatch.get('Ext_Ref_Num__c')
-            redis_dispatch = self._redis_client.get(dispatch_number)
+            redis_key = f'{self._config.ENVIRONMENT_NAME}-{dispatch_number}'
+            redis_dispatch = self._redis_client.get(redis_key)
             if redis_dispatch is not None:
                 return_dispatches.append(dispatch)
         return return_dispatches

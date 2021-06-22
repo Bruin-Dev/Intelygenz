@@ -34,6 +34,8 @@ LIT_CONFIG = {
     'login_ttl': 90
 }
 
+ENVIRONMENT_NAME = 'dev'
+
 LOG_CONFIG = {
     'name': 'lit-bridge-test',
     'level': logging.DEBUG,

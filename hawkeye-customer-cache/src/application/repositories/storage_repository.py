@@ -6,7 +6,8 @@ class StorageRepository:
         self._config = config
         self._logger = logger
         self._redis = redis
-        self.__cache_key = 'hawkeye'
+
+        self.__cache_key = f'{config.ENVIRONMENT_NAME}-hawkeye'
 
     def get_hawkeye_cache(self):
         if self._redis.exists(self.__cache_key):

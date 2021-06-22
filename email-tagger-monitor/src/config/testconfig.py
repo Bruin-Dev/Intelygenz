@@ -44,6 +44,8 @@ MONITOR_CONFIG = {
 
 ENVIRONMENT = 'dev'
 
+ENVIRONMENT_NAME = 'dev'
+
 LOG_CONFIG = {
     'name': 'test-name',
     'level': logging.DEBUG,

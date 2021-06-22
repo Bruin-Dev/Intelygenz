@@ -10,10 +10,14 @@ class StorageRepository:
         self._logger = logger
         self._redis = redis
 
-        self.__next_refresh_key = 'next_refresh_date'
+        self._redis_key_prefix = config.ENVIRONMENT_NAME
+
+        self.__next_refresh_key = f'{self._redis_key_prefix}-next_refresh_date'
         self.__next_refresh_date_format = '%m/%d/%Y, %H:%M:%S'
 
     def get_cache(self, key):
+        key = f'{self._redis_key_prefix}-{key}'
+
         if self._redis.exists(key):
             cache = self._redis.get(key)
             return json.loads(cache)
@@ -33,6 +37,7 @@ class StorageRepository:
         return caches
 
     def set_cache(self, key, cache):
+        key = f'{self._redis_key_prefix}-{key}'
         self._redis.set(key, json.dumps(cache))
 
     def get_refresh_date(self) -> datetime:

@@ -24,6 +24,7 @@ class TestStorageRepository:
 
     def get_cache_key_exist_test(self, instance_storage_repository):
         redis_key = "VCO1"
+        fixed_key = f"{instance_storage_repository._config.ENVIRONMENT_NAME}-{redis_key}"
         redis_cache = ["Edge list"]
 
         instance_storage_repository._redis.exists = Mock(return_value=True)
@@ -31,6 +32,7 @@ class TestStorageRepository:
 
         cache = instance_storage_repository.get_cache(redis_key)
 
+        instance_storage_repository._redis.get.assert_called_with(fixed_key)
         assert cache == redis_cache
 
     def get_cache_key_doesnt_exist_test(self, instance_storage_repository):
@@ -42,17 +44,19 @@ class TestStorageRepository:
 
         cache = instance_storage_repository.get_cache(redis_key)
 
+        instance_storage_repository._redis.get.assert_not_called()
         assert cache == []
 
     def set_cache_test(self, instance_storage_repository):
         redis_key = "VCO1"
+        fixed_key = f"{instance_storage_repository._config.ENVIRONMENT_NAME}-{redis_key}"
         redis_cache = ["Edge list"]
 
         instance_storage_repository._redis.set = Mock()
 
         instance_storage_repository.set_cache(redis_key, redis_cache)
 
-        instance_storage_repository._redis.set.assert_called_with(redis_key, json.dumps(redis_cache))
+        instance_storage_repository._redis.set.assert_called_with(fixed_key, json.dumps(redis_cache))
 
     def get_refresh_date_with_key_missing_in_redis_test(self, instance_storage_repository):
         instance_storage_repository._redis.get = Mock(return_value=None)
@@ -72,7 +76,7 @@ class TestStorageRepository:
         assert result == next_refresh_date
 
     def update_refresh_date_test(self, instance_storage_repository):
-        next_refresh_key = 'next_refresh_date'
+        next_refresh_key = f'{instance_storage_repository._config.ENVIRONMENT_NAME}-next_refresh_date'
 
         current_datetime = datetime.utcnow()
         next_refresh_interval = instance_storage_repository._config.REFRESH_CONFIG['refresh_map_minutes']

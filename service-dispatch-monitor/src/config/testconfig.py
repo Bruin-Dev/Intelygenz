@@ -16,6 +16,8 @@ NATS_CONFIG = {
 
 ENVIRONMENT = 'dev'
 
+ENVIRONMENT_NAME = 'dev'
+
 DISPATCH_MONITOR_CONFIG = {
     'environment': 'dev',
     'timezone': 'US/Eastern',

@@ -737,7 +737,7 @@ class TestApiServer:
             assert data == expected_response_create
             api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
             api_server_test._redis_client.set.assert_called_once_with(
-                dispatch_number, json.dumps(redis_data), ex=expires_ttl)
+                f"{api_server_test._config.ENVIRONMENT_NAME}-{dispatch_number}", json.dumps(redis_data), ex=expires_ttl)
 
     @pytest.mark.asyncio
     async def lit_create_dispatch_with_error_appending_note_test(self, api_server_test):

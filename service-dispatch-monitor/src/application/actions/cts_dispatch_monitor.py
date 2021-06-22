@@ -143,14 +143,16 @@ class CtsDispatchMonitor:
                 func_args = [dispatch, final_igz_id, filtered_ticket_notes_by_igz_id[final_igz_id]]
                 self._scheduler.add_job(process_dispatch, 'date', next_run_time=undefined, replace_existing=False,
                                         id=f"_process_dispatch_{dispatch_number}", args=func_args)
-                if self._redis_client.get(dispatch_number) is None:
+
+                redis_key = f'{self._config.ENVIRONMENT_NAME}-{dispatch_number}'
+                if self._redis_client.get(redis_key) is None:
                     redis_data = {
                         'ticket_id': ticket_id,
                         'igz_dispatch_number': final_igz_id,
                     }
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"Adding to redis cts dispatch. data: {redis_data}")
-                    self._redis_client.set(dispatch_number, json.dumps(redis_data),
+                    self._redis_client.set(redis_key, json.dumps(redis_data),
                                            ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
                 return True
             else:
