@@ -757,28 +757,34 @@ variable "velocloud-bridge-task-definition-json" {
 }
 
 // ticket-collector environment variables
-variable "TICKET_COLLECTOR_DOCUMENTDB_USERNAME" {
+variable "TICKET_COLLECTOR_MONGO_USERNAME" {
   type = string
   default = "collector"
   description = "DocumentDB main username"
 }
 
-variable "TICKET_COLLECTOR_MONGODB_DATABASE" {
+variable "TICKET_COLLECTOR_MONGO_PASSWORD" {
+  type = string
+  default = "mypassword"
+  description = "DocumentDB main password"
+}
+
+variable "TICKET_COLLECTOR_MONGO_DB_NAME" {
   type = string
   default = "bruin"
-  description = "interval task run"
+  description = "documentdb collection database name"
+}
+
+variable "TICKET_COLLECTOR_MONGO_HOST" {
+  type = string
+  default = "documentdb.hostname.private"
+  description = "documentdb hostname for database access"
 }
 
 variable "TICKET_COLLECTOR_INTERVAL_TASKS_RUN" {
   type = number
   default = "1"
   description = "interval task run"
-}
-
-variable "TICKET_COLLECTOR_CIDR_ACCESS_FROM_VPN" {
-  type = string
-  default = "52.51.50.68/32"
-  description = "Allow connections from Intelygenz vpn"
 }
 
 // ticket-statistics environment variables
