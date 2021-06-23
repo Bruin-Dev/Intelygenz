@@ -5,26 +5,34 @@ function common_variables_by_environment() {
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
     export KRE_BASE_URL=${KRE_BASE_URL_DEV}
+    export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+    export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+    export REDIS_HOSTNAME=${REDIS_HOSTNAME_DEV}
+    export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_DEV}
+    export REDIS_TNBA_FEEDBACK_HOSTNAME=${REDIS_TNBA_FEEDBACK_HOSTNAME_DEV}
+    export REDIS_EMAIL_TAGGER_HOSTNAME=${REDIS_EMAIL_TAGGER_HOSTNAME_DEV}
   else
     # common environment variables for production environment
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
     export KRE_BASE_URL=${KRE_BASE_URL_PRO}
+    export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+    export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+    export REDIS_HOSTNAME=${REDIS_HOSTNAME_PRO}
+    export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_PRO}
+    export REDIS_TNBA_FEEDBACK_HOSTNAME=${REDIS_TNBA_FEEDBACK_HOSTNAME_PRO}
+    export REDIS_EMAIL_TAGGER_HOSTNAME=${REDIS_EMAIL_TAGGER_HOSTNAME_PRO}
   fi
 }
 
 function bruin_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # bruin-bridge environment variables for ephemeral environments
-    export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     export BRUIN_LOGIN_URL_IP="\"\""
     export BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     export BRUIN_BASE_URL_IP="\"\""
     export BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
   else
     # bruin-bridge environment variables for production environment
-    export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     export BRUIN_LOGIN_URL_IP="\"\""
     export BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     export BRUIN_BASE_URL_IP="\"\""
@@ -165,6 +173,22 @@ function t7_bridge_variables() {
   fi
 }
 
+function ticket_collector_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # ticket-collector environment variables for ephemeral environments
+    export TICKET_COLLECTOR_MONGO_USERNAME="user"
+    export TICKET_COLLECTOR_MONGO_PASSWORD="mypassword"
+    export TICKET_COLLECTOR_MONGO_HOST="docdb"
+    export TICKET_COLLECTOR_MONGO_DB_NAME="mydb"
+  else
+    # ticket-collector environment variables for production environment
+    export TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
+    export TICKET_COLLECTOR_MONGO_PASSWORD=${TICKET_COLLECTOR_MONGO_PASSWORD}
+    export TICKET_COLLECTOR_MONGO_HOST=${TICKET_COLLECTOR_MONGO_HOST}
+    export TICKET_COLLECTOR_MONGO_DB_NAME=${TICKET_COLLECTOR_MONGO_DB_NAME}
+  fi
+}
+
 function velocloud_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # velocloud-bridge environment variables for ephemeral environments
@@ -205,6 +229,7 @@ function environments_assign() {
   lumin_billing_report_variables
   notifier_variables
   t7_bridge_variables
+  ticket_collector_variables
   velocloud_bridge_variables
 }
 

@@ -23,6 +23,8 @@
     - export TF_VAR_WHITELISTED_IPS="[${LOAD_BALANCER_WHITELIST}]"
     - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
     - export TF_VAR_GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    - export TF_VAR_TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
+    - export TF_VAR_TICKET_COLLECTOR_MONGO_PASSWORD=${TICKET_COLLECTOR_MONGO_PASSWORD}
     - if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then export TF_VAR_ENABLE_FLUENT_BIT=true; fi
     - >
       for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
@@ -39,6 +41,9 @@
                   if [[ ${i} == "3-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       export FLUENT_BIT_LOG_GROUP_NAME=$(terraform output fluent-bit-role-arn)
                       export FLUENT_BIT_IAM_ROLE_ARN=$(terraform output fluent-bit-log-group-name)
+                  fi
+                  if [[ ${i} == "6-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/TICKET_COLLECTOR_MONGO_HOST" --form "value=$(terraform output ticket-collector-mongo-host)"
                   fi
                   cd ..
               else

@@ -13,10 +13,6 @@ helm-branches:
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
     HELM_CHART_RELEASE_NAME: "automation-engine"
     HELM_CHART_DIR: "helm/charts/automation-engine"
-    REDIS_HOSTNAME: ${REDIS_HOSTNAME_DEV}
-    REDIS_CUSTOMER_CACHE_HOSTNAME: ${REDIS_CUSTOMER_CACHE_HOSTNAME_DEV}
-    REDIS_TNBA_FEEDBACK_HOSTNAME: ${REDIS_TNBA_FEEDBACK_HOSTNAME_DEV}
-    REDIS_EMAIL_TAGGER_HOSTNAME: ${REDIS_EMAIL_TAGGER_HOSTNAME_DEV}
   before_script:  
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -42,13 +38,9 @@ helm-master:
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
     HELM_CHART_RELEASE_NAME: "automation-engine"
     HELM_CHART_DIR: "helm/charts/automation-engine"
-    REDIS_HOSTNAME: ${REDIS_HOSTNAME_PRO}
-    REDIS_CUSTOMER_CACHE_HOSTNAME: ${REDIS_CUSTOMER_CACHE_HOSTNAME_PRO}
-    REDIS_TNBA_FEEDBACK_HOSTNAME: ${REDIS_TNBA_FEEDBACK_HOSTNAME_PRO}
-    REDIS_EMAIL_TAGGER_HOSTNAME: ${REDIS_EMAIL_TAGGER_HOSTNAME_PRO}
   before_script:   
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export ENVIRONMENT_SLUG=production
     - export CURRENT_ENVIRONMENT=production
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production
@@ -94,6 +86,7 @@ destroy-helm-master:
     HELM_CHART_RELEASE_NAME: "automation-engine"
   before_script:  
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
+    - export ENVIRONMENT_SLUG=production
     - export CURRENT_ENVIRONMENT=production
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production

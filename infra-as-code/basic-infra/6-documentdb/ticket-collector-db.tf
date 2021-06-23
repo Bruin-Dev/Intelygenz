@@ -22,7 +22,7 @@ resource "aws_security_group" "docdb_security_group" {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    cidr_blocks = [var.cdir_private_1[production],var.cdir_private_2[production]]
+    cidr_blocks = [var.cdir_private_1[var.CURRENT_ENVIRONMENT],var.cdir_private_2[var.CURRENT_ENVIRONMENT]]
   }
 
   egress {
@@ -50,18 +50,12 @@ resource "aws_docdb_cluster_parameter_group" "docdb_parameter_group" {
   }
 }
 
-resource "random_password" "documentdb-password" {
-  count   = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  length  = 16
-  special = false
-}
-
 resource "aws_docdb_cluster" "docdb" {
   count                   = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   cluster_identifier      = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
   engine                  = "docdb"
-  master_username         = var.TICKET_COLLECTOR_DOCUMENTDB_USERNAME
-  master_password         = random_password.documentdb-password[0].result
+  master_username         = var.TICKET_COLLECTOR_MONGO_USERNAME
+  master_password         = var.TICKET_COLLECTOR_MONGO_PASSWORD
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   skip_final_snapshot     = true

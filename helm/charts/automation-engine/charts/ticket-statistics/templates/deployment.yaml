@@ -1,60 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "email-tagger-kre-bridge.fullname" . }}
+  name: {{ include "ticket-statistics.fullname" . }}
   labels:
-    {{- include "email-tagger-kre-bridge.labels" . | nindent 4 }}
+    {{- include "ticket-statistics.labels" . | nindent 4 }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
-{{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-{{- end }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "email-tagger-kre-bridge.selectorLabels" . | nindent 6 }}
+      {{- include "ticket-statistics.selectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "email-tagger-kre-bridge.labels" . | nindent 8 }}
+        {{- include "ticket-statistics.labels" . | nindent 8 }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
-      priorityClassName: high-priority
-      initContainers:
-        - name: wait-nats-server
-          image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
-          envFrom:
-            - configMapRef:
-                name: {{ include "email-tagger-kre-bridge.configmapName" . }}
-        - name: wait-redis
-          image: busybox:1.28
-          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
-          envFrom:
-            - configMapRef:
-                name: {{ include "email-tagger-kre-bridge.configmapName" . }}
+      priorityClassName: medium-priority
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "email-tagger-kre-bridge.configmapName" . }}
+                name: {{ include "ticket-statistics.configmapName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /_health
+              path: /api/_health
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
           readinessProbe:
             httpGet:
-              path: /_health
+              path: /api/_health
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
           resources:
