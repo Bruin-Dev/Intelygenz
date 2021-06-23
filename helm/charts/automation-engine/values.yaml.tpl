@@ -487,6 +487,28 @@ hawkeye-outage-monitor:
       cpu: 100m
       memory: 128Mi
 
+# -- intermapper-outage-monitor subchart specific configuration
+intermapper-outage-monitor:
+  enabled: ${INTERMAPPER_OUTAGE_MONITOR_ENABLED}
+  replicaCount: ${INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/intermapper-outage-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${INTERMAPPER_OUTAGE_MONITOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 # -- last-contact-report subchart specific configuration
 last-contact-report:
@@ -961,6 +983,84 @@ t7-bridge:
     maxReplicas: 2
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
+
+
+# -- ticket-collector subchart specific configuration
+ticket-collector:
+  enabled: ${TICKET_COLLECTOR_ENABLED}
+  replicaCount: ${TICKET_COLLECTOR_DESIRED_TASKS}
+  config:
+    # -- Indicate the interval task that must run in parallel
+    interval_tasks_run: "1"
+    # -- Indicate mongo username
+    mongodb_username: ${TICKET_COLLECTOR_MONGO_USERNAME}
+    # -- Indicate mongo password
+    mongodb_password: ${TICKET_COLLECTOR_MONGO_PASSWORD}
+    # -- Indicate mongo hostname
+    mongodb_host: ${TICKET_COLLECTOR_MONGO_HOST}
+    # -- Indicate mongo database to use
+    mongodb_database: ${TICKET_COLLECTOR_MONGO_DB_NAME}
+    # -- Client ID credentials for Bruin API
+    bruin_client_id: ${BRUIN_CLIENT_ID}
+    # -- Client Secret credentials for Bruin API
+    bruin_client_secret: ${BRUIN_CLIENT_SECRET}
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-collector
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${TICKET_COLLECTOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+
+# -- ticket-statistics subchart specific configuration
+ticket-statistics:
+  enabled: ${TICKET_STATISTICS_ENABLED}
+  replicaCount: ${TICKET_STATISTICS_DESIRED_TASKS}
+  config:
+    # -- Indicate mongo username
+    mongodb_username: ${TICKET_COLLECTOR_MONGO_USERNAME}
+    # -- Indicate mongo password
+    mongodb_password: ${TICKET_COLLECTOR_MONGO_PASSWORD}
+    # -- Indicate mongo hostname
+    mongodb_host: ${TICKET_COLLECTOR_MONGO_HOST}
+    # -- Indicate mongo database to use
+    mongodb_database: ${TICKET_COLLECTOR_MONGO_DB_NAME}
+    # -- Indicate ticket statistics server port
+    server_port: 5000
+    # -- Indicate ticket statistics server root path
+    server_root_path: "/api"
+    # -- Indicate ticket statistics server version
+    server_version: ${TICKET_STATISTICS_BUILD_NUMBER}
+    # -- Indicate ticket statistics server name
+    server_name: ticket-statistics
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-statistics
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${TICKET_STATISTICS_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 
 # -- tnba-feedback subchart specific configuration

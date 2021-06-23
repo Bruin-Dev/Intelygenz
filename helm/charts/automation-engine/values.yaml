@@ -581,6 +581,32 @@ hawkeye-outage-monitor:
       memory: 128Mi
 
 
+# -- intermapper-outage-monitor subchart specific configuration
+intermapper-outage-monitor:
+  # -- Field to indicate if the intermapper-outage-monitor module is going to be deployed
+  enabled: true
+  # -- Number of replicas of intermapper-outage-monitor module
+  replicaCount: 1
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/intermapper-outage-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+
 # -- last-contact-report subchart specific configuration
 last-contact-report:
   # -- Field to indicate if the last-contact-report module is going to be deployed
@@ -1077,6 +1103,88 @@ t7-bridge:
     maxReplicas: 2
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
+
+
+# -- ticket-collector subchart specific configuration
+ticket-collector:
+  # -- Field to indicate if the ticket-collector module is going to be deployed
+  enabled: true
+  # -- Number of replicas of ticket-collector module
+  replicaCount: 1
+  config:
+    # -- Indicate the interval task that must run in parallel
+    interval_tasks_run: ""
+    # -- Indicate mongo username
+    mongodb_username: ""
+    # -- Indicate mongo password
+    mongodb_password: ""
+    # -- Indicate mongo hostname
+    mongodb_host: ""
+    # -- Indicate mongo database to use
+    mongodb_database: ""
+    # -- Indicate bruin client id to access
+    bruin_client_id: ""
+    # -- Indicate bruin client secret
+    bruin_client_secret: ""
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-collector
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+
+# -- ticket-statistics subchart specific configuration
+ticket-statistics:
+  # -- Field to indicate if the ticket-statistics module is going to be deployed
+  enabled: true
+  # -- Number of replicas of ticket-statistics module
+  replicaCount: 1
+  config:
+    # -- Indicate mongo username
+    mongodb_username: ""
+    # -- Indicate mongo password
+    mongodb_password: ""
+    # -- Indicate mongo hostname
+    mongodb_host: ""
+    # -- Indicate mongo database to use
+    mongodb_database: ""
+    # -- Indicate ticket statistics server port
+    server_port: ""
+    # -- Indicate ticket statistics server root path
+    server_root_path: ""
+    # -- Indicate ticket statistics server version
+    server_version: ""
+    # -- Indicate ticket statistics server name
+    server_name: ""
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-statistics
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 
 # -- tnba-feedback subchart specific configuration

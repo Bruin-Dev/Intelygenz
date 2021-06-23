@@ -20,3 +20,15 @@ variable "cdir_private_2" {
     "dev"         = "172.31.87.0/24"
   }
 }
+
+variable "TICKET_COLLECTOR_MONGO_USERNAME" {
+  type = string
+  default = "myusername"
+  description = "DocumentDB main username"
+}
+
+variable "TICKET_COLLECTOR_MONGO_PASSWORD" {
+  type = string
+  default = "mypassword"
+  description = "DocumentDB main password"
+}

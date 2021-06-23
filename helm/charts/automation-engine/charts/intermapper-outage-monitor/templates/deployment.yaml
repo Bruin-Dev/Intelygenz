@@ -1,48 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "email-tagger-kre-bridge.fullname" . }}
+  name: {{ include "intermapper-outage-monitor.fullname" . }}
   labels:
-    {{- include "email-tagger-kre-bridge.labels" . | nindent 4 }}
+    {{- include "intermapper-outage-monitor.labels" . | nindent 4 }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
-{{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-{{- end }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "email-tagger-kre-bridge.selectorLabels" . | nindent 6 }}
+      {{- include "intermapper-outage-monitor.selectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "email-tagger-kre-bridge.labels" . | nindent 8 }}
+        {{- include "intermapper-outage-monitor.labels" . | nindent 8 }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
-      priorityClassName: high-priority
+      priorityClassName: medium-priority
       initContainers:
-        - name: wait-nats-server
+        {{- if .Values.config.capabilities_enabled.bruin_bridge }}
+        - name: wait-bruin-bridge
           image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
-          envFrom:
-            - configMapRef:
-                name: {{ include "email-tagger-kre-bridge.configmapName" . }}
-        - name: wait-redis
+          command: ['sh', '-c', 'until wget --spider -S http://bruin-bridge:5000/_health; do echo waiting for bruin-bridge; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.notifier }}
+        - name: wait-notifier
           image: busybox:1.28
-          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
-          envFrom:
-            - configMapRef:
-                name: {{ include "email-tagger-kre-bridge.configmapName" . }}
+          command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "email-tagger-kre-bridge.configmapName" . }}
+                name: {{ include "intermapper-outage-monitor.configmapName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

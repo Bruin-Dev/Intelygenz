@@ -4,7 +4,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-  name: {{ include "dispatch-portal-frontend.fullname" . }}-ingress
+  name: {{ include "ticket-statistics.fullname" . }}-ingress
 spec:
   rules:
     {{ if eq .Values.global.environment "production" -}}
@@ -15,10 +15,6 @@ spec:
       http:
         paths:
         - backend:
-            serviceName: dispatch-portal-backend
-            servicePort: 5000
-          path: /dispatch_portal/api(/|$)(.*)
-        - backend:
-            serviceName: dispatch-portal-frontend
-            servicePort: https
-          path: /dispatch_portal(/|$)(.*)
+            serviceName: ticket-statistics
+            servicePort: {{ .Values.service.port }}
+          path: /api/statistics(/|$)(.*)
