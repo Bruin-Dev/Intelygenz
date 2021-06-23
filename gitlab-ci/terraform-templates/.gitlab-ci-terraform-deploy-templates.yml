@@ -36,6 +36,10 @@
                   fi
                   terraform refresh
                   terraform plan && terraform apply -auto-approve
+                  if [[ ${i} == "3-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                      export FLUENT_BIT_LOG_GROUP_NAME=$(terraform output fluent-bit-role-arn)
+                      export FLUENT_BIT_IAM_ROLE_ARN=$(terraform output fluent-bit-log-group-name)
+                  fi
                   cd ..
               else
                   for e in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
@@ -47,10 +51,6 @@
                               terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
                               terraform refresh
                               terraform plan && terraform apply -auto-approve
-                              if [[[ ${e} != "3-eks-cluster" ]] &&  ["$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
-                                  export FLUENT_BIT_LOG_GROUP_NAME=$(terraform output fluent-bit-role-arn)
-                                  export FLUENT_BIT_IAM_ROLE_ARN=$(terraform output fluent-bit-log-group-name)
-                              fi
                           fi
                           cd ..
                       )
