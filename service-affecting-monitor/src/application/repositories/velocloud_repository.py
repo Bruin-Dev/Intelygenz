@@ -115,3 +115,15 @@ class VelocloudRepository:
             'end': now,
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
+
+    async def get_links_metrics_for_autoresolve(self) -> dict:
+        now = datetime.now(utc)
+        past_moment = now - timedelta(
+            minutes=self._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
+        )
+
+        interval_for_metrics = {
+            'start': past_moment,
+            'end': now,
+        }
+        return await self.get_all_links_metrics(interval=interval_for_metrics)

@@ -22,7 +22,91 @@ class BruinRepository:
         self._notifications_repository = notifications_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_REPORT_CONFIG["semaphore"])
 
-    async def append_note_to_ticket(self, ticket_id: int, note: str):
+    async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list, *,
+                          service_number: str = None):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'ticket_statuses': ticket_statuses,
+                'ticket_topic': ticket_topic,
+                'product_category': 'SD-WAN',
+            },
+        }
+
+        if service_number:
+            request['body']['service_number'] = service_number
+
+        try:
+            if not service_number:
+                self._logger.info(
+                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'{ticket_topic} and belonging to client {client_id} from Bruin...'
+                )
+            else:
+                self._logger.info(
+                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin...'
+                )
+
+            response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
+                f'with ticket topic {ticket_topic} and belonging to client {client_id} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                if not service_number:
+                    self._logger.info(
+                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic} and belonging to client {client_id} from Bruin!'
+                    )
+                else:
+                    self._logger.info(
+                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic}, service number {service_number} and belonging to client '
+                        f'{client_id} from Bruin!'
+                    )
+            else:
+                if not service_number:
+                    err_msg = (
+                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic} and belonging to client {client_id} in '
+                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+                else:
+                    err_msg = (
+                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
+                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
+        ticket_topic = 'VAS'
+
+        return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
+
+    async def get_open_affecting_tickets(self, client_id: int, *, service_number: str = None):
+        ticket_statuses = ['New', 'InProgress', 'Draft']
+
+        return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
+
+    async def append_note_to_ticket(self, ticket_id: int, note: str, *, service_numbers: list = None):
         err_msg = None
 
         request = {
@@ -32,6 +116,9 @@ class BruinRepository:
                 'note': note,
             },
         }
+
+        if service_numbers:
+            request['body']['service_numbers'] = service_numbers
 
         try:
             self._logger.info(f'Appending note to ticket {ticket_id}... Note contents: {note}')
@@ -52,6 +139,47 @@ class BruinRepository:
                     f'Error while appending note to ticket {ticket_id} in '
                     f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
                     f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def unpause_ticket_detail(self, ticket_id: int, service_number: str):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "ticket_id": ticket_id,
+                "service_number": service_number,
+            },
+        }
+
+        try:
+            self._logger.info(f'Unpausing detail of ticket {ticket_id} related to serial number {service_number}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.unpause", request, timeout=30)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when unpausing detail of ticket {ticket_id} related to serial number '
+                f'{service_number}. Error: {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f'Detail of ticket {ticket_id} related to serial number {service_number}) was unpaused!'
+                )
+            else:
+                err_msg = (
+                    f'Error while unpausing detail of ticket {ticket_id} related to serial number {service_number}) in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. '
+                    f'Error: Error {response_status} - {response_body}'
                 )
 
         if err_msg:
@@ -215,6 +343,16 @@ class BruinRepository:
         return await self.change_detail_work_queue(
             ticket_id=ticket_id, task_result=task_result, service_number=service_number, detail_id=detail_id
         )
+
+    async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        autoresolve_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            f'Auto-resolving task for serial: {serial_number}',
+            f'TimeStamp: {current_datetime_tz_aware}',
+        ])
+
+        return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[serial_number])
 
     async def append_reopening_note_to_ticket(self, ticket_id: int, affecting_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))

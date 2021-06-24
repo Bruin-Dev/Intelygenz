@@ -1,12 +1,15 @@
 from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
+from unittest.mock import call
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from dateutil.parser import parse
+from pytz import utc
 from shortuuid import uuid
 
 from application.actions import service_affecting_monitor as service_affecting_monitor_module
@@ -126,6 +129,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
         service_affecting_monitor._bandwidth_check = CoroutineMock()
+        service_affecting_monitor._run_autoresolve_process = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -134,6 +138,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._packet_loss_check.assert_awaited_once()
         service_affecting_monitor._jitter_check.assert_awaited_once()
         service_affecting_monitor._bandwidth_check.assert_awaited_once()
+        service_affecting_monitor._run_autoresolve_process.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process_non_2xx_customer_cache_return_ko_test(self):
@@ -162,6 +167,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
         service_affecting_monitor._bandwidth_check = CoroutineMock()
+        service_affecting_monitor._run_autoresolve_process = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -170,6 +176,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._packet_loss_check.assert_not_awaited()
         service_affecting_monitor._jitter_check.assert_not_awaited()
         service_affecting_monitor._bandwidth_check.assert_not_awaited()
+        service_affecting_monitor._run_autoresolve_process.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process_empty_customer_cache_return_ko_test(self):
@@ -198,6 +205,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
         service_affecting_monitor._bandwidth_check = CoroutineMock()
+        service_affecting_monitor._run_autoresolve_process = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -206,6 +214,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._packet_loss_check.assert_not_awaited()
         service_affecting_monitor._jitter_check.assert_not_awaited()
         service_affecting_monitor._bandwidth_check.assert_not_awaited()
+        service_affecting_monitor._run_autoresolve_process.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def latency_check_with_no_troubles_test(self):
@@ -423,7 +432,7 @@ class TestServiceAffectingMonitor:
         }
 
         link_best_latency_ms_rx = 14
-        link_best_latency_ms_tx = 121
+        link_best_latency_ms_tx = 141
 
         link_1 = {
             'bestLatencyMsRx': link_best_latency_ms_rx,
@@ -524,7 +533,7 @@ class TestServiceAffectingMonitor:
             "edge_id": 1602
         }
 
-        link_best_latency_ms_rx = 121
+        link_best_latency_ms_rx = 141
         link_best_latency_ms_tx = 14
 
         link_1 = {
@@ -1197,7 +1206,7 @@ class TestServiceAffectingMonitor:
             "edge_id": 1602
         }
 
-        link_1_best_jitter_ms_rx = 32
+        link_1_best_jitter_ms_rx = 52
         link_1_best_jitter_ms_tx = 15
         link_2_best_jitter_ms_rx = 10
         link_2_best_jitter_ms_tx = 20
@@ -1759,8 +1768,8 @@ class TestServiceAffectingMonitor:
 
         link_1_bandwidth_bps_rx = 100
         link_1_bandwidth_bps_tx = 100
-        link_1_bytes_rx = 1200
-        link_1_bytes_tx = 9900
+        link_1_bytes_rx = 1500
+        link_1_bytes_tx = 21000
 
         link_1 = {
             'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
@@ -1859,7 +1868,7 @@ class TestServiceAffectingMonitor:
 
         link_1_bandwidth_bps_rx = 100
         link_1_bandwidth_bps_tx = 100
-        link_1_bytes_rx = 9900
+        link_1_bytes_rx = 21000
         link_1_bytes_tx = 1200
 
         link_1 = {
@@ -1959,8 +1968,8 @@ class TestServiceAffectingMonitor:
 
         link_1_bandwidth_bps_rx = 100
         link_1_bandwidth_bps_tx = 100
-        link_1_bytes_rx = 9900
-        link_1_bytes_tx = 9900
+        link_1_bytes_rx = 21000
+        link_1_bytes_tx = 21000
 
         link_1 = {
             'bpsOfBestPathTx': link_1_bandwidth_bps_tx,
@@ -2017,12 +2026,12 @@ class TestServiceAffectingMonitor:
             }]
 
         bandwidth_metrics = {
-            'rx_throughput': 88,
+            'rx_throughput': 93.33333333333333,
             'rx_bandwidth': link_1_bandwidth_bps_rx,
-            'rx_threshold': 80,
-            'tx_throughput': 88,
+            'rx_threshold': 90,
+            'tx_throughput': 93.33333333333333,
             'tx_bandwidth': link_1_bandwidth_bps_tx,
-            'tx_threshold': 80,
+            'tx_threshold': 90,
         }
 
         logger = Mock()
@@ -2060,6 +2069,3094 @@ class TestServiceAffectingMonitor:
             trouble='Bandwidth Over Utilization',
             ticket_dict=ticket_dict,
         )
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_process_ok_test(self):
+        host = 'mettel.velocloud.net'
+        enterprise_id = 2
+        edge_id = 4206
+        serial_number = 'VC05200048223'
+
+        contact_info = {
+            'ticket': {
+                'email': 'fake@mail.com',
+                'phone': '6666666666',
+                'name': 'Fake'
+            },
+            'site': {
+                'email': 'fake@mail.com',
+                'phone': '6666666666',
+                'name': 'Fake'
+            },
+        }
+
+        edge_status = {
+            'host': host,
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': edge_id,
+            'edgeSerialNumber': serial_number,
+            # Some fields omitted for simplicity
+        }
+        edge_cached_info = {
+            'edge': {
+                'host': host,
+                'enterprise_id': enterprise_id,
+                'edge_id': edge_id
+            },
+            'serial_number': serial_number,
+            'bruin_client_info': {
+                'client_id': 30000,
+                'client_name': 'MetTel',
+            },
+            # Some fields omitted for simplicity
+        }
+
+        link_1_status = {
+            'displayName': '70.59.5.185',
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            # Some fields omitted for simplicity
+        }
+        link_1_metrics = {
+            'bytesTx': 5694196,
+            'bytesRx': 9607567,
+            'bpsOfBestPathRx': 182296000,
+            'bpsOfBestPathTx': 43243000,
+            'bestJitterMsRx': 0,
+            'bestJitterMsTx': 0,
+            'bestLatencyMsRx': 3,
+            'bestLatencyMsTx': 6.4167,
+            'bestLossPctRx': 0,
+            'bestLossPctTx': 0,
+            # Some fields omitted for simplicity
+        }
+        link_1_metrics_object = {
+            **link_1_metrics,
+            'link': {
+                **edge_status,
+                **link_1_status,
+            },
+        }
+
+        link_2_status = {
+            'displayName': '70.59.5.186',
+            'interface': 'RAY',
+            'linkState': 'STABLE',
+            'linkId': 5294,
+            # Some fields omitted for simplicity
+        }
+        link_2_metrics = {
+            'bytesTx': 5694197,
+            'bytesRx': 9607568,
+            'bpsOfBestPathRx': 182296001,
+            'bpsOfBestPathTx': 43243001,
+            'bestJitterMsRx': 1,
+            'bestJitterMsTx': 1,
+            'bestLatencyMsRx': 4,
+            'bestLatencyMsTx': 6.4168,
+            'bestLossPctRx': 1,
+            'bestLossPctTx': 1,
+            # Some fields omitted for simplicity
+        }
+        link_2_metrics_object = {
+            **link_2_metrics,
+            'link': {
+                **edge_status,
+                **link_2_status,
+            },
+        }
+
+        links_metrics_objects = [
+            link_1_metrics_object,
+            link_2_metrics_object,
+        ]
+        links_metrics_response = {
+            'request_id': uuid_,
+            'body': links_metrics_objects,
+            'status': 200,
+        }
+
+        structured_link_1 = {
+            'edge_status': edge_status,
+            'link_status': link_1_status,
+            'link_metrics': link_1_metrics,
+        }
+        structured_link_2 = {
+            'edge_status': edge_status,
+            'link_status': link_2_status,
+            'link_metrics': link_2_metrics,
+        }
+        structured_links = [
+            structured_link_1,
+            structured_link_2,
+        ]
+
+        link_1_metrics_with_cache_and_contact_info = {
+            'cached_info': edge_cached_info,
+            'contact_info': contact_info,
+            **structured_link_1,
+        }
+        link_2_metrics_with_cache_and_contact_info = {
+            'cached_info': edge_cached_info,
+            'contact_info': contact_info,
+            **structured_link_2,
+        }
+        links_metrics_with_cache_and_contact_info = [
+            link_1_metrics_with_cache_and_contact_info,
+            link_2_metrics_with_cache_and_contact_info,
+        ]
+
+        edge_with_links_info = {
+            'cached_info': edge_cached_info,
+            'contact_info': contact_info,
+            'edge_status': edge_status,
+            'links': [
+                {
+                    'link_status': link_1_status,
+                    'link_metrics': link_1_metrics,
+                },
+                {
+                    'link_status': link_2_status,
+                    'link_metrics': link_2_metrics,
+                },
+            ]
+        }
+        edges_with_links_info = [
+            edge_with_links_info,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_autoresolve = CoroutineMock(return_value=links_metrics_response)
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._structure_links_metrics = Mock(return_value=structured_links)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock(
+            return_value=links_metrics_with_cache_and_contact_info
+        )
+        service_affecting_monitor._group_links_by_edge = Mock(return_value=edges_with_links_info)
+        service_affecting_monitor._run_autoresolve_for_edge = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_process()
+
+        velocloud_repository.get_links_metrics_for_autoresolve.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metrics_objects)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
+            structured_links
+        )
+        service_affecting_monitor._group_links_by_edge.assert_called_once_with(
+            links_metrics_with_cache_and_contact_info
+        )
+        service_affecting_monitor._run_autoresolve_for_edge.assert_has_awaits([
+            call(edge_with_links_info),
+        ])
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_process_with_no_links_metrics_test(self):
+        links_metrics_response = {
+            'request_id': uuid_,
+            'body': [],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_metrics_for_autoresolve = CoroutineMock(return_value=links_metrics_response)
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._structure_links_metrics = Mock()
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info = Mock()
+        service_affecting_monitor._group_links_by_edge = Mock()
+        service_affecting_monitor._run_autoresolve_for_edge = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_process()
+
+        velocloud_repository.get_links_metrics_for_autoresolve.assert_awaited_once()
+        service_affecting_monitor._structure_links_metrics.assert_not_called()
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
+        service_affecting_monitor._group_links_by_edge.assert_not_called()
+        service_affecting_monitor._run_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_metrics_above_thresholds_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500000,
+                        'bytesRx': 500000,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600000,
+                        'bytesRx': 600000,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=False)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock()
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_not_awaited()
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_not_called()
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_not_called()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_not_called()
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_get_affecting_tickets_rpc_having_non_2xx_status_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_tickets_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock()
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_not_called()
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_not_called()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_not_called()
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_empty_list_of_affecting_tickets_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_tickets_response = {
+            'body': [],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock()
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_not_called()
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_not_called()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_not_called()
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_affecting_tickets_not_created_by_automation_engine_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Gray Fox",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": 67890,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 8:31:54 AM",
+            "createdBy": "Raiden",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock()
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_not_called()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_not_called()
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_get_ticket_details_rpc_having_non_2xx_status_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 8:31:54 AM",
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        ticket_details_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock()
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_not_called()
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_not_called()
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_last_affecting_trouble_detected_long_time_ago_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1_creation_date = '9/25/2020 6:31:54 AM'
+        affecting_ticket_2_creation_date = '9/25/2020 8:31:54 AM'
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_2_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        affecting_ticket_1_detail = {
+            "detailID": 5217537,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_1_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Latency\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_1_details_object = {
+            'ticketDetails': [
+                affecting_ticket_1_detail,
+            ],
+            'ticketNotes': affecting_ticket_1_notes,
+        }
+
+        affecting_ticket_2_detail = {
+            "detailID": 5217666,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_2_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Packet Loss\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_2_details_object = {
+            'ticketDetails': [
+                affecting_ticket_2_detail,
+            ],
+            'ticketNotes': affecting_ticket_2_notes,
+        }
+
+        ticket_details_response_1 = {
+            'body': affecting_ticket_1_details_object,
+            'status': 200,
+        }
+        ticket_details_response_2 = {
+            'body': affecting_ticket_2_details_object,
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+            ticket_details_response_1,
+            ticket_details_response_2,
+        ])
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock(return_value=False)
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock()
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_has_calls([
+            call(affecting_ticket_1_notes, affecting_ticket_1_creation_date),
+            call(affecting_ticket_2_notes, affecting_ticket_2_creation_date),
+        ])
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_not_called()
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_affecting_ticket_not_being_autoresolvable_anymore_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1_creation_date = '9/25/2020 6:31:54 AM'
+        affecting_ticket_2_creation_date = '9/25/2020 8:31:54 AM'
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_2_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        affecting_ticket_1_detail = {
+            "detailID": 5217537,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_1_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Latency\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_1_details_object = {
+            'ticketDetails': [
+                affecting_ticket_1_detail,
+            ],
+            'ticketNotes': affecting_ticket_1_notes,
+        }
+
+        affecting_ticket_2_detail = {
+            "detailID": 5217666,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_2_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Packet Loss\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_2_details_object = {
+            'ticketDetails': [
+                affecting_ticket_2_detail,
+            ],
+            'ticketNotes': affecting_ticket_2_notes,
+        }
+
+        ticket_details_response_1 = {
+            'body': affecting_ticket_1_details_object,
+            'status': 200,
+        }
+        ticket_details_response_2 = {
+            'body': affecting_ticket_2_details_object,
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+            ticket_details_response_1,
+            ticket_details_response_2,
+        ])
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock(return_value=True)
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock(return_value=False)
+        service_affecting_monitor._is_ticket_resolved = Mock()
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_has_calls([
+            call(affecting_ticket_1_notes, affecting_ticket_1_creation_date),
+            call(affecting_ticket_2_notes, affecting_ticket_2_creation_date),
+        ])
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_has_calls([
+            call(affecting_ticket_1_notes),
+            call(affecting_ticket_2_notes),
+        ])
+        service_affecting_monitor._is_ticket_resolved.assert_not_called()
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_affecting_ticket_details_being_resolved_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1_creation_date = '9/25/2020 6:31:54 AM'
+        affecting_ticket_2_creation_date = '9/25/2020 8:31:54 AM'
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_2_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        affecting_ticket_1_detail = {
+            "detailID": 5217537,
+            "detailValue": serial_number,
+            "detailStatus": "R",
+        }
+        affecting_ticket_1_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Latency\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_1_details_object = {
+            'ticketDetails': [
+                affecting_ticket_1_detail,
+            ],
+            'ticketNotes': affecting_ticket_1_notes,
+        }
+
+        affecting_ticket_2_detail = {
+            "detailID": 5217666,
+            "detailValue": serial_number,
+            "detailStatus": "R",
+        }
+        affecting_ticket_2_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Packet Loss\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_2_details_object = {
+            'ticketDetails': [
+                affecting_ticket_2_detail,
+            ],
+            'ticketNotes': affecting_ticket_2_notes,
+        }
+
+        ticket_details_response_1 = {
+            'body': affecting_ticket_1_details_object,
+            'status': 200,
+        }
+        ticket_details_response_2 = {
+            'body': affecting_ticket_2_details_object,
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+            ticket_details_response_1,
+            ticket_details_response_2,
+        ])
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock(return_value=True)
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock(return_value=True)
+        service_affecting_monitor._is_ticket_resolved = Mock(return_value=True)
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_has_calls([
+            call(affecting_ticket_1_notes, affecting_ticket_1_creation_date),
+            call(affecting_ticket_2_notes, affecting_ticket_2_creation_date),
+        ])
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_has_calls([
+            call(affecting_ticket_1_notes),
+            call(affecting_ticket_2_notes),
+        ])
+        service_affecting_monitor._is_ticket_resolved.assert_has_calls([
+            call(affecting_ticket_1_detail),
+            call(affecting_ticket_2_detail),
+        ])
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_environment_other_than_production_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1_creation_date = '9/25/2020 6:31:54 AM'
+        affecting_ticket_2_creation_date = '9/25/2020 8:31:54 AM'
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_2_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        affecting_ticket_1_detail = {
+            "detailID": 5217537,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_1_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Latency\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_1_details_object = {
+            'ticketDetails': [
+                affecting_ticket_1_detail,
+            ],
+            'ticketNotes': affecting_ticket_1_notes,
+        }
+
+        affecting_ticket_2_detail = {
+            "detailID": 5217666,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_2_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Packet Loss\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_2_details_object = {
+            'ticketDetails': [
+                affecting_ticket_2_detail,
+            ],
+            'ticketNotes': affecting_ticket_2_notes,
+        }
+
+        ticket_details_response_1 = {
+            'body': affecting_ticket_1_details_object,
+            'status': 200,
+        }
+        ticket_details_response_2 = {
+            'body': affecting_ticket_2_details_object,
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+            ticket_details_response_1,
+            ticket_details_response_2,
+        ])
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock(return_value=True)
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock(return_value=True)
+        service_affecting_monitor._is_ticket_resolved = Mock(return_value=False)
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'dev'
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_has_calls([
+            call(affecting_ticket_1_notes, affecting_ticket_1_creation_date),
+            call(affecting_ticket_2_notes, affecting_ticket_2_creation_date),
+        ])
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_has_calls([
+            call(affecting_ticket_1_notes),
+            call(affecting_ticket_2_notes),
+        ])
+        service_affecting_monitor._is_ticket_resolved.assert_has_calls([
+            call(affecting_ticket_1_detail),
+            call(affecting_ticket_2_detail),
+        ])
+        bruin_repository.unpause_ticket_detail.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_with_unsuccessful_ticket_resolution_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1_creation_date = '9/25/2020 6:31:54 AM'
+        affecting_ticket_2_creation_date = '9/25/2020 8:31:54 AM'
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_2_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        affecting_ticket_1_detail_id = 5217537
+        affecting_ticket_1_detail = {
+            "detailID": affecting_ticket_1_detail_id,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_1_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Latency\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_1_details_object = {
+            'ticketDetails': [
+                affecting_ticket_1_detail,
+            ],
+            'ticketNotes': affecting_ticket_1_notes,
+        }
+
+        affecting_ticket_2_detail_id = 5217666
+        affecting_ticket_2_detail = {
+            "detailID": affecting_ticket_2_detail_id,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_2_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Packet Loss\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_2_details_object = {
+            'ticketDetails': [
+                affecting_ticket_2_detail,
+            ],
+            'ticketNotes': affecting_ticket_2_notes,
+        }
+
+        ticket_details_response_1 = {
+            'body': affecting_ticket_1_details_object,
+            'status': 200,
+        }
+        ticket_details_response_2 = {
+            'body': affecting_ticket_2_details_object,
+            'status': 200,
+        }
+
+        resolve_ticket_detail_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+            ticket_details_response_1,
+            ticket_details_response_2,
+        ])
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_detail_response)
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock(return_value=True)
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock(return_value=True)
+        service_affecting_monitor._is_ticket_resolved = Mock(return_value=False)
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'production'
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_has_calls([
+            call(affecting_ticket_1_notes, affecting_ticket_1_creation_date),
+            call(affecting_ticket_2_notes, affecting_ticket_2_creation_date),
+        ])
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_has_calls([
+            call(affecting_ticket_1_notes),
+            call(affecting_ticket_2_notes),
+        ])
+        service_affecting_monitor._is_ticket_resolved.assert_has_calls([
+            call(affecting_ticket_1_detail),
+            call(affecting_ticket_2_detail),
+        ])
+        bruin_repository.unpause_ticket_detail.assert_has_awaits([
+            call(affecting_ticket_1_id, serial_number),
+            call(affecting_ticket_2_id, serial_number),
+        ])
+        bruin_repository.resolve_ticket.assert_has_awaits([
+            call(affecting_ticket_1_id, affecting_ticket_1_detail_id),
+            call(affecting_ticket_2_id, affecting_ticket_2_detail_id),
+        ])
+        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge_ok_test(self):
+        serial_number = 'VC1234567'
+        client_id = 30000
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': serial_number,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        affecting_ticket_1_id = 12345
+        affecting_ticket_2_id = 67890
+
+        affecting_ticket_1_creation_date = '9/25/2020 6:31:54 AM'
+        affecting_ticket_2_creation_date = '9/25/2020 8:31:54 AM'
+
+        affecting_ticket_1 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_ticket_2 = {
+            "clientID": client_id,
+            "clientName": "Aperture Science",
+            "ticketID": affecting_ticket_2_id,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": affecting_ticket_2_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        affecting_tickets_response = {
+            'body': [
+                affecting_ticket_1,
+                affecting_ticket_2,
+            ],
+            'status': 200,
+        }
+
+        affecting_ticket_1_detail_id = 5217537
+        affecting_ticket_1_detail = {
+            "detailID": affecting_ticket_1_detail_id,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_1_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Latency\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_1_details_object = {
+            'ticketDetails': [
+                affecting_ticket_1_detail,
+            ],
+            'ticketNotes': affecting_ticket_1_notes,
+        }
+
+        affecting_ticket_2_detail_id = 5217666
+        affecting_ticket_2_detail = {
+            "detailID": affecting_ticket_2_detail_id,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        affecting_ticket_2_notes = [
+            {
+                "noteValue": (
+                    "#*MetTel's IPA*#\n"
+                    "Trouble: Packet Loss\n"
+                    "TimeStamp: 2019-09-10 10:34:00-04:00"
+                ),
+                'createdDate': '2019-09-10 10:34:00-04:00',
+                'serviceNumber': [
+                    serial_number,
+                ],
+            }
+        ]
+        affecting_ticket_2_details_object = {
+            'ticketDetails': [
+                affecting_ticket_2_detail,
+            ],
+            'ticketNotes': affecting_ticket_2_notes,
+        }
+
+        ticket_details_response_1 = {
+            'body': affecting_ticket_1_details_object,
+            'status': 200,
+        }
+        ticket_details_response_2 = {
+            'body': affecting_ticket_2_details_object,
+            'status': 200,
+        }
+
+        resolve_ticket_detail_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_affecting_tickets = CoroutineMock(return_value=affecting_tickets_response)
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
+            ticket_details_response_1,
+            ticket_details_response_2,
+        ])
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_detail_response)
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+        service_affecting_monitor._are_all_metrics_within_thresholds = Mock(return_value=True)
+        service_affecting_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently = Mock(return_value=True)
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable = Mock(return_value=True)
+        service_affecting_monitor._is_ticket_resolved = Mock(return_value=False)
+        service_affecting_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'production'
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._run_autoresolve_for_edge(edge)
+
+        service_affecting_monitor._are_all_metrics_within_thresholds.assert_called_once_with(edge)
+        bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        service_affecting_monitor._was_ticket_created_by_automation_engine.assert_has_calls([
+            call(affecting_ticket_1),
+            call(affecting_ticket_2),
+        ])
+        bruin_repository.get_ticket_details.assert_has_awaits([
+            call(affecting_ticket_1_id),
+            call(affecting_ticket_2_id),
+        ])
+        service_affecting_monitor._was_last_affecting_trouble_detected_recently.assert_has_calls([
+            call(affecting_ticket_1_notes, affecting_ticket_1_creation_date),
+            call(affecting_ticket_2_notes, affecting_ticket_2_creation_date),
+        ])
+        service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable.assert_has_calls([
+            call(affecting_ticket_1_notes),
+            call(affecting_ticket_2_notes),
+        ])
+        service_affecting_monitor._is_ticket_resolved.assert_has_calls([
+            call(affecting_ticket_1_detail),
+            call(affecting_ticket_2_detail),
+        ])
+        bruin_repository.unpause_ticket_detail.assert_has_awaits([
+            call(affecting_ticket_1_id, serial_number),
+            call(affecting_ticket_2_id, serial_number),
+        ])
+        bruin_repository.resolve_ticket.assert_has_awaits([
+            call(affecting_ticket_1_id, affecting_ticket_1_detail_id),
+            call(affecting_ticket_2_id, affecting_ticket_2_detail_id),
+        ])
+        bruin_repository.append_autoresolve_note_to_ticket.assert_has_awaits([
+            call(affecting_ticket_1_id, serial_number),
+            call(affecting_ticket_2_id, serial_number),
+        ])
+        service_affecting_monitor._notify_successful_autoresolve.assert_has_awaits([
+            call(affecting_ticket_1_id, serial_number),
+            call(affecting_ticket_2_id, serial_number),
+        ])
+
+    def group_links_by_edge_test(self):
+        contact_info = {
+            'ticket': {
+                'email': 'fake@mail.com',
+                'phone': '6666666666',
+                'name': 'Fake'
+            },
+            'site': {
+                'email': 'fake@mail.com',
+                'phone': '6666666666',
+                'name': 'Fake'
+            },
+        }
+
+        edge_1_status = {
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC1234567',
+            # Some fields omitted for simplicity
+        }
+        edge_2_status = {
+            'host': 'metvco02.mettel.net',
+            'enterpriseName': 'Diamond Dogs',
+            'enterpriseId': 1,
+            'edgeName': 'Naked Snake',
+            'edgeState': 'CONNECTED',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': 'VC7654321',
+            # Some fields omitted for simplicity
+        }
+
+        edge_1_cached_info = {
+            'edge': {
+                'host': 'mettel.velocloud.net',
+                'enterprise_id': 1,
+                'edge_id': 1,
+            },
+            'serial_number': 'VC1234567',
+            'bruin_client_info': {
+                'client_id': 30000,
+                'client_name': 'MetTel',
+            },
+            # Some fields omitted for simplicity
+        }
+        edge_2_cached_info = {
+            'edge': {
+                'host': 'metvco02.mettel.net',
+                'enterprise_id': 1,
+                'edge_id': 1,
+            },
+            'serial_number': 'VC7654321',
+            'bruin_client_info': {
+                'client_id': 30000,
+                'client_name': 'MetTel',
+            },
+            # Some fields omitted for simplicity
+        }
+
+        link_1_status = {
+            'displayName': '70.59.5.185',
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            # Some fields omitted for simplicity
+        }
+        link_1_metrics = {
+            'bytesTx': 5694196,
+            'bytesRx': 9607567,
+            'bpsOfBestPathRx': 182296000,
+            'bpsOfBestPathTx': 43243000,
+            'bestJitterMsRx': 0,
+            'bestJitterMsTx': 0,
+            'bestLatencyMsRx': 3,
+            'bestLatencyMsTx': 6.4167,
+            'bestLossPctRx': 0,
+            'bestLossPctTx': 0,
+            # Some fields omitted for simplicity
+        }
+
+        link_2_status = {
+            'displayName': '70.59.5.186',
+            'interface': 'RAY',
+            'linkState': 'STABLE',
+            'linkId': 5294,
+            # Some fields omitted for simplicity
+        }
+        link_2_metrics = {
+            'bytesTx': 5694197,
+            'bytesRx': 9607568,
+            'bpsOfBestPathRx': 182296001,
+            'bpsOfBestPathTx': 43243001,
+            'bestJitterMsRx': 1,
+            'bestJitterMsTx': 1,
+            'bestLatencyMsRx': 4,
+            'bestLatencyMsTx': 6.4168,
+            'bestLossPctRx': 1,
+            'bestLossPctTx': 1,
+            # Some fields omitted for simplicity
+        }
+
+        link_3_status = {
+            'displayName': '70.59.5.187',
+            'interface': 'ZEKE',
+            'linkState': 'STABLE',
+            'linkId': 5295,
+            # Some fields omitted for simplicity
+        }
+        link_3_metrics = {
+            'bytesTx': 5694198,
+            'bytesRx': 9607569,
+            'bpsOfBestPathRx': 182296002,
+            'bpsOfBestPathTx': 43243002,
+            'bestJitterMsRx': 2,
+            'bestJitterMsTx': 2,
+            'bestLatencyMsRx': 5,
+            'bestLatencyMsTx': 6.4169,
+            'bestLossPctRx': 2,
+            'bestLossPctTx': 2,
+            # Some fields omitted for simplicity
+        }
+
+        link_1_metrics_with_cache_and_contact_info = {
+            'cached_info': edge_1_cached_info,
+            'contact_info': contact_info,
+            'edge_status': edge_1_status,
+            'link_status': link_1_status,
+            'link_metrics': link_1_metrics,
+        }
+        link_2_metrics_with_cache_and_contact_info = {
+            'cached_info': edge_1_cached_info,
+            'contact_info': contact_info,
+            'edge_status': edge_1_status,
+            'link_status': link_2_status,
+            'link_metrics': link_2_metrics,
+        }
+        link_3_metrics_with_cache_and_contact_info = {
+            'cached_info': edge_2_cached_info,
+            'contact_info': contact_info,
+            'edge_status': edge_2_status,
+            'link_status': link_3_status,
+            'link_metrics': link_3_metrics,
+        }
+        links_metrics_with_cache_and_contact_info = [
+            link_1_metrics_with_cache_and_contact_info,
+            link_2_metrics_with_cache_and_contact_info,
+            link_3_metrics_with_cache_and_contact_info,
+        ]
+
+        edge_1_with_links_info = {
+            'cached_info': edge_1_cached_info,
+            'contact_info': contact_info,
+            'edge_status': edge_1_status,
+            'links': [
+                {
+                    'link_status': link_1_status,
+                    'link_metrics': link_1_metrics,
+                },
+                {
+                    'link_status': link_2_status,
+                    'link_metrics': link_2_metrics,
+                },
+            ]
+        }
+        edge_2_with_links_info = {
+            'cached_info': edge_2_cached_info,
+            'contact_info': contact_info,
+            'edge_status': edge_2_status,
+            'links': [
+                {
+                    'link_status': link_3_status,
+                    'link_metrics': link_3_metrics,
+                },
+            ]
+        }
+        edges_with_links_info = [
+            edge_1_with_links_info,
+            edge_2_with_links_info,
+        ]
+
+        result = ServiceAffectingMonitor._group_links_by_edge(links_metrics_with_cache_and_contact_info)
+        assert result == edges_with_links_info
+
+    def are_all_metrics_within_thresholds_with_all_metrics_ok_and_client_being_RSI_test(self):
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': 'VC1234567',
+                'bruin_client_info': {
+                    'client_id': 83109,
+                    'client_name': 'RSI',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._are_all_metrics_within_thresholds(edge)
+        assert result is True
+
+    def are_all_metrics_within_thresholds_with_some_metrics_above_threshold_and_client_being_RSI_test(self):
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': 'VC1234567',
+                'bruin_client_info': {
+                    'client_id': 83109,
+                    'client_name': 'RSI',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 200,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 200,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 20,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 205,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 205,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 25,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._are_all_metrics_within_thresholds(edge)
+        assert result is False
+
+    def are_all_metrics_within_thresholds_with_all_metrics_ok_and_client_not_being_RSI_test(self):
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': 'VC1234567',
+                'bruin_client_info': {
+                    'client_id': 30000,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._are_all_metrics_within_thresholds(edge)
+        assert result is True
+
+    def are_all_metrics_within_thresholds_with_some_metrics_above_threshold_and_client_not_being_RSI_test(self):
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': 'VC1234567',
+                'bruin_client_info': {
+                    'client_id': 30000,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500,
+                        'bytesRx': 500,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 200,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 200,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 20,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600,
+                        'bytesRx': 600,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 205,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 205,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 25,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._are_all_metrics_within_thresholds(edge)
+        assert result is False
+
+    def are_all_metrics_within_thresholds_with_only_bandwidth_metrics_above_threshold_and_client_not_being_RSI_test(
+            self):
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1,
+                },
+                'serial_number': 'VC1234567',
+                'bruin_client_info': {
+                    'client_id': 30000,
+                    'client_name': 'MetTel',
+                },
+                # Some fields omitted for simplicity
+            },
+            'links': [
+                {
+                    'link_metrics': {
+                        'bytesTx': 500000,
+                        'bytesRx': 500000,
+                        'bpsOfBestPathRx': 100,
+                        'bpsOfBestPathTx': 100,
+                        'bestJitterMsRx': 30,
+                        'bestJitterMsTx': 30,
+                        'bestLatencyMsRx': 100,
+                        'bestLatencyMsTx': 100,
+                        'bestLossPctRx': 5,
+                        'bestLossPctTx': 5,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+                {
+                    'link_metrics': {
+                        'bytesTx': 600000,
+                        'bytesRx': 600000,
+                        'bpsOfBestPathRx': 150,
+                        'bpsOfBestPathTx': 150,
+                        'bestJitterMsRx': 35,
+                        'bestJitterMsTx': 35,
+                        'bestLatencyMsRx': 105,
+                        'bestLatencyMsTx': 105,
+                        'bestLossPctRx': 2,
+                        'bestLossPctTx': 2,
+                        # Some fields omitted for simplicity
+                    },
+                    # Some fields omitted for simplicity
+                },
+            ]
+            # Some fields omitted for simplicity
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._are_all_metrics_within_thresholds(edge)
+        assert result is True
+
+    def was_ticket_created_by_automation_engine_test(self):
+        ticket = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "Intelygenz Ai",
+        }
+        result = ServiceAffectingMonitor._was_ticket_created_by_automation_engine(ticket)
+        assert result is True
+
+        ticket = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": 12345,
+            "category": "SD-WAN",
+            "topic": "Service Affecting Trouble",
+            "ticketStatus": "New",
+            "createDate": "9/25/2020 6:31:54 AM",
+            "createdBy": "InterMapper Service",
+        }
+        result = ServiceAffectingMonitor._was_ticket_created_by_automation_engine(ticket)
+        assert result is False
+
+    def is_affecting_ticket_detail_auto_resolvable_test(self):
+        serial_number = 'VC1234567'
+
+        text_identifier = (
+            "#*MetTel's IPA*#\n"
+            f"Auto-resolving task for serial {serial_number}\n"
+        )
+
+        autoresolve_note_text = f"{text_identifier}TimeStamp: 2021-01-02 10:18:16-05:00"
+
+        non_autoresolve_note_text = (
+            "#*MetTel's IPA*#\n"
+            "Just another kind of note\n"
+        )
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        ticket_notes = [
+            {
+                "noteId": 41894040,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894043,
+                "noteValue": non_autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+        ]
+        result = service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable(ticket_notes)
+        assert result is True
+
+        ticket_notes = [
+            {
+                "noteId": 41894040,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894041,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": non_autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+        ]
+        result = service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable(ticket_notes)
+        assert result is True
+
+        ticket_notes = [
+            {
+                "noteId": 41894040,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894041,
+                "noteValue": non_autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894043,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            }
+        ]
+        result = service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable(ticket_notes)
+        assert result is False
+
+        ticket_notes = [
+            {
+                "noteId": 41894040,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            },
+            {
+                "noteId": 41894043,
+                "noteValue": autoresolve_note_text,
+                "serviceNumber": [
+                    serial_number,
+                ],
+            }
+        ]
+        result = service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable(ticket_notes)
+        assert result is False
+
+    def was_last_affecting_trouble_detected_recently_with_none_of_reopen_note_and_initial_affecting_note_found_test(
+            self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        ticket_notes = []
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, minutes=14, seconds=59)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is True
+
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, minutes=15)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is True
+
+        new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, minutes=15, seconds=1)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is False
+
+    def was_last_affecting_trouble_detected_recently_with_reopen_note_found_test(self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        initial_affecting_note_timestamp = '2021-01-02T10:18:16.71-05:00'
+        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nEdge Name: Big Boss\nTrouble: Jitter\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": initial_affecting_note_timestamp,
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*MetTel's IPA*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": reopen_timestamp,
+        }
+
+        ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        datetime_mock = Mock()
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1, minutes=14, seconds=59)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is True
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1, minutes=15)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is True
+
+        new_now = parse(reopen_timestamp) + timedelta(hours=1, minutes=15, seconds=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is False
+
+    def was_last_affecting_trouble_detected_recently_with_reopen_note_not_found_and_initial_affecting_note_found_test(
+            self):
+        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        initial_affecting_note_timestamp = '2021-01-02T10:18:16.71-05:00'
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nEdge Name: Big Boss\nTrouble: Jitter\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": initial_affecting_note_timestamp,
+        }
+
+        ticket_notes = [
+            ticket_note_1,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        datetime_mock = Mock()
+
+        new_now = parse(initial_affecting_note_timestamp) + timedelta(hours=1, minutes=14, seconds=59)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is True
+
+        new_now = parse(initial_affecting_note_timestamp) + timedelta(hours=1, minutes=15)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is True
+
+        new_now = parse(initial_affecting_note_timestamp) + timedelta(hours=1, minutes=15, seconds=1)
+        datetime_mock.now = Mock(return_value=new_now)
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
+                ticket_notes, ticket_creation_date
+            )
+            assert result is False
+
+    def get_first_element_matching_with_match_test(self):
+        payload = range(0, 11)
+
+        def is_divisible_by_5(num):
+            return num % 5 == 0
+
+        def is_not_zero(num):
+            return num != 0
+
+        def cond(num):
+            return is_divisible_by_5(num) and is_not_zero(num)
+
+        result = ServiceAffectingMonitor._get_first_element_matching(iterable=payload, condition=cond)
+        expected = 5
+
+        assert result == expected
+
+    def get_first_element_matching_with_no_match_test(self):
+        payload = [0] * 10
+        fallback_value = 42
+
+        def is_divisible_by_5(num):
+            return num % 5 == 0
+
+        def is_not_zero(num):
+            return num != 0
+
+        def cond(num):
+            return is_divisible_by_5(num) and is_not_zero(num)
+
+        result = ServiceAffectingMonitor._get_first_element_matching(
+            iterable=payload, condition=cond, fallback=fallback_value
+        )
+
+        assert result == fallback_value
+
+    def get_last_element_matching_with_match_test(self):
+        payload = range(0, 11)
+
+        def is_divisible_by_5(num):
+            return num % 5 == 0
+
+        def is_not_zero(num):
+            return num != 0
+
+        def cond(num):
+            return is_divisible_by_5(num) and is_not_zero(num)
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._get_last_element_matching(iterable=payload, condition=cond)
+        expected = 10
+
+        assert result == expected
+
+    def get_last_element_matching_with_no_match_test(self):
+        payload = [0] * 10
+        fallback_value = 42
+
+        def is_divisible_by_5(num):
+            return num % 5 == 0
+
+        def is_not_zero(num):
+            return num != 0
+
+        def cond(num):
+            return is_divisible_by_5(num) and is_not_zero(num)
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        result = service_affecting_monitor._get_last_element_matching(
+            iterable=payload, condition=cond, fallback=fallback_value
+        )
+
+        assert result == fallback_value
+
+    @pytest.mark.asyncio
+    async def notify_successful_autoresolve_test(self):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository, velocloud_repository,
+                                                            customer_cache_repository, notifications_repository)
+
+        await service_affecting_monitor._notify_successful_autoresolve(ticket_id, serial_number)
+
+        autoresolve_slack_message = (
+            f'Task related to serial number {serial_number} in Service Affecting ticket {ticket_id} was autoresolved. '
+            f'Details at https://app.bruin.com/t/{ticket_id}'
+        )
+        notifications_repository.send_slack_message.assert_awaited_once_with(autoresolve_slack_message)
 
     @pytest.mark.asyncio
     async def notify_trouble_with_ticket_already_existing_test(self):
@@ -2926,7 +6023,7 @@ class TestServiceAffectingMonitor:
         ticket_dict = {'ticket': 'some ticket details'}
 
         config = testconfig
-        config.MONITOR_CONFIG['environment'] = None
+        config.MONITOR_CONFIG['environment'] = 'some-unknown-config'
         bruin_repository = Mock()
         velocloud_repository = Mock()
         customer_cache_repository = Mock()

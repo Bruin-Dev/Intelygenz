@@ -1,17 +1,29 @@
+import asyncio
 import re
 import time
 
 from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
+from typing import Callable
+from typing import List
 
 from apscheduler.util import undefined
+from dateutil.parser import parse
 from pytz import timezone
+from pytz import utc
 
 from igz.packages.eventbus.eventbus import EventBus
 
 from application.repositories import EdgeIdentifier
 from application.repositories.bruin_repository import BruinRepository
+
+
+INITIAL_AFFECTING_NOTE_REGEX = re.compile(
+    r"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Trouble:",
+    re.DOTALL | re.MULTILINE
+)
+REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
 
 class ServiceAffectingMonitor:
@@ -28,6 +40,8 @@ class ServiceAffectingMonitor:
         self._velocloud_repository = velocloud_repository
         self._customer_cache_repository = customer_cache_repository
         self._notifications_repository = notifications_repository
+
+        self.__autoresolve_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['autoresolve']['semaphore'])
 
         self.__reset_state()
 
@@ -70,6 +84,8 @@ class ServiceAffectingMonitor:
         await self._packet_loss_check()
         await self._jitter_check()
         await self._bandwidth_check()
+
+        await self._run_autoresolve_process()
 
         self._logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
 
@@ -201,6 +217,265 @@ class ServiceAffectingMonitor:
                 })
 
         return result
+
+    async def _run_autoresolve_process(self):
+        self._logger.info('Starting auto-resolve process...')
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_autoresolve()
+        links_metrics: list = links_metrics_response['body']
+
+        if not links_metrics:
+            self._logger.info("List of links metrics arrived empty while running auto-resolve process. Skipping...")
+            return
+
+        links_metrics = self._structure_links_metrics(links_metrics)
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        edges_with_links_info = self._group_links_by_edge(metrics_with_cache_and_contact_info)
+
+        self._logger.info(f'Running auto-resolve for {len(edges_with_links_info)} edges')
+        autoresolve_tasks = [self._run_autoresolve_for_edge(edge) for edge in edges_with_links_info]
+        await asyncio.gather(*autoresolve_tasks)
+
+        self._logger.info('Auto-resolve process finished!')
+
+    async def _run_autoresolve_for_edge(self, edge: dict):
+        async with self.__autoresolve_semaphore:
+            serial_number = edge['cached_info']['serial_number']
+
+            self._logger.info(f'Starting autoresolve for edge {serial_number}...')
+
+            if not self._are_all_metrics_within_thresholds(edge):
+                self._logger.info(
+                    f'At least one metric of edge {serial_number} is not within the threshold. Skipping autoresolve...'
+                )
+                return
+
+            client_id = edge['cached_info']['bruin_client_info']['client_id']
+            affecting_ticket_response = await self._bruin_repository.get_open_affecting_tickets(
+                client_id, service_number=serial_number
+            )
+            affecting_ticket_response_status = affecting_ticket_response['status']
+            if affecting_ticket_response_status not in range(200, 300):
+                return
+
+            affecting_tickets: list = affecting_ticket_response['body']
+            if not affecting_tickets:
+                self._logger.info(
+                    f'No affecting ticket found for edge with serial number {serial_number}. Skipping autoresolve...'
+                )
+                return
+
+            for affecting_ticket in affecting_tickets:
+                affecting_ticket_id = affecting_ticket['ticketID']
+                affecting_ticket_creation_date = affecting_ticket['createDate']
+
+                if not self._was_ticket_created_by_automation_engine(affecting_ticket):
+                    self._logger.info(
+                        f'Ticket {affecting_ticket_id} was not created by Automation Engine. Skipping autoresolve...'
+                    )
+                    continue
+
+                ticket_details_response = await self._bruin_repository.get_ticket_details(affecting_ticket_id)
+                ticket_details_response_body = ticket_details_response['body']
+                ticket_details_response_status = ticket_details_response['status']
+                if ticket_details_response_status not in range(200, 300):
+                    continue
+
+                details_from_ticket = ticket_details_response_body['ticketDetails']
+                detail_for_ticket_resolution = self._get_first_element_matching(
+                    details_from_ticket,
+                    lambda detail: detail['detailValue'] == serial_number,
+                )
+                ticket_detail_id = detail_for_ticket_resolution['detailID']
+
+                notes_from_affecting_ticket = ticket_details_response_body['ticketNotes']
+                relevant_notes = [
+                    note
+                    for note in notes_from_affecting_ticket
+                    if serial_number in note['serviceNumber']
+                    if note['noteValue'] is not None
+                ]
+                if not self._was_last_affecting_trouble_detected_recently(relevant_notes,
+                                                                          affecting_ticket_creation_date):
+                    self._logger.info(
+                        f'Edge with serial number {serial_number} has been under an affecting trouble for a long time, '
+                        f'so the detail of ticket {affecting_ticket_id} related to it will not be autoresolved. '
+                        'Skipping autoresolve...'
+                    )
+                    continue
+
+                can_detail_be_autoresolved_one_more_time = self._is_affecting_ticket_detail_auto_resolvable(
+                    relevant_notes
+                )
+                if not can_detail_be_autoresolved_one_more_time:
+                    self._logger.info(
+                        f'Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial '
+                        f'{serial_number}) has been maxed out already. Skipping autoresolve...'
+                    )
+                    continue
+
+                if self._is_ticket_resolved(detail_for_ticket_resolution):
+                    self._logger.info(
+                        f'Detail of ticket {affecting_ticket_id} related to serial {serial_number} is already '
+                        'resolved. Skipping autoresolve...'
+                    )
+                    continue
+
+                working_environment = self._config.MONITOR_CONFIG['environment']
+                if working_environment != 'production':
+                    self._logger.info(
+                        f'Skipping autoresolve for detail of ticket {affecting_ticket_id} related to serial number '
+                        f'{serial_number} since the current environment is {working_environment.upper()}'
+                    )
+                    continue
+
+                self._logger.info(
+                    f'Autoresolving detail of ticket {affecting_ticket_id} related to serial number {serial_number}...'
+                )
+                await self._bruin_repository.unpause_ticket_detail(affecting_ticket_id, serial_number)
+                resolve_ticket_response = await self._bruin_repository.resolve_ticket(
+                    affecting_ticket_id, ticket_detail_id
+                )
+                if resolve_ticket_response['status'] not in range(200, 300):
+                    continue
+
+                await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
+                await self._notify_successful_autoresolve(affecting_ticket_id, serial_number)
+
+                self._logger.info(
+                    f'Detail of ticket {affecting_ticket_id} related to serial number {serial_number} was autoresolved!'
+                )
+
+    def _are_all_metrics_within_thresholds(self, edge: dict) -> bool:
+        client_id = edge['cached_info']['bruin_client_info']['client_id']
+
+        all_metrics_within_thresholds = True
+
+        for link in edge['links']:
+            metrics = link['link_metrics']
+
+            is_rx_latency_below_threshold = metrics['bestLatencyMsRx'] < self._config.MONITOR_CONFIG["latency"]
+            is_tx_latency_below_threshold = metrics['bestLatencyMsTx'] < self._config.MONITOR_CONFIG["latency"]
+            are_latency_metrics_below_threshold = is_rx_latency_below_threshold and is_tx_latency_below_threshold
+
+            is_rx_packet_loss_below_threshold = metrics['bestLossPctRx'] < self._config.MONITOR_CONFIG["packet_loss"]
+            is_tx_packet_loss_below_threshold = metrics['bestLossPctTx'] < self._config.MONITOR_CONFIG["packet_loss"]
+            are_packet_loss_metrics_below_threshold = \
+                is_rx_packet_loss_below_threshold and is_tx_packet_loss_below_threshold
+
+            is_rx_jitter_below_threshold = metrics['bestJitterMsRx'] < self._config.MONITOR_CONFIG["jitter"]
+            is_tx_jitter_below_threshold = metrics['bestJitterMsTx'] < self._config.MONITOR_CONFIG["jitter"]
+            are_jitter_metrics_below_threshold = is_rx_jitter_below_threshold and is_tx_jitter_below_threshold
+
+            are_bandwidth_metrics_below_threshold = True
+            if self._is_rep_services_client_id(client_id):
+                metrics_lookup_interval = self._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
+                bandwidth_threshold = self._config.MONITOR_CONFIG['bandwidth_percentage']
+                tx_bandwidth = metrics['bpsOfBestPathTx']
+                rx_bandwidth = metrics['bpsOfBestPathRx']
+                rx_throughput = (metrics['bytesRx'] * 8) / (metrics_lookup_interval * 60)
+                tx_throughput = (metrics['bytesTx'] * 8) / (metrics_lookup_interval * 60)
+                is_rx_bandwidth_below_threshold = (rx_throughput / rx_bandwidth) * 100 < bandwidth_threshold
+                is_tx_bandwidth_below_threshold = (tx_throughput / tx_bandwidth) * 100 < bandwidth_threshold
+                are_bandwidth_metrics_below_threshold = \
+                    is_rx_bandwidth_below_threshold and is_tx_bandwidth_below_threshold
+
+            all_metrics_within_thresholds &= all([
+                are_latency_metrics_below_threshold,
+                are_packet_loss_metrics_below_threshold,
+                are_jitter_metrics_below_threshold,
+                are_bandwidth_metrics_below_threshold,
+            ])
+
+        return all_metrics_within_thresholds
+
+    @staticmethod
+    def _was_ticket_created_by_automation_engine(ticket: dict) -> bool:
+        return ticket['createdBy'] == 'Intelygenz Ai'
+
+    def _was_last_affecting_trouble_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
+        current_datetime = datetime.now(utc)
+        max_seconds_since_last_affecting_trouble = self._config.MONITOR_CONFIG['autoresolve'][
+            'last_affecting_trouble_seconds']
+
+        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
+
+        last_reopen_note = self._get_last_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: REOPEN_NOTE_REGEX.match(note['noteValue'])
+        )
+        if last_reopen_note:
+            note_creation_date = parse(last_reopen_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
+
+        initial_affecting_note = self._get_first_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: INITIAL_AFFECTING_NOTE_REGEX.search(note['noteValue'])
+        )
+        if initial_affecting_note:
+            note_creation_date = parse(initial_affecting_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
+
+        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
+        seconds_elapsed_since_last_affecting_trouble = (current_datetime - ticket_creation_datetime).total_seconds()
+        return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
+
+    def _is_affecting_ticket_detail_auto_resolvable(self, ticket_notes: list) -> bool:
+        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving task for serial")
+        max_autoresolves = self._config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
+        times_autoresolved = 0
+
+        for ticket_note in ticket_notes:
+            note_value = ticket_note['noteValue']
+            is_autoresolve_note = bool(regex.match(note_value))
+            times_autoresolved += int(is_autoresolve_note)
+
+            if times_autoresolved >= max_autoresolves:
+                return False
+
+        return True
+
+    @staticmethod
+    def _get_first_element_matching(iterable, condition: Callable, fallback=None):
+        try:
+            return next(elem for elem in iterable if condition(elem))
+        except StopIteration:
+            return fallback
+
+    def _get_last_element_matching(self, iterable, condition: Callable, fallback=None):
+        return self._get_first_element_matching(reversed(iterable), condition, fallback)
+
+    async def _notify_successful_autoresolve(self, ticket_id, serial_number):
+        message = (
+            f'Task related to serial number {serial_number} in Service Affecting ticket {ticket_id} was autoresolved. '
+            f'Details at https://app.bruin.com/t/{ticket_id}'
+        )
+        await self._notifications_repository.send_slack_message(message)
+
+    @staticmethod
+    def _group_links_by_edge(links: List[dict]) -> List[dict]:
+        edge_info_by_edge_identifier = {}
+
+        for link in links:
+            edge_identifier = EdgeIdentifier(**link['cached_info']['edge'])
+
+            edge_info = {
+                'cached_info': link['cached_info'],
+                'contact_info': link['contact_info'],
+                'edge_status': link['edge_status'],
+                'links': [],
+            }
+            edge_info_by_edge_identifier.setdefault(edge_identifier, edge_info)
+
+            link_info = {
+                'link_status': link['link_status'],
+                'link_metrics': link['link_metrics'],
+            }
+            edge_info_by_edge_identifier[edge_identifier]['links'].append(link_info)
+
+        return list(edge_info_by_edge_identifier.values())
 
     async def _latency_check(self):
         self._logger.info('Looking for latency issues...')

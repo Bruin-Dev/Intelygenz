@@ -19,18 +19,24 @@ MONITOR_CONFIG = {
     'environment': "test",
     'timezone': 'US/Eastern',
     'monitoring_seconds': 600,
-    "latency": 120,
+    "latency": 140,
     "packet_loss": 8,
-    "jitter": 30,
-    "bandwidth_percentage": 80,
+    "jitter": 50,
+    "bandwidth_percentage": 90,
     'monitoring_minutes_interval': 10,
     "monitoring_minutes_per_trouble": {
-        "latency": 10,
-        "packet_loss": 10,
-        "jitter": 10,
-        "bandwidth": 15,
+        "latency": 30,
+        "packet_loss": 30,
+        "jitter": 30,
+        "bandwidth": 30,
     },
     'forward_to_hnoc': 60,
+    'autoresolve': {
+        'semaphore': 3,
+        'metrics_lookup_interval_minutes': 30,
+        'last_affecting_trouble_seconds': 75 * 60,
+        'max_autoresolves': 3,
+    },
 }
 
 MONITOR_REPORT_CONFIG = {
