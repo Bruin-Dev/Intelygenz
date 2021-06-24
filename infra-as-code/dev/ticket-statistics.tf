@@ -105,26 +105,6 @@ resource "aws_security_group" "automation-ticket-statistics_service" {
   }
 }
 
-resource "aws_service_discovery_service" "ticket-statistics" {
-  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  name  = local.automation-ticket-statistics-service_discovery_service-name
-
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
-
-    dns_records {
-      ttl = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-
-  health_check_custom_config {
-    failure_threshold = 1
-  }
-}
-
 resource "aws_ecs_service" "automation-ticket-statistics" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   name = local.automation-ticket-statistics-resource-name
@@ -140,7 +120,9 @@ resource "aws_ecs_service" "automation-ticket-statistics" {
     assign_public_ip = false
   }
 
-  service_registries {
-    registry_arn = aws_service_discovery_service.ticket-statistics[0].arn
+  load_balancer {
+    target_group_arn = aws_lb_target_group.automation-ticket-statistics.arn
+    container_name   = "ticket-statistics"
+    container_port   = 5000
   }
 }
