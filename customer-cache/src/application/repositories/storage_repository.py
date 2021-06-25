@@ -15,6 +15,15 @@ class StorageRepository:
             return json.loads(cache)
         return []
 
+    def get_refresh_date(self):
+        if self._redis.exists("refresh_date"):
+            date = self._redis.get("refresh_date")
+            return date
+        return None
+
+    def set_refresh_date(self, date):
+        self._redis.set("refresh_date", date)
+
     def get_host_cache(self, filters):
         caches = []
         # If not filter add all velocloud servers to search in all

@@ -40,6 +40,8 @@ class RefreshCache:
     async def _refresh_cache(self):
         @retry(wait=wait_random(min=120, max=300), reraise=True)
         async def _refresh_cache():
+
+            # TODO Put here a function _need_to_refresh_cache() returns boolean, if boolean false shortcircuit
             self.__reset_state()
 
             velocloud_hosts = sum([list(filter_.keys()) for filter_ in self._config.REFRESH_CONFIG['velo_servers']], [])
@@ -77,6 +79,7 @@ class RefreshCache:
                 for host in split_host_dict
             ]
             await asyncio.gather(*tasks, return_exceptions=True)
+            # TODO here set the hour to refresh cache to utc now +4 hours
             self._logger.info("Finished refreshing cache!")
 
         try:
@@ -87,6 +90,7 @@ class RefreshCache:
             await self._notifications_repository.send_slack_message(slack_message)
 
     async def schedule_cache_refresh(self):
+        # TODO change configuration here to try to refresh every 5 minutes in case we need a hot refresh just reset redis
         self._logger.info(
             f"Scheduled to refresh cache every {self._config.REFRESH_CONFIG['refresh_map_minutes'] // 60} hours"
         )
@@ -301,3 +305,6 @@ class RefreshCache:
         with open(f'./{file_name}', 'r', encoding='utf-8') as csvfile:
             payload = csvfile.read()
             return base64.b64encode(payload.encode('utf-8')).decode('utf-8')
+
+    def _need_to_reset_cache(self):
+        pass
