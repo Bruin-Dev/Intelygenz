@@ -29,5 +29,5 @@ module "mettel-automation-eks-cluster" {
     "k8s.io/cluster-autoscaler/${local.cluster_name}" = "true"
   })
 
-  version = "14.0.0"
+  version = "17.1.0"
 }
