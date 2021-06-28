@@ -375,10 +375,12 @@ class ServiceAffectingMonitor:
                 rx_bandwidth = metrics['bpsOfBestPathRx']
                 rx_throughput = (metrics['bytesRx'] * 8) / (metrics_lookup_interval * 60)
                 tx_throughput = (metrics['bytesTx'] * 8) / (metrics_lookup_interval * 60)
-                is_rx_bandwidth_below_threshold = (rx_throughput / rx_bandwidth) * 100 < bandwidth_threshold
-                is_tx_bandwidth_below_threshold = (tx_throughput / tx_bandwidth) * 100 < bandwidth_threshold
-                are_bandwidth_metrics_below_threshold = \
-                    is_rx_bandwidth_below_threshold and is_tx_bandwidth_below_threshold
+
+                if tx_bandwidth and rx_bandwidth:
+                    is_rx_bandwidth_below_threshold = (rx_throughput / rx_bandwidth) * 100 < bandwidth_threshold
+                    is_tx_bandwidth_below_threshold = (tx_throughput / tx_bandwidth) * 100 < bandwidth_threshold
+                    are_bandwidth_metrics_below_threshold = \
+                        is_rx_bandwidth_below_threshold and is_tx_bandwidth_below_threshold
 
             all_metrics_within_thresholds &= all([
                 are_latency_metrics_below_threshold,
