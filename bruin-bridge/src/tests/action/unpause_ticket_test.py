@@ -60,7 +60,7 @@ class TestOpenTicket:
         bruin_repo.unpause_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic,
                                                            dict(request_id=request_id,
-                                                                body='You must include ticket_id and serial_number '
+                                                                body='You must include ticket_id and service_number '
                                                                      'or detail_id in the request',
                                                                 status=400))
 
@@ -74,7 +74,7 @@ class TestOpenTicket:
         serial_number = 123456789
         detail_id = 987654321
         msg = {'request_id': request_id, 'response_topic': response_topic,
-               'body': {'ticket_id': ticket_id, 'serial_number': serial_number, 'detail_id': detail_id}}
+               'body': {'ticket_id': ticket_id, 'service_number': serial_number, 'detail_id': detail_id}}
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
