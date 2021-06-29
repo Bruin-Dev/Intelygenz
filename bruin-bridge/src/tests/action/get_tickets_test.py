@@ -52,6 +52,8 @@ class TestGetTicket:
             'status': 200
         }
         param_copy = msg['body'].copy()
+        param_copy['product_category'] = param_copy['category']
+        del [param_copy['category']]
         del [param_copy['ticket_status']]
 
         event_bus = Mock()
@@ -111,6 +113,10 @@ class TestGetTicket:
             **repository_response,
         }
 
+        param_copy = repository_params.copy()
+        param_copy['product_category'] = param_copy['category']
+        del [param_copy['category']]
+
         logger = Mock()
 
         event_bus = Mock()
@@ -123,9 +129,58 @@ class TestGetTicket:
         await bruin_ticket_response.get_all_tickets(request_msg)
 
         bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
-            repository_params, ticket_status_list
+            param_copy, ticket_status_list
         )
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(response_topic, response_msg)
+
+    @pytest.mark.asyncio
+    async def get_all_tickets_with_no_category_test(self):
+        logger = Mock()
+        filtered_tickets_list = [{'ticketID': 123}, {'ticketID': 321}]
+        request_id = "123"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+
+        client_id = 123
+
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+
+        ticket_status_list = ['New', 'In-Progress']
+        msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'body': {
+                'client_id': client_id,
+                'ticket_topic': ticket_topic,
+                'ticket_status': ticket_status_list,
+            },
+        }
+
+        response_to_publish_in_topic = {
+            'request_id': request_id,
+            'body': filtered_tickets_list,
+            'status': 200
+        }
+
+        param_copy = msg['body'].copy()
+        del [param_copy['ticket_status']]
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value={'body': filtered_tickets_list,
+                                                                                'status': 200})
+
+        bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
+        await bruin_ticket_response.get_all_tickets(msg)
+
+        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
+            param_copy, ticket_status_list
+        )
+        bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, response_to_publish_in_topic
+        )
 
     @pytest.mark.asyncio
     async def get_all_tickets_with_no_ticket_id_test(self):
@@ -150,8 +205,12 @@ class TestGetTicket:
                 'ticket_status': ticket_status_list,
             },
         }
+
         param_copy = msg['body'].copy()
+        param_copy['product_category'] = param_copy['category']
+        del [param_copy['category']]
         del [param_copy['ticket_status']]
+
         response_to_publish_in_topic = {
             'request_id': request_id,
             'body': filtered_tickets_list,
@@ -215,7 +274,10 @@ class TestGetTicket:
             },
         }
         param_copy = msg['body'].copy()
+        param_copy['product_category'] = param_copy['category']
+        del [param_copy['category']]
         del [param_copy['ticket_status']]
+
         response_to_publish_in_topic = {
             'request_id': request_id,
             'body': filtered_tickets_list,
@@ -263,7 +325,7 @@ class TestGetTicket:
         response_to_publish_in_topic = {
             'request_id': request_id,
             'body': 'You must specify '
-                    '{..."body:{"client_id", "category", "ticket_topic",'
+                    '{..."body:{"client_id", "ticket_topic",'
                     ' "ticket_status":[list of statuses]}...} in the request',
             'status': 400
         }

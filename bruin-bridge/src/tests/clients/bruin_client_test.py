@@ -78,7 +78,7 @@ class TestBruinClient:
     @pytest.mark.asyncio
     async def get_all_tickets_test(self):
         logger = Mock()
-        params = dict(client_id=123, ticket_id=321, ticket_status="New", category='SD-WAN', ticket_topic='VOO')
+        params = dict(client_id=123, ticket_id=321, ticket_status="New", product_category='SD-WAN', ticket_topic='VOO')
 
         get_response = {
             "responses": [

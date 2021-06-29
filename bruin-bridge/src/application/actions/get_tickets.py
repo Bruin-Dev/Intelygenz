@@ -22,10 +22,10 @@ class GetTicket:
             filtered_tickets_response["body"] = 'Must include "body" in request'
             await self._event_bus.publish_message(msg['response_topic'], filtered_tickets_response)
             return
-        if not all(key in body.keys() for key in ("client_id", "category", "ticket_topic", "ticket_status")):
+        if not all(key in body.keys() for key in ("client_id", "ticket_topic", "ticket_status")):
             filtered_tickets_response["status"] = 400
             filtered_tickets_response["body"] = 'You must specify ' \
-                                                '{..."body:{"client_id", "category", "ticket_topic",' \
+                                                '{..."body:{"client_id", "ticket_topic",' \
                                                 ' "ticket_status":[list of statuses]}...} in the request'
             await self._event_bus.publish_message(msg['response_topic'], filtered_tickets_response)
             return
@@ -34,9 +34,12 @@ class GetTicket:
 
         params = {
             "client_id": body["client_id"],
-            "category": body["category"],
             "ticket_topic": body["ticket_topic"]
         }
+
+        category = body.get('category')
+        if category:
+            params['product_category'] = category
 
         ticket_id = body.get('ticket_id')
         if ticket_id:

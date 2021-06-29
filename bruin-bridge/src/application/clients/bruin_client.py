@@ -55,9 +55,6 @@ class BruinClient:
 
     async def get_all_tickets(self, params):
         try:
-            if params.get("category"):
-                params["product_category"] = params["category"]
-                del(params["category"])
 
             parsed_params = humps.pascalize(params)
 
