@@ -29,6 +29,8 @@ INTERMAPPER_CONFIG = {
     'intermapper_down_events': ['Down', 'Critical', 'Alarm', 'Warning', 'Link Warning'],
     'intermapper_up_events': ['Up', 'OK'],
     'autoresolve_last_outage_seconds': 60 * 60,
+    'autoresolve_product_category_list': ['Cloud Connect', 'Cloud Firewall', 'POTS in a Box', 'Premise Firewall',
+                                          'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi']
 
 }
 LOG_CONFIG = {

@@ -233,6 +233,52 @@ class BruinRepository:
 
         return response
 
+    async def get_ticket_product_category(self, client_id: int, ticket_id):
+        err_msg = None
+        ticket_statuses = ['New', 'InProgress', 'Draft']
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'ticket_status': ticket_statuses,
+                'ticket_topic': 'VOO',
+                'ticket_id': ticket_id
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Getting product category of ticket id {ticket_id} from Bruin...'
+            )
+
+            response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when requesting product category of ticket id {ticket_id} from Bruin API -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f'Got product category of ticket id {ticket_id} from Bruin'
+                )
+            else:
+                err_msg = (
+                    f'Error while retrieving product category of ticket id {ticket_id} in '
+                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_ticket_details(self, ticket_id: int):
         err_msg = None
 

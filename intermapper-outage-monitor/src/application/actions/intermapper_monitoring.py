@@ -165,6 +165,24 @@ class InterMapperMonitor:
         for ticket in tickets_body:
 
             ticket_id = ticket['ticketID']
+
+            product_category_response = await self._bruin_repository.get_ticket_product_category(client_id, ticket_id)
+            product_category_response_body = product_category_response['body']
+            product_category_response_status = product_category_response['status']
+            if product_category_response_status not in range(200, 300):
+                return False
+
+            product_category = ''
+            if len(product_category_response_body) > 0:
+                product_category = product_category_response_body[0].get('category')
+
+            self._logger.info(f'Product category of ticket {ticket_id} is {product_category}')
+
+            if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve_product_category_list']:
+                self._logger.info(f"Ticket's product category is {product_category}, and is not "
+                                  f"one of the categories we autoresolve for. Skipping autoresolve ...")
+                continue
+
             outage_ticket_creation_date = ticket['createDate']
 
             self._logger.info(f'Checking to see if ticket {ticket_id} can be autoresolved')

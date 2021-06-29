@@ -691,7 +691,7 @@ class TestInterMapperMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": "POTS in a Box",
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -783,6 +783,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -797,6 +798,7 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date
@@ -843,6 +845,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock()
         bruin_repository.get_ticket_details = CoroutineMock()
         bruin_repository.resolve_ticket = CoroutineMock()
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -857,6 +860,7 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
@@ -896,6 +900,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock()
         bruin_repository.get_ticket_details = CoroutineMock()
         bruin_repository.resolve_ticket = CoroutineMock()
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -910,6 +915,7 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
@@ -920,7 +926,7 @@ class TestInterMapperMonitor:
         assert response is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_failed_tickets_details_rpc_request_test(self):
+    async def autoresolve_ticket_failed_product_category_rpc_request_test(self):
         asset_id = 123
         client_id = 83959
         intermapper_body = os.linesep.join([
@@ -954,6 +960,223 @@ class TestInterMapperMonitor:
             'status': 200,
         }
 
+        product_category_response = {
+            'body': 'Failed RPC',
+            'status': 400,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=product_category_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note = CoroutineMock()
+
+        config = testconfig
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._was_last_outage_detected_recently = Mock()
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
+
+        response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
+
+        bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
+
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
+
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+        assert response is False
+
+    @pytest.mark.asyncio
+    async def autoresolve_ticket_no_product_category_test(self):
+        asset_id = 123
+        client_id = 83959
+        intermapper_body = os.linesep.join([
+            "Event: UP",
+            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
+            "Address: 1.3.4",
+            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
+            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
+            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+
+        circuit_id = 3214
+
+        outage_ticket_1_id = 99999
+        outage_ticket_1_creation_date = "9/25/2020 6:31:54 AM"
+        outage_ticket_1 = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": outage_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": outage_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        outage_ticket_response = {
+            'body': [
+                outage_ticket_1
+            ],
+            'status': 200,
+        }
+
+        product_category_response = {
+            'body': [],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=product_category_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note = CoroutineMock()
+
+        config = testconfig
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._was_last_outage_detected_recently = Mock()
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
+
+        response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
+
+        bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
+
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
+
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def autoresolve_ticket_product_category_not_in_list_test(self):
+        asset_id = 123
+        client_id = 83959
+        intermapper_body = os.linesep.join([
+            "Event: UP",
+            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
+            "Address: 1.3.4",
+            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
+            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
+            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+
+        circuit_id = 3214
+
+        outage_ticket_1_id = 99999
+        outage_ticket_1_creation_date = "9/25/2020 6:31:54 AM"
+        outage_ticket_1 = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": outage_ticket_1_id,
+            "category": "SD-WAN",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": outage_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        outage_ticket_response = {
+            'body': [
+                outage_ticket_1
+            ],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.append_autoresolve_note = CoroutineMock()
+
+        config = testconfig
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._was_last_outage_detected_recently = Mock()
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
+
+        response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
+
+        bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
+
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
+
+        bruin_repository.resolve_ticket.assert_not_awaited()
+        bruin_repository.append_autoresolve_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def autoresolve_ticket_failed_tickets_details_rpc_request_test(self):
+        asset_id = 123
+        client_id = 83959
+        intermapper_body = os.linesep.join([
+            "Event: UP",
+            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
+            "Address: 1.3.4",
+            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
+            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
+            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+
+        circuit_id = 3214
+
+        outage_ticket_1_id = 99999
+        outage_ticket_1_creation_date = "9/25/2020 6:31:54 AM"
+        outage_ticket_1 = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": outage_ticket_1_id,
+            "category": "POTS in a Box",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": outage_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        outage_ticket_response = {
+            'body': [
+                outage_ticket_1
+            ],
+            'status': 200,
+        }
+
         ticket_details_response = {
             'body': 'Failed RPC',
             'status': 400,
@@ -967,6 +1190,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock()
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -981,6 +1205,7 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
 
@@ -1015,7 +1240,7 @@ class TestInterMapperMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": "POTS in a Box",
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -1100,6 +1325,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -1114,6 +1340,7 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date
@@ -1149,7 +1376,7 @@ class TestInterMapperMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": "POTS in a Box",
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -1234,6 +1461,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -1248,6 +1476,8 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
+
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date
@@ -1285,7 +1515,7 @@ class TestInterMapperMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": "POTS in a Box",
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -1370,6 +1600,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_product_category = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -1384,6 +1615,7 @@ class TestInterMapperMonitor:
         response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, intermapper_body)
 
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, circuit_id)
+        bruin_repository.get_ticket_product_category.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date
