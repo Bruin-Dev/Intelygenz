@@ -35,6 +35,7 @@ REFRESH_CONFIG = {
     'min': 1,
     'stop_delay': 0,
     'refresh_map_minutes': 60 * 4,
+    'refresh_check_interval_minutes': 5,
     'blacklisted_edges': [
         # Simulate a federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 11888, 'edge_id': 12345}

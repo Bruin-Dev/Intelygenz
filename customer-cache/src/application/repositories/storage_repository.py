@@ -15,15 +15,6 @@ class StorageRepository:
             return json.loads(cache)
         return []
 
-    def get_refresh_date(self):
-        if self._redis.exists("refresh_date"):
-            date = self._redis.get("refresh_date")
-            return date
-        return None
-
-    def set_refresh_date(self, date):
-        self._redis.set("refresh_date", date)
-
     def get_host_cache(self, filters):
         caches = []
         # If not filter add all velocloud servers to search in all
@@ -39,3 +30,17 @@ class StorageRepository:
 
     def set_cache(self, key, cache):
         self._redis.set(key, json.dumps(cache))
+
+    def get_refresh_date(self):
+        if self._redis.exists("next_refresh_date"):
+            self._logger.info("Getting next refresh date from Redis...")
+            date = self._redis.get("next_refresh_date")
+            self._logger.info(f"Got next refresh date from Redis: {date}")
+            return date
+        self._logger.info('No "next_refresh_date" key found in Redis')
+        return None
+
+    def set_refresh_date(self, date):
+        self._logger.info('Setting new refresh date in Redis...')
+        self._redis.set("next_refresh_date", date)
+        self._logger.info(f'New reset date: {date} set in Redis')

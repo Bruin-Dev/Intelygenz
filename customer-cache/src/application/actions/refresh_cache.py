@@ -1,7 +1,7 @@
 import base64
 import csv
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import asyncio
@@ -40,8 +40,9 @@ class RefreshCache:
     async def _refresh_cache(self):
         @retry(wait=wait_random(min=120, max=300), reraise=True)
         async def _refresh_cache():
-
-            # TODO Put here a function _need_to_refresh_cache() returns boolean, if boolean false shortcircuit
+            if not self._need_to_reset_cache():
+                self._logger.info("Cache refresh is not due yet. Skipping refresh process...")
+                return
             self.__reset_state()
 
             velocloud_hosts = sum([list(filter_.keys()) for filter_ in self._config.REFRESH_CONFIG['velo_servers']], [])
@@ -79,7 +80,8 @@ class RefreshCache:
                 for host in split_host_dict
             ]
             await asyncio.gather(*tasks, return_exceptions=True)
-            # TODO here set the hour to refresh cache to utc now +4 hours
+            in_4_hours = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG['refresh_map_minutes'])
+            self._storage_repository.set_refresh_date(in_4_hours.strftime('%m/%d/%Y, %H:%M:%S'))
             self._logger.info("Finished refreshing cache!")
 
         try:
@@ -90,14 +92,14 @@ class RefreshCache:
             await self._notifications_repository.send_slack_message(slack_message)
 
     async def schedule_cache_refresh(self):
-        # TODO change configuration here to try to refresh every 5 minutes in case we need a hot refresh just reset redis
         self._logger.info(
             f"Scheduled to refresh cache every {self._config.REFRESH_CONFIG['refresh_map_minutes'] // 60} hours"
         )
-
+        self._logger.info(f"Scheduled to check if refresh is needed every "
+                          f"{self._config.REFRESH_CONFIG['refresh_check_interval_minutes']} minutes")
         try:
             self._scheduler.add_job(self._refresh_cache, 'interval',
-                                    minutes=self._config.REFRESH_CONFIG['refresh_map_minutes'],
+                                    minutes=self._config.REFRESH_CONFIG['refresh_check_interval_minutes'],
                                     next_run_time=datetime.now(timezone(self._config.REFRESH_CONFIG['timezone'])),
                                     replace_existing=False, id='_refresh_cache')
         except ConflictingIdError:
@@ -307,4 +309,13 @@ class RefreshCache:
             return base64.b64encode(payload.encode('utf-8')).decode('utf-8')
 
     def _need_to_reset_cache(self):
-        pass
+        self._logger.info("Checking if it is time to refresh the cache...")
+        now = datetime.utcnow()
+        time_from_redis = self._storage_repository.get_refresh_date()
+        is_time = True
+        if time_from_redis:
+            dt_from_redis = datetime.strptime(time_from_redis, '%m/%d/%Y, %H:%M:%S')
+            is_time = now > dt_from_redis
+
+        self._logger.info(f"Is time to refresh cache? {is_time}")
+        return is_time
