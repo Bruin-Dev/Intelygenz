@@ -22,6 +22,12 @@ This means we will store one partial cache for each velocloud host once it has f
 On start and each 4 hours, the process should be executed again to refresh the cache, but the substitution will only be 
 done when process is finished and the length of the new cache is greater than 0 elements.
 
+Every time the cache is successfully refreshed, the date of the next refresh will be stored in redis. Every 5
+minutes redis will be checked in case a refresh is due.
+
+If a force refresh is needed, you only need to flush the customer-cache redis, so there's not a next refresh
+date stored in Redis. The system enforces a refresh in that scenario.
+
 # Get Customers
 ### Description
 When the customer cache receives a request from topic customer.cache.get it makes a callback to function get_customers.
