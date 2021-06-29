@@ -1,3 +1,7 @@
+# generated project CSV
+old_cache*.csv
+new_cache*.csv
+
 # Intellij
 *.idea/
 *.iml

@@ -40,7 +40,7 @@ class RefreshCache:
     async def _refresh_cache(self):
         @retry(wait=wait_random(min=120, max=300), reraise=True)
         async def _refresh_cache():
-            if not self._need_to_reset_cache():
+            if not self._need_to_refresh_cache():
                 self._logger.info("Cache refresh is not due yet. Skipping refresh process...")
                 return
             self.__reset_state()
@@ -308,7 +308,7 @@ class RefreshCache:
             payload = csvfile.read()
             return base64.b64encode(payload.encode('utf-8')).decode('utf-8')
 
-    def _need_to_reset_cache(self):
+    def _need_to_refresh_cache(self):
         self._logger.info("Checking if it is time to refresh the cache...")
         now = datetime.utcnow()
         time_from_redis = self._storage_repository.get_refresh_date()
