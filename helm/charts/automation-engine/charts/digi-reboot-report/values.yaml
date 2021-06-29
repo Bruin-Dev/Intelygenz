@@ -36,32 +36,48 @@ config:
   digi_report_recipient: ""
   # -- Indicate the capabilities dependencies
   capabilities_enabled:
-    # -- Indicate is bruin-bridge is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # bruin-bridge service responds correctly to healthcheck calls.
     bruin_bridge: true
-    # -- Indicate is cts-bridge is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if cts-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # cts-bridge service responds correctly to healthcheck calls.
     cts_bridge: true
-    # -- Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # customer-cache service responds correctly to healthcheck calls.
+    customer_cache: true
+    # -- Indicate if digi-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # digi-bridge service responds correctly to healthcheck calls.
+    digi_bridge: true
+    # -- Indicate if email-tagger-kre-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # email-tagger-kre-bridge service responds correctly to healthcheck calls.
+    email_tagger_kre_bridge: true
+    # -- Indicate if hawkeye-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # hawkeye-bridge service responds correctly to healthcheck calls.
     hawkeye_bridge: true
-    # -- Indicate is lit-bridge is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if hawkeye-customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-customer-cache service responds correctly to healthcheck calls.
+    hawkeye_customer_cache: true
+    # -- Indicate if lit-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # lit-bridge service responds correctly to healthcheck calls.
     lit_bridge: true
-    # -- Indicate is notifier is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
     notifier: true
-    # -- Indicate is t8-bridge is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # t7-bridge service responds correctly to healthcheck calls.
     t7_bridge: true
-    # -- Indicate is velocloud-bridge is going to be activated. If it is true an initContainer
-    # will be created in the tnba-monitor deployment that will wait until the
+    # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
     # velocloud-bridge service responds correctly to healthcheck calls.
     velocloud_bridge: true
 
