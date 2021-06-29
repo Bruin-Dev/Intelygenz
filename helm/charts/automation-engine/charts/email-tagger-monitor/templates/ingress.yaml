@@ -7,11 +7,11 @@ metadata:
   name: {{ include "email-tagger-monitor.fullname" . }}-ingress
 spec:
   rules:
-    {{ if eq .Values.global.environment "production" -}}
+    {{ if eq .Values.global.environment "production" }}
     - host: master.mettel-automation.net
-    {{ else -}}
+    {{ else }}
     - host: {{ .Values.global.environment }}.mettel-automation.net
-    {{ end -}}
+    {{ end }}
       http:
         paths:
         - backend:

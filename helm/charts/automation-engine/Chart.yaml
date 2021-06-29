@@ -39,6 +39,9 @@ dependencies:
   - name: digi-bridge
     version: '*.*.*'
     condition: digi-bridge.enabled
+  - name: digi-reboot-report
+    version: '*.*.*'
+    condition: digi-reboot-report.enabled
   - name: dispatch-portal-backend
     version: '*.*.*'
     condition: dispatch-portal-backend.enabled
@@ -48,6 +51,12 @@ dependencies:
   - name: ecr-cred-helper
     version: '*.*.*'
     condition: ecr-cred-helper.enabled
+  - name: email-tagger-kre-bridge
+    version: '*.*.*'
+    condition: email-tagger-kre-bridge.enabled
+  - name: email-tagger-monitor
+    version: '*.*.*'
+    condition: email-tagger-monitor.enabled
   - name: hawkeye-affecting-monitor
     version: '*.*.*'
     condition: hawkeye-affecting-monitor.enabled
@@ -60,6 +69,9 @@ dependencies:
   - name: hawkeye-outage-monitor
     version: '*.*.*'
     condition: hawkeye-outage-monitor.enabled
+  - name: intermapper-outage-monitor
+    version: '*.*.*'
+    condition: intermapper-outage-monitor.enabled
   - name: last-contact-report
     version: '*.*.*'
     condition: last-contact-report.enabled
@@ -72,6 +84,9 @@ dependencies:
   - name: notifier
     version: '*.*.*'
     condition: notifier.enabled
+  - name: service-affecting-monitor
+    version: '*.*.*'
+    condition: service-affecting-monitor.enabled
   - name: service-dispatch-monitor
     version: '*.*.*'
     condition: service-dispatch-monitor.enabled
@@ -96,12 +111,18 @@ dependencies:
   - name: t7-bridge
     version: '*.*.*'
     condition: t7-bridge.enabled
-  - name: tnba-monitor
+  - name: ticket-collector
     version: '*.*.*'
-    condition: tnba-monitor.enabled
+    condition: ticket-collector.enabled
+  - name: ticket-statistics
+    version: '*.*.*'
+    condition: ticket-statistics.enabled
   - name: tnba-feedback
     version: '*.*.*'
     condition: tnba-feedback.enabled
+  - name: tnba-monitor
+    version: '*.*.*'
+    condition: tnba-monitor.enabled
   - name: velocloud-bridge
     version: '*.*.*'
     condition: velocloud-bridge.enabled
