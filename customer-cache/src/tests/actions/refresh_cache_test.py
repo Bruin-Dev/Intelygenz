@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -105,6 +105,26 @@ class TestRefreshCache:
                                                                                instance_cache_edges)
 
     @pytest.mark.asyncio
+    async def not_refresh_cache_when_not_due_test(self, instance_refresh_cache, instance_cache_edges):
+
+        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
+        next_run_time = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+        instance_refresh_cache._logger.error = Mock()
+        instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(
+            return_value=instance_cache_edges)
+
+        instance_refresh_cache._partial_refresh_cache = CoroutineMock()
+        instance_refresh_cache._need_to_refresh_cache = Mock(return_value=False)
+        tenacity_retry_mock = patch.object(refresh_cache_module, 'retry', side_effect=retry_mock(attempts=1))
+        with patch.object(refresh_cache_module, 'datetime', new=datetime_mock):
+            with uuid_mock, tenacity_retry_mock:
+                await instance_refresh_cache._refresh_cache()
+
+        instance_refresh_cache._partial_refresh_cache.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def refresh_cache_edge_list_failed_test(self, instance_refresh_cache):
         error = "Couldn't find any edge to refresh the cache"
         err_msg_refresh_cache = f"Maximum retries happened while while refreshing the cache cause of error was {error}"
@@ -145,6 +165,20 @@ class TestRefreshCache:
 
         instance_refresh_cache._partial_refresh_cache.assert_not_awaited()
         instance_refresh_cache._notifications_repository.send_slack_message.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def need_to_refresh_cache_test(self, instance_refresh_cache):
+        next_refresh = (datetime.utcnow() - timedelta(minutes=1)).strftime('%m/%d/%Y, %H:%M:%S')
+        instance_refresh_cache._storage_repository.get_refresh_date = Mock(return_value=next_refresh)
+        refresh_due = instance_refresh_cache._need_to_refresh_cache()
+        assert refresh_due
+
+    @pytest.mark.asyncio
+    async def no_need_to_refresh_cache_test(self, instance_refresh_cache):
+        next_refresh = (datetime.utcnow() + timedelta(minutes=10)).strftime('%m/%d/%Y, %H:%M:%S')
+        instance_refresh_cache._storage_repository.get_refresh_date = Mock(return_value=next_refresh)
+        refresh_due = instance_refresh_cache._need_to_refresh_cache()
+        assert not refresh_due
 
     @pytest.mark.asyncio
     async def partial_refresh_cache_with_edges_and_not_invalid_edges_test(self, instance_refresh_cache):

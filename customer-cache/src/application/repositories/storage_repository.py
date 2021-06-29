@@ -40,7 +40,7 @@ class StorageRepository:
         self._logger.info('No "next_refresh_date" key found in Redis')
         return None
 
-    def set_refresh_date(self, date):
+    def set_refresh_date(self, date: str):
         self._logger.info('Setting new refresh date in Redis...')
         self._redis.set("next_refresh_date", date)
         self._logger.info(f'New reset date: {date} set in Redis')

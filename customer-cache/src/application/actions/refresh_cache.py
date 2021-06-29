@@ -80,8 +80,8 @@ class RefreshCache:
                 for host in split_host_dict
             ]
             await asyncio.gather(*tasks, return_exceptions=True)
-            in_4_hours = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG['refresh_map_minutes'])
-            self._storage_repository.set_refresh_date(in_4_hours.strftime('%m/%d/%Y, %H:%M:%S'))
+            next_refresh = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG['refresh_map_minutes'])
+            self._storage_repository.set_refresh_date(next_refresh.strftime('%m/%d/%Y, %H:%M:%S'))
             self._logger.info("Finished refreshing cache!")
 
         try:
