@@ -2,7 +2,7 @@ image:
   repository: public.ecr.aws/aws-observability/aws-for-fluent-bit
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "${FLUENT_BIT_CHART_V}"
+  tag: ${FLUENT_BIT_CHART_V}
 
 imagePullSecrets: []
 nameOverride: ""

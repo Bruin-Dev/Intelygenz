@@ -146,7 +146,9 @@ dmypy.json
 # Terraform - Compiled files
 *.tfstate
 *.tfstate.backup
+**/.terraform.lock.hcl
 .terraform.tfstate.lock.info
+.terraform.lock.hcl
 .terraform
 
 last_contact.csv

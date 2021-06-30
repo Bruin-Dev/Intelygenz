@@ -31,18 +31,20 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              if [[ ${i} != "5-elasticaches" ]]; then
+              if [[ ${i} != "4-elasticaches" ]]; then
                   terraform init -backend=true -get=true -input=false
-                  if [[ ${i} != "0-ecr-repositories" && ${i} != "4-eks-roles" ]]; then
+                  if [[ ${i} != "0-ecr-repositories" && ${i} != "3-eks-roles" ]]; then
                       terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
                   fi
                   terraform refresh
                   terraform plan && terraform apply -auto-approve
-                  if [[ ${i} == "3-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
-                      export FLUENT_BIT_LOG_GROUP_NAME=$(terraform output fluent-bit-role-arn)
-                      export FLUENT_BIT_IAM_ROLE_ARN=$(terraform output fluent-bit-log-group-name)
+                  if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_LOG_GROUP_NAME" --form "value=$(terraform output fluent-bit-log-group-name)"
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_IAM_ROLE_ARN" --form "value=$(terraform output fluent-bit-role-arn)"
                   fi
-                  if [[ ${i} == "6-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                  if [[ ${i} == "5-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/TICKET_COLLECTOR_MONGO_HOST" --form "value=$(terraform output ticket-collector-mongo-host)"
                   fi
                   cd ..
