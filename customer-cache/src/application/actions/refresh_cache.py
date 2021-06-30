@@ -43,6 +43,7 @@ class RefreshCache:
             if not self._need_to_refresh_cache():
                 self._logger.info("Cache refresh is not due yet. Skipping refresh process...")
                 return
+
             self.__reset_state()
 
             velocloud_hosts = sum([list(filter_.keys()) for filter_ in self._config.REFRESH_CONFIG['velo_servers']], [])
@@ -80,8 +81,8 @@ class RefreshCache:
                 for host in split_host_dict
             ]
             await asyncio.gather(*tasks, return_exceptions=True)
-            next_refresh = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG['refresh_map_minutes'])
-            self._storage_repository.set_refresh_date(next_refresh.strftime('%m/%d/%Y, %H:%M:%S'))
+
+            self._storage_repository.update_refresh_date()
             self._logger.info("Finished refreshing cache!")
 
         try:
@@ -310,12 +311,12 @@ class RefreshCache:
 
     def _need_to_refresh_cache(self):
         self._logger.info("Checking if it is time to refresh the cache...")
-        now = datetime.utcnow()
-        time_from_redis = self._storage_repository.get_refresh_date()
+        next_refresh_date = self._storage_repository.get_refresh_date()
+
         is_time = True
-        if time_from_redis:
-            dt_from_redis = datetime.strptime(time_from_redis, '%m/%d/%Y, %H:%M:%S')
-            is_time = now > dt_from_redis
+        if next_refresh_date:
+            now = datetime.utcnow()
+            is_time = now > next_refresh_date
 
         self._logger.info(f"Is time to refresh cache? {is_time}")
         return is_time

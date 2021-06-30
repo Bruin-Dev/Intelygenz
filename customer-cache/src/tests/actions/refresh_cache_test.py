@@ -168,7 +168,7 @@ class TestRefreshCache:
 
     @pytest.mark.asyncio
     async def need_to_refresh_cache_test(self, instance_refresh_cache):
-        next_refresh = (datetime.utcnow() - timedelta(minutes=1)).strftime('%m/%d/%Y, %H:%M:%S')
+        next_refresh = datetime.utcnow() - timedelta(minutes=1)
         instance_refresh_cache._storage_repository.get_refresh_date = Mock(return_value=next_refresh)
         refresh_due = instance_refresh_cache._need_to_refresh_cache()
         assert refresh_due
@@ -182,7 +182,7 @@ class TestRefreshCache:
 
     @pytest.mark.asyncio
     async def no_need_to_refresh_cache_test(self, instance_refresh_cache):
-        next_refresh = (datetime.utcnow() + timedelta(minutes=10)).strftime('%m/%d/%Y, %H:%M:%S')
+        next_refresh = datetime.utcnow() + timedelta(minutes=10)
         instance_refresh_cache._storage_repository.get_refresh_date = Mock(return_value=next_refresh)
         refresh_due = instance_refresh_cache._need_to_refresh_cache()
         assert not refresh_due
