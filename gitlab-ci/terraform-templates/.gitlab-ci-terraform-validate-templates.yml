@@ -44,7 +44,7 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              if [[ ${i} != "5-elasticaches" ]]; then
+              if [[ ${i} != "4-elasticaches" ]]; then
                   terraform init -backend=true -get=true -input=false
                   terraform validate
                   cd ..
