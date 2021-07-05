@@ -834,12 +834,12 @@ class ServiceAffectingMonitor:
             return f'{round((bps / 1000000000), 3)} Gbps'
 
     def _ticket_object_to_string(self, ticket_dict, watermark=None):
-        edge_triage_str = "#*MetTel's IPA*# \n"
+        edge_triage_str = "#*MetTel's IPA*#\n"
         if watermark is not None:
-            edge_triage_str = f"{watermark} \n"
+            edge_triage_str = f"{watermark}\n"
         for key in ticket_dict.keys():
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
-            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
+            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]}\n'
         return edge_triage_str
 
     def _ticket_object_to_string_without_watermark(self, ticket_dict):

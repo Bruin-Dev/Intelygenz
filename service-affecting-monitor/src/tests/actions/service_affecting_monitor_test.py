@@ -6369,7 +6369,7 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository, notifications_repository)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)
-        assert ticket_note == "#*MetTel's IPA*# \nEdgeName: Test \nEdge Status: ok \n"
+        assert ticket_note == "#*MetTel's IPA*#\nEdgeName: Test\nEdge Status: ok\n"
 
     def ticket_object_to_string_watermark_given_test(self):
         event_bus = Mock()
@@ -6388,7 +6388,7 @@ class TestServiceAffectingMonitor:
                                                             metrics_repository, bruin_repository, velocloud_repository,
                                                             customer_cache_repository, notifications_repository)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict, watermark)
-        assert ticket_note == f'{watermark} \nEdgeName: Test \nEdge Status: ok \n'
+        assert ticket_note == f'{watermark}\nEdgeName: Test\nEdge Status: ok\n'
 
     def structure_links_metrics_test(self):
         event_bus = Mock()
