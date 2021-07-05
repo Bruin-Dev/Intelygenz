@@ -4853,8 +4853,7 @@ class TestServiceAffectingMonitor:
         result = service_affecting_monitor._is_affecting_ticket_detail_auto_resolvable(ticket_notes)
         assert result is False
 
-    def was_last_affecting_trouble_detected_recently_with_none_of_reopen_note_and_initial_affecting_note_found_test(
-            self):
+    def was_last_affecting_trouble_detected_recently_with_no_affecting_note_found_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         ticket_notes = []
 
@@ -4900,26 +4899,29 @@ class TestServiceAffectingMonitor:
             )
             assert result is False
 
-    def was_last_affecting_trouble_detected_recently_with_reopen_note_found_test(self):
+    def was_last_affecting_trouble_detected_recently_with_last_affecting_found_being_reopen_note_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         initial_affecting_note_timestamp = '2021-01-02T10:18:16.71-05:00'
         reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
 
         ticket_note_1 = {
+            "noteId": 68246615,
+            "noteValue": (
+                "#*MetTel's IPA*#\nRe-opening ticket\nEdge Name: Big Boss\nTrouble: Latency\n"
+                "TimeStamp: 2021-01-03 10:18:16-05:00"
+            ),
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": reopen_timestamp,
+        }
+        ticket_note_2 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nEdge Name: Big Boss\nTrouble: Jitter\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
                 'VC1234567',
             ],
             "createdDate": initial_affecting_note_timestamp,
-        }
-        ticket_note_2 = {
-            "noteId": 68246615,
-            "noteValue": "#*MetTel's IPA*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
-            "serviceNumber": [
-                'VC1234567',
-            ],
-            "createdDate": reopen_timestamp,
         }
 
         ticket_notes = [
@@ -4968,12 +4970,35 @@ class TestServiceAffectingMonitor:
             )
             assert result is False
 
-    def was_last_affecting_trouble_detected_recently_with_reopen_note_not_found_and_initial_affecting_note_found_test(
-            self):
+    def was_last_affecting_trouble_detected_recently_with_last_affecting_note_being_trouble_note_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         initial_affecting_note_timestamp = '2021-01-02T10:18:16.71-05:00'
+        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
+        last_affecting_note_timestamp = '2021-01-02T12:00:16.71-05:00'
 
         ticket_note_1 = {
+            "noteId": 68246616,
+            "noteValue": (
+                "#*MetTel's IPA*#\nEdge Name: Big Boss\nTrouble: Packet Loss\n"
+                "TimeStamp: 2021-01-03 10:18:16-05:00"
+            ),
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": last_affecting_note_timestamp,
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": (
+                "#*MetTel's IPA*#\nRe-opening ticket\nEdge Name: Big Boss\nTrouble: Latency\n"
+                "TimeStamp: 2021-01-03 10:18:16-05:00"
+            ),
+            "serviceNumber": [
+                'VC1234567',
+            ],
+            "createdDate": reopen_timestamp,
+        }
+        ticket_note_3 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nEdge Name: Big Boss\nTrouble: Jitter\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
@@ -4984,6 +5009,8 @@ class TestServiceAffectingMonitor:
 
         ticket_notes = [
             ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
         ]
 
         event_bus = Mock()
@@ -5003,7 +5030,7 @@ class TestServiceAffectingMonitor:
 
         datetime_mock = Mock()
 
-        new_now = parse(initial_affecting_note_timestamp) + timedelta(hours=1, minutes=14, seconds=59)
+        new_now = parse(last_affecting_note_timestamp) + timedelta(hours=1, minutes=14, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
@@ -5011,7 +5038,7 @@ class TestServiceAffectingMonitor:
             )
             assert result is True
 
-        new_now = parse(initial_affecting_note_timestamp) + timedelta(hours=1, minutes=15)
+        new_now = parse(last_affecting_note_timestamp) + timedelta(hours=1, minutes=15)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(
@@ -5019,7 +5046,7 @@ class TestServiceAffectingMonitor:
             )
             assert result is True
 
-        new_now = parse(initial_affecting_note_timestamp) + timedelta(hours=1, minutes=15, seconds=1)
+        new_now = parse(last_affecting_note_timestamp) + timedelta(hours=1, minutes=15, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             result = service_affecting_monitor._was_last_affecting_trouble_detected_recently(

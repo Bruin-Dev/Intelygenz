@@ -19,11 +19,10 @@ from application.repositories import EdgeIdentifier
 from application.repositories.bruin_repository import BruinRepository
 
 
-INITIAL_AFFECTING_NOTE_REGEX = re.compile(
+AFFECTING_NOTE_REGEX = re.compile(
     r"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Trouble:",
     re.DOTALL | re.MULTILINE
 )
-REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
 
 class ServiceAffectingMonitor:
@@ -402,21 +401,12 @@ class ServiceAffectingMonitor:
 
         notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
 
-        last_reopen_note = self._get_last_element_matching(
+        last_affecting_note = self._get_last_element_matching(
             notes_sorted_by_date_asc,
-            lambda note: REOPEN_NOTE_REGEX.match(note['noteValue'])
+            lambda note: AFFECTING_NOTE_REGEX.search(note['noteValue'])
         )
-        if last_reopen_note:
-            note_creation_date = parse(last_reopen_note['createdDate']).astimezone(utc)
-            seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
-            return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
-
-        initial_affecting_note = self._get_first_element_matching(
-            notes_sorted_by_date_asc,
-            lambda note: INITIAL_AFFECTING_NOTE_REGEX.search(note['noteValue'])
-        )
-        if initial_affecting_note:
-            note_creation_date = parse(initial_affecting_note['createdDate']).astimezone(utc)
+        if last_affecting_note:
+            note_creation_date = parse(last_affecting_note['createdDate']).astimezone(utc)
             seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
             return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
 
