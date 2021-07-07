@@ -32,6 +32,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- KRE Base URL to make calls for get tickets predictions
   kre_base_url: ""
   # -- Base URL for T7 API

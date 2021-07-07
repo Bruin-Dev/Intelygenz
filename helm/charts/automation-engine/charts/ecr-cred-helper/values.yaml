@@ -6,6 +6,7 @@ enabled: false
 
 # -- Specific configuration for ecr-cred-helper
 config:
+  papertrail_prefix: ""
   mode: "aws"
   # -- Secret Access Key of AWS Account
   aws_secret_access_key: ""

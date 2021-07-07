@@ -33,6 +33,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- Client ID credentials for Digi API
   digi_client_id: ""
   # -- Client Secret credentials for Digi API

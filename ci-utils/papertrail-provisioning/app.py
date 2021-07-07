@@ -52,7 +52,7 @@ class PapertrailProvisioner:
         image_tag = [elem['image_tag'] for elem in data if elem['repository'] == repository]
         if not image_tag:
             return None
-        return image_tag[0].split("-")[-1]
+        return image_tag[0]
 
     def papertrail_provision(self):
         file_exec = "go-papertrail-cli"

@@ -32,6 +32,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- Base URL for KRE API
   kre_base_url: ""
 

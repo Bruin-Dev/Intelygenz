@@ -5,7 +5,7 @@ import os
 
 ENVIRONMENT_ID = os.environ['ENVIRONMENT_SLUG']
 BRANCH_NAME = os.environ['CI_COMMIT_REF_NAME']
-PAPERTRAIL_PORT = os.environ['TF_VAR_PAPERTRAIL_PORT']
+PAPERTRAIL_PORT = os.environ['PAPERTRAIL_PORT']
 PAPERTRAIL_CLI_VERSION = os.environ['PAPERTRAIL_CLI_VERSION']
 PAPERTRAIL_CLI_DONWLOAD_URL = f"https://github.com/xoanmm/go-papertrail-cli/releases/download/v" \
                               f"{PAPERTRAIL_CLI_VERSION}/go-papertrail-cli_{PAPERTRAIL_CLI_VERSION}" \

@@ -32,6 +32,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   hawkeye_client_username: ""
   # -- Client password credentials for Hawkeye API
   hawkeye_client_password: ""

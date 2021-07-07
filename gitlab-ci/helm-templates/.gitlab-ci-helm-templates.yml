@@ -38,6 +38,7 @@
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
         helm upgrade --wait --force --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
           -f values.yaml -n ${HELM_CHART_RELEASE_NAME}
+        python3 ci-utils/papertrail-provisioning/app.py -f "$DOCKER_IMAGES_FILE"
       else
         helm upgrade --wait --force --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
           -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
