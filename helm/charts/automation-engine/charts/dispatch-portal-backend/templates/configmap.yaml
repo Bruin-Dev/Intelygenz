@@ -14,4 +14,5 @@ data:
   PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
   PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
+  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
   DISPATCH_PORTAL_SERVER_PORT: "{{ .Values.config.dispatch_portal_server_port }}"

@@ -75,11 +75,11 @@ global:
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: ${REDIS_EMAIL_TAGGER_HOSTNAME}
   # -- Indicates if the logs will be sent to papertrail or not.
-  papertrail_active: "False"
+  papertrail_active: ${PAPERTRAIL_ACTIVE}
   # -- Papertrail host to which the logs will be sent
-  papertrail_host: "logs.papertrailapp.com"
+  papertrail_host: ${PAPERTRAIL_HOST}
   # -- Papertrail port to which the logs will be sent
-  papertrail_port: "0"
+  papertrail_port: ${PAPERTRAIL_PORT}
   # -- Contact email address
   last_contact_recipient: ${LAST_CONTACT_RECIPIENT}
   # -- Email account password
@@ -111,6 +111,8 @@ bruin-bridge:
     port: 5000
   # bruin-bridge specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "bruin-bridge-${BRUIN_BRIDGE_BUILD_NUMBER}"
     # -- Client ID credentials for Bruin API
     bruin_client_id: ${BRUIN_CLIENT_ID}
     # -- Client Secret credentials for Bruin API
@@ -139,6 +141,8 @@ cts-bridge:
   enabled: ${CTS_BRIDGE_ENABLED}
   # cts-bridge specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "cts-bridge-${CTS_BRIDGE_BUILD_NUMBER}"
     # -- Client ID credentials for CTS API
     cts_client_id: ${CTS_CLIENT_ID}
     # -- Client Secret credentials for CTS API
@@ -184,6 +188,8 @@ customer-cache:
   enabled: ${CUSTOMER_CACHE_ENABLED}
   replicaCount: ${CUSTOMER_CACHE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "customer-cache-${CUSTOMER_CACHE_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -210,6 +216,8 @@ digi-bridge:
   replicaCount: ${DIGI_BRIDGE_DESIRED_TASKS}
   # digi-bridge specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "digi-bridge-${DIGI_BRIDGE_BUILD_NUMBER}"
     # -- Client ID credentials for Digi API
     digi_client_id: ${DIGI_CLIENT_ID}
     # -- Client Secret credentials for Digi API
@@ -256,6 +264,8 @@ digi-reboot-report:
   enabled: ${DIGI_REBOOT_REPORT_ENABLED}
   replicaCount: ${DIGI_REBOOT_REPORT_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "digi-reboot-report-${DIGI_REBOOT_REPORT_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Email address to send digi-reboot-report
@@ -282,6 +292,8 @@ dispatch-portal-backend:
   enabled: ${DISPATCH_PORTAL_BACKEND_ENABLED}
   replicaCount: ${DISPATCH_PORTAL_BACKEND_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "dispatch-portal-backend-${DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     dispatch_portal_server_port: 5000
@@ -328,6 +340,8 @@ email-tagger-kre-bridge:
   enabled: ${EMAIL_TAGGER_KRE_BRIDGE_ENABLED}
   replicaCount: ${EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "email-tagger-kre-bridge-${EMAIL_TAGGER_KRE_BRIDGE_BUILD_NUMBER}"
     # -- Base URL for KRE API
     kre_base_url: ${KRE_BASE_URL}
   image:
@@ -358,6 +372,8 @@ email-tagger-monitor:
   enabled: ${EMAIL_TAGGER_MONITOR_ENABLED}
   replicaCount: ${EMAIL_TAGGER_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "email-tagger-monitor-${EMAIL_TAGGER_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Signature secret key
@@ -388,6 +404,8 @@ hawkeye-affecting-monitor:
   enabled: ${HAWKEYE_AFFECTING_MONITOR_ENABLED}
   replicaCount: ${HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "hawkeye-affecting-monitor-${HAWKEYE_AFFECTING_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -412,6 +430,8 @@ hawkeye-bridge:
   enabled: ${HAWKEYE_BRIDGE_ENABLED}
   replicaCount: ${HAWKEYE_BRIDGE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "hawkeye-bridge-${HAWKEYE_BRIDGE_BUILD_NUMBER}"
     hawkeye_client_username: ${HAWKEYE_CLIENT_USERNAME}
     # -- Client password credentials for Hawkeye API
     hawkeye_client_password: ${HAWKEYE_CLIENT_PASSWORD}
@@ -445,6 +465,8 @@ hawkeye-customer-cache:
   enabled: ${HAWKEYE_CUSTOMER_CACHE_ENABLED}
   replicaCount: ${HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "hawkeye-customer-cache-${HAWKEYE_CUSTOMER_CACHE_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -469,6 +491,8 @@ hawkeye-outage-monitor:
   enabled: ${HAWKEYE_OUTAGE_MONITOR_ENABLED}
   replicaCount: ${HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "hawkeye-outage-monitor-${HAWKEYE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -492,6 +516,8 @@ intermapper-outage-monitor:
   enabled: ${INTERMAPPER_OUTAGE_MONITOR_ENABLED}
   replicaCount: ${INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "intermapper-outage-monitor-${INTERMAPPER_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -515,6 +541,8 @@ last-contact-report:
   enabled: ${LAST_CONTACT_REPORT_ENABLED}
   replicaCount: ${LAST_CONTACT_REPORT_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "last-contact-report-${LAST_CONTACT_REPORT_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -540,6 +568,8 @@ lit-bridge:
   # -- Number of lit-bridge pods to do calls to LIT API.
   replicaCount: ${LIT_BRIDGE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "lit-bridge-${LIT_BRIDGE_BUILD_NUMBER}"
     # -- Client ID credentials for LIT API
     lit_client_id: ${LIT_CLIENT_ID}
     # -- Client Secret credentials for LIT API
@@ -582,6 +612,8 @@ lumin-billing-report:
   enabled: ${LUMIN_BILLING_REPORT_ENABLED}
   replicaCount: ${LUMIN_BILLING_REPORT_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "lumin-billing-report-${LUMIN_BILLING_REPORT_BUILD_NUMBER}"
     # -- URI of Lumin API
     lumin_uri: ${LUMIN_URI}
     # -- Token credentials for Lumin API
@@ -624,6 +656,8 @@ notifier:
     port: 5000
   # notifier specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "notifier-${NOTIFIER_BUILD_NUMBER}"
     # -- Slack Webhook URL to send messages
     slack_url: ${NOTIFIER_SLACK_URL}
     # -- Telestax URL
@@ -657,6 +691,8 @@ service-affecting-monitor:
   enabled: ${SERVICE_AFFECTING_MONITOR_ENABLED}
   replicaCount: ${SERVICE_AFFECTING_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-affecting-monitor-${SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -692,6 +728,8 @@ service-dispatch-monitor:
   enabled: ${SERVICE_DISPATCH_MONITOR_ENABLED}
   replicaCount: ${SERVICE_DISPATCH_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-dispatch-monitor-${SERVICE_DISPATCH_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -716,6 +754,8 @@ service-outage-monitor-1:
   enabled: ${SERVICE_OUTAGE_MONITOR_1_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-outage-monitor-1-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -756,6 +796,8 @@ service-outage-monitor-2:
   enabled: ${SERVICE_OUTAGE_MONITOR_2_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-outage-monitor-2-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -796,6 +838,8 @@ service-outage-monitor-3:
   enabled: ${SERVICE_OUTAGE_MONITOR_3_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-outage-monitor-3-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -836,6 +880,8 @@ service-outage-monitor-4:
   enabled: ${SERVICE_OUTAGE_MONITOR_4_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_4_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-outage-monitor-4-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -876,6 +922,8 @@ service-outage-monitor-triage:
   enabled: ${SERVICE_OUTAGE_MONITOR_TRIAGE_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "service-outage-monitor-triage-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -916,6 +964,8 @@ sites-monitor:
   enabled: ${SITES_MONITOR_ENABLED}
   replicaCount: ${SITES_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "sites-monitor-${SITES_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -953,6 +1003,8 @@ t7-bridge:
   enabled: ${T7_BRIDGE_ENABLED}
   replicaCount: ${T7_BRIDGE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "t7-bridge-${T7_BRIDGE_BUILD_NUMBER}"
     # -- KRE Base URL to make calls for get tickets predictions
     kre_base_url: ${KRE_BASE_URL}
     # -- Base URL for T7 API
@@ -990,6 +1042,8 @@ ticket-collector:
   enabled: ${TICKET_COLLECTOR_ENABLED}
   replicaCount: ${TICKET_COLLECTOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "ticket-collector-${TICKET_COLLECTOR_BUILD_NUMBER}"
     # -- Indicate the interval task that must run in parallel
     interval_tasks_run: "1"
     # -- Indicate mongo username
@@ -1028,6 +1082,8 @@ ticket-statistics:
   enabled: ${TICKET_STATISTICS_ENABLED}
   replicaCount: ${TICKET_STATISTICS_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "ticket-statistics-${TICKET_STATISTICS_BUILD_NUMBER}"
     # -- Indicate mongo username
     mongodb_username: ${TICKET_COLLECTOR_MONGO_USERNAME}
     # -- Indicate mongo password
@@ -1068,6 +1124,8 @@ tnba-feedback:
   enabled: ${TNBA_FEEDBACK_ENABLED}
   replicaCount: ${TNBA_FEEDBACK_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "tnba-feedback-${TNBA_FEEDBACK_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1092,6 +1150,8 @@ tnba-monitor:
   enabled: ${TNBA_MONITOR_ENABLED}
   replicaCount: ${TNBA_MONITOR_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "tnba-monitor-${TNBA_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1116,6 +1176,8 @@ velocloud-bridge:
   enabled: ${VELOCLOUD_BRIDGE_ENABLED}
   replicaCount: ${VELOCLOUD_BRIDGE_DESIRED_TASKS}
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "velocloud-bridge-${VELOCLOUD_BRIDGE_BUILD_NUMBER}"
     # -- Velocloud credentials
     velocloud_credentials: ${VELOCLOUD_CREDENTIALS}
   image:

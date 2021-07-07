@@ -119,6 +119,8 @@ bruin-bridge:
     port: 5000
   # -- bruin-bridge specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Client ID credentials for Bruin API
     bruin_client_id: ""
     # -- Client Secret credentials for Bruin API
@@ -149,6 +151,8 @@ cts-bridge:
   replicaCount: 1
   # -- cts-bridge specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Client ID credentials for CTS API
     cts_client_id: ""
     # -- Client Secret credentials for CTS API
@@ -202,6 +206,8 @@ customer-cache:
   # -- Number of replicas of customer-cache module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -229,6 +235,8 @@ digi-bridge:
   replicaCount: 1
   # -- digi-bridge specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Client ID credentials for Digi API
     digi_client_id: ""
     # -- Client Secret credentials for Digi API
@@ -282,6 +290,8 @@ digi-reboot-report:
   # -- Number of replicas of digi-reboot-report module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Email address to send digi-reboot-report
@@ -310,6 +320,8 @@ dispatch-portal-backend:
   # -- Number of replicas of dispatch-portal-backend module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Indicate the port of dispatch portal server
@@ -407,6 +419,8 @@ email-tagger-kre-bridge:
   # -- Number of replicas of email-tagger-kre-bridge module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Base URL for KRE API
     kre_base_url: ""
   image:
@@ -440,6 +454,8 @@ email-tagger-monitor:
   # -- Number of replicas of email-tagger-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     # -- Redis chache for email-tagger
@@ -474,6 +490,8 @@ hawkeye-affecting-monitor:
   # -- Number of replicas of hawkeye-affecting-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -500,6 +518,8 @@ hawkeye-bridge:
   # -- Number of replicas of hawkeye-bridge module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     hawkeye_client_username: ""
     # -- Client password credentials for Hawkeye API
     hawkeye_client_password: ""
@@ -536,6 +556,8 @@ hawkeye-customer-cache:
   # -- Number of replicas of hawkeye-customer-cache module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -562,6 +584,8 @@ hawkeye-outage-monitor:
   # -- Number of replicas of hawkeye-outage-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -588,6 +612,8 @@ intermapper-outage-monitor:
   # -- Number of replicas of intermapper-outage-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -614,6 +640,8 @@ last-contact-report:
   # -- Number of replicas of last-contact-report module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -640,6 +668,8 @@ lit-bridge:
   # -- Number of replicas of lit-bridge module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Client ID credentials for LIT API
     lit_client_id: ""
     # -- Client Secret credentials for LIT API
@@ -685,6 +715,8 @@ lumin-billing-report:
   # -- Number of replicas of lumin-billing-report module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- URI of Lumin API
     lumin_uri: ""
     # -- Token credentials for Lumin API
@@ -729,6 +761,8 @@ notifier:
     port: 5000
   # -- notifier specific configuration variables
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Slack Webhook URL to send messages
     slack_url: ""
     # -- Telestax URL
@@ -765,6 +799,8 @@ service-affecting-monitor:
   # -- Number of replicas of service-affecting-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -802,6 +838,8 @@ service-dispatch-monitor:
   # -- Number of replicas of service-dispatch-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -828,6 +866,8 @@ service-outage-monitor-1:
   # -- Number of replicas of service-outage-monitor-1 module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -870,6 +910,8 @@ service-outage-monitor-2:
   # -- Number of replicas of service-outage-monitor-2 module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -912,6 +954,8 @@ service-outage-monitor-3:
   # -- Number of replicas of service-outage-monitor-3 module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -954,6 +998,8 @@ service-outage-monitor-4:
   # -- Number of replicas of service-outage-monitor-4 module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -996,6 +1042,8 @@ service-outage-monitor-triage:
   # -- Number of replicas of service-outage-monitor-triage module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1038,6 +1086,8 @@ sites-monitor:
   # -- Number of replicas of sites-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1072,6 +1122,8 @@ t7-bridge:
   # -- Number of replicas of t7-bridge module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- KRE Base URL to make calls for get tickets predictions
     kre_base_url: ""
     # -- Base URL for T7 API
@@ -1112,6 +1164,8 @@ ticket-collector:
   # -- Number of replicas of ticket-collector module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the interval task that must run in parallel
     interval_tasks_run: ""
     # -- Indicate mongo username
@@ -1152,6 +1206,8 @@ ticket-statistics:
   # -- Number of replicas of ticket-statistics module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate mongo username
     mongodb_username: ""
     # -- Indicate mongo password
@@ -1194,6 +1250,8 @@ tnba-feedback:
   # -- Number of replicas of tnba-feedback module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1220,6 +1278,8 @@ tnba-monitor:
   # -- Number of replicas of tnba-monitor module
   replicaCount: 1
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1246,6 +1306,8 @@ velocloud-bridge:
   # -- Number of replicas of velocloud-bridge module
   replicaCount: 2
   config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
     # -- Velocloud credentials
     velocloud_credentials: ""
   image:

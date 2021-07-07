@@ -32,6 +32,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- Indicate the interval task that must run in parallel
   interval_tasks_run: ""
   # -- Indicate mongo username

@@ -35,6 +35,7 @@ global:
 replicaCount: 1
 
 config:
+  papertrail_prefix: ""
   # -- Slack Webhook URL to send messages
   slack_url: ""
   # -- Telestax URL

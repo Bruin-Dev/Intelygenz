@@ -33,6 +33,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- URI of Lumin API
   lumin_uri: ""
   # -- Token credentials for Lumin API

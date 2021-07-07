@@ -32,6 +32,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- Indicate mongo username
   mongodb_username: ""
   # -- Indicate mongo password

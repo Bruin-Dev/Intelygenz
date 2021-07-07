@@ -12,4 +12,5 @@ data:
   PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
   PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
+  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
   INTERVAL_TASKS_RUN: "{{ .Values.config.interval_tasks_run }}"

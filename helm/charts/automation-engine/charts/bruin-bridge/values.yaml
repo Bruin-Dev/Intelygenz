@@ -32,6 +32,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- Client ID credentials for Bruin API
   bruin_client_id: ""
   # -- Client Secret credentials for Bruin API

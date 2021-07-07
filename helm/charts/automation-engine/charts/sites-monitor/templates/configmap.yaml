@@ -14,5 +14,6 @@ data:
   PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
   PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
+  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
   LAST_CONTACT_RECIPIENT: {{ .Values.global.last_contact_recipient }}
   MONITORING_SECONDS: "{{ .Values.config.monitoring_seconds }}"

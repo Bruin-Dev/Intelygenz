@@ -33,6 +33,7 @@ global:
     name: "ecr-registry"
 
 config:
+  papertrail_prefix: ""
   # -- Signature secret key
   request_signature_secret_key: ""
   # -- Request api key

@@ -33,6 +33,7 @@ global:
 replicaCount: 1
 
 config:
+  papertrail_prefix: ""
   # -- Client ID credentials for CTS API
   cts_client_id: ""
   # -- Client Secret credentials for CTS API

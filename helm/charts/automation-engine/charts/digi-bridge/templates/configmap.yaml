@@ -14,6 +14,7 @@ data:
   PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
   PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
+  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
   DIGI_IP_PRO: "{{ .Values.config.digi_ip_pro }}"
   DIGI_RECORD_NAME_PRO: "{{ .Values.config.digi_record_name_pro }}"
   DIGI_IP_DEV: "{{ .Values.config.digi_ip_dev }}"
