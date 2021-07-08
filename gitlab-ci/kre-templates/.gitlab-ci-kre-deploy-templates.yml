@@ -89,7 +89,7 @@
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
         cd ${CI_PROJECT_DIR}              
-        envsubst < helm/kre-runtimes/dashboards.yaml > helm/kre-runtimes/dashboards.yaml
+        envsubst < helm/kre-runtimes/dashboards.yaml.tpl > helm/kre-runtimes/dashboards.yaml
         kubectl apply -f helm/kre-runtimes/dashboards.yaml
       fi
   tags:
