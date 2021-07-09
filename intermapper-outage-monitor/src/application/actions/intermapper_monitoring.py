@@ -154,7 +154,7 @@ class InterMapperMonitor:
 
     async def _autoresolve_ticket(self, circuit_id, client_id, intermapper_body):
         self._logger.info('Starting the autoresolve process')
-        tickets_response = await self._bruin_repository.get_tickets(client_id, circuit_id)
+        tickets_response = await self._bruin_repository.get_ticket_basic_info(client_id, circuit_id)
         tickets_body = tickets_response['body']
         tickets_status = tickets_response['status']
         if tickets_status not in range(200, 300):
@@ -166,15 +166,17 @@ class InterMapperMonitor:
 
             ticket_id = ticket['ticketID']
 
-            product_category_response = await self._bruin_repository.get_ticket_product_category(client_id, ticket_id)
+            product_category_response = await self._bruin_repository.get_tickets(client_id, ticket_id)
             product_category_response_body = product_category_response['body']
             product_category_response_status = product_category_response['status']
             if product_category_response_status not in range(200, 300):
                 return False
 
-            product_category = ''
-            if len(product_category_response_body) > 0:
-                product_category = product_category_response_body[0].get('category')
+            if not product_category_response_body:
+                self._logger.info(f"Ticket {ticket_id} couldn't be found in Bruin. Skipping autoresolve...")
+                continue
+
+            product_category = product_category_response_body[0].get('category')
 
             self._logger.info(f'Product category of ticket {ticket_id} is {product_category}')
 

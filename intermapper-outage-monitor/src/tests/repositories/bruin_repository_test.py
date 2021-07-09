@@ -539,7 +539,7 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
 
     @pytest.mark.asyncio
-    async def get_tickets_with_service_number_specified_test(self):
+    async def get_ticket_basic_info_with_service_number_specified_test(self):
         bruin_client_id = 12345
         service_number = 'VC1234567'
         ticket_statuses = ['New', 'InProgress', 'Draft']
@@ -573,13 +573,13 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.get_tickets(bruin_client_id, service_number)
+            result = await bruin_repository.get_ticket_basic_info(bruin_client_id, service_number)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_tickets_with_rpc_request_failing_test(self):
+    async def get_ticket_basic_info_with_rpc_request_failing_test(self):
         bruin_client_id = 12345
         service_number = 'VC1234567'
         ticket_statuses = ['New', 'InProgress', 'Draft']
@@ -607,7 +607,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.get_tickets(bruin_client_id, service_number)
+            result = await bruin_repository.get_ticket_basic_info(bruin_client_id, service_number)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -615,7 +615,7 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_tickets_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_ticket_basic_info_with_rpc_request_returning_non_2xx_status_test(self):
         bruin_client_id = 12345
         service_number = 'VC1234567'
         ticket_statuses = ['New', 'InProgress', 'Draft']
@@ -648,7 +648,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.get_tickets(bruin_client_id, service_number)
+            result = await bruin_repository.get_ticket_basic_info(bruin_client_id, service_number)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -656,7 +656,7 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_ticket_product_category_test(self):
+    async def get_tickets_test(self):
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VOO"
@@ -690,13 +690,13 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_product_category(bruin_client_id, ticket_id)
+            result = await bruin_repository.get_tickets(bruin_client_id, ticket_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_ticket_product_category_rpc_request_failing_test(self):
+    async def get_tickets_rpc_request_failing_test(self):
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VOO"
@@ -724,7 +724,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_product_category(bruin_client_id, ticket_id)
+            result = await bruin_repository.get_tickets(bruin_client_id, ticket_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -732,7 +732,7 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_ticket_product_category_rpc_request_returning_non_2xx_status_test(self):
+    async def get_tickets_rpc_request_returning_non_2xx_status_test(self):
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VOO"
@@ -765,7 +765,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_product_category(bruin_client_id, ticket_id)
+            result = await bruin_repository.get_tickets(bruin_client_id, ticket_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.request", request, timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()

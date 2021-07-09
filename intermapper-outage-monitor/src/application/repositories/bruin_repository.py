@@ -182,7 +182,7 @@ class BruinRepository:
 
         return response
 
-    async def get_tickets(self, client_id: int, service_number: str = None):
+    async def get_ticket_basic_info(self, client_id: int, service_number: str = None):
         err_msg = None
         ticket_statuses = ['New', 'InProgress', 'Draft']
 
@@ -198,15 +198,15 @@ class BruinRepository:
 
         try:
             self._logger.info(
-                f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                f'Getting all tickets basic info with any status of {ticket_statuses}, with ticket topic '
                 f'VOO, service number {service_number} and belonging to client {client_id} from Bruin...'
             )
 
             response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
         except Exception as e:
             err_msg = (
-                f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
-                f'with ticket topic VOO and belonging to client {client_id} -> {e}'
+                f'An error occurred when requesting tickets  basic info from Bruin API with any status'
+                f' of {ticket_statuses}, with ticket topic VOO and belonging to client {client_id} -> {e}'
             )
             response = nats_error_response
         else:
@@ -215,14 +215,14 @@ class BruinRepository:
 
             if response_status in range(200, 300):
                 self._logger.info(
-                    f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'Got all tickets basic info with any status of {ticket_statuses}, with ticket topic '
                     f'VOO, service number {service_number} and belonging to client '
                     f'{client_id} from Bruin!'
                 )
             else:
                 err_msg = (
-                    f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'VOO, service number {service_number} and belonging to client {client_id} in '
+                    f'Error while retrieving tickets basic info with any status of {ticket_statuses}, '
+                    f'with ticket topic VOO, service number {service_number} and belonging to client {client_id} in '
                     f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
@@ -233,7 +233,7 @@ class BruinRepository:
 
         return response
 
-    async def get_ticket_product_category(self, client_id: int, ticket_id):
+    async def get_tickets(self, client_id: int, ticket_id):
         err_msg = None
         ticket_statuses = ['New', 'InProgress', 'Draft']
 
@@ -249,13 +249,13 @@ class BruinRepository:
 
         try:
             self._logger.info(
-                f'Getting product category of ticket id {ticket_id} from Bruin...'
+                f'Getting all tickets of ticket id {ticket_id} from Bruin...'
             )
 
             response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
         except Exception as e:
             err_msg = (
-                f'An error occurred when requesting product category of ticket id {ticket_id} from Bruin API -> {e}'
+                f'An error occurred when requesting all tickets of ticket id {ticket_id} from Bruin API -> {e}'
             )
             response = nats_error_response
         else:
@@ -264,11 +264,11 @@ class BruinRepository:
 
             if response_status in range(200, 300):
                 self._logger.info(
-                    f'Got product category of ticket id {ticket_id} from Bruin'
+                    f'Got all tickets of ticket id {ticket_id} from Bruin'
                 )
             else:
                 err_msg = (
-                    f'Error while retrieving product category of ticket id {ticket_id} in '
+                    f'Error while retrieving all tickets of ticket id {ticket_id} in '
                     f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
