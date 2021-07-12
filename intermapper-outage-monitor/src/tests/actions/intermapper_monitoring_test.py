@@ -802,7 +802,7 @@ class TestInterMapperMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, circuit_id, max_autoresolves=3
+            relevant_notes_for_edge, circuit_id, max_autoresolves=3
         )
 
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
@@ -1253,7 +1253,7 @@ class TestInterMapperMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, circuit_id, max_autoresolves=3
+            relevant_notes_for_edge, circuit_id, max_autoresolves=3
         )
 
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -1389,7 +1389,7 @@ class TestInterMapperMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, circuit_id, max_autoresolves=3
+            relevant_notes_for_edge, circuit_id, max_autoresolves=3
         )
 
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)

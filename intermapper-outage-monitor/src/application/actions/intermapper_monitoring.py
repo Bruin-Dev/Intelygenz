@@ -199,7 +199,7 @@ class InterMapperMonitor:
                 continue
 
             can_detail_be_autoresolved_one_more_time = self._is_outage_ticket_detail_auto_resolvable(
-                notes_from_outage_ticket, circuit_id, max_autoresolves=3
+                relevant_notes, circuit_id, max_autoresolves=3
             )
             if not can_detail_be_autoresolved_one_more_time:
                 self._logger.info(
