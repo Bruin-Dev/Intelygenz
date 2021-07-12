@@ -2,6 +2,9 @@
 old_cache*.csv
 new_cache*.csv
 
+# project databases
+databases/
+
 # Intellij
 *.idea/
 *.iml
