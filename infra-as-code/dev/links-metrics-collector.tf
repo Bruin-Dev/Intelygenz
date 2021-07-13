@@ -34,6 +34,8 @@ data "template_file" "automation-links-metrics-collector" {
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
 
+    NATS_SERVER1 = local.nats_server1
+    REDIS_HOSTNAME = local.redis-hostname
     MONGODB_USERNAME = var.TICKET_COLLECTOR_MONGO_USERNAME
     MONGODB_PASSWORD = var.TICKET_COLLECTOR_MONGO_PASSWORD
     MONGODB_HOST = var.TICKET_COLLECTOR_MONGO_HOST
