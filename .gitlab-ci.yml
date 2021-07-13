@@ -33,6 +33,7 @@ variables:
   hawkeye_outage_monitor_desired_tasks: 1
   intermapper_outage_monitor_desired_tasks: 1
   last_contact_report_desired_tasks: 1
+  links_metrics_collector_desired_tasks: 1
   lit_bridge_desired_tasks: 1
   lumin_billing_report_desired_tasks: 1
   metrics_prometheus_desired_tasks: 1
@@ -91,6 +92,7 @@ include:
   - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
   - local: 'intermapper-outage-monitor/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
+  - local: 'links-metrics-collector/.gitlab-ci.yml'
   - local: 'lit-bridge/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'
   - local: 'metrics-dashboard/.gitlab-ci.yml'

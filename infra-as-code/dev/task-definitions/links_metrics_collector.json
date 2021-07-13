@@ -1,6 +1,6 @@
 [
   {
-    "name": "digi-reboot-report",
+    "name": "links-metrics-collector",
     "image": "${image}",
     "portMappings": [
       {
@@ -33,8 +33,20 @@
     },
     "environment": [
       {
-        "name": "PYTHONUNBUFFERED",
-        "value": "${PYTHONUNBUFFERED}"
+        "name": "MONGO_USERNAME",
+        "value": "${MONGODB_USERNAME}"
+      },
+      {
+        "name": "MONGO_PASS",
+        "value": "${MONGODB_PASSWORD}"
+      },
+      {
+        "name": "MONGO_URL",
+        "value": "${MONGODB_HOST}"
+      },
+      {
+        "name": "MONGO_PORT",
+        "value": "${MONGODB_PORT}"
       },
       {
         "name": "NATS_SERVER1",
@@ -43,10 +55,6 @@
       {
         "name": "REDIS_HOSTNAME",
         "value": "${REDIS_HOSTNAME}"
-      },
-      {
-        "name": "DIGI_REPORT_RECIPIENT",
-        "value": "${DIGI_REPORT_RECIPIENT}"
       },
       {
         "name": "CURRENT_ENVIRONMENT",

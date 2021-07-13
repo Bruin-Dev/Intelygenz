@@ -520,6 +520,12 @@ variable "last_contact_report_desired_tasks" {
   description = "Number of desired tasks of microservice last-contact-report"
 }
 
+variable "links_metrics_collector_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice links-metrics-collector"
+}
+
 variable "lit_bridge_desired_tasks" {
   default = 1
   type = number
@@ -779,6 +785,11 @@ variable "TICKET_COLLECTOR_MONGO_HOST" {
   type = string
   default = "documentdb.hostname.private"
   description = "documentdb hostname for database access"
+}
+
+variable "TICKET_COLLECTOR_MONGO_PORT" {
+  default = "27017"
+  description = "documentdb PORT for database"
 }
 
 variable "TICKET_COLLECTOR_INTERVAL_TASKS_RUN" {
