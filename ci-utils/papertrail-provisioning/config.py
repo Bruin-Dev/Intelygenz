@@ -103,6 +103,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "automation-last-contact-report"
                 },
                 {
+                    "query": f"links-metrics-collector AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                    "search_name": f"[links-metrics-collector] - logs",
+                    "repository": "automation-links-metrics-collector"
+                },
+                {
                     "query": f"lit-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[lit-bridge] - logs",
                     "repository": "automation-lit-bridge"
