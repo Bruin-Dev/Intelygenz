@@ -181,7 +181,7 @@ class InterMapperMonitor:
             self._logger.info(f'Product category of ticket {ticket_id} is {product_category}')
 
             if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve_product_category_list']:
-                self._logger.info(f"Ticket's product category is {product_category}, and is not "
+                self._logger.info(f"Product category of ticket {ticket_id} is {product_category}, and is not "
                                   f"one of the categories we autoresolve for. Skipping autoresolve ...")
                 continue
 
