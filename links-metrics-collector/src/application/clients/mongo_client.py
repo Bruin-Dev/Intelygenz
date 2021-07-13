@@ -37,8 +37,8 @@ class MyMongoClient:
             self._logger.info(f'The collection tickets on database links_metrics exists on mongodb.')
         else:
             self._logger.info(f'The collection tickets on database links_metrics does not exists on mongodb.')
-            db.create_collection("links-metrics")
-        result = db["links-metrics"].insert_one(json_data)
+            db.create_collection("links_metrics")
+        result = db["links_metrics"].insert_one(json_data)
         self._logger.info(f'ACK of inserting: {result.acknowledged}')
         return result.inserted_id
 
@@ -47,7 +47,7 @@ class MyMongoClient:
         self._logger.info(f'Trying to fetch data from {interval_start} to {interval_end}')
         db = self._client.get_default_database()
 
-        cursor = db["links-metrics"].find({"created_date": {
+        cursor = db["links_metrics"].find({"created_date": {
             "$gte": interval_start,
             "$lt": interval_end
         }})
