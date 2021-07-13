@@ -7,12 +7,17 @@
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | cts-bridge |[![cts-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=cts-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| digi-bridge |[![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| digi-reboot-report |[![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| email-tagger-kre-bridge |[![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| email-tagger-monitor |[![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-affecting-monitor |[![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-customer-cache |[![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| intermapper-outage-monitor |[![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -86,9 +91,8 @@ new microservice and any new env variables to the system's files. This is done i
 it to both the infrastructure and the pipeline.
 You will need to add/modify files in the folders of the 
 - [automation-engine](#automation-engine)  
-- [gitlab-ci](#gitlab-ci) 
 - [infra-as-code](#infra-as-code) 
-- [installation-utils](#installation-utils)
+- [helm](#helm) 
 
 Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
 specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
@@ -102,32 +106,22 @@ In the automation-engine root folder it is necessary update the following files:
 - [README.md](README.md)
 - [docker-compose.yml](docker-compose.yml)
 
-### gitlab-ci
-If your microservices adds any new env variables you will need to make changes to the following file:
-- [terraform-templates/.gitlab-ci-terraform-basic-templates.yml](gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml)
-
 ### infra-as-code
 In infra-as-code you will need to make the changes to the following locations:
 - Add desired amount and any new env variables here: [.gitlab-ci.yml](infra-as-code/.gitlab-ci.yml)
 
 - basic infra folder    
-    - [ecr_repositories.tf](infra-as-code/basic-infra/ecr_repositories.tf)
-- dev folder
-    - Create a new file called `[new microservice name].tf`
-    - If the microservice is a capability then it goes in the `depends_on` sections of the use cases' terraform file
-    - [locals.tf](infra-as-code/dev/locals.tf)
-    - [metrics-prometheus.tf](infra-as-code/dev/metrics-prometheus.tf)
-    - In [variable.tf](infra-as-code/dev/variables.tf) Copy the other services' variable `[microservice name]_BUILD_NUMBER` 
-      for the new microservice and swap the name. Also copy the format for the desired amount and make one for the new service.
-      Any new env variables will be placed here as well.
-    - dashboard-definitions folder
-        -   [dashboard_cluster_definition.json](infra-as-code/dev/dashboards-definitions/dashboard_cluster_definition.json)
-    - task-definitions folder
-        -   Create a new file called `[new microservice name].json`
- 
-### installation-utils
-In installation-utils you will need to make changes to the following files:
-- [environment_files_generator.py](installation-utils/environment_files_generator.py)
+    - [0-ecr_repositories](infra-as-code/basic-infra/0-ecr_repositories) *NOTE: to add new ecr image
+
+### helm
+If your microservices adds any new env variables you will need to make changes to the following files:
+- One of this places:
+    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/configmap.yaml](helm/charts/automation-engine/charts) *NOTE: The variable will be save in plain text (make sure that you create variable as ".Values.config.<var>")
+    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/secret.yaml](helm/charts/automation-engine/charts) *NOTE: The variable have sensitive data and will be save in base64-encoded string.
+- [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/values.yaml](helm/charts/automation-engine/charts) *NOTE: this only need to define the variable empty
+- [helm/charts/automation-engine/charts/values.yaml](helm/charts/automation-engine/charts/values.yaml) *NOTE: this only need to define the variable empty
+- [helm/charts/automation-engine/charts/values.yaml.tpl](helm/charts/automation-engine/charts/values.yaml.tpl) *NOTE: here you put the variable and the value that will be replaced by pipeline to deploy
+- [ci-utils/environments/deploy_environment_vars.sh](ci-utils/environments/deploy_environment_vars.sh) *NOTE: make sure the variable exist in gitlab-ci variables.
 
 # Technologies used
 
@@ -375,13 +369,15 @@ Run:
 
 `$ docker-compose up --build`
 
-# KRE
+# EKS and KRE
 
-In this project [KRE](https://konstellation-io.github.io/website/) is used, it has been deployed in an [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments, as well as all the parts needed for this in AWS.
+- Automation-engine is deployed in [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html).
+
+- Additionaly we use [KRE](https://konstellation-io.github.io/website/) proyect for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
 
 ## Access Control
 
-In the creation and possible updates in the EKS clusters used for the KRE [environments](./docs/PIPELINES#kre-environments), an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
+In the creation and possible updates in the EKS clusters an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
 
 ### Roles
 
@@ -398,7 +394,7 @@ Below are the roles created for each of the users actually, as well as the categ
 | IAM User Name | Role in Project | IAM role created |
 |---------------|-----------------|------------------|
 | alberto.iglesias | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
-| angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
+| alejandro.aceituna | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna |
 | angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
 | angel.luis.piquero | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
 | brandon.samudio | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
@@ -429,12 +425,12 @@ The following tools are required to access to the EKS clusters created for each 
   $ sudo mv ./kubectl /usr/local/bin/kubectl
   ```
 
-- **kubectx**: utility to manage and switch between kubectl contexts. It can be installed with the following the commands show below:
+- **k9s**: utility to manage and inspect a kubernetes cluster. It can be installed with the following the commands show below:
 
   1. Get the latest tag name:
 
       ```sh
-      LATEST_RELEASE_TAG=$(curl --silent "https://api.github.com/repos/ahmetb/kubectx/releases/latest" | jq -r .tag_name)
+      LATEST_RELEASE_TAG=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | jq -r .tag_name)
       ```
 
   2. Download the binary according to the OS used:
@@ -442,21 +438,21 @@ The following tools are required to access to the EKS clusters created for each 
      - *MacOS*:
 
        ```sh
-       $ curl -L "https://github.com/ahmetb/kubectx/releases/download/${LATEST_RELEASE_TAG}/kubectx_${LATEST_RELEASE_TAG}_darwin_x86_64.tar.gz" -o kubectx.tar.gz
+       $ curl -L "https://github.com/derailed/k9s/releases/download/${LATEST_RELEASE_TAG}/k9s_darwin_x86_64.tar.gz" -o k9s.tar.gz
        ```
 
      - *Linux*:
 
        ```sh
-       $ curl -L "https://github.com/ahmetb/kubectx/releases/download/${LATEST_RELEASE_TAG}/kubectx_${LATEST_RELEASE_TAG}_linux_x86_64.tar.gz" -o kubectx.tar.gz
+       $ curl -L "https://github.com/derailed/k9s/releases/download/${LATEST_RELEASE_TAG}/k9s_linux_x86_64.tar.gz" -o k9s.tar.gz
        ```
 
   3. Unzip the files downloaded in the previous step and configure:
 
      ```sh
-     $ tar -zxvf kubectx.tar.gz
-     $ chmod +x ./kubectx
-     $ sudo mv ./kubectx /usr/local/bin/kubectx
+     $ tar -zxvf k9s.tar.gz
+     $ chmod +x ./k9s
+     $ sudo mv ./k9s /usr/local/bin/k9s
      ```
 
 - **robo3t**: It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
@@ -545,11 +541,17 @@ The following steps must be followed to set up the configuration to access any o
 
    > The name of the EKS cluster for production is `mettel-automation-kre` and for development is `mettel-automation-kre-dev`.
 
-4. Switch to the `kubectl` context related to the cluster to be interacted with using `kubectx`:
+4. Open k9s to connect to te cluster, if you have more clusters in you kubeconfig file you can chose you cluster with `context` command inside k9s:
 
     ```sh
-    $ kubectx arn:aws:eks:us-east-1:<aws_account_id>:cluster/<kre_eks_cluster_name>
+    $ k9s
+    
+    # after k9s open, select you cluster by put this command in k9s:
+    :context
     ```
+
+NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like ':/' to find or ':q' to exit. You can find more information about k9s in his [github page](https://github.com/derailed/k9s).
+
 # Lists of projects READMEs
 
 ## Microservices
