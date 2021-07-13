@@ -14,7 +14,9 @@ class MyMongoClient:
         password = self._config.MONGO_PASS
         url = self._config.MONGO_URL
         port = self._config.MONGO_PORT
-        conn_string = f'mongodb://{username}:{password}@{url}:{port}'
+        conn_string = f'mongodb://{username}:{password}@{url}:{port}?ssl=true&ssl_ca_certs=' \
+                      f'/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference' \
+                      f'=secondaryPreferred&retryWrites=false'
         self._logger.info(f'Connecting to mongo using: {conn_string}')
         try:
             client = MongoClient(conn_string)
