@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 setup(
     name='links-metrics-collector',
-    version='1.0.1',
+    version='1.0.0',
     description='MetTel\'s automation base microservice',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,

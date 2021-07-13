@@ -27,7 +27,7 @@ data "external" "links-metrics-collector-build_number" {
 
 data "template_file" "automation-links-metrics-collector" {
   count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  template = file("${path.module}/task-definitions/ticket_collector.json")
+  template = file("${path.module}/task-definitions/links_metrics_collector.json")
 
   vars = {
     image = local.automation-links-metrics-collector-image
@@ -121,7 +121,7 @@ resource "aws_ecs_service" "automation-links-metrics-collector" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   name = local.automation-links-metrics-collector-resource-name
   task_definition = local.automation-links-metrics-collector-task_definition
-  desired_count = var.ticket_collector_desired_tasks
+  desired_count = var.links_metrics_collector_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 
