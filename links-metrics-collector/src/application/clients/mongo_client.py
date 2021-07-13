@@ -14,7 +14,7 @@ class MyMongoClient:
         password = self._config.MONGO_PASS
         url = self._config.MONGO_URL
         port = self._config.MONGO_PORT
-        conn_string = f'mongodb://{username}:{password}@{url}:{port}?ssl=true&ssl_ca_certs=' \
+        conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?ssl=true&ssl_ca_certs=' \
                       f'/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference' \
                       f'=secondaryPreferred&retryWrites=false'
         self._logger.info(f'Connecting to mongo using: {conn_string}')
@@ -31,16 +31,23 @@ class MyMongoClient:
 
     def insert(self, json_data: dict):
         self._logger.info(f'Inserting data in mongo: {json_data}')
-        db = self._client.velocloud
-        result = db.links_metrics.insert_one(json_data)
+        db = self._client.get_default_database()
+        list_collections = db.collection_names()
+        if "links_metrics" in list_collections:
+            self._logger.info(f'The collection tickets on database links_metrics exists on mongodb.')
+        else:
+            self._logger.info(f'The collection tickets on database links_metrics does not exists on mongodb.')
+            db.create_collection("links-metrics")
+        result = db["links-metrics"].insert_one(json_data)
         self._logger.info(f'ACK of inserting: {result.acknowledged}')
         return result.inserted_id
 
     def get_from_interval(self, interval_start, interval_end):
         # start and end are datetime isoformat objects
         self._logger.info(f'Trying to fetch data from {interval_start} to {interval_end}')
-        db = self._client.velocloud
-        cursor = db.links_metrics.find({"created_date": {
+        db = self._client.get_default_database()
+
+        cursor = db["links-metrics"].find({"created_date": {
             "$gte": interval_start,
             "$lt": interval_end
         }})
