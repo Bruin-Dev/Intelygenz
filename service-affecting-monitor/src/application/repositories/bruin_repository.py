@@ -384,6 +384,7 @@ class BruinRepository:
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
             "#*MetTel's IPA*#",
+            'All Service Affecting conditions (Jitter, Packet Loss, Latency and Utilization) have stabilized.',
             f'Auto-resolving task for serial: {serial_number}',
             f'TimeStamp: {current_datetime_tz_aware}',
         ])
