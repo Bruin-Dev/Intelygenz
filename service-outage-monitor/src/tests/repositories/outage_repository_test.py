@@ -291,6 +291,7 @@ class TestOutageRepository:
                 },
             ],
         }
+
         links_configuration = [
             {
                 'interfaces': ['REX'],

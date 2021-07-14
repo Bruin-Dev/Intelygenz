@@ -48,6 +48,7 @@ MONITOR_CONFIG = {
         'forward_to_hnoc': 60,
     },
     'velocloud_instances_filter': velocloud_hosts_and_filters,
+    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned'],
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
