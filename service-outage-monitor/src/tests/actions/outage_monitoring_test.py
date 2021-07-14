@@ -10144,6 +10144,17 @@ class TestServiceOutageMonitor:
                     'linkId': 5293,
                     'linkIpAddress': '70.59.5.185',
                 },
+                {
+                    'displayName': 'BYOB 70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
             ],
         }
         cached_edge = {
@@ -10276,7 +10287,7 @@ class TestServiceOutageMonitor:
                                                                            detail_id=outage_ticket_detail_1[
                                                                                'detailID'])
         bruin_repository.append_asr_forwarding_note.assert_awaited_once_with(
-            ticket_id, edge_status['links'], edge_serial
+            ticket_id, [edge_status['links'][0]], edge_serial
         )
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
 
@@ -10435,6 +10446,127 @@ class TestServiceOutageMonitor:
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=[])
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.get_ticket_overview = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock()
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
+
+        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
+
+        outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
+        outage_repository.find_disconnected_wired_links.assert_called_once_with(
+            edge_status, cached_edge['links_configuration'])
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.get_ticket_overview.assert_not_awaited()
+
+        outage_monitor._is_ticket_old_enough.assert_not_called()
+
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_no_whitelist_links_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+
+        edge_status = {
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 1,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'ONLINE',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'links': [
+                {
+                    'displayName': 'BYOB 70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'displayName': 'customer owned 70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'displayName': 'Customer Owned 70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+            ],
+        }
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()

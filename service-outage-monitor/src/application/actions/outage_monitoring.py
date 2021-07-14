@@ -897,11 +897,23 @@ class OutageMonitor:
             )
             return
 
+        self._logger.info(f'Searching serial {serial_number} for any wired links')
         links_wired = self._outage_repository.find_disconnected_wired_links(edge_status, links_configuration)
         if not links_wired:
             self._logger.info(
                 f'No wired links are disconnected for serial {serial_number}. Related detail of ticket {ticket_id} '
                 'will not be forwarded to ASR Investigate.'
+            )
+            return
+
+        self._logger.info(f'Filtering out any of the wired links of serial {serial_number} that contains any of the '
+                          f'following: {self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]} '
+                          f'in the link label')
+        whitelisted_links = self._find_whitelisted_links_for_asr_forward(links_wired)
+        if not whitelisted_links:
+            self._logger.info(
+                f'No links with whitelisted labels were found for serial {serial_number}. '
+                f'Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate.'
             )
             return
 
@@ -954,12 +966,23 @@ class OutageMonitor:
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
-            await self._bruin_repository.append_asr_forwarding_note(ticket_id, links_wired, serial_number)
+            await self._bruin_repository.append_asr_forwarding_note(ticket_id, whitelisted_links, serial_number)
             slack_message = (
                 f'Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded '
                 f'to {task_result} queue!'
             )
             await self._notifications_repository.send_slack_message(slack_message)
+
+    def _is_link_label_black_listed(self, link_label):
+        blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]
+        return any(label for label in blacklisted_link_labels if label in link_label)
+
+    def _find_whitelisted_links_for_asr_forward(self, links: list) -> list:
+        return [
+            link
+            for link in links
+            if self._is_link_label_black_listed(link['displayName']) is False
+        ]
 
     def _was_digi_rebooted_recently(self, ticket_note) -> bool:
         current_datetime = datetime.now(utc)
