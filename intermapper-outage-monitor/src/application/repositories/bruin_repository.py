@@ -14,7 +14,7 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def append_note_to_ticket(self, ticket_id: int, note: str):
+    async def append_note_to_ticket(self, ticket_id: int, note: str, wtns: list = None):
         err_msg = None
 
         request = {
@@ -24,10 +24,11 @@ class BruinRepository:
                 'note': note,
             },
         }
+        if wtns:
+            request['body']['service_numbers'] = wtns
 
         try:
-            self._logger.info(f'Appending note for all service number(s) in ticket {ticket_id}...')
-
+            self._logger.info(f'Appending note to ticket {ticket_id}... Note contents: {note}')
             response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=60)
         except Exception as e:
             err_msg = (
@@ -39,7 +40,9 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
+            if response_status in range(200, 300):
+                self._logger.info(f'Note appended to ticket {ticket_id}!')
+            else:
                 err_msg = (
                     f'Error while appending note to ticket {ticket_id} in '
                     f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
@@ -137,15 +140,23 @@ class BruinRepository:
         ])
         return await self.append_note_to_ticket(ticket_id, intermapper_note)
 
-    async def append_autoresolve_note(self, ticket_id, wtn, intermapper_body):
+    async def append_intermapper_up_note(self, ticket_id, wtn, intermapper_body):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        intermapper_note = os.linesep.join([
+            f"#*MetTel's IPA*#",
+            f'{intermapper_body}',
+            f'TimeStamp: {current_datetime_tz_aware}'
+        ])
+        return await self.append_note_to_ticket(ticket_id, intermapper_note, wtns=[wtn])
+
+    async def append_autoresolve_note(self, ticket_id, wtn):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'Auto-resolving task for {wtn}',
-            f'{intermapper_body}',
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
-        return await self.append_note_to_ticket(ticket_id, intermapper_note)
+        return await self.append_note_to_ticket(ticket_id, intermapper_note, wtns=[wtn])
 
     async def resolve_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None

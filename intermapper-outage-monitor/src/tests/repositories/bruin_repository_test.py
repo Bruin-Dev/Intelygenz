@@ -64,6 +64,41 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def append_note_to_ticket_wtn_provided_test(self):
+        circuit_id = 1234
+        ticket_id = 11111
+        ticket_note = 'This is a ticket note'
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'note': ticket_note,
+                'service_numbers': [circuit_id]
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 'Note appended with success',
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note, wtns=[circuit_id])
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=60)
+        assert result == response
+
+    @pytest.mark.asyncio
     async def append_note_to_ticket_with_rpc_request_failing_test(self):
         ticket_id = 11111
         ticket_note = 'This is a ticket note'
@@ -503,7 +538,7 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
 
     @pytest.mark.asyncio
-    async def append_autoresolve_note_test(self):
+    async def append_intermapper_up_note_test(self):
         ticket_id = 11111
         circuit_id = 1345
         intermapper_body = os.linesep.join([
@@ -527,16 +562,41 @@ class TestBruinRepository:
         current_datetime = datetime.now()
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f'Auto-resolving task for {circuit_id}',
             f'{intermapper_body}',
             f'TimeStamp: {current_datetime}'
         ])
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
-            await bruin_repository.append_autoresolve_note(ticket_id, circuit_id, intermapper_body)
+            await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, intermapper_body)
 
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
+
+    @pytest.mark.asyncio
+    async def append_autoresolve_note_test(self):
+        ticket_id = 11111
+        circuit_id = 1345
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        current_datetime = datetime.now()
+        intermapper_note = os.linesep.join([
+            f"#*MetTel's IPA*#",
+            f'Auto-resolving task for {circuit_id}',
+            f'TimeStamp: {current_datetime}'
+        ])
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            await bruin_repository.append_autoresolve_note(ticket_id, circuit_id)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
 
     @pytest.mark.asyncio
     async def get_ticket_basic_info_with_service_number_specified_test(self):

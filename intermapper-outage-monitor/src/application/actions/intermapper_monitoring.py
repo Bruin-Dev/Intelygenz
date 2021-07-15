@@ -63,7 +63,7 @@ class InterMapperMonitor:
             self._logger.info('Grabbing the asset_id from the InterMapper email')
             asset_id = self._extract_value_from_field('(', ')', parsed_email_dict['name'])
 
-            if asset_id is None or asset_id == 'SD-WAN':
+            if asset_id is None or asset_id == 'SD-WAN' or asset_id == '':
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response['status']
                 if mark_email_as_read_status not in range(200, 300):
@@ -166,6 +166,13 @@ class InterMapperMonitor:
 
             ticket_id = ticket['ticketID']
 
+            self._logger.info(f'Posting InterMapper UP note to task of ticket id {ticket_id} '
+                              f'related to circuit ID {circuit_id}...')
+            up_note_response = await self._bruin_repository.append_intermapper_up_note(ticket_id, circuit_id,
+                                                                                       intermapper_body)
+            if up_note_response['status'] not in range(200, 300):
+                return False
+
             product_category_response = await self._bruin_repository.get_tickets(client_id, ticket_id)
             product_category_response_body = product_category_response['body']
             product_category_response_status = product_category_response['status']
@@ -232,7 +239,9 @@ class InterMapperMonitor:
             if resolve_ticket_response['status'] not in range(200, 300):
                 return False
 
-            await self._bruin_repository.append_autoresolve_note(ticket_id, circuit_id, intermapper_body)
+            self._logger.info(f'Autoresolve was successful for task of ticket {ticket_id} related to '
+                              f'circuit ID {circuit_id}. Posting autoresolve note...')
+            await self._bruin_repository.append_autoresolve_note(ticket_id, circuit_id)
             slack_message = (
                 f'Outage ticket {ticket_id} for circuit_id {circuit_id} was autoresolved through InterMapper emails. '
                 f'Ticket details at https://app.bruin.com/t/{ticket_id}.'
