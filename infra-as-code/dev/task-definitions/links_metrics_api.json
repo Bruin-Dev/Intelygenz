@@ -1,6 +1,6 @@
 [
   {
-    "name": "links-metrics-collector",
+    "name": "links-metrics-api",
     "image": "${image}",
     "portMappings": [
       {
