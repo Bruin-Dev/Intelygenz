@@ -23,8 +23,8 @@ variables:
   customer_cache_desired_tasks: 1
   digi_bridge_desired_tasks: 1
   digi_reboot_report_desired_tasks: 1
-  dispatch_portal_backend_desired_tasks: 1
-  dispatch_portal_frontend_desired_tasks: 1
+  dispatch_portal_backend_desired_tasks: 0
+  dispatch_portal_frontend_desired_tasks: 0
   email_tagger_monitor_desired_tasks: 1
   email_tagger_kre_bridge_desired_tasks: 1
   hawkeye_affecting_monitor_desired_tasks: 0
@@ -43,7 +43,7 @@ variables:
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
   service_affecting_monitor_desired_tasks: 1
-  service_dispatch_monitor_desired_tasks: 1
+  service_dispatch_monitor_desired_tasks: 0
   service_outage_monitor_1_desired_tasks: 1
   service_outage_monitor_2_desired_tasks: 1
   service_outage_monitor_3_desired_tasks: 1
