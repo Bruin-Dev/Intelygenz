@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1618409369742,
+  "iteration": 1627028651327,
   "links": [],
   "panels": [
     {
@@ -1022,21 +1022,33 @@
       },
       {
         "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": null,
-        "definition": "label_values(edges_processed, namespace)",
+        "definition": "kube_namespace_created",
         "description": null,
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "environment_name",
+        "label": "namespace",
         "multi": true,
         "name": "namespace",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
         "query": {
-          "query": "label_values(edges_processed, namespace)",
+          "query": "kube_namespace_created",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 0,
-        "regex": ".*",
+        "refresh": 1,
+        "regex": "/.*namespace=\"(?<namespace>automation-.*?)\".*/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",

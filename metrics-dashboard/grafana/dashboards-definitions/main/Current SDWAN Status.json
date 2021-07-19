@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1556815896789,
+  "iteration": 1626695320093,
   "links": [],
   "panels": [
     {
@@ -28,6 +27,13 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -79,9 +85,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "edges_processed",
+          "expr": "edges_processed{namespace=~\"$namespace\"}",
           "format": "time_series",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "Edges processed",
           "refId": "A"
@@ -115,6 +122,13 @@
         "label": "Others",
         "threshold": 0
       },
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fontSize": "80%",
       "format": "none",
       "gridPos": {
@@ -138,7 +152,7 @@
       "strokeWidth": 1,
       "targets": [
         {
-          "expr": "sum by (state) ((edge_state_gauge))",
+          "expr": "sum by (state) ((edge_state_gauge{namespace=~\"$namespace\"}))",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -165,6 +179,13 @@
         "label": "Others",
         "threshold": 0
       },
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fontSize": "80%",
       "format": "none",
       "gridPos": {
@@ -189,9 +210,10 @@
       "strokeWidth": 1,
       "targets": [
         {
-          "expr": "sum by (state) ((link_state_gauge))",
+          "expr": "sum by (state) ((link_state_gauge{namespace=~\"$namespace\"}))",
           "format": "time_series",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
           "refId": "A"
@@ -213,13 +235,22 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
         "y": 10
       },
+      "hiddenSeries": false,
       "id": 3,
       "legend": {
         "alignAsTable": true,
@@ -236,18 +267,24 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "paceLength": 10,
       "percentage": false,
+      "pluginVersion": "7.4.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
+      "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (state) ((edge_state_gauge))",
+          "expr": "sum by (state) ((edge_state_gauge{namespace=~\"$namespace\"}))",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
           "refId": "A"
@@ -303,13 +340,22 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
         "y": 10
       },
+      "hiddenSeries": false,
       "id": 4,
       "legend": {
         "alignAsTable": true,
@@ -326,18 +372,24 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "paceLength": 10,
       "percentage": false,
+      "pluginVersion": "7.4.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
+      "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (state) ((link_state_gauge))",
+          "expr": "sum by (state) ((link_state_gauge{namespace=~\"$namespace\"}))",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
           "refId": "A"
@@ -386,10 +438,16 @@
     },
     {
       "columns": [],
-      "datasource": "thanos-querier",
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fontSize": "100%",
       "gridPos": {
-        "h": 4,
+        "h": 10,
         "w": 12,
         "x": 0,
         "y": 16
@@ -408,12 +466,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -432,6 +492,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -448,6 +509,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -464,6 +526,7 @@
         },
         {
           "alias": "Enterprise ID",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "#F2495C",
@@ -482,6 +545,7 @@
         },
         {
           "alias": "State",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -504,6 +568,7 @@
         },
         {
           "alias": "Enterprise name: State",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -520,6 +585,7 @@
         },
         {
           "alias": "Enterprise name",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -537,6 +603,7 @@
         },
         {
           "alias": "TOTAL",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -553,6 +620,7 @@
         },
         {
           "alias": "CONNECTED",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -569,6 +637,7 @@
         },
         {
           "alias": "OFFLINE",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -585,6 +654,7 @@
         },
         {
           "alias": "NEVER ACTIVATED",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -601,6 +671,7 @@
         },
         {
           "alias": "DEGRADED",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -618,41 +689,48 @@
       ],
       "targets": [
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='CONNECTED'}))",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='CONNECTED',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
           "interval": "10m",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='OFFLINE'}))",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='OFFLINE',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='NEVER_ACTIVATED'}))",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='NEVER_ACTIVATED',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='DEGRADED'}))",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='DEGRADED',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "E"
         },
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge))",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -660,13 +738,20 @@
       "timeShift": null,
       "title": "Edges States by enterprise",
       "transform": "table",
-      "type": "table"
+      "type": "table-old"
     },
     {
       "columns": [],
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "fontSize": "100%",
       "gridPos": {
-        "h": 4,
+        "h": 10,
         "w": 12,
         "x": 12,
         "y": 16
@@ -683,12 +768,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -705,6 +792,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -721,6 +809,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -737,6 +826,7 @@
         },
         {
           "alias": "Enterprise ID",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "#F2495C",
@@ -755,6 +845,7 @@
         },
         {
           "alias": "State",
+          "align": "auto",
           "colorMode": "value",
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -782,6 +873,7 @@
         },
         {
           "alias": "Enterprise Name",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -799,6 +891,7 @@
         },
         {
           "alias": "TOTAL",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -815,6 +908,7 @@
         },
         {
           "alias": "STABLE",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -831,6 +925,7 @@
         },
         {
           "alias": "UNSTABLE",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -847,6 +942,7 @@
         },
         {
           "alias": "DISCONNECTED",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -864,30 +960,37 @@
       ],
       "targets": [
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge{state='STABLE'}))",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='STABLE',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge{state='UNSTABLE'}))",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='UNSTABLE',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge{state='DISCONNECTED'}))",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='DISCONNECTED',namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge))",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{namespace=~\"$namespace\"}))",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{enterprise_name}}:{{state}}",
           "refId": "A"
@@ -897,17 +1000,19 @@
       "timeShift": null,
       "title": "Link States by enterprise",
       "transform": "table",
-      "type": "table"
+      "type": "table-old"
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 18,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "datasource": null,
+        "datasource": "-- Mixed --",
+        "description": null,
+        "error": null,
         "filters": [],
         "hide": 0,
         "label": "",
@@ -916,13 +1021,41 @@
         "type": "adhoc"
       },
       {
-        "datasource": "-- Mixed --",
-        "filters": [],
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": null,
+        "definition": "kube_namespace_created",
+        "description": null,
+        "error": null,
         "hide": 0,
-        "label": "",
-        "name": "Filters",
+        "includeAll": true,
+        "label": "namespace",
+        "multi": true,
+        "name": "namespace",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": {
+          "query": "kube_namespace_created",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 0,
+        "regex": "/.*namespace=\"(?<namespace>automation-.*?)\".*/",
         "skipUrlSync": false,
-        "type": "adhoc"
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
