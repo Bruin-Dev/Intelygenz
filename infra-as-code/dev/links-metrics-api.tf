@@ -117,7 +117,7 @@ resource "aws_ecs_service" "automation-links-metrics-api" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.automation-links-metrics-api.arn
+    target_group_arn = aws_lb_target_group.target_group_oreilly_front_end_ssl[0].arn
     container_name   = "links-metrics-api"
     container_port   = 5000
   }

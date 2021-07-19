@@ -33,6 +33,7 @@ variables:
   hawkeye_outage_monitor_desired_tasks: 1
   intermapper_outage_monitor_desired_tasks: 1
   last_contact_report_desired_tasks: 1
+  links_metrics_api_desired_tasks: 1
   links_metrics_collector_desired_tasks: 1
   lit_bridge_desired_tasks: 1
   lumin_billing_report_desired_tasks: 1

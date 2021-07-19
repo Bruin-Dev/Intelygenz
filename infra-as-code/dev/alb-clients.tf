@@ -9,8 +9,8 @@ resource "aws_route53_record" "oreilly" {
   type = "A"
 
   alias {
-    name = aws_lb.automation-oreilly-alb.dns_name
-    zone_id = aws_lb.automation-oreilly-alb.zone_id
+    name = aws_lb.automation-oreilly-alb[0].dns_name
+    zone_id = aws_lb.automation-oreilly-alb[0].zone_id
     evaluate_target_health = true
   }
 }

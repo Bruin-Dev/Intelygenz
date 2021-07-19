@@ -520,6 +520,12 @@ variable "last_contact_report_desired_tasks" {
   description = "Number of desired tasks of microservice last-contact-report"
 }
 
+variable "links_metrics_api_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice links-metrics-api"
+}
+
 variable "links_metrics_collector_desired_tasks" {
   default = 1
   type = number

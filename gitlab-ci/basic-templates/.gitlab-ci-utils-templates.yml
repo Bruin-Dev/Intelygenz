@@ -27,6 +27,7 @@
     - export TF_VAR_hawkeye_customer_cache_desired_tasks=${hawkeye_customer_cache_desired_tasks}
     - export TF_VAR_hawkeye_outage_monitor_desired_tasks=${hawkeye_outage_monitor_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
+    - export TF_VAR_links_metrics_api_desired_tasks=${links_metrics_api_desired_tasks}
     - export TF_VAR_links_metrics_collector_desired_tasks=${links_metrics_collector_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_lumin_billing_report_desired_tasks=${lumin_billing_report_desired_tasks}
