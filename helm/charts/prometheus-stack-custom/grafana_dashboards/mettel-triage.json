@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 21,
-  "iteration": 1618400240088,
+  "iteration": 1627034279830,
   "links": [],
   "panels": [
     {
@@ -670,33 +669,27 @@
       },
       {
         "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": null,
-        "definition": "label_values(tickets_with_triage_counter_total, namespace)",
+        "definition": "kube_namespace_created",
         "description": null,
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "environment_name",
+        "label": "namespace",
         "multi": true,
         "name": "namespace",
-        "options": [
-          {
-            "selected": false,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": true,
-            "text": "a5c35b84",
-            "value": "a5c35b84"
-          }
-        ],
+        "options": [],
         "query": {
-          "query": "label_values(tickets_with_triage_counter_total, namespace)",
+          "query": "kube_namespace_created",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 0,
-        "regex": ".*",
+        "refresh": 1,
+        "regex": "/.*namespace=\"(?<namespace>automation-.*?)\".*/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -728,5 +721,5 @@
   "timezone": "",
   "title": "Triage",
   "uid": "u3tpYYmG1",
-  "version": 9
+  "version": 1
 }

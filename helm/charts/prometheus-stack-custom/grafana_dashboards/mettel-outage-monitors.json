@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1618398764352,
+  "iteration": 1626693983714,
   "links": [],
   "panels": [
     {
@@ -776,7 +776,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "service-outage-monitor-1",
           "value": "service-outage-monitor-1"
         },
@@ -810,26 +809,43 @@
           }
         ],
         "query": "service-outage-monitor-1,service-outage-monitor-2,service-outage-monitor-3,service-outage-monitor-4",
+        "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
       },
       {
         "allValue": null,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
         "datasource": null,
-        "definition": "label_values(cycle_runtime_gauge, namespace)",
+        "definition": "kube_namespace_created",
         "description": null,
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "environment_name",
+        "label": "namespace",
         "multi": true,
         "name": "namespace",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
         "query": {
-          "query": "label_values(cycle_runtime_gauge, namespace)",
+          "query": "kube_namespace_created",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 0,
-        "regex": ".*",
+        "refresh": 1,
+        "regex": "/.*namespace=\"(?<namespace>automation-.*?)\".*/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -861,5 +877,5 @@
   "timezone": "",
   "title": "Outage Monitor (all instances)",
   "uid": "u3tpYYmG2",
-  "version": 178
+  "version": 1
 }
