@@ -122,7 +122,7 @@ resource "aws_lb_listener" "oreilly_front_end" {
 
 resource "aws_lb_target_group" "target_group_oreilly_fornt_end" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  name = "${var.ENVIRONMENT}-oreilly-frontend"
+  name = "${var.CURRENT_ENVIRONMENT}-oreilly-http"
   port = 80
   protocol = "HTTP"
   vpc_id = data.aws_vpc.mettel-automation-vpc.id
@@ -159,7 +159,7 @@ resource "aws_lb_listener" "oreilly_front_end_ssl" {
 
 resource "aws_lb_target_group" "target_group_oreilly_front_end_ssl" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  name = "${var.ENVIRONMENT}-oreilly-frontend-ssl"
+  name = "${var.CURRENT_ENVIRONMENT}-oreilly-ssl"
   port = 5000
   protocol = "HTTP"
   vpc_id = data.aws_vpc.mettel-automation-vpc.id
