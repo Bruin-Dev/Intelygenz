@@ -93,6 +93,7 @@ include:
   - local: 'infra-as-code/network-resources/.gitlab-ci.yml'
   - local: 'intermapper-outage-monitor/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
+  - local: 'links-metrics-api/.gitlab-ci.yml'
   - local: 'links-metrics-collector/.gitlab-ci.yml'
   - local: 'lit-bridge/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'

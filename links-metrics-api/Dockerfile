@@ -16,3 +16,4 @@ RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
 ENV PYTHONUNBUFFERED 1
 
 CMD ["python3", "-u", "src/app.py"]
+
