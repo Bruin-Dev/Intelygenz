@@ -213,6 +213,7 @@ class RefreshCache:
 
                 return {
                     'edge': edge_with_serial['edge'],
+                    'edge_name': edge_with_serial['edge_name'],
                     'last_contact': edge_with_serial['last_contact'],
                     'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,

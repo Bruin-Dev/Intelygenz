@@ -192,6 +192,7 @@ class TestRefreshCache:
         # Scenario: Bruin returns all management statuses correctly
         edge_from_bruin_1 = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
@@ -199,6 +200,7 @@ class TestRefreshCache:
         }
         edge_from_bruin_1_with_config = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
@@ -216,6 +218,7 @@ class TestRefreshCache:
         }
         edge_from_bruin_2 = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 2020},
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO202020",
@@ -223,6 +226,7 @@ class TestRefreshCache:
         }
         edge_from_bruin_2_with_config = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
@@ -280,6 +284,7 @@ class TestRefreshCache:
 
         edge_from_bruin_1_with_config = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
@@ -295,6 +300,7 @@ class TestRefreshCache:
         }
         edge_from_bruin_2_with_config = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1920},
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
@@ -377,6 +383,7 @@ class TestRefreshCache:
                 "enterprise_id": 19,
                 "edge_id": 1919
             },
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VC1919191",
@@ -391,6 +398,7 @@ class TestRefreshCache:
                 "enterprise_id": 20,
                 "edge_id": 2020
             },
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': "VC1919192",
@@ -414,6 +422,7 @@ class TestRefreshCache:
                 "enterprise_id": 19,
                 "edge_id": 1919
             },
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VC1919191",
@@ -428,6 +437,7 @@ class TestRefreshCache:
                 "enterprise_id": 20,
                 "edge_id": 2020
             },
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': "VC1919192",
@@ -453,6 +463,7 @@ class TestRefreshCache:
                 "enterprise_id": 19,
                 "edge_id": 1919
             },
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VC1919191",
@@ -467,6 +478,7 @@ class TestRefreshCache:
                 "enterprise_id": 20,
                 "edge_id": 2020
             },
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': "VC1919192",
@@ -513,6 +525,7 @@ class TestRefreshCache:
 
         device_info_1_stored_cache = {
             'edge': edge_full_id_1,
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
@@ -523,6 +536,7 @@ class TestRefreshCache:
         }
         device_info_1_new_cache = {
             'edge': edge_full_id_1,
+            'edge_name': "Big Boss",
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
@@ -533,6 +547,7 @@ class TestRefreshCache:
         }
         device_info_2 = {
             'edge': edge_full_id_2,
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': serial_number_2,
@@ -543,6 +558,7 @@ class TestRefreshCache:
         }
         device_info_3_stored_cache = {
             'edge': edge_full_id_3,
+            'edge_name': "Liquid Snake",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -553,6 +569,7 @@ class TestRefreshCache:
         }
         device_info_3_new_cache = {
             'edge': edge_full_id_3,
+            'edge_name': "Liquid Snake",
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -617,6 +634,7 @@ class TestRefreshCache:
 
         device_info_1 = {
             'edge': edge_full_id_1,
+            'edge_name': "Big Boss",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
@@ -627,6 +645,7 @@ class TestRefreshCache:
         }
         device_info_2 = {
             'edge': edge_full_id_2,
+            'edge_name': "Otacon",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': serial_number_2,
@@ -637,6 +656,7 @@ class TestRefreshCache:
         }
         device_info_3_stored_cache = {
             'edge': edge_full_id_3,
+            'edge_name': "Liquid Snake",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -647,6 +667,7 @@ class TestRefreshCache:
         }
         device_info_3_new_cache = {
             'edge': edge_full_id_3,
+            'edge_name': "Liquid Snake",
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
@@ -657,6 +678,7 @@ class TestRefreshCache:
         }
         device_info_4 = {
             'edge': edge_full_id_4,
+            'edge_name': "Vulcan Raven",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "1789-hj09-vgi6-k97m",
             'serial_number': serial_number_4,
@@ -667,6 +689,7 @@ class TestRefreshCache:
         }
         device_info_5 = {
             'edge': edge_full_id_5,
+            'edge_name': "Psycho Mantis",
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "2890-ik10-whj7-l08n",
             'serial_number': serial_number_5,
@@ -708,6 +731,7 @@ class TestRefreshCache:
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['bruin_client_info'] = [bruin_client_info]
+        instance_edges_refresh_cache[0]['edge_name'] = "Big Boss"
         links_configuration = [
             {
                 'interfaces': ['GE1'],
