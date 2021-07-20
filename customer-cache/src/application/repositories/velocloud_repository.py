@@ -47,6 +47,7 @@ class VelocloudRepository:
             }
             serial_number = edge.get('edgeSerialNumber')
             last_contact = edge.get('edgeLastContact')
+            edge_name = edge.get('edgeName')
 
             if last_contact == '0000-00-00 00:00:00' or last_contact is None:
                 self._logger.info(f"Edge {EdgeIdentifier(**edge_full_id)} lastContact has an invalid value: "
@@ -66,6 +67,7 @@ class VelocloudRepository:
 
             edges_with_serials.append({
                 'edge': edge_full_id,
+                'edge_name': edge_name,
                 'serial_number': serial_number,
                 'last_contact': last_contact,
                 'logical_ids': logical_id
