@@ -35,6 +35,11 @@ class ServiceAffectingMonitorReports:
             await self._notifications_repository.send_slack_message(err_msg)
             return
         self._clients_id: Set[int] = set(edge['bruin_client_info']['client_id'] for edge in self._customer_cache)
+        self._cached_info_by_serial = {
+            cached_info['serial_number']: cached_info
+            for cached_info in self._customer_cache
+        }
+
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=self._config.MONITOR_REPORT_CONFIG['trailing_days'])
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -63,6 +68,7 @@ class ServiceAffectingMonitorReports:
         self._customer_cache = []
         self._affecting_tickets_per_client = {}
         self._clients_id = {}
+        self._cached_info_by_serial = {}
 
     async def start_service_affecting_monitor_reports_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting monitor reports')
@@ -107,7 +113,8 @@ class ServiceAffectingMonitorReports:
 
             ticket_details_by_serial = self._bruin_repository.group_ticket_details_by_serial(
                 filtered_ticket_details)
-            report_list = self._bruin_repository.prepare_items_for_report(ticket_details_by_serial)
+            report_list = self._bruin_repository.prepare_items_for_report(ticket_details_by_serial,
+                                                                          self._cached_info_by_serial)
 
             final_report_list = self._bruin_repository.filter_trouble_reports(active_reports=active_reports,
                                                                               report_list=report_list,

@@ -635,16 +635,17 @@ class BruinRepository:
                 })
         return result
 
-    def prepare_items_for_report(self, all_serials):
+    def prepare_items_for_report(self, all_serials, cached_info_by_serial):
         items_for_report = []
         bandwidth_config = self._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['bandwidth']
         for serial, ticket_details in all_serials.items():
             interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
+            cached_info = cached_info_by_serial[serial]
             client_id = ticket_details[0]['ticket']['clientID']
             for trouble in interfaces_by_trouble.keys():
                 for interface, ticket_ids in interfaces_by_trouble[trouble].items():
                     self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
-                    item_report = self.build_item_report(ticket_details=ticket_details, serial=serial,
+                    item_report = self.build_item_report(ticket_details=ticket_details, cached_info=cached_info,
                                                          number_of_tickets=len(ticket_ids),
                                                          interface=interface, trouble=trouble)
                     if trouble != 'Bandwidth Over Utilization' or \
@@ -654,14 +655,15 @@ class BruinRepository:
         return items_for_report
 
     @staticmethod
-    def build_item_report(ticket_details, serial, number_of_tickets, interface, trouble):
+    def build_item_report(ticket_details, cached_info, number_of_tickets, interface, trouble):
         return {
             'customer': {
                 'client_id': ticket_details[0]['ticket']['clientID'],
                 'client_name': ticket_details[0]['ticket']['clientName'],
             },
             'location': ticket_details[0]['ticket']['address'],
-            'serial_number': serial,
+            'edge_name': cached_info.get('edge_name'),
+            'serial_number': cached_info['serial_number'],
             'number_of_tickets': number_of_tickets,
             'bruin_tickets_id': set(
                 detail_object['ticket_id']

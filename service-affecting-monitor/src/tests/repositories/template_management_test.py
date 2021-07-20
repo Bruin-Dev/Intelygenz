@@ -25,6 +25,7 @@ class TestTemplateRenderer:
                     'country': 'USA'
                 },
                 'serial_number': 'VC05200085762',
+                'edge_name': 'Big Boss',
                 'number_of_tickets': 4,
                 'bruin_tickets_id': [
                     5081250, 5075176, 5074441, 5073652
@@ -43,6 +44,7 @@ class TestTemplateRenderer:
                     'country': 'USA'
                 },
                 'serial_number': 'VC05200085762',
+                'edge_name': 'Otacon',
                 'number_of_tickets': 4,
                 'bruin_tickets_id': [
                     5081250, 5075176, 5074441, 5073652
@@ -80,6 +82,7 @@ class TestTemplateRenderer:
                     'country': 'USA'
                 },
                 'serial_number': 'VC05200085762',
+                'edge_name': 'Big Boss',
                 'number_of_tickets': 4,
                 'bruin_tickets_id': [
                     5081250, 5075176, 5074441, 5073652
@@ -98,6 +101,7 @@ class TestTemplateRenderer:
                     'country': 'USA'
                 },
                 'serial_number': 'VC05200085762',
+                'edge_name': 'Otacon',
                 'number_of_tickets': 4,
                 'bruin_tickets_id': [
                     5081250, 5075176, 5074441, 5073652
