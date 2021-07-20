@@ -14,7 +14,7 @@ class MyMongoClient:
         password = self._config.MONGO_PASS
         url = self._config.MONGO_URL
         port = self._config.MONGO_PORT
-        if self._config.ENVIRONMENT_NAME is "production":
+        if self._config.ENVIRONMENT_NAME == "production":
             conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?ssl=true&ssl_ca_certs=' \
                           f'/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference' \
                           f'=secondaryPreferred&retryWrites=false'
