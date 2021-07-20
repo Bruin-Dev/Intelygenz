@@ -14,12 +14,12 @@ class MyMongoClient:
         password = self._config.MONGO_PASS
         url = self._config.MONGO_URL
         port = self._config.MONGO_PORT
-        if self._config.ENVIRONMENT_NAME is not "production":
-            conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?authSource=admin'
-        else:
+        if self._config.ENVIRONMENT_NAME is "production":
             conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?ssl=true&ssl_ca_certs=' \
                           f'/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference' \
                           f'=secondaryPreferred&retryWrites=false'
+        else:
+            conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?authSource=admin'
 
         self._logger.info(f'Connecting to mongo using: {conn_string}, '
                           f'current environment: {self._config.ENVIRONMENT_NAME}')
