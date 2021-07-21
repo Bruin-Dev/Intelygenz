@@ -8,6 +8,7 @@ from application.clients import email_reader_client as email_reader_client_modul
 from application.clients.email_reader_client import EmailReaderClient
 from config import testconfig as config
 
+MESSAGE_1_UID_BYTES = b'1234'
 
 MESSAGE_1 = {
     'message': {
@@ -24,7 +25,7 @@ MESSAGE_1 = {
     'subject': 'Idling Alert -- TT Bank - wert wert wert',
     'body': 'tt Bank - yuio yuio has been idling for over 15 minute(s) at 04:28 AM 03/20/2020 \
             It is located at LOCATION: zxcv zxcv. It is currently on job 000000.',
-    'msg_uid': '1234'
+    'msg_uid': MESSAGE_1_UID_BYTES.decode('utf-8')
 }
 
 
@@ -191,7 +192,7 @@ class TestEmailReaderClient:
 
         msg_bytes = Mock()
         msg_part = [msg_bytes, b'some_data']
-        msg_bytes.split = Mock(return_value=[111, 999, MESSAGE_1['msg_uid']])
+        msg_bytes.split = Mock(return_value=[111, 999, MESSAGE_1_UID_BYTES])
 
         initial_fetch_return = [msg_part, b')']
         with patch.object(email_reader_client_module.email, 'message_from_bytes', return_value=message_object):

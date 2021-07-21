@@ -71,7 +71,7 @@ class EmailReaderClient:
                     if msg_parts == b')':
                         continue
                     msg = email.message_from_bytes(msg_parts[1])
-                    msg_uid = msg_parts[0].split()[2]
+                    msg_uid = msg_parts[0].split()[2].decode("utf-8")
                     body = self._get_body(msg)
                     subject = str(make_header(decode_header(msg['Subject'])))
 
