@@ -7,6 +7,7 @@ from hypercorn.config import Config as HyperCornConfig
 from quart import jsonify
 from quart_openapi import Pint
 
+
 MEGABYTE: int = (1024 * 1024)
 MAX_CONTENT_LENGTH = 32 * MEGABYTE  # 32mb
 SHA256_PREFIX = re.compile(r"^sha256=")
@@ -18,10 +19,10 @@ class APIServer:
     _hypercorn_config = None
     _new_bind = None
 
-    def __init__(self, logger, config):
+    def __init__(self, logger, config, get_link_metrics):
         self._config = config
         self._logger = logger
-
+        self._get_link_metrics = get_link_metrics
         self._max_content_length = MAX_CONTENT_LENGTH
         self._title = config.QUART_CONFIG['title']
         self._port = config.QUART_CONFIG['port']
@@ -51,5 +52,5 @@ class APIServer:
         return jsonify(None), HTTPStatus.OK, None
 
     async def _test_method(self):
-        json_response = {"message": "Hello world, this is a placeholder!"}
-        return jsonify(json_response), HTTPStatus.OK, None
+        json_res = self._get_link_metrics.get_links_metrics()
+        return jsonify(json_res), HTTPStatus.OK, None
