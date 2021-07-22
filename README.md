@@ -393,15 +393,22 @@ Below are the roles created for each of the users actually, as well as the categ
 
 | IAM User Name | Role in Project | IAM role created |
 |---------------|-----------------|------------------|
-| alberto.iglesias | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
-| alejandro.aceituna | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna |
-| angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
-| angel.luis.piquero | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
-| brandon.samudio | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
-| daniel.fernandez | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
-| joseluis.vega | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
-| sancho.munoz | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
-| xisco.capllonch | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-xisco.capllonch |
+| alberto.iglesias | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alberto.iglesias |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
+| alejandro.aceituna | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alejandro.aceituna |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna |
+| angel.costales | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.costales |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
+| angel.luis.piquero | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.luis.piquero |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
+| brandon.samudio | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation--brandon.samudio |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
+| daniel.fernandez | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-daniel.fernandez |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
+| joseluis.vega | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
+| sancho.munoz | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-sancho.munoz |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
 
@@ -455,7 +462,7 @@ The following tools are required to access to the EKS clusters created for each 
      $ sudo mv ./k9s /usr/local/bin/k9s
      ```
 
-- **robo3t**: It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
+- **robo3t** (optional): It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
 
     - *MacOS*:
       
@@ -492,16 +499,17 @@ The following tools are required to access to the EKS clusters created for each 
       ``` 
 
 
+- **awscli**: It is necessary to have the command line tool for AWS in version `2.x.x` or higher. It can be installed with `pip`, `brew`, or with an installer. Go to [aws documentation](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) reference to install it.
 
-- **awscli**: It is necessary to have the command line tool for AWS in version `1.18.98` or higher. It can be installed with `pip` with the following command show below:
+NOTE: is very important to have `awscli` properly working because is used to create the Kubernetes configuration file (~/.kube/config) to interact with the EKS cluster (this feature is only available in the most recent versions). Check that you have installed the correct compatible version with:
 
-  ```sh
-  $ pip3 install awscli==1.18.98
-  ```
+     ```sh
+     aws --version
+     ```
 
 ### Setup
 
-The following steps must be followed to set up the configuration to access any of the EKS clusters of KRE:
+The following steps must be followed to set up the configuration to access any of the EKS clusters:
 
 1. Setting up a profile to use `awscli` in the project, this will require two steps:
 
@@ -539,7 +547,7 @@ The following steps must be followed to set up the configuration to access any o
     $ aws eks update-kubeconfig --name <kre_eks_cluster_name> --profile devops-role-kre
     ```
 
-   > The name of the EKS cluster for production is `mettel-automation-kre` and for development is `mettel-automation-kre-dev`.
+   > The name of the EKS cluster's are, production automation engine: `mettel-automation`, production konstelation: `mettel-automation-kre`, development automation engine: `mettel-automation-dev` and development konstellation: `mettel-automation-kre-dev`.
 
 4. Open k9s to connect to te cluster, if you have more clusters in you kubeconfig file you can chose you cluster with `context` command inside k9s:
 

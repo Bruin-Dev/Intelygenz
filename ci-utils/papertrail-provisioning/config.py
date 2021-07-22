@@ -32,6 +32,11 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[bruin-bridge] - logs",
                     "repository": "automation-bruin-bridge"
                 },
+                # {
+                #     "query": f"cts-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                #     "search_name": f"[cts-bridge] - logs",
+                #     "repository": "automation-cts-bridge"
+                # },
                 {
                     "query": f"customer-cache AND {ENVIRONMENT_ID} AND <BUILD_NUMBER> AND -\"-customer-cache\"",
                     "search_name": f"[customer-cache] - logs",
@@ -47,11 +52,16 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[digi-reboot-report] - logs",
                     "repository": "automation-digi-reboot-report"
                 },
-                {
-                    "query": f"grafana AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
-                    "search_name": f"[grafana] - logs",
-                    "repository": "automation-metrics-dashboard/grafana"
-                },
+                # {
+                #     "query": f"dispatch-portal-backend AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                #     "search_name": f"[dispatch-portal-backend] - logs",
+                #     "repository": "automation-dispatch-portal-backend"
+                # },
+                # {
+                #     "query": f"grafana AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                #     "search_name": f"[grafana] - logs",
+                #     "repository": "automation-metrics-dashboard/grafana"
+                # },
                 {
                     "query": f"email-tagger-kre-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[email-tagger-kre-bridge] - logs",
@@ -102,6 +112,11 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[links-metrics-collector] - logs",
                     "repository": "automation-links-metrics-collector"
                 },
+                # {
+                #     "query": f"lit-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                #     "search_name": f"[lit-bridge] - logs",
+                #     "repository": "automation-lit-bridge"
+                # },
                 {
                     "query": f"lumin-billing-report AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[lumin-billing-report] - logs",
@@ -122,6 +137,11 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[service-affecting-monitor] - logs",
                     "repository": "automation-service-affecting-monitor"
                 },
+                # {
+                #     "query": f"service-dispatch-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
+                #     "search_name": f"[service-dispatch-monitor] - logs",
+                #     "repository": "automation-service-dispatch-monitor"
+                # },
                 {
                     "query": f"service-outage-monitor-1 AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-1] - logs",

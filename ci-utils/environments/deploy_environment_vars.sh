@@ -243,6 +243,7 @@ function environments_assign() {
   digi_reboot_report_variables
   email_tagger_monitor_variables
   hawkeye_bridge_variables
+  links_metrics_api_variables
   lit_bridge_variables
   lumin_billing_report_variables
   notifier_variables
