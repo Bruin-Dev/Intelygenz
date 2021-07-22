@@ -31,6 +31,8 @@
       if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
         export TICKET_COLLECTOR_ENABLED=false
         export TICKET_STATISTICS_ENABLED=false
+        export LINKS_METRICS_API_ENABLED=false
+        export LINKS_METRICS_COLLECTOR_ENABLED=false
       fi
     - envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
     # DEPLOY HELM CHART
