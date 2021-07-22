@@ -56,8 +56,19 @@ class MyMongoClient:
             "$gte": interval_start,
             "$lt": interval_end
         }})
-        result = [res for res in cursor]
-        for res in result:
-            del res["_id"]
+        result = []
+
+        for doc in cursor:
+            del doc["_id"]
+
+            oreilly_metrics = []
+            for link_metrics in doc['metrics']:
+                if link_metrics['link']['enterpriseId'] == self._config.ENTERPRISE_ID:
+                    del link_metrics['link']['host']
+                    oreilly_metrics.append(link_metrics)
+
+            doc['metrics'] = oreilly_metrics
+            result.append(doc)
+
         self._logger.info(f'Data fetched from mongo: {result}')
         return result
