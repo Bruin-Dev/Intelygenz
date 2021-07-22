@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "links-metrics-api.fullname" . }}
+  labels:
+    {{- include "links-metrics-api.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "links-metrics-api.selectorLabels" . | nindent 4 }}

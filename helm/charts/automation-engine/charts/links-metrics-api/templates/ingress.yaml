@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.config.whitelist_access }}
+  name: {{ include "links-metrics-api.fullname" . }}-ingress
+spec:
+  rules:
+    {{ if eq .Values.global.environment "production" }}
+    - host: oreilly.mettel-automation.net
+    {{ else }}
+    - host: oreilly-{{ .Values.global.environment }}.mettel-automation.net
+    {{ end }}
+      http:
+        paths:
+        - backend:
+            serviceName: links-metrics-api
+            servicePort: {{ .Values.service.port }}
+          path: /api/statistics(/|$)(.*)

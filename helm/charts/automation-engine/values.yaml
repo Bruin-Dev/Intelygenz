@@ -661,6 +661,75 @@ last-contact-report:
       memory: 128Mi
 
 
+# -- links-metrics-api subchart specific configuration
+links-metrics-api:
+  enabled: true
+  # -- Number of links-metrics-api pods
+  replicaCount: 1
+  config:
+    papertrail_prefix: ""
+    # -- Indicate mongo username
+    mongodb_username: ""
+    # -- Indicate mongo password
+    mongodb_password: ""
+    # -- Indicate mongo hostname
+    mongodb_host: ""
+    # -- Indicate mongo port to use
+    mongodb_port: ""
+    # -- Indicate the whitelist source range CIDR to allow access
+    whitelist_access: ""
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-api
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
+# -- links-metrics-collector subchart specific configuration
+links-metrics-collector:
+  enabled: true
+  # -- Number of links-metrics-collector pods
+  replicaCount: 1
+  config:
+    papertrail_prefix: ""
+    # -- Indicate mongo username
+    mongodb_username: ""
+    # -- Indicate mongo password
+    mongodb_password: ""
+    # -- Indicate mongo hostname
+    mongodb_host: ""
+    # -- Indicate mongo port to use
+    mongodb_port: ""
+    # -- Indicate the whitelist source range CIDR to allow access
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-collector
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
 # -- lit-bridge subchart specific configuration
 lit-bridge:
   # -- Field to indicate if the lit-bridge module is going to be deployed

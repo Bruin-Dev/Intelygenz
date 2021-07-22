@@ -22,12 +22,12 @@ variables:
   DOCKER_IMAGE_UTILS_VERSION: 1.1.1
   # Desired replicas of microservices
   BRUIN_BRIDGE_DESIRED_TASKS: "2"
-  CTS_BRIDGE_DESIRED_TASKS: "1"
+  CTS_BRIDGE_DESIRED_TASKS: "0"                        #--> disable dispatch portal feature
   CUSTOMER_CACHE_DESIRED_TASKS: "1"
   DIGI_BRIDGE_DESIRED_TASKS: "1"
   DIGI_REBOOT_REPORT_DESIRED_TASKS: "1"
-  DISPATCH_PORTAL_BACKEND_DESIRED_TASKS: "0"
-  DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS: "0"
+  DISPATCH_PORTAL_BACKEND_DESIRED_TASKS: "0"           #--> disable dispatch portal feature
+  DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS: "0"          #--> disable dispatch portal feature
   EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS: "1"
   EMAIL_TAGGER_MONITOR_DESIRED_TASKS: "1"
   HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS: "0"
@@ -36,7 +36,9 @@ variables:
   HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS: "1"
   INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS: "1"
   LAST_CONTACT_REPORT_DESIRED_TASKS: "1"
-  LIT_BRIDGE_DESIRED_TASKS: "1"
+  LINKS_METRICS_API_DESIRED_TASKS: "1"
+  LINKS_METRICS_COLLECTOR_DESIRED_TASKS: "1"
+  LIT_BRIDGE_DESIRED_TASKS: "0"                        #--> disable dispatch portal feature
   LUMIN_BILLING_REPORT_DESIRED_TASKS: "1"
   METRICS_PROMETHEUS_DESIRED_TASKS: "1"
   NATS_SERVER_DESIRED_TASKS: "1"
@@ -44,7 +46,7 @@ variables:
   NATS_SERVER_2_DESIRED_TASKS: "1"
   NOTIFIER_DESIRED_TASKS: "1"
   SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "1"
-  SERVICE_DISPATCH_MONITOR_DESIRED_TASKS: "0"
+  SERVICE_DISPATCH_MONITOR_DESIRED_TASKS: "0"          #--> disable dispatch portal feature
   SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: "1"
   SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS: "1"
   SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS: "1"
@@ -82,9 +84,8 @@ include:
   - local: 'customer-cache/.gitlab-ci.yml'
   - local: 'digi-bridge/.gitlab-ci.yml'
   - local: 'digi-reboot-report/.gitlab-ci.yml'
-#  - local: 'dispatch-portal-backend/.gitlab-ci.yml'
-#  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
-  - local: 'email-tagger-monitor/.gitlab-ci.yml'
+#  - local: 'dispatch-portal-backend/.gitlab-ci.yml'   #--> disable dispatch portal feature
+#  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'  #--> disable dispatch portal feature
   - local: 'email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'email-tagger-monitor/.gitlab-ci.yml'
   - local: 'hawkeye-affecting-monitor/.gitlab-ci.yml'

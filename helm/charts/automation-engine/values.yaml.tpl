@@ -562,6 +562,76 @@ last-contact-report:
       memory: 128Mi
 
 
+# -- links-metrics-api subchart specific configuration
+links-metrics-api:
+  enabled: ${LINKS_METRICS_API_ENABLED}
+  # -- Number of links-metrics-api pods
+  replicaCount: ${LINKS_METRICS_API_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "links-metrics-api-${LINKS_METRICS_API_BUILD_NUMBER}"
+    # -- Indicate mongo username    
+    mongodb_username: ${TICKET_COLLECTOR_MONGO_USERNAME}
+    # -- Indicate mongo password
+    mongodb_password: ${TICKET_COLLECTOR_MONGO_PASSWORD}
+    # -- Indicate mongo hostname
+    mongodb_host: ${TICKET_COLLECTOR_MONGO_HOST}
+    # -- Indicate mongo port to use
+    mongodb_port: ${TICKET_COLLECTOR_MONGO_PORT}    
+    # -- Indicate the whitelist source range CIDR to allow access
+    whitelist_access: ${LINKS_METRICS_API_WHITELIST_ACCESS}
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-api
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${LINKS_METRICS_API_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
+# -- links-metrics-collector subchart specific configuration
+links-metrics-collector:
+  enabled: ${LINKS_METRICS_COLLECTOR_ENABLED}
+  # -- Number of links-metrics-api pods
+  replicaCount: ${LINKS_METRICS_COLLECTOR_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "links-metrics-api-${LINKS_METRICS_COLLECTOR_BUILD_NUMBER}"
+    # -- Indicate mongo username    
+    mongodb_username: ${TICKET_COLLECTOR_MONGO_USERNAME}
+    # -- Indicate mongo password
+    mongodb_password: ${TICKET_COLLECTOR_MONGO_PASSWORD}
+    # -- Indicate mongo hostname
+    mongodb_host: ${TICKET_COLLECTOR_MONGO_HOST}
+    # -- Indicate mongo port to use
+    mongodb_port: ${TICKET_COLLECTOR_MONGO_PORT}    
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-collector
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${LINKS_METRICS_COLLECTOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
 # -- lit-bridge subchart specific configuration
 lit-bridge:
   enabled: ${LIT_BRIDGE_ENABLED}

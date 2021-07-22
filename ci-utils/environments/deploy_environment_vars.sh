@@ -127,6 +127,16 @@ function hawkeye_bridge_variables() {
   export HAWKEYE_CLIENT_PASSWORD=$(base64 -d <<< "${HAWKEYE_CLIENT_PASSWORD_ENC}")
 }
 
+function links_metrics_api_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # links-metris-api environment variables for ephemeral environments
+    export LINKS_METRICS_API_WHITELIST_ACCESS=${LINKS_METRICS_API_WHITELIST_ACCESS_PRO}
+  else
+    # links-metris-api environment variables for production environment
+    export LINKS_METRICS_API_WHITELIST_ACCESS=${LINKS_METRICS_API_WHITELIST_ACCESS_PRO}
+  fi
+}
+
 function lit_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # lit-bridge environment variables for ephemeral environments
