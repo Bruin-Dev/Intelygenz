@@ -1,3 +1,4 @@
+import datetime as dt
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import call
@@ -47,6 +48,7 @@ class TestNewTicketsMonitor:
         email_tagger_repository = Mock()
         new_tickets_monitor = NewTicketsMonitor(event_bus, logger, scheduler, config, new_tickets_repository,
                                                 email_tagger_repository, bruin_repository)
+        added_seconds = dt.timedelta(0, 5)
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -57,7 +59,7 @@ class TestNewTicketsMonitor:
         scheduler.add_job.assert_called_once_with(
             new_tickets_monitor._run_new_tickets_polling, 'interval',
             seconds=testconfig.MONITOR_CONFIG['scheduler_config']['new_tickets_seconds'],
-            next_run_time=next_run_time,
+            next_run_time=next_run_time + added_seconds,
             replace_existing=False,
             id='_run_new_tickets_polling',
         )
