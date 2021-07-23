@@ -20,6 +20,24 @@ class TestEmailTaggerRepository:
         assert new_emails_repository._notifications_repository is notifications_repository
         assert new_emails_repository._storage_repository is storage_repository
 
+    def validate_ticket_test(self, logger, notifications_repository, storage_repository):
+        new_tickets_repository = NewTicketsRepository(testconfig, logger, notifications_repository, storage_repository)
+
+        pending_tickets = [
+            {'email': {'email': {'email_id': '100', 'client_id': '333'}}, 'ticket': {'ticket_id': 200}},
+            {'email': {'email': {'email_id': '101', 'client_id': '333'}}, 'ticket': {'ticket_id': 201}},
+            None,
+            {'email': None, 'ticket': {'ticket_id': 201}},
+            {'email': {'email': {'email_id': '101', 'client_id': '333'}}, 'ticket': None},
+            {'email': {'email': {'email_id': None, 'client_id': '333'}}, 'ticket': None},
+            {'email': {'email': None}, 'ticket': None},
+            {},
+            {'email': {}, 'ticket': {}},
+        ]
+        expected_validations = [True, True, False, False, False, False, False, False, False]
+        for expected_validation, ticket in zip(expected_validations, pending_tickets):
+            assert new_tickets_repository.validate_ticket(ticket) == expected_validation
+
     def get_pending_emails_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.find_all = Mock(return_value=[])
         new_emails_repository = NewTicketsRepository(testconfig, logger, notifications_repository,
