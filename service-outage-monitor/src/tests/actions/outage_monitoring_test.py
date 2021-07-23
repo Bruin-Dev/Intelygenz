@@ -10021,6 +10021,17 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
+                    'displayName': 'Test Name',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
                     'displayName': '70.59.5.185',
                     'isp': None,
                     'interface': 'Augmented',
@@ -10133,6 +10144,17 @@ class TestServiceOutageMonitor:
             'edgeLatitude': None,
             'edgeLongitude': None,
             'links': [
+                {
+                    'displayName': 'Test Name',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
                 {
                     'displayName': '70.59.5.185',
                     'isp': None,
@@ -10315,7 +10337,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -10413,7 +10435,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -10513,6 +10535,17 @@ class TestServiceOutageMonitor:
             'links': [
                 {
                     'displayName': 'BYOB 70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
+                {
+                    'displayName': '70.59.5.185',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -10633,7 +10666,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -10736,7 +10769,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -10865,7 +10898,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -11025,7 +11058,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -11200,7 +11233,7 @@ class TestServiceOutageMonitor:
             'edgeLongitude': None,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
+                    'displayName': 'Test Name',
                     'isp': None,
                     'interface': 'GE1',
                     'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',

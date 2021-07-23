@@ -5,6 +5,7 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
+from ipaddress import ip_address
 from time import perf_counter
 from typing import Callable
 
@@ -973,6 +974,12 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
 
+    def _is_link_label_an_ip(self, link_label):
+        try:
+            return bool(ip_address(link_label))
+        except ValueError:
+            return False
+
     def _is_link_label_black_listed(self, link_label):
         blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]
         return any(label for label in blacklisted_link_labels if label in link_label)
@@ -982,6 +989,7 @@ class OutageMonitor:
             link
             for link in links
             if self._is_link_label_black_listed(link['displayName']) is False
+            if self._is_link_label_an_ip(link['displayName']) is False
         ]
 
     def _was_digi_rebooted_recently(self, ticket_note) -> bool:
