@@ -23,7 +23,7 @@ class StorageRepository:
 
         matches = []
         for key in self._redis.scan_iter(match):
-            v = self.get(key)
+            v = json.loads(self._redis.get(key))
             matches.append(v)
 
         return matches

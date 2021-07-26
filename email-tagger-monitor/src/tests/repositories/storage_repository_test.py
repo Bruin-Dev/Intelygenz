@@ -53,10 +53,11 @@ class TestStorageRepository:
         fixed_match_2 = f"{storage_repository._config.ENVIRONMENT_NAME}-{match_2}"
 
         expected = [{fixed_match_1: 12345}, {fixed_match_2: 12345}]
-        storage_repository.get = Mock()
-        storage_repository.get.side_effect = expected
+        expected_raw = [json.dumps(e) for e in expected]
+
         storage_repository._redis.scan_iter = MagicMock()
         storage_repository._redis.scan_iter.return_value = [fixed_match_1, fixed_match_2]
+        storage_repository._redis.get = Mock(side_effect=expected_raw)
 
         actual = storage_repository.find_all(lookup_key)
 
