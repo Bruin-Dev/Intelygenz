@@ -4,9 +4,8 @@ from http import HTTPStatus
 
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
-from quart import jsonify
+from quart import jsonify, request
 from quart_openapi import Pint
-
 
 MEGABYTE: int = (1024 * 1024)
 MAX_CONTENT_LENGTH = 32 * MEGABYTE  # 32mb
@@ -34,23 +33,21 @@ class APIServer:
         self._logger.info(f'env: {os.environ}')
         self._new_bind = f'0.0.0.0:{self._port}'
         self._app = Pint(__name__, title=self._title, no_openapi=True)
+        API_REF = self._app
 
-        self.register_endpoints()
+        @API_REF.route("/_health")
+        async def _health():
+            return jsonify(None), HTTPStatus.OK, None
+
+        @API_REF.route(f"{self._endpoint_prefix}/metrics", methods=["GET"])
+        async def _get_link_metrics():
+            self._logger.info(f"Getting request: {request.url}")
+            start_date = request.args.get("start_date")
+            end_date = request.args.get("end_date")
+            json_res = self._get_link_metrics.get_links_metrics(start_date, end_date)
+            return jsonify(json_res), HTTPStatus.OK, None
 
     async def run_server(self):
         self._hypercorn_config.bind = [self._new_bind]
         self._logger.info(f"Starting API in port {self._port}")
         await serve(self._app, self._hypercorn_config)
-
-    def register_endpoints(self):
-        self._app.add_url_rule("/_health", None, self._health)
-        self._app.add_url_rule(self._endpoint_prefix + "/metrics", None, self._test_method, methods=['GET'],
-                               strict_slashes=False)
-
-    # Endpoints
-    def _health(self):
-        return jsonify(None), HTTPStatus.OK, None
-
-    async def _test_method(self):
-        json_res = self._get_link_metrics.get_links_metrics()
-        return jsonify(json_res), HTTPStatus.OK, None

@@ -70,5 +70,5 @@ class MyMongoClient:
             doc['metrics'] = oreilly_metrics
             result.append(doc)
 
-        self._logger.info(f'Data fetched from mongo: {result}')
+        self._logger.info(f'Data fetched from mongo successfully!')
         return result
