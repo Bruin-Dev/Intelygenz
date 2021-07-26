@@ -16,11 +16,9 @@ class GetLinkMetrics:
         self._config = config
         self._mongo_client = mongo_client
 
-    def get_links_metrics(self):
-        # Basic example on how to retrieve data using a time filter.
-        # A velo filter and a enterpriseId filter can be set here too when required.
-        interval_start = (datetime.utcnow() - timedelta(days=30)).isoformat()
-        interval_end = datetime.utcnow().isoformat()
+    def get_links_metrics(self, start_date, end_date):
+        interval_start = start_date
+        interval_end = end_date
 
         start_time = int(dateutil.parser.isoparse(interval_start).timestamp() * 1000)
         json_res = GetLinkMetrics._get_empty_json_response()
@@ -50,7 +48,6 @@ class GetLinkMetrics:
 
     @staticmethod
     def _create_or_update_link(response, link, start_time):
-        # Check existance to define this var
         link_exists = GetLinkMetrics._link_exists(response, link)
 
         if not link_exists:
