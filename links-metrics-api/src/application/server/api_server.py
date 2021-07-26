@@ -8,7 +8,7 @@ from quart import jsonify, request
 from quart_openapi import Pint
 
 MEGABYTE: int = (1024 * 1024)
-MAX_CONTENT_LENGTH = 32 * MEGABYTE  # 32mb
+MAX_CONTENT_LENGTH = 16 * MEGABYTE  # 16mb
 SHA256_PREFIX = re.compile(r"^sha256=")
 
 
@@ -44,6 +44,9 @@ class APIServer:
             self._logger.info(f"Getting request: {request.url}")
             start_date = request.args.get("start_date")
             end_date = request.args.get("end_date")
+            if not end_date or not start_date:
+                return jsonify({"error": "Request must have start_date and end_date as query params"}), \
+                       HTTPStatus.BAD_REQUEST, None
             json_res = self._get_link_metrics.get_links_metrics(start_date, end_date)
             return jsonify(json_res), HTTPStatus.OK, None
 
