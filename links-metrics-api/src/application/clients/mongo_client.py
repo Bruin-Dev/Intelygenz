@@ -1,4 +1,3 @@
-from pymongo import errors as pymongo_errors
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
@@ -29,7 +28,7 @@ class MyMongoClient:
             client.server_info()
             self._logger.info(f'Connected to mongo!')
 
-        except pymongo_errors.ServerSelectionTimeoutError as err:
+        except Exception as err:
             self._logger.error(err)
             raise ValueError('Could not connect to MongoDB!')
         return client
