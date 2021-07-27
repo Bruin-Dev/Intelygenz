@@ -16,13 +16,13 @@ class GetLinkMetrics:
         self._config = config
         self._mongo_client = mongo_client
 
-    def get_links_metrics(self, start_date, end_date):
+    async def get_links_metrics(self, start_date, end_date):
         interval_start = start_date
         interval_end = end_date
 
         start_time = int(dateutil.parser.isoparse(interval_start).timestamp() * 1000)
         json_res = GetLinkMetrics._get_empty_json_response()
-        mongo_metrics = self._mongo_client.get_from_interval(interval_start, interval_end)
+        mongo_metrics = await self._mongo_client.get_from_interval(interval_start, interval_end)
         GetLinkMetrics._process_mongo_metrics(mongo_metrics, json_res, start_time)
         return json_res
 

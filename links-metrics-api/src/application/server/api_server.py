@@ -47,7 +47,7 @@ class APIServer:
             if not end_date or not start_date:
                 return jsonify({"error": "Request must have start_date and end_date as query params"}), \
                        HTTPStatus.BAD_REQUEST, None
-            json_res = self._get_link_metrics.get_links_metrics(start_date, end_date)
+            json_res = await self._get_link_metrics.get_links_metrics(start_date, end_date)
             return jsonify(json_res), HTTPStatus.OK, None
 
     async def run_server(self):
