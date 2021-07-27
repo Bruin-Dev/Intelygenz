@@ -89,6 +89,7 @@ resource "aws_security_group" "automation-dev-oreilly-inbound" {
 
 resource "aws_lb" "automation-oreilly-alb" {
   count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  idle_timeout = 600
   name = "${var.ENVIRONMENT}-oreilly"
   load_balancer_type = "application"
   subnets = data.aws_subnet_ids.mettel-automation-public-subnets.ids
