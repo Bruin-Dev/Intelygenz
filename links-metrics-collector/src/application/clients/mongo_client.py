@@ -35,7 +35,7 @@ class MyMongoClient:
         return client
 
     def insert(self, json_data: dict):
-        self._logger.info(f'Inserting data in mongo: {json_data}')
+        self._logger.info(f'Inserting data in mongo...')
         db = self._client.get_default_database()
         list_collections = db.collection_names()
         if "links_metrics" in list_collections:
