@@ -342,6 +342,7 @@ font-family: Arial, sans-serif;
                       <tr>
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Trouble</th>
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Serial Number</th>
+                        <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Edge Name</th>
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Location</th>
 						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; text-align: center; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Number of tickets</th>
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;">Tickets</th>
@@ -358,6 +359,10 @@ font-family: Arial, sans-serif;
                           color: #596872; font-weight: normal;
                           font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
                           white-space: nowrap">{{ i["__KEY__"] }}</td>
+                          <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
+                          color: #596872; font-weight: normal;
+                          font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                          white-space: nowrap">{{ i["__EDGE_NAME__"] }}</td>
                           <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                           color: #596872; font-weight: normal;
                           font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;

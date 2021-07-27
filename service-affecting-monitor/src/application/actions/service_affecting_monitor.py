@@ -425,7 +425,7 @@ class ServiceAffectingMonitor:
         return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
 
     def _is_affecting_ticket_detail_auto_resolvable(self, ticket_notes: list) -> bool:
-        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving task for serial")
+        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Auto-resolving task for serial", re.DOTALL)
         max_autoresolves = self._config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
         times_autoresolved = 0
 

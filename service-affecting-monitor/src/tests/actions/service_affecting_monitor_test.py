@@ -4723,6 +4723,7 @@ class TestServiceAffectingMonitor:
 
         text_identifier = (
             "#*MetTel's IPA*#\n"
+            "All Service Affecting conditions (Jitter, Packet Loss, Latency and Utilization) have stabilized.\n"
             f"Auto-resolving task for serial {serial_number}\n"
         )
 

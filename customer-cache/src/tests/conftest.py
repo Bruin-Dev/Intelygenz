@@ -115,6 +115,7 @@ def instance_cache_edges():
     return [
         {
             'edge': {'host': 'some host', 'enterprise_id': 123, 'edge_id': 321},
+            'edge_name': 'Big Boss',
             'last_contact': str(datetime.now()),
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC01",
@@ -122,6 +123,7 @@ def instance_cache_edges():
         },
         {
             'edge': {'host': 'some host', 'enterprise_id': 1, 'edge_id': 321},
+            'edge_name': 'Otacon',
             'last_contact': str(datetime.now()),
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC02",

@@ -8,6 +8,21 @@ class NewTicketsRepository:
         self._notifications_repository = notifications_repository
         self._storage_repository = storage_repository
 
+    def validate_ticket(self, ticket: dict) -> bool:
+        if not ticket:
+            return False
+        elif 'email' not in ticket or not ticket['email'] or 'ticket' not in ticket or not ticket['ticket']:
+            return False
+        elif 'email' not in ticket['email'] or not ticket['email']['email']:
+            return False
+        elif ('email_id' not in ticket['email']['email'] or not ticket['email']['email']['email_id']) or (
+                'client_id' not in ticket['email']['email'] or not ticket['email']['email']['client_id']):
+            return False
+        elif 'ticket_id' not in ticket['ticket'] or not ticket['ticket']['ticket_id']:
+            return False
+
+        return True
+
     def get_pending_tickets(self) -> List[dict]:
         return self._storage_repository.find_all("ticket_*")
 

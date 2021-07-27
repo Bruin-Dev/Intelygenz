@@ -50,6 +50,7 @@ class TemplateRenderer:
                 "type": "even" if idx % 2 == 0 else "odd",
                 "__KEY__": value['serial_number'],
                 "__CLIENT__": f"{value['customer']['client_id']} | {value['customer']['client_name']}",
+                "__EDGE_NAME__": value['edge_name'],
                 "__LOCATION__": f"{'<br>'.join(list(value['location'].values()))}",
                 "__NUMBER_OF_TICKETS__": f"{value['number_of_tickets']}",
                 "__BRUIN_TICKETS_ID__": f"{',<br>'.join([str(i) for i in value['bruin_tickets_id']])}",

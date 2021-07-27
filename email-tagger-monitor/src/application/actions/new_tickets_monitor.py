@@ -1,5 +1,6 @@
 import asyncio
 import time
+import datetime as dt
 
 from datetime import datetime
 
@@ -25,8 +26,9 @@ class NewTicketsMonitor:
         next_run_time = undefined
 
         if exec_on_start:
+            added_seconds = dt.timedelta(0, 5)
             tz = timezone(self._config.MONITOR_CONFIG["timezone"])
-            next_run_time = datetime.now(tz)
+            next_run_time = datetime.now(tz) + added_seconds
             self._logger.info('NewTicketsMonitor feedback job is going to be executed immediately')
 
         try:
@@ -50,6 +52,7 @@ class NewTicketsMonitor:
         tasks = [
             self._save_metrics(data['email'], data['ticket'])
             for data in new_tickets
+            if self._new_tickets_repository.validate_ticket(data)
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info("NewTicketsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
