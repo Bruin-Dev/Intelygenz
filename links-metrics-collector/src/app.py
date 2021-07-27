@@ -18,7 +18,7 @@ class Container:
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'Links metrics collector starting in: {config.ENVIRONMENT_NAME}...')
+        self._logger.info(f'Links metrics collector starting in: {config.CURRENT_ENVIRONMENT}...')
 
         # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)

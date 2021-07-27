@@ -14,7 +14,7 @@ class MyMongoClient:
         password = self._config.MONGO_PASS
         url = self._config.MONGO_URL
         port = self._config.MONGO_PORT
-        if self._config.ENVIRONMENT_NAME == "production":
+        if self._config.CURRENT_ENVIRONMENT == "production":
             conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?ssl=true&ssl_ca_certs=' \
                           f'/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference' \
                           f'=secondaryPreferred&retryWrites=false'
@@ -22,7 +22,7 @@ class MyMongoClient:
             conn_string = f'mongodb://{username}:{password}@{url}:{port}/velocloud?authSource=admin'
 
         self._logger.info(f'Connecting to mongo using: {conn_string}, '
-                          f'current environment: {self._config.ENVIRONMENT_NAME}')
+                          f'current environment: {self._config.CURRENT_ENVIRONMENT}')
         try:
             client = MongoClient(conn_string)
             # ping the server here to check login was successful

@@ -12,7 +12,7 @@ class Container:
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'Links metrics API starting in: {config.ENVIRONMENT_NAME}...')
+        self._logger.info(f'Links metrics API starting in: {config.CURRENT_ENVIRONMENT}...')
 
         # CLIENTS
         self._mongo_client = MyMongoClient(logger=self._logger, config=config)
