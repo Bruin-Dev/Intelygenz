@@ -32,7 +32,7 @@ resource "aws_security_group" "automation-dev-oreilly-inbound" {
     cidr_blocks = [
       "24.5.222.73/32", // US OFFICE
       "76.102.161.105/32", // KEKO HOME
-      "76.103.237.82/32", // SANCHO HOME
+      "76.126.233.247/32", // SANCHO HOME
       "73.158.200.161/32", // BRANDON HOME
       "83.61.20.90/32", // IGZ CALLAO OFFICE 1
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
@@ -40,7 +40,9 @@ resource "aws_security_group" "automation-dev-oreilly-inbound" {
       "52.51.50.68/32", // IGZ VPN
       "79.146.229.176/32",   // JESUS HOME
       "139.47.71.34/32",    // JC HOME
-      "54.73.0.183/32", // IGZ GITLAB RUNNERS  
+      "54.73.0.183/32", // IGZ GITLAB RUNNERS
+      "208.70.182.0/23", // OREILLY NET 1
+      "66.119.29.113/32", // OREILLY NET 2
     ]
   }
 
@@ -51,13 +53,15 @@ resource "aws_security_group" "automation-dev-oreilly-inbound" {
     cidr_blocks = [
       "24.5.222.73/32", // US OFFICE
       "76.102.161.105/32", // KEKO HOME
-      "76.103.237.82/32", // SANCHO HOME
+      "76.126.233.247/32", // SANCHO HOME
       "73.158.200.161/32", // BRANDON HOME
       "83.61.20.90/32", // IGZ CALLAO OFFICE 1
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "52.51.50.68/32", // IGZ VPN
-      "54.73.0.183/32", // IGZ GITLAB RUNNERS   
+      "54.73.0.183/32", // IGZ GITLAB RUNNERS
+      "208.70.182.0/23", // OREILLY NET 1
+      "66.119.29.113/32", // OREILLY NET 2
     ]
   }
 
