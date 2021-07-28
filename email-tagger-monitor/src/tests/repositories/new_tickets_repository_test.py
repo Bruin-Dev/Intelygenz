@@ -21,7 +21,8 @@ class TestEmailTaggerRepository:
         assert new_emails_repository._storage_repository is storage_repository
 
     def validate_ticket_test(self, logger, notifications_repository, storage_repository):
-        new_tickets_repository = NewTicketsRepository(testconfig, logger, notifications_repository, storage_repository)
+        new_tickets_repository = NewTicketsRepository(logger, testconfig, notifications_repository,
+                                                      storage_repository)
 
         pending_tickets = [
             {'email': {'email': {'email_id': '100', 'client_id': '333'}}, 'ticket': {'ticket_id': 200}},
@@ -40,7 +41,7 @@ class TestEmailTaggerRepository:
 
     def get_pending_emails_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.find_all = Mock(return_value=[])
-        new_emails_repository = NewTicketsRepository(testconfig, logger, notifications_repository,
+        new_emails_repository = NewTicketsRepository(logger, testconfig, notifications_repository,
                                                      storage_repository)
 
         actual = new_emails_repository.get_pending_tickets()

@@ -7,6 +7,7 @@ class NewTicketsRepository:
         self._config = config
         self._notifications_repository = notifications_repository
         self._storage_repository = storage_repository
+        self.TICKET_PREFIX = self._config.MONITOR_CONFIG["prefixes"]["ticket_prefix"]
 
     def validate_ticket(self, ticket: dict) -> bool:
         if not ticket:
@@ -24,7 +25,15 @@ class NewTicketsRepository:
         return True
 
     def get_pending_tickets(self) -> List[dict]:
-        return self._storage_repository.find_all("ticket_*")
+        filtered_tickets = []
+        all_tickets = self._storage_repository.find_all(self.TICKET_PREFIX)
+        self._logger.info(f"Checking for valid tickets {len(all_tickets)}")
+        for ticket in all_tickets:
+            if self.validate_ticket(ticket):
+                filtered_tickets.append(ticket)
+            else:
+                self._logger.info(f"Ticket not valid be processed. [{ticket}]")
+        return filtered_tickets
 
     def save_new_ticket(self, email_data: dict, ticket_data: dict):
         email_id = email_data['email']['email_id']

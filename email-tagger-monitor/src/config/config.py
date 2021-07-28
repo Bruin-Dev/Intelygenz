@@ -18,6 +18,10 @@ NATS_CONFIG = {
 
 MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
+    'prefixes': {
+        'ticket_prefix': "ticket_*",
+        'email_prefix': "email_*"
+    },
     'scheduler_config': {
         'new_emails_seconds': 10,
         'new_tickets_seconds': 10

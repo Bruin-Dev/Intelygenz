@@ -19,9 +19,27 @@ class TestEmailTaggerRepository:
         assert new_emails_repository._notifications_repository is notifications_repository
         assert new_emails_repository._storage_repository is storage_repository
 
+    def validate_email_test(self, logger, notifications_repository, storage_repository):
+        storage_repository.find_all = Mock(return_value=[])
+        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository,
+                                                    storage_repository)
+
+        pending_emails = [
+            {'email': {'email_id': '100', 'parent_id': '333'}},
+            {'email': {'email_id': '101', 'parent_id': '334'}},
+            {'email': {'email_id': '101'}},
+            None,
+            {'email': {'email': None}, 'ticket': None},
+            {},
+            {'email': {}, 'ticket': {}},
+        ]
+        expected_validations = [True, True, True, False, False, False, False]
+        for expected_validation, email in zip(expected_validations, pending_emails):
+            assert new_emails_repository.validate_email(email) == expected_validation
+
     def get_pending_emails_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.find_all = Mock(return_value=[])
-        new_emails_repository = NewEmailsRepository(testconfig, logger, notifications_repository,
+        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository,
                                                     storage_repository)
 
         actual = new_emails_repository.get_pending_emails()

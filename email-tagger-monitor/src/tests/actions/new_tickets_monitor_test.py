@@ -75,24 +75,13 @@ class TestNewTicketsMonitor:
         email_tagger_repository = Mock()
         new_tickets_monitor = NewTicketsMonitor(event_bus, logger, scheduler, config, new_tickets_repository,
                                                 email_tagger_repository, bruin_repository)
-
         pending_tickets = [
             {'email': {'email': {'email_id': '100', 'client_id': '333'}}, 'ticket': {'ticket_id': 200}},
-            {'email': {'email': {'email_id': '101', 'client_id': '333'}}, 'ticket': {'ticket_id': 201}},
-            None,
-            {'email': None, 'ticket': {'ticket_id': 201}},
-            {'email': {'email': {'email_id': '101', 'client_id': '333'}}, 'ticket': None},
-            {'email': {'email': {'email_id': None, 'client_id': '333'}}, 'ticket': None},
-            {'email': {'email': None}, 'ticket': None},
-            {},
-            {'email': {}, 'ticket': {}},
+            {'email': {'email': {'email_id': '101', 'client_id': '333'}}, 'ticket': {'ticket_id': 201}}
         ]
-        expected_validations = [True, True, False, False, False, False, False, False, False]
-
         ticket_basic_info = {'ticket_id': 444, 'ticket_type': 'BIL'}
 
         new_tickets_monitor._new_tickets_repository.get_pending_tickets = Mock(return_value=pending_tickets)
-        new_tickets_monitor._new_tickets_repository.validate_ticket = Mock(side_effect=expected_validations)
         new_tickets_monitor._email_tagger_repository.save_metrics = CoroutineMock(return_value={'status': 200})
         new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value={
             'status': 200,
