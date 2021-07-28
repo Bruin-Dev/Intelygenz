@@ -43,6 +43,8 @@ resource "aws_security_group" "automation-dev-oreilly-inbound" {
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "208.70.182.0/23", // OREILLY NET 1
       "66.119.29.113/32", // OREILLY NET 2
+      "173.27.96.221/32", // OREILLY NET 3
+      "156.146.113.90/32", // OREILLY NET 4
     ]
   }
 
@@ -62,6 +64,8 @@ resource "aws_security_group" "automation-dev-oreilly-inbound" {
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "208.70.182.0/23", // OREILLY NET 1
       "66.119.29.113/32", // OREILLY NET 2
+      "173.27.96.221/32", // OREILLY NET 3
+      "156.146.113.90/32", // OREILLY NET 4
     ]
   }
 
