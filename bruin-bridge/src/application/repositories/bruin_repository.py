@@ -290,3 +290,11 @@ class BruinRepository:
 
     async def post_email_tag(self, email_id: str, tag_id: str):
         return await self._bruin_client.post_email_tag(email_id, tag_id)
+
+    async def change_ticket_severity(self, ticket_id: int, payload: dict):
+        payload = {
+            'Severity': payload['severity'],
+            'Reason': payload['reason'],
+        }
+
+        return await self._bruin_client.change_ticket_severity(ticket_id, payload)

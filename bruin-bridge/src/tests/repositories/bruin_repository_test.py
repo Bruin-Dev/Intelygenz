@@ -1875,3 +1875,35 @@ class TestBruinRepository:
 
         bruin_client.post_email_tag.assert_awaited_once_with(email_id, tag_id)
         assert post_response == expected_post_response
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_test(self):
+        logger = Mock()
+
+        ticket_id = 12345
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        original_payload = {
+            'severity': severity_level,
+            'reason': reason_for_change,
+        }
+        pascalized_payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        change_ticket_severity_response = {
+            'TicketId': ticket_id,
+            'Result': True,
+        }
+
+        bruin_client = Mock()
+        bruin_client.change_ticket_severity = CoroutineMock(return_value=change_ticket_severity_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.change_ticket_severity(ticket_id, original_payload)
+
+        bruin_client.change_ticket_severity.assert_awaited_once_with(ticket_id, pascalized_payload)
+        assert result == change_ticket_severity_response

@@ -3367,3 +3367,213 @@ class TestPostMultipleTicketNotes:
 
             assert post_response["body"] == "Got internal error from Bruin"
             assert post_response["status"] == 500
+
+
+class TestChangeTicketSeverity:
+    @pytest.mark.asyncio
+    async def change_ticket_severity_ok_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        response_json = {
+            'TicketId': ticket_id,
+            'Result': True,
+        }
+        response_status = 200
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=response_json)
+        response_mock.status = response_status
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(return_value=response_mock)) as mock_put:
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        mock_put.assert_called_once()
+        assert result["body"] == response_json
+        assert result["status"] == response_status
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_400_status_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            # "Severity" field missing on purpose
+            'Reason': reason_for_change,
+        }
+
+        response_status = 400
+        response_json = {
+            "message": "Invalid Severity",
+            "messageDetail": None,
+            "data": None,
+            "type": "ApiValidationException",
+            "code": response_status,
+        }
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=response_json)
+        response_mock.status = response_status
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(return_value=response_mock)) as mock_put:
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        mock_put.assert_called_once()
+        assert result["body"] == response_json
+        assert result["status"] == response_status
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_401_status_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        response_status = 401
+
+        response_mock = CoroutineMock()
+        response_mock.status = response_status
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(return_value=response_mock)) as mock_put:
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        mock_put.assert_called_once()
+        assert result["body"] == 'Got 401 from Bruin'
+        assert result["status"] == response_status
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_403_status_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        response_status = 403
+
+        response_mock = CoroutineMock()
+        response_mock.status = response_status
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(return_value=response_mock)) as mock_put:
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        mock_put.assert_called_once()
+        assert result["body"] == (
+            f'Permissions to change the severity level of ticket {ticket_id} were not granted'
+        )
+        assert result["status"] == response_status
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_404_status_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        response_status = 404
+
+        response_mock = CoroutineMock()
+        response_mock.status = response_status
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(return_value=response_mock)) as mock_put:
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        mock_put.assert_called_once()
+        assert result["body"] == 'Resource not found'
+        assert result["status"] == response_status
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_500_status_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        response_status = 500
+
+        response_mock = CoroutineMock()
+        response_mock.status = response_status
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(return_value=response_mock)) as mock_put:
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        mock_put.assert_called_once()
+        assert result["body"] == 'Got internal error from Bruin'
+        assert result["status"] == response_status
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_connection_error_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        severity_level = 2
+        reason_for_change = 'WTN has been under troubles for a long time'
+
+        payload = {
+            'Severity': severity_level,
+            'Reason': reason_for_change,
+        }
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        error = 'Connection was closed by Bruin server'
+        with patch.object(bruin_client._session, 'put', new=CoroutineMock(side_effect=ClientConnectionError(error))):
+            result = await bruin_client.change_ticket_severity(ticket_id, payload)
+
+        expected = {
+            "body": f"Connection error in Bruin API: {error}",
+            "status": 500,
+        }
+        assert result == expected
