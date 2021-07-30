@@ -1,6 +1,7 @@
 import math
 import os
 from datetime import datetime
+from typing import List
 
 from pytz import timezone
 from shortuuid import uuid
@@ -479,6 +480,51 @@ class BruinRepository:
 
         return response
 
+    async def change_ticket_severity(self, ticket_id: int, severity_level: int, reason_for_change: str):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'severity': severity_level,
+                'reason': reason_for_change,
+            },
+        }
+
+        try:
+            self._logger.info(f'Changing severity level of ticket {ticket_id} to {severity_level}...')
+            response = await self._event_bus.rpc_request("bruin.change.ticket.severity", request, timeout=45)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when changing the severity level of ticket {ticket_id} to {severity_level} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Severity level of ticket {ticket_id} successfully changed to {severity_level}!')
+            else:
+                err_msg = (
+                    f'Error while changing severity of ticket {ticket_id} to {severity_level} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+        else:
+            success_msg = (
+                f'Severity level of Service Outage ticket {ticket_id} changed to {severity_level}: '
+                f'https://app.bruin.com/t/{ticket_id}'
+            )
+            await self._notifications_repository.send_slack_message(success_msg)
+
+        return response
+
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number):
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
@@ -586,3 +632,28 @@ class BruinRepository:
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
         return await self.append_note_to_ticket(ticket_id, task_result_note)
+
+    async def change_ticket_severity_for_offline_edge(self, ticket_id: int):
+        severity_level = self._config.MONITOR_CONFIG['severity_levels']['medium_high']
+        reason_for_change = os.linesep.join([
+            "#*MetTel's IPA*#",
+            f'Changing to Severity {severity_level}',
+            'Edge Status: Offline',
+        ])
+        return await self.change_ticket_severity(ticket_id, severity_level, reason_for_change)
+
+    async def change_ticket_severity_for_disconnected_links(self, ticket_id: int, links: List[str]):
+        severity_level = self._config.MONITOR_CONFIG['severity_levels']['medium_low']
+
+        reason_for_change_lines = [
+            "#*MetTel's IPA*#",
+            f'Changing to Severity {severity_level}',
+            'Edge Status: Online',
+        ]
+        reason_for_change_lines += [
+            f'Interface {link} Status: Disconnected'
+            for link in links
+        ]
+
+        reason_for_change = os.linesep.join(reason_for_change_lines)
+        return await self.change_ticket_severity(ticket_id, severity_level, reason_for_change)

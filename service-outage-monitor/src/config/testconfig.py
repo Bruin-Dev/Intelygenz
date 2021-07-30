@@ -37,6 +37,12 @@ MONITOR_CONFIG = {
     'autoresolve_last_outage_seconds': 60 * 60,
     'last_digi_reboot_seconds': 30 * 60,
     'semaphore': 1,
+    'severity_levels': {
+        'high': 1,
+        'medium_high': 2,
+        'medium_low': 3,
+        'low': 4,
+    },
 }
 
 LOG_CONFIG = {

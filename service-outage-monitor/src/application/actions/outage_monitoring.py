@@ -470,6 +470,11 @@ class OutageMonitor:
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(ticket_creation_response_body, cached_edge, edge_status)
+                        await self._change_ticket_severity(
+                            ticket_id=ticket_creation_response_body,
+                            edge_status=edge_status,
+                            check_ticket_tasks=False,
+                        )
 
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number,
@@ -481,6 +486,11 @@ class OutageMonitor:
                             f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
                             f'(ID = {ticket_creation_response_body}). Skipping outage ticket creation for this edge...'
                         )
+                        await self._change_ticket_severity(
+                            ticket_id=ticket_creation_response_body,
+                            edge_status=edge_status,
+                            check_ticket_tasks=True,
+                        )
                         await self._check_for_failed_digi_reboot(ticket_creation_response_body,
                                                                  logical_id_list, serial_number, edge_status,
                                                                  edge_full_id)
@@ -490,6 +500,12 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
+                        await self._change_ticket_severity(
+                            ticket_id=ticket_creation_response_body,
+                            edge_status=edge_status,
+                            check_ticket_tasks=True,
+                        )
+
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
@@ -503,6 +519,11 @@ class OutageMonitor:
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
                         await self._post_note_in_outage_ticket(ticket_creation_response_body, edge_status)
+                        await self._change_ticket_severity(
+                            ticket_id=ticket_creation_response_body,
+                            edge_status=edge_status,
+                            check_ticket_tasks=True,
+                        )
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
                             f'[outage-recheck] There is a resolve outage ticket for the same location of faulty edge '
@@ -513,6 +534,11 @@ class OutageMonitor:
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
                         await self._append_triage_note(ticket_creation_response_body, cached_edge, edge_status)
+                        await self._change_ticket_severity(
+                            ticket_id=ticket_creation_response_body,
+                            edge_status=edge_status,
+                            check_ticket_tasks=False,
+                        )
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for {len(edges_still_in_outage)} faulty '
@@ -558,7 +584,7 @@ class OutageMonitor:
             )
 
             await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
-        elif self._outage_repository.is_any_link_disconnected(edge_status=edge_status):
+        elif self._outage_repository.is_any_link_disconnected(edge_status['links']):
             self._logger.info(f'At least one link of the edge with serial {serial_number} was DISCONNECTED.')
 
             ticket_data_response = await self._bruin_repository.get_ticket_overview(ticket_id=ticket_id)
@@ -851,3 +877,47 @@ class OutageMonitor:
         seconds_elapsed_since_creation = (current_datetime - ticket_creation_datetime).total_seconds()
 
         return seconds_elapsed_since_creation >= max_seconds_since_creation
+
+    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, *, check_ticket_tasks: bool):
+        self._logger.info(f'Attempting to change severity level of ticket {ticket_id}...')
+
+        serial_number = edge_status['edgeSerialNumber']
+
+        if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
+            self._logger.info(
+                f'Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue '
+                f'is that edge {serial_number} is offline.'
+            )
+            await self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
+        else:
+            if check_ticket_tasks:
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+                if ticket_details_response['status'] not in range(200, 300):
+                    return
+
+                ticket_tasks = ticket_details_response['body']['ticketDetails']
+                if self._has_ticket_multiple_unresolved_tasks(ticket_tasks):
+                    self._logger.info(
+                        f'Severity level of ticket {ticket_id} will remain the same, as the root cause of the outage '
+                        f'issue is that at least one link of edge {serial_number} is disconnected, and this ticket '
+                        f'has multiple unresolved tasks.'
+                    )
+                    return
+
+            self._logger.info(
+                f'Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue '
+                f'is that at least one link of edge {serial_number} is disconnected, and this ticket has a single '
+                'unresolved task.'
+            )
+            disconnected_links = self._outage_repository.find_disconnected_links(edge_status['links'])
+            disconnected_interfaces = [link['interface'] for link in disconnected_links]
+
+            await self._bruin_repository.change_ticket_severity_for_disconnected_links(
+                ticket_id, disconnected_interfaces
+            )
+
+        self._logger.info(f'Finished changing severity level of ticket {ticket_id}!')
+
+    def _has_ticket_multiple_unresolved_tasks(self, ticket_tasks: list) -> bool:
+        unresolved_tasks = [task for task in ticket_tasks if not self._is_detail_resolved(task)]
+        return len(unresolved_tasks) > 1

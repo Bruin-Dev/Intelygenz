@@ -1499,6 +1499,129 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def change_ticket_severity_test(self):
+        ticket_id = 12345
+        severity_level = 2
+        reason_for_change = os.linesep.join([
+            'Changing to Severity 2',
+            'Edge Status: Offline',
+        ])
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'severity': severity_level,
+                'reason': reason_for_change,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': {
+                'TicketId': ticket_id,
+                'Result': True,
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.change_ticket_severity(ticket_id, severity_level, reason_for_change)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.change.ticket.severity", request, timeout=45)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_rpc_request_failing_test(self):
+        ticket_id = 12345
+        severity_level = 2
+        reason_for_change = os.linesep.join([
+            'Changing to Severity 2',
+            'Edge Status: Offline',
+        ])
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'severity': severity_level,
+                'reason': reason_for_change,
+            },
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.change_ticket_severity(ticket_id, severity_level, reason_for_change)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.change.ticket.severity", request, timeout=45)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_rpc_request_returning_non_2xx_status_test(self):
+        ticket_id = 12345
+        severity_level = 2
+        reason_for_change = os.linesep.join([
+            'Changing to Severity 2',
+            'Edge Status: Offline',
+        ])
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'severity': severity_level,
+                'reason': reason_for_change,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.change_ticket_severity(ticket_id, severity_level, reason_for_change)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.change.ticket.severity", request, timeout=45)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == response
+
+    @pytest.mark.asyncio
     async def append_autoresolve_note_to_ticket_test(self):
         serial_number = 'VC1234567'
 
@@ -2209,3 +2332,56 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
 
         assert results == return_body
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_for_offline_edge_test(self):
+        ticket_id = 12345
+        severity_level = testconfig.MONITOR_CONFIG['severity_levels']['medium_high']
+        reason_for_change = os.linesep.join([
+            "#*MetTel's IPA*#",
+            f'Changing to Severity {severity_level}',
+            'Edge Status: Offline',
+        ])
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        event_bus = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.change_ticket_severity = CoroutineMock()
+
+        await bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
+
+        bruin_repository.change_ticket_severity.assert_awaited_once_with(ticket_id, severity_level, reason_for_change)
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_for_disconnected_links_test(self):
+        link_1_interface = 'REX'
+        link_2_interface = 'RAY'
+        links = [
+            link_1_interface,
+            link_2_interface,
+        ]
+
+        ticket_id = 12345
+        severity_level = testconfig.MONITOR_CONFIG['severity_levels']['medium_low']
+        reason_for_change = os.linesep.join([
+            "#*MetTel's IPA*#",
+            f'Changing to Severity {severity_level}',
+            'Edge Status: Online',
+            'Interface REX Status: Disconnected',
+            'Interface RAY Status: Disconnected',
+        ])
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        event_bus = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.change_ticket_severity = CoroutineMock()
+
+        await bruin_repository.change_ticket_severity_for_disconnected_links(ticket_id, links)
+
+        bruin_repository.change_ticket_severity.assert_awaited_once_with(ticket_id, severity_level, reason_for_change)

@@ -32,8 +32,11 @@ class OutageRepository:
     def is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
-    def is_any_link_disconnected(self, edge_status: dict) -> bool:
-        return any(self.is_faulty_link(link['linkState']) for link in edge_status['links'])
+    def is_any_link_disconnected(self, links: list) -> bool:
+        return any(self.find_disconnected_links(links))
+
+    def find_disconnected_links(self, links: list) -> list:
+        return [link for link in links if self.is_faulty_link(link['linkState'])]
 
     def is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
                                                 serial_number: str,

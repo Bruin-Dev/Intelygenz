@@ -150,92 +150,53 @@ class TestOutageRepository:
         assert result is True
 
     def is_any_link_disconnected_test(self):
-        edge_status_1 = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'ONLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'links': [
-                {
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        edge_status_2 = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'ONLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'links': [
-                {
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
+        links_1 = [
+            {
+                'interface': 'REX',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '70.59.5.185',
+            },
+            {
+                'interface': 'RAY',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'DISCONNECTED',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '70.59.5.185',
+            },
+        ]
+        links_2 = [
+            {
+                'interface': 'REX',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '70.59.5.185',
+            },
+            {
+                'interface': 'RAY',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '70.59.5.185',
+            },
+        ]
+
         logger = Mock()
 
         outage_utils = OutageRepository(logger=logger)
 
-        result_1 = outage_utils.is_any_link_disconnected(edge_status_1)
-        result_2 = outage_utils.is_any_link_disconnected(edge_status_2)
+        result_1 = outage_utils.is_any_link_disconnected(links_1)
+        result_2 = outage_utils.is_any_link_disconnected(links_2)
 
         assert result_1 is True
         assert result_2 is False
@@ -267,6 +228,43 @@ class TestOutageRepository:
 
         result = outage_utils.is_faulty_link(link_state_2)
         assert result is True
+
+    def find_disconnected_links_test(self):
+        link_1 = {
+            'interface': 'REX',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        link_2 = {
+            'interface': 'RAY',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'DISCONNECTED',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        logger = Mock()
+
+        outage_repository = OutageRepository(logger=logger)
+
+        links = [
+            link_1,
+            link_2,
+        ]
+        result = outage_repository.find_disconnected_links(links)
+        assert result == [link_2]
+
+        links = [
+            link_1,
+        ]
+        result = outage_repository.find_disconnected_links(links)
+        assert result == []
 
     def is_outage_ticket_detail_auto_resolvable_test(self):
         serial_number_1 = 'VC1234567'

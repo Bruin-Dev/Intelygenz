@@ -4588,6 +4588,8 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
+        outage_monitor._change_ticket_severity = CoroutineMock()
+
         ticket_detail_1 = {
             'detailID': 12345,
             'detailValue': edge_1_serial,
@@ -4619,6 +4621,18 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note.assert_has_awaits([
             call(outage_ticket_creation_body_1, cached_edge_1, new_links_grouped_by_edge_1),
             call(outage_ticket_creation_body_2, cached_edge_2, new_links_grouped_by_edge_2),
+        ])
+        outage_monitor._change_ticket_severity.assert_has_awaits([
+            call(
+                ticket_id=outage_ticket_creation_body_1,
+                edge_status=new_links_grouped_by_edge_1,
+                check_ticket_tasks=False,
+            ),
+            call(
+                ticket_id=outage_ticket_creation_body_2,
+                edge_status=new_links_grouped_by_edge_2,
+                check_ticket_tasks=False,
+            ),
         ])
         outage_monitor._check_for_digi_reboot.assert_has_awaits([
             call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1,
@@ -4946,6 +4960,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
+        outage_monitor._change_ticket_severity = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
@@ -4957,6 +4972,18 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket.assert_has_awaits([
             call(client_id, edge_1_serial),
             call(client_id, edge_2_serial),
+        ])
+        outage_monitor._change_ticket_severity.assert_has_awaits([
+            call(
+                ticket_id=outage_ticket_creation_body_1,
+                edge_status=new_links_grouped_by_edge_1,
+                check_ticket_tasks=True,
+            ),
+            call(
+                ticket_id=outage_ticket_creation_body_2,
+                edge_status=new_links_grouped_by_edge_2,
+                check_ticket_tasks=True,
+            ),
         ])
         outage_monitor._check_for_failed_digi_reboot.assert_has_awaits([
             call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial,
@@ -5290,6 +5317,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        outage_monitor._change_ticket_severity = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
@@ -5306,6 +5334,18 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_has_awaits([
             call(outage_ticket_creation_body_1, new_links_grouped_by_edge_1),
             call(outage_ticket_creation_body_2, new_links_grouped_by_edge_2),
+        ])
+        outage_monitor._change_ticket_severity.assert_has_awaits([
+            call(
+                ticket_id=outage_ticket_creation_body_1,
+                edge_status=new_links_grouped_by_edge_1,
+                check_ticket_tasks=True,
+            ),
+            call(
+                ticket_id=outage_ticket_creation_body_2,
+                edge_status=new_links_grouped_by_edge_2,
+                check_ticket_tasks=True,
+            ),
         ])
         outage_monitor._check_for_digi_reboot.assert_has_awaits([
             call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1,
@@ -5635,6 +5675,7 @@ class TestServiceOutageMonitor:
         outage_monitor._post_note_in_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        outage_monitor._change_ticket_severity = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
@@ -5646,6 +5687,18 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket.assert_has_awaits([
             call(client_id, edge_1_serial),
             call(client_id, edge_2_serial),
+        ])
+        outage_monitor._change_ticket_severity.assert_has_awaits([
+            call(
+                ticket_id=outage_ticket_creation_body_1,
+                edge_status=new_links_grouped_by_edge_1,
+                check_ticket_tasks=True,
+            ),
+            call(
+                ticket_id=outage_ticket_creation_body_2,
+                edge_status=new_links_grouped_by_edge_2,
+                check_ticket_tasks=True,
+            ),
         ])
         outage_monitor._append_triage_note.assert_not_awaited()
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
@@ -5974,6 +6027,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        outage_monitor._change_ticket_severity = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
@@ -5985,6 +6039,18 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket.assert_has_awaits([
             call(client_id, edge_1_serial),
             call(client_id, edge_2_serial),
+        ])
+        outage_monitor._change_ticket_severity.assert_has_awaits([
+            call(
+                ticket_id=outage_ticket_creation_body_1,
+                edge_status=new_links_grouped_by_edge_1,
+                check_ticket_tasks=False,
+            ),
+            call(
+                ticket_id=outage_ticket_creation_body_2,
+                edge_status=new_links_grouped_by_edge_2,
+                check_ticket_tasks=False,
+            ),
         ])
         outage_monitor._append_triage_note.assert_has_awaits([
             call(outage_ticket_creation_body_1, cached_edge_1, new_links_grouped_by_edge_1),
@@ -9639,3 +9705,458 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             result = outage_monitor._is_ticket_old_enough(ticket_creation_date)
             assert result is True
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_edge_down_test(self):
+        ticket_id = 12345
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'DISCONNECTED',
+            'edgeSerialNumber': 'VC1234567',
+            'links': [
+                # No links specified for simplicity
+            ],
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=True)
+
+        bruin_repository = Mock()
+        bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+
+        # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
+
+        bruin_repository.change_ticket_severity_for_offline_edge.assert_awaited_once_with(ticket_id)
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_links_down_and_no_check_for_ticket_tasks_test(self):
+        ticket_id = 12345
+
+        link_1_interface = 'REX'
+        link_2_interface = 'RAY'
+        link_3_interface = 'Mk. II'
+
+        link_1 = {
+            # Some fields omitted for simplicity
+            'interface': link_1_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        link_2 = {
+            # Some fields omitted for simplicity
+            'interface': link_2_interface,
+            'linkState': 'STABLE',
+        }
+        link_3 = {
+            # Some fields omitted for simplicity
+            'interface': link_3_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'ONLINE',
+            'edgeSerialNumber': 'VC1234567',
+            'links': [
+                link_1,
+                link_2,
+                link_3,
+            ],
+        }
+
+        disconnected_links = [
+            link_1,
+            link_3,
+        ]
+        disconnected_interfaces = [
+            link_1_interface,
+            link_3_interface,
+        ]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
+
+        bruin_repository = Mock()
+        bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
+
+        bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
+            ticket_id, disconnected_interfaces
+        )
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_links_down_and_check_for_ticket_tasks_and_just_one_ticket_task_test(self):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        link_1_interface = 'REX'
+        link_2_interface = 'RAY'
+        link_3_interface = 'Mk. II'
+
+        link_1 = {
+            # Some fields omitted for simplicity
+            'interface': link_1_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        link_2 = {
+            # Some fields omitted for simplicity
+            'interface': link_2_interface,
+            'linkState': 'STABLE',
+        }
+        link_3 = {
+            # Some fields omitted for simplicity
+            'interface': link_3_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'ONLINE',
+            'edgeSerialNumber': serial_number,
+            'links': [
+                link_1,
+                link_2,
+                link_3,
+            ],
+        }
+
+        disconnected_links = [
+            link_1,
+            link_3,
+        ]
+        disconnected_interfaces = [
+            link_1_interface,
+            link_3_interface,
+        ]
+
+        ticket_tasks = [
+            {
+                "detailID": 11111,
+                "detailStatus": 'I',
+                "detailValue": serial_number,
+                # Some fields omitted for simplicity
+            }
+        ]
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': ticket_tasks,
+                'ticketNotes': [],
+            },
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=False)
+
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
+        bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
+            ticket_id, disconnected_interfaces
+        )
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_links_down_and_no_check_for_ticket_tasks_and_multiple_ticket_tasks_test(self):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        link_1_interface = 'REX'
+        link_2_interface = 'RAY'
+        link_3_interface = 'Mk. II'
+
+        link_1 = {
+            # Some fields omitted for simplicity
+            'interface': link_1_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        link_2 = {
+            # Some fields omitted for simplicity
+            'interface': link_2_interface,
+            'linkState': 'STABLE',
+        }
+        link_3 = {
+            # Some fields omitted for simplicity
+            'interface': link_3_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'ONLINE',
+            'edgeSerialNumber': serial_number,
+            'links': [
+                link_1,
+                link_2,
+                link_3,
+            ],
+        }
+
+        disconnected_links = [
+            link_1,
+            link_3,
+        ]
+
+        ticket_tasks = [
+            {
+                "detailID": 11111,
+                "detailStatus": 'I',
+                "detailValue": serial_number,
+                # Some fields omitted for simplicity
+            },
+            {
+                "detailID": 22222,
+                "detailStatus": 'I',
+                "detailValue": 'VC9999999',
+                # Some fields omitted for simplicity
+            }
+        ]
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': ticket_tasks,
+                'ticketNotes': [],
+            },
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
+
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
+        bruin_repository.change_ticket_severity_for_disconnected_links.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_links_down_and_no_check_for_ticket_tasks_and_ticket_details_rpc_failure_test(
+            self):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        link_1_interface = 'REX'
+        link_2_interface = 'RAY'
+        link_3_interface = 'Mk. II'
+
+        link_1 = {
+            # Some fields omitted for simplicity
+            'interface': link_1_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        link_2 = {
+            # Some fields omitted for simplicity
+            'interface': link_2_interface,
+            'linkState': 'STABLE',
+        }
+        link_3 = {
+            # Some fields omitted for simplicity
+            'interface': link_3_interface,
+            'linkState': 'DISCONNECTED',
+        }
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'ONLINE',
+            'edgeSerialNumber': serial_number,
+            'links': [
+                link_1,
+                link_2,
+                link_3,
+            ],
+        }
+
+        disconnected_links = [
+            link_1,
+            link_3,
+        ]
+
+        ticket_details_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=False)
+        outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
+
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor._has_ticket_multiple_unresolved_tasks.assert_not_called()
+        bruin_repository.change_ticket_severity_for_disconnected_links.assert_not_awaited()
+
+    def has_ticket_multiple_unresolved_tasks_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        outage_repository = Mock()
+        bruin_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+
+        ticket_tasks = [
+            {
+                "detailID": 11111,
+                "detailStatus": 'I',
+                "detailValue": 'VC1234567',
+                # Some fields omitted for simplicity
+            },
+        ]
+        result = outage_monitor._has_ticket_multiple_unresolved_tasks(ticket_tasks)
+        assert result is False
+
+        ticket_tasks = [
+            {
+                "detailID": 11111,
+                "detailStatus": 'R',
+                "detailValue": 'VC1234567',
+                # Some fields omitted for simplicity
+            },
+            {
+                "detailID": 22222,
+                "detailStatus": 'R',
+                "detailValue": 'VC9999999',
+                # Some fields omitted for simplicity
+            },
+        ]
+        result = outage_monitor._has_ticket_multiple_unresolved_tasks(ticket_tasks)
+        assert result is False
+
+        ticket_tasks = [
+            {
+                "detailID": 11111,
+                "detailStatus": 'I',
+                "detailValue": 'VC1234567',
+                # Some fields omitted for simplicity
+            },
+            {
+                "detailID": 22222,
+                "detailStatus": 'R',
+                "detailValue": 'VC9999999',
+                # Some fields omitted for simplicity
+            },
+        ]
+        result = outage_monitor._has_ticket_multiple_unresolved_tasks(ticket_tasks)
+        assert result is False
+
+        ticket_tasks = [
+            {
+                "detailID": 11111,
+                "detailStatus": 'I',
+                "detailValue": 'VC1234567',
+                # Some fields omitted for simplicity
+            },
+            {
+                "detailID": 22222,
+                "detailStatus": 'I',
+                "detailValue": 'VC9999999',
+                # Some fields omitted for simplicity
+            },
+        ]
+        result = outage_monitor._has_ticket_multiple_unresolved_tasks(ticket_tasks)
+        assert result is True
