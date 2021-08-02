@@ -184,12 +184,12 @@ class InterMapperMonitor:
                 continue
 
             product_category = product_category_response_body[0].get('category')
+            self._logger.info(f'Product category of ticket {ticket_id} from bruin is {product_category}')
 
-            self._logger.info(f'Product category of ticket {ticket_id} is {product_category}')
-
-            if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve_product_category_list']:
-                self._logger.info(f"Product category of ticket {ticket_id} is {product_category}, and is not "
-                                  f"one of the categories we autoresolve for. Skipping autoresolve ...")
+            if self._are_all_product_categories_whitelisted(product_category) is False:
+                self._logger.info(f"At least one product category of ticket {ticket_id} from the "
+                                  f"following list is not one of the whitelisted categories for "
+                                  f"auto-resolve: {product_category}. Skipping autoresolve ...")
                 continue
 
             outage_ticket_creation_date = ticket['createDate']
@@ -341,3 +341,10 @@ class InterMapperMonitor:
 
     def _get_last_element_matching(self, iterable, condition: Callable, fallback=None):
         return self._get_first_element_matching(reversed(iterable), condition, fallback)
+
+    def _are_all_product_categories_whitelisted(self, bruin_product_category: str) -> bool:
+        all_product_categories = bruin_product_category.split(",")
+        for product_category in all_product_categories:
+            if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve_product_category_list']:
+                return False
+        return True

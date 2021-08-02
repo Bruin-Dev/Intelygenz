@@ -691,7 +691,7 @@ class TestInterMapperMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "POTS in a Box",
+            "category": "POTS in a Box,Switches",
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
