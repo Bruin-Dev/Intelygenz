@@ -19,12 +19,12 @@ variables:
   DOCKER_BASE_IMAGE_VERSION: 2.1.3
   DOCKER_IMAGE_UTILS_VERSION: 1.0.3
   bruin_bridge_desired_tasks: 2
-  cts_bridge_desired_tasks: 1
+  cts_bridge_desired_tasks: 0                          #--> disable dispatch portal feature
   customer_cache_desired_tasks: 1
   digi_bridge_desired_tasks: 1
   digi_reboot_report_desired_tasks: 1
-  dispatch_portal_backend_desired_tasks: 0
-  dispatch_portal_frontend_desired_tasks: 0
+  dispatch_portal_backend_desired_tasks: 0             #--> disable dispatch portal feature
+  dispatch_portal_frontend_desired_tasks: 0            #--> disable dispatch portal feature
   email_tagger_monitor_desired_tasks: 1
   email_tagger_kre_bridge_desired_tasks: 1
   hawkeye_affecting_monitor_desired_tasks: 0
@@ -35,7 +35,7 @@ variables:
   last_contact_report_desired_tasks: 1
   links_metrics_api_desired_tasks: 1
   links_metrics_collector_desired_tasks: 1
-  lit_bridge_desired_tasks: 1
+  lit_bridge_desired_tasks: 0                          #--> disable dispatch portal feature
   lumin_billing_report_desired_tasks: 1
   metrics_prometheus_desired_tasks: 1
   nats_server_desired_tasks: 1
@@ -43,7 +43,7 @@ variables:
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
   service_affecting_monitor_desired_tasks: 1
-  service_dispatch_monitor_desired_tasks: 0
+  service_dispatch_monitor_desired_tasks: 0            #--> disable dispatch portal feature
   service_outage_monitor_1_desired_tasks: 1
   service_outage_monitor_2_desired_tasks: 1
   service_outage_monitor_3_desired_tasks: 1
@@ -73,13 +73,13 @@ include:
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-validate-templates.yml'
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
-  - local: 'cts-bridge/.gitlab-ci.yml'
+#  - local: 'cts-bridge/.gitlab-ci.yml'                #--> disable dispatch portal feature
   - local: 'customer-cache/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'digi-bridge/.gitlab-ci.yml'
   - local: 'digi-reboot-report/.gitlab-ci.yml'
-#  - local: 'dispatch-portal-backend/.gitlab-ci.yml'
-#  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
+#  - local: 'dispatch-portal-backend/.gitlab-ci.yml'   #--> disable dispatch portal feature
+#  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'  #--> disable dispatch portal feature
   - local: 'email-tagger-monitor/.gitlab-ci.yml'
   - local: 'email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'hawkeye-affecting-monitor/.gitlab-ci.yml'
@@ -95,13 +95,13 @@ include:
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'links-metrics-api/.gitlab-ci.yml'
   - local: 'links-metrics-collector/.gitlab-ci.yml'
-  - local: 'lit-bridge/.gitlab-ci.yml'
+#  - local: 'lit-bridge/.gitlab-ci.yml'                #--> disable dispatch portal feature
   - local: 'lumin-billing-report/.gitlab-ci.yml'
   - local: 'metrics-dashboard/.gitlab-ci.yml'
   - local: 'nats-server/.gitlab-ci.yml'
   - local: 'notifier/.gitlab-ci.yml'
   - local: 'service-affecting-monitor/.gitlab-ci.yml'
-  - local: 'service-dispatch-monitor/.gitlab-ci.yml'
+#  - local: 'service-dispatch-monitor/.gitlab-ci.yml'  #--> disable dispatch portal feature
   - local: 'service-outage-monitor/.gitlab-ci.yml'
   - local: 'sites-monitor/.gitlab-ci.yml'
   - local: 'tnba-feedback/.gitlab-ci.yml'
