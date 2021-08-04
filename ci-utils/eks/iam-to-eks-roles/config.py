@@ -13,12 +13,18 @@ CLUSTER_ROLES_PERMISSIONS = {
             },
             {
                 "apiGroups": [""],
-                "resources": ["namespaces", "namespaces/finalize", "namespaces/status", "nodes", "nodes/proxy", "nodes/status", "persistentvolumeclaims", "persistentvolumeclaims/status", "persistentvolumes", "persistentvolumes/status", "pods/attach", "pods/binding", "pods/eviction", "pods/proxy", "pods/status", "serviceaccounts", "services", "services/proxy", "services/status"],
+                "resources": ["namespaces", "namespaces/finalize", "namespaces/status", 
+                              "nodes", "nodes/proxy", "nodes/status", "persistentvolumeclaims",
+                              "persistentvolumeclaims/status", "persistentvolumes", "persistentvolumes/status",
+                              "pods/attach", "pods/binding", "pods/eviction", "pods/proxy", "pods/status",
+                              "serviceaccounts", "services", "services/proxy", "services/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {
                 "apiGroups": ["apps"],
-                "resources": ["controllerrevisions", "daemonsets", "daemonsets/status", "deployments", "deployments/scale", "deployments/status", "replicasets", "replicasets/scale", "replicasets/status", "statefulsets", "statefulsets/scale", "statefulsets/status"],
+                "resources": ["controllerrevisions", "daemonsets", "daemonsets/status", "deployments",
+                              "deployments/scale", "deployments/status", "replicasets", "replicasets/scale",
+                              "replicasets/status", "statefulsets", "statefulsets/scale", "statefulsets/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {
@@ -33,7 +39,8 @@ CLUSTER_ROLES_PERMISSIONS = {
             },
             {
                 "apiGroups": ["storage.k8s.io"],
-                "resources": ["csidrivers", "csinodes", "storageclasses", "volumeattachments", "volumeattachments/status"],
+                "resources": ["csidrivers", "csinodes", "storageclasses", "volumeattachments",
+                              "volumeattachments/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {
@@ -73,12 +80,23 @@ CLUSTER_ROLES_PERMISSIONS = {
             },
             {
                 "apiGroups": [""],
-                "resources": ["namespaces", "namespaces/finalize", "namespaces/status", "nodes", "nodes/proxy", "nodes/status", "persistentvolumeclaims", "persistentvolumeclaims/status", "persistentvolumes", "persistentvolumes/status", "pods/attach", "pods/binding", "pods/eviction", "pods/proxy", "pods/status", "serviceaccounts", "services", "services/proxy", "services/status"],
+                "resources": ["pods", "pods/log", "pods/exec", "configmaps", "secrets"],
+                "verbs": ["get", "list", "watch", "create", "patch", "update", "delete"]
+            },
+            {
+                "apiGroups": [""],
+                "resources": ["namespaces", "namespaces/finalize", "namespaces/status", 
+                              "nodes", "nodes/proxy", "nodes/status", "persistentvolumeclaims",
+                              "persistentvolumeclaims/status", "persistentvolumes", "persistentvolumes/status",
+                              "pods/attach", "pods/binding", "pods/eviction", "pods/proxy", "pods/status",
+                              "serviceaccounts", "services", "services/proxy", "services/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {
                 "apiGroups": ["apps"],
-                "resources": ["controllerrevisions", "daemonsets", "daemonsets/status", "deployments", "deployments/scale", "deployments/status", "replicasets", "replicasets/scale", "replicasets/status", "statefulsets", "statefulsets/scale", "statefulsets/status"],
+                "resources": ["controllerrevisions", "daemonsets", "daemonsets/status", "deployments",
+                              "deployments/scale", "deployments/status", "replicasets", "replicasets/scale",
+                              "replicasets/status", "statefulsets", "statefulsets/scale", "statefulsets/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {
@@ -93,7 +111,8 @@ CLUSTER_ROLES_PERMISSIONS = {
             },
             {
                 "apiGroups": ["storage.k8s.io"],
-                "resources": ["csidrivers", "csinodes", "storageclasses", "volumeattachments", "volumeattachments/status"],
+                "resources": ["csidrivers", "csinodes", "storageclasses", "volumeattachments",
+                              "volumeattachments/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {
