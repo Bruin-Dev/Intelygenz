@@ -6,6 +6,8 @@ variable "eks_developer_users" {
     "daniel.fernandez",
     "joseluis.vega",
     "sancho.munoz",
+    "juancarlos.gomez",
+    "ricardo.hortelano"
   ]
 }
 
@@ -15,7 +17,6 @@ variable "eks_devops_users" {
   default = [
     "alberto.iglesias",
     "angel.luis.piquero",
-    "xisco.capllonch",
     "alejandro.aceituna"
   ]
 }
