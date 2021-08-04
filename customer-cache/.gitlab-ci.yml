@@ -23,6 +23,7 @@ customer-cache-test:
         - customer-cache/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_alpine
+  needs: ["customer-cache-linter"]
 
 # ==============================================
 # Images builds jobs for customer-cache module
@@ -38,3 +39,4 @@ customer-cache-build:
         - customer-cache/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["customer-cache-test"]

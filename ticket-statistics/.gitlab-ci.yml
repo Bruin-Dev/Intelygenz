@@ -11,18 +11,6 @@ ticket-statistics-linter:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
-# =========================================
-# Unit tests jobs for ticket-statistics module
-# =========================================
-#ticket-statistics-test:
-#  variables:
-#    MODULE: ticket-statistics
-#  rules:
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-#      changes:
-#        - ticket-statistics/**/*
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-#  extends: .unittest_module_python_alpine
 
 # ============================================
 # Images builds jobs for ticket-statistics module
@@ -38,4 +26,4 @@ ticket-statistics-build:
         - ticket-statistics/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-
+  needs: ["ticket-statistics-linter"]

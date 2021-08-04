@@ -23,6 +23,7 @@ last-contact-report-test:
         - last-contact-report/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
+  needs: ["last-contact-report-linter"]
 
 # =================================================
 # Images builds jobs for last-contact-report module
@@ -38,3 +39,4 @@ last-contact-report-build:
         - last-contact-report/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["last-contact-report-test"]

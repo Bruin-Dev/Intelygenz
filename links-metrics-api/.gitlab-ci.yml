@@ -26,3 +26,4 @@ links-metrics-api-build:
         - links-metrics-api/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["links-metrics-api-linter"]

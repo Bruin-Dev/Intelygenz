@@ -48,6 +48,7 @@ dispatch-portal-frontend-test:
     - dispatch-portal-frontend-linter
   tags:
     - kubernetes
+  needs: ["dispatch-portal-frontend-linter"]
 
 dispatch-portal-frontend-test-e2e:
   stage: unit_test
@@ -67,6 +68,7 @@ dispatch-portal-frontend-test-e2e:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event") && $TEST_DISPATCH_PORTAL_FRONTEND == "true"'
   tags:
     - kubernetes
+  needs: ["dispatch-portal-frontend-linter"]
 
 # =================================================================
 # Images builds jobs for dispatch-portal-frontend module components
@@ -87,6 +89,7 @@ dispatch-portal-frontend-nextjs-build:
         - dispatch-portal-frontend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["dispatch-portal-frontend-test", "dispatch-portal-frontend-test-e2e"]
 
 
 dispatch-portal-frontend-nginx-build:
@@ -105,3 +108,4 @@ dispatch-portal-frontend-nginx-build:
         - dispatch-portal-frontend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["dispatch-portal-frontend-test", "dispatch-portal-frontend-test-e2e"]

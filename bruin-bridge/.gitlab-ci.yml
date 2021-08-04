@@ -23,6 +23,7 @@ bruin-bridge-test:
         - bruin-bridge/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_alpine
+  needs: ["bruin-bridge-linter"]
 
 # ==========================================
 # Images builds jobs for bruin-bridge module
@@ -38,4 +39,4 @@ bruin-bridge-build:
         - bruin-bridge/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-
+  needs: ["bruin-bridge-test"]

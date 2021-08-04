@@ -23,6 +23,7 @@ cts-bridge-test:
         - cts-bridge/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
+  needs: ["cts-bridge-linter"]
 
 # ==========================================
 # Images builds jobs for cts-bridge module
@@ -38,3 +39,4 @@ cts-bridge-build:
         - cts-bridge/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["cts-bridge-test"]

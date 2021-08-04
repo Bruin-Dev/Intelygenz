@@ -15,14 +15,15 @@ hawkeye-affecting-monitor-linter:
 # Unit tests jobs for hawkeye-affecting-monitor module
 # ====================================================
 hawkeye-affecting-monitor-test:
- variables:
-   MODULE: hawkeye-affecting-monitor
- rules:
-   - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
-     changes:
-       - hawkeye-affecting-monitor/**/*
-   - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
- extends: .unittest_module_python
+  variables:
+    MODULE: hawkeye-affecting-monitor
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - hawkeye-affecting-monitor/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python
+  needs: ["hawkeye-affecting-monitor-linter"]
 
 # =======================================================
 # Images builds jobs for hawkeye-affecting-monitor module
@@ -38,3 +39,4 @@ hawkeye-affecting-monitor-build:
         - hawkeye-affecting-monitor/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["hawkeye-affecting-monitor-test"]

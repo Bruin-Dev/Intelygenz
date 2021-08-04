@@ -27,6 +27,7 @@ lumin-billing-report-test:
         - lumin-billing-report/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
+  needs: ["lumin-billing-report-linter"]
 
 # =================================================
 # Images builds jobs for lumin-billing-report module
@@ -42,3 +43,4 @@ lumin-billing-report-build:
         - lumin-billing-report/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["lumin-billing-report-test"]

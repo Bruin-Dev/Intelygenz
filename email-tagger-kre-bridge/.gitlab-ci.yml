@@ -23,6 +23,7 @@ email-tagger-kre-bridge-test:
         - email-tagger-kre-bridge/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
+  needs: ["email-tagger-kre-bridge-linter"]
 
 # =======================================
 # Images builds jobs for email-tagger-kre-bridge module
@@ -38,3 +39,4 @@ email-tagger-kre-bridge-build:
         - email-tagger-kre-bridge/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["email-tagger-kre-bridge-test"]

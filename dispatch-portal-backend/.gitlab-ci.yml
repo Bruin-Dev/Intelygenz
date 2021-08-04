@@ -23,6 +23,7 @@ dispatch-portal-backend-test:
         - dispatch-portal-backend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_alpine
+  needs: ["dispatch-portal-backend-linter"]
 
 # ================================================
 # Images builds jobs for dispatch-portal-backend module
@@ -38,3 +39,4 @@ dispatch-portal-backend-build:
         - dispatch-portal-backend/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
+  needs: ["dispatch-portal-backend-test"]
