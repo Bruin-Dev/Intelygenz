@@ -89,7 +89,7 @@
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
         cd ${CI_PROJECT_DIR}              
-        envsubst < helm/kre-runtimes/dashboards.yaml.tpl > helm/kre-runtimes/dashboards.yaml
+        envsubst '${KRE_RUNTIME_NAME},${KRE_RUNTIME_INFLUX_SOURCE},${KRE_RUNTIME_DASHBOARD},${KRE_RUNTIME_DASHBOARD_USER},${KRE_RUNTIME_DASHBOARD_PASSWORD}' < helm/kre-runtimes/dashboards.yaml.tpl > helm/kre-runtimes/dashboards.yaml
         kubectl apply -f helm/kre-runtimes/dashboards.yaml
       fi
   tags:
