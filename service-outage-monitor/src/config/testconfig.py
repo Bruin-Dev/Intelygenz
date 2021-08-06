@@ -24,7 +24,8 @@ MONITOR_CONFIG = {
     'timezone': "US/Eastern",
     'jobs_intervals': {
         'outage_monitor': 60 * 3,
-        'quarantine': quarantine_time,
+        'quarantine_edge_outage': quarantine_time,
+        'quarantine_link_outage': quarantine_time,
         'build_cache': 60 * 60,
         'forward_to_hnoc': 60,
     },

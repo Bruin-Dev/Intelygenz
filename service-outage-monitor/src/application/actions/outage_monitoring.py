@@ -131,20 +131,38 @@ class OutageMonitor:
         mapped_serials_w_status = [edge["cached_info"]["serial_number"] for edge in edges_full_info]
         self._logger.info(f"Mapped cache serials with status: {mapped_serials_w_status}")
 
-        outage_edges = [edge for edge in edges_full_info if self._outage_repository.is_there_an_outage(edge['status'])]
+        outage_edges = [edge for edge in edges_full_info
+                        if self._outage_repository.is_faulty_edge(edge['status']['edgeState'])]
+
         outage_serials = [edge["cached_info"]["serial_number"] for edge in outage_edges]
-        healthy_edges = [edge for edge in edges_full_info if edge not in outage_edges]
+        outage_links = [edge for edge in edges_full_info
+                        if not self._outage_repository.is_faulty_edge(edge['status']['edgeState'])
+                        if self._outage_repository.is_any_link_disconnected(edge['status']['links'])]
+        outage_link_serials = [edge["cached_info"]["serial_number"] for edge in outage_links]
+        healthy_edges = [edge for edge in edges_full_info if edge not in outage_edges if edge not in outage_links]
         healthy_serials = [edge["cached_info"]["serial_number"] for edge in healthy_edges]
-        self._logger.info(f"Outage serials: {outage_serials}")
+        self._logger.info(f"Faulty Edge serials: {outage_serials}")
+        self._logger.info(f"Edge with faulty links serials: {outage_link_serials}")
         self._logger.info(f"Healthy serials: {healthy_serials}")
 
         if outage_edges:
             self._logger.info(
                 f"{len(outage_edges)} edges were detected in outage state. Scheduling re-check job for all of them..."
             )
-            self._schedule_recheck_job_for_edges(outage_edges)
+            self._schedule_recheck_job_for_edges(outage_edges, self._config.MONITOR_CONFIG['jobs_intervals'][
+                                                     'quarantine_edge_outage'])
         else:
             self._logger.info("No edges were detected in outage state. Re-check job won't be scheduled")
+
+        if outage_links:
+            self._logger.info(
+                f"{len(outage_links)} edges with links that were detected in outage state. "
+                f"Scheduling re-check job for all of them..."
+            )
+            self._schedule_recheck_job_for_edges(outage_links, self._config.MONITOR_CONFIG['jobs_intervals'][
+                                                     'quarantine_link_outage'])
+        else:
+            self._logger.info("No edges with links were detected in outage state. Re-check job won't be scheduled")
 
         if healthy_edges:
             self._logger.info(
@@ -158,12 +176,12 @@ class OutageMonitor:
         stop = perf_counter()
         self._logger.info(f"Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes")
 
-    def _schedule_recheck_job_for_edges(self, edges: list):
+    def _schedule_recheck_job_for_edges(self, edges: list, quarantine_time):
         self._logger.info(f'Scheduling recheck job for {len(edges)} edges in outage state...')
 
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
         current_datetime = datetime.now(tz)
-        run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
+        run_date = current_datetime + timedelta(seconds=quarantine_time)
 
         self._scheduler.add_job(self._recheck_edges_for_ticket_creation, 'date',
                                 args=[edges],
