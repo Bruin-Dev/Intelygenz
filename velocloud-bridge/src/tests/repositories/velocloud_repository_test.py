@@ -379,48 +379,30 @@ class TestVelocloudRepository:
             },
         ]
         config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Edge Specific Profile',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [
-                        {
-                            "id": 563,
-                            "created": "2016-03-07T17:52:57.000Z",
-                            "name": "WAN",
-                            "type": "ENTERPRISE",
-                            "description": None,
-                            "schemaVersion": "3.3.2",
-                            "version": "1618589033631",
-                            "configurationId": 157,
-                            "data": {
-                                "links": links_configuration,
-                            },
-                        },
-                    ],
+            "body": {
+                "WAN": {
+                    "version": "1619512204741",
+                    "schemaVersion": "3.3.2",
+                    "type": "ENTERPRISE",
+                    "data": {
+                        "networks": [],
+                        "links": links_configuration,
+                    },
                 },
-            ],
+            },
             "status": 200,
         }
 
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
+        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_stack_response)
 
         velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
+        velocloud_client.get_edge_configuration_modules.assert_awaited_once_with(edge_full_id)
 
         expected = {
             'body': links_configuration,
@@ -429,14 +411,14 @@ class TestVelocloudRepository:
         assert response == expected
 
     @pytest.mark.asyncio
-    async def get_links_configuration_with_config_stack_response_having_non_2xx_status_test(self):
+    async def get_links_configuration_with_config_modules_response_having_non_2xx_status_test(self):
         edge_full_id = {
             'host': "mettel.velocloud.net",
             'enterprise_id': 1,
             'edge_id': 1,
         }
 
-        config_stack_response = {
+        config_modules_response = {
             "body": 'Got internal error from Velocloud',
             "status": 500,
         }
@@ -444,121 +426,14 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
+        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_modules_response)
 
         velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-        assert response == config_stack_response
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_config_stack_response_having_non_2xx_status_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": 'Got internal error from Velocloud',
-            "status": 500,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': (
-                f'Bad status calling get_edge_configuration_stack. '
-                f'Response {config_stack_response} for edge {edge_full_id}'
-            ),
-            'status': 500,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_config_stack_empty_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": [],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': f'No config stack was found for edge {edge_full_id}',
-            'status': 404,
-        }
-        assert response == expected
-
-    @pytest.mark.asyncio
-    async def get_links_configuration_with_edge_specific_config_missing_in_config_stack_test(self):
-        edge_full_id = {
-            'host': "mettel.velocloud.net",
-            'enterprise_id': 1,
-            'edge_id': 1,
-        }
-
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Public_Wired_3_Segmented',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [],
-                },
-            ],
-            "status": 200,
-        }
-
-        logger = Mock()
-
-        velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
-
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
-
-        response = await velocloud_repository.get_links_configuration(edge_full_id)
-
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
-
-        expected = {
-            'body': f'No specific config was found for edge {edge_full_id}',
-            'status': 404,
-        }
-        assert response == expected
+        velocloud_client.get_edge_configuration_modules.assert_awaited_once_with(edge_full_id)
+        assert response == config_modules_response
 
     @pytest.mark.asyncio
     async def get_links_configuration_with_WAN_module_missing_in_edge_specific_config_test(self):
@@ -568,65 +443,46 @@ class TestVelocloudRepository:
             'edge_id': 1,
         }
 
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Edge Specific Profile',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [
-                        {
-                            'id': 16275,
-                            'created': '2020-09-21T18:27:09.000Z',
-                            'name': 'QOS',
-                            'type': 'ENTERPRISE',
-                            'description': None,
-                            'schemaVersion': '3.3.2',
-                            'version': '1600726682905',
-                            'configurationId': 4352,
-                            'data': {
-                                'segments': [
-                                    {
-                                        'segment': {
-                                            'segmentId': 0,
-                                            'name': 'Global Segment',
-                                            'type': 'REGULAR'
-                                        },
-                                        'cosMapping': {
-                                            'lsInputType': 'weight',
-                                            'realtime': {
-                                                'high': {'value': 35, 'ratelimit': False},
-                                                'normal': {'value': 15, 'ratelimit': False},
-                                                'low': {'value': 1, 'ratelimit': False}
-                                            }
-                                        },
+        config_modules_response = {
+            "body": {
+                "QOS": {
+                    "version": "1619512204741",
+                    "schemaVersion": "3.3.2",
+                    "type": "ENTERPRISE",
+                    "data": {
+                        "segments": [
+                            {
+                                'segment': {
+                                    'segmentId': 0,
+                                    'name': 'Global Segment',
+                                    'type': 'REGULAR'
+                                },
+                                'cosMapping': {
+                                    'lsInputType': 'weight',
+                                    'realtime': {
+                                        'high': {'value': 35, 'ratelimit': False},
+                                        'normal': {'value': 15, 'ratelimit': False},
+                                        'low': {'value': 1, 'ratelimit': False},
                                     },
-                                ],
+                                },
                             },
-                        }
-                    ],
+                        ],
+                    },
                 },
-            ],
+            },
             "status": 200,
         }
 
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
+        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_modules_response)
 
         velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
+        velocloud_client.get_edge_configuration_modules.assert_awaited_once_with(edge_full_id)
 
         expected = {
             'body': f'No WAN module was found for edge {edge_full_id}',
@@ -642,47 +498,28 @@ class TestVelocloudRepository:
             'edge_id': 1,
         }
 
-        config_stack_response = {
-            "body": [
-                {
-                    'id': 157,
-                    'created': '2016-03-07T17:52:57.000Z',
-                    'name': 'Edge Specific Profile',
-                    'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                    'version': '1601533416221',
-                    'description': None,
-                    'configurationType': 'SEGMENT_BASED',
-                    'schemaVersion': '3.3.2',
-                    'effective': '2016-03-07T17:52:57.000Z',
-                    'modified': '2020-10-01T06:23:36.000Z',
-                    'modules': [
-                        {
-                            'id': 16275,
-                            'created': '2020-09-21T18:27:09.000Z',
-                            'name': 'WAN',
-                            'type': 'ENTERPRISE',
-                            'description': None,
-                            'schemaVersion': '3.3.2',
-                            'version': '1600726682905',
-                            'configurationId': 4352,
-                            'data': {},
-                        }
-                    ],
+        config_modules_response = {
+            "body": {
+                "WAN": {
+                    "version": "1619512204741",
+                    "schemaVersion": "3.3.2",
+                    "type": "ENTERPRISE",
+                    "data": {},
                 },
-            ],
+            },
             "status": 200,
         }
 
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_stack = CoroutineMock(return_value=config_stack_response)
+        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_modules_response)
 
         velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
-        velocloud_client.get_edge_configuration_stack.assert_awaited_once_with(edge_full_id)
+        velocloud_client.get_edge_configuration_modules.assert_awaited_once_with(edge_full_id)
 
         expected = {
             'body': f'No links configuration was found in WAN module of edge {edge_full_id}',

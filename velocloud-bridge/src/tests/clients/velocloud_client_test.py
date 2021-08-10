@@ -1330,38 +1330,21 @@ class TestVelocloudClient:
         assert result == expected_result
 
     @pytest.mark.asyncio
-    async def get_configuration_stack_test(self):
+    async def get_configuration_modules_test(self):
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 113
         edge_id = 123
-        body_response = [
-            {
-                'id': 4352,
-                'created': '2016-03-07T17:52:57.000Z',
-                'name': 'Public_Wired_3_Segmented',
-                'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                'version': '1601533416221',
-                'description': None,
-                'configurationType': 'SEGMENT_BASED',
-                'schemaVersion': '3.3.2',
-                'effective': '2016-03-07T17:52:57.000Z',
-                'modified': '2020-10-01T06:23:36.000Z',
-                'modules': [],
-            },
-            {
-                'id': 157,
-                'created': '2016-03-07T17:52:57.000Z',
-                'name': 'Edge Specific Profile',
-                'logicalId': '74ac6e04-1473-11e8-bb32-0a04f5c05f9c',
-                'version': '1601533416221',
-                'description': None,
-                'configurationType': 'SEGMENT_BASED',
-                'schemaVersion': '3.3.2',
-                'effective': '2016-03-07T17:52:57.000Z',
-                'modified': '2020-10-01T06:23:36.000Z',
-                'modules': [],
-            },
-        ]
+        body_response = {
+            "WAN": {
+                "version": "1619512204741",
+                "schemaVersion": "3.3.2",
+                "type": "ENTERPRISE",
+                "data": {
+                    "networks": [],
+                    "links": [],
+                }
+            }
+        }
         edge_full_id = {
             'host': velocloud_host,
             'enterprise_id': enterprise_id,
@@ -1386,13 +1369,13 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_edge_configuration_stack(edge_full_id)
+            result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
         assert result['body'] == body_response
         assert result['status'] == 200
 
     @pytest.mark.asyncio
-    async def get_configuration_stack_internal_error_test(self):
+    async def get_configuration_modules_internal_error_test(self):
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 113
         edge_id = 123
@@ -1421,17 +1404,17 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_edge_configuration_stack(edge_full_id)
+            result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
         assert result['body'] == body_response
         assert result['status'] == 500
 
     @pytest.mark.asyncio
-    async def get_configuration_stack_bad_status_test(self):
+    async def get_configuration_modules_bad_status_test(self):
         velocloud_host = 'mettel.velocloud.net'
-        enterprise_id = 113
+        enterprise_id = None
         edge_id = 123
-        body_response = {'error': {'message': 'missing edge configuration to getEdgeConfigurationStack'}}
+        body_response = {'error': {'message': 'invalid enterpriseId'}}
         edge_full_id = {
             'host': velocloud_host,
             'enterprise_id': enterprise_id,
@@ -1456,14 +1439,14 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
-            result = await velocloud_client.get_edge_configuration_stack(edge_full_id)
+            result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
         assert result['body'] == f"Got 400 from Velocloud -> {body_response['error']['message']} " \
                                  f"for edge {edge_full_id}"
         assert result['status'] == 400
 
     @pytest.mark.asyncio
-    async def get_configuration_stack_bexception_test(self):
+    async def get_configuration_modules_exception_test(self):
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 113
         edge_id = 123
@@ -1493,6 +1476,6 @@ class TestVelocloudClient:
         velocloud_client._clients = clients_by_host
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
-            result = await velocloud_client.get_edge_configuration_stack(edge_full_id)
+            result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
         assert result == expected_result

@@ -374,7 +374,7 @@ class VelocloudClient:
 
         return result
 
-    async def get_edge_configuration_stack(self, edge):
+    async def get_edge_configuration_modules(self, edge):
         velocloud_host = edge['host']
 
         result = dict.fromkeys(["body", "status"])
@@ -382,6 +382,9 @@ class VelocloudClient:
         request_body = {
             "enterpriseId": edge["enterprise_id"],
             "edgeId": edge["edge_id"],
+            "modules": [
+                "WAN",
+            ],
         }
         target_host_client = self._get_header_by_host(velocloud_host)
 
@@ -393,10 +396,10 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f'Getting edge configuration stack for edge {edge}...')
+            self._logger.info(f'Getting edge configuration modules for edge {edge}...')
 
             response = await self._session.post(
-                f"https://{velocloud_host}/portal/rest/edge/getEdgeConfigurationStack",
+                f"https://{velocloud_host}/portal/rest/edge/getEdgeConfigurationModules",
                 json=request_body,
                 headers=target_host_client['headers'],
                 ssl=self._config['verify_ssl']
@@ -422,7 +425,7 @@ class VelocloudClient:
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
         self._logger.info(
-            f'Got HTTP {response.status} from Velocloud after claiming edge configuration stack for edge {edge}'
+            f'Got HTTP {response.status} from Velocloud after claiming edge configuration modules for edge {edge}'
         )
         result['body'] = await response.json()
         result['status'] = response.status
