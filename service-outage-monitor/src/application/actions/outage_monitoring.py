@@ -150,7 +150,7 @@ class OutageMonitor:
                 f"{len(outage_edges)} edges were detected in outage state. Scheduling re-check job for all of them..."
             )
             self._schedule_recheck_job_for_edges(outage_edges, self._config.MONITOR_CONFIG['jobs_intervals'][
-                                                     'quarantine_edge_outage'])
+                                                     'quarantine_edge_outage'], 'edges')
         else:
             self._logger.info("No edges were detected in outage state. Re-check job won't be scheduled")
 
@@ -160,7 +160,7 @@ class OutageMonitor:
                 f"Scheduling re-check job for all of them..."
             )
             self._schedule_recheck_job_for_edges(outage_links, self._config.MONITOR_CONFIG['jobs_intervals'][
-                                                     'quarantine_link_outage'])
+                                                     'quarantine_link_outage'], 'links')
         else:
             self._logger.info("No edges with links were detected in outage state. Re-check job won't be scheduled")
 
@@ -176,8 +176,11 @@ class OutageMonitor:
         stop = perf_counter()
         self._logger.info(f"Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes")
 
-    def _schedule_recheck_job_for_edges(self, edges: list, quarantine_time):
-        self._logger.info(f'Scheduling recheck job for {len(edges)} edges in outage state...')
+    def _schedule_recheck_job_for_edges(self, edges: list, quarantine_time, outage_type):
+        if outage_type == 'links':
+            self._logger.info(f'Scheduling recheck job for {len(edges)} edges with faulty links in outage state...')
+        else:
+            self._logger.info(f'Scheduling recheck job for {len(edges)} edges in outage state...')
 
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
         current_datetime = datetime.now(tz)
@@ -188,7 +191,7 @@ class OutageMonitor:
                                 run_date=run_date,
                                 replace_existing=False,
                                 misfire_grace_time=9999,
-                                id=f'_ticket_creation_recheck',
+                                id=f'{outage_type}_ticket_creation_recheck',
                                 )
 
         self._logger.info(f'Edges scheduled for recheck successfully')

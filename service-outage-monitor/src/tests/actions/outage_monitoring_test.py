@@ -728,8 +728,10 @@ class TestServiceOutageMonitor:
         )
 
         outage_monitor._schedule_recheck_job_for_edges.assert_has_calls([
-            call(edges_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage']),
-            call(edges_with_links_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'])
+            call(edges_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'],
+                 'edges'),
+            call(edges_with_links_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'],
+                 'links')
         ])
 
         outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edges_in_healthy_state[0])
@@ -1394,7 +1396,8 @@ class TestServiceOutageMonitor:
         )
 
         outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
-            edges_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'])
+            edges_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'],
+            'edges')
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -1690,7 +1693,8 @@ class TestServiceOutageMonitor:
         )
 
         outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
-            edges_with_links_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_link_outage'])
+            edges_with_links_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_link_outage'],
+            'links')
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     def map_cached_edges_with_edges_status_test(self):
@@ -1954,7 +1958,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                outage_monitor._schedule_recheck_job_for_edges(edges, quarantine_time)
+                outage_monitor._schedule_recheck_job_for_edges(edges, quarantine_time, 'edges')
 
         expected_run_date = next_run_time + timedelta(seconds=quarantine_time)
         scheduler.add_job.assert_called_once_with(
@@ -1963,7 +1967,7 @@ class TestServiceOutageMonitor:
             run_date=expected_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
-            id=f'_ticket_creation_recheck',
+            id=f'edges_ticket_creation_recheck',
         )
 
     @pytest.mark.asyncio
