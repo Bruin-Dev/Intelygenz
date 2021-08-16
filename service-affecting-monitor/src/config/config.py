@@ -4,6 +4,8 @@
 import os
 import logging
 import sys
+
+from application import AffectingTroubles
 from config import contact_info
 
 NATS_CONFIG = {
@@ -22,16 +24,18 @@ MONITOR_CONFIG = {
     'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
-    "latency": 140,
-    "packet_loss": 8,
-    "jitter": 50,
-    "bandwidth_percentage": 90,
     'monitoring_minutes_interval': 10,
-    "monitoring_minutes_per_trouble": {
-        "latency": 30,
-        "packet_loss": 30,
-        "jitter": 30,
-        "bandwidth": 30,
+    'thresholds': {
+        AffectingTroubles.LATENCY: 140,                    # milliseconds
+        AffectingTroubles.PACKET_LOSS: 8,                  # packets
+        AffectingTroubles.JITTER: 50,                      # milliseconds
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,  # percentage of total bandwidth
+    },
+    'monitoring_minutes_per_trouble': {
+        AffectingTroubles.LATENCY: 30,
+        AffectingTroubles.PACKET_LOSS: 30,
+        AffectingTroubles.JITTER: 30,
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
     },
     'forward_to_hnoc': 60,
     'autoresolve': {
