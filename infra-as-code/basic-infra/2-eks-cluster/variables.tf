@@ -57,6 +57,12 @@ variable "WHITELISTED_IPS" {
   description = "Allowed IPs to access Load Balancer created by nginx ingress controller"
 }
 
+variable "WHITELISTED_IPS_OREILLY" {
+  type        = list(string)
+  default     = [""]
+  description = "Allowed IPs to access Load Balancer created for oreilly client"
+}
+
 # grafana variables
 
 variable "GRAFANA_ADMIN_USER" {

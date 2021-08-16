@@ -7,3 +7,8 @@ output "eks_devops_roles" {
   description = "List of devops users roles"
   value = aws_iam_role.devops_eks.*.arn
 }
+
+output "ssl-certificate-arn" {
+  description = "AWS SSL certificate for automation-engine.net"
+  value = aws_acm_certificate.ssl_certificate.arn
+}

@@ -21,6 +21,7 @@
     - export TF_VAR_METRICS_SERVER_VERSION=${KUBERNETES_METRICS_SERVER_V}
     - export TF_VAR_RELOADER_CHART_VERSION=${RELOADER_CHART_V}
     - export TF_VAR_WHITELISTED_IPS="[${LOAD_BALANCER_WHITELIST}]"
+    - export TF_VAR_WHITELISTED_IPS_OREILLY="[${LOAD_BALANCER_WHITELIST_OREILLY}]"
     - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
     - export TF_VAR_GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     - export TF_VAR_TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
@@ -42,6 +43,15 @@
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_LOG_GROUP_NAME" --form "value=$(terraform output fluent-bit-log-group-name)"
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_IAM_ROLE_ARN" --form "value=$(terraform output fluent-bit-role-arn)"
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_PRO" --form "value=$(terraform output oreilly-security-group-id)"
+                  fi
+                  if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_DEV" --form "value=$(terraform output oreilly-security-group-id)"
+                  fi
+                  if [[ ${i} == "3-eks-roles" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/AUTOMATION_SSL_CERTIFICATE_ARN" --form "value=$(terraform output ssl-certificate-arn)"
                   fi
                   if [[ ${i} == "5-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
