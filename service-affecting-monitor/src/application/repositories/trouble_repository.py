@@ -1,0 +1,133 @@
+from datetime import datetime
+
+from dateutil.parser import parse
+from pytz import utc
+
+from application import AFFECTING_NOTE_REGEX
+from application import AffectingTroubles
+
+
+class TroubleRepository:
+    def __init__(self, config, utils_repository):
+        self._config = config
+        self._utils_repository = utils_repository
+
+    def was_last_trouble_detected_recently(self, ticket_notes: list, ticket_creation_date: str, *,
+                                           max_seconds_since_last_trouble: int) -> bool:
+        current_datetime = datetime.now(utc)
+
+        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
+
+        last_affecting_note = self._utils_repository.get_last_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: AFFECTING_NOTE_REGEX.search(note['noteValue'])
+        )
+        if last_affecting_note:
+            note_creation_date = parse(last_affecting_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_trouble
+
+        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
+        seconds_elapsed_since_last_affecting_trouble = (current_datetime - ticket_creation_datetime).total_seconds()
+        return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_trouble
+
+    def is_latency_rx_within_threshold(self, link_metrics: dict) -> bool:
+        trouble = AffectingTroubles.LATENCY
+        return link_metrics['bestLatencyMsRx'] < self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+    def is_latency_tx_within_threshold(self, link_metrics: dict) -> bool:
+        trouble = AffectingTroubles.LATENCY
+        return link_metrics['bestLatencyMsTx'] < self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+    def are_latency_metrics_within_threshold(self, link_metrics: dict) -> bool:
+        return (
+            self.is_latency_rx_within_threshold(link_metrics)
+            and self.is_latency_tx_within_threshold(link_metrics)
+        )
+
+    def is_packet_loss_rx_within_threshold(self, link_metrics: dict) -> bool:
+        trouble = AffectingTroubles.PACKET_LOSS
+        return link_metrics['bestLossPctRx'] < self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+    def is_packet_loss_tx_within_threshold(self, link_metrics: dict) -> bool:
+        trouble = AffectingTroubles.PACKET_LOSS
+        return link_metrics['bestLossPctTx'] < self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+    def are_packet_loss_metrics_within_threshold(self, link_metrics: dict) -> bool:
+        return (
+            self.is_packet_loss_rx_within_threshold(link_metrics)
+            and self.is_packet_loss_tx_within_threshold(link_metrics)
+        )
+
+    def is_jitter_rx_within_threshold(self, link_metrics: dict) -> bool:
+        trouble = AffectingTroubles.JITTER
+        return link_metrics['bestJitterMsRx'] < self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+    def is_jitter_tx_within_threshold(self, link_metrics: dict) -> bool:
+        trouble = AffectingTroubles.JITTER
+        return link_metrics['bestJitterMsTx'] < self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+    def are_jitter_metrics_within_threshold(self, link_metrics: dict) -> bool:
+        return (
+            self.is_jitter_rx_within_threshold(link_metrics)
+            and self.is_jitter_tx_within_threshold(link_metrics)
+        )
+
+    @staticmethod
+    def get_bandwidth_throughput_bps(total_bytes: int, lookup_interval_minutes: int) -> float:
+        return (total_bytes * 8) / (lookup_interval_minutes * 60)
+
+    @staticmethod
+    def get_consumed_bandwidth_percentage(throughput: float, bandwidth: int) -> float:
+        return (throughput / bandwidth) * 100
+
+    def __is_bandwidth_within_threshold(self, total_bytes: int, bandwidth: int, lookup_interval_minutes: int) -> bool:
+        trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
+        threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+        throughput = self.get_bandwidth_throughput_bps(total_bytes, lookup_interval_minutes)
+        consumed_bandwidth = self.get_consumed_bandwidth_percentage(throughput, bandwidth)
+        return consumed_bandwidth < threshold
+
+    def is_bandwidth_rx_within_threshold(self, link_metrics: dict, lookup_interval_minutes: int) -> bool:
+        rx_bytes = link_metrics['bytesRx']
+        rx_bandwidth = link_metrics['bpsOfBestPathRx']
+        return self.__is_bandwidth_within_threshold(rx_bytes, rx_bandwidth, lookup_interval_minutes)
+
+    def is_bandwidth_tx_within_threshold(self, link_metrics: dict, lookup_interval_minutes: int) -> bool:
+        tx_bytes = link_metrics['bytesTx']
+        tx_bandwidth = link_metrics['bpsOfBestPathTx']
+        return self.__is_bandwidth_within_threshold(tx_bytes, tx_bandwidth, lookup_interval_minutes)
+
+    def are_bandwidth_metrics_within_threshold(self, link_metrics: dict, lookup_interval_minutes: int) -> bool:
+        return (
+            self.is_bandwidth_rx_within_threshold(link_metrics, lookup_interval_minutes)
+            and self.is_bandwidth_tx_within_threshold(link_metrics, lookup_interval_minutes)
+        )
+
+    def are_all_metrics_within_thresholds(self, edge_data: dict, *, lookup_interval_minutes: int,
+                                          check_bandwidth_troubles: bool) -> bool:
+        all_metrics_within_thresholds = True
+
+        for link in edge_data['links']:
+            metrics = link['link_metrics']
+
+            bandwidth_within_threshold = True
+            if check_bandwidth_troubles:
+                tx_bandwidth = metrics['bpsOfBestPathTx']
+                rx_bandwidth = metrics['bpsOfBestPathRx']
+
+                if tx_bandwidth > 0 and rx_bandwidth > 0:
+                    bandwidth_within_threshold = self.are_bandwidth_metrics_within_threshold(
+                        metrics,
+                        lookup_interval_minutes=lookup_interval_minutes,
+                    )
+
+            all_metrics_within_thresholds &= all([
+                self.are_latency_metrics_within_threshold(metrics),
+                self.are_packet_loss_metrics_within_threshold(metrics),
+                self.are_jitter_metrics_within_threshold(metrics),
+                bandwidth_within_threshold,
+            ])
+
+        return all_metrics_within_thresholds

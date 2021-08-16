@@ -4,6 +4,7 @@ from datetime import timedelta
 from pytz import utc
 from shortuuid import uuid
 
+from application import AffectingTroubles
 from application.repositories import nats_error_response
 
 
@@ -73,8 +74,10 @@ class VelocloudRepository:
         return return_response
 
     async def get_links_metrics_for_latency_checks(self) -> dict:
+        trouble = AffectingTroubles.LATENCY
+
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['latency'])
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
 
         scan_interval_for_metrics = {
             'start': past_moment,
@@ -83,9 +86,11 @@ class VelocloudRepository:
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
     async def get_links_metrics_for_packet_loss_checks(self) -> dict:
+        trouble = AffectingTroubles.PACKET_LOSS
+
         now = datetime.now(utc)
         past_moment = now - timedelta(
-            minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['packet_loss']
+            minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
         )
 
         scan_interval_for_metrics = {
@@ -95,8 +100,10 @@ class VelocloudRepository:
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
     async def get_links_metrics_for_jitter_checks(self) -> dict:
+        trouble = AffectingTroubles.JITTER
+
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['jitter'])
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
 
         scan_interval_for_metrics = {
             'start': past_moment,
@@ -105,10 +112,10 @@ class VelocloudRepository:
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
     async def get_links_metrics_for_bandwidth_checks(self) -> dict:
+        trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
+
         now = datetime.now(utc)
-        past_moment = now - timedelta(
-            minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['bandwidth']
-        )
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
 
         scan_interval_for_metrics = {
             'start': past_moment,

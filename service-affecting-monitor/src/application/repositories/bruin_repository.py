@@ -9,6 +9,7 @@ from pytz import timezone
 from shortuuid import uuid
 from tenacity import wait_fixed, retry, stop_after_attempt
 
+from application import AffectingTroubles
 from application.repositories import nats_error_response
 
 INTERFACE_NOTE_REGEX = re.compile(r'Interface: (?P<interface_name>[a-zA-Z0-9]+)')
@@ -96,15 +97,39 @@ class BruinRepository:
 
         return response
 
-    async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
-        ticket_topic = 'VAS'
+    async def get_ticket_details(self, ticket_id: int):
+        err_msg = None
 
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id
+            },
+        }
 
-    async def get_open_affecting_tickets(self, client_id: int, *, service_number: str = None):
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        try:
+            self._logger.info(f'Getting details of ticket {ticket_id} from Bruin...')
+            response = await self._event_bus.rpc_request("bruin.ticket.details.request", request, timeout=15)
+        except Exception as e:
+            err_msg = f'An error occurred when requesting ticket details from Bruin API for ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
 
-        return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving details of ticket {ticket_id} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+            else:
+                self._logger.info(f'Got details of ticket {ticket_id} from Bruin!')
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+        return response
 
     async def append_note_to_ticket(self, ticket_id: int, note: str, *, service_numbers: list = None):
         err_msg = None
@@ -372,6 +397,21 @@ class BruinRepository:
 
         return response
 
+    async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
+        ticket_topic = 'VAS'
+
+        return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
+
+    async def get_open_affecting_tickets(self, client_id: int, *, service_number: str = None):
+        ticket_statuses = ['New', 'InProgress', 'Draft']
+
+        return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
+
+    async def get_resolved_affecting_tickets(self, client_id: int, *, service_number: str = None):
+        ticket_statuses = ['Resolved']
+
+        return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
+
     async def change_detail_work_queue_to_hnoc(self, ticket_id: int, *, service_number: str = None,
                                                detail_id: int = None):
         task_result = 'HNOC Investigate'
@@ -381,99 +421,20 @@ class BruinRepository:
         )
 
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):
+        all_troubles = list(AffectingTroubles)
+        troubles_joint = f"{', '.join(trouble.value for trouble in all_troubles[:-1])} and {all_troubles[-1].value}"
+
         current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = os.linesep.join([
             "#*MetTel's IPA*#",
-            'All Service Affecting conditions (Jitter, Packet Loss, Latency and Utilization) have stabilized.',
+            f'All Service Affecting conditions ({troubles_joint}) have stabilized.',
             f'Auto-resolving task for serial: {serial_number}',
             f'TimeStamp: {current_datetime_tz_aware}',
         ])
 
         return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[serial_number])
 
-    async def append_reopening_note_to_ticket(self, ticket_id: int, affecting_causes: str):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-        reopening_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f'Re-opening ticket.',
-            f'{affecting_causes}',
-            f'TimeStamp: {current_datetime_tz_aware}',
-        ])
-
-        return await self.append_note_to_ticket(ticket_id, reopening_note)
-
-    async def get_affecting_ticket(self, client_id, serial):
-        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved']
-        ticket_request_msg = {
-            'request_id': uuid(),
-            'body': {
-                'client_id': client_id,
-                'product_category': 'SD-WAN',
-                'ticket_topic': 'VAS',
-                'service_number': serial,
-                'ticket_statuses': ticket_statuses
-            }
-        }
-        self._logger.info(f"Retrieving affecting tickets for serial: {serial}")
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.basic.request",
-                                                        ticket_request_msg,
-                                                        timeout=90)
-        if all_tickets['status'] not in range(200, 300):
-            self._logger.error(f"Error: an error occurred retrieving affecting tickets by serial")
-            return None
-
-        if len(all_tickets['body']) > 0:
-            all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]), reverse=True)
-            ticket_id = all_tickets_sorted[0]['ticketID']
-            ticket_details = await self.get_ticket_details(ticket_id)
-
-            if ticket_details['status'] not in range(200, 300):
-                self._logger.error(f"Error: an error occurred retrieving ticket details for ticket: {ticket_id}")
-                return None
-
-            ticket_details_body = ticket_details['body']
-            self._logger.info(f'Returning ticket details of ticket: {ticket_id}')
-            return {
-                'ticketID': ticket_id,
-                **ticket_details_body,
-            }
-        self._logger.info(f'No service affecting tickets found for serial: {serial}')
-        return {}
-
-    async def get_ticket_details(self, ticket_id: int):
-        err_msg = None
-
-        request = {
-            'request_id': uuid(),
-            'body': {
-                'ticket_id': ticket_id
-            },
-        }
-
-        try:
-            self._logger.info(f'Getting details of ticket {ticket_id} from Bruin...')
-            response = await self._event_bus.rpc_request("bruin.ticket.details.request", request, timeout=15)
-        except Exception as e:
-            err_msg = f'An error occurred when requesting ticket details from Bruin API for ticket {ticket_id} -> {e}'
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
-                    f'Error {response_status} - {response_body}'
-                )
-            else:
-                self._logger.info(f'Got details of ticket {ticket_id} from Bruin!')
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-        return response
-
+    # ------------------------ Legacy methods for SA reports ------------------------
     async def _get_ticket_details(self, ticket):
         @retry(wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG['wait_fixed']),
                stop=stop_after_attempt(self._config.MONITOR_REPORT_CONFIG['stop_after_attempt']),
@@ -673,15 +634,6 @@ class BruinRepository:
             'interfaces': interface,
             'trouble': trouble
         }
-
-    @staticmethod
-    def find_detail_by_serial(ticket, edge_serial_number):
-        ticket_details = None
-        for detail in ticket.get("ticketDetails"):
-            if edge_serial_number == detail['detailValue']:
-                ticket_details = detail
-                break
-        return ticket_details
 
     @staticmethod
     def filter_ticket_details_by_serials(ticket_details, list_cache_serials):

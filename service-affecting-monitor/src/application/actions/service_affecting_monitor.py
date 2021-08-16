@@ -1,68 +1,60 @@
 import asyncio
-import re
 import time
 
-from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
-from typing import Callable
 from typing import List
+from typing import Optional
 
+from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
-from pytz import utc
 
-from igz.packages.eventbus.eventbus import EventBus
-
+from application import AffectingTroubles
 from application.repositories import EdgeIdentifier
-from application.repositories.bruin_repository import BruinRepository
-
-
-AFFECTING_NOTE_REGEX = re.compile(
-    r"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Trouble:",
-    re.DOTALL | re.MULTILINE
-)
 
 
 class ServiceAffectingMonitor:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, metrics_repository,
-                 bruin_repository, velocloud_repository, customer_cache_repository, notifications_repository):
-        self._event_bus = event_bus
+    def __init__(self, logger, scheduler, config, metrics_repository, bruin_repository, velocloud_repository,
+                 customer_cache_repository, notifications_repository, ticket_repository, trouble_repository,
+                 utils_repository):
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
-        self._template_renderer = template_renderer
         self._metrics_repository = metrics_repository
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
         self._customer_cache_repository = customer_cache_repository
         self._notifications_repository = notifications_repository
+        self._ticket_repository = ticket_repository
+        self._trouble_repository = trouble_repository
+        self._utils_repository = utils_repository
 
         self.__autoresolve_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['autoresolve']['semaphore'])
 
         self.__reset_state()
 
-    async def start_service_affecting_monitor_job(self, exec_on_start=False):
-        self._logger.info(f'Scheduled task: service affecting')
+    def __reset_state(self):
+        self._customer_cache = []
+
+    async def start_service_affecting_monitor(self, exec_on_start=False):
+        self._logger.info('Scheduling Service Affecting Monitor job...')
         next_run_time = undefined
 
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-            self._logger.info(f'It will be executed now')
+            self._logger.info('Service Affecting Monitor job is going to be executed immediately')
 
-        self._scheduler.add_job(self._service_affecting_monitor_process, 'interval',
-                                minutes=self._config.MONITOR_CONFIG["monitoring_minutes_interval"],
-                                next_run_time=next_run_time,
-                                replace_existing=True,
-                                id='_monitor_each_edge')
-
-    def _is_ticket_resolved(self, ticket_detail: dict) -> bool:
-        return ticket_detail['detailStatus'] == 'R'
-
-    def __reset_state(self):
-        self._customer_cache = []
+        try:
+            self._scheduler.add_job(self._service_affecting_monitor_process, 'interval',
+                                    minutes=self._config.MONITOR_CONFIG["monitoring_minutes_interval"],
+                                    next_run_time=next_run_time,
+                                    replace_existing=False,
+                                    id='_service_affecting_monitor_process')
+        except ConflictingIdError as conflict:
+            self._logger.info(f'Skipping start of Service Affecting Monitoring job. Reason: {conflict}')
 
     async def _service_affecting_monitor_process(self):
         self.__reset_state()
@@ -240,16 +232,23 @@ class ServiceAffectingMonitor:
     async def _run_autoresolve_for_edge(self, edge: dict):
         async with self.__autoresolve_semaphore:
             serial_number = edge['cached_info']['serial_number']
+            client_id = edge['cached_info']['bruin_client_info']['client_id']
 
             self._logger.info(f'Starting autoresolve for edge {serial_number}...')
 
-            if not self._are_all_metrics_within_thresholds(edge):
+            check_bandwidth_troubles = self._is_rep_services_client_id(client_id)
+            metrics_lookup_interval = self._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
+            all_metrics_within_thresholds = self._trouble_repository.are_all_metrics_within_thresholds(
+                edge,
+                lookup_interval_minutes=metrics_lookup_interval,
+                check_bandwidth_troubles=check_bandwidth_troubles,
+            )
+            if not all_metrics_within_thresholds:
                 self._logger.info(
                     f'At least one metric of edge {serial_number} is not within the threshold. Skipping autoresolve...'
                 )
                 return
 
-            client_id = edge['cached_info']['bruin_client_info']['client_id']
             affecting_ticket_response = await self._bruin_repository.get_open_affecting_tickets(
                 client_id, service_number=serial_number
             )
@@ -268,7 +267,7 @@ class ServiceAffectingMonitor:
                 affecting_ticket_id = affecting_ticket['ticketID']
                 affecting_ticket_creation_date = affecting_ticket['createDate']
 
-                if not self._was_ticket_created_by_automation_engine(affecting_ticket):
+                if not self._ticket_repository.was_ticket_created_by_automation_engine(affecting_ticket):
                     self._logger.info(
                         f'Ticket {affecting_ticket_id} was not created by Automation Engine. Skipping autoresolve...'
                     )
@@ -281,9 +280,8 @@ class ServiceAffectingMonitor:
                     continue
 
                 details_from_ticket = ticket_details_response_body['ticketDetails']
-                detail_for_ticket_resolution = self._get_first_element_matching(
-                    details_from_ticket,
-                    lambda detail: detail['detailValue'] == serial_number,
+                detail_for_ticket_resolution = self._ticket_repository.find_task_by_serial_number(
+                    details_from_ticket, serial_number
                 )
                 ticket_detail_id = detail_for_ticket_resolution['detailID']
 
@@ -294,8 +292,15 @@ class ServiceAffectingMonitor:
                     if serial_number in note['serviceNumber']
                     if note['noteValue'] is not None
                 ]
-                if not self._was_last_affecting_trouble_detected_recently(relevant_notes,
-                                                                          affecting_ticket_creation_date):
+
+                max_seconds_since_last_trouble = self._config.MONITOR_CONFIG['autoresolve'][
+                    'last_affecting_trouble_seconds']
+                last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
+                    relevant_notes,
+                    affecting_ticket_creation_date,
+                    max_seconds_since_last_trouble=max_seconds_since_last_trouble,
+                )
+                if not last_trouble_was_detected_recently:
                     self._logger.info(
                         f'Edge with serial number {serial_number} has been under an affecting trouble for a long time, '
                         f'so the detail of ticket {affecting_ticket_id} related to it will not be autoresolved. '
@@ -303,17 +308,14 @@ class ServiceAffectingMonitor:
                     )
                     continue
 
-                can_detail_be_autoresolved_one_more_time = self._is_affecting_ticket_detail_auto_resolvable(
-                    relevant_notes
-                )
-                if not can_detail_be_autoresolved_one_more_time:
+                if self._ticket_repository.is_autoresolve_threshold_maxed_out(relevant_notes):
                     self._logger.info(
                         f'Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial '
-                        f'{serial_number}) has been maxed out already. Skipping autoresolve...'
+                        f'{serial_number} has been maxed out already. Skipping autoresolve...'
                     )
                     continue
 
-                if self._is_ticket_resolved(detail_for_ticket_resolution):
+                if self._ticket_repository.is_task_resolved(detail_for_ticket_resolution):
                     self._logger.info(
                         f'Detail of ticket {affecting_ticket_id} related to serial {serial_number} is already '
                         'resolved. Skipping autoresolve...'
@@ -339,112 +341,13 @@ class ServiceAffectingMonitor:
                     continue
 
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
-                await self._notify_successful_autoresolve(affecting_ticket_id, serial_number)
+                await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
 
                 self._logger.info(
                     f'Detail of ticket {affecting_ticket_id} related to serial number {serial_number} was autoresolved!'
                 )
 
-    def _are_all_metrics_within_thresholds(self, edge: dict) -> bool:
-        client_id = edge['cached_info']['bruin_client_info']['client_id']
-
-        all_metrics_within_thresholds = True
-
-        for link in edge['links']:
-            metrics = link['link_metrics']
-
-            is_rx_latency_below_threshold = metrics['bestLatencyMsRx'] < self._config.MONITOR_CONFIG["latency"]
-            is_tx_latency_below_threshold = metrics['bestLatencyMsTx'] < self._config.MONITOR_CONFIG["latency"]
-            are_latency_metrics_below_threshold = is_rx_latency_below_threshold and is_tx_latency_below_threshold
-
-            is_rx_packet_loss_below_threshold = metrics['bestLossPctRx'] < self._config.MONITOR_CONFIG["packet_loss"]
-            is_tx_packet_loss_below_threshold = metrics['bestLossPctTx'] < self._config.MONITOR_CONFIG["packet_loss"]
-            are_packet_loss_metrics_below_threshold = \
-                is_rx_packet_loss_below_threshold and is_tx_packet_loss_below_threshold
-
-            is_rx_jitter_below_threshold = metrics['bestJitterMsRx'] < self._config.MONITOR_CONFIG["jitter"]
-            is_tx_jitter_below_threshold = metrics['bestJitterMsTx'] < self._config.MONITOR_CONFIG["jitter"]
-            are_jitter_metrics_below_threshold = is_rx_jitter_below_threshold and is_tx_jitter_below_threshold
-
-            are_bandwidth_metrics_below_threshold = True
-            if self._is_rep_services_client_id(client_id):
-                metrics_lookup_interval = self._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
-                bandwidth_threshold = self._config.MONITOR_CONFIG['bandwidth_percentage']
-                tx_bandwidth = metrics['bpsOfBestPathTx']
-                rx_bandwidth = metrics['bpsOfBestPathRx']
-                rx_throughput = (metrics['bytesRx'] * 8) / (metrics_lookup_interval * 60)
-                tx_throughput = (metrics['bytesTx'] * 8) / (metrics_lookup_interval * 60)
-
-                if tx_bandwidth and rx_bandwidth:
-                    is_rx_bandwidth_below_threshold = (rx_throughput / rx_bandwidth) * 100 < bandwidth_threshold
-                    is_tx_bandwidth_below_threshold = (tx_throughput / tx_bandwidth) * 100 < bandwidth_threshold
-                    are_bandwidth_metrics_below_threshold = \
-                        is_rx_bandwidth_below_threshold and is_tx_bandwidth_below_threshold
-
-            all_metrics_within_thresholds &= all([
-                are_latency_metrics_below_threshold,
-                are_packet_loss_metrics_below_threshold,
-                are_jitter_metrics_below_threshold,
-                are_bandwidth_metrics_below_threshold,
-            ])
-
-        return all_metrics_within_thresholds
-
-    @staticmethod
-    def _was_ticket_created_by_automation_engine(ticket: dict) -> bool:
-        return ticket['createdBy'] == 'Intelygenz Ai'
-
-    def _was_last_affecting_trouble_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
-        current_datetime = datetime.now(utc)
-        max_seconds_since_last_affecting_trouble = self._config.MONITOR_CONFIG['autoresolve'][
-            'last_affecting_trouble_seconds']
-
-        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
-
-        last_affecting_note = self._get_last_element_matching(
-            notes_sorted_by_date_asc,
-            lambda note: AFFECTING_NOTE_REGEX.search(note['noteValue'])
-        )
-        if last_affecting_note:
-            note_creation_date = parse(last_affecting_note['createdDate']).astimezone(utc)
-            seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
-            return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
-
-        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
-        seconds_elapsed_since_last_affecting_trouble = (current_datetime - ticket_creation_datetime).total_seconds()
-        return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_affecting_trouble
-
-    def _is_affecting_ticket_detail_auto_resolvable(self, ticket_notes: list) -> bool:
-        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Auto-resolving task for serial", re.DOTALL)
-        max_autoresolves = self._config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
-        times_autoresolved = 0
-
-        for ticket_note in ticket_notes:
-            note_value = ticket_note['noteValue']
-            is_autoresolve_note = bool(regex.match(note_value))
-            times_autoresolved += int(is_autoresolve_note)
-
-            if times_autoresolved >= max_autoresolves:
-                return False
-
-        return True
-
-    @staticmethod
-    def _get_first_element_matching(iterable, condition: Callable, fallback=None):
-        try:
-            return next(elem for elem in iterable if condition(elem))
-        except StopIteration:
-            return fallback
-
-    def _get_last_element_matching(self, iterable, condition: Callable, fallback=None):
-        return self._get_first_element_matching(reversed(iterable), condition, fallback)
-
-    async def _notify_successful_autoresolve(self, ticket_id, serial_number):
-        message = (
-            f'Task related to serial number {serial_number} in Service Affecting ticket {ticket_id} was autoresolved. '
-            f'Details at https://app.bruin.com/t/{ticket_id}'
-        )
-        await self._notifications_repository.send_slack_message(message)
+            self._logger.info(f'Finished autoresolve for edge {serial_number}!')
 
     @staticmethod
     def _group_links_by_edge(links: List[dict]) -> List[dict]:
@@ -489,23 +392,13 @@ class ServiceAffectingMonitor:
 
             edge_identifier = EdgeIdentifier(**cached_info['edge'])
 
-            is_rx_latency_below_threshold = metrics['bestLatencyMsRx'] < self._config.MONITOR_CONFIG["latency"]
-            is_tx_latency_below_threshold = metrics['bestLatencyMsTx'] < self._config.MONITOR_CONFIG["latency"]
-
-            if is_rx_latency_below_threshold and is_tx_latency_below_threshold:
+            if self._trouble_repository.are_latency_metrics_within_threshold(metrics):
                 self._logger.info(
                     f"Link {link_status['interface']} from {edge_identifier} didn't exceed latency thresholds"
                 )
                 continue
 
-            ticket_dict = self._compose_ticket_dict(
-                link_info=elem,
-                input=metrics['bestLatencyMsRx'],
-                output=metrics['bestLatencyMsTx'],
-                trouble='Latency',
-                threshold=self._config.MONITOR_CONFIG["latency"]
-            )
-            await self._notify_trouble(link_info=elem, trouble='Latency', ticket_dict=ticket_dict)
+            await self._process_latency_trouble(elem)
 
         self._logger.info("Finished looking for latency issues!")
 
@@ -529,23 +422,13 @@ class ServiceAffectingMonitor:
 
             edge_identifier = EdgeIdentifier(**cached_info['edge'])
 
-            is_rx_packet_loss_below_threshold = metrics['bestLossPctRx'] < self._config.MONITOR_CONFIG["packet_loss"]
-            is_tx_packet_loss_below_threshold = metrics['bestLossPctTx'] < self._config.MONITOR_CONFIG["packet_loss"]
-
-            if is_rx_packet_loss_below_threshold and is_tx_packet_loss_below_threshold:
+            if self._trouble_repository.are_packet_loss_metrics_within_threshold(metrics):
                 self._logger.info(
                     f"Link {link_status['interface']} from {edge_identifier} didn't exceed packet loss thresholds"
                 )
                 continue
 
-            ticket_dict = self._compose_ticket_dict(
-                link_info=elem,
-                input=metrics['bestLossPctRx'],
-                output=metrics['bestLossPctTx'],
-                trouble='Packet Loss',
-                threshold=self._config.MONITOR_CONFIG["packet_loss"]
-            )
-            await self._notify_trouble(link_info=elem, trouble='Packet Loss', ticket_dict=ticket_dict)
+            await self._process_packet_loss_trouble(elem)
 
         self._logger.info("Finished looking for packet loss issues!")
 
@@ -569,23 +452,13 @@ class ServiceAffectingMonitor:
 
             edge_identifier = EdgeIdentifier(**cached_info['edge'])
 
-            is_rx_jitter_below_threshold = metrics['bestJitterMsRx'] < self._config.MONITOR_CONFIG["jitter"]
-            is_tx_jitter_below_threshold = metrics['bestJitterMsTx'] < self._config.MONITOR_CONFIG["jitter"]
-
-            if is_rx_jitter_below_threshold and is_tx_jitter_below_threshold:
+            if self._trouble_repository.are_jitter_metrics_within_threshold(metrics):
                 self._logger.info(
                     f"Link {link_status['interface']} from {edge_identifier} didn't exceed jitter thresholds"
                 )
                 continue
 
-            ticket_dict = self._compose_ticket_dict(
-                link_info=elem,
-                input=metrics['bestJitterMsRx'],
-                output=metrics['bestJitterMsTx'],
-                trouble='Jitter',
-                threshold=self._config.MONITOR_CONFIG["jitter"]
-            )
-            await self._notify_trouble(link_info=elem, trouble='Jitter', ticket_dict=ticket_dict)
+            await self._process_jitter_trouble(elem)
 
         self._logger.info("Finished looking for jitter issues!")
 
@@ -620,118 +493,295 @@ class ServiceAffectingMonitor:
 
             edge_identifier = EdgeIdentifier(**cached_info['edge'])
 
-            minutes_to_check = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['bandwidth']
-            threshold = self._config.MONITOR_CONFIG['bandwidth_percentage']
+            trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
+            scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+            bandwidth_metrics_are_within_threshold = (
+                (rx_bandwidth == 0 or self._trouble_repository.is_bandwidth_rx_within_threshold(metrics, scan_interval))
+                and
+                (tx_bandwidth == 0 or self._trouble_repository.is_bandwidth_tx_within_threshold(metrics, scan_interval))
+            )
 
-            rx_throughput = (metrics['bytesRx'] * 8) / (minutes_to_check * 60)
-            tx_throughput = (metrics['bytesTx'] * 8) / (minutes_to_check * 60)
-
-            bandwidth_dict = {}
-
-            if rx_bandwidth > 0 and (rx_throughput / rx_bandwidth) * 100 > threshold:
-                bandwidth_dict['rx_throughput'] = rx_throughput
-                bandwidth_dict['rx_bandwidth'] = rx_bandwidth
-                bandwidth_dict['rx_threshold'] = (threshold / 100) * rx_bandwidth
-
-            if tx_bandwidth > 0 and (tx_throughput / tx_bandwidth) * 100 > threshold:
-                bandwidth_dict['tx_throughput'] = tx_throughput
-                bandwidth_dict['tx_bandwidth'] = tx_bandwidth
-                bandwidth_dict['tx_threshold'] = (threshold / 100) * tx_bandwidth
-
-            if not bandwidth_dict:
+            if bandwidth_metrics_are_within_threshold:
                 self._logger.info(
                     f"Link {link_status['interface']} from {edge_identifier} didn't exceed any bandwidth thresholds"
                 )
                 continue
 
-            ticket_dict = self._compose_bandwidth_ticket_dict(link_info=elem, bandwidth_metrics=bandwidth_dict)
-            await self._notify_trouble(link_info=elem, trouble='Bandwidth Over Utilization', ticket_dict=ticket_dict)
+            await self._process_bandwidth_trouble(elem)
 
         self._logger.info("Finished looking for bandwidth issues!")
 
-    async def _notify_trouble(self, link_info, trouble, ticket_dict):
-        cached_info = link_info['cached_info']
-        contact_info = link_info['contact_info']
-        edge_identifier = EdgeIdentifier(**cached_info['edge'])
+    async def _process_latency_trouble(self, link_data: dict):
+        trouble = AffectingTroubles.LATENCY
+        await self._process_affecting_trouble(link_data, trouble)
 
-        self._logger.info(f'Service affecting trouble {trouble} detected in edge {edge_identifier}')
-        if self._config.MONITOR_CONFIG['environment'] == 'production':
-            client_id = cached_info['bruin_client_info']['client_id']
+    async def _process_packet_loss_trouble(self, link_data: dict):
+        trouble = AffectingTroubles.PACKET_LOSS
+        await self._process_affecting_trouble(link_data, trouble)
 
-            edge_serial_number = cached_info['serial_number']
-            ticket = await self._bruin_repository.get_affecting_ticket(client_id, edge_serial_number)
-            if ticket is None:
-                return
-            if len(ticket) == 0:
-                # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
-                ticket_note = self._ticket_object_to_string(ticket_dict)
-                response = await self._bruin_repository.create_affecting_ticket(client_id, edge_serial_number,
-                                                                                contact_info)
-                if response["status"] not in range(200, 300):
-                    return
-                ticket_id = response["body"]["ticketIds"][0]
-                self._metrics_repository.increment_tickets_created()
+    async def _process_jitter_trouble(self, link_data: dict):
+        trouble = AffectingTroubles.JITTER
+        await self._process_affecting_trouble(link_data, trouble)
 
-                await self._bruin_repository.append_note_to_ticket(ticket_id=ticket_id,
-                                                                   note=ticket_note)
+    async def _process_bandwidth_trouble(self, link_data: dict):
+        trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
+        await self._process_affecting_trouble(link_data, trouble)
 
-                slack_message = f'Ticket created with ticket id: {ticket_id}\n' \
-                                f'https://app.bruin.com/helpdesk?clientId={client_id}&' \
-                                f'ticketId={ticket_id} , in ' \
-                                f'{self._config.MONITOR_CONFIG["environment"]}'
-                await self._notifications_repository.send_slack_message(slack_message)
+    async def _process_affecting_trouble(self, link_data: dict, trouble: AffectingTroubles):
+        trouble_processed = False
+        open_affecting_ticket = None
+        resolved_affecting_ticket = None
 
-                self._logger.info(f'Ticket created with ticket id: {ticket_id}')
+        serial_number = link_data['cached_info']['serial_number']
+        interface = link_data['link_status']['interface']
+        client_id = link_data['cached_info']['bruin_client_info']['client_id']
 
+        self._logger.info(
+            f'Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge '
+            f'{serial_number}'
+        )
+
+        open_affecting_tickets_response = await self._bruin_repository.get_open_affecting_tickets(
+            client_id, service_number=serial_number
+        )
+        if open_affecting_tickets_response['status'] not in range(200, 300):
+            return
+
+        # Get oldest open ticket related to Service Affecting Monitor (i.e. trouble must be latency, packet loss, jitter
+        # or bandwidth)
+        open_affecting_tickets = open_affecting_tickets_response['body']
+        open_affecting_ticket = await self._get_oldest_affecting_ticket_for_serial_number(
+            open_affecting_tickets, serial_number
+        )
+
+        if open_affecting_ticket:
+            ticket_id = open_affecting_ticket['ticket_overview']['ticketID']
+            self._logger.info(
+                f'An open Service Affecting ticket was found for edge {serial_number}. Ticket ID: {ticket_id}'
+            )
+
+            # The task related to the serial we're checking can be in Resolved state, even if the ticket is returned as
+            # open by Bruin. If that's the case, the task should be re-opened instead.
+            if self._ticket_repository.is_task_resolved(open_affecting_ticket['ticket_task']):
                 self._logger.info(
-                    f'Detail related to serial {edge_serial_number} of ticket {ticket_id} will be forwarded to the '
-                    f'HNOC queue shortly'
+                    f'Service Affecting ticket with ID {ticket_id} is open, but the task related to edge '
+                    f'{serial_number} is Resolved. Therefore, the ticket will be considered as Resolved.'
                 )
-                self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=edge_serial_number)
-                return
+                resolved_affecting_ticket = {**open_affecting_ticket}
+                open_affecting_ticket = None
             else:
-                ticket_details = BruinRepository.find_detail_by_serial(ticket, edge_serial_number)
-                if not ticket_details:
-                    self._logger.error(f"No ticket details matching the serial number {edge_serial_number}")
-                    return
-                if self._is_ticket_resolved(ticket_details):
-                    self._logger.info(f'[service-affecting-monitor] ticket with trouble {trouble} '
-                                      f'detected in edge with data {edge_identifier}. '
-                                      f'Ticket: {ticket}. Re-opening ticket..')
-                    ticket_id = ticket['ticketID']
-                    detail_id = ticket_details['detailID']
-                    open_ticket_response = await self._bruin_repository.open_ticket(ticket_id, detail_id)
-                    if open_ticket_response['status'] not in range(200, 300):
-                        err_msg = f'[service-affecting-monitor] Error: Could not reopen ticket: {ticket}'
-                        self._logger.error(err_msg)
-                        await self._notifications_repository.send_slack_message(err_msg)
-                        return
+                await self._append_latest_trouble_to_ticket(open_affecting_ticket, trouble, link_data)
+                trouble_processed = True
+        else:
+            self._logger.info(f'No open Service Affecting ticket was found for edge {serial_number}')
 
-                    ticket_note = self._ticket_object_to_string_without_watermark(ticket_dict)
-                    slack_message = (
-                        f'Affecting ticket {ticket_id} reopened. Details at https://app.bruin.com/t/{ticket_id}'
-                    )
-                    await self._notifications_repository.send_slack_message(slack_message)
-                    await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note)
-                    self._metrics_repository.increment_tickets_reopened()
+        # If we didn't get a Resolved ticket in the Open Tickets flow, we need to go look for it
+        if not trouble_processed and not resolved_affecting_ticket:
+            resolved_affecting_tickets_response = await self._bruin_repository.get_resolved_affecting_tickets(
+                client_id, service_number=serial_number
+            )
+            if resolved_affecting_tickets_response['status'] not in range(200, 300):
+                return
 
-                    self._logger.info(
-                        f'Forwarding reopened detail {detail_id} (serial {edge_serial_number}) of ticket {ticket_id} '
-                        'to the HNOC queue...'
-                    )
-                    self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=edge_serial_number)
-                else:
-                    for ticket_note in ticket['ticketNotes']:
-                        if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:
-                            return
-                    ticket_id = ticket["ticketID"]
-                    note = self._ticket_object_to_string(ticket_dict)
-                    await self._bruin_repository.append_note_to_ticket(ticket_id, note)
+            resolved_affecting_tickets = resolved_affecting_tickets_response['body']
+            resolved_affecting_ticket = await self._get_oldest_affecting_ticket_for_serial_number(
+                resolved_affecting_tickets, serial_number
+            )
 
-                    slack_message = f'Posting {trouble} note to ticket id: {ticket_id}\n' \
-                                    f'https://app.bruin.com/t/{ticket_id} , in ' \
-                                    f'{self._config.MONITOR_CONFIG["environment"]}'
-                    await self._notifications_repository.send_slack_message(slack_message)
+        # If any of Open Ticket or Resolved Tickets flows returned a Resolved ticket task, keep going
+        if not trouble_processed and resolved_affecting_ticket:
+            ticket_id = resolved_affecting_ticket['ticket_overview']['ticketID']
+            self._logger.info(
+                f'A resolved Service Affecting ticket was found for edge {serial_number}. Ticket ID: {ticket_id}'
+            )
+            await self._unresolve_task_for_affecting_ticket(resolved_affecting_ticket, trouble, link_data)
+            trouble_processed = True
+        else:
+            self._logger.info(f'No resolved Service Affecting ticket was found for edge {serial_number}')
+
+        # If not a single ticket was found for the serial, create a new one
+        if not trouble_processed and not open_affecting_ticket and not resolved_affecting_ticket:
+            self._logger.info(f'No open or resolved Service Affecting ticket was found for edge {serial_number}')
+            await self._create_affecting_ticket(trouble, link_data)
+
+        self._logger.info(
+            f'Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge '
+            f'{serial_number} has been processed'
+        )
+
+    async def _get_oldest_affecting_ticket_for_serial_number(self, tickets: List[dict],
+                                                             serial_number: str) -> Optional[dict]:
+        tickets = sorted(tickets, key=lambda item: parse(item["createDate"]))
+
+        for ticket in tickets:
+            ticket_id = ticket['ticketID']
+            ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+
+            if ticket_details_response['status'] not in range(200, 300):
+                return
+
+            ticket_notes = ticket_details_response['body']['ticketNotes']
+            relevant_notes = [
+                note
+                for note in ticket_notes
+                if serial_number in note['serviceNumber']
+                if note['noteValue'] is not None
+            ]
+
+            ticket_tasks = ticket_details_response['body']['ticketDetails']
+            relevant_task = self._ticket_repository.find_task_by_serial_number(ticket_tasks, serial_number)
+            return {
+                'ticket_overview': ticket,
+                'ticket_task': relevant_task,
+                'ticket_notes': relevant_notes,
+            }
+
+    async def _append_latest_trouble_to_ticket(self, ticket_info: dict, trouble: AffectingTroubles, link_data: dict):
+        ticket_id = ticket_info['ticket_overview']['ticketID']
+        serial_number = link_data['cached_info']['serial_number']
+        interface = link_data['link_status']['interface']
+
+        self._logger.info(
+            f'Appending Service Affecting trouble note to ticket {ticket_id} for {trouble.value} trouble detected in '
+            f'interface {interface} of edge {serial_number}...'
+        )
+
+        ticket_id = ticket_info['ticket_overview']['ticketID']
+        ticket_notes = ticket_info['ticket_notes']
+
+        # Get notes since latest re-open or ticket creation
+        filtered_notes = self._ticket_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
+            ticket_notes
+        )
+
+        # If there is a SA trouble note for the current trouble since the latest re-open note, skip
+        # Otherwise, append SA trouble note to ticket using the callback passed as parameter
+        if self._ticket_repository.is_there_any_note_for_trouble(filtered_notes, trouble):
+            self._logger.info(
+                f'No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble '
+                f'detected in interface {interface} of edge {serial_number}. A note for this trouble was already '
+                f'appended to the ticket after the latest re-open (or ticket creation)'
+            )
+            return
+
+        build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
+        affecting_trouble_note = build_note_fn(link_data)
+
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if not working_environment == 'production':
+            self._logger.info(
+                f'No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble '
+                f'detected in interface {interface} of edge {serial_number}, since the current environment is '
+                f'{working_environment.upper()}'
+            )
+            return
+
+        append_note_response = await self._bruin_repository.append_note_to_ticket(
+            ticket_id, affecting_trouble_note,
+            service_numbers=[serial_number],
+        )
+        if append_note_response['status'] not in range(200, 300):
+            return
+
+        self._logger.info(
+            f'Service Affecting trouble note for {trouble.value} trouble detected in interface {interface} '
+            f'of edge {serial_number} was successfully appended to ticket {ticket_id}!'
+        )
+        await self._notifications_repository.notify_successful_note_append(ticket_id, serial_number, trouble)
+
+    async def _unresolve_task_for_affecting_ticket(self, ticket_info: dict, trouble: AffectingTroubles,
+                                                   link_data: dict):
+        ticket_id = ticket_info['ticket_overview']['ticketID']
+        serial_number = link_data['cached_info']['serial_number']
+        interface = link_data['link_status']['interface']
+
+        self._logger.info(
+            f'Unresolving task related to edge {serial_number} of Service Affecting ticket {ticket_id} due to a '
+            f'{trouble.value} trouble detected in interface {interface}...'
+        )
+
+        ticket_id = ticket_info['ticket_overview']['ticketID']
+        task_id = ticket_info['ticket_task']['detailID']
+
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if not working_environment == 'production':
+            self._logger.info(
+                f'Task related to edge {serial_number} of Service Affecting ticket {ticket_id} will not be unresolved '
+                f'because of the {trouble.value} trouble detected in interface {interface}, since the current '
+                f'environment is {working_environment.upper()}'
+            )
+            return
+
+        unresolve_task_response = await self._bruin_repository.open_ticket(ticket_id, task_id)
+        if unresolve_task_response['status'] not in range(200, 300):
+            return
+
+        self._logger.info(
+            f'Task related to edge {serial_number} of Service Affecting ticket {ticket_id} was successfully '
+            f'unresolved! The cause was a {trouble.value} trouble detected in interface {interface}'
+        )
+        await self._notifications_repository.notify_successful_reopen(ticket_id, serial_number, trouble)
+        self._metrics_repository.increment_tickets_reopened()
+
+        build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
+        reopen_trouble_note = build_note_fn(link_data, is_reopen_note=True)
+        await self._bruin_repository.append_note_to_ticket(
+            ticket_id, reopen_trouble_note,
+            service_numbers=[serial_number],
+        )
+
+        self._logger.info(
+            f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
+        )
+        self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+    async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict):
+        serial_number = link_data['cached_info']['serial_number']
+        interface = link_data['link_status']['interface']
+        client_id = link_data['cached_info']['bruin_client_info']['client_id']
+        contact_info = link_data['contact_info']
+
+        self._logger.info(
+            f'Creating Service Affecting ticket to report a {trouble.value} trouble detected in interface {interface} '
+            f'of edge {serial_number}...'
+        )
+
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if not working_environment == 'production':
+            self._logger.info(
+                f'No Service Affecting ticket will be created to report a {trouble.value} trouble detected in '
+                f'interface {interface} of edge {serial_number}, since the current environment is '
+                f'{working_environment.upper()}'
+            )
+            return
+
+        create_affecting_ticket_response = await self._bruin_repository.create_affecting_ticket(
+            client_id, serial_number, contact_info
+        )
+        if create_affecting_ticket_response["status"] not in range(200, 300):
+            return
+
+        ticket_id = create_affecting_ticket_response["body"]["ticketIds"][0]
+        self._logger.info(
+            f'Service Affecting ticket to report {trouble.value} trouble detected in interface {interface} '
+            f'of edge {serial_number} was successfully created! Ticket ID is {ticket_id}'
+        )
+        self._metrics_repository.increment_tickets_created()
+        await self._notifications_repository.notify_successful_ticket_creation(ticket_id, serial_number, trouble)
+
+        build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
+        affecting_trouble_note = build_note_fn(link_data)
+
+        await self._bruin_repository.append_note_to_ticket(
+            ticket_id, affecting_trouble_note,
+            service_numbers=[serial_number],
+        )
+
+        self._logger.info(
+            f'Task related to serial {serial_number} of ticket {ticket_id} will be forwarded to the '
+            f'HNOC queue shortly'
+        )
+        self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
@@ -760,87 +810,3 @@ class ServiceAffectingMonitor:
     @staticmethod
     def _is_rep_services_client_id(client_id: int):
         return client_id == 83109 or client_id == 85940
-
-    def _compose_ticket_dict(self, link_info, input, output, trouble, threshold):
-        edge_overview = OrderedDict()
-        edge_overview["Edge Name"] = link_info["edge_status"]["edgeName"]
-        edge_overview["Trouble"] = trouble
-        edge_overview["Interface"] = link_info['link_status']['interface']
-        edge_overview["Name"] = link_info['link_status']['displayName']
-        edge_overview["Threshold"] = threshold
-        edge_overview['Interval for Scan'] = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][
-            trouble.lower().replace(' ', '_')]
-        edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-        if input >= threshold:
-            edge_overview["Receive"] = input
-        if output >= threshold:
-            edge_overview["Transfer"] = output
-        edge_overview["Links"] = \
-            f'[Edge|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
-            f'{link_info["edge_status"]["enterpriseId"]}' \
-            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/] - ' \
-            f'[QoE|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
-            f'{link_info["edge_status"]["enterpriseId"]}' \
-            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/qoe/] - ' \
-            f'[Transport|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
-            f'{link_info["edge_status"]["enterpriseId"]}' \
-            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/links/] \n'
-
-        return edge_overview
-
-    def _compose_bandwidth_ticket_dict(self, link_info: dict, bandwidth_metrics: dict) -> dict:
-        edge_overview = OrderedDict()
-
-        edge_overview["Edge Name"] = link_info["edge_status"]["edgeName"]
-        edge_overview["Trouble"] = 'Bandwidth Over Utilization'
-        edge_overview["Interface"] = link_info['link_status']['interface']
-        edge_overview["Name"] = link_info['link_status']['displayName']
-        edge_overview['Interval for Scan'] = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble']['bandwidth']
-        edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-
-        if 'rx_throughput' in bandwidth_metrics:
-            edge_overview['Throughput (Receive)'] = self._humanize_bps(bandwidth_metrics['rx_throughput'])
-            edge_overview['Bandwidth (Receive)'] = self._humanize_bps(bandwidth_metrics['rx_bandwidth'])
-            edge_overview['Threshold (Receive)'] = f"{self._config.MONITOR_CONFIG['bandwidth_percentage']}% " \
-                                                   f"({self._humanize_bps(bandwidth_metrics['rx_threshold'])})"
-        if 'tx_throughput' in bandwidth_metrics:
-            edge_overview['Throughput (Transfer)'] = self._humanize_bps(bandwidth_metrics['tx_throughput'])
-            edge_overview['Bandwidth (Transfer)'] = self._humanize_bps(bandwidth_metrics['tx_bandwidth'])
-            edge_overview['Threshold (Transfer)'] = f"{self._config.MONITOR_CONFIG['bandwidth_percentage']}% " \
-                                                    f"({self._humanize_bps(bandwidth_metrics['tx_threshold'])})"
-
-        edge_overview["Links"] = \
-            f'[Edge|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
-            f'{link_info["edge_status"]["enterpriseId"]}' \
-            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/] - ' \
-            f'[QoE|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
-            f'{link_info["edge_status"]["enterpriseId"]}' \
-            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/qoe/] - ' \
-            f'[Transport|https://{link_info["edge_status"]["host"]}/#!/operator/customer/' \
-            f'{link_info["edge_status"]["enterpriseId"]}' \
-            f'/monitor/edge/{link_info["edge_status"]["edgeId"]}/links/] \n'
-
-        return edge_overview
-
-    @staticmethod
-    def _humanize_bps(bps: int) -> str:
-        if 0 <= bps < 1000:
-            return f'{round(bps, 3)} bps'
-        if 1000 <= bps < 100000000:
-            return f'{round((bps / 1000), 3)} Kbps'
-        if 100000000 <= bps < 100000000000:
-            return f'{round((bps / 1000000), 3)} Mbps'
-        if bps >= 100000000000:
-            return f'{round((bps / 1000000000), 3)} Gbps'
-
-    def _ticket_object_to_string(self, ticket_dict, watermark=None):
-        edge_triage_str = "#*MetTel's IPA*#\n"
-        if watermark is not None:
-            edge_triage_str = f"{watermark}\n"
-        for key in ticket_dict.keys():
-            parsed_key = re.sub(r" LABELMARK(.)*", "", key)
-            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]}\n'
-        return edge_triage_str
-
-    def _ticket_object_to_string_without_watermark(self, ticket_dict):
-        return self._ticket_object_to_string(ticket_dict, "")
