@@ -2,12 +2,25 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "links-metrics-api.fullname" . }}
+  annotations:
+    {{ if eq .Values.global.environment "production" }}
+    external-dns.alpha.kubernetes.io/hostname: oreilly.mettel-automation.net
+    {{ else }}
+    external-dns.alpha.kubernetes.io/hostname: oreilly-{{ .Values.global.environment }}.mettel-automation.net
+    {{ end }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.service.awsCertArn }}
+    service.beta.kubernetes.io/aws-load-balancer-security-groups: {{ .Values.service.securityGroup }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
   labels:
     {{- include "links-metrics-api.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      protocol: TCP
+    - name: http
+      port: 80
+      targetPort: {{ .Values.service.port }}
+    - name: https
+      port: 443
+      targetPort: {{ .Values.service.port }}
   selector:
     {{- include "links-metrics-api.selectorLabels" . | nindent 4 }}

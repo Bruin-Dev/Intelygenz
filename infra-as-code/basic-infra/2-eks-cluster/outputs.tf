@@ -8,3 +8,8 @@ output "fluent-bit-role-arn" {
 output "fluent-bit-log-group-name" {
   value = join("", aws_cloudwatch_log_group.eks_log_group.*.id)
 }
+
+output "oreilly-security-group-id" {
+  description = "Oreilly whitelisted security group access"
+  value       = aws_security_group.links_metrics_api_oreilly.id
+}

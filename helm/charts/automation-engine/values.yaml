@@ -676,8 +676,6 @@ links-metrics-api:
     mongodb_host: ""
     # -- Indicate mongo port to use
     mongodb_port: ""
-    # -- Indicate the whitelist source range CIDR to allow access
-    whitelist_access: ""
     <<: *capabilitiesEnabled
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-api
@@ -685,8 +683,10 @@ links-metrics-api:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 5000
+    securityGroup: ""
+    awsCertArn: ""
   resources:
     limits:
       cpu: 400m

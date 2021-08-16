@@ -42,7 +42,6 @@ config:
   # -- Indicate mongo port to use
   mongodb_port: ""
   # -- Indicate the whitelist source range CIDR to allow access
-  whitelist_access: ""
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
@@ -96,9 +95,11 @@ image:
   tag: ""
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 5000
-
+  securityGroup: ""
+  awsCertArn: ""
+  
 resources:
   limits:
     cpu: 400m
