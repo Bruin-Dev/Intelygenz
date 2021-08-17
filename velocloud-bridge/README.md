@@ -24,9 +24,11 @@ In the `config.py`script, there's a way to split this into an array of dictionar
 ````
 
 ## Service logic
-The bridge will subscribe to 'get.links.with.edge.info`, `get.links.metric.info` and `alert.request.event.edge`.
-When a message is received by `alert.request.event.edge`, the bridge will get the specific edge event and send to
-a response topic that was built by NATS under the hood:
+The bridge will subscribe to 'get.links.with.edge.info`, `get.links.metric.info`, `alert.request.event.edge`,
+and `alert.request.event.edge`. 
+
+When a message is received by `alert.request.event.edge`, the bridge will get the 
+specific edge event and send to a response topic that was built by NATS under the hood:
 
 __alert.request.event.edge schema__
 ```
@@ -55,6 +57,39 @@ __alert.response.event.edge.{some service id} schema__
     'status': 200
 }
 ```
+
+When a message is received by `alert.request.event.enterprise`, the bridge will get the 
+specific enterprise events and send to a response topic that was built by NATS under the hood:
+
+__alert.request.event.enterprise schema__
+```
+{
+    'request_id': 123,
+    'body':{
+        'host': "some.host", 
+        'enterprise_id':19, 
+        'start_date': '2019-07-19 14:19:45',  # Seven days before end_date
+        'end_date': '2019-07-26 14:19:45',
+        'filter': ['EDGE_UP']
+        'limit':  200
+    }
+}
+```
+The `filter` field is used to request from the bridge only events that have event names in the list. If no filter is provided
+all events are returned.
+
+The `limit` field is used to limit how many events do we actually want to be returned. If no limit is provided then 
+all events are returned.
+
+__alert.response.event.enterprise.{some service id} schema__
+```
+{
+    'request_id': 123, 
+    'body': {...}, 
+    'status': 200
+}
+```
+
 When `get.links.with.edge.info` receives the `host` parameter it will return all the links corresponding to the host 
 
 __get.links.with.edge.info schema__

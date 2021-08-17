@@ -117,31 +117,26 @@ class VelocloudClient:
         self._logger.info(f"Host: {host} not found in client array")
         return None
 
-    async def get_all_edge_events(self, edge, start, end, limit):
+    async def get_all_events(self, host, body):
         try:
             return_response = dict.fromkeys(["body", "status"])
-            target_host_client = self._get_header_by_host(edge["host"])
+            target_host_client = self._get_header_by_host(host)
 
             if target_host_client is None:
-                self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
-                return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
+                self._logger.error(f'Cannot find a client to connect to {host}')
+                return_response["body"] = f'Cannot find a client to connect to {host}'
                 return_response["status"] = 404
-                await self._start_relogin_job(edge["host"])
+                await self._start_relogin_job(host)
                 return return_response
 
-            body = {"enterpriseId": edge["enterprise_id"],
-                    "interval": {"start": start, "end": end},
-                    "filter": {"limit": limit},
-                    "edgeId": [edge["edge_id"]]}
-
-            response = await self._session.post(f"https://{edge['host']}/portal/rest/event/getEnterpriseEvents",
+            response = await self._session.post(f"https://{host}/portal/rest/event/getEnterpriseEvents",
                                                 json=body,
                                                 headers=target_host_client['headers'],
                                                 ssl=self._config['verify_ssl'])
 
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json, edge["host"])
+                return_response["body"] = await self._json_return(response_json, host)
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:

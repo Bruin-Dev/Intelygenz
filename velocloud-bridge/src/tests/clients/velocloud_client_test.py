@@ -261,12 +261,18 @@ class TestVelocloudClient:
         logger = Mock()
         scheduler = Mock()
 
-        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        host = 'some_host'
+        edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
         interval_start = "Some interval start time"
         interval_end = "Some interval end time"
         limit = "some_limit"
         events_status = "Some Enterprise Information"
-        header = {'host': 'some_host', 'headers': 'some header dict'}
+        body = {"enterpriseId": edge_id["enterprise_id"],
+                "interval": {"start": interval_start, "end": interval_end},
+                "filter": {"limit": limit},
+                "edgeId": [edge_id["edge_id"]]}
+
+        header = {'host': host, 'headers': 'some header dict'}
 
         response_mock = Mock()
         response_mock.json = CoroutineMock(return_value=events_status)
@@ -278,14 +284,11 @@ class TestVelocloudClient:
 
         with patch.object(velocloud_client._session, 'post',
                           new=CoroutineMock(return_value=response_mock)) as mock_post:
-            events = await velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
+            events = await velocloud_client.get_all_events(host, body)
 
             mock_post.assert_called_once()
             assert edge_id['host'] in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['json'] == {'enterpriseId': edge_id['enterprise_id'],
-                                                      'interval': {'start': interval_start, 'end': interval_end},
-                                                      'filter': {'limit': limit},
-                                                      'edgeId': [edge_id['edge_id']]}
+            assert mock_post.call_args[1]['json'] == body
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert events["body"] == events_status
 
@@ -295,12 +298,17 @@ class TestVelocloudClient:
         logger = Mock()
         scheduler = Mock()
 
-        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        host = 'some_host'
+        edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
         interval_start = "Some interval start time"
         interval_end = "Some interval end time"
         limit = "some_limit"
         events_status = "Some Enterprise Information"
-        header = {'host': 'some_host', 'headers': 'some header dict'}
+        header = {'host': host, 'headers': 'some header dict'}
+        body = {"enterpriseId": edge_id["enterprise_id"],
+                "interval": {"start": interval_start, "end": interval_end},
+                "filter": {"limit": limit},
+                "edgeId": [edge_id["edge_id"]]}
 
         response_mock = Mock()
         response_mock.json = CoroutineMock(return_value=events_status)
@@ -312,7 +320,7 @@ class TestVelocloudClient:
 
         with patch.object(velocloud_client._session, 'post',
                           new=CoroutineMock(return_value=response_mock)) as mock_post:
-            events = await velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
+            events = await velocloud_client.get_all_events(host, body)
 
             mock_post.assert_called_once()
             assert events["body"] == events_status
@@ -323,12 +331,16 @@ class TestVelocloudClient:
         logger = Mock()
         scheduler = Mock()
 
-        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        host = 'some_host'
+        edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
         interval_start = "Some interval start time"
         interval_end = "Some interval end time"
         limit = "some_limit"
         events_status = "Some Enterprise Information"
-        header = {'host': 'some_host', 'headers': 'some header dict'}
+        body = {"enterpriseId": edge_id["enterprise_id"],
+                "interval": {"start": interval_start, "end": interval_end},
+                "filter": {"limit": limit},
+                "edgeId": [edge_id["edge_id"]]}
 
         response_mock = Mock()
         response_mock.json = CoroutineMock(return_value=events_status)
@@ -341,7 +353,7 @@ class TestVelocloudClient:
 
         with patch.object(velocloud_client._session, 'post',
                           new=CoroutineMock(return_value=response_mock)) as mock_post:
-            events = await velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
+            events = await velocloud_client.get_all_events(host, body)
 
             mock_post.assert_not_called()
             velocloud_client._start_relogin_job.assert_awaited_once()
@@ -355,12 +367,16 @@ class TestVelocloudClient:
         logger = Mock()
         scheduler = Mock()
 
-        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        host = 'some_host'
+        edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
         interval_start = "Some interval start time"
         interval_end = "Some interval end time"
         limit = "some_limit"
-        events_status = "Some Enterprise Information"
-        header = {'host': 'some_host', 'headers': 'some header dict'}
+        header = {'host': host, 'headers': 'some header dict'}
+        body = {"enterpriseId": edge_id["enterprise_id"],
+                "interval": {"start": interval_start, "end": interval_end},
+                "filter": {"limit": limit},
+                "edgeId": [edge_id["edge_id"]]}
 
         response_mock = Mock()
         response_mock.status = 500
@@ -372,7 +388,7 @@ class TestVelocloudClient:
 
         with patch.object(velocloud_client._session, 'post',
                           new=CoroutineMock(return_value=response_mock)) as mock_post:
-            events = await velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
+            events = await velocloud_client.get_all_events(host, body)
 
             assert events == {"body": 'Got internal error from Velocloud', "status": 500}
 

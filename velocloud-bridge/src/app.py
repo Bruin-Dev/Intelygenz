@@ -10,6 +10,7 @@ from igz.packages.server.api import QuartServer
 
 from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.actions.enterprise_edge_list import EnterpriseEdgeList
+from application.actions.enterprise_events_for_alert import EventEnterpriseForAlert
 from application.actions.enterprise_name_list_response import EnterpriseNameList
 from application.actions.get_edge_links_series import GetEdgeLinksSeries
 from application.actions.links_configuration import LinksConfiguration
@@ -42,6 +43,7 @@ class Container:
         self._subscriber_links_metric_info = NATSClient(config, logger=self._logger)
         self._subscriber_enterprise_edge_list = NATSClient(config, logger=self._logger)
         self._subscriber_event_alert = NATSClient(config, logger=self._logger)
+        self._subscriber_enterprise_event_alert = NATSClient(config, logger=self._logger)
         self._subscriber_links_configuration = NATSClient(config, logger=self._logger)
         self._subscriber_edge_links_series = NATSClient(config, logger=self._logger)
 
@@ -50,12 +52,15 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_links_with_edge_info, consumer_name="links_with_edge_info")
         self._event_bus.add_consumer(self._subscriber_links_metric_info, consumer_name="links_metric_info")
         self._event_bus.add_consumer(self._subscriber_event_alert, consumer_name="event_alert")
+        self._event_bus.add_consumer(self._subscriber_enterprise_event_alert, consumer_name="enterprise_event_alert")
         self._event_bus.add_consumer(self._subscriber_enterprise_edge_list, consumer_name="enterprise_edge_list")
         self._event_bus.add_consumer(self._subscriber_links_configuration, consumer_name="links_configuration")
         self._event_bus.add_consumer(self._subscriber_edge_links_series, consumer_name="edge_links_series")
         self._event_bus.set_producer(self._publisher)
 
         self._edge_events_for_alert = EventEdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
+        self._enterprise_events_for_alert = EventEnterpriseForAlert(self._event_bus, self._velocloud_repository,
+                                                                    self._logger)
         self._links_with_edge_info_action = LinksWithEdgeInfo(self._event_bus, self._logger, self._velocloud_repository)
         self._links_metric_info_action = LinksMetricInfo(self._event_bus, self._logger, self._velocloud_repository)
         self._links_configuration_action = LinksConfiguration(self._event_bus, self._velocloud_repository, self._logger)
@@ -65,6 +70,8 @@ class Container:
 
         self._alert_edge_event = ActionWrapper(self._edge_events_for_alert, "report_edge_event",
                                                is_async=True, logger=self._logger)
+        self._alert_enterprise_event = ActionWrapper(self._enterprise_events_for_alert, "report_enterprise_event",
+                                                     is_async=True, logger=self._logger)
         self._list_enterprise_name = ActionWrapper(self._enterprise_name_list, "enterprise_name_list",
                                                    is_async=True, logger=self._logger)
 
@@ -88,6 +95,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="event_alert",
                                                  topic="alert.request.event.edge",
                                                  action_wrapper=self._alert_edge_event,
+                                                 queue="velocloud_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="enterprise_event_alert",
+                                                 topic="alert.request.event.enterprise",
+                                                 action_wrapper=self._alert_enterprise_event,
                                                  queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="links_with_edge_info",
                                                  topic="get.links.with.edge.info",

@@ -15,21 +15,31 @@ class VelocloudRepository:
 
     async def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
+        body = {"enterpriseId": edge["enterprise_id"],
+                "interval": {"start": start, "end": end},
+                "filter": {"limit": limit},
+                "edgeId": [edge["edge_id"]]}
+        return await self._get_all_events(edge["host"], body, filter_events_status_list)
 
-        response = await self._velocloud_client.get_all_edge_events(edge, start, end, limit)
+    async def get_all_enterprise_events(self, enterprise, host, start, end, limit, filter_events_status_list):
+        self._logger.info(f'Getting events from enterprise:{enterprise} from time:{start} to time:{end}')
 
-        if response["status"] not in range(200, 300):
-            return response
+        body = {"enterpriseId": enterprise,
+                "interval": {"start": start, "end": end},
+                "filter": {"limit": limit}}
 
-        full_events = response["body"]
+        return await self._get_all_events(host, body, filter_events_status_list)
 
-        if filter_events_status_list is None:
-            response["body"] = full_events["data"]
-            return response
-        else:
-            event_list = [event for event in full_events["data"] if event['event'] in filter_events_status_list]
-            response["body"] = event_list
-            return response
+    async def _get_all_events(self, host, body, filter_events_status_list):
+        if filter_events_status_list is not None:
+            body['filter']['rules'] = [
+                {
+                    "field": "event",
+                    "op": "is",
+                    "values": filter_events_status_list
+                }
+            ]
+        return await self._velocloud_client.get_all_events(host, body)
 
     async def get_all_enterprise_names(self, msg):
         self._logger.info('Getting all enterprise names')
