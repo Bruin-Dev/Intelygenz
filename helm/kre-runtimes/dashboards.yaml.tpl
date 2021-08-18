@@ -67,10 +67,10 @@ data:
         auth_basic           "Admin Area";
         auth_basic_user_file /etc/apache2/.htpasswd;
 
-
-        location ~ ^/dashboard$ { 
-            return 301 https://$host/measurements/${KRE_RUNTIME_NAME}/sources/${KRE_RUNTIME_INFLUX_SOURCE}/dashboards/${KRE_RUNTIME_DASHBOARD}; 
+        location ~ ^/dashboard(.*)$ {
+            return 302 https://$host/measurements/${KRE_RUNTIME_NAME}/sources/${KRE_RUNTIME_INFLUX_SOURCE}/dashboards/28?refresh=Paused&present=true&$1$args;
         }
+
         location ~ ^/measurements/${KRE_RUNTIME_NAME}/(.*)$ {
             proxy_pass http://chronograf.${KRE_RUNTIME_NAME}.svc.cluster.local/measurements/${KRE_RUNTIME_NAME}/$1$is_args$args;
         }
@@ -84,14 +84,146 @@ data:
       <meta charset="UTF-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Dashboard</title>
+      <style>
+        body{
+            background-color: black;
+            color: white;
+            font-family: 'Roboto', Arial, Helvetica, sans-serif;
+        }
+        .filters_wrapper{}
+        .filters{
+            padding: 5px;
+            border: 0px solid gray;
+            height: 30px;
+        }
+        .predefined{}
+        .predefined select{
+            height: 24px;
+        }
+      </style>
+      <title>${KRE_RUNTIME_NAME} Dashboard</title>
     </head>
     <body>
-      <iframe
-        src="/dashboard"
-        frameborder="0" allowfullscreen
-        style="position:absolute;top:0;left:0;width:100%;height:100%;"
-      ></iframe>
+      <div class="filters_wrapper">
+        <div class="predefined filters" style="float: right;">
+            <select id="predefined_dates_filter" name="dates">
+                <option value="now%28%29%20-%207d">default past 7d</option>
+                <option value="now%28%29%20-%205m">past 5m</option>
+                <option value="now%28%29%20-%2015m">past 15m</option>
+                <option value="now%28%29%20-%201h">past 1h</option>
+                <option value="now%28%29%20-%206h">past 6h</option>
+                <option value="now%28%29%20-%2012h">past 12h</option>
+                <option value="now%28%29%20-%2024h">past 24h</option>
+                <option value="now%28%29%20-%202d">past 2d</option>
+                <option value="now%28%29%20-%207d">past 7d</option>
+                <option value="now%28%29%20-%2030d">past 30d</option>
+                <!-- Custom predefined values -->
+                this_week, last_week, current_month, last_month
+                <option value="this_week">current week</option>
+                <option value="last_week">last week</option>
+                <option value="current_month">current month</option>
+                <option value="last_month">last month</option>
+            </select>
+        </div>
+        <h1>Email Tagger Dashboard</h1>
+      </div>
+      <iframe id="mettel_public_dashboard" width="100%" height="100%"
+            src="/dashboard?lower=now%28%29%20-%207d"
+            frameborder="0"
+            style="position:absolute;top:60px;left:0;width:100%;height:100%;" allowfullscreen
+      >
+      </iframe>
+      <script>
+         const MONITOR_BASE_URL = "https://monitor.${KRE_RUNTIME_DASHBOARD_DNS}.mettel-automation.net/dashboard"
+
+         function formatDate(d){
+             return d.toISOString().split('T')[0];
+         }
+
+         function getCurrentWeek(){
+             const curr = new Date;
+             const first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+             const last = first + 6; // last day is the first day + 6
+             const firstday = formatDate(new Date(curr.setDate(first)))
+             const lastday = formatDate(new Date(curr.setDate(last)))
+             return {
+                firstday, lastday
+             }
+         }
+
+         function getLastWeek(){
+             const curr = new Date;
+             const first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+             const firstLastWeek = curr.getDate() - curr.getDay() - 7; // First day is the day of the month - the day of the week
+             const lastWeek = first + 6 - 7; // last day is the first day + 6
+             const firstday = formatDate(new Date(curr.setDate(firstLastWeek)));
+             const lastday = formatDate(new Date(curr.setDate(lastWeek)));
+             return {
+                firstday, lastday
+             }
+         }
+
+         function getCurrentMonth(){
+             const curr = new Date;
+             const firstdayCurrMonth = new Date(curr.getFullYear(), curr.getMonth(), 2);
+             const lastdayCurrMonth = new Date(curr.getFullYear(), curr.getMonth() + 1, 2);
+             const firstday = formatDate(firstdayCurrMonth);
+             const lastday = formatDate(lastdayCurrMonth);
+             return {
+                firstday, lastday
+             }
+         }
+
+         function getPreviousMonth(){
+             const curr = new Date;
+             const prevMonthLastDate = new Date(curr.getFullYear(), curr.getMonth(), 2);
+             const prevMonthFirstDate = new Date(curr.getFullYear() - (curr.getMonth() > 0 ? 0 : 1), (curr.getMonth() - 1 + 12) % 12, 2);
+             const firstday = formatDate(prevMonthFirstDate);
+             const lastday = formatDate(prevMonthLastDate);
+             return {
+                firstday, lastday
+             }
+         }
+
+         document.addEventListener('DOMContentLoaded', function() {
+             var predefinedValues = document.getElementById('predefined_dates_filter');
+             predefinedValues.onchange = (event) => {
+                 const inputText = event.target.value;
+
+                 let monitor_url_with_filters = "";
+                 switch (inputText) {
+                    case "this_week":
+                        const dates = getCurrentWeek()
+                        monitor_url_with_filters = MONITOR_BASE_URL +
+                            "?lower=" + dates.firstday + "&upper=" + dates.lastday;
+                        break;
+                    case "last_week":
+                        const datesLastWeek = getLastWeek()
+                        monitor_url_with_filters = MONITOR_BASE_URL +
+                            "?lower=" + datesLastWeek.firstday + "&upper=" + datesLastWeek.lastday;
+                        break;
+                    case "current_month":
+                        const datesCurrentMonth = getCurrentMonth()
+                        monitor_url_with_filters = MONITOR_BASE_URL +
+                            "?lower=" + datesCurrentMonth.firstday + "&upper=" + datesCurrentMonth.lastday;
+                        break;
+                    case "last_month":
+                        const datesLastMonth = getPreviousMonth()
+                        monitor_url_with_filters = MONITOR_BASE_URL +
+                            "?lower=" + datesLastMonth.firstday + "&upper=" + datesLastMonth.lastday;
+                        break;
+                    default:
+                        monitor_url_with_filters = MONITOR_BASE_URL + "?lower=" + inputText;
+                        break;
+                 }
+                 if (monitor_url_with_filters !== "") {
+                     document.getElementById("mettel_public_dashboard").src = monitor_url_with_filters;
+                 }else{
+                     console.log("Error: filters empty!")
+                 }
+             };
+         }, false);
+      </script>
     </body>
     </html>
 
@@ -132,7 +264,7 @@ metadata:
   namespace: ${KRE_RUNTIME_NAME}
 spec:
   rules:
-  - host: monitor.${KRE_RUNTIME_NAME}.mettel-automation.net
+  - host: monitor.${KRE_RUNTIME_DASHBOARD_DNS}.mettel-automation.net
     http:
       paths:
       - backend:
@@ -142,5 +274,5 @@ spec:
         pathType: ImplementationSpecific
   tls:
   - hosts:
-    - monitor.${KRE_RUNTIME_NAME}.mettel-automation.net
-    secretName: monitor.${KRE_RUNTIME_NAME}.mettel-automation.net-tls
+    - monitor.${KRE_RUNTIME_DASHBOARD_DNS}.mettel-automation.net
+    secretName: monitor.${KRE_RUNTIME_DASHBOARD_DNS}.mettel-automation.net-tls

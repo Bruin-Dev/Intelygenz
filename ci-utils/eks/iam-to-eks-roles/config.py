@@ -13,7 +13,9 @@ CLUSTER_ROLES_PERMISSIONS = {
             },
             {
                 "apiGroups": [""],
-                "resources": ["namespaces",
+                "resources": ["events",
+                              "endpoints",
+                              "namespaces",
                               "namespaces/finalize",
                               "namespaces/status",
                               "nodes",

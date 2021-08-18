@@ -33,6 +33,9 @@
   script:
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DELETE PUBLIC DASHBOARDS
+    - envsubst < helm/kre-runtimes/dashboards.yaml.tpl > helm/kre-runtimes/dashboards.yaml
+    - kubectl delete -f helm/kre-runtimes/dashboards.yaml
     # DELETE HELM RELEASE FOR RUNTIME AND ASSOCIATED RESOURCES
     - helm -n ${KRE_RUNTIME_NAME} uninstall ${KRE_RUNTIME_NAME}
     - >
@@ -53,11 +56,5 @@
     - terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
     - terraform refresh
     - terraform destroy -auto-approve
-      - >
-      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
-        cd ${CI_PROJECT_DIR}              
-        envsubst < helm/kre-runtimes/dashboards.yaml > helm/kre-runtimes/dashboards.yaml
-        kubectl delete -f helm/kre-runtimes/dashboards.yaml
-      fi
   tags:
     - kubernetes

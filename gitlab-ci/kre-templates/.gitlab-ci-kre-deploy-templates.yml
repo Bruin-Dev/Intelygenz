@@ -59,13 +59,14 @@
     - terraform plan && terraform apply -auto-approve
     - KRE_HOSTED_ZONE_ID=$(terraform output kre_runtime_hosted_zone_id | tr -d '"')
     - cd ${CI_PROJECT_DIR}
-    # INSTALL KUBE CONFIG
+    # CONFIGURE CLUSTER CREDENTIALS TO DEPLOY (KUBECONFIG)
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
-    # create ns if necessary
+    # CREATE NAMESPACE IF NECESSARY
     - kubectl create ns ${KRE_RUNTIME_NAME} --dry-run -o yaml | kubectl apply -f -
     # ADD HELM REPOSITORIES
     - helm repo add konstellation-io https://charts.konstellation.io
     - helm repo update
+    # INSTALL KONSTELLATION RUNTIME ENGINE
     - helm upgrade
       --wait
       --install ${KRE_RUNTIME_NAME}
@@ -86,11 +87,15 @@
       --set certManager.dns01.route53.secretAccessKey=${AWS_SECRET_ACCESS_KEY}
       --set certManager.dns01.route53.hostedZoneID=${KRE_HOSTED_ZONE_ID}
       konstellation-io/kre
+    # CREATE / UPDATE PUBLIC DASHBOARDS
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
-        cd ${CI_PROJECT_DIR}              
-        envsubst '${KRE_RUNTIME_NAME},${KRE_RUNTIME_INFLUX_SOURCE},${KRE_RUNTIME_DASHBOARD},${KRE_RUNTIME_DASHBOARD_USER},${KRE_RUNTIME_DASHBOARD_PASSWORD}' < helm/kre-runtimes/dashboards.yaml.tpl > helm/kre-runtimes/dashboards.yaml
-        kubectl apply -f helm/kre-runtimes/dashboards.yaml
+        export KRE_RUNTIME_DASHBOARD_DNS=${KRE_RUNTIME_NAME}              
+      else
+        export KRE_RUNTIME_DASHBOARD_DNS=${KRE_RUNTIME_NAME}-dev
       fi
+    - envsubst '${KRE_RUNTIME_DASHBOARD_DNS},${KRE_RUNTIME_NAME},${KRE_RUNTIME_INFLUX_SOURCE},${KRE_RUNTIME_DASHBOARD},${KRE_RUNTIME_DASHBOARD_USER},${KRE_RUNTIME_DASHBOARD_PASSWORD}' < helm/kre-runtimes/dashboards.yaml.tpl > helm/kre-runtimes/dashboards.yaml
+    - kubectl apply -f helm/kre-runtimes/dashboards.yaml
+    - kubectl -n ${KRE_RUNTIME_NAME} rollout restart deployment chronograf-proxy
   tags:
     - kubernetes
