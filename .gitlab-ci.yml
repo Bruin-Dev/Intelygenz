@@ -94,7 +94,6 @@ include:
   - local: 'hawkeye-outage-monitor/.gitlab-ci.yml'
   - local: 'helm/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
-  - local: 'infra-as-code/data-collector/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
   - local: 'intermapper-outage-monitor/.gitlab-ci.yml'
