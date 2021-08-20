@@ -103,26 +103,3 @@
         envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
         helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml        
       fi
-
-.terraform_template_deploy_data_collector: &terraform_template_deploy_data_collector
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - >
-      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
-        apk add zip unzip
-        export TF_VAR_REST_API_DATA_COLLECTOR_AUTH_TOKEN=${REST_API_DATA_COLLECTOR_AUTH_TOKEN}
-        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_COLLECTION=${REST_API_DATA_COLLECTOR_MONGODB_COLLECTION}
-        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_DATABASE=${REST_API_DATA_COLLECTOR_MONGODB_DATABASE}
-        envsubst < infra-as-code/data-collector/init.tf > temp_dc.tf
-        envsubst < infra-as-code/data-collector/variables.tf > temp_vars_dc.tf
-        mv temp_dc.tf infra-as-code/data-collector/init.tf
-        mv temp_vars_dc.tf infra-as-code/data-collector/variables.tf
-        cd infra-as-code/data-collector
-        terraform init
-        terraform apply -auto-approve
-        cd ${CI_PROJECT_DIR}
-      fi
