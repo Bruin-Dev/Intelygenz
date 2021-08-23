@@ -17,8 +17,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-# quarantine_time = 60 * 3
-quarantine_time = 5
+quarantine_time = 60 * 3
+
 
 try:
     velocloud_hosts = os.environ["VELOCLOUD_HOSTS"].replace(' ', '').split(':')
