@@ -14,26 +14,26 @@ class BruinRepository:
         self._notifications_repository = notifications_repository
         self._timeout = self._config.MONITOR_CONFIG['nats_request_timeout']['post_ticket_seconds']
 
-    async def get_single_ticket_basic_info(self, ticket_id):
+    async def get_site(self, client_id, site_id):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
-        async def get_single_ticket_basic_info():
+        async def get_site():
             err_msg = None
-            self._logger.info(f'Getting ticket "{ticket_id}" basic info')
+            self._logger.info(f'Getting site for client_id "{client_id}" and site_id "{site_id}')
             request_msg = {
                 "request_id": uuid(),
                 "body": {
-                    "ticket_id": ticket_id,
+                    "client_id": client_id,
+                    "site_id": site_id,
                 }
             }
             try:
-                response = await self._event_bus.rpc_request("bruin.single_ticket.basic.request", request_msg,
-                                                             timeout=self._timeout)
+                response = await self._event_bus.rpc_request("bruin.get.site", request_msg, timeout=self._timeout)
             except Exception as err:
                 err_msg = (
-                    f'An error occurred when getting basic info from Bruin, '
-                    f'for ticket_id "{ticket_id}" -> {err}'
+                    f'An error occurred when getting site from Bruin, '
+                    f'for client_id "{client_id}" and site_id "{site_id}" -> {err}'
                 )
                 response = nats_error_response
             else:
@@ -42,28 +42,25 @@ class BruinRepository:
 
                 if response_status not in range(200, 300):
                     err_msg = (
-                        f'Error getting basic info for ticket {ticket_id} in '
+                        f'Error getting basic info for client_id "{client_id}" and site_id "{site_id}" in '
                         f'{self._config.ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
+                    # TODO: review - return as array or just the first element or none if empty
                     response['body'] = {
-                        'ticket_id': ticket_id,
-                        'ticket_status': response['body']['ticketStatus'],
-                        'call_type': response['body']['callType'],
-                        'category': response['body']['category'],
-                        'creation_date': response['body']['createDate']
+                        'site': response['body'].get('documents', [])
                     }
 
             if err_msg:
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             else:
-                self._logger.info(f'Basic info for ticket {ticket_id} retrieved from Bruin')
+                self._logger.info(f'Site for client_id "{client_id}" and site_id "{site_id}" retrieved from Bruin')
 
             return response
 
         try:
-            return await get_single_ticket_basic_info()
+            return await get_site()
         except Exception as e:
-            self._logger.error(f"Error getting ticket {ticket_id} from Bruin: {e}")
+            self._logger.error(f'Error getting client_id "{client_id}" and site_id "{site_id}" from Bruin: {e}')
