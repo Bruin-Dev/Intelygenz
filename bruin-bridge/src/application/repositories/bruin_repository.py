@@ -298,3 +298,15 @@ class BruinRepository:
         }
 
         return await self._bruin_client.change_ticket_severity(ticket_id, payload)
+
+    async def get_site(self, params):
+        response = await self._bruin_client.get_site(params)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        documents = response["body"].get("documents", [])
+        response_body = documents
+
+        response["body"] = response_body
+        return response
