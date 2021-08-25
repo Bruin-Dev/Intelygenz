@@ -1,0 +1,44 @@
+{
+  "documents": [
+    {
+      "clientID": 72959,
+      "clientName": "TENET",
+      "vendor": "MetTel",
+      "accountNumber": "0300001136",
+      "subAccountNumber": "360166",
+      "inventoryID": "1082279",
+      "serviceNumber": "2109677750",
+      "siteId": 343443,
+      "siteLabel": "TENET",
+      "address": {
+        "address": "8200 Perrin Beitel Rd",
+        "city": "San Antonio",
+        "state": "TX",
+        "zip": "78218-1547",
+        "country": "USA"
+      },
+      "hierarchy": "|SOUTHWESTERN REGION|NON LEAD|BAPTIST HEALTH SYSTEM - SAN ANTONIO|524040|",
+      "costCenter": "SAN ANTONIO - 8200 PERRIN BEITEL",
+      "assignee": null,
+      "description": null,
+      "installDate": "2013-11-07T05:00:00Z",
+      "disconnectDate": "2016-02-01T05:00:00Z",
+      "status": "D",
+      "verified": "Y",
+      "productCategory": "Voice",
+      "productType": "Long Distance",
+      "items": [
+        {
+          "itemName": null,
+          "primaryIndicator": "Long Distance"
+        }
+      ],
+      "contractIdentifier": null,
+      "rateCardIdentifier": null,
+      "lastInvoiceUsageDate": "2016-02-01T05:00:00Z",
+      "lastUsageDate": "2016-01-26T00:07:00Z",
+      "longitude": -98.4096658,
+      "latitude": 29.5125306
+    }
+  ]
+}
