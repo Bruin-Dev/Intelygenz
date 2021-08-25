@@ -1,6 +1,3 @@
-from typing import List
-
-
 class VelocloudRepository:
     _config = None
     _clients = None
@@ -103,3 +100,6 @@ class VelocloudRepository:
         config_response["body"] = links_configuration
 
         return config_response
+
+    async def get_edge_links_series(self, host, payload):
+        return await self._velocloud_client.get_edge_links_series(host, payload)

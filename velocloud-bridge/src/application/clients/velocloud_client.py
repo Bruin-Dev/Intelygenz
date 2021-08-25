@@ -320,6 +320,53 @@ class VelocloudClient:
 
         return result
 
+    async def get_edge_links_series(self, velocloud_host: str, payload):
+        target_host_client = self._get_header_by_host(velocloud_host)
+        result = dict.fromkeys(["body", "status"])
+        self._logger.info(f'Trying to get edge links series for payload {payload} and'
+                          f' from Velocloud host "{velocloud_host}"...')
+        if target_host_client is None:
+            await self._start_relogin_job(velocloud_host)
+
+            result["body"] = f'Cannot find a client to connect to host {velocloud_host}'
+            result["status"] = 404
+            self.__log_result(result)
+
+            return result
+
+        try:
+            response = await self._session.post(
+                f"https://{velocloud_host}/portal/rest/metrics/getEdgeLinkSeries",
+                json=payload,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = 'Error while connecting to Velocloud API'
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        if response.status in range(500, 513):
+            result["body"] = "Got internal error from Velocloud"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+
+        self._logger.info(
+            f'Got HTTP {response.status} from Velocloud after edge link series for {payload}'
+            f'and host {velocloud_host}'
+        )
+
+        result['body'] = await response.json()
+        result['status'] = response.status
+
+        self.__log_result(result)
+
+        return result
+
     async def get_enterprise_edges(self, velocloud_host: str, enterprise_id: str):
         result = dict.fromkeys(["body", "status"])
 

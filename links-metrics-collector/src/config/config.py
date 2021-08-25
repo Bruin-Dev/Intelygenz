@@ -25,8 +25,15 @@ MONGO_USERNAME = os.getenv('MONGO_USERNAME')
 MONGO_PASS = os.getenv('MONGO_PASS')
 MONGO_URL = os.getenv('MONGO_URL')
 MONGO_PORT = os.getenv('MONGO_PORT')
-STORING_INTERVAL_MINUTES = 5
-VELO_HOSTS = ["mettel.velocloud.net"]
+STORING_INTERVAL_MINUTES = 15
+VELO_HOST = "mettel.velocloud.net"
+OREILLY_CLIENT_ID = 22
+METRICS_LIST = ['bytesRx', 'bytesTx', 'totalBytes', 'totalPackets', 'p1BytesRx', 'p1BytesTx', 'p1PacketsRx',
+                'p1PacketsTx', 'p2BytesRx', 'p2BytesTx', 'p2PacketsRx', 'p2PacketsTx', 'p3BytesRx', 'p3BytesTx',
+                'p3PacketsRx', 'p3PacketsTx', 'packetsRx', 'packetsTx', 'controlBytesRx', 'controlBytesTx',
+                'controlPacketsRx', 'controlPacketsTx', 'bestJitterMsRx', 'bestJitterMsTx', 'bestLatencyMsRx',
+                'bestLatencyMsTx', 'bestLossPctRx', 'bestLossPctTx', 'bpsOfBestPathRx', 'bpsOfBestPathTx',
+                'signalStrength', 'scoreTx', 'scoreRx']
 
 LOG_CONFIG = {
     'name': 'links-metrics-collector',

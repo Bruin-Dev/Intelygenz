@@ -7,7 +7,6 @@ from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
-from application.actions.get_link_metrics import GetLinkMetrics
 from application.actions.store_links_metrics import StoreLinkMetrics
 from application.clients.mongo_client import MyMongoClient
 from config import config
@@ -44,7 +43,6 @@ class Container:
         # # ACTIONS
         self._links_metrics_collector = StoreLinkMetrics(self._logger, config, self._event_bus, self._mongo_client,
                                                          self._scheduler)
-        self._get_links_metrics = GetLinkMetrics(self._logger, config, self._mongo_client)
 
     async def _start(self):
         await self._event_bus.connect()

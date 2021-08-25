@@ -38,22 +38,17 @@ class MyMongoClient:
         self._logger.info(f'Trying to fetch data from {interval_start} to {interval_end}')
         db = self._client.get_default_database()
 
-        cursor = db["links_metrics"].find({"created_date": {
-            "$gte": interval_start,
-            "$lt": interval_end
-        }})
+        cursor = db["links_series"].find(
+            {
+                "start_date": {
+                    "$gte": int(interval_start),
+                },
+                "end_date": {
+                    "$lte": int(interval_end)}
+            })
         result = []
-
-        for doc in await cursor.to_list(None):
+        async for doc in cursor:
             del doc["_id"]
-
-            oreilly_metrics = []
-            for link_metrics in doc['metrics']:
-                if link_metrics['link']['enterpriseId'] == self._config.ENTERPRISE_ID:
-                    del link_metrics['link']['host']
-                    oreilly_metrics.append(link_metrics)
-
-            doc['metrics'] = oreilly_metrics
             result.append(doc)
 
         self._logger.info(f'Data fetched from mongo successfully!')

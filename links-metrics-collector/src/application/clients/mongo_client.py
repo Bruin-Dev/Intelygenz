@@ -38,26 +38,11 @@ class MyMongoClient:
         self._logger.info(f'Inserting data in mongo...')
         db = self._client.get_default_database()
         list_collections = db.collection_names()
-        if "links_metrics" in list_collections:
-            self._logger.info(f'The collection tickets on database links_metrics exists on mongodb.')
+        if "links_series" in list_collections:
+            self._logger.info(f'The collection tickets on database links_series exists on mongodb.')
         else:
-            self._logger.info(f'The collection tickets on database links_metrics does not exists on mongodb.')
-            db.create_collection("links_metrics")
-        result = db["links_metrics"].insert_one(json_data)
+            self._logger.info(f'The collection tickets on database links_series does not exists on mongodb.')
+            db.create_collection("links_series")
+        result = db["links_series"].insert_one(json_data)
         self._logger.info(f'ACK of inserting: {result.acknowledged}')
         return result.inserted_id
-
-    def get_from_interval(self, interval_start, interval_end):
-        # start and end are datetime isoformat objects
-        self._logger.info(f'Trying to fetch data from {interval_start} to {interval_end}')
-        db = self._client.get_default_database()
-
-        cursor = db["links_metrics"].find({"created_date": {
-            "$gte": interval_start,
-            "$lt": interval_end
-        }})
-        result = [res for res in cursor]
-        for res in result:
-            del res["_id"]
-        self._logger.info(f'Data fetched from mongo: {result}')
-        return result

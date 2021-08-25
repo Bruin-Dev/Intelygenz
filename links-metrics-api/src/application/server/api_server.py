@@ -45,7 +45,9 @@ class APIServer:
             start_date = request.args.get("start_date")
             end_date = request.args.get("end_date")
             if not end_date or not start_date:
-                return jsonify({"error": "Request must have start_date and end_date as query params"}), \
+                return jsonify({"error": "Request must have start_date and end_date as query params"
+                                         "start date and end date are integers representing milliseconds from epoch"
+                                         "in UTC"}), \
                        HTTPStatus.BAD_REQUEST, None
             json_res = await self._get_link_metrics.get_links_metrics(start_date, end_date)
             return jsonify(json_res), HTTPStatus.OK, None
