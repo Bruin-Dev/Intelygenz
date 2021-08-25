@@ -1027,3 +1027,65 @@ class BruinClient:
             return_response["status"] = 500
 
         return return_response
+
+    async def get_site(self, params):
+        try:
+            parsed_params = humps.pascalize(params)
+
+            self._logger.info(f'Getting Bruin Site for params: {params}')
+            return_response = dict.fromkeys(["body", "status"])
+
+            try:
+                response = await self._session.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Site',
+                    params=parsed_params,
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status"] = 500
+                return return_response
+
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
+
+            if response.status == 401:
+                self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = "Got 401 from Bruin"
+                return_response["status"] = response.status
+
+            if response.status == 403:
+                self._logger.error(f"Got HTTP 403 from Bruin")
+                return_response["body"] = {
+                    "error": "403 error"
+                }
+                return_response["status"] = response.status
+
+            if response.status == 404:
+                self._logger.error(f"Got HTTP 404 from Bruin")
+                return_response["body"] = "Resource not found"
+                return_response["status"] = response.status
+
+            if response.status in range(500, 513):
+                self._logger.error(f"Got HTTP {response.status} from Bruin")
+                return_response["body"] = f"Got internal error from Bruin"
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
