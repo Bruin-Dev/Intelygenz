@@ -88,7 +88,40 @@ class TestGetSite:
         assert logger.error.called
 
     @pytest.mark.asyncio
-    async def get_site_incomplete_filters_client_id_test(self):
+    async def get_site_incomplete_filters_test(self):
+        client_id = 72959
+        site_id = 343443
+        logger = Mock()
+        logger.info = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_site = CoroutineMock()
+
+        event_bus_request = {
+            "request_id": 19,
+            "body": {
+                "client_id": client_id
+            },
+            "response_topic": "some.topic"
+        }
+
+        event_bus_response = {
+            "request_id": 19,
+            'body': 'You must specify "site_id" in the body',
+            'status': 400
+        }
+
+        get_site = GetSite(logger, event_bus, bruin_repository)
+        await get_site.get_site(event_bus_request)
+        bruin_repository.get_site.assert_not_awaited()
+        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
+        assert logger.error.called
+
+    @pytest.mark.asyncio
+    async def get_site_incomplete_filters_site_id_test(self):
+        client_id = 72959
         site_id = 343443
         logger = Mock()
         logger.info = Mock()

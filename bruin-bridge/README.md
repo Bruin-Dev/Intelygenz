@@ -58,6 +58,11 @@
     * [Description](#description-14)
     * [Request message](#request-message-13)
     * [Response message](#response-message-13)
+  * [Get Site](#get-site)
+    * [Description](#description-15)
+    * [Request message](#request-message-14)
+    * [Response message](#response-message-14)
+
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -600,5 +605,57 @@ and then a response message is published to the response topic that was built by
   "status": 200
 }
 ```
+
+# Get Site Details
+### Description
+When the bruin bridge receives a request with a request message from topic `"bruin.get.site"` it makes a callback
+to function `get_site`. From the request message, we need the `site_id` and `client_id` to get the details of a site
+for a particular client from Bruin.
+
+We call the bruin repository with these fields so that it can call the bruin client to get the site details dict from bruin.
+The bruin client should return a message having the site details like the site's contact info along with other fields,
+and then a response message is published to the response topic that was built by NATS under the hood.
+### Request message
+```json
+{
+    "request_id": 123,
+    "body": {
+        "client_id": 85719,
+        "site_id": 999
+    }
+}
+```
+### Response message
+```json
+{
+  "request_id": 123,
+  "body": [
+    {
+      "clientID": 85719,
+      "clientName": "Rotech Healthcare, Inc.",
+      "siteID": 999,
+      "siteLabel": "4074320248 - DEBORAH ROBERTSON",
+      "siteAddDate": "2016-10-06T15:32:23.897Z",
+      "address": {
+        "addressID": 1675311,
+        "address": "3600 Vineland Rd Ste 114",
+        "city": "Orlando",
+        "state": "FL",
+        "zip": "32811-6460",
+        "country": "USA"
+      },
+      "longitude": -81.429743,
+      "latitude": 28.5047608,
+      "businessHours": "SUNDAY|NOT AVAILABLE,MONDAY|8PM-6PM,TUESDAY|8PM-6PM,WEDNESDAY|8PM-6PM,THURSDAY|8PM-6PM,FRIDAY|8PM-6PM,SATURDAY|NOT AVAILABLE",
+      "timeZone": "Eastern",
+      "primaryContactName": "Help Desk",
+      "primaryContactPhone": null,
+      "primaryContactEmail": "test@email.com"
+    }
+  ],
+  "status": 200
+}
+```
+
 # Running in docker-compose 
 `docker-compose up --build redis nats-server bruin-bridge`

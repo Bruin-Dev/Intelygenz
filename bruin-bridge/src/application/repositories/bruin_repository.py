@@ -306,7 +306,12 @@ class BruinRepository:
             return response
 
         documents = response["body"].get("documents", [])
-        response_body = documents
+        if not documents:
+            response["status"] = 404
+            response["body"] = (
+                f"No site information was found for site {params['site_id']} and client {params['client_id']}"
+            )
+            return response
 
-        response["body"] = response_body
+        response["body"] = documents[0]
         return response
