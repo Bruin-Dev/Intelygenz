@@ -1,0 +1,26 @@
+{
+  "documents": [
+    {
+      "clientID": 72959,
+      "clientName": "TENET",
+      "siteID": "343443",
+      "siteLabel": "TENET",
+      "siteAddDate": "2018-07-05T06:18:20.723Z",
+      "address": {
+        "addressID": 311716,
+        "address": "8200 Perrin Beitel Rd",
+        "city": "San Antonio",
+        "state": "TX",
+        "zip": "78218-1547",
+        "country": "USA"
+      },
+      "longitude": -98.4096658,
+      "latitude": 29.5125306,
+      "businessHours": null,
+      "timeZone": null,
+      "primaryContactName": null,
+      "primaryContactPhone": null,
+      "primaryContactEmail": null
+    }
+  ]
+}
