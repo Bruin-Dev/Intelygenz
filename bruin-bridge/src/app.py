@@ -22,6 +22,7 @@ from application.actions.resolve_ticket import ResolveTicket
 from application.actions.get_client_info import GetClientInfo
 from application.actions.unpause_ticket import UnpauseTicket
 from application.actions.post_email_tag import PostEmailTag
+from application.actions.get_site import GetSite
 from igz.packages.nats.clients import NATSClient
 from application.actions.post_ticket import PostTicket
 from igz.packages.eventbus.eventbus import EventBus
@@ -71,6 +72,7 @@ class Container:
         self._subscriber_get_circuit_id = NATSClient(config, logger=self._logger)
         self._subscriber_post_email_tag = NATSClient(config, logger=self._logger)
         self._subscriber_change_ticket_severity = NATSClient(config, logger=self._logger)
+        self._subscriber_get_site = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -105,6 +107,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_post_email_tag, consumer_name="post_email_tag")
         self._event_bus.add_consumer(self._subscriber_get_circuit_id, consumer_name="get_circuit_id")
         self._event_bus.add_consumer(self._subscriber_change_ticket_severity, consumer_name="change_ticket_severity")
+        self._event_bus.add_consumer(self._subscriber_get_site, consumer_name="get_site")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -133,6 +136,7 @@ class Container:
         self._post_email_tag = PostEmailTag(self._logger, self._event_bus, self._bruin_repository)
         self._get_circuit_id = GetCircuitID(self._logger, self._event_bus, self._bruin_repository)
         self._change_ticket_severity = ChangeTicketSeverity(self._logger, self._event_bus, self._bruin_repository)
+        self._get_site = GetSite(self._logger, self._event_bus, self._bruin_repository)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -183,6 +187,7 @@ class Container:
                                                     logger=self._logger)
         self._action_change_ticket_severity = ActionWrapper(self._change_ticket_severity, "change_ticket_severity",
                                                             is_async=True, logger=self._logger)
+        self._action_get_site = ActionWrapper(self._get_site, "get_site", is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -261,6 +266,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="change_ticket_severity",
                                                  topic="bruin.change.ticket.severity",
                                                  action_wrapper=self._action_change_ticket_severity,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="get_site",
+                                                 topic="bruin.get.site",
+                                                 action_wrapper=self._action_get_site,
                                                  queue="bruin_bridge")
 
     async def start_server(self):

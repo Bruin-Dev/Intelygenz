@@ -3577,3 +3577,186 @@ class TestChangeTicketSeverity:
             "status": 500,
         }
         assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_site_test(self):
+        logger = Mock()
+        client_id = 72959
+        site_id = 343443
+        params = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+        get_site_response = {
+          "documents": [
+            {
+              "clientID": client_id,
+              "clientName": "TENET",
+              "siteID": f"{site_id}",
+              "siteLabel": "TENET",
+              "siteAddDate": "2018-07-05T06:18:20.723Z",
+              "address": {
+                "addressID": 311716,
+                "address": "8200 Perrin Beitel Rd",
+                "city": "San Antonio",
+                "state": "TX",
+                "zip": "78218-1547",
+                "country": "USA"
+              },
+              "longitude": -98.4096658,
+              "latitude": 29.5125306,
+              "businessHours": None,
+              "timeZone": None,
+              "primaryContactName": "primaryContactName string",
+              "primaryContactPhone": "primaryContactPhone string",
+              "primaryContactEmail": "some@email.com"
+            }
+          ]
+        }
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=get_site_response)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)) as mock_get:
+            ticket_details = await bruin_client.get_site(params)
+
+            mock_get.assert_called_once()
+            assert ticket_details["body"] == get_site_response
+            assert ticket_details["status"] == 200
+
+    @pytest.mark.asyncio
+    async def get_site_with_400_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        client_id = 72959
+        site_id = 343443
+        params = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+        error_response = {'error': "400 error"}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock.status = 400
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+            logger.error.assert_called()
+
+            assert ticket_details['body'] == error_response
+            assert ticket_details['status'] == 400
+
+    @pytest.mark.asyncio
+    async def get_site_with_401_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        client_id = 72959
+        site_id = 343443
+        params = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 401
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+            bruin_client.login.assert_awaited()
+            logger.error.assert_called()
+
+            assert ticket_details['body'] == "Got 401 from Bruin"
+            assert ticket_details['status'] == 401
+
+    @pytest.mark.asyncio
+    async def get_site_with_403_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        client_id = 72959
+        site_id = 343443
+        params = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+        error_response = {'error': "403 error"}
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock.status = 403
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+            logger.error.assert_called()
+
+            assert ticket_details['body'] == error_response
+            assert ticket_details['status'] == 403
+
+    @pytest.mark.asyncio
+    async def get_site_with_404_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        client_id = 72959
+        site_id = 343443
+        params = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 404
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+            logger.error.assert_called()
+
+            assert ticket_details['body'] == "Resource not found"
+            assert ticket_details['status'] == 404
+
+    @pytest.mark.asyncio
+    async def get_site_with_500_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        client_id = 72959
+        site_id = 343443
+        params = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 500
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+            logger.error.assert_called()
+
+            assert ticket_details['body'] == "Got internal error from Bruin"
+            assert ticket_details['status'] == 500

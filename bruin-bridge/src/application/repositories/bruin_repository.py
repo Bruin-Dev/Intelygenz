@@ -298,3 +298,20 @@ class BruinRepository:
         }
 
         return await self._bruin_client.change_ticket_severity(ticket_id, payload)
+
+    async def get_site(self, params):
+        response = await self._bruin_client.get_site(params)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        documents = response["body"].get("documents", [])
+        if not documents:
+            response["status"] = 404
+            response["body"] = (
+                f"No site information was found for site {params['site_id']} and client {params['client_id']}"
+            )
+            return response
+
+        response["body"] = documents[0]
+        return response

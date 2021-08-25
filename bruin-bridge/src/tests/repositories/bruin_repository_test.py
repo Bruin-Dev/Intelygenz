@@ -1907,3 +1907,93 @@ class TestBruinRepository:
 
         bruin_client.change_ticket_severity.assert_awaited_once_with(ticket_id, pascalized_payload)
         assert result == change_ticket_severity_response
+
+    @pytest.mark.asyncio
+    async def get_site_ok_test(self):
+        client_id = 72959
+        site_id = 343443
+        shared_payload = {
+            "client_id": client_id,
+            "site_id": site_id
+        }
+
+        logger = Mock()
+
+        site_info = {
+            "clientID": client_id,
+            "clientName": "TENET",
+            "siteID": f"{site_id}",
+            "siteLabel": "TENET",
+            "siteAddDate": "2018-07-05T06:18:20.723Z",
+            "address": {
+                "addressID": 311716,
+                "address": "8200 Perrin Beitel Rd",
+                "city": "San Antonio",
+                "state": "TX",
+                "zip": "78218-1547",
+                "country": "USA"
+            },
+            "longitude": -98.4096658,
+            "latitude": 29.5125306,
+            "businessHours": None,
+            "timeZone": None,
+            "primaryContactName": "primaryContactName string",
+            "primaryContactPhone": "primaryContactPhone string",
+            "primaryContactEmail": "some@email.com"
+        }
+        get_site_response = {
+            "body": {
+                "documents": [
+                    site_info,
+                ]
+            },
+            "status": 200,
+        }
+
+        bruin_client = Mock()
+        bruin_client.get_site = CoroutineMock(return_value=get_site_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_site(params=shared_payload)
+
+        bruin_client.get_site.assert_awaited_once_with(shared_payload)
+
+        expected_response = {
+            "body": site_info,
+            "status": 200,
+        }
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def get_site_with_response_having_empty_list_of_sites_test(self):
+        client_id = 72959
+        site_id = 343443
+        shared_payload = {
+            "client_id": client_id,
+            "site_id": site_id,
+        }
+
+        get_site_response = {
+            "body": {
+                "documents": [],
+            },
+            "status": 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_site = CoroutineMock(return_value=get_site_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_site(params=shared_payload)
+
+        bruin_client.get_site.assert_awaited_once_with(shared_payload)
+
+        expected_response = {
+            "body": f"No site information was found for site {site_id} and client {client_id}",
+            "status": 404,
+        }
+        assert result == expected_response
