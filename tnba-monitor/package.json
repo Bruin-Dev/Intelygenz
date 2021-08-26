@@ -6,11 +6,11 @@
     "devDependencies": {},
     "release": {
         "monorepo": {
-            "branch": "master",
+            "branch": "feature/migration-to-k8s",
             "branches": [
-                "master",
+                "feature/migration-to-k8s",
                 {
-                    "name": "master"
+                    "name": "feature/migration-to-k8s"
                 }
             ],
             "analyzeCommits": {
@@ -30,11 +30,11 @@
             "preset": "eslint",
             "changelogFile": "CHANGELOG.md"
         },
-        "branch": "master",
+        "branch": "feature/migration-to-k8s",
         "branches": [
-            "master",
+            "feature/migration-to-k8s",
             {
-                "name": "master"
+                "name": "feature/migration-to-k8s"
             }
         ],
         "verifyConditions": [

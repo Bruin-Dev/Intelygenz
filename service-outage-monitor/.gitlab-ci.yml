@@ -39,4 +39,7 @@ service-outage-monitor-build:
         - service-outage-monitor/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["service-outage-monitor-test"]
+  needs:
+    - job: service-outage-monitor-test
+    - job: semantic-release
+      optional: true

@@ -39,4 +39,7 @@ digi-reboot-report-build:
         - digi-reboot-report/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $DIGI_REBOOT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["digi-reboot-report-test"]
+  needs:
+    - job: digi-reboot-report-test
+    - job: semantic-release
+      optional: true

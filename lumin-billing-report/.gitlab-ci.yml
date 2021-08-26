@@ -43,4 +43,7 @@ lumin-billing-report-build:
         - lumin-billing-report/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $LUMIN_BILLING_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["lumin-billing-report-test"]
+  needs:
+    - job: lumin-billing-report-test
+    - job: semantic-release
+      optional: true

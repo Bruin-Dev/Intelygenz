@@ -26,4 +26,7 @@ ticket-collector-build:
         - ticket-collector/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["ticket-collector-linter"]
+  needs:
+    - job: ticket-collector-linter
+    - job: semantic-release
+      optional: true

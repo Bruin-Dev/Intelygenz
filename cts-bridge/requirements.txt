@@ -1,5 +1,0 @@
-requests==2.22.0
-APScheduler==3.6.0
-simple-salesforce==1.0.0
--f https://s3pypi.mettel-automation.net/igzpackages/index.html
-igzpackages==2.0.1
