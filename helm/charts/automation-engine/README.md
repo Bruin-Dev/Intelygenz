@@ -9,19 +9,14 @@ A Helm chart for Kubernetes to deploy automation-engine project
 | Repository | Name | Version |
 |------------|------|---------|
 |  | bruin-bridge | *.*.* |
-|  | cts-bridge | *.*.* |
 |  | customer-cache | *.*.* |
 |  | digi-bridge | *.*.* |
-|  | dispatch-portal-backend | *.*.* |
-|  | dispatch-portal-frontend | *.*.* |
 |  | hawkeye-bridge | *.*.* |
 |  | hawkeye-customer-cache | *.*.* |
 |  | hawkeye-outage-monitor | *.*.* |
 |  | last-contact-report | *.*.* |
-|  | lit-bridge | *.*.* |
 |  | lumin-billing-report | *.*.* |
 |  | notifier | *.*.* |
-|  | service-dispatch-monitor | *.*.* |
 |  | service-outage-monitor-1 | *.*.* |
 |  | service-outage-monitor-2 | *.*.* |
 |  | service-outage-monitor-3 | *.*.* |

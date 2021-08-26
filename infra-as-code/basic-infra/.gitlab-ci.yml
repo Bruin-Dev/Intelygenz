@@ -45,7 +45,7 @@ basic-infra-dev:
     - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master"'
@@ -98,7 +98,7 @@ destroy-basic-infra-dev:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - export TF_VAR_ENVIRONMENT="dev"
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master"'
