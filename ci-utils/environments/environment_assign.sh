@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ "${CI_COMMIT_REF_SLUG}" != "feature/migration-to-k8s" ]]; then
+if [[ "${CI_COMMIT_REF_SLUG}" == "feature/migration-to-k8s" ]]; then
   export ENVIRONMENT_ID=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
   export ENVIRONMENT_VAR="automation-"${ENVIRONMENT_ID}
   export TAG=${ENVIRONMENT_ID}-${CI_PIPELINE_ID}

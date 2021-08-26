@@ -58,4 +58,3 @@ docker-compose up --build sites-monitor
 ````
 
 You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../metrics-dashboard/grafana/Dockerfile)
-

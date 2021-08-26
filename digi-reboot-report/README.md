@@ -49,4 +49,3 @@ Last step is take all the data from the ticket map to create a csv file that the
 # Running in docker-compose 
 
 `docker-compose up --build nats-server redis digi-bridge bruin-bridge notifier digi-reboot-report`
-
