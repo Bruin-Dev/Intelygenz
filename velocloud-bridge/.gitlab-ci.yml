@@ -34,7 +34,7 @@ velocloud-bridge-build:
     MODULE_NAME: velocloud-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - velocloud-bridge/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'

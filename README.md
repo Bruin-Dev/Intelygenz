@@ -35,6 +35,7 @@
 
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
+  - [Commit Message Format](#commit-message-format)
   - [Adding new microservice to the system](#adding-new-microservices-to-the-system)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
@@ -100,11 +101,13 @@ Each commit message consists of a *header*, a *body*, and a *footer*.
 <footer>
 ```
 
-The `header` is mandatory and must conform to the Commit Message Header format.
+The `header` is mandatory and must conform to the [Commit Message Header](#commit-header) format.
 
-The `body` is mandatory for all commits except for those of type "docs". When the body is present it must be at least 20 characters long and must conform to the Commit Message Body format.
+The `body` is optional for all commits except for those of type `perf` although the recommendation is to always use it. For `perf` case is required that `BREAKING CHANGE: `part exists for 
+semantic-release be able to create a new ~~Major~~ Breaking Release.
+When the body is present it must be at least 20 characters long and must conform to the [Commit Message Body](#commit-body) format.
 
-The `footer` is optional. The Commit Message Footer format describes what the footer is used for and the structure it must have.
+The `footer` is optional. The [Commit Message Footer](#commit-footer) format describes what the footer is used for and the structure it must have.
 
 Any line of the commit message cannot be longer than 50 characters.
 
@@ -206,24 +209,25 @@ In the automation-engine root folder it is necessary update the following files:
 - [.gitlab-ci.yml](.gitlab-ci.yml)
 - [README.md](README.md)
 - [docker-compose.yml](docker-compose.yml)
-- [package.json](package.json) in root of the repo and inside the path of the microservice for semantic-release
+- [package.json](package.json) (*semantic-release functionality*)
+- [path/to/miceoservice/package.json](bruin-bridge/package.json) (*semantic-release functionality*)
 
 ### infra-as-code
 In infra-as-code you will need to make the changes to the following locations:
 - Add desired amount and any new env variables here: [.gitlab-ci.yml](infra-as-code/.gitlab-ci.yml)
 
 - basic infra folder    
-    - [0-ecr_repositories](infra-as-code/basic-infra/0-ecr_repositories) *NOTE: to add new ecr image
+    - [0-ecr_repositories](infra-as-code/basic-infra/0-ecr_repositories) *NOTE: to add new ecr image*
 
 ### helm
 If your microservices adds any new env variables you will need to make changes to the following files:
-- One of this places:
-    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/configmap.yaml](helm/charts/automation-engine/charts) *NOTE: The variable will be save in plain text (make sure that you create variable as ".Values.config.<var>")
-    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/secret.yaml](helm/charts/automation-engine/charts) *NOTE: The variable have sensitive data and will be save in base64-encoded string.
-- [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/values.yaml](helm/charts/automation-engine/charts) *NOTE: this only need to define the variable empty
-- [helm/charts/automation-engine/charts/values.yaml](helm/charts/automation-engine/charts/values.yaml) *NOTE: this only need to define the variable empty
-- [helm/charts/automation-engine/charts/values.yaml.tpl](helm/charts/automation-engine/charts/values.yaml.tpl) *NOTE: here you put the variable and the value that will be replaced by pipeline to deploy
-- [ci-utils/environments/deploy_environment_vars.sh](ci-utils/environments/deploy_environment_vars.sh) *NOTE: make sure the variable exist in gitlab-ci variables.
+- One or both of these places:
+    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/configmap.yaml](helm/charts/automation-engine/charts) *NOTE: The variable will be save in plain text (make sure that you create variable as ".Values.config.<var>")*
+    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/secret.yaml](helm/charts/automation-engine/charts) *NOTE: The variable have sensitive data and will be save in base64-encoded string.*
+- [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/values.yaml](helm/charts/automation-engine/charts) *NOTE: this only need to define the variable empty*
+- [helm/charts/automation-engine/charts/values.yaml](helm/charts/automation-engine/charts/values.yaml) *NOTE: this only need to define the variable empty*
+- [helm/charts/automation-engine/charts/values.yaml.tpl](helm/charts/automation-engine/charts/values.yaml.tpl) *NOTE: here you put the variable and the value that will be replaced by pipeline to deploy*
+- [ci-utils/environments/deploy_environment_vars.sh](ci-utils/environments/deploy_environment_vars.sh) *NOTE: make sure the variable exist in gitlab-ci variables.*
 
 # Technologies used
 

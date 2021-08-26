@@ -30,9 +30,6 @@ dependencies:
   - name: bruin-bridge
     version: '*.*.*'
     condition: bruin-bridge.enabled
-  - name: cts-bridge
-    version: '*.*.*'
-    condition: cts-bridge.enabled
   - name: customer-cache
     version: '*.*.*'
     condition: customer-cache.enabled
@@ -42,12 +39,6 @@ dependencies:
   - name: digi-reboot-report
     version: '*.*.*'
     condition: digi-reboot-report.enabled
-  - name: dispatch-portal-backend
-    version: '*.*.*'
-    condition: dispatch-portal-backend.enabled
-  - name: dispatch-portal-frontend
-    version: '*.*.*'
-    condition: dispatch-portal-frontend.enabled
   - name: ecr-cred-helper
     version: '*.*.*'
     condition: ecr-cred-helper.enabled
@@ -81,9 +72,6 @@ dependencies:
   - name: links-metrics-collector
     version: '*.*.*'
     condition: links-metrics-collector.enabled
-  - name: lit-bridge
-    version: '*.*.*'
-    condition: lit-bridge.enabled
   - name: lumin-billing-report
     version: '*.*.*'
     condition: lumin-billing-report.enabled
@@ -93,9 +81,6 @@ dependencies:
   - name: service-affecting-monitor
     version: '*.*.*'
     condition: service-affecting-monitor.enabled
-  - name: service-dispatch-monitor
-    version: '*.*.*'
-    condition: service-dispatch-monitor.enabled
   - name: service-outage-monitor-1
     version: '*.*.*'
     condition: service-outage-monitor-1.enabled

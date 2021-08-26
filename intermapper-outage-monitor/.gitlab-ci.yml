@@ -34,7 +34,7 @@ intermapper-outage-monitor-build:
     MODULE_NAME: intermapper-outage-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - intermapper-outage-monitor/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
