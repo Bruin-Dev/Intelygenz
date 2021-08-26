@@ -34,13 +34,6 @@ class GetSite:
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        if "site_id" not in filters.keys():
-            self._logger.error(f'Cannot get bruin site using {json.dumps(filters)}. Need "site_id"')
-            response["status"] = 400
-            response["body"] = 'You must specify "site_id" in the body'
-            await self._event_bus.publish_message(response_topic, response)
-            return
-
         self._logger.info(
             f'Getting Bruin site with filters: {json.dumps(filters)}'
         )
