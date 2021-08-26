@@ -85,6 +85,107 @@ it should be `package-example-env`
 From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
 Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
 
+## <a name="commit"></a> Commit Message Format
+*This specification is inspired by and supersedes the AngularJS commit message format.*
+
+We have very precise rules over how our Git commit messages must be formatted. This format leads to easier to read commit history.
+
+Each commit message consists of a *header*, a *body*, and a *footer*.
+
+```
+<header>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
+
+The `header` is mandatory and must conform to the Commit Message Header format.
+
+The `body` is mandatory for all commits except for those of type "docs". When the body is present it must be at least 20 characters long and must conform to the Commit Message Body format.
+
+The `footer` is optional. The Commit Message Footer format describes what the footer is used for and the structure it must have.
+
+Any line of the commit message cannot be longer than 50 characters.
+
+### <a name="commit-header"></a>Commit Message Header
+```
+<type>(<scope>): <short summary>
+  │       │             │
+  │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
+  │       │
+  │       └─⫸ Commit Scope: infra-as-code|ci-cd|helm|bruin-bridge|ci-utils|cts-bridge|customer-cache|digi-bridge|
+  │                          digi-reboot-report|dispatch-portal-backend|dispatch-portal-frontend|email-tagger-kre-bridge|
+  │                          email-tagger-kre-monitor|hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
+  │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
+  |                          links-metrics-collector|lit-bridge|lumin-billing-report|notifier|service-affecting-monitor|
+  |                          service-dispatch-monitor|service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
+  |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
+  │
+  └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
+```
+The `<type>` and `<short summary>` fields are mandatory, the `(<scope>)` field is optional.
+**NOTE**: beware with space between `(scope):` and `short summary`, it's necessary for semantic-release functionality.
+
+#### Type
+Must be one of the following:
+
+* **build**: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+* **ci**: Changes to our CI configuration files and scripts (example scopes: Circle, BrowserStack, SauceLabs)
+* **docs**: Documentation only changes
+* **feat**: A new feature
+* **fix**: A bug fix
+* **perf**: A code change that improves performance
+* **refactor**: A code change that neither fixes a bug nor adds a feature
+* **test**: Adding missing tests or correcting existing tests
+
+#### Scope
+The scope should be the name of the npm package affected (as perceived by the person reading the changelog generated from commit messages).
+
+#### Short summary
+Use the summary field to provide a succinct description of the change:
+
+use the imperative, present tense: "change" not "changed" nor "changes"
+don't capitalize the first letter
+no dot (.) at the end
+
+### <a name="commit-body"></a>Commit Message Body
+Just as in the summary, use the imperative, present tense: "fix" not "fixed" nor "fixes".
+
+Explain the motivation for the change in the commit message body. This commit message should explain why you are making the change. You can include a comparison of the previous behavior with the new behavior in order to illustrate the impact of the change.
+
+### <a name="commit-footer"></a>Commit Message Footer
+The footer can contain information about breaking changes and is also the place to reference GitHub issues, Jira tickets, and other PRs that this commit closes or is related to.
+
+```
+BREAKING CHANGE: <breaking change summary>
+<BLANK LINE>
+<breaking change description + migration instructions>
+<BLANK LINE>
+<BLANK LINE>
+Fixes #<issue number>
+```
+
+Breaking Change section should start with the phrase "BREAKING CHANGE: " followed by a summary of the breaking change, a blank line, and a detailed description of the breaking change that also includes migration instructions.
+
+### Revert commits
+If the commit reverts a previous commit, it should begin with revert: , followed by the header of the reverted commit.
+
+The content of the commit message body should contain:
+
+- information about the SHA of the commit being reverted in the following format: `This reverts commit <SHA>`,
+- a clear description of the reason for reverting the commit message.
+
+### Example
+
+The table below shows which commit message gets you which release type when semantic-release runs (using the default configuration):
+
+| Commit message                                                                                                                                                                                | Release type               | Tag        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |----------- |
+| `fix(bruin-bridge): stop 'something' breaking when too much pressure applied`                                                                                                                 | Patch Release              | 1.0.**1**  |
+| `feat(bruin-bridge): add 'something' option to 20`                                                                                                                                            | ~~Minor~~ Feature Release  | 1.**1**.0  |
+| `perf(bruin-bridge): remove something option`<br><br>`BREAKING CHANGE: The something option has been removed.`<br>`The default something value of 10 is always used for performance reasons.` | ~~Major~~ Breaking Release | **2**.0.0  |
+
 ## Adding new microservices to the system
 In addition to creating the microservice folder and all the standards files inside that folder, you must add this
 new microservice and any new env variables to the system's files. This is done in order to add 
