@@ -46,4 +46,3 @@ or unresolve it depending on the outage state of the device.
 
 # Running in docker-compose
 `docker-compose up --build redis hawkeye-bridge bruin-bridge notifier nats-server hawkeye-customer-cache hawkeye-outage-monitor`
-

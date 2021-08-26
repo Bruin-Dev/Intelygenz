@@ -78,4 +78,3 @@ docker-compose up --build nats-server redis redis-email-tagger
 ```
 docker-compose up --build email-tagger-monitor
 ```
-

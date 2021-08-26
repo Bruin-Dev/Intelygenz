@@ -94,4 +94,3 @@ Response when no edges satisfy specified filters
     "status": 404
 }
 ```
-

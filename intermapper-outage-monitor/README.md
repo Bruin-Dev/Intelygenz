@@ -30,4 +30,3 @@ Which is then followed up by appending the full `body` of the InterMapper email 
 
 # Running in docker-compose
 `docker-compose up --build nats-server notifier bruin_bridge intermapper-outage-monitor`
-

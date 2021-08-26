@@ -170,4 +170,3 @@ As usual, the response message will have the following fields:
 
 # Running in docker-compose
 `docker-compose up --build redis nats-server t7-bridge`
-
