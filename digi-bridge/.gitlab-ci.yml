@@ -39,4 +39,7 @@ digi-bridge-build:
         - digi-bridge/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $DIGI_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["digi-bridge-test"]
+  needs:
+    - job: digi-bridge-test
+    - job: semantic-release
+      optional: true

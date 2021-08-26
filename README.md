@@ -206,6 +206,7 @@ In the automation-engine root folder it is necessary update the following files:
 - [.gitlab-ci.yml](.gitlab-ci.yml)
 - [README.md](README.md)
 - [docker-compose.yml](docker-compose.yml)
+- [package.json](package.json) in root of the repo and inside the path of the microservice for semantic-release
 
 ### infra-as-code
 In infra-as-code you will need to make the changes to the following locations:

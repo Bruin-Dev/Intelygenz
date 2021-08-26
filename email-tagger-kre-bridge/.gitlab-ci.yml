@@ -39,4 +39,7 @@ email-tagger-kre-bridge-build:
         - email-tagger-kre-bridge/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["email-tagger-kre-bridge-test"]
+  needs:
+    - job: email-tagger-kre-bridge-test
+    - job: semantic-release
+      optional: true

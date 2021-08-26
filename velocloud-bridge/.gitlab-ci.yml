@@ -39,4 +39,7 @@ velocloud-bridge-build:
         - velocloud-bridge/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["velocloud-bridge-test"]
+  needs:
+    - job: velocloud-bridge-test
+    - job: semantic-release
+      optional: true

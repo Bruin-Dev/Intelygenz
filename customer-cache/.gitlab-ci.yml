@@ -39,4 +39,7 @@ customer-cache-build:
         - customer-cache/**/*
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
-  needs: ["customer-cache-test"]
+  needs:
+    - job: customer-cache-test
+    - job: semantic-release
+      optional: true
