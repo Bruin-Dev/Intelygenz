@@ -577,7 +577,7 @@ links-metrics-api:
     # -- Indicate mongo hostname
     mongodb_host: ${TICKET_COLLECTOR_MONGO_HOST}
     # -- Indicate mongo port to use
-    mongodb_port: "${TICKET_COLLECTOR_MONGO_PORT}"
+    mongodb_port: ${TICKET_COLLECTOR_MONGO_PORT}
     <<: *capabilitiesEnabled
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-api
@@ -613,7 +613,7 @@ links-metrics-collector:
     # -- Indicate mongo hostname
     mongodb_host: ${TICKET_COLLECTOR_MONGO_HOST}
     # -- Indicate mongo port to use
-    mongodb_port: "${TICKET_COLLECTOR_MONGO_PORT}"
+    mongodb_port: ${TICKET_COLLECTOR_MONGO_PORT}
     <<: *capabilitiesEnabled
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-collector
