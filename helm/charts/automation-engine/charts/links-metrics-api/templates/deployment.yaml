@@ -38,12 +38,12 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /api/_health
+              path: /_health
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
           readinessProbe:
             httpGet:
-              path: /api/_health
+              path: /_health
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
           resources:
