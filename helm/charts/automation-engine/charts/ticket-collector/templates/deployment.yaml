@@ -30,6 +30,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "ticket-collector.configmapName" . }}
+            - secretRef:
+                name: {{ include "ticket-collector.secretName" . }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
