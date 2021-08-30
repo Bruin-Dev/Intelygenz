@@ -15,11 +15,13 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
-        events = {"body": {"data": [{'event': 'EDGE_UP'}]},
-                  "status": 200}
+        events_response = {"body": {"data": [{'event': 'EDGE_UP'}]},
+                           "status": 200}
+        edge_events_response = {"body": [{'event': 'EDGE_UP'}],
+                                "status": 200}
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events)
+        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -40,7 +42,7 @@ class TestVelocloudRepository:
                 }
         edge_events = await vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         test_velocloud_client.get_all_events.assert_awaited_once_with(edge["host"], body)
-        assert edge_events == events
+        assert edge_events == edge_events_response
 
     @pytest.mark.asyncio
     async def get_all_edge_events_none_filter_test(self):
@@ -48,10 +50,12 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
-        events = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]}, "status": 200}
+        events_response = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]}, "status": 200}
+        edge_events_response = {"body": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}],
+                                "status": 200}
         filter_events_status_list = None
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events)
+        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -65,7 +69,32 @@ class TestVelocloudRepository:
                 }
         edge_events = await vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         test_velocloud_client.get_all_events.assert_awaited_once_with(edge["host"], body)
-        assert edge_events == events
+        assert edge_events == edge_events_response
+
+    @pytest.mark.asyncio
+    async def get_all_edge_events_non_2xx_status_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+
+        events_response = {"body": "Failed", "status": 400}
+        filter_events_status_list = None
+
+        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        start = datetime.now() - timedelta(hours=24)
+        end = datetime.now()
+        limit = None
+        body = {"enterpriseId": edge["enterprise_id"],
+                "interval": {"start": start, "end": end},
+                "edgeId": [edge["edge_id"]],
+                'filter': {
+                    "limit": limit,
+                }
+                }
+        edge_events = await vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
+        test_velocloud_client.get_all_events.assert_awaited_once_with(edge["host"], body)
+        assert edge_events == events_response
 
     @pytest.mark.asyncio
     async def get_all_enterprise_events_filter_test(self):
@@ -73,11 +102,13 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
-        events = {"body": {"data": [{'event': 'EDGE_UP'}]},
-                  "status": 200}
+        events_response = {"body": {"data": [{'event': 'EDGE_UP'}]},
+                           "status": 200}
+        enterprise_events_response = {"body": [{'event': 'EDGE_UP'}],
+                                      "status": 200}
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events)
+        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
         host = vr._config['servers'][0]['url']
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
@@ -96,10 +127,10 @@ class TestVelocloudRepository:
                             ]
                 }
                 }
-        edge_events = await vr.get_all_enterprise_events(enterprise_id, host, start, end, limit,
-                                                         filter_events_status_list)
+        enterprise_events = await vr.get_all_enterprise_events(enterprise_id, host, start, end, limit,
+                                                               filter_events_status_list)
         test_velocloud_client.get_all_events.assert_awaited_once_with(host, body)
-        assert edge_events == events
+        assert enterprise_events == enterprise_events_response
 
     @pytest.mark.asyncio
     async def get_all_enterprise_events_no_filter_test(self):
@@ -107,11 +138,13 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
-        events = {"body": {"data": [{'event': 'EDGE_UP'}]},
-                  "status": 200}
+        events_response = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]},
+                           "status": 200}
+        enterprise_events_response = {"body": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}],
+                                      "status": 200}
         filter_events_status_list = None
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events)
+        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
         host = vr._config['servers'][0]['url']
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
@@ -124,10 +157,38 @@ class TestVelocloudRepository:
 
                 }
                 }
-        edge_events = await vr.get_all_enterprise_events(enterprise_id, host, start, end, limit,
-                                                         filter_events_status_list)
+        enterprise_events = await vr.get_all_enterprise_events(enterprise_id, host, start, end, limit,
+                                                               filter_events_status_list)
         test_velocloud_client.get_all_events.assert_awaited_once_with(host, body)
-        assert edge_events == events
+        assert enterprise_events == enterprise_events_response
+
+    @pytest.mark.asyncio
+    async def get_all_enterprise_events_non_2xx_status_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+
+        events_response = {"body": 'Failed', "status": 400}
+
+        filter_events_status_list = None
+
+        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        host = vr._config['servers'][0]['url']
+        enterprise_id = 19
+        start = datetime.now() - timedelta(hours=24)
+        end = datetime.now()
+        limit = None
+        body = {"enterpriseId": enterprise_id,
+                "interval": {"start": start, "end": end},
+                'filter': {
+                    "limit": limit,
+
+                }
+                }
+        enterprise_events = await vr.get_all_enterprise_events(enterprise_id, host, start, end, limit,
+                                                               filter_events_status_list)
+        test_velocloud_client.get_all_events.assert_awaited_once_with(host, body)
+        assert enterprise_events == events_response
 
     @pytest.mark.asyncio
     async def connect_to_all_servers_test(self):

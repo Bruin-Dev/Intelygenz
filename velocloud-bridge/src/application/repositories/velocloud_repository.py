@@ -39,7 +39,15 @@ class VelocloudRepository:
                     "values": filter_events_status_list
                 }
             ]
-        return await self._velocloud_client.get_all_events(host, body)
+        response = await self._velocloud_client.get_all_events(host, body)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        full_events = response["body"]
+        response["body"] = full_events["data"]
+
+        return response
 
     async def get_all_enterprise_names(self, msg):
         self._logger.info('Getting all enterprise names')
