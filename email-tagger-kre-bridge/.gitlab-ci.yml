@@ -34,10 +34,10 @@ email-tagger-kre-bridge-build:
     MODULE_NAME: email-tagger-kre-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - email-tagger-kre-bridge/**/*
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
     - job: email-tagger-kre-bridge-test
