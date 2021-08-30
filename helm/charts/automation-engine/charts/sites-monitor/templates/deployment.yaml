@@ -55,11 +55,13 @@ spec:
               path: /_health
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
+            timeoutSeconds: 60
           readinessProbe:
             httpGet:
               path: /_health
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
+            timeoutSeconds: 60
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

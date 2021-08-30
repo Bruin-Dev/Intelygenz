@@ -23,7 +23,6 @@ helm-branches:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
-      when: manual
       allow_failure: true
 
 helm-master:
@@ -95,3 +94,4 @@ destroy-helm-master:
     action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
