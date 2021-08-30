@@ -15,3 +15,4 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
   PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
   PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
+  MONGO_PORT: "{{ .Values.config.mongodb_port }}"
