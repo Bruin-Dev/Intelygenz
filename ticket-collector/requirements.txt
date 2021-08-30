@@ -1,5 +1,6 @@
 prometheus_client==0.6.0
 APScheduler==3.6.0
+tzlocal==1.2
 -f https://s3pypi.mettel-automation.net/igzpackages/index.html
 igzpackages==2.0.1
 pymongo==3.11.4
