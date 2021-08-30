@@ -131,9 +131,11 @@ function links_metrics_api_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # links-metris-api environment variables for ephemeral environments
     export LINKS_METRICS_API_WHITELIST_ACCESS=${LINKS_METRICS_API_WHITELIST_ACCESS_PRO}
+    export TICKET_COLLECTOR_MONGO_PORT=${TICKET_COLLECTOR_MONGO_PORT_PRO}
   else
     # links-metris-api environment variables for production environment
     export LINKS_METRICS_API_WHITELIST_ACCESS=${LINKS_METRICS_API_WHITELIST_ACCESS_PRO}
+    export TICKET_COLLECTOR_MONGO_PORT=${TICKET_COLLECTOR_MONGO_PORT_PRO}
   fi
 }
 
