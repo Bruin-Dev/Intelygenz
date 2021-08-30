@@ -93,7 +93,6 @@ include:
   - local: 'links-metrics-api/.gitlab-ci.yml'
   - local: 'links-metrics-collector/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'
-  - local: 'metrics-dashboard/.gitlab-ci.yml'
   - local: 'notifier/.gitlab-ci.yml'
   - local: 'service-affecting-monitor/.gitlab-ci.yml'
   - local: 'service-outage-monitor/.gitlab-ci.yml'
