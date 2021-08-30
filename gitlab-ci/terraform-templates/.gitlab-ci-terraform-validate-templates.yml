@@ -58,6 +58,7 @@
                           fi
                           cd ..
                       )
+                  done
               fi
           )
       done
