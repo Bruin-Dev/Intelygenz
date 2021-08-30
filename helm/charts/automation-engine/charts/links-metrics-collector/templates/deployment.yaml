@@ -30,6 +30,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "links-metrics-collector.configmapName" . }}
+            - secretRef:
+                name: {{ include "links-metrics-collector.secretName" . }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

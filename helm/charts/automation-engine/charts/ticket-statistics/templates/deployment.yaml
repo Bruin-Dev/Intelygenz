@@ -30,6 +30,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "ticket-statistics.configmapName" . }}
+            - secretRef:
+                name: {{ include "ticket-statistics.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

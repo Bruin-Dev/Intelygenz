@@ -30,6 +30,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "links-metrics-api.configmapName" . }}
+            - secretRef:
+                name: {{ include "links-metrics-api.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
