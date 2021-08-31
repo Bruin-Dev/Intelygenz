@@ -8,21 +8,13 @@
         "monorepo": {
             "branch": "master",
             "analyzeCommits": {
-                "format": "eslint",
-                "preset": "eslint"
-            },
-            "generateNotes": {
-                "preset": "eslint",
-                "changelogFile": "CHANGELOG.md"
+                "format": "angular",
+                "preset": "angular"
             }
         },
         "analyzeCommits": {
-            "format": "eslint",
-            "preset": "eslint"
-        },
-        "generateNotes": {
-            "preset": "eslint",
-            "changelogFile": "CHANGELOG.md"
+            "format": "angular",
+            "preset": "angular"
         },
         "branch": "master",
         "verifyConditions": [

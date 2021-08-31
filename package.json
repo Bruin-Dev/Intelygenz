@@ -19,12 +19,11 @@
   "author": "angel.costales@intelygenz.com",
   "license": "ISC",
   "devDependencies": {
-    "lerna": "*",
-    "multi-semantic-release": "*",
-    "conventional-changelog-eslint": "*",
-    "@semantic-release/commit-analyzer": "*",
-    "@semantic-release/release-notes-generator": "*",
-    "@semantic-release/gitlab": "*"
+    "lerna": "4.0.0",
+    "multi-semantic-release": "2.8.4",
+    "semantic-release": "17.4.7",
+    "@semantic-release/commit-analyzer": "8.0.1",
+    "@semantic-release/gitlab": "6.2.2"
   },
   "resolutions": {
     "react": "^16.13.1",
