@@ -106,7 +106,7 @@ include:
 
 semantic-release:
   stage: release
-  image: registry.gitlab.intelygenz.com/ig_intelygenz/mtk_multikrd/base_images/node:15.3-alpine
+  image: node:15.3-alpine
   environment:
     name: production
   script:
