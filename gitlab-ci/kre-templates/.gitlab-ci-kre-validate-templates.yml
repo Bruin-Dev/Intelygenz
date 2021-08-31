@@ -9,8 +9,8 @@
     - >
       for i in $(ls -d */ | cut -d " " -f10); do
         echo "The current Workdir is $i"
-        terraform init -backend=false -chdir=$i
-        terraform validate
+        terraform -chdir=$i init -backend=false 
+        terraform -chdir=$i validate
       done
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
