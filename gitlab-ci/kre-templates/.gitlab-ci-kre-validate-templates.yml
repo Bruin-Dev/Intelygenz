@@ -8,12 +8,8 @@
     - cd ${MODULE} || exit 1
     - >
       for i in $(ls -d */ | cut -d " " -f10); do
-        echo "Terraform directory basic code: $i"
-      done
-    - >
-      for i in $(ls -d */ | cut -d " " -f10); do
         echo "The current Workdir is $i"
-        terraform init -backend=false $i
+        terraform init -backend=false -chdir=$i
         terraform validate
       done
   rules:
