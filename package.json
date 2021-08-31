@@ -22,7 +22,8 @@
     "lerna": "*",
     "multi-semantic-release": "*",
     "@semantic-release/commit-analyzer": "*",
-    "@semantic-release/release-notes-generator": "*"
+    "@semantic-release/release-notes-generator": "*",
+    "@semantic-release/gitlab": "*"
   },
   "resolutions": {
     "react": "^16.13.1",
