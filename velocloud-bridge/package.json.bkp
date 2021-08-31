@@ -17,10 +17,6 @@
             "analyzeCommits": {
                 "format": "angular",
                 "preset": "angular"
-            },
-            "generateNotes": {
-                "preset": "angular",
-                "changelogFile": "CHANGELOG.md"
             }
         },
         "branch": "master",

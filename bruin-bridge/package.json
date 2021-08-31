@@ -7,36 +7,16 @@
     "release": {
         "monorepo": {
             "branch": "master",
-            "branches": [
-                "master",
-                {
-                    "name": "master"
-                }
-            ],
             "analyzeCommits": {
-                "format": "eslint",
-                "preset": "eslint"
-            },
-            "generateNotes": {
-                "preset": "eslint",
-                "changelogFile": "CHANGELOG.md"
+                "format": "angular",
+                "preset": "angular"
             }
         },
         "analyzeCommits": {
-            "format": "eslint",
-            "preset": "eslint"
-        },
-        "generateNotes": {
-            "preset": "eslint",
-            "changelogFile": "CHANGELOG.md"
+            "format": "angular",
+            "preset": "angular"
         },
         "branch": "master",
-        "branches": [
-            "master",
-            {
-                "name": "master"
-            }
-        ],
         "verifyConditions": [
             {
                 "path": "@semantic-release/gitlab",
