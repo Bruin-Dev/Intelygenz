@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+#    nginx.ingress.kubernetes.io/rewrite-target: /$2
   name: {{ include "email-tagger-monitor.fullname" . }}-ingress
 spec:
   rules:
@@ -17,4 +17,4 @@ spec:
         - backend:
             serviceName: email-tagger-monitor
             servicePort: {{ .Values.service.port }}
-          path: /api/email-tagger-webhook(/|$)(.*)
+          path: {{ .Values.config.api_server_endpoint_prefix }}(/|$)(.*)
