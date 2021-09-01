@@ -343,7 +343,7 @@ email-tagger-kre-bridge:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "email-tagger-kre-bridge-${EMAIL_TAGGER_KRE_BRIDGE_BUILD_NUMBER}"
     # -- Base URL for KRE API
-    kre_base_url: ${KRE_BASE_URL}
+    kre_base_url: ${KRE_EMAIL_TAGGER_BASE_URL}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-kre-bridge
     pullPolicy: Always
@@ -1076,7 +1076,7 @@ t7-bridge:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "t7-bridge-${T7_BRIDGE_BUILD_NUMBER}"
     # -- KRE Base URL to make calls for get tickets predictions
-    kre_base_url: ${KRE_BASE_URL}
+    kre_base_url: ${KRE_TNBA_BASE_URL}
     # -- Base URL for T7 API
     t7_base_url: ${T7_BASE_URL}
     ## -- Token credentials for T7 API

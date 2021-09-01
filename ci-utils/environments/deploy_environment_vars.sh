@@ -4,7 +4,8 @@ function common_variables_by_environment() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    export KRE_BASE_URL=${KRE_BASE_URL_DEV}
+    export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_DEV}
+    export KRE_EMAIL_TAGGER_BASE_URL=${KRE_EMAIL_TAGGER_BASE_URL_DEV}
     export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
     export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_DEV}
@@ -18,7 +19,8 @@ function common_variables_by_environment() {
   else
     # common environment variables for production environment
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
-    export KRE_BASE_URL=${KRE_BASE_URL_PRO}
+    export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_PRO}
+    export KRE_EMAIL_TAGGER_BASE_URL=${KRE_EMAIL_TAGGER_BASE_URL_PRO}
     export BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
     export BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_PRO}
