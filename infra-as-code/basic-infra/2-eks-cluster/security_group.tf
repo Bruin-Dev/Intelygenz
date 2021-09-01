@@ -19,7 +19,7 @@ resource "aws_security_group" "links_metrics_api_oreilly" {
   vpc_id      = data.aws_vpc.mettel-automation-vpc.id
 
   ingress {
-      description      = "Oreilly IPs access to 443"
+      description      = "Allowed IP to access to 443 Oreilly service"
       from_port        = 443
       to_port          = 443
       protocol         = "tcp"
@@ -27,7 +27,7 @@ resource "aws_security_group" "links_metrics_api_oreilly" {
     }
 
   ingress {
-      description      = "Oreilly IPs access to 80"
+      description      = "Allowed IP to access to 80 Oreilly service"
       from_port        = 80
       to_port          = 80
       protocol         = "tcp"
