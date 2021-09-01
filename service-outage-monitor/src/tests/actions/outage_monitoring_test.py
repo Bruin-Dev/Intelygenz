@@ -10124,7 +10124,7 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_test(self):
         ticket_id = 12345
         edge_serial = 'VC5678901'
-        task_result = 'ASR Investigate'
+        task_result = 'No Trouble Found - Carrier Issue'
 
         edge_status = {
             'host': 'mettel.velocloud.net',
@@ -11037,7 +11037,7 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_already_forwarded_test(self):
         ticket_id = 12345
         edge_serial = 'VC5678901'
-        task_result = 'ASR Investigate'
+        task_result = 'No Trouble Found - Carrier Issue'
 
         edge_status = {
             'host': 'mettel.velocloud.net',
@@ -11096,7 +11096,7 @@ class TestServiceOutageMonitor:
         ticket_time_stamp = current_datetime - timedelta(minutes=60)
 
         task_result_note = f"#*MetTel's IPA*#\nStatus of Wired Link GE1 is DISCONNECTED after 1 hour.\n" \
-                           f"Moving task to: {task_result}\nTimeStamp: {current_datetime}"
+                           f"Moving task to: ASR Investigate\nTimeStamp: {current_datetime}"
 
         ticket_note_1 = {
             "noteId": 68246614,
@@ -11212,7 +11212,7 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_failed_to_change_task_result_test(self):
         ticket_id = 12345
         edge_serial = 'VC5678901'
-        task_result = 'ASR Investigate'
+        task_result = 'No Trouble Found - Carrier Issue'
 
         edge_status = {
             'host': 'mettel.velocloud.net',

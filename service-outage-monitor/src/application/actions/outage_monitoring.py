@@ -954,7 +954,7 @@ class OutageMonitor:
             )
             return
 
-        task_result = "ASR Investigate"
+        task_result = "No Trouble Found - Carrier Issue"
         task_result_note = self._find_note(relevant_notes, 'ASR Investigate')
 
         if task_result_note is not None:
