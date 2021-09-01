@@ -58,6 +58,7 @@
     ]
   },
   "workspaces": [
+    "./bouncing-detector",
     "./bruin-bridge",
     "./customer-cache",
     "./digi-bridge",

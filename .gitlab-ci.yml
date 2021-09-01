@@ -21,6 +21,10 @@ variables:
   DOCKER_BASE_IMAGE_VERSION: 2.1.3
   DOCKER_IMAGE_UTILS_VERSION: 1.1.1
   # Desired replicas of microservices
+  BOUNCING_DETECTOR_1_DESIRED_TASKS: "1"
+  BOUNCING_DETECTOR_2_DESIRED_TASKS: "1"
+  BOUNCING_DETECTOR_3_DESIRED_TASKS: "1"
+  BOUNCING_DETECTOR_4_DESIRED_TASKS: "1"
   BRUIN_BRIDGE_DESIRED_TASKS: "2"
   CUSTOMER_CACHE_DESIRED_TASKS: "1"
   DIGI_BRIDGE_DESIRED_TASKS: "1"
@@ -74,6 +78,7 @@ include:
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-destroy-templates.yml'
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-validate-templates.yml'
   # Gitlab-CI jobs declaration for each microservice/module
+  - local: 'bouncing-detector/.gitlab-ci.yml'
   - local: 'bruin-bridge/.gitlab-ci.yml'
   - local: 'customer-cache/.gitlab-ci.yml'
   - local: 'digi-bridge/.gitlab-ci.yml'
