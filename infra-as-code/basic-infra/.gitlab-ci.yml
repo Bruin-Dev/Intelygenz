@@ -1,30 +1,122 @@
 # ===========================================================
 # Linter validation jobs for infra-as-code/basic-infra module
-# ============================================================
-terraform-validate-basic-infra:
+# ===========================================================
+
+terraform-valite-basic-infra:
   stage: validation
-  extends: .terraform_basic_template
-  script:
-    - terraform init infra-as-code/basic-infra
-    - terraform validate infra-as-code/basic-infra
+  extends: .terraform_dirs_validate_template
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
       changes:
         - infra-as-code/basic-infra/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
 
 # ==============================================================
 # Terraform deployment jobs for infra-as-code/basic-infra module
 # ==============================================================
-basic-infra:
+basic-infra-dev:
   stage: basic_infra
-  extends: .terraform_basic_template
-  script:
-    - terraform init infra-as-code/basic-infra
-    - terraform refresh infra-as-code/basic-infra
-    - terraform apply -auto-approve infra-as-code/basic-infra
+  extends: .terraform_template_deploy_basic_infra
+  environment:
+    name: development
+    on_stop: destroy-basic-infra-dev
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    IAM_TO_EKS_ROLES: developer, devops
+    HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
+    HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
+    HELM_CHART_FLUENT_BIT_DIR: "helm/charts/fluent-bit-custom"
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
+    FLUENT_BIT_CHART_V: ${FLUENT_BIT_CHART_V_DEV}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
+    LOAD_BALANCER_WHITELIST_OREILLY: ${LOAD_BALANCER_WHITELIST_OREILLY_DEV}
+    RELOADER_CHART_V: ${RELOADER_CHART_V_DEV}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_DEV}
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - export TF_VAR_ENVIRONMENT="dev"
+    - source ci-utils/environments/environment_assign.sh
+    - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
+    - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+
+basic-infra-pro:
+  stage: basic_infra
+  extends: .terraform_template_deploy_basic_infra
+  environment:
+    name: production
+    on_stop: destroy-basic-infra-pro
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    IAM_TO_EKS_ROLES: developer, devops
+    HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
+    HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
+    HELM_CHART_FLUENT_BIT_DIR: "helm/charts/fluent-bit-custom"    
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PRO}
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_PRO}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_PRO}
+    FLUENT_BIT_CHART_V: ${FLUENT_BIT_CHART_V_PRO}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PRO}
+    LOAD_BALANCER_WHITELIST_OREILLY: ${LOAD_BALANCER_WHITELIST_OREILLY_PRO}
+    RELOADER_CHART_V: ${RELOADER_CHART_V_PRO}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PRO}
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
+    - source ci-utils/environments/environment_assign.sh
+    - export EKS_CLUSTER_NAME="mettel-automation"
+    - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
       when: manual
       allow_failure: true
 
+# ===========================================================
+# Terraform destroy jobs for infra-as-code/basic-infra module
+# ===========================================================
+destroy-basic-infra-dev:
+  stage: destroy
+  extends: .terraform_template_destroy_basic_infra
+  environment:
+    name: development
+    action: stop
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    EKS_CLUSTER_NAME: "mettel-automation-dev"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - export TF_VAR_ENVIRONMENT="dev"
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+
+destroy-basic-infra-pro:
+  stage: destroy
+  extends: .terraform_template_destroy_basic_infra
+  environment:
+    name: production
+    action: stop
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    EKS_CLUSTER_NAME: "mettel-automation"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true

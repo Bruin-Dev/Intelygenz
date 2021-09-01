@@ -101,7 +101,7 @@ As usual, the response message will have the following fields:
             "error": {
                 "code": "error_in_prediction",
                 "message": "Error executing prediction: The labels ['Line Test Results Provided'] are not in the \"Task Result\" labels map."
-            },
+            }
         },
         {
             "assetId": "VC1122334",

@@ -32,11 +32,27 @@ class OutageRepository:
     def is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
+    def _is_link_wired(self, link, links_configuration):
+        link_type = ''
+        for link_configuration in links_configuration:
+            if link['interface'] in link_configuration['interfaces']:
+                link_type = link_configuration['type']
+                break
+        return link_type == 'WIRED'
+
     def is_any_link_disconnected(self, links: list) -> bool:
         return any(self.find_disconnected_links(links))
 
     def find_disconnected_links(self, links: list) -> list:
         return [link for link in links if self.is_faulty_link(link['linkState'])]
+
+    def find_disconnected_wired_links(self, edge_status, links_configuration):
+        return [
+            link
+            for link in edge_status['links']
+            if self._is_link_wired(link, links_configuration)
+            if self.is_faulty_link(link['linkState'])
+        ]
 
     def is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
                                                 serial_number: str,

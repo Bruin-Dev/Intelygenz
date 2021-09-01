@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sites-monitor.fullname" . }}
+  labels:
+    {{- include "sites-monitor.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+    {{- if .Values.config.metrics.enabled }}
+    - name: {{ .Values.config.metrics.svc.name }}
+      port: {{ .Values.config.metrics.svc.port }}
+    {{- end }}
+  selector:
+    {{- include "sites-monitor.selectorLabels" . | nindent 4 }}

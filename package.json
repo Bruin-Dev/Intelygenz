@@ -1,0 +1,63 @@
+{
+  "name": "automation-engine",
+  "version": "1.0.0",
+  "description": "Lerna automation-engine monorepo configuration",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "bootstrap": "npx lerna bootstrap --use-workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.intelygenz.com:mettel/automation-engine.git"
+  },
+  "keywords": [
+    "lerna",
+    "automation-engine"
+  ],
+  "author": "angel.costales@intelygenz.com",
+  "license": "ISC",
+  "devDependencies": {
+    "lerna": "4.0.0",
+    "multi-semantic-release": "2.8.4",
+    "semantic-release": "17.4.7",
+    "@semantic-release/commit-analyzer": "8.0.1",
+    "@semantic-release/gitlab": "6.2.2"
+  },
+  "resolutions": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "workspaces": [
+    "./bruin-bridge",
+    "./customer-cache",
+    "./digi-bridge",
+    "./digi-reboot-report",
+    "./email-tagger-kre-bridge",
+    "./email-tagger-monitor",
+    "./hawkeye-affecting-monitor",
+    "./hawkeye-bridge",
+    "./hawkeye-customer-cache",
+    "./hawkeye-outage-monitor",
+    "./intermapper-outage-monitor",
+    "./last-contact-report",
+    "./links-metrics-api",
+    "./links-metrics-collector",
+    "./lumin-billing-report",
+    "./notifier",
+    "./service-affecting-monitor",
+    "./service-outage-monitor",
+    "./sites-monitor",
+    "./t7-bridge",
+    "./ticket-collector",
+    "./ticket-statistics",
+    "./tnba-feedback",
+    "./tnba-monitor",
+    "./velocloud-bridge"
+  ],
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

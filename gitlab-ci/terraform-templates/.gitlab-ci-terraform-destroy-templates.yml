@@ -1,50 +1,48 @@
-##
-# Using Gitlab-CI extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
+#
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
-.terraform_template_destroy_environment: &terraform_template_destroy_environment
+.terraform_template_destroy_basic_infra: &terraform_template_destroy_basic_infra
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v${ECS_CLI_VERSION}
-    - chmod +x /usr/local/bin/ecs-cli
-    - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
-    - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS=${VELOCLOUD_HOST_1}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER=${VELOCLOUD_HOST_1_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS=${VELOCLOUD_HOST_2}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER=${VELOCLOUD_HOST_2_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS=${VELOCLOUD_HOST_3}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER=${VELOCLOUD_HOST_3_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=${VELOCLOUD_HOST_4}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=${VELOCLOUD_HOST_4_FILTER}
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform refresh infra-as-code/dev
-    - terraform destroy -auto-approve infra-as-code/dev
-    - python3 ci-utils/delete-environments-aws-resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
-    - pip3 install -r ci-utils/ecr/requirements.txt
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -e ${TF_VAR_ENVIRONMENT} -a -p
-  tags:
-    - kubernetes
-
-.terraform_template_destroy_network-resources: &terraform_template_destroy_network-resources
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
-    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
-    - terraform init infra-as-code/network-resources
-    - terraform refresh infra-as-code/network-resources
-    - terraform destroy -auto-approve infra-as-code/network-resources
-  tags:
-    - kubernetes
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DESTROY PROMETHEUS HELM CHART
+    - helm -n prometheus uninstall prometheus
+    # Iterate over terraform directories in module
+    - cd "${MODULE}" || exit 1
+    - >
+      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
+          (
+              cd "${i}" || exit
+              echo "The current Workdir is $i"
+              if [[ ${i} != "4-elasticaches" ]]; then
+                  terraform init -backend=true -get=true -input=false
+                  if [[ ${i} != "0-ecr-repositories" && ${i} != "3-eks-roles" ]]; then
+                      terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                      terraform refresh
+                      terraform DESTROY -auto-approve
+                  fi
+                  cd ..
+              else
+                  for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
+                      (
+                          cd "${i}" || exit 1
+                          if [[ ${i} != "modules" ]]; then
+                            echo "Terraform directory $i"
+                            terraform init
+                            terraform workspace select "${TF_VAR_ENVIRONMENT}"
+                            terraform refresh
+                            terraform plan && terraform destroy -auto-approve
+                          fi
+                          cd ..
+                      )
+                  done
+                  cd "${CI_PROJECT_DIR}/${MODULE}" || exit 1
+              fi
+          )
+      done

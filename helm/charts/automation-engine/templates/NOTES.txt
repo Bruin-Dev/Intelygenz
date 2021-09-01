@@ -1,0 +1,1 @@
+Automation-Engine deployed version: {{ .Chart.AppVersion }}

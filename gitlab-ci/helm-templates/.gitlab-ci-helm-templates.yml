@@ -1,0 +1,71 @@
+#
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
+#
+
+.helm_template_deploy_chart: &helm_template_deploy_chart
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # CREATE NAMESPACE IF IS NECESSARY
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
+        kubectl create namespace ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME} --dry-run -o yaml | kubectl apply -f -
+      else
+        kubectl create namespace ${HELM_CHART_RELEASE_NAME} --dry-run -o yaml | kubectl apply -f -
+      fi
+    # INITIALIZE HELM
+    - python3 ci-utils/helm/add_helm_repositories.py
+    - helm repo update
+    - helm dep up ${HELM_CHART_DIR}
+    # GET DOCKER IMAGE FOR HELM CHART
+    - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_NAME} -g -a -p -f "$DOCKER_IMAGES_FILE"
+    - source ci-utils/environments/build_number_assign.sh
+    # GET HELM CHART SET ATTRIBUTES
+    - source ci-utils/environments/deploy_environment_vars.sh
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
+        export TICKET_COLLECTOR_ENABLED=false
+        export TICKET_STATISTICS_ENABLED=false
+        export LINKS_METRICS_API_ENABLED=false
+        export LINKS_METRICS_COLLECTOR_ENABLED=false
+      fi
+    - envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+    # DEPLOY HELM CHART
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
+          -f values.yaml -n ${HELM_CHART_RELEASE_NAME}
+        python3 ci-utils/papertrail-provisioning/app.py -f "$DOCKER_IMAGES_FILE"
+      else
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
+          -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
+      fi
+
+.helm_template_destroy_chart: &helm_template_destroy_chart
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DESTROY HELM CHART
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
+        helm -n ${HELM_CHART_RELEASE_NAME} uninstall ${HELM_CHART_RELEASE_NAME}
+      else
+        helm -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME} uninstall ${HELM_CHART_RELEASE_NAME}
+      fi
+    # DESTROY NAMESPACE
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
+        kubectl delete namespace ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
+      else
+        kubectl delete namespace ${HELM_CHART_RELEASE_NAME}
+      fi

@@ -1,0 +1,50 @@
+{
+    "name": "velocloud-bridge",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {},
+    "devDependencies": {},
+    "release": {
+        "monorepo": {
+            "branch": "master",
+            "branches": [
+                "master",
+                {
+                    "name": "master"
+                }
+            ],
+            "analyzeCommits": {
+                "format": "angular",
+                "preset": "angular"
+            }
+        },
+        "analyzeCommits": {
+            "format": "angular",
+            "preset": "angular"
+        },
+        "branch": "master",
+        "branches": [
+            "master",
+            {
+                "name": "master"
+            }
+        ],
+        "verifyConditions": [
+            {
+                "path": "@semantic-release/gitlab",
+                "gitlabUrl": "https://gitlab.intelygenz.com",
+                "gitlabApiPathPrefix": "/api/v4"
+            }
+        ],
+        "publish": [
+            {
+                "path": "@semantic-release/gitlab",
+                "gitlabUrl": "https://gitlab.intelygenz.com",
+                "gitlabApiPathPrefix": "/api/v4"
+            }
+        ],
+        "prepare": [],
+        "success": false,
+        "fail": false
+    }
+}

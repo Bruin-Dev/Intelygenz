@@ -69,5 +69,5 @@ REDIS = {
 }
 
 REDIS_CACHE = {
-    "host": os.environ["REDIS_CACHE_HOSTNAME"]
+    "host": os.environ["REDIS_EMAIL_TAGGER_HOSTNAME"]
 }

@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 4,
-  "iteration": 1592333563222,
+  "iteration": 1626693983713,
   "links": [],
   "panels": [
     {
@@ -26,6 +25,13 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -50,10 +56,10 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "6.5.2",
+      "pluginVersion": "7.4.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -63,10 +69,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "cycle_runtime_gauge{job=\"$instance\"}",
+          "expr": "cycle_runtime_gauge{job=\"$instance\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -122,6 +130,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -153,7 +167,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -176,7 +189,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "outage_ticket_counter_total{job=\"$instance\"} - min_over_time(outage_ticket_counter_total{job=\"$instance\"}[1h])",
+          "expr": "outage_ticket_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(outage_ticket_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -205,6 +220,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -236,7 +257,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -259,7 +279,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "outage_monitoring_edge_counter_total{job=\"$instance\"} - min_over_time(outage_monitoring_edge_counter_total{job=\"$instance\"}[1h])",
+          "expr": "outage_monitoring_edge_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(outage_monitoring_edge_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         },
         {
@@ -292,6 +314,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -323,7 +351,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -346,7 +373,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "max_retry_error_counter_total{job=\"$instance\"} - min_over_time(max_retry_error_counter_total{job=\"$instance\"}[1h])",
+          "expr": "max_retry_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(max_retry_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -375,6 +404,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -406,7 +441,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -429,7 +463,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "temp_cache_error_counter_total{job=\"$instance\"} - min_over_time(temp_cache_error_counter_total{job=\"$instance\"}[8h])",
+          "expr": "temp_cache_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(temp_cache_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[8h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -458,6 +494,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -489,7 +531,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -512,7 +553,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "first_triage_error_counter_total{job=\"$instance\"} - min_over_time(first_triage_error_counter_total{job=\"$instance\"}[4h])",
+          "expr": "first_triage_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(first_triage_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[4h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -541,6 +584,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -572,7 +621,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -595,7 +643,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "autoresolve_counter_total{job=\"$instance\"} - min_over_time(autoresolve_counter_total{job=\"$instance\"}[1h])",
+          "expr": "autoresolve_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(autoresolve_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -624,6 +674,12 @@
         "#d44a3a"
       ],
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -655,7 +711,6 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -678,7 +733,9 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "reopened_counter_total{job=\"$instance\"} - min_over_time(reopened_counter_total{job=\"$instance\"}[1h])",
+          "expr": "reopened_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(reopened_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -699,13 +756,15 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 21,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "datasource": null,
+        "description": null,
+        "error": null,
         "filters": [],
         "hide": 0,
         "label": "",
@@ -717,10 +776,11 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "service-outage-monitor-1",
           "value": "service-outage-monitor-1"
         },
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Outage Monitor instance(s)",
@@ -749,8 +809,50 @@
           }
         ],
         "query": "service-outage-monitor-1,service-outage-monitor-2,service-outage-monitor-3,service-outage-monitor-4",
+        "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": null,
+        "definition": "kube_namespace_created",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "namespace",
+        "multi": true,
+        "name": "namespace",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": {
+          "query": "kube_namespace_created",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 0,
+        "regex": "/.*namespace=\"(?<namespace>automation-.*?)\".*/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -774,6 +876,6 @@
   },
   "timezone": "",
   "title": "Outage Monitor (all instances)",
-  "uid": "u3tpYYmGz",
-  "version": 3491
+  "uid": "u3tpYYmG2",
+  "version": 1
 }

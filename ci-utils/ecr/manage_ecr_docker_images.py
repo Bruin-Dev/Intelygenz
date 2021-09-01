@@ -15,6 +15,7 @@ class EcrUtil:
     _client = boto3.client('ecr', region_name='us-east-1')
     _repositories_to_avoid = ['automation-python-3.6', 'automation-python-3.6-alpine']
     _production_tag = "automation-master"
+    _project_name = "mettel-automation"
 
     @staticmethod
     def _write_to_json_file(filename, content):
@@ -23,12 +24,29 @@ class EcrUtil:
         logging.info(f"Successfully write content in file {filename}")
         return filename
 
+    def _check_project_tag_from_tags_list(self, tags_list):
+        for tag in tags_list:
+            if tag['Key'] == 'Project' and tag['Value'] == self._project_name:
+                return True
+        return False
+
     def _get_all_ecr_repositories_from_aws(self):
         repositories_in_ecr = []
         repositories = self._client.describe_repositories()
         for repository in repositories['repositories']:
-            if 'automation' in repository['repositoryName']:
-                repositories_in_ecr.append(repository['repositoryName'])
+            repository_name = repository['repositoryName']
+            print(f"Getting info or repository with name {repository_name}")
+            repository_arn = repository.get('repositoryArn')
+            if repository_arn:
+                print(f"Obtaining tags for {repository_arn}")
+                tags_of_repository_resp = self._client.list_tags_for_resource(
+                    resourceArn=repository_arn
+                )
+                tags_of_repository = tags_of_repository_resp.get('tags')
+                if tags_of_repository:
+                    if self._check_project_tag_from_tags_list(tags_of_repository):
+                        print(f"Appending repository {repository} to repositories to delete images")
+                        repositories_in_ecr.append(repository_name)
         if len(repositories_in_ecr) > 0:
             repositories_to_avoid = self._repositories_to_avoid
             repositories_in_ecr = [elem for elem in repositories_in_ecr if elem not in repositories_to_avoid]

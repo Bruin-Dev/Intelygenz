@@ -13,3 +13,4 @@ COPY email-tagger-kre-bridge/ /service/app
 ENV PYTHONUNBUFFERED 1
 
 CMD ["python3", "-u", "src/app.py"]
+

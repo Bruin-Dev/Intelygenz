@@ -1,6 +1,6 @@
 .terraform_validate_template: &terraform_validate_template
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -28,5 +28,39 @@
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+  tags:
+    - kubernetes
+
+.terraform_dirs_validate_template: &terraform_dirs_validate_template
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+          (
+              cd "${i}" || exit
+              echo "The current Workdir is $i"
+              if [[ ${i} != "4-elasticaches" ]]; then
+                  terraform init -backend=true -get=true -input=false
+                  terraform validate
+                  cd ..
+              else
+                  for e in $(ls -d */ | cut -d " " -f10); do
+                      (
+                          cd "${e}" || exit
+                          if [[ ${e} != "modules" ]]; then
+                            terraform init -backend=true -get=true -input=false
+                            terraform validate
+                          fi
+                          cd ..
+                      )
+                  done
+              fi
+          )
+      done
   tags:
     - kubernetes

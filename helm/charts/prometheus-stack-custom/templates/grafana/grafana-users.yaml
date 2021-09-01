@@ -1,0 +1,13 @@
+{{/*apiVersion: v1*/}}
+{{/*kind: Secret*/}}
+{{/*metadata:*/}}
+{{/*  name: grafana-users*/}}
+{{/*  labels:*/}}
+{{/*    app: grafana*/}}
+{{/*data:*/}}
+{{/*  GRAFANA_USER_EMAIL: {{ .Values.kubeprometheusstack.grafana.grafanaUsersToCreate.user_email | b64enc }}*/}}
+{{/*  GRAFANA_USER_LOGIN: {{ .Values.kubeprometheusstack.grafana.grafanaUsersToCreate.user_login | b64enc }}*/}}
+{{/*  GRAFANA_USER_NAME: {{ .Values.kubeprometheusstack.grafana.grafanaUsersToCreate.user_name | b64enc }}*/}}
+{{/*  GRAFANA_USER_PASSWORD: {{ .Values.kubeprometheusstack.grafana.grafanaUsersToCreate.user_password | b64enc }}*/}}
+{{/*  GRAFANA_USER_ROLE: {{ .Values.kubeprometheusstack.grafana.grafanaUsersToCreate.user_role | b64enc }}*/}}
+{{/*  GRAFANA_USER_FOLDER: {{ .Values.kubeprometheusstack.grafana.grafanaUsersToCreate.user_folder | b64enc }}*/}}

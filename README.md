@@ -7,12 +7,17 @@
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | cts-bridge |[![cts-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=cts-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| digi-bridge |[![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| digi-reboot-report |[![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| email-tagger-kre-bridge |[![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| email-tagger-monitor |[![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-affecting-monitor |[![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-customer-cache |[![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| intermapper-outage-monitor |[![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -30,6 +35,7 @@
 
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
+  - [Commit Message Format](#commit-message-format)
   - [Adding new microservice to the system](#adding-new-microservices-to-the-system)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
@@ -80,15 +86,117 @@ it should be `package-example-env`
 From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
 Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
 
+## <a name="commit"></a> Commit Message Format
+*This specification is inspired by and supersedes the AngularJS commit message format.*
+
+We have very precise rules over how our Git commit messages must be formatted. This format leads to easier to read commit history.
+
+Each commit message consists of a *header*, a *body*, and a *footer*.
+
+```
+<header>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
+
+The `header` is mandatory and must conform to the [Commit Message Header](#commit-header) format.
+
+The `body` is optional for all commits except for those of type `perf` although the recommendation is to always use it. For `perf` case is required that `BREAKING CHANGE: `part exists for 
+semantic-release be able to create a new ~~Major~~ Breaking Release.
+When the body is present it must be at least 20 characters long and must conform to the [Commit Message Body](#commit-body) format.
+
+The `footer` is optional. The [Commit Message Footer](#commit-footer) format describes what the footer is used for and the structure it must have.
+
+Any line of the commit message cannot be longer than 50 characters.
+
+### <a name="commit-header"></a>Commit Message Header
+```
+<type>(<scope>): <short summary>
+  │       │             │
+  │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
+  │       │
+  │       └─⫸ Commit Scope: infra-as-code|ci-cd|helm|bruin-bridge|ci-utils|cts-bridge|customer-cache|digi-bridge|
+  │                          digi-reboot-report|dispatch-portal-backend|dispatch-portal-frontend|email-tagger-kre-bridge|
+  │                          email-tagger-kre-monitor|hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
+  │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
+  |                          links-metrics-collector|lit-bridge|lumin-billing-report|notifier|service-affecting-monitor|
+  |                          service-dispatch-monitor|service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
+  |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
+  │
+  └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
+```
+The `<type>` and `<short summary>` fields are mandatory, the `(<scope>)` field is optional.
+**NOTE**: beware with space between `(scope):` and `short summary`, it's necessary for semantic-release functionality.
+
+#### Type
+Must be one of the following:
+
+* **build**: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+* **ci**: Changes to our CI configuration files and scripts (example scopes: Circle, BrowserStack, SauceLabs)
+* **docs**: Documentation only changes
+* **feat**: A new feature
+* **fix**: A bug fix
+* **perf**: A code change that improves performance
+* **refactor**: A code change that neither fixes a bug nor adds a feature
+* **test**: Adding missing tests or correcting existing tests
+
+#### Scope
+The scope should be the name of the npm package affected (as perceived by the person reading the changelog generated from commit messages).
+
+#### Short summary
+Use the summary field to provide a succinct description of the change:
+
+use the imperative, present tense: "change" not "changed" nor "changes"
+don't capitalize the first letter
+no dot (.) at the end
+
+### <a name="commit-body"></a>Commit Message Body
+Just as in the summary, use the imperative, present tense: "fix" not "fixed" nor "fixes".
+
+Explain the motivation for the change in the commit message body. This commit message should explain why you are making the change. You can include a comparison of the previous behavior with the new behavior in order to illustrate the impact of the change.
+
+### <a name="commit-footer"></a>Commit Message Footer
+The footer can contain information about breaking changes and is also the place to reference GitHub issues, Jira tickets, and other PRs that this commit closes or is related to.
+
+```
+BREAKING CHANGE: <breaking change summary>
+<BLANK LINE>
+<breaking change description + migration instructions>
+<BLANK LINE>
+<BLANK LINE>
+Fixes #<issue number>
+```
+
+Breaking Change section should start with the phrase "BREAKING CHANGE: " followed by a summary of the breaking change, a blank line, and a detailed description of the breaking change that also includes migration instructions.
+
+### Revert commits
+If the commit reverts a previous commit, it should begin with revert: , followed by the header of the reverted commit.
+
+The content of the commit message body should contain:
+
+- information about the SHA of the commit being reverted in the following format: `This reverts commit <SHA>`,
+- a clear description of the reason for reverting the commit message.
+
+### Example
+
+The table below shows which commit message gets you which release type when semantic-release runs (using the default configuration):
+
+| Commit message                                                                                                                                                                                | Release type               | Tag        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |----------- |
+| `fix(bruin-bridge): stop 'something' breaking when too much pressure applied`                                                                                                                 | Patch Release              | 1.0.**1**  |
+| `feat(bruin-bridge): add 'something' option to 20`                                                                                                                                            | ~~Minor~~ Feature Release  | 1.**1**.0  |
+| `perf(bruin-bridge): remove something option`<br><br>`BREAKING CHANGE: The something option has been removed.`<br>`The default something value of 10 is always used for performance reasons.` | ~~Major~~ Breaking Release | **2**.0.0  |
+
 ## Adding new microservices to the system
 In addition to creating the microservice folder and all the standards files inside that folder, you must add this
 new microservice and any new env variables to the system's files. This is done in order to add 
 it to both the infrastructure and the pipeline.
 You will need to add/modify files in the folders of the 
 - [automation-engine](#automation-engine)  
-- [gitlab-ci](#gitlab-ci) 
 - [infra-as-code](#infra-as-code) 
-- [installation-utils](#installation-utils)
+- [helm](#helm) 
 
 Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
 specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
@@ -101,33 +209,25 @@ In the automation-engine root folder it is necessary update the following files:
 - [.gitlab-ci.yml](.gitlab-ci.yml)
 - [README.md](README.md)
 - [docker-compose.yml](docker-compose.yml)
-
-### gitlab-ci
-If your microservices adds any new env variables you will need to make changes to the following file:
-- [terraform-templates/.gitlab-ci-terraform-basic-templates.yml](gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml)
+- [package.json](package.json) (*semantic-release functionality*)
+- [path/to/miceoservice/package.json](bruin-bridge/package.json) (*semantic-release functionality*)
 
 ### infra-as-code
 In infra-as-code you will need to make the changes to the following locations:
 - Add desired amount and any new env variables here: [.gitlab-ci.yml](infra-as-code/.gitlab-ci.yml)
 
 - basic infra folder    
-    - [ecr_repositories.tf](infra-as-code/basic-infra/ecr_repositories.tf)
-- dev folder
-    - Create a new file called `[new microservice name].tf`
-    - If the microservice is a capability then it goes in the `depends_on` sections of the use cases' terraform file
-    - [locals.tf](infra-as-code/dev/locals.tf)
-    - [metrics-prometheus.tf](infra-as-code/dev/metrics-prometheus.tf)
-    - In [variable.tf](infra-as-code/dev/variables.tf) Copy the other services' variable `[microservice name]_BUILD_NUMBER` 
-      for the new microservice and swap the name. Also copy the format for the desired amount and make one for the new service.
-      Any new env variables will be placed here as well.
-    - dashboard-definitions folder
-        -   [dashboard_cluster_definition.json](infra-as-code/dev/dashboards-definitions/dashboard_cluster_definition.json)
-    - task-definitions folder
-        -   Create a new file called `[new microservice name].json`
- 
-### installation-utils
-In installation-utils you will need to make changes to the following files:
-- [environment_files_generator.py](installation-utils/environment_files_generator.py)
+    - [0-ecr_repositories](infra-as-code/basic-infra/0-ecr_repositories) *NOTE: to add new ecr image*
+
+### helm
+If your microservices adds any new env variables you will need to make changes to the following files:
+- One or both of these places:
+    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/configmap.yaml](helm/charts/automation-engine/charts) *NOTE: The variable will be save in plain text (make sure that you create variable as ".Values.config.<var>")*
+    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/secret.yaml](helm/charts/automation-engine/charts) *NOTE: The variable have sensitive data and will be save in base64-encoded string.*
+- [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/values.yaml](helm/charts/automation-engine/charts) *NOTE: this only need to define the variable empty*
+- [helm/charts/automation-engine/charts/values.yaml](helm/charts/automation-engine/charts/values.yaml) *NOTE: this only need to define the variable empty*
+- [helm/charts/automation-engine/charts/values.yaml.tpl](helm/charts/automation-engine/charts/values.yaml.tpl) *NOTE: here you put the variable and the value that will be replaced by pipeline to deploy*
+- [ci-utils/environments/deploy_environment_vars.sh](ci-utils/environments/deploy_environment_vars.sh) *NOTE: make sure the variable exist in gitlab-ci variables.*
 
 # Technologies used
 
@@ -187,30 +287,30 @@ The following example shows how to configure `<service_name>_desired_tasks` vari
 ```sh
 variables:
   . . .
-  bruin_bridge_desired_tasks: 0
-  cts_bridge_desired_tasks: 0
-  customer_cache_desired_tasks: 1
-  dispatch_portal_backend_desired_tasks: 1
-  hawkeye_affecting_monitor_desired_tasks: 0
-  hawkeye_bridge_desired_tasks: 0
-  hawkeye_customer_cache_desired_tasks: 0
-  hawkeye_outage_monitor_desired_tasks: 0
-  last_contact_report_desired_tasks: 1
-  lit_bridge_desired_tasks: 1
-  metrics_prometheus_desired_tasks: 0
-  nats_server_desired_tasks: 0
-  nats_server_1_desired_tasks: 1
-  nats_server_2_desired_tasks: 1
-  notifier_desired_tasks: 1
-  service_affecting_monitor_desired_tasks: 1
-  service_outage_monitor_1_desired_tasks: 0
-  service_outage_monitor_2_desired_tasks: 0
-  service_outage_monitor_3_desired_tasks: 0
-  service_outage_monitor_4_desired_tasks: 0
-  service_outage_monitor_triage_desired_tasks: 0
-  sites_monitor_desired_tasks: 0
-  t7_bridge_desired_tasks: 0
-  velocloud_bridge_desired_tasks: 5
+  BRUIN_BRIDGE_DESIRED_TASKS: 0
+  CTS_BRIDGE_DESIRED_TASKS: 0
+  CUSTOMER_CACHE_DESIRED_TASKS: 1
+  DISPATCH_PORTAL_BACKEND_DESIRED_TASKS: 1
+  HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS: 0
+  HAWKEYE_BRIDGE_DESIRED_TASKS: 0
+  HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS: 0
+  HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS: 0
+  LAST_CONTACT_REPORT_DESIRED_TASKS: 1
+  LIT_BRIDGE_DESIRED_TASKS: 1
+  METRICS_PROMETHEUS_DESIRED_TASKS: 0
+  NATS_SERVER_DESIRED_TASKS: 0
+  NATS_SERVER_1_DESIRED_TASKS: 1
+  NATS_SERVER_2_DESIRED_TASKS: 1
+  NOTIFIER_DESIRED_TASKS: 1
+  SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: 1
+  SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_4_DESIRED_TASKS: 0
+  SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS: 0
+  SITES_MONITOR_DESIRED_TASKS: 0
+  T7_BRIDGE_DESIRED_TASKS: 0
+  VELOCLOUD_BRIDGE_DESIRED_TASKS: 5
   . . .
 ```
 
@@ -375,13 +475,15 @@ Run:
 
 `$ docker-compose up --build`
 
-# KRE
+# EKS and KRE
 
-In this project [KRE](https://konstellation-io.github.io/website/) is used, it has been deployed in an [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments, as well as all the parts needed for this in AWS.
+- Automation-engine is deployed in [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html).
+
+- Additionaly we use [KRE](https://konstellation-io.github.io/website/) proyect for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
 
 ## Access Control
 
-In the creation and possible updates in the EKS clusters used for the KRE [environments](./docs/PIPELINES#kre-environments), an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
+In the creation and possible updates in the EKS clusters an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.
 
 ### Roles
 
@@ -397,15 +499,22 @@ Below are the roles created for each of the users actually, as well as the categ
 
 | IAM User Name | Role in Project | IAM role created |
 |---------------|-----------------|------------------|
-| alberto.iglesias | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
-| angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
-| angel.costales | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
-| angel.luis.piquero | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
-| brandon.samudio | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
-| daniel.fernandez | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
-| joseluis.vega | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
-| sancho.munoz | developer | arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
-| xisco.capllonch | devops | arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-xisco.capllonch |
+| alberto.iglesias | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alberto.iglesias |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
+| alejandro.aceituna | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alejandro.aceituna |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna |
+| angel.costales | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.costales |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
+| angel.luis.piquero | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.luis.piquero |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
+| brandon.samudio | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation--brandon.samudio |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
+| daniel.fernandez | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-daniel.fernandez |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
+| joseluis.vega | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
+| sancho.munoz | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-sancho.munoz |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
 
@@ -429,12 +538,12 @@ The following tools are required to access to the EKS clusters created for each 
   $ sudo mv ./kubectl /usr/local/bin/kubectl
   ```
 
-- **kubectx**: utility to manage and switch between kubectl contexts. It can be installed with the following the commands show below:
+- **k9s**: utility to manage and inspect a kubernetes cluster. It can be installed with the following the commands show below:
 
   1. Get the latest tag name:
 
       ```sh
-      LATEST_RELEASE_TAG=$(curl --silent "https://api.github.com/repos/ahmetb/kubectx/releases/latest" | jq -r .tag_name)
+      LATEST_RELEASE_TAG=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | jq -r .tag_name)
       ```
 
   2. Download the binary according to the OS used:
@@ -442,24 +551,24 @@ The following tools are required to access to the EKS clusters created for each 
      - *MacOS*:
 
        ```sh
-       $ curl -L "https://github.com/ahmetb/kubectx/releases/download/${LATEST_RELEASE_TAG}/kubectx_${LATEST_RELEASE_TAG}_darwin_x86_64.tar.gz" -o kubectx.tar.gz
+       $ curl -L "https://github.com/derailed/k9s/releases/download/${LATEST_RELEASE_TAG}/k9s_darwin_x86_64.tar.gz" -o k9s.tar.gz
        ```
 
      - *Linux*:
 
        ```sh
-       $ curl -L "https://github.com/ahmetb/kubectx/releases/download/${LATEST_RELEASE_TAG}/kubectx_${LATEST_RELEASE_TAG}_linux_x86_64.tar.gz" -o kubectx.tar.gz
+       $ curl -L "https://github.com/derailed/k9s/releases/download/${LATEST_RELEASE_TAG}/k9s_linux_x86_64.tar.gz" -o k9s.tar.gz
        ```
 
   3. Unzip the files downloaded in the previous step and configure:
 
      ```sh
-     $ tar -zxvf kubectx.tar.gz
-     $ chmod +x ./kubectx
-     $ sudo mv ./kubectx /usr/local/bin/kubectx
+     $ tar -zxvf k9s.tar.gz
+     $ chmod +x ./k9s
+     $ sudo mv ./k9s /usr/local/bin/k9s
      ```
 
-- **robo3t**: It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
+- **robo3t** (optional): It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
 
     - *MacOS*:
       
@@ -496,16 +605,17 @@ The following tools are required to access to the EKS clusters created for each 
       ``` 
 
 
+- **awscli**: It is necessary to have the command line tool for AWS in version `2.x.x` or higher. It can be installed with `pip`, `brew`, or with an installer. Go to [aws documentation](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) reference to install it.
 
-- **awscli**: It is necessary to have the command line tool for AWS in version `1.18.98` or higher. It can be installed with `pip` with the following command show below:
+NOTE: is very important to have `awscli` properly working because is used to create the Kubernetes configuration file (~/.kube/config) to interact with the EKS cluster (this feature is only available in the most recent versions). Check that you have installed the correct compatible version with:
 
-  ```sh
-  $ pip3 install awscli==1.18.98
-  ```
+     ```sh
+     aws --version
+     ```
 
 ### Setup
 
-The following steps must be followed to set up the configuration to access any of the EKS clusters of KRE:
+The following steps must be followed to set up the configuration to access any of the EKS clusters:
 
 1. Setting up a profile to use `awscli` in the project, this will require two steps:
 
@@ -543,13 +653,19 @@ The following steps must be followed to set up the configuration to access any o
     $ aws eks update-kubeconfig --name <kre_eks_cluster_name> --profile devops-role-kre
     ```
 
-   > The name of the EKS cluster for production is `mettel-automation-kre` and for development is `mettel-automation-kre-dev`.
+   > The name of the EKS cluster's are, production automation engine: `mettel-automation`, production konstelation: `mettel-automation-kre`, development automation engine: `mettel-automation-dev` and development konstellation: `mettel-automation-kre-dev`.
 
-4. Switch to the `kubectl` context related to the cluster to be interacted with using `kubectx`:
+4. Open k9s to connect to te cluster, if you have more clusters in you kubeconfig file you can chose you cluster with `context` command inside k9s:
 
     ```sh
-    $ kubectx arn:aws:eks:us-east-1:<aws_account_id>:cluster/<kre_eks_cluster_name>
+    $ k9s
+    
+    # after k9s open, select you cluster by put this command in k9s:
+    :context
     ```
+
+NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like ':/' to find or ':q' to exit. You can find more information about k9s in his [github page](https://github.com/derailed/k9s).
+
 # Lists of projects READMEs
 
 ## Microservices

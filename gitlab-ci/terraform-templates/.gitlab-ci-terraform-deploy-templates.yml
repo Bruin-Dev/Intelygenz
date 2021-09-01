@@ -2,95 +2,104 @@
 # Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
-.terraform_template_deploy_environment: &terraform_template_deploy_environment
+.terraform_template_deploy_basic_infra: &terraform_template_deploy_basic_infra
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
-  script:
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
-    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
-    - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
-    - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
-    - export TF_VAR_customer_cache_desired_tasks=${customer_cache_desired_tasks}
-    - export TF_VAR_digi_bridge_desired_tasks=${digi_bridge_desired_tasks}
-    - export TF_VAR_digi_reboot_report_desired_tasks=${digi_reboot_report_desired_tasks}
-    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
-    - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
-    - export TF_VAR_hawkeye_affecting_monitor_desired_tasks=${hawkeye_affecting_monitor_desired_tasks}
-    - export TF_VAR_hawkeye_bridge_desired_tasks=${hawkeye_bridge_desired_tasks}
-    - export TF_VAR_hawkeye_customer_cache_desired_tasks=${hawkeye_customer_cache_desired_tasks}
-    - export TF_VAR_hawkeye_outage_monitor_desired_tasks=${hawkeye_outage_monitor_desired_tasks}
-    - export TF_VAR_intermapper_outage_monitor_desired_tasks=${intermapper_outage_monitor_desired_tasks}
-    - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
-    - export TF_VAR_links_metrics_api_desired_tasks=${links_metrics_api_desired_tasks}
-    - export TF_VAR_links_metrics_collector_desired_tasks=${links_metrics_collector_desired_tasks}
-    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
-    - export TF_VAR_lumin_billing_report_desired_tasks=${lumin_billing_report_desired_tasks}
-    - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
-    - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
-    - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
-    - export TF_VAR_nats_server_2_desired_tasks=${nats_server_2_desired_tasks}
-    - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
-    - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
-    - export TF_VAR_service_dispatch_monitor_desired_tasks=${service_dispatch_monitor_desired_tasks}
-    - export TF_VAR_service_outage_monitor_1_desired_tasks=${service_outage_monitor_1_desired_tasks}
-    - export TF_VAR_service_outage_monitor_2_desired_tasks=${service_outage_monitor_2_desired_tasks}
-    - export TF_VAR_service_outage_monitor_3_desired_tasks=${service_outage_monitor_3_desired_tasks}
-    - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
-    - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
-    - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
-    - export TF_VAR_ticket_collector_desired_tasks=${ticket_collector_desired_tasks}
-    - export TF_VAR_ticket_statistics_desired_tasks=${ticket_statistics_desired_tasks}
-    - export TF_VAR_tnba_monitor_desired_tasks=${tnba_monitor_desired_tasks}
-    - export TF_VAR_tnba_feedback_desired_tasks=${tnba_feedback_desired_tasks}
-    - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
-    - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
-    - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
-    - export TF_VAR_HAWKEYE_CLIENT_USERNAME=${HAWKEYE_CLIENT_USERNAME}
-    - export TF_VAR_HAWKEYE_CLIENT_PASSWORD=$(base64 -d <<< $HAWKEYE_CLIENT_PASSWORD)
-    - export TF_VAR_HAWKEYE_BASE_URL=${HAWKEYE_BASE_URL}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS=${VELOCLOUD_HOST_1}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER=${VELOCLOUD_HOST_1_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS=${VELOCLOUD_HOST_2}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER=${VELOCLOUD_HOST_2_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS=${VELOCLOUD_HOST_3}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER=${VELOCLOUD_HOST_3_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=${VELOCLOUD_HOST_4}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=${VELOCLOUD_HOST_4_FILTER}
-    - export TF_VAR_DOCDB_CLUSTER_MASTER_USERNAME=${DOCDB_CLUSTER_MASTER_USERNAME}
-    - export TF_VAR_DOCDB_CLUSTER_MASTER_PASSWORD=${DOCDB_CLUSTER_MASTER_PASSWORD}
-    - apk add zip
-    - pip3 install -r ci-utils/ecr/requirements.txt
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -g -a -e ${TF_VAR_ENVIRONMENT} -p
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform refresh infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
-  tags:
-    - kubernetes
-
-.terraform_template_deploy_network-resources: &terraform_template_deploy_network-resources
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
-    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
-    - terraform init infra-as-code/network-resources
-    - terraform validate infra-as-code/network-resources
-    - terraform plan infra-as-code/network-resources
-    - terraform apply -auto-approve infra-as-code/network-resources
-  tags:
-    - kubernetes
+    # create output folder for cache files between jobs
+    - mkdir -p output
+    # iterate over terraform directories in module
+    - cd "${MODULE}" || exit 1
+    # assign terraform variables
+    - export TF_VAR_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - export TF_VAR_CLUSTER_AUTOSCALER_HELM_CHART_VERSION=${CLUSTER_AUTOSCALER_CHART_V}
+    - export TF_VAR_EXTERNAL_DNS_HELM_CHART_VERSION=${EXTERNAL_DNS_CHART_V}
+    - export TF_VAR_INGRESS_NGINX_HELM_CHART_VERSION=${INGRESS_NGINX_CHART_V}
+    - export TF_VAR_METRICS_SERVER_VERSION=${KUBERNETES_METRICS_SERVER_V}
+    - export TF_VAR_RELOADER_CHART_VERSION=${RELOADER_CHART_V}
+    - export TF_VAR_WHITELISTED_IPS="[${LOAD_BALANCER_WHITELIST}]"
+    - export TF_VAR_WHITELISTED_IPS_OREILLY="[${LOAD_BALANCER_WHITELIST_OREILLY}]"
+    - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
+    - export TF_VAR_GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    - export TF_VAR_TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
+    - export TF_VAR_TICKET_COLLECTOR_MONGO_PASSWORD=${TICKET_COLLECTOR_MONGO_PASSWORD}
+    - if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then export TF_VAR_ENABLE_FLUENT_BIT=true; fi
+    - >
+      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
+          (
+              cd "${i}" || exit
+              echo "The current Workdir is $i"
+              if [[ ${i} != "4-elasticaches" ]]; then
+                  terraform init -backend=true -get=true -input=false
+                  if [[ ${i} != "0-ecr-repositories" && ${i} != "3-eks-roles" ]]; then
+                      terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                  fi
+                  terraform refresh
+                  terraform plan && terraform apply -auto-approve
+                  if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_LOG_GROUP_NAME" --form "value=$(terraform output fluent-bit-log-group-name)"
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_IAM_ROLE_ARN" --form "value=$(terraform output fluent-bit-role-arn)"
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_PRO" --form "value=$(terraform output oreilly-security-group-id)"
+                  fi
+                  if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_DEV" --form "value=$(terraform output oreilly-security-group-id)"
+                  fi
+                  if [[ ${i} == "3-eks-roles" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/AUTOMATION_SSL_CERTIFICATE_ARN" --form "value=$(terraform output ssl-certificate-arn)"
+                  fi
+                  if [[ ${i} == "5-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/TICKET_COLLECTOR_MONGO_HOST" --form "value=$(terraform output ticket-collector-mongo-host)"
+                  fi
+                  cd ..
+              else
+                  for e in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
+                      (
+                          cd "${e}" || exit 1
+                          if [[ ${e} != "modules" ]]; then
+                              echo "Start to create elasticache ${e}"
+                              terraform init
+                              terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
+                              terraform refresh
+                              terraform plan && terraform apply -auto-approve
+                          fi
+                          cd ..
+                      )
+                  done
+                  cd "${CI_PROJECT_DIR}/${MODULE}" || exit 1
+              fi
+          )
+      done
+    - cd ${CI_PROJECT_DIR}
+    # INSTALL NECESSARY PYTHON LIBRARIES
+    - pip3 install -r ci-utils/eks/iam-to-eks-roles/requirements.txt --use-feature=2020-resolver
+    # ASSIGN RBAC PERMISSION IN EKS FROM IAM USER ROLES
+    - >
+      for i in $(echo $IAM_TO_EKS_ROLES | tr ", " "\n"); do
+        (
+          python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation --project-role-tag ${i}
+        )
+      done
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INSTALL PRIORITY CLASS
+    - kubectl apply -f helm/priority-class
+    # INITIALIZE HELM
+    - python3 ci-utils/helm/add_helm_repositories.py
+    - helm repo update
+    - helm dep up ${HELM_CHART_PROMETHEUS_DIR}
+    # DEPLOY PROMETHEUS HELM CHART
+    - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
+    - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
+    # DEPLOY FLUENT-BIT HELM CHART
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+        envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
+        helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml        
+      fi

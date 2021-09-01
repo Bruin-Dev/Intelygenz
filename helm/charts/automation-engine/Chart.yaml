@@ -1,0 +1,119 @@
+apiVersion: v2
+name: automation-engine
+description: A Helm chart for Kubernetes to deploy automation-engine project
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.16.0"
+
+dependencies:
+  - name: nats
+    version: 0.7.2
+    repository: https://nats-io.github.io/k8s/helm/charts/
+  - name: bruin-bridge
+    version: '*.*.*'
+    condition: bruin-bridge.enabled
+  - name: customer-cache
+    version: '*.*.*'
+    condition: customer-cache.enabled
+  - name: digi-bridge
+    version: '*.*.*'
+    condition: digi-bridge.enabled
+  - name: digi-reboot-report
+    version: '*.*.*'
+    condition: digi-reboot-report.enabled
+  - name: ecr-cred-helper
+    version: '*.*.*'
+    condition: ecr-cred-helper.enabled
+  - name: email-tagger-kre-bridge
+    version: '*.*.*'
+    condition: email-tagger-kre-bridge.enabled
+  - name: email-tagger-monitor
+    version: '*.*.*'
+    condition: email-tagger-monitor.enabled
+  - name: hawkeye-affecting-monitor
+    version: '*.*.*'
+    condition: hawkeye-affecting-monitor.enabled
+  - name: hawkeye-bridge
+    version: '*.*.*'
+    condition: hawkeye-bridge.enabled
+  - name: hawkeye-customer-cache
+    version: '*.*.*'
+    condition: hawkeye-customer-cache.enabled
+  - name: hawkeye-outage-monitor
+    version: '*.*.*'
+    condition: hawkeye-outage-monitor.enabled
+  - name: intermapper-outage-monitor
+    version: '*.*.*'
+    condition: intermapper-outage-monitor.enabled
+  - name: last-contact-report
+    version: '*.*.*'
+    condition: last-contact-report.enabled
+  - name: links-metrics-api
+    version: '*.*.*'
+    condition: links-metrics-api.enabled
+  - name: links-metrics-collector
+    version: '*.*.*'
+    condition: links-metrics-collector.enabled
+  - name: lumin-billing-report
+    version: '*.*.*'
+    condition: lumin-billing-report.enabled
+  - name: notifier
+    version: '*.*.*'
+    condition: notifier.enabled
+  - name: service-affecting-monitor
+    version: '*.*.*'
+    condition: service-affecting-monitor.enabled
+  - name: service-outage-monitor-1
+    version: '*.*.*'
+    condition: service-outage-monitor-1.enabled
+  - name: service-outage-monitor-2
+    version: '*.*.*'
+    condition: service-outage-monitor-2.enabled
+  - name: service-outage-monitor-3
+    version: '*.*.*'
+    condition: service-outage-monitor-3.enabled
+  - name: service-outage-monitor-4
+    version: '*.*.*'
+    condition: service-outage-monitor-4.enabled
+  - name: service-outage-monitor-triage
+    version: '*.*.*'
+    condition: service-outage-monitor-triage.enabled
+  - name: sites-monitor
+    version: '*.*.*'
+    condition: sites-monitor.enabled
+  - name: t7-bridge
+    version: '*.*.*'
+    condition: t7-bridge.enabled
+  - name: ticket-collector
+    version: '*.*.*'
+    condition: ticket-collector.enabled
+  - name: ticket-statistics
+    version: '*.*.*'
+    condition: ticket-statistics.enabled
+  - name: tnba-feedback
+    version: '*.*.*'
+    condition: tnba-feedback.enabled
+  - name: tnba-monitor
+    version: '*.*.*'
+    condition: tnba-monitor.enabled
+  - name: velocloud-bridge
+    version: '*.*.*'
+    condition: velocloud-bridge.enabled

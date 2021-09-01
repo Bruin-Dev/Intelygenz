@@ -1,0 +1,118 @@
+# Default values for email-tagger-monitor.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of email-tagger-monitor pods
+replicaCount: 1
+
+enabled: true
+
+# -- Global configuration
+global:
+  # -- Name of environment for EKS cluster and network resources
+  current_environment: "dev"
+  # -- Name of environment for helm charts and
+  environment: "automation-test"
+  # -- NATS cluster endpoint used by bruin-bridge
+  nats_server: "nats://nats:4222"
+  # -- Redis Hostname used to store heavy NATS messages (>1MB)
+  redis_hostname: "redis"
+  # -- Redis Hostname used to store information used by email-tagger
+  redis_email_tagger_hostname: "redis"
+  # -- Indicates if the logs will be sent to papertrail or not.
+  papertrail_active: "False"
+  # -- Papertrail host to which the logs will be sent
+  papertrail_host: "logs.papertrailapp.com"
+  # -- Papertrail port to which the logs will be sent
+  papertrail_port: "0"
+  # -- Indicates if the helm chart will be displayed in an aws or local environment,
+  # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
+  mode: "aws"
+  ecr_registry:
+    # -- Name of the imagePullSecret created to access the images stored in ECR.
+    name: "ecr-registry"
+
+config:
+  papertrail_prefix: ""
+  # -- Signature secret key
+  request_signature_secret_key: ""
+  # -- Request api key
+  request_api_key: ""
+  # -- API server endpoint prefix
+  api_server_endpoint_prefix: ""
+  capabilities_enabled:
+    # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # bruin-bridge service responds correctly to healthcheck calls.
+    bruin_bridge: true
+    # -- Indicate if cts-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # cts-bridge service responds correctly to healthcheck calls.
+    cts_bridge: true
+    # -- Indicate if customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # customer-cache service responds correctly to healthcheck calls.
+    customer_cache: true
+    # -- Indicate if digi-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # digi-bridge service responds correctly to healthcheck calls.
+    digi_bridge: true
+    # -- Indicate if email-tagger-kre-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # email-tagger-kre-bridge service responds correctly to healthcheck calls.
+    email_tagger_kre_bridge: true
+    # -- Indicate if hawkeye-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-bridge service responds correctly to healthcheck calls.
+    hawkeye_bridge: true
+    # -- Indicate if hawkeye-customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-customer-cache service responds correctly to healthcheck calls.
+    hawkeye_customer_cache: true
+    # -- Indicate if lit-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # lit-bridge service responds correctly to healthcheck calls.
+    lit_bridge: true
+    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifier service responds correctly to healthcheck calls.
+    notifier: true
+    # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # t7-bridge service responds correctly to healthcheck calls.
+    t7_bridge: true
+    # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # velocloud-bridge service responds correctly to healthcheck calls.
+    velocloud_bridge: true
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-monitor
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+resources:
+  limits:
+    cpu: 400m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

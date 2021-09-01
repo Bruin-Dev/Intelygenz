@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+#    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: {{ include "email-tagger-monitor.fullname" . }}-ingress
+spec:
+  rules:
+    {{ if eq .Values.global.environment "production" }}
+    - host: master.mettel-automation.net
+    {{ else }}
+    - host: {{ .Values.global.environment }}.mettel-automation.net
+    {{ end }}
+      http:
+        paths:
+        - backend:
+            serviceName: email-tagger-monitor
+            servicePort: {{ .Values.service.port }}
+          path: {{ .Values.config.api_server_endpoint_prefix }}(/|$)(.*)

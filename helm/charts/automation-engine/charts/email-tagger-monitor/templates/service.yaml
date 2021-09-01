@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "email-tagger-monitor.fullname" . }}
+  labels:
+    {{- include "email-tagger-monitor.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+  selector:
+    {{- include "email-tagger-monitor.selectorLabels" . | nindent 4 }}

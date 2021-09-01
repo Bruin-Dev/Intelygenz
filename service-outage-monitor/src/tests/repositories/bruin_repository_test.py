@@ -2334,6 +2334,55 @@ class TestBruinRepository:
         assert results == return_body
 
     @pytest.mark.asyncio
+    async def append_asr_forwarding_note_test(self):
+        current_datetime = datetime.now()
+        ticket_id = 11111
+        serial_number = 'VC1234567'
+
+        links = [
+            {
+                'displayName': 'Travis Touchdown',
+                'interface': 'GE1',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+            {
+                'displayName': 'Claire Redfield',
+                'interface': 'GE2',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5294,
+            },
+        ]
+        task_result_note = os.linesep.join([
+            f"#*MetTel's IPA*#",
+            f'Status of Wired Link GE1 (Travis Touchdown) is DISCONNECTED after 1 hour.',
+            f'Status of Wired Link GE2 (Claire Redfield) is DISCONNECTED after 1 hour.',
+            f'Moving task to: ASR Investigate',
+            f'TimeStamp: {current_datetime}'
+        ])
+        return_body = {
+            'body': 'Success',
+            'status': 200
+        }
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=return_body)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            results = await bruin_repository.append_asr_forwarding_note(ticket_id, links, serial_number)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, task_result_note, service_numbers=[serial_number]
+        )
+        assert results == return_body
+
+    @pytest.mark.asyncio
     async def change_ticket_severity_for_offline_edge_test(self):
         ticket_id = 12345
         severity_level = testconfig.MONITOR_CONFIG['severity_levels']['medium_high']

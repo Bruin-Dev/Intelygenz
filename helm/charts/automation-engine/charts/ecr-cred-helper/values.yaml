@@ -1,0 +1,65 @@
+# Default values for ecr-cred-helper.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+enabled: false
+
+# -- Specific configuration for ecr-cred-helper
+config:
+  papertrail_prefix: ""
+  mode: "aws"
+  # -- Secret Access Key of AWS Account
+  aws_secret_access_key: ""
+  # -- Access Key Id of AWS Account
+  aws_access_key_id: ""
+  # -- AWS Region of account
+  aws_region: "us-east-1"
+  # -- awscli version to use for get credentials
+  awscli_version: "1.16.257"
+  # -- Kubectl version
+  kubectl_version: "1.17.0"
+  ecr_registry:
+    url: ""
+    password: ""
+    name: "ecr-registry"
+  schedule_expr: "0 */6 * * *"
+
+image:
+  repository: alpine
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "3.12.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "sa-ecr-cred-helper"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

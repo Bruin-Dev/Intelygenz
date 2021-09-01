@@ -3,17 +3,17 @@
 A number of scripts developed in bash for naming environments are stored in this folder.
 
 **Table of contents**:
-- [environment_assign](#environment_assign)
-  - [Description](#environment_assign_description)
-  - [Usage](#environment_assign_usage)
+- [environment_assign](#script-environment_assign)
+  - [Description](#description)
+  - [Usage](#usage)
 
-## Script environment_assign<a name="environment_assign"></a>
+## Script environment_assign
 
-### Description <a name="environment_assign_description"></a>
+### Description
 
 This [script](./environment_assign.sh) has been developed in bash for naming environments.
 
-### Usage <a name="environment_assign_usage"></a>
+### Usage
 
 In order to use this [script](./environment_assign.sh) it is necessary to perform the following steps previously:
 

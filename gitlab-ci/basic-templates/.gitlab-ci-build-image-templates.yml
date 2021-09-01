@@ -14,14 +14,18 @@
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - pip3 install -r ci-utils/ecr/requirements.txt
   script:
-    - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg REPOSITORY_URL=${REPOSITORY_URL} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+    - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION}
+      --build-arg REPOSITORY_URL="${REPOSITORY_URL}/automation"
+      -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+      -t ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+      -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+    - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+    - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o
   after_script:
     - source ci-utils/environments/environment_assign.sh
-    - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+    - docker rmi ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+    - docker rmi ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
   tags:
     - kubernetes
 

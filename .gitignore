@@ -146,7 +146,9 @@ dmypy.json
 # Terraform - Compiled files
 *.tfstate
 *.tfstate.backup
+**/.terraform.lock.hcl
 .terraform.tfstate.lock.info
+.terraform.lock.hcl
 .terraform
 
 last_contact.csv
@@ -156,6 +158,11 @@ last_contact.csv
 
 #Local thanos storage files
 metrics-dashboard/thanos/storage
+
+# Helm requirements
+charts/*/charts
+requirements.lock
+*Chart.lock
 
 # Generated csv files
 *old_cache.csv
