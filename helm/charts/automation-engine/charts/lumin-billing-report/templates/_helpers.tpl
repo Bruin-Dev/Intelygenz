@@ -35,7 +35,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 project: mettel-automation
 component: lumin-billing-report
 microservice-type: independent
-environment-name: {{ .Values.global.environment }}
+environment-name: "{{ .Values.global.environment }}"
 current-environment: {{ .Values.global.current_environment }}
 {{- end }}
 

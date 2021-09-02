@@ -61,8 +61,7 @@ nats:
 global:
   # -- Name of environment for EKS cluster and network resources
   current_environment: ${CURRENT_ENVIRONMENT}
-  # -- Name of environment for helm charts and
-  # redis elasticaches used
+  # -- Name of environment for helm charts
   environment: "${ENVIRONMENT_SLUG}"
   # -- NATS cluster endpoint used by bruin-bridge
   nats_server: "nats://nats:4222"
