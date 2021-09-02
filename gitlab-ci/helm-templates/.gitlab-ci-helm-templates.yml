@@ -35,6 +35,10 @@
         export LINKS_METRICS_COLLECTOR_ENABLED=false
       fi
     - envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+    - echo "the ENVIRONMENT_SLUG is $ENVIRONMENT_SLUG"
+    - echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
+    - echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
+    - echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
     # DEPLOY HELM CHART
     - >
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
