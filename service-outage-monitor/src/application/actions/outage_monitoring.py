@@ -941,19 +941,6 @@ class OutageMonitor:
             if note['noteValue'] is not None
         ]
 
-        ticket_data_response = await self._bruin_repository.get_ticket_overview(ticket_id=ticket_id)
-        if ticket_data_response['status'] not in range(200, 300):
-            return
-
-        ticket_creation_date = ticket_data_response['body']['createDate']
-
-        if not self._is_ticket_old_enough(ticket_creation_date):
-            self._logger.info(
-                f'Ticket {ticket_id} is too recent, so detail related to serial {serial_number} will not be '
-                'forwarded to the ASR Investigate queue'
-            )
-            return
-
         task_result = "No Trouble Found - Carrier Issue"
         task_result_note = self._find_note(relevant_notes, 'ASR Investigate')
 

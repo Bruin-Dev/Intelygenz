@@ -10270,7 +10270,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -10291,7 +10290,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10300,9 +10298,6 @@ class TestServiceOutageMonitor:
             edge_status, cached_edge['links_configuration'])
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.get_ticket_overview.assert_awaited_once_with(ticket_id=ticket_id)
-
-        outage_monitor._is_ticket_old_enough.assert_called_once_with(ticket['createDate'])
 
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, task_result,
                                                                            serial_number=edge_serial,
@@ -10373,7 +10368,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.get_ticket_overview = CoroutineMock()
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -10394,7 +10388,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10402,9 +10395,6 @@ class TestServiceOutageMonitor:
         outage_repository.find_disconnected_wired_links.assert_not_called()
 
         bruin_repository.get_ticket_details.assert_not_awaited()
-        bruin_repository.get_ticket_overview.assert_not_awaited()
-
-        outage_monitor._is_ticket_old_enough.assert_not_called()
 
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -10471,7 +10461,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.get_ticket_overview = CoroutineMock()
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -10492,7 +10481,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10501,9 +10489,6 @@ class TestServiceOutageMonitor:
             edge_status, cached_edge['links_configuration'])
 
         bruin_repository.get_ticket_details.assert_not_awaited()
-        bruin_repository.get_ticket_overview.assert_not_awaited()
-
-        outage_monitor._is_ticket_old_enough.assert_not_called()
 
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -10603,7 +10588,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.get_ticket_overview = CoroutineMock()
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -10624,7 +10608,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10633,9 +10616,6 @@ class TestServiceOutageMonitor:
             edge_status, cached_edge['links_configuration'])
 
         bruin_repository.get_ticket_details.assert_not_awaited()
-        bruin_repository.get_ticket_overview.assert_not_awaited()
-
-        outage_monitor._is_ticket_old_enough.assert_not_called()
 
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -10706,7 +10686,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.get_ticket_overview = CoroutineMock()
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -10727,7 +10706,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10736,297 +10714,6 @@ class TestServiceOutageMonitor:
             edge_status, cached_edge['links_configuration'])
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.get_ticket_overview.assert_not_awaited()
-
-        outage_monitor._is_ticket_old_enough.assert_not_called()
-
-        bruin_repository.change_detail_work_queue.assert_not_awaited()
-        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
-
-        notifications_repository.send_slack_message.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def attempt_forward_to_asr_failed_ticket_overview_rpc_request_test(self):
-        ticket_id = 12345
-        edge_serial = 'VC5678901'
-
-        edge_status = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'ONLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': 'Test Name',
-                    'isp': None,
-                    'interface': 'GE1',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        cached_edge = {
-            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
-            'last_contact': "0000-00-00 00:00:00",
-            'logical_ids': "8456-cg76-sdf3-h64j",
-            'serial_number': edge_serial,
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
-            'links_configuration':
-                [
-                    {
-                        'interfaces': ['GE1'],
-                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
-                        'mode': 'PUBLIC',
-                        'type': 'WIRED',
-                        'last_active': '2020-09-29T04:45:15.000Z'
-                    }
-                ]
-        }
-        outage_ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_serial,
-            "detailStatus": "I",
-        }
-        current_datetime = datetime.now(utc)
-
-        ticket_note_1 = {
-            "noteId": 68246614,
-            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
-            "serviceNumber": [
-                edge_serial,
-            ],
-            "createdDate": current_datetime,
-        }
-
-        outage_ticket_notes = [ticket_note_1]
-
-        ticket_details_response = {
-            'body': {
-                'ticketDetails': [
-                    outage_ticket_detail_1,
-                ],
-                'ticketNotes': outage_ticket_notes,
-            },
-            'status': 200,
-        }
-
-        response_overview = {
-            'status': 400,
-            'body': 'Failed'
-        }
-
-        outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
-        bruin_repository.change_detail_work_queue = CoroutineMock()
-        bruin_repository.append_asr_forwarding_note = CoroutineMock()
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        velocloud_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
-
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
-
-        outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
-        outage_repository.find_disconnected_wired_links.assert_called_once_with(
-            edge_status, cached_edge['links_configuration'])
-
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.get_ticket_overview.assert_awaited_once_with(ticket_id=ticket_id)
-
-        outage_monitor._is_ticket_old_enough.assert_not_called()
-
-        bruin_repository.change_detail_work_queue.assert_not_awaited()
-        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def attempt_forward_to_asr_too_recent_test(self):
-        ticket_id = 12345
-        edge_serial = 'VC5678901'
-
-        edge_status = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'ONLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': 'Test Name',
-                    'isp': None,
-                    'interface': 'GE1',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        cached_edge = {
-            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
-            'last_contact': "0000-00-00 00:00:00",
-            'logical_ids': "8456-cg76-sdf3-h64j",
-            'serial_number': edge_serial,
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
-            'links_configuration':
-                [
-                    {
-                        'interfaces': ['GE1'],
-                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
-                        'mode': 'PUBLIC',
-                        'type': 'WIRED',
-                        'last_active': '2020-09-29T04:45:15.000Z'
-                    }
-                ]
-        }
-        outage_ticket_detail_1 = {
-            "detailID": 2746937,
-            "detailValue": edge_serial,
-            "detailStatus": "I",
-        }
-        current_datetime = datetime.now(utc)
-
-        ticket_note_1 = {
-            "noteId": 68246614,
-            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
-            "serviceNumber": [
-                edge_serial,
-            ],
-            "createdDate": current_datetime,
-        }
-
-        outage_ticket_notes = [ticket_note_1]
-
-        ticket_details_response = {
-            'body': {
-                'ticketDetails': [
-                    outage_ticket_detail_1,
-                ],
-                'ticketNotes': outage_ticket_notes,
-            },
-            'status': 200,
-        }
-
-        ticket = {
-            'ticketID': 123,
-            "clientName": "Sam &amp; Su's Retail Shop 5",
-            "category": "",
-            "topic": "Add Cloud PBX User License",
-            "referenceTicketNumber": 0,
-            "ticketStatus": "Resolved",
-            "address": {
-                "address": "69 Blanchard St",
-                "city": "Newark",
-                "state": "NJ",
-                "zip": "07105-4701",
-                "country": "USA"
-            },
-            "createDate": "4/23/2019 7:59:50 PM",
-            "createdBy": "Amulya Bidar Nataraj 113",
-            "creationNote": 'null',
-            "resolveDate": "4/23/2019 8:00:35 PM",
-            "resolvedby": 'null',
-            "closeDate": 'null',
-            "closedBy": 'null',
-            "lastUpdate": 'null',
-            "updatedBy": 'null',
-            "mostRecentNote": " ",
-            "nextScheduledDate": "4/23/2019 4:00:00 AM",
-            "flags": "",
-            "severity": "100"
-        }
-        response_overview = {
-            'status': 200,
-            'body': ticket
-        }
-
-        outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
-        bruin_repository.change_detail_work_queue = CoroutineMock()
-        bruin_repository.append_asr_forwarding_note = CoroutineMock()
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        velocloud_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=False)
-
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
-
-        outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
-        outage_repository.find_disconnected_wired_links.assert_called_once_with(
-            edge_status, cached_edge['links_configuration'])
-
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.get_ticket_overview.assert_awaited_once_with(ticket_id=ticket_id)
-
-        outage_monitor._is_ticket_old_enough.assert_called_once_with(ticket['createDate'])
 
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -11169,7 +10856,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -11190,7 +10876,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -11199,9 +10884,6 @@ class TestServiceOutageMonitor:
             edge_status, cached_edge['links_configuration'])
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.get_ticket_overview.assert_awaited_once_with(ticket_id=ticket_id)
-
-        outage_monitor._is_ticket_old_enough.assert_called_once_with(ticket['createDate'])
 
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -11331,7 +11013,6 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_asr_forwarding_note = CoroutineMock()
 
@@ -11352,7 +11033,6 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
-        outage_monitor._is_ticket_old_enough = Mock(return_value=True)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -11361,9 +11041,6 @@ class TestServiceOutageMonitor:
             edge_status, cached_edge['links_configuration'])
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        bruin_repository.get_ticket_overview.assert_awaited_once_with(ticket_id=ticket_id)
-
-        outage_monitor._is_ticket_old_enough.assert_called_once_with(ticket['createDate'])
 
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, task_result,
                                                                            serial_number=edge_serial,

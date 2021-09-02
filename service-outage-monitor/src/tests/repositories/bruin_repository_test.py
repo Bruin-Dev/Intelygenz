@@ -2355,8 +2355,8 @@ class TestBruinRepository:
         ]
         task_result_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f'Status of Wired Link GE1 (Travis Touchdown) is DISCONNECTED after 1 hour.',
-            f'Status of Wired Link GE2 (Claire Redfield) is DISCONNECTED after 1 hour.',
+            f'Status of Wired Link GE1 (Travis Touchdown) is DISCONNECTED.',
+            f'Status of Wired Link GE2 (Claire Redfield) is DISCONNECTED.',
             f'Moving task to: ASR Investigate',
             f'TimeStamp: {current_datetime}'
         ])

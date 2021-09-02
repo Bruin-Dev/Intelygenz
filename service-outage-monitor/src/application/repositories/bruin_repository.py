@@ -642,7 +642,7 @@ class BruinRepository:
 
         for link in links:
             note_lines.append(
-                f'Status of Wired Link {link["interface"]} ({link["displayName"]}) is {link["linkState"]} after 1 hour.'
+                f'Status of Wired Link {link["interface"]} ({link["displayName"]}) is {link["linkState"]}.'
             )
 
         note_lines += [
