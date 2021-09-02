@@ -118,7 +118,8 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while appending note to ticket {ticket_id} in '
-                    f'{self._config.BOUNCING_DETECTOR_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
+                    f'{self._config.BOUNCING_DETECTOR_CONFIG["environment"].upper()} \
+                    environment. Note was {note}. Error: '
                     f'Error {response_status} - {response_body}'
                 )
 
