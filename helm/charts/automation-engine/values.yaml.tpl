@@ -63,7 +63,7 @@ global:
   current_environment: ${CURRENT_ENVIRONMENT}
   # -- Name of environment for helm charts and
   # redis elasticaches used
-  environment: ${ENVIRONMENT_SLUG}
+  environment: "${ENVIRONMENT_SLUG}"
   # -- NATS cluster endpoint used by bruin-bridge
   nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
