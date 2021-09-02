@@ -964,7 +964,7 @@ class TestBouncingDetector:
                                              velocloud_repository, customer_cache_repository, notifications_repository)
 
         ticket_note = bouncing_detector._ticket_object_to_string(test_dict)
-        assert ticket_note == "#*MetTel's IPA*#\nEdgeName: Test\nEdge Status: ok\n"
+        assert ticket_note == "#*MetTel's IPA*#\nTrouble: Circuit Instability\n\nEdgeName: Test\nEdge Status: ok\n"
 
     def ticket_object_to_string_without_watermark_test(self):
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
@@ -981,7 +981,7 @@ class TestBouncingDetector:
                                              velocloud_repository, customer_cache_repository, notifications_repository)
 
         ticket_note = bouncing_detector._ticket_object_to_string_without_watermark(test_dict)
-        assert ticket_note == "\nEdgeName: Test\nEdge Status: ok\n"
+        assert ticket_note == "\nTrouble: Circuit Instability\n\nEdgeName: Test\nEdge Status: ok\n"
 
     @pytest.mark.asyncio
     async def create_bouncing_ticket_ok_test(self):
@@ -1467,7 +1467,8 @@ class TestBouncingDetector:
 
         ticket_id = 123
         mock_ticket_note = "some test ticket note"
-        slack_message = f'Appending Circuit Instability note to ticket id: {ticket_id}\n' \
+        slack_message = f'Appending Circuit Instability note to unresolved ticket ' \
+                        f'with ticket id: {ticket_id}\n' \
                         f'https://app.bruin.com/t/{ticket_id} , in production'
 
         event_bus = Mock()
@@ -1534,7 +1535,8 @@ class TestBouncingDetector:
         ticket_id = 123
         mock_ticket_note = "some test ticket note"
         mock_reopen_ticket_note = "some reopen ticket note"
-        slack_message = f'Affecting ticket {ticket_id} reopened. Details at https://app.bruin.com/t/{ticket_id}'
+        slack_message = f'Affecting ticket {ticket_id} reopened through bouncing-detector service. ' \
+                        f'Details at https://app.bruin.com/t/{ticket_id}'
 
         event_bus = Mock()
         logger = Mock()

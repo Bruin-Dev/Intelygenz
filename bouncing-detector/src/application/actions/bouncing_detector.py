@@ -37,7 +37,7 @@ class BouncingDetector:
                                 id='_bouncing_detector')
 
     async def _bouncing_detector_process(self):
-        self._logger.info(f"Starting bouncing detect process to find any circuit instability "
+        self._logger.info(f"Starting bouncing detector process to find any circuit instability "
                           f"in host {self._config.BOUNCING_DETECTOR_CONFIG['velocloud_host']} ")
         start = time.time()
 
@@ -47,7 +47,7 @@ class BouncingDetector:
 
         self._customer_cache: list = customer_cache_response['body']
         if not self._customer_cache:
-            self._logger.info('Got an empty customer cache. Process cannot keep going.')
+            self._logger.info('Got an empty customer cache. Skipping process...')
             return
 
         link_metrics_response = await self._velocloud_repository.get_last_link_metrics()
@@ -95,12 +95,15 @@ class BouncingDetector:
 
     async def _check_for_bouncing_events(self, events_by_serial):
         for serial in events_by_serial:
+            self._logger.info(f'Checking serial {serial} for circuit instability')
             await self._check_for_bouncing_edge_events(serial, events_by_serial[serial])
             await self._check_for_bouncing_link_events(serial, events_by_serial[serial])
 
     async def _check_for_bouncing_edge_events(self, serial, event_list):
         edge_down_events = [event for event in event_list if event['event'] == 'EDGE_DOWN']
-        if len(edge_down_events) > self._config.BOUNCING_DETECTOR_CONFIG['event_threshold']:
+        if len(edge_down_events) >= self._config.BOUNCING_DETECTOR_CONFIG['event_threshold']:
+            self._logger.info(f'Circuit Instability detected in edge with serial {serial}. {len(edge_down_events)}'
+                              f'EDGE_DOWN events were detected.')
             cached_edge_info = self._get_first_element_matching(
                 self._customer_cache,
                 lambda edge: edge["serial_number"] == serial,
@@ -116,7 +119,7 @@ class BouncingDetector:
             interface = event['message'].split()[1]
             link_down_events[interface].append(event)
         for interface in link_down_events:
-            if len(link_down_events[interface]) > self._config.BOUNCING_DETECTOR_CONFIG['event_threshold']:
+            if len(link_down_events[interface]) >= self._config.BOUNCING_DETECTOR_CONFIG['event_threshold']:
                 cached_edge_info = self._get_first_element_matching(
                     self._customer_cache,
                     lambda edge: edge["serial_number"] == serial,
@@ -129,6 +132,10 @@ class BouncingDetector:
                 if link_info is None:
                     self._logger.info(f'No link info is available for interface {interface} in serial {serial}')
                     continue
+
+                self._logger.info(f'Circuit Instability detected in edge with serial {serial} for interface link: '
+                                  f'{interface}. {len(link_down_events[interface])} LINK_DEAD events were detected.')
+
                 ticket_dict = self._get_link_ticket_dict(cached_edge_info, link_info["link"], interface,
                                                          len(link_down_events[interface]))
                 await self._create_bouncing_ticket(cached_edge_info, ticket_dict, serial)
@@ -189,8 +196,7 @@ class BouncingDetector:
         return edge_overview
 
     async def _create_bouncing_ticket(self, edge_cached_info, ticket_dict, serial):
-        self._logger.info(f'Circuit Instability detected through bouncing events in the edge with serial {serial}')
-        self._logger.info('Attempting service affecting ticket creation')
+        self._logger.info(f'Attempting service affecting ticket creation for edge with serial {serial}')
 
         ticket_note = self._ticket_object_to_string(ticket_dict)
 
@@ -229,7 +235,7 @@ class BouncingDetector:
                     self._logger.error(f"No ticket details matching the serial number {serial}")
                     return
                 if self._is_ticket_resolved(ticket_details):
-                    self._logger.info(f'Service Affecting ticket'
+                    self._logger.info(f'A resolved service Affecting ticket '
                                       f'detected in edge with serial {serial}. '
                                       f'Ticket: {ticket}. Re-opening ticket..')
                     ticket_id = ticket['ticketID']
@@ -238,7 +244,8 @@ class BouncingDetector:
                     if open_ticket_response['status'] not in range(200, 300):
                         return
                     slack_message = (
-                        f'Affecting ticket {ticket_id} reopened. Details at https://app.bruin.com/t/{ticket_id}'
+                        f'Affecting ticket {ticket_id} reopened through bouncing-detector service. '
+                        f'Details at https://app.bruin.com/t/{ticket_id}'
                     )
                     reopen_ticket_note = self._ticket_object_to_string_without_watermark(ticket_dict)
 
@@ -246,10 +253,14 @@ class BouncingDetector:
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, reopen_ticket_note)
 
                 else:
+                    self._logger.info(f'A unresolved service Affecting ticket '
+                                      f'detected in edge with serial {serial}. '
+                                      f'Ticket: {ticket}. Appending ticket note..')
                     ticket_id = ticket["ticketID"]
                     await self._bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
 
-                    slack_message = f'Appending Circuit Instability note to ticket id: {ticket_id}\n' \
+                    slack_message = f'Appending Circuit Instability note to unresolved ticket ' \
+                                    f'with ticket id: {ticket_id}\n' \
                                     f'https://app.bruin.com/t/{ticket_id} , in ' \
                                     f'{self._config.BOUNCING_DETECTOR_CONFIG["environment"]}'
                     await self._notifications_repository.send_slack_message(slack_message)
@@ -258,6 +269,7 @@ class BouncingDetector:
         edge_triage_str = "#*MetTel's IPA*#\n"
         if watermark is not None:
             edge_triage_str = f"{watermark}\n"
+        edge_triage_str = edge_triage_str + 'Trouble: Circuit Instability\n\n'
         for key in ticket_dict.keys():
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
             edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]}\n'
