@@ -188,6 +188,118 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def get_ticket_test(self):
+        ticket_id = 11111
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': {
+                "clientID": 83109,
+                "ticketID": ticket_id,
+                "ticketStatus": "Resolved",
+                "address": {
+                    "address": "323 Marble Mill Rd NW",
+                    "city": "Marietta",
+                    "state": "GA",
+                    "zip": "30060-1037",
+                    "country": "USA",
+                },
+                "createDate": "9/8/2020 11:40:11 PM",
+                "createdBy": "Intelygenz Ai",
+                "callType": "REP",
+                "category": "VOO",
+                "severity": 3,
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.get_ticket(ticket_id)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.single_ticket.basic.request", request, timeout=15)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def get_ticket_with_rpc_request_failing_test(self):
+        ticket_id = 11111
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+            },
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.get_ticket(ticket_id)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.single_ticket.basic.request", request, timeout=15)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_with_rpc_request_returning_non_2xx_status_test(self):
+        ticket_id = 11111
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.get_ticket(ticket_id)
+
+        event_bus.rpc_request.assert_awaited_once_with("bruin.single_ticket.basic.request", request, timeout=15)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == response
+
+    @pytest.mark.asyncio
     async def get_ticket_details_test(self):
         ticket_id = 11111
 
@@ -2385,7 +2497,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def change_ticket_severity_for_offline_edge_test(self):
         ticket_id = 12345
-        severity_level = testconfig.MONITOR_CONFIG['severity_levels']['medium_high']
+        severity_level = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
         reason_for_change = os.linesep.join([
             "#*MetTel's IPA*#",
             f'Changing to Severity {severity_level}',
@@ -2414,7 +2526,7 @@ class TestBruinRepository:
         ]
 
         ticket_id = 12345
-        severity_level = testconfig.MONITOR_CONFIG['severity_levels']['medium_low']
+        severity_level = testconfig.MONITOR_CONFIG['severity_by_outage_type']['link_down']
         reason_for_change = os.linesep.join([
             "#*MetTel's IPA*#",
             f'Changing to Severity {severity_level}',

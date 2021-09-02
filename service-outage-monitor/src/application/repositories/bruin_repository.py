@@ -90,6 +90,41 @@ class BruinRepository:
 
         return response
 
+    async def get_ticket(self, ticket_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting info of ticket {ticket_id}...')
+            response = await self._event_bus.rpc_request("bruin.single_ticket.basic.request", request, timeout=15)
+        except Exception as e:
+            err_msg = f'An error occurred when requesting info of ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Got info of ticket {ticket_id} from Bruin!')
+            else:
+                err_msg = (
+                    f'Error while retrieving info of ticket {ticket_id} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_ticket_details(self, ticket_id: int):
         err_msg = None
 
@@ -654,7 +689,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, task_result_note, service_numbers=[serial_number])
 
     async def change_ticket_severity_for_offline_edge(self, ticket_id: int):
-        severity_level = self._config.MONITOR_CONFIG['severity_levels']['medium_high']
+        severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
         reason_for_change = os.linesep.join([
             "#*MetTel's IPA*#",
             f'Changing to Severity {severity_level}',
@@ -663,7 +698,7 @@ class BruinRepository:
         return await self.change_ticket_severity(ticket_id, severity_level, reason_for_change)
 
     async def change_ticket_severity_for_disconnected_links(self, ticket_id: int, links: List[str]):
-        severity_level = self._config.MONITOR_CONFIG['severity_levels']['medium_low']
+        severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']
 
         reason_for_change_lines = [
             "#*MetTel's IPA*#",

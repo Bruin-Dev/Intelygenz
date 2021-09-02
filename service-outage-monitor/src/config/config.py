@@ -17,6 +17,13 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+SEVERITY_LEVELS = {
+    'high': 1,
+    'medium_high': 2,
+    'medium_low': 3,
+    'low': 4,
+}
+
 quarantine_time = 60 * 3
 
 
@@ -58,11 +65,9 @@ MONITOR_CONFIG = {
     'autoresolve_last_outage_seconds': 75 * 60,
     'last_digi_reboot_seconds': 30 * 60,
     'semaphore': 5,
-    'severity_levels': {
-        'high': 1,
-        'medium_high': 2,
-        'medium_low': 3,
-        'low': 4,
+    'severity_by_outage_type': {
+        'edge_down': SEVERITY_LEVELS['medium_high'],
+        'link_down': SEVERITY_LEVELS['medium_low'],
     },
 }
 

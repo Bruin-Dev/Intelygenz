@@ -8,6 +8,7 @@ from datetime import timedelta
 from ipaddress import ip_address
 from time import perf_counter
 from typing import Callable
+from typing import Coroutine
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -1001,12 +1002,16 @@ class OutageMonitor:
 
         serial_number = edge_status['edgeSerialNumber']
 
+        change_severity_task: Coroutine = None
+        target_severity_level = None
+
         if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
             self._logger.info(
                 f'Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue '
                 f'is that edge {serial_number} is offline.'
             )
-            await self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
+            change_severity_task = self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
+            target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
         else:
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
@@ -1030,12 +1035,32 @@ class OutageMonitor:
             disconnected_links = self._outage_repository.find_disconnected_links(edge_status['links'])
             disconnected_interfaces = [link['interface'] for link in disconnected_links]
 
-            await self._bruin_repository.change_ticket_severity_for_disconnected_links(
+            change_severity_task = self._bruin_repository.change_ticket_severity_for_disconnected_links(
                 ticket_id, disconnected_interfaces
             )
+            target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']
 
-        self._logger.info(f'Finished changing severity level of ticket {ticket_id}!')
+        get_ticket_response = await self._bruin_repository.get_ticket(ticket_id)
+        if not get_ticket_response['status'] in range(200, 300):
+            change_severity_task.close()
+            return
+
+        ticket_info = get_ticket_response['body']
+        if self._is_ticket_already_in_severity_level(ticket_info, target_severity_level):
+            self._logger.info(
+                f'Ticket {ticket_id} is already in severity level {target_severity_level}, so there is no need '
+                'to change it.'
+            )
+            change_severity_task.close()
+            return
+
+        await change_severity_task
+        self._logger.info(f'Finished changing severity level of ticket {ticket_id} to {target_severity_level}!')
 
     def _has_ticket_multiple_unresolved_tasks(self, ticket_tasks: list) -> bool:
         unresolved_tasks = [task for task in ticket_tasks if not self._is_detail_resolved(task)]
         return len(unresolved_tasks) > 1
+
+    @staticmethod
+    def _is_ticket_already_in_severity_level(ticket_info: dict, severity_level: int) -> bool:
+        return ticket_info['severity'] == severity_level

@@ -11062,6 +11062,18 @@ class TestServiceOutageMonitor:
             ],
         }
 
+        ticket_info = {
+            # Some fields omitted for simplicity
+            "ticketID": ticket_id,
+            "severity": 3,
+        }
+        get_ticket_response = {
+            'body': ticket_info,
+            'status': 200,
+        }
+
+        target_severity_level = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -11077,16 +11089,20 @@ class TestServiceOutageMonitor:
         outage_repository.is_faulty_edge = Mock(return_value=True)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
+        outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
 
+        bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
+        outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
         bruin_repository.change_ticket_severity_for_offline_edge.assert_awaited_once_with(ticket_id)
 
     @pytest.mark.asyncio
@@ -11132,6 +11148,18 @@ class TestServiceOutageMonitor:
             link_3_interface,
         ]
 
+        ticket_info = {
+            # Some fields omitted for simplicity
+            "ticketID": ticket_id,
+            "severity": 3,
+        }
+        get_ticket_response = {
+            'body': ticket_info,
+            'status': 200,
+        }
+
+        target_severity_level = testconfig.MONITOR_CONFIG['severity_by_outage_type']['link_down']
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -11148,15 +11176,19 @@ class TestServiceOutageMonitor:
         outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
+        outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
 
+        bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
+        outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
             ticket_id, disconnected_interfaces
         )
@@ -11221,6 +11253,18 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
+        ticket_info = {
+            # Some fields omitted for simplicity
+            "ticketID": ticket_id,
+            "severity": 3,
+        }
+        get_ticket_response = {
+            'body': ticket_info,
+            'status': 200,
+        }
+
+        target_severity_level = testconfig.MONITOR_CONFIG['severity_by_outage_type']['link_down']
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -11238,6 +11282,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
@@ -11245,11 +11290,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=False)
+        outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
+        bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
+        outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
             ticket_id, disconnected_interfaces
         )
@@ -11333,6 +11381,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.get_ticket = CoroutineMock()
         bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
@@ -11340,11 +11389,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
+        outage_monitor._is_ticket_already_in_severity_level = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
+        bruin_repository.get_ticket.assert_not_awaited()
+        outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -11410,6 +11462,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.get_ticket = CoroutineMock()
         bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
@@ -11417,12 +11470,116 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
+        outage_monitor._is_ticket_already_in_severity_level = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_not_called()
+        bruin_repository.get_ticket.assert_not_awaited()
+        outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_retrieval_of_ticket_info_returning_non_2xx_status_test(self):
+        ticket_id = 12345
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'DISCONNECTED',
+            'edgeSerialNumber': 'VC1234567',
+            'links': [
+                # No links specified for simplicity
+            ],
+        }
+
+        get_ticket_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=True)
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
+        bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        outage_monitor._is_ticket_already_in_severity_level = Mock()
+
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
+
+        bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
+        outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
+        bruin_repository.change_ticket_severity_for_offline_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def change_ticket_severity_with_ticket_already_in_target_severity_level_test(self):
+        ticket_id = 12345
+        edge_status = {
+            # Some fields omitted for simplicity
+            'edgeState': 'DISCONNECTED',
+            'edgeSerialNumber': 'VC1234567',
+            'links': [
+                # No links specified for simplicity
+            ],
+        }
+
+        ticket_info = {
+            # Some fields omitted for simplicity
+            "ticketID": ticket_id,
+            "severity": 3,
+        }
+        get_ticket_response = {
+            'body': ticket_info,
+            'status': 200,
+        }
+
+        target_severity_level = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(return_value=True)
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
+        bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository)
+        outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=True)
+
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
+
+        bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
+        outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
+        bruin_repository.change_ticket_severity_for_offline_edge.assert_not_awaited()
 
     def has_ticket_multiple_unresolved_tasks_test(self):
         event_bus = Mock()
@@ -11504,3 +11661,18 @@ class TestServiceOutageMonitor:
         ]
         result = outage_monitor._has_ticket_multiple_unresolved_tasks(ticket_tasks)
         assert result is True
+
+    def is_ticket_already_in_severity_level_test(self):
+        ticket_info = {
+            # Some fields omitted for simplicity
+            "ticketID": 12345,
+            "severity": 3,
+        }
+
+        severity_level = 3
+        result = OutageMonitor._is_ticket_already_in_severity_level(ticket_info, severity_level)
+        assert result is True
+
+        severity_level = 2
+        result = OutageMonitor._is_ticket_already_in_severity_level(ticket_info, severity_level)
+        assert result is False
