@@ -9,7 +9,7 @@ metadata:
 data:
   API_SERVER_ENDPOINT_PREFIX: "{{ .Values.config.api_server_endpoint_prefix }}"
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment }}
-  ENVIRONMENT_NAME: {{ .Values.global.environment }}
+  ENVIRONMENT_NAME: "{{ .Values.global.environment }}"
   NATS_SERVER1: {{ .Values.global.nats_server }}
   REDIS_HOSTNAME: {{ .Values.global.redis_hostname }}
   REDIS_EMAIL_TAGGER_HOSTNAME: {{ .Values.global.redis_email_tagger_hostname }}

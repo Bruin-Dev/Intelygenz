@@ -10,7 +10,7 @@ spec:
     {{ if eq .Values.global.environment "production" }}
     - host: master.mettel-automation.net
     {{ else }}
-    - host: {{ .Values.global.environment }}.mettel-automation.net
+    - host: {{ .Values.global.environment }}-dev.mettel-automation.net
     {{ end }}
       http:
         paths:

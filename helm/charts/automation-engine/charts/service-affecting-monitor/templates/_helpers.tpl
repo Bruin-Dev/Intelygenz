@@ -35,7 +35,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 project: mettel-automation
 component: service-affecting-monitor
 microservice-type: case-of-use
-environment-name: {{ .Values.global.environment }}
+environment-name: "{{ .Values.global.environment }}"
 current-environment: {{ .Values.global.current_environment }}
 {{- end }}
 

@@ -34,7 +34,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 project: mettel-automation
 component: cts-bridge
 microservice-type: capability
-environment-name: {{ .Values.global.environment }}
+environment-name: "{{ .Values.global.environment }}"
 current-environment: {{ .Values.global.current_environment }}
 {{- end }}
 
