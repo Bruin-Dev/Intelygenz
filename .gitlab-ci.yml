@@ -111,7 +111,7 @@ semantic-release:
     name: production
   script:
     - yarn bootstrap
-    - yarn global add multi-semantic-release
+    - yarn global add multi-semantic-release@2.8.4
     - apk add --update git bash
     - multi-semantic-release
   resource_group: semantic-release
