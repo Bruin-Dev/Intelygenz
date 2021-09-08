@@ -56,7 +56,6 @@
     "./tnba-monitor",
     "./velocloud-bridge"
   ],
-  "private": true,
   "publishConfig": {
     "access": "restricted"
   }
