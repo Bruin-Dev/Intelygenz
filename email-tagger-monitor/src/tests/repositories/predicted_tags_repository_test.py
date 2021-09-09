@@ -39,7 +39,7 @@ class TestPredictedTagsRepository:
             "email_id": "123456",
             "tag_id": "123"
         }
-        response = predicted_tags_repository.save_new_tag(tag_data)
+        response = predicted_tags_repository.save_new_tag(**tag_data)
 
         storage_repository.save.assert_called_once_with(expected_tag, tag_data)
         assert response is None
