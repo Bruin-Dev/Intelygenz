@@ -16,7 +16,7 @@ uuid_mock = patch.object(new_emails_monitor_module, 'uuid', return_value=uuid_)
 
 
 @pytest.fixture
-def get_emails_monitor_mock_instance():
+def new_emails_monitor():
     event_bus = Mock()
     logger = Mock()
     scheduler = Mock()
@@ -53,9 +53,7 @@ class TestNewEmailsMonitor:
         assert new_emails_monitor._predicted_tag_repository is predicted_tag_repository
 
     @pytest.mark.asyncio
-    async def start_new_emails_monitor_job_with_exec_on_start_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    async def start_new_emails_monitor_job_with_exec_on_start_test(self, new_emails_monitor):
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -63,7 +61,7 @@ class TestNewEmailsMonitor:
             with patch.object(new_emails_monitor_module, 'timezone', new=Mock()):
                 await new_emails_monitor.start_email_events_monitor(exec_on_start=True)
 
-        new_emails_monitor.scheduler.add_job.assert_called_once_with(
+        new_emails_monitor._scheduler.add_job.assert_called_once_with(
             new_emails_monitor._run_new_emails_polling, 'interval',
             seconds=testconfig.MONITOR_CONFIG['scheduler_config']['new_emails_seconds'],
             next_run_time=next_run_time,
@@ -72,9 +70,7 @@ class TestNewEmailsMonitor:
         )
 
     @pytest.mark.asyncio
-    async def new_emails_monitor_process_ok_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    async def new_emails_monitor_process_ok_test(self, new_emails_monitor):
         pending_emails = [
             {'email': {'email_id': '100'}},
             {'email': {'email_id': '101'}},
@@ -104,9 +100,7 @@ class TestNewEmailsMonitor:
         ], any_order=True)
 
     @pytest.mark.asyncio
-    async def new_emails_monitor_process_tag_already_present_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    async def new_emails_monitor_process_tag_already_present_test(self, new_emails_monitor):
         email_id = "TEST101"
         pending_email = {'email': {'email_id': email_id}}
         prediction_tag_id = "1001"
@@ -131,9 +125,7 @@ class TestNewEmailsMonitor:
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
 
     @pytest.mark.asyncio
-    async def _process_new_email_ok_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    async def _process_new_email_ok_test(self, new_emails_monitor):
         email_id = "123456"
         email_data = {
             "email": {
@@ -169,9 +161,7 @@ class TestNewEmailsMonitor:
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
 
     @pytest.mark.asyncio
-    async def _process_new_email_non_2xx_get_prediction_status_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    async def _process_new_email_non_2xx_get_prediction_status_test(self, new_emails_monitor):
         email_id = "123456"
         email_data = {
             "email": {
@@ -198,9 +188,7 @@ class TestNewEmailsMonitor:
         new_emails_monitor._new_emails_repository.mark_complete.assert_not_called()
 
     @pytest.mark.asyncio
-    async def _process_new_email_non_2xx_post_email_tag_status_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    async def _process_new_email_non_2xx_post_email_tag_status_test(self, new_emails_monitor):
         email_id = "123456"
         email_data = {
             "email": {
@@ -236,9 +224,7 @@ class TestNewEmailsMonitor:
         new_emails_monitor._predicted_tag_repository.save_new_tag.assert_not_called()
         new_emails_monitor._new_emails_repository.mark_complete.assert_not_called()
 
-    def get_most_probable_tag_id_test(self):
-        new_emails_monitor = get_emails_monitor_mock_instance()
-
+    def get_most_probable_tag_id_test(self, new_emails_monitor):
         tag_id = new_emails_monitor.get_most_probable_tag_id([
             {'tag_id': 'WRONG1', 'probability': 0.1},
             {'tag_id': 'WRONG2', 'probability': 0.2},

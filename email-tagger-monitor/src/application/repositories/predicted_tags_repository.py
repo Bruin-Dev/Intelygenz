@@ -15,7 +15,7 @@ class PredictedTagsRepository:
         key = f"tag_email_{email_id}"
         self._logger.info(f"saving predicted tag_id='{tag_id}' with email_id='{email_id}'")
         new_pred = {"email_id": email_id,
-                    "predicted_tag_id": tag_id}
+                    "tag_id": tag_id}
         self._storage_repository.save(key, new_pred)
 
     def mark_complete(self, email_id: str):
