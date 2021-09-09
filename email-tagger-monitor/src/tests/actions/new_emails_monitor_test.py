@@ -15,6 +15,20 @@ uuid_ = uuid()
 uuid_mock = patch.object(new_emails_monitor_module, 'uuid', return_value=uuid_)
 
 
+@pytest.fixture
+def get_emails_monitor_mock_instance():
+    event_bus = Mock()
+    logger = Mock()
+    scheduler = Mock()
+    config = testconfig
+    bruin_repository = Mock()
+    predicted_tag_repository = Mock()
+    new_emails_repository = Mock()
+    email_tagger_repository = Mock()
+    return NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
+                            email_tagger_repository, bruin_repository, predicted_tag_repository)
+
+
 class TestNewEmailsMonitor:
 
     def instance_test(self):
@@ -23,10 +37,11 @@ class TestNewEmailsMonitor:
         scheduler = Mock()
         config = testconfig
         bruin_repository = Mock()
+        predicted_tag_repository = Mock()
         new_emails_repository = Mock()
         email_tagger_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+                                              email_tagger_repository, bruin_repository, predicted_tag_repository)
 
         assert new_emails_monitor._event_bus is event_bus
         assert new_emails_monitor._logger is logger
@@ -35,18 +50,12 @@ class TestNewEmailsMonitor:
         assert new_emails_monitor._bruin_repository is bruin_repository
         assert new_emails_monitor._email_tagger_repository is email_tagger_repository
         assert new_emails_monitor._new_emails_repository is new_emails_repository
+        assert new_emails_monitor._predicted_tag_repository is predicted_tag_repository
 
     @pytest.mark.asyncio
     async def start_new_emails_monitor_job_with_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
+
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -54,7 +63,7 @@ class TestNewEmailsMonitor:
             with patch.object(new_emails_monitor_module, 'timezone', new=Mock()):
                 await new_emails_monitor.start_email_events_monitor(exec_on_start=True)
 
-        scheduler.add_job.assert_called_once_with(
+        new_emails_monitor.scheduler.add_job.assert_called_once_with(
             new_emails_monitor._run_new_emails_polling, 'interval',
             seconds=testconfig.MONITOR_CONFIG['scheduler_config']['new_emails_seconds'],
             next_run_time=next_run_time,
@@ -64,15 +73,7 @@ class TestNewEmailsMonitor:
 
     @pytest.mark.asyncio
     async def new_emails_monitor_process_ok_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
 
         pending_emails = [
             {'email': {'email_id': '100'}},
@@ -104,15 +105,7 @@ class TestNewEmailsMonitor:
 
     @pytest.mark.asyncio
     async def new_emails_monitor_process_tag_already_present_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
 
         email_id = "TEST101"
         pending_email = {'email': {'email_id': email_id}}
@@ -139,15 +132,7 @@ class TestNewEmailsMonitor:
 
     @pytest.mark.asyncio
     async def _process_new_email_ok_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
 
         email_id = "123456"
         email_data = {
@@ -179,19 +164,13 @@ class TestNewEmailsMonitor:
         new_emails_monitor._email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
         new_emails_monitor._bruin_repository.post_email_tag.assert_awaited_once_with(email_data["email"]["email_id"],
                                                                                      prediction_response[0]['tag_id'])
+        new_emails_monitor._predicted_tag_repository.save_new_tag.assert_called_once_with(
+            email_id, prediction_response[0]['tag_id'])
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
 
     @pytest.mark.asyncio
     async def _process_new_email_non_2xx_get_prediction_status_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
 
         email_id = "123456"
         email_data = {
@@ -215,19 +194,12 @@ class TestNewEmailsMonitor:
 
         new_emails_monitor._email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
         new_emails_monitor._bruin_repository.post_email_tag.assert_not_awaited()
+        new_emails_monitor._predicted_tag_repository.save_new_tag.assert_not_called()
         new_emails_monitor._new_emails_repository.mark_complete.assert_not_called()
 
     @pytest.mark.asyncio
     async def _process_new_email_non_2xx_post_email_tag_status_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
 
         email_id = "123456"
         email_data = {
@@ -261,18 +233,11 @@ class TestNewEmailsMonitor:
         new_emails_monitor._email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
         new_emails_monitor._bruin_repository.post_email_tag.assert_awaited_once_with(email_data["email"]["email_id"],
                                                                                      prediction_response[0]['tag_id'])
+        new_emails_monitor._predicted_tag_repository.save_new_tag.assert_not_called()
         new_emails_monitor._new_emails_repository.mark_complete.assert_not_called()
 
     def get_most_probable_tag_id_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        new_emails_repository = Mock()
-        email_tagger_repository = Mock()
-        new_emails_monitor = NewEmailsMonitor(event_bus, logger, scheduler, config, new_emails_repository,
-                                              email_tagger_repository, bruin_repository)
+        new_emails_monitor = get_emails_monitor_mock_instance()
 
         tag_id = new_emails_monitor.get_most_probable_tag_id([
             {'tag_id': 'WRONG1', 'probability': 0.1},
