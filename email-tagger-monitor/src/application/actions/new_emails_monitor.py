@@ -10,7 +10,7 @@ from pytz import timezone
 
 class NewEmailsMonitor:
     def __init__(self, event_bus, logger, scheduler, config, new_emails_repository, email_tagger_repository,
-                 bruin_repository):
+                 bruin_repository, tag_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -18,6 +18,7 @@ class NewEmailsMonitor:
         self._new_emails_repository = new_emails_repository
         self._email_tagger_repository = email_tagger_repository
         self._bruin_repository = bruin_repository
+        self._predicted_tag_repository = tag_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['new_emails_concurrent'])
 
     async def start_email_events_monitor(self, exec_on_start=False):
@@ -77,6 +78,9 @@ class NewEmailsMonitor:
                 # NOTE: Status 409 means "Tag already present", and the email is treated as complete
                 if not (response["status"] in range(200, 300) or response["status"] == 409):
                     return
+
+            # add predicted tag to DB
+            self._predicted_tag_repository.save_new_tag(email_id, tag_id)
 
             # Remove from DB
             self._new_emails_repository.mark_complete(email_id)
