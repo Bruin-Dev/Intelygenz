@@ -2,6 +2,10 @@
   "name": "automation-engine",
   "version": "1.0.0",
   "description": "Lerna automation-engine monorepo configuration",
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  },
   "directories": {
     "doc": "docs"
   },
@@ -20,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "lerna": "4.0.0",
-    "multi-semantic-release": "2.8.4",
+    "multi-semantic-release": "2.8.5",
     "semantic-release": "17.4.7",
     "@semantic-release/gitlab": "6.2.2"
   },
@@ -79,9 +83,5 @@
     "./tnba-feedback",
     "./tnba-monitor",
     "./velocloud-bridge"
-  ],
-  "private": true,
-  "publishConfig": {
-    "access": "restricted"
-  }
+  ]
 }
