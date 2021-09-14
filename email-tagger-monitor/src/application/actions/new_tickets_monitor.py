@@ -57,6 +57,16 @@ class NewTicketsMonitor:
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info("NewTicketsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
 
+    def _check_error(self, error_code: int, ticket_id: int, email_id: str):
+        if error_code == 404:
+            # Increase error counter for ticket
+            error_counter = self._new_tickets_repository.increase_ticket_error_counter(
+                ticket_id, error_code)
+            # If max value reached, delete ticket from storage
+            if error_counter >= self._config.MONITOR_CONFIG["max_retries_error_404"]:
+                self._new_tickets_repository.delete_ticket(email_id, ticket_id)
+                self._new_tickets_repository.delete_ticket_error_counter(ticket_id, error_code)
+
     async def _save_metrics(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
         ticket_id = int(ticket_data["ticket_id"])
@@ -65,6 +75,9 @@ class NewTicketsMonitor:
 
             # Get more info from Bruin
             ticket_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
+
+            if ticket_response["status"] == 404:
+                self._check_error(404, ticket_id, email_id)
 
             if ticket_response["status"] not in range(200, 300):
                 return

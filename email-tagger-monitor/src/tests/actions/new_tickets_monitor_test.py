@@ -16,6 +16,19 @@ uuid_ = uuid()
 uuid_mock = patch.object(new_tickets_monitor_module, 'uuid', return_value=uuid_)
 
 
+@pytest.fixture
+def new_tickets_monitor():
+    event_bus = Mock()
+    logger = Mock()
+    scheduler = Mock()
+    config = testconfig
+    bruin_repository = Mock()
+    new_tickets_repository = Mock()
+    email_tagger_repository = Mock()
+    return NewTicketsMonitor(event_bus, logger, scheduler, config, new_tickets_repository,
+                             email_tagger_repository, bruin_repository)
+
+
 class TestNewTicketsMonitor:
 
     def instance_test(self):
@@ -147,3 +160,33 @@ class TestNewTicketsMonitor:
         new_tickets_monitor._email_tagger_repository.save_metrics.assert_awaited_once_with(email_data,
                                                                                            ticket_basic_info)
         new_tickets_monitor._new_tickets_repository.mark_complete.assert_called_once_with(email_id, ticket_id)
+
+    @pytest.mark.asyncio
+    async def _save_metrics_404_error(self, new_tickets_monitor):
+        email_id = "100"
+        ticket_id = 200
+        client_id = 300
+        error_code = 404
+        email_data = {'email': {'email_id': email_id, 'client_id': client_id}}
+        ticket_data = {'ticket_id': '200'}
+        ticket_basic_info = {'ticket_id': ticket_id, 'ticket_type': 'BIL'}
+
+        new_tickets_monitor._email_tagger_repository.save_metrics = CoroutineMock(return_value={'status': 200})
+        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value={
+            'status': error_code,
+            'body': ticket_basic_info
+        })
+        new_tickets_monitor._new_tickets_repository.mark_complete = Mock()
+        new_tickets_monitor._config.MONITOR_CONFIG["max_retries_error_404"] = 1
+
+        await new_tickets_monitor._save_metrics(email_data, ticket_data)
+
+        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info.assert_awaited_once_with(ticket_id)
+
+        new_tickets_monitor._new_tickets_repository.delete_ticket.assert_awaited_once_with(email_id, ticket_id)
+        new_tickets_monitor._new_tickets_repository.delete_ticket.delete_ticket_error_counter(ticket_id, error_code)
+        new_tickets_monitor._new_tickets_repository.increase_ticket_error_counter.assert_awaited_once_with(
+            ticket_id, error_code)
+
+        new_tickets_monitor._email_tagger_repository.save_metrics.assert_not_called()
+        new_tickets_monitor._new_tickets_repository.mark_complete.assert_not_called()

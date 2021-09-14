@@ -18,6 +18,7 @@ NATS_CONFIG = {
 
 MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
+    'max_retries_error_404': 5,
     'scheduler_config': {
         'new_emails_seconds': 10,
         'new_tickets_seconds': 10

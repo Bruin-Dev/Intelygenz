@@ -5,6 +5,17 @@ from application.repositories.new_tickets_repository import NewTicketsRepository
 from config import testconfig
 
 
+@pytest.fixture
+def new_emails_repository():
+    logger = Mock()
+    config = testconfig
+    notifications_repository = Mock()
+    storage_repository = Mock()
+
+    return NewTicketsRepository(logger, config, notifications_repository,
+                                storage_repository)
+
+
 class TestEmailTaggerRepository:
     def instance_test(self):
         logger = Mock()
@@ -86,3 +97,17 @@ class TestEmailTaggerRepository:
 
         storage_repository.remove.assert_called_once_with(expected_id)
         assert response is None
+
+    def increase_ticket_error_counter_ok_test(self, new_emails_repository):
+        ticket_id = 1001
+        error_code = 404
+        key = f"error_{error_code}_ticket_{ticket_id}"
+        new_emails_repository.increase_ticket_error_counter(ticket_id, error_code)
+        new_emails_repository._storage_repository.increment.assert_called_once_with(key)
+
+    def delete_ticket_error_counter_ok_test(self, new_emails_repository):
+        ticket_id = 1001
+        error_code = 404
+        key = f"error_{error_code}_ticket_{ticket_id}"
+        new_emails_repository.delete_ticket_error_counter(ticket_id, error_code)
+        new_emails_repository._storage_repository.remove.assert_called_once_with(key)

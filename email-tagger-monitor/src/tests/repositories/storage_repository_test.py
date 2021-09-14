@@ -89,3 +89,9 @@ class TestStorageRepository:
 
         storage_repository._redis.delete.assert_called_once_with(fixed_key_1, fixed_key_2)
         assert actual is None
+
+    def increment_test(self, storage_repository):
+        key = "incr_test"
+        storage_key = f"{storage_repository._config.ENVIRONMENT_NAME}-{key}"
+        storage_repository.increment(key)
+        storage_repository._redis.incr.assert_called_once_with(storage_key, amount=1)
