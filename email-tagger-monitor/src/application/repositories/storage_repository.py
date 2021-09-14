@@ -34,7 +34,7 @@ class StorageRepository:
 
     def increment(self, key):
         key = f'{self._redis_key_prefix}-{key}'
-        self._redis.incr(key, amount=1)
+        return self._redis.incr(key, amount=1)
 
     def remove(self, *keys):
         keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
