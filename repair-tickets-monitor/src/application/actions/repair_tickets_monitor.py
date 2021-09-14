@@ -58,30 +58,92 @@ class RepairTicketsMonitor:
     async def _process_repair_email(self, email_data: dict):
         # TODO: define the new logic
         email_id = email_data["email"]["email_id"]
+        client_id = email_data["email"]["client_id"]
         parent_id = email_data["email"].get("parent_id", None)
 
         async with self._semaphore:
             # Get tag from KRE
-            # response = await self._repair_tickets_kre_repository.get_prediction(email_data)
+            # prediction_response = await self._repair_tickets_kre_repository.get_prediction(email_data)
+            # prediction = response.get('body')
+            # if prediction_response["status"] not in range(200, 300):
+            #     return
+
             # TODO: change
-            response = {}
-            prediction = response.get('body')
-            if response["status"] not in range(200, 300):
-                return
 
-            if prediction is not None and len(prediction) > 0:
-                self._logger.info(
-                    f"Got prediction with {len(prediction)} tags from KRE [email_id='{email_id}', "
-                    f"parent_id='{parent_id}'] {prediction}"
-                )
-                # Send tag to Bruin
-                # response = await self._bruin_repository.post_email_tag(email_id, tag_id)
-                # TODO: change
-                response = {}
+            prediction_response = {
+                'status': 200,
+                'body': {
+                    'above_threshold': True,
+                    'in_validation_set': False,
+                    'service_numbers': [
+                        '2109677750'
+                    ],
+                    'prediction_class': 'VOO'
+                }
+            }
+            prediction = prediction_response.get('body')
 
-                # NOTE: Status 409 means "Tag already present", and the email is treated as complete
-                if not (response["status"] in range(200, 300) or response["status"] == 409):
-                    return
+            contact_info_by_site_id = {}
+            if prediction['above_threshold'] and not prediction['in_validation_set']:
+                for service_number in prediction['service_numbers']:
+                    client_info_response = await self._bruin_repository.get_client_info(client_id, service_number)
+                    if client_info_response['status'] not in range(200, 300):
+                        self._logger.info("TODO: error")
+                        continue
+
+                    client_info = client_info_response.get('body', [])
+                    if not client_info:
+                        self._logger.info("TODO: err, empty body for site id")
+                        continue
+
+                    # TODO: check where to get the first site id
+                    client_info = client_info[0]
+                    site_id = client_info['site_id']
+
+                    contact_info_response = self._bruin_repository.get_site(client_id, site_id)
+                    site_contact_info = {
+                        "primary_contact_name": contact_info_response['body']["primaryContactName"],
+                        "primary_contact_phone": contact_info_response['body']["primaryContactPhone"],
+                        "primary_contact_email": contact_info_response['body']["primaryContactEmail"]
+                    }
+
+                    # TODO: check if the contact info is filled, otherwise don't created the ticket
+                    #  or created with other endpoint info
+                    ticket_contact_info = {}  # ???
+
+                    contact_info_by_site_id[client_info_response['body']['site_id']] = site_contact_info
+                    # TODO: create ticket
+                    if prediction_response['prediction_class'] == 'VOO':
+                        self._logger.info("TODO: create ticket for VOO or VAS ???")
+                        create_outage_ticket_response = self._bruin_repository.create_outage_ticket(
+                            client_id, service_number)
+                        if create_outage_ticket_response['status'] not in range(200, 300):
+                            self._logger.error('TODO: error creating ticket')
+                            continue
+
+                        # TODO: remove
+                        create_outage_ticket_response = {
+                            'status': 200,
+                            'body': {
+                                "clientId": 0,
+                                "wtNs": [
+                                    "string"
+                                ],
+                                "referenceTicketNumber": "string",
+                                "requestDescription": "string",
+                                "localContact": {
+                                    "name": "string",
+                                    "phone": "string",
+                                    "email": "string"
+                                }
+                            }
+                        }
+                        self._logger.info(
+                            f"VOO Ticket created for client_id {client_id} and service_number {service_number} - "
+                            f"{create_outage_ticket_response.get('body')}")
+
+                    # self._repair_tickets_kre_repository.save_predictions(
+                    #     client_id, site_id, service_number, site_contact_info, prediction)
 
             # Remove from DB
             # self._repair_tickets_repository.mark_complete(email_id)
