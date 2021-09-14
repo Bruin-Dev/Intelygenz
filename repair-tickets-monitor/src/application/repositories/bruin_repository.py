@@ -64,3 +64,96 @@ class BruinRepository:
             return await get_site()
         except Exception as e:
             self._logger.error(f'Error getting client_id "{client_id}" and site_id "{site_id}" from Bruin: {e}')
+
+    async def get_client_info(self, client_id, service_number):
+        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
+                                     min=self._config.NATS_CONFIG['min']),
+               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        async def get_client_info():
+            err_msg = None
+            self._logger.info(f'Getting client_info for client_id "{client_id}" and service_number "{service_number}')
+            request_msg = {
+                "request_id": uuid(),
+                "body": {
+                    "client_id": client_id,
+                    "service_number": service_number,
+                }
+            }
+            try:
+                response = await self._event_bus.rpc_request("bruin.customer.get.info", request_msg, timeout=self._timeout)
+            except Exception as err:
+                err_msg = (
+                    f'An error occurred when getting client_info from Bruin, '
+                    f'for client_id "{client_id}" and service_number "{service_number}" -> {err}'
+                )
+                response = nats_error_response
+            else:
+                response_body = response['body']
+                response_status = response['status']
+
+                if response_status not in range(200, 300):
+                    err_msg = (
+                        f'Error getting basic info for client_id "{client_id}" and service_number "{service_number}" in '
+                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+                else:
+                    # TODO: review - return as array or just the first element or none if empty
+                    response['body'] = {
+                        'site': response['body'].get('documents', [])
+                    }
+
+            if err_msg:
+                self._logger.error(err_msg)
+                await self._notifications_repository.send_slack_message(err_msg)
+            else:
+                self._logger.info(f'client_info for client_id "{client_id}" and service_number "{service_number}" '
+                                  f'retrieved from Bruin')
+
+            return response
+
+        try:
+            return await get_client_info()
+        except Exception as e:
+            self._logger.error(f'Error getting client_id "{client_id}" and service_number "{service_number}" '
+                               f'from Bruin: {e}')
+
+    async def create_outage_ticket(self, client_id: int, service_number: str):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "client_id": client_id,
+                "service_number": service_number,
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Creating outage ticket for device {service_number} that belongs to client {client_id}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
+            self._logger.info(f'Outage ticket for device {service_number} that belongs to client {client_id} created!')
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when creating outage ticket for device {service_number} belong to client'
+                f'{client_id} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            is_bruin_custom_status = response_status in (409, 471, 472, 473)
+            if not (response_status in range(200, 300) or is_bruin_custom_status):
+                err_msg = (
+                    f'Error while creating outage ticket for device {service_number} that belongs to client '
+                    f'{client_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
