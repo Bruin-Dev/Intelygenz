@@ -895,3 +895,49 @@ class TestRefreshCache:
                 EdgeIdentifier(**instance_edges_refresh_cache[0]['edge'])
             ]
         }
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_pending_blacklisted_client_id_test(self, instance_refresh_cache,
+                                                                  instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+
+        bruin_client_info = {'client_id': 88748}
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
+        instance_edges_refresh_cache[0]['bruin_client_info'] = [bruin_client_info]
+        instance_edges_refresh_cache[0]['edge_name'] = "Big Boss"
+        links_configuration = [
+            {
+                'interfaces': ['GE1'],
+                'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'mode': 'PUBLIC',
+                'type': 'WIRED',
+                'last_active': '2020-09-29T04:45:15.000Z'
+            }
+        ]
+        instance_edges_refresh_cache[0]['links_configuration'] = links_configuration
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': [bruin_client_info, bruin_client_info], 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'Pending', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        instance_refresh_cache._invalid_edges = {
+            instance_edges_refresh_cache[0]['edge']['host']: []
+        }
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {
+            instance_edges_refresh_cache[0]['edge']['host']: [
+                EdgeIdentifier(**instance_edges_refresh_cache[0]['edge'])
+            ]
+        }

@@ -209,6 +209,12 @@ class RefreshCache:
                     self._invalid_edges[host].append(edge_identifier)
                     return
                 else:
+                    if management_status_response_body == "Pending" and client_id in \
+                            self._config.REFRESH_CONFIG['blacklisted_client_ids']:
+                        self._logger.info(f"Edge ({serial_number}) has management_status: Pending and has a blacklisted"
+                                          f"client_id: {client_id}. Skipping...")
+                        self._invalid_edges[host].append(edge_identifier)
+                        return
                     self._logger.info(f'Management status for {edge_identifier} seems active')
 
                 return {
