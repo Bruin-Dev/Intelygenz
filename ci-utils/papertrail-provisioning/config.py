@@ -29,177 +29,177 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"bruin-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[bruin-bridge] - logs",
-                    "repository": "automation-bruin-bridge"
+                    "repository": "bruin-bridge"
                 },
                 # {
                 #     "query": f"cts-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[cts-bridge] - logs",
-                #     "repository": "automation-cts-bridge"
+                #     "repository": "cts-bridge"
                 # },
                 {
                     "query": f"customer-cache AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER> AND -\"-customer-cache\"",
                     "search_name": f"[customer-cache] - logs",
-                    "repository": "automation-customer-cache"
+                    "repository": "customer-cache"
                 },
                 {
                     "query": f"digi-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[digi-bridge] - logs",
-                    "repository": "automation-digi-bridge"
+                    "repository": "digi-bridge"
                 },
                 {
                     "query": f"digi-reboot-report AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[digi-reboot-report] - logs",
-                    "repository": "automation-digi-reboot-report"
+                    "repository": "digi-reboot-report"
                 },
                 # {
                 #     "query": f"dispatch-portal-backend AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[dispatch-portal-backend] - logs",
-                #     "repository": "automation-dispatch-portal-backend"
+                #     "repository": "dispatch-portal-backend"
                 # },
                 # {
                 #     "query": f"grafana AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[grafana] - logs",
-                #     "repository": "automation-metrics-dashboard/grafana"
+                #     "repository": "metrics-dashboard/grafana"
                 # },
                 {
                     "query": f"email-tagger-kre-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[email-tagger-kre-bridge] - logs",
-                    "repository": "automation-email-tagger-kre-bridge"
+                    "repository": "email-tagger-kre-bridge"
                 },
                 {
                     "query": f"email-tagger-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[email-tagger-monitor] - logs",
-                    "repository": "automation-email-tagger-monitor"
+                    "repository": "email-tagger-monitor"
                 },
                 {
                     "query": f"hawkeye-affecting-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-affecting-monitor] - logs",
-                    "repository": "automation-hawkeye-affecting-monitor"
+                    "repository": "hawkeye-affecting-monitor"
                 },
                 {
                     "query": f"hawkeye-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-bridge] - logs",
-                    "repository": "automation-hawkeye-bridge"
+                    "repository": "hawkeye-bridge"
                 },
                 {
                     "query": f"hawkeye-customer-cache AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-customer-cache] - logs",
-                    "repository": "automation-hawkeye-customer-cache"
+                    "repository": "hawkeye-customer-cache"
                 },
                 {
                     "query": f"hawkeye-outage-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-outage-monitor] - logs",
-                    "repository": "automation-hawkeye-outage-monitor"
+                    "repository": "hawkeye-outage-monitor"
                 },
                 {
                     "query": f"intermapper-outage-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[intermapper-outage-monitor] - logs",
-                    "repository": "automation-intermapper-outage-monitor"
+                    "repository": "intermapper-outage-monitor"
                 },
                 {
                     "query": f"last-contact-report AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[last-contact-report] - logs",
-                    "repository": "automation-last-contact-report"
+                    "repository": "last-contact-report"
                 },
                 {
                     "query": f"links-metrics-api AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[links-metrics-api] - logs",
-                    "repository": "automation-links-metrics-api"
+                    "repository": "links-metrics-api"
                 },
                 {
                     "query": f"links-metrics-collector AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[links-metrics-collector] - logs",
-                    "repository": "automation-links-metrics-collector"
+                    "repository": "links-metrics-collector"
                 },
                 # {
                 #     "query": f"lit-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[lit-bridge] - logs",
-                #     "repository": "automation-lit-bridge"
+                #     "repository": "lit-bridge"
                 # },
                 {
                     "query": f"lumin-billing-report AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[lumin-billing-report] - logs",
-                    "repository": "automation-lumin-billing-report"
+                    "repository": "lumin-billing-report"
                 },
                 {
                     "query": f"notifier AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[notifier] - logs",
-                    "repository": "automation-notifier"
+                    "repository": "notifier"
                 },
                 {
                     "query": f"NGINX AND <BUILD_NUMBER> AND {ENVIRONMENT_NAME}",
                     "search_name": f"[nginx] - logs",
-                    "repository": "automation-dispatch-portal-frontend/nginx"
+                    "repository": "dispatch-portal-frontend/nginx"
                 },
                 {
                     "query": f"service-affecting-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-affecting-monitor] - logs",
-                    "repository": "automation-service-affecting-monitor"
+                    "repository": "service-affecting-monitor"
                 },
                 # {
                 #     "query": f"service-dispatch-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[service-dispatch-monitor] - logs",
-                #     "repository": "automation-service-dispatch-monitor"
+                #     "repository": "service-dispatch-monitor"
                 # },
                 {
                     "query": f"service-outage-monitor-1 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-1] - logs",
-                    "repository": "automation-service-outage-monitor"
+                    "repository": "service-outage-monitor"
                 },
                 {
                     "query": f"service-outage-monitor-2 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-2] - logs",
-                    "repository": "automation-service-outage-monitor"
+                    "repository": "service-outage-monitor"
                 },
                 {
                     "query": f"service-outage-monitor-3 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-3] - logs",
-                    "repository": "automation-service-outage-monitor"
+                    "repository": "service-outage-monitor"
                 },
                 {
                     "query": f"service-outage-monitor-4 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-4] - logs",
-                    "repository": "automation-service-outage-monitor"
+                    "repository": "service-outage-monitor"
                 },
                 {
                     "query": f"service-outage-monitor-triage AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-triage] - logs",
-                    "repository": "automation-service-outage-monitor"
+                    "repository": "service-outage-monitor"
                 },
                 {
                     "query": f"sites-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[sites-monitor] - logs",
-                    "repository": "automation-sites-monitor"
+                    "repository": "sites-monitor"
                 },
                 {
                     "query": f"t7-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[t7-bridge] - logs",
-                    "repository": "automation-t7-bridge"
+                    "repository": "t7-bridge"
                 },
                 {
                     "query": f"ticket-collector AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[ticket-collector] - logs",
-                    "repository": "automation-ticket-collector"
+                    "repository": "ticket-collector"
                 },
                 {
                     "query": f"ticket-statistics AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[ticket-statistics] - logs",
-                    "repository": "automation-ticket-statistics"
+                    "repository": "ticket-statistics"
                 },
                 {
                     "query": f"tnba-feedback AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[tnba-feedback] - logs",
-                    "repository": "automation-tnba-feedback"
+                    "repository": "tnba-feedback"
                 },
                 {
                     "query": f"tnba-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[tnba-monitor] - logs",
-                    "repository": "automation-tnba-monitor"
+                    "repository": "tnba-monitor"
                 },
                 {
                     "query": f"velocloud-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[velocloud-bridge] - logs",
-                    "repository": "automation-velocloud-bridge"
+                    "repository": "velocloud-bridge"
                 },
                 {
                     "query": f"{ENVIRONMENT_NAME}",
