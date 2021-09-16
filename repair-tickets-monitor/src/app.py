@@ -16,6 +16,7 @@ from application.repositories.repair_tickets_repository import RepairTicketsRepo
 from application.repositories.repair_tickets_kre_repository import RepairTicketsKRERepository
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
+from application.actions.repair_tickets_feedback_monitor import RepairTicketsFeedbackMonitor
 
 
 class Container:
@@ -53,10 +54,14 @@ class Container:
                                                             self._repair_tickets_repository,
                                                             self._repair_tickets_kre_repository,
                                                             self._bruin_repository)
+        self._repair_tickets_monitor = RepairTicketsFeedbackMonitor(self._event_bus, self._logger, self._scheduler,
+                                                                    config, self._repair_tickets_repository,
+                                                                    self._repair_tickets_kre_repository)
 
     async def _start(self):
         await self._event_bus.connect()
 
+        await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)
         await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)
 
         self._scheduler.start()

@@ -11,6 +11,10 @@ class RepairTicketsRepository:
     def get_pending_repair_emails(self) -> List[dict]:
         return self._storage_repository.find_all("email_rta_*")
 
+    def get_feedback_emails(self) -> List[dict]:
+        # TODO: retrieve file for a concrete day o range of dates from S3
+        return []
+
     # def save_new_email(self, email_data: dict):
     #     email_id = email_data['email']['email_id']
     #     key = f"email_{email_id}"

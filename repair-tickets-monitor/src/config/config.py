@@ -19,7 +19,8 @@ NATS_CONFIG = {
 MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
     'scheduler_config': {
-        'repair_ticket_seconds': 10
+        'repair_ticket_seconds': 10,
+        'repair_ticket_feedback_seconds': 10
     },
     'nats_request_timeout': {
         'kre_seconds': 10,
@@ -41,7 +42,7 @@ LOG_CONFIG = {
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
         'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
-        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-repair-ticket-monitor'),
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-repair-ticket-feedback-monitor'),
         'host': os.getenv('PAPERTRAIL_HOST'),
         'port': int(os.getenv('PAPERTRAIL_PORT'))
     },
