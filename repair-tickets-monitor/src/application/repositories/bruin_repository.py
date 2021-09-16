@@ -1,3 +1,4 @@
+from typing import List
 from shortuuid import uuid
 
 from tenacity import retry, wait_exponential, stop_after_delay
@@ -118,25 +119,28 @@ class BruinRepository:
             self._logger.error(f'Error getting client_id "{client_id}" and service_number "{service_number}" '
                                f'from Bruin: {e}')
 
-    async def create_outage_ticket(self, client_id: int, service_number: str):
+    async def create_outage_ticket(self, client_id: int, service_numbers: List[str], contact_info: dict):
+        # endpoint: bruin.ticket.creation.outage.request -- POST /api/Ticket/repair
         err_msg = None
 
+        # TODO: check payload on bruin client
         request = {
             'request_id': uuid(),
             'body': {
                 "client_id": client_id,
-                "service_number": service_number,
+                "service_numbers": service_numbers,
+                "local_contact": contact_info
             },
         }
 
         try:
             self._logger.info(
-                f'Creating outage ticket for device {service_number} that belongs to client {client_id}...')
+                f'Creating outage ticket for {service_numbers} that belongs to client {client_id}...')
             response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
-            self._logger.info(f'Outage ticket for device {service_number} that belongs to client {client_id} created!')
+            self._logger.info(f'Outage ticket for {service_numbers} that belongs to client {client_id} created!')
         except Exception as e:
             err_msg = (
-                f'An error occurred when creating outage ticket for device {service_number} belong to client'
+                f'An error occurred when creating outage ticket for device {service_numbers} belong to client'
                 f'{client_id} -> {e}'
             )
             response = nats_error_response
@@ -147,8 +151,51 @@ class BruinRepository:
             is_bruin_custom_status = response_status in (409, 471, 472, 473)
             if not (response_status in range(200, 300) or is_bruin_custom_status):
                 err_msg = (
-                    f'Error while creating outage ticket for device {service_number} that belongs to client '
-                    f'{client_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'Error while creating outage ticket for {service_numbers} that belongs to client '
+                    f'{client_id} in {self._config.ENVIRONMENT.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def create_affecting_ticket(self, client_id: int, service_numbers: List[str], contact_info: dict):
+        # endpoint: bruin.ticket.creation.request -- POST /api/Ticket
+        err_msg = None
+
+        # TODO: check payload on bruin client
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "client_id": client_id,
+                "service_numbers": service_numbers,
+                "contact": contact_info
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Creating affecting ticket for {service_numbers} that belongs to client {client_id}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.creation.request", request, timeout=30)
+            self._logger.info(f'Outage ticket for {service_numbers} that belongs to client {client_id} created!')
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when creating affecting ticket for device {service_numbers} belong to client'
+                f'{client_id} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            is_bruin_custom_status = response_status in (409, 471, 472, 473)
+            if not (response_status in range(200, 300) or is_bruin_custom_status):
+                err_msg = (
+                    f'Error while creating affecting ticket for {service_numbers} that belongs to client '
+                    f'{client_id} in {self._config.ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
