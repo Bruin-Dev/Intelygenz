@@ -17,7 +17,8 @@ NATS_CONFIG = {
 MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
     'scheduler_config': {
-        'repair_ticket_seconds': 1
+        'repair_ticket_seconds': 1,
+        'repair_ticket_feedback_seconds': 10
     },
     'nats_request_timeout': {
         'kre_seconds': 10,
