@@ -23,7 +23,6 @@ basic-infra-dev:
   extends: .terraform_template_deploy_basic_infra
   environment:
     name: development
-    on_stop: destroy-basic-infra-dev
   variables:
     MODULE: "infra-as-code/basic-infra"
     IAM_TO_EKS_ROLES: developer, devops
@@ -56,7 +55,6 @@ basic-infra-pro:
   extends: .terraform_template_deploy_basic_infra
   environment:
     name: production
-    on_stop: destroy-basic-infra-pro
   variables:
     MODULE: "infra-as-code/basic-infra"
     IAM_TO_EKS_ROLES: developer, devops
@@ -90,7 +88,6 @@ destroy-basic-infra-dev:
   extends: .terraform_template_destroy_basic_infra
   environment:
     name: development
-    action: stop
   variables:
     MODULE: "infra-as-code/basic-infra"
     EKS_CLUSTER_NAME: "mettel-automation-dev"
@@ -109,7 +106,6 @@ destroy-basic-infra-pro:
   extends: .terraform_template_destroy_basic_infra
   environment:
     name: production
-    action: stop
   variables:
     MODULE: "infra-as-code/basic-infra"
     EKS_CLUSTER_NAME: "mettel-automation"
