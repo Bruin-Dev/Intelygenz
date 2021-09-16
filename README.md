@@ -5,12 +5,9 @@
 | Module      | Coverage |
 |:-----------:|:--------:|
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| cts-bridge |[![cts-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=cts-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | digi-bridge |[![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | digi-reboot-report |[![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| dispatch-portal-frontend |[![dispatch-portal-frontend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-frontend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | email-tagger-kre-bridge |[![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | email-tagger-monitor |[![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | hawkeye-affecting-monitor |[![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -23,7 +20,6 @@
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| service-dispatch-monitor|[![service-dispatch-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-dispatch-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -52,7 +48,7 @@
   - [Docker custom images and python libraries](#docker-custom-images-and-python-libraries)
   - [Env files](#env-files)
   - [Finish up](#finish-up)
-- [KRE](#KRE)
+- [EKS and KRE](#EKS and KRE)
   - [Access Control](#access-control)
     - [Roles](#roles)
     - [Roles assigned to users](#roles-assigned-to-users)
@@ -513,8 +509,8 @@ Below are the roles created for each of the users actually, as well as the categ
 |  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
 | joseluis.vega | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega |
 |  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
-| sancho.munoz | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-sancho.munoz |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-sancho.munoz |
+| marc.vivancos | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-marc.vivancos |
+|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-marc.vivancos |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
 

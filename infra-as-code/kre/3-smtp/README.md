@@ -28,7 +28,7 @@
 | common\_info | Global Tags # kre infrastructure for mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation-kre",<br>  "provisioning": "Terraform"<br>}</pre> | no |
 | enable\_spf\_record | n/a | `bool` | `true` | no |
 | extra\_ses\_records | n/a | `list(string)` | `[]` | no |
-| igz\_users\_email | IGZ user for create email accounts | `list` | <pre>[<br>  "alberto.iglesias@intelygenz.com",<br>  "angel.costales@intelygenz.com",<br>  "angel.sanchez@intelygenz.com",<br>  "angelluis.piquero@intelygenz.com",<br>  "brandon.samudio@intelygenz.com",<br>  "daniel.fernandez@intelygenz.com",<br>  "francisco.capllonch@intelygenz.com",<br>  "gustavo.marin@intelygenz.com",<br>  "jonas.dacruz@intelygenz.com",<br>  "joseluis.vega@intelygenz.com",<br>  "juancarlos.gomez@intelygenz.com",<br>  "julia.hossu@intelygenz.com",<br>  "mettel@intelygenz.com",<br>  "sancho.munoz@intelygenz.com",<br>  "xoan.mallon@intelygenz.com"<br>]</pre> | no |
+| igz\_users\_email | IGZ user for create email accounts | `list` | <pre>[<br>  "alberto.iglesias@intelygenz.com",<br>  "angel.costales@intelygenz.com",<br>  "angel.sanchez@intelygenz.com",<br>  "angelluis.piquero@intelygenz.com",<br>  "brandon.samudio@intelygenz.com",<br>  "daniel.fernandez@intelygenz.com", <br>  "gustavo.marin@intelygenz.com",<br>  "jonas.dacruz@intelygenz.com",<br>  "joseluis.vega@intelygenz.com",<br>  "juancarlos.gomez@intelygenz.com",<br>  "julia.hossu@intelygenz.com",<br>  "mettel@intelygenz.com",<br>  "marc.vivancos@intelygenz.com",<br>  "xoan.mallon@intelygenz.com"<br>]</pre> | no |
 | region | n/a | `string` | `"us-east-1"` | no |
 | subdomain\_name\_prefix | n/a | `string` | `"intelygenz"` | no |
 

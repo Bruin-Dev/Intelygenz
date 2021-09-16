@@ -27,7 +27,7 @@
 | AWS\_SECRET\_ACCESS\_KEY | AWS Secret Access Key credentials | `string` | `""` | no |
 | CURRENT\_ENVIRONMENT | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
 | common\_info | Global Tags # kre infrastructure for mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation-kre",<br>  "provisioning": "Terraform"<br>}</pre> | no |
-| eks\_developer\_users | List of users with developer role access in EKS cluster | `list(string)` | <pre>[<br>  "brandon.samudio",<br>  "daniel.fernandez",<br>  "joseluis.vega",<br>  "sancho.munoz"<br>]</pre> | no |
+| eks\_developer\_users | List of users with developer role access in EKS cluster | `list(string)` | <pre>[<br>  "brandon.samudio",<br>  "daniel.fernandez",<br>  "joseluis.vega",<br>  "marc.vivancos"<br>]</pre> | no |
 | eks\_devops\_users | List of users with devops role access in EKS cluster | `list(string)` | <pre>[<br>  "alberto.iglesias",<br>  "angel.costales",<br>  "angel.luis.piquero",<br>  "xisco.capllonch",<br>  "xoan.mallon.devops"<br>]</pre> | no |
 
 ## Outputs

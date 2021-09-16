@@ -27,7 +27,7 @@
 | CURRENT\_ENVIRONMENT | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
 | EKS\_CLUSTER\_NAME | EKS Cluster name to obtain data | `string` | `""` | no |
 | common\_info | Global Tags # mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation",<br>  "provisioning": "Terraform"<br>}</pre> | no |
-| eks\_developer\_users | n/a | `list(string)` | <pre>[<br>  "brandon.samudio",<br>  "daniel.fernandez",<br>  "joseluis.vega",<br>  "sancho.munoz",<br>  "xoan.mallon.developer"<br>]</pre> | no |
+| eks\_developer\_users | n/a | `list(string)` | <pre>[<br>  "brandon.samudio",<br>  "daniel.fernandez",<br>  "joseluis.vega",<br>  "marc.vivancos",<br>  "xoan.mallon.developer"<br>]</pre> | no |
 | eks\_devops\_users | List of users with devops role access in EKS cluster | `list(string)` | <pre>[<br>  "alberto.iglesias",<br>  "angel.luis.piquero",<br>  "xoan.mallon"<br>]</pre> | no |
 
 ## Outputs

@@ -4,7 +4,7 @@ variable "eks_developer_users" {
     "brandon.samudio",
     "daniel.fernandez",
     "joseluis.vega",
-    "sancho.munoz",
+    "marc.vivancos",
     "ricardo.hortelano",
     "juancarlos.gomez",
     "julia.hossu"

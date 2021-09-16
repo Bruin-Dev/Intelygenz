@@ -126,13 +126,12 @@ In this stage will be the following jobs:
           "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio",
           "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez",
           "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega",
-          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-sancho.munoz",
+          "arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-marc.vivancos",
         ]
         eks_devops_roles = [
           "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias",
           "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales",
           "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero",
-          "arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-xoan.mallon.devops",
         ]
        ```
     

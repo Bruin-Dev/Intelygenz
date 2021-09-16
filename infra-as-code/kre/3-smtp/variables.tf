@@ -8,14 +8,13 @@ variable "igz_users_email" {
     "angelluis.piquero@intelygenz.com",
     "brandon.samudio@intelygenz.com",
     "daniel.fernandez@intelygenz.com",
-    "francisco.capllonch@intelygenz.com",
     "gustavo.marin@intelygenz.com",
     "jonas.dacruz@intelygenz.com",
     "joseluis.vega@intelygenz.com",
     "alejandro.aceituna@intelygenz.com",
     "julia.hossu@intelygenz.com",
     "mettel@intelygenz.com",
-    "sancho.munoz@intelygenz.com"
+    "marc.vivancos@intelygenz.com"
   ]
 }
 
