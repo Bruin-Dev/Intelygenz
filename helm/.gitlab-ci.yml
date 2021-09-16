@@ -95,3 +95,4 @@ destroy-helm-master:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
+      allow_failure: true
