@@ -16,7 +16,6 @@
 | hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | intermapper-outage-monitor |[![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -113,12 +112,12 @@ Any line of the commit message cannot be longer than 50 characters.
   │       │             │
   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
   │       │
-  │       └─⫸ Commit Scope: infra-as-code|ci-cd|helm|bruin-bridge|ci-utils|cts-bridge|customer-cache|digi-bridge|
-  │                          digi-reboot-report|dispatch-portal-backend|dispatch-portal-frontend|email-tagger-kre-bridge|
-  │                          email-tagger-kre-monitor|hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
+  │       └─⫸ Commit Scope: infra-as-code|ci-cd|helm|bruin-bridge|ci-utils|customer-cache|digi-bridge|
+  │                          digi-reboot-report|email-tagger-kre-bridge|email-tagger-kre-monitor|
+  │                          hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
   │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
-  |                          links-metrics-collector|lit-bridge|lumin-billing-report|notifier|service-affecting-monitor|
-  |                          service-dispatch-monitor|service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
+  |                          links-metrics-collector|lumin-billing-report|notifier|service-affecting-monitor|
+  |                          service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
   |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
@@ -668,20 +667,15 @@ NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like
 
 - [Base microservice](base-microservice/README.md)
 - [Bruin bridge](bruin-bridge/README.md)
-- [CTS bridge](cts-bridge/README.md)
 - [Customer cache](customer-cache/README.md)
-- [Dispatch portal frontend](dispatch-portal-frontend/README.md)
-- [Dispatch portal backend](dispatch-portal-backend/README.md)
 - [Hawkeye affecting monitor](hawkeye-affecting-monitor/README.md)
 - [Hawkeye bridge](hawkeye-bridge/README.md)
 - [Hawkeye customer cache](hawkeye-customer-cache/README.md)
 - [Hawkeye outage monitor](hawkeye-outage-monitor/README.md)
 - [Last contact report](last-contact-report/README.md)
-- [LIT bridge](lit-bridge/README.md)
 - [Lumin billing report](lumin-billing-report/README.md)
 - [Notifier](notifier/README.md)
 - [Service affecting monitor](service-affecting-monitor/README.md)
-- [Service dispatch monitor](service-dispatch-monitor/README.md)
 - [Service outage monitor](service-outage-monitor/README.md)
 - [Sites monitor](sites-monitor/README.md)
 - [T7 bridge](t7-bridge/README.md)
