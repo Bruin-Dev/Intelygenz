@@ -766,4 +766,3 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
   - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
     area for the [local docker-compose](docker-compose.yml). Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
     grafana dashboard.
-
