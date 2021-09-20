@@ -27,6 +27,26 @@ PAPERTRAIL_PROVISIONING = {
             "group_name": f"[{ENVIRONMENT_NAME}] - {BRANCH_NAME} logs",
             "searches": [
                 {
+                    "query": f"bouncing-detector-1 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[bouncing-detector-1] - logs",
+                    "repository": "bouncing-detector-1"
+                },
+                {
+                    "query": f"bouncing-detector-2 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[bouncing-detector-2] - logs",
+                    "repository": "bouncing-detector-2"
+                },
+                {
+                    "query": f"bouncing-detector-3 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[bouncing-detector-3] - logs",
+                    "repository": "bouncing-detector-3"
+                },
+                {
+                    "query": f"bouncing-detector-4 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[bouncing-detector-4] - logs",
+                    "repository": "bouncing-detector-4"
+                },
+                {
                     "query": f"bruin-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[bruin-bridge] - logs",
                     "repository": "bruin-bridge"
