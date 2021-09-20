@@ -420,7 +420,7 @@ These variables are indicated in different ways, depending on whether you want t
 
   variables:
     . . .
-    IGZ_PACKAGES_VERSION: 2.0.0
+    IGZ_PACKAGES_VERSION: 2.0.4
     DOCKER_BASE_IMAGE_VERSION: 2.0.0
     . . .
 

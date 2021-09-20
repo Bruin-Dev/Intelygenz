@@ -4,7 +4,7 @@
 
 .terraform_template_deploy_basic_infra: &terraform_template_deploy_basic_infra
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

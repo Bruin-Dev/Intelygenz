@@ -33,7 +33,7 @@ services:
       dockerfile: bruin-mock-local/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 2.1.0
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - bruin-mock-local/src/config/env
     ports:

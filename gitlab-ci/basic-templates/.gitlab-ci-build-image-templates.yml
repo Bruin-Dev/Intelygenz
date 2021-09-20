@@ -15,7 +15,7 @@
     - pip3 install -r ci-utils/ecr/requirements.txt
   script:
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION}
-      --build-arg REPOSITORY_URL="${REPOSITORY_URL}/automation"
+      --build-arg REPOSITORY_URL="${REPOSITORY_URL}/"
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
       -f ${MODULE_NAME}/Dockerfile .
