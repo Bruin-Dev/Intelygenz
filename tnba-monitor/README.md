@@ -69,3 +69,4 @@ as a Slack notification.
 
 # Running in docker-compose
 `docker-compose up --build redis nats-server bruin-bridge velocloud-bridge t7-bridge notifier tnba-monitor`
+
