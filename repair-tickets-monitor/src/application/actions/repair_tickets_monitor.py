@@ -1,5 +1,6 @@
 import asyncio
 import time
+from collections import defaultdict
 
 from datetime import datetime
 
@@ -71,7 +72,7 @@ class RepairTicketsMonitor:
                 return
             prediction = prediction_response.get('body')
 
-            contact_info_by_site_id = {}
+            contact_info_by_site_id = defaultdict(dict)
 
             for service_number in prediction['service_numbers']:
                 client_info_response = await self._bruin_repository.get_client_info(client_id, service_number)
@@ -99,11 +100,9 @@ class RepairTicketsMonitor:
                 #  or created with other endpoint info
                 ticket_contact_info = {}  # ???
 
-                if site_id not in contact_info_by_site_id:
-                    contact_info_by_site_id[site_id] = {
-                        'service_numbers': []
-                    }
                 contact_info_by_site_id[site_id]['site_contact_info'] = site_contact_info
+                if 'service_numbers' not in contact_info_by_site_id[site_id]:
+                    contact_info_by_site_id[site_id]['service_numbers'] = []
                 contact_info_by_site_id[site_id]['service_numbers'].append(service_number)
 
             self._logger.info(f"email_id: {email_id} client_id: {client_id} prediction class "
