@@ -1,13 +1,13 @@
-import asyncio
 import pytest
 
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, call
+from unittest.mock import patch
 from shortuuid import uuid
 from asynctest import CoroutineMock
 
+from application import AffectingTroubles
 from application.repositories import velocloud_repository as velocloud_repository_module
-from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories import nats_error_response
 from config import testconfig
 
 uuid_ = uuid()
@@ -15,525 +15,311 @@ uuid_mock = patch.object(velocloud_repository_module, 'uuid', return_value=uuid_
 
 
 class TestVelocloudRepository:
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
+    def instance_test(self, velocloud_repository, event_bus, logger, notifications_repository):
         assert velocloud_repository._event_bus is event_bus
         assert velocloud_repository._logger is logger
-        assert velocloud_repository._config is config
+        assert velocloud_repository._config is testconfig
         assert velocloud_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
-    async def get_links_metrics_by_host_test(self):
-        host = 'some-host'
-        interval = {'start': 'date_start', 'end': 'date_end'}
-        response = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 200,
+    async def get_links_metrics_by_host__metrics_retrieved_test(
+            self, velocloud_repository, make_get_links_metrics_request, make_metrics_for_link,
+            make_list_of_link_metrics, make_rpc_response):
+        velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': datetime.now() - timedelta(minutes=30),
+            'end': datetime.now(),
         }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        link_1_metrics = make_metrics_for_link(link_id=1)
+        link_2_metrics = make_metrics_for_link(link_id=2)
+        links_metrics = make_list_of_link_metrics(link_1_metrics, link_2_metrics)
+
+        request = make_get_links_metrics_request(
+            request_id=uuid_,
+            velocloud_host=velocloud_host,
+            interval=interval,
+        )
+        response = make_rpc_response(
+            request_id=uuid_,
+            body=links_metrics,
+            status=200,
+        )
+
+        velocloud_repository._event_bus.rpc_request.return_value = response
 
         with uuid_mock:
-            result = await velocloud_repository.get_links_metrics_by_host(host, interval)
+            result = await velocloud_repository.get_links_metrics_by_host(velocloud_host, interval)
 
+        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "get.links.metric.info", request, timeout=30
+        )
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_links_metrics_by_host_bad_status_test(self):
-        host = 'some-host'
-        interval = {'start': 'date_start', 'end': 'date_end'}
-        response = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 400,
+    async def get_links_metrics_by_host__rpc_request_failing_test(
+            self, velocloud_repository, make_get_links_metrics_request):
+        velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': datetime.now() - timedelta(minutes=30),
+            'end': datetime.now(),
         }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        request = make_get_links_metrics_request(
+            request_id=uuid_,
+            velocloud_host=velocloud_host,
+            interval=interval,
+        )
+
+        velocloud_repository._event_bus.rpc_request.side_effect = Exception
         velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
-        with uuid_mock:
-            result = await velocloud_repository.get_links_metrics_by_host(host, interval)
 
+        with uuid_mock:
+            result = await velocloud_repository.get_links_metrics_by_host(velocloud_host, interval)
+
+        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "get.links.metric.info", request, timeout=30
+        )
+        velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        velocloud_repository._logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_links_metrics_by_host__rpc_request_has_not_2xx_status_test(
+            self, velocloud_repository, make_get_links_metrics_request, velocloud_500_response):
+        velocloud_host = 'mettel.velocloud.net'
+        interval = {
+            'start': datetime.now() - timedelta(minutes=30),
+            'end': datetime.now(),
+        }
+
+        request = make_get_links_metrics_request(
+            request_id=uuid_,
+            velocloud_host=velocloud_host,
+            interval=interval,
+        )
+
+        velocloud_repository._event_bus.rpc_request.return_value = velocloud_500_response
+        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await velocloud_repository.get_links_metrics_by_host(velocloud_host, interval)
+
+        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "get.links.metric.info", request, timeout=30
+        )
+        velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        velocloud_repository._logger.error.assert_called_once()
+        assert result == velocloud_500_response
+
+    @pytest.mark.asyncio
+    async def get_all_links_metrics__all_rpc_requests_have_not_2xx_status_test(
+            self, velocloud_repository, make_list_of_link_metrics, make_rpc_response, velocloud_500_response):
+        velocloud_host_1 = "mettel.velocloud.net"
+        velocloud_host_2 = "metvco02.mettel.net"
+        velocloud_host_1_enterprise_1_id = 100
+        velocloud_host_1_enterprise_2_id = 10000
+        velocloud_host_2_enterprise_1_id = 1000000
+
+        edge_1_contact_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host_1,
+            "enterprise_id": velocloud_host_1_enterprise_1_id,
+            "edge_id": 1,
+        }
+        edge_2_contact_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host_1,
+            "enterprise_id": velocloud_host_1_enterprise_2_id,
+            "edge_id": 2,
+        }
+        edge_3_contact_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host_2,
+            "enterprise_id": velocloud_host_2_enterprise_1_id,
+            "edge_id": 3,
+        }
+        contact_info = [
+            edge_1_contact_info,
+            edge_2_contact_info,
+            edge_3_contact_info,
+        ]
+
+        interval = {
+            'start': datetime.now() - timedelta(minutes=30),
+            'end': datetime.now(),
+        }
+
+        links_metrics = make_list_of_link_metrics()
+        response = make_rpc_response(
+            request_id=uuid_,
+            body=links_metrics,
+            status=200,
+        )
+
+        velocloud_repository.get_links_metrics_by_host.return_value = velocloud_500_response
+
+        custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['device_by_id'] = contact_info
+        with patch.dict(velocloud_repository._config.MONITOR_CONFIG, custom_monitor_config):
+            with uuid_mock:
+                result = await velocloud_repository.get_all_links_metrics(interval)
+
+        velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_1, interval=interval)
+        velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_2, interval=interval)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_links_metrics_by_host_exception_test(self):
-        host = 'some-host'
-        interval = {'start': 'date_start', 'end': 'date_end'}
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[Exception, None])
+    async def get_all_links_metrics__all_rpc_requests_succeed_test(
+            self, velocloud_repository, make_metrics_for_link, make_list_of_link_metrics, make_rpc_response):
+        velocloud_host_1 = "mettel.velocloud.net"
+        velocloud_host_2 = "metvco02.mettel.net"
+        velocloud_host_1_enterprise_1_id = 100
+        velocloud_host_1_enterprise_2_id = 10000
+        velocloud_host_2_enterprise_1_id = 1000000
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
-        with uuid_mock:
-            result = await velocloud_repository.get_links_metrics_by_host(host, interval)
-
-        assert result == {'body': None, 'status': 503}
-
-    @pytest.mark.asyncio
-    async def get_all_links_metrics_test(self):
-        host = 'some-host'
-        interval = {'start': 'date_start', 'end': 'date_end'}
-        response_1 = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 200,
+        edge_1_contact_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host_1,
+            "enterprise_id": velocloud_host_1_enterprise_1_id,
+            "edge_id": 1,
         }
-        response_2 = {
-            'request_id': uuid_,
-            'body': [
-            ],
-            'status': 400,
+        edge_2_contact_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host_1,
+            "enterprise_id": velocloud_host_1_enterprise_2_id,
+            "edge_id": 2,
         }
-        response_3 = {
-            'request_id': uuid_,
-            'body': [
-            ],
-            'status': 400,
+        edge_3_contact_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host_2,
+            "enterprise_id": velocloud_host_2_enterprise_1_id,
+            "edge_id": 3,
         }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
+        contact_info = [
+            edge_1_contact_info,
+            edge_2_contact_info,
+            edge_3_contact_info,
+        ]
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_links_metrics_by_host = CoroutineMock(side_effect=[response_1, response_2, response_3])
-
-        with uuid_mock:
-            result = await velocloud_repository.get_all_links_metrics(interval)
-
-        assert result == response_1
-
-    @pytest.mark.asyncio
-    async def get_links_metrics_for_latency_checks_test(self):
-        host = 'some-host'
-        next_run_time = datetime.now()
-        past_moment = next_run_time - timedelta(
-            minutes=testconfig.MONITOR_CONFIG['monitoring_minutes_per_trouble']['latency']
-        )
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        response_1 = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 200,
+        interval = {
+            'start': datetime.now() - timedelta(minutes=30),
+            'end': datetime.now(),
         }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_all_links_metrics = CoroutineMock(return_value=response_1)
-
-        with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
-                result = await velocloud_repository.get_links_metrics_for_latency_checks()
-
-        assert result == response_1
-        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(
-            interval={'start': past_moment, 'end': next_run_time})
-
-    @pytest.mark.asyncio
-    async def get_links_metrics_for_packet_loss_checks_test(self):
-        host = 'some-host'
-        next_run_time = datetime.now()
-        past_moment = next_run_time - timedelta(
-            minutes=testconfig.MONITOR_CONFIG['monitoring_minutes_per_trouble']['packet_loss']
-        )
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        response_1 = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 200,
-        }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_all_links_metrics = CoroutineMock(return_value=response_1)
-
-        with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
-                result = await velocloud_repository.get_links_metrics_for_packet_loss_checks()
-
-        assert result == response_1
-        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(
-            interval={'start': past_moment, 'end': next_run_time})
-
-    @pytest.mark.asyncio
-    async def get_links_metrics_for_jitter_checks_test(self):
-        host = 'some-host'
-        next_run_time = datetime.now()
-        past_moment = next_run_time - timedelta(
-            minutes=testconfig.MONITOR_CONFIG['monitoring_minutes_per_trouble']['jitter']
-        )
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        response_1 = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 200,
-        }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_all_links_metrics = CoroutineMock(return_value=response_1)
-
-        with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
-                result = await velocloud_repository.get_links_metrics_for_jitter_checks()
-
-        assert result == response_1
-        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(
-            interval={'start': past_moment, 'end': next_run_time})
-
-    @pytest.mark.asyncio
-    async def get_links_metrics_for_bandwidth_checks_test(self):
-        host = 'some-host'
-        next_run_time = datetime.now()
-        past_moment = next_run_time - timedelta(
-            minutes=testconfig.MONITOR_CONFIG['monitoring_minutes_per_trouble']['bandwidth']
-        )
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        response_1 = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'host': host,
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 2,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 4206,
-                    'edgeSerialNumber': 'VC05200048223',
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ],
-            'status': 200,
-        }
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_all_links_metrics = CoroutineMock(return_value=response_1)
-
-        with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
-                result = await velocloud_repository.get_links_metrics_for_bandwidth_checks()
-
-        assert result == response_1
-        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(
-            interval={'start': past_moment, 'end': next_run_time})
-
-    @pytest.mark.asyncio
-    async def get_links_metrics_for_autoresolve_test(self):
-        current_moment = datetime.now()
-        past_moment = current_moment - timedelta(
-            minutes=testconfig.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
+        link_1_metrics = make_metrics_for_link(link_id=1)
+        links_metrics_rpc_1 = make_list_of_link_metrics(link_1_metrics)
+        rpc_1_response = make_rpc_response(
+            request_id=uuid_,
+            body=links_metrics_rpc_1,
+            status=200,
         )
 
-        links_metrics_response = {
-            'request_id': uuid_,
-            'body': [
-                {
-                    'linkId': 22,
-                    'bytesTx': 5694196,
-                    'bytesRx': 9607567,
-                    'packetsTx': 81966,
-                    'packetsRx': 95687,
-                    'totalBytes': 15301763,
-                    'totalPackets': 177653,
-                    'p1BytesRx': 35503,
-                    'p1BytesTx': 3279,
-                    'p1PacketsRx': 168,
-                    'p1PacketsTx': 46,
-                    'p2BytesRx': 4720158,
-                    'p2BytesTx': 0,
-                    'p2PacketsRx': 18879,
-                    'p2PacketsTx': 0,
-                    'p3BytesRx': 0,
-                    'p3BytesTx': 0,
-                    'p3PacketsRx': 0,
-                    'p3PacketsTx': 0,
-                    'controlBytesRx': 4851906,
-                    'controlBytesTx': 5690917,
-                    'controlPacketsRx': 76640,
-                    'controlPacketsTx': 81920,
-                    'bpsOfBestPathRx': 182296000,
-                    'bpsOfBestPathTx': 43243000,
-                    'bestJitterMsRx': 0,
-                    'bestJitterMsTx': 0,
-                    'bestLatencyMsRx': 3,
-                    'bestLatencyMsTx': 6.4167,
-                    'bestLossPctRx': 0,
-                    'bestLossPctTx': 0,
-                    'scoreTx': 4.400000095367432,
-                    'scoreRx': 4.400000095367432,
-                    'signalStrength': 0,
-                    'state': 0,
-                    'name': 'REX',
-                    'link': {
-                        'host': 'mettel.velocloud.net',
-                        'enterpriseName': 'Militaires Sans Frontières',
-                        'enterpriseId': 2,
-                        'enterpriseProxyId': None,
-                        'enterpriseProxyName': None,
-                        'edgeName': 'Big Boss',
-                        'edgeState': 'CONNECTED',
-                        'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                        'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                        'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                        'edgeId': 4206,
-                        'edgeSerialNumber': 'VC05200048223',
-                        'edgeHASerialNumber': None,
-                        'edgeModelNumber': 'edge520',
-                        'edgeLatitude': None,
-                        'edgeLongitude': None,
-                        'displayName': '70.59.5.185',
-                        'isp': None,
-                        'interface': 'REX',
-                        'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                        'linkState': 'STABLE',
-                        'linkLastActive': '2020-09-29T04:45:15.000Z',
-                        'linkVpnState': 'STABLE',
-                        'linkId': 5293,
-                        'linkIpAddress': '70.59.5.185',
-                    },
-                }
-            ],
-            'status': 200,
+        link_2_metrics = make_metrics_for_link(link_id=2)
+        links_metrics_rpc_2 = make_list_of_link_metrics(link_2_metrics)
+        rpc_2_response = make_rpc_response(
+            request_id=uuid_,
+            body=links_metrics_rpc_2,
+            status=200,
+        )
+
+        links_metrics = make_list_of_link_metrics(link_1_metrics, link_2_metrics)
+        response = make_rpc_response(
+            request_id=uuid_,
+            body=links_metrics,
+            status=200,
+        )
+
+        velocloud_repository.get_links_metrics_by_host.side_effect = [
+            rpc_1_response,
+            rpc_2_response,
+        ]
+
+        custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['device_by_id'] = contact_info
+        with patch.dict(velocloud_repository._config.MONITOR_CONFIG, custom_monitor_config):
+            with uuid_mock:
+                result = await velocloud_repository.get_all_links_metrics(interval)
+
+        velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_1, interval=interval)
+        velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_2, interval=interval)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def get_links_metrics_for_latency_checks_test(self, velocloud_repository, frozen_datetime):
+        trouble = AffectingTroubles.LATENCY
+        current_datetime = frozen_datetime.now()
+
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        interval = {
+            'start': current_datetime - timedelta(minutes=lookup_interval),
+            'end': current_datetime,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_latency_checks()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_all_links_metrics = CoroutineMock(return_value=links_metrics_response)
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_moment)
+    @pytest.mark.asyncio
+    async def get_links_metrics_for_packet_loss_checks_test(self, velocloud_repository, frozen_datetime):
+        trouble = AffectingTroubles.PACKET_LOSS
+        current_datetime = frozen_datetime.now()
 
-        with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
-                result = await velocloud_repository.get_links_metrics_for_autoresolve()
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        interval = {
+            'start': current_datetime - timedelta(minutes=lookup_interval),
+            'end': current_datetime,
+        }
 
-        assert result == links_metrics_response
-        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(
-            interval={'start': past_moment, 'end': current_moment},
-        )
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_packet_loss_checks()
+
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+
+    @pytest.mark.asyncio
+    async def get_links_metrics_for_jitter_checks_test(self, velocloud_repository, frozen_datetime):
+        trouble = AffectingTroubles.JITTER
+        current_datetime = frozen_datetime.now()
+
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        interval = {
+            'start': current_datetime - timedelta(minutes=lookup_interval),
+            'end': current_datetime,
+        }
+
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_jitter_checks()
+
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+
+    @pytest.mark.asyncio
+    async def get_links_metrics_for_bandwidth_checks_test(self, velocloud_repository, frozen_datetime):
+        trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
+        current_datetime = frozen_datetime.now()
+
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        interval = {
+            'start': current_datetime - timedelta(minutes=lookup_interval),
+            'end': current_datetime,
+        }
+
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_bandwidth_checks()
+
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+
+    @pytest.mark.asyncio
+    async def get_links_metrics_for_autoresolve_test(self, velocloud_repository, frozen_datetime):
+        current_datetime = frozen_datetime.now()
+
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
+        interval = {
+            'start': current_datetime - timedelta(minutes=lookup_interval),
+            'end': current_datetime,
+        }
+
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_autoresolve()
+
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)

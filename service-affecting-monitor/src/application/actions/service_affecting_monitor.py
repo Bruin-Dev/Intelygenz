@@ -54,7 +54,7 @@ class ServiceAffectingMonitor:
                                     replace_existing=False,
                                     id='_service_affecting_monitor_process')
         except ConflictingIdError as conflict:
-            self._logger.info(f'Skipping start of Service Affecting Monitoring job. Reason: {conflict}')
+            self._logger.error(f'Skipping start of Service Affecting Monitoring job. Reason: {conflict}')
 
     async def _service_affecting_monitor_process(self):
         self.__reset_state()

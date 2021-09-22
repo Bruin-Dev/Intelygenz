@@ -1,56 +1,23 @@
 from collections import defaultdict
-from unittest.mock import Mock
 
 import pytest
 
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.customer_cache_repository import CustomerCacheRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.template_management import TemplateRenderer
 from config import testconfig
+
+from tests.fixtures.bruin import *
+from tests.fixtures.custom_objects import *
+from tests.fixtures.customer_cache import *
+from tests.fixtures.instances import *
+from tests.fixtures.misc import *
+from tests.fixtures.rpc import *
+from tests.fixtures.velocloud import *
 
 
 # Scopes
 # - function
 # - module
 # - session
-
-
-@pytest.fixture(scope='function')
-def logger():
-    return Mock()
-
-
-@pytest.fixture(scope='function')
-def scheduler():
-    return Mock()
-
-
-@pytest.fixture(scope='function')
-def event_bus():
-    return Mock()
-
-
-@pytest.fixture(scope='function')
-def template_renderer():
-    return TemplateRenderer(testconfig)
-
-
-@pytest.fixture(scope='function')
-def notifications_repository(event_bus):
-    return NotificationsRepository(event_bus)
-
-
-@pytest.fixture(scope='function')
-def customer_cache_repository(event_bus, logger, notifications_repository):
-    return CustomerCacheRepository(event_bus, logger, testconfig, notifications_repository)
-
-
-@pytest.fixture(scope='function')
-def bruin_repository(event_bus, logger, notifications_repository):
-    return BruinRepository(event_bus=event_bus, logger=logger, config=testconfig,
-                           notifications_repository=notifications_repository)
 
 
 @pytest.fixture(scope='function')
