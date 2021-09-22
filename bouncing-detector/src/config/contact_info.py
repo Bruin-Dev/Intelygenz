@@ -1,11 +1,13 @@
 from config import confie_contact_info
 from config import oreilly_contact_info
+from config import rotech_contact_info
 from config import royal_brass_contact_info
 from config import tenet_contact_info
 
 oreilly_devices = oreilly_contact_info.devices_by_id
 confie_devices = confie_contact_info.devices_by_id
 tenet_devices = tenet_contact_info.devices_by_id
+rotech_devices = rotech_contact_info.devices_by_id
 royal_brass_devices = royal_brass_contact_info.devices_by_id
 
 contact_info = [
@@ -1992,24 +1994,6 @@ contact_info = [
         }
     },
     {
-        "serial": "VCE20000001891",
-        "host": "metvco03.mettel.net",
-        "enterprise_id": 2,
-        "edge_id": 696,
-        "contacts": {
-            "ticket": {
-                "email": "",
-                "phone": "215-466-2047",
-                "name": "Kevin Bunting"
-            },
-            "site": {
-                "email": "",
-                "phone": "215-466-2047",
-                "name": "Kevin Bunting"
-            }
-        }
-    },
-    {
         "serial": "VC05200056863",
         "host": "metvco03.mettel.net",
         "enterprise_id": 2,
@@ -2024,78 +2008,6 @@ contact_info = [
                 "email": "stacee.hanson@rotech.com",
                 "phone": "303-709-7944",
                 "name": "Stacee Crouse"
-            }
-        }
-    },
-    {
-        "serial": "VC05200044864",
-        "host": "metvco03.mettel.net",
-        "enterprise_id": 2,
-        "edge_id": 231,
-        "contacts": {
-            "ticket": {
-                "email": "kristi.moe@rotech.com",
-                "phone": "(303)730-6777",
-                "name": "Kellogg, Kristi A"
-            },
-            "site": {
-                "email": "kristi.moe@rotech.com",
-                "phone": "(303)730-6777",
-                "name": "Kellogg, Kristi A"
-            }
-        }
-    },
-    {
-        "serial": "VC05200056286",
-        "host": "metvco03.mettel.net",
-        "enterprise_id": 2,
-        "edge_id": 617,
-        "contacts": {
-            "ticket": {
-                "email": "stacee.hanson@rotech.com",
-                "phone": "(407)822-4600",
-                "name": "Hanson, Stacee J"
-            },
-            "site": {
-                "email": "stacee.hanson@rotech.com",
-                "phone": "(407)822-4600",
-                "name": "Hanson, Stacee J"
-            }
-        }
-    },
-    {
-        "serial": "VC05200056936",
-        "host": "metvco03.mettel.net",
-        "enterprise_id": 2,
-        "edge_id": 530,
-        "contacts": {
-            "ticket": {
-                "email": "debbie.stroud@Rotech.com",
-                "phone": "(702)384-2424",
-                "name": "Stroud, Debbie L"
-            },
-            "site": {
-                "email": "debbie.stroud@Rotech.com",
-                "phone": "(702)384-2424",
-                "name": "Stroud, Debbie L"
-            }
-        }
-    },
-    {
-        "serial": "VC05200043162",
-        "host": "metvco03.mettel.net",
-        "enterprise_id": 2,
-        "edge_id": 162,
-        "contacts": {
-            "ticket": {
-                "email": "esther.andrade@rotech.com",
-                "phone": "(972)256-2030",
-                "name": "Andrade, Esther"
-            },
-            "site": {
-                "email": "esther.andrade@rotech.com",
-                "phone": "(972)256-2030",
-                "name": "Andrade, Esther"
             }
         }
     },
@@ -11935,4 +11847,4 @@ contact_info = [
 # When customers wants to reenable Confie Seguros monitoring append it to the existing aggregate list
 # devices_by_id = contact_info + ..... + confie_devices
 
-devices_by_id = contact_info + oreilly_devices + tenet_devices + royal_brass_devices
+devices_by_id = contact_info + oreilly_devices + tenet_devices + royal_brass_devices + rotech_devices
