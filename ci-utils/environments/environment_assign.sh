@@ -14,7 +14,7 @@ if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
 else
   export ENVIRONMENT_ID="production"
   export ENVIRONMENT_VAR="automation-master"
-  export TAG=$(git tag | sort --version-sort | grep "${MODULE_NAME}" | tail -n -1| cut -d "@" -f2)
+  export TAG=$(git tag | sort --version-sort | grep "^${MODULE_NAME}" | tail -n -1| cut -d "@" -f2)
   export DOCKER_BUILD_LATEST_TAG="latest"
   export DNS_ENVIRONMENT_VAR="https://master.mettel-automation.net"
   # prometheus environment variables for production environment
