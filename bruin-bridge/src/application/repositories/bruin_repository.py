@@ -189,7 +189,8 @@ class BruinRepository:
                              status["status"] == "A" and status["serviceNumber"] in filters["service_number"]]
             for status in active_status:
                 response_body.append({"client_id": status.get("clientID"),
-                                      "client_name": status.get("clientName")})
+                                      "client_name": status.get("clientName"),
+                                      "site_id": status.get("siteId")})
 
         response["body"] = response_body
         return response

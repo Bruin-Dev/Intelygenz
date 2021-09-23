@@ -393,7 +393,8 @@ The bruin client should return a message contanining the information of the cust
     "request_id": 123,
     "body": {
         "client_id": 9994,
-        "client_name": "METTEL/NEW YORK"
+        "client_name": "METTEL/NEW YORK",
+        "site_id": 1234
     },
     "status": 200
 }

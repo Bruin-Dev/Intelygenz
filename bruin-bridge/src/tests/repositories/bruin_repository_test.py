@@ -974,7 +974,8 @@ class TestBruinRepository:
 
         expected_result = {
             "body": [{"client_id": client_response["body"]["documents"][0]["clientID"],
-                     "client_name": client_response["body"]["documents"][0]["clientName"]}],
+                     "client_name": client_response["body"]["documents"][0]["clientName"],
+                      "site_id": client_response["body"]["documents"][0]["siteId"]}],
             "status": response_status
         }
 
@@ -1153,7 +1154,8 @@ class TestBruinRepository:
 
         expected_result = {
             "body": {"client_id": None,
-                     "client_name": None},
+                     "client_name": None,
+                     "side_id": None},
             "status": response_status
         }
 

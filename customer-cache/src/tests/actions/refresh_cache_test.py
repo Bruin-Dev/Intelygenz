@@ -196,7 +196,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234}
         }
         edge_from_bruin_1_with_config = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
@@ -204,7 +204,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 [
                     {
@@ -222,7 +222,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO202020",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"}
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234}
         }
         edge_from_bruin_2_with_config = {
             'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
@@ -230,7 +230,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 [
                     {
@@ -246,8 +246,8 @@ class TestRefreshCache:
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
         serials_with_more_than_one_status = {
             'VC05200037714': [
-                {'client_id': 85940, 'client_name': 'Titan America'},
-                {'client_id': 88748, 'client_name': 'FIS-First Hawaiian Bank-7517'}
+                {'client_id': 85940, 'client_name': 'Titan America', "site_id": 1234},
+                {'client_id': 88748, 'client_name': 'FIS-First Hawaiian Bank-7517', "site_id": 1234}
             ]
         }
         stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
@@ -288,7 +288,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 {
                     'interfaces': ['GE1'],
@@ -304,7 +304,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
-            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 {
                     'interfaces': ['GE2'],
@@ -390,6 +390,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_2 = {
@@ -405,6 +406,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         new_cache = [
@@ -429,6 +431,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_2 = {
@@ -444,6 +447,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         stored_cache = [
@@ -470,6 +474,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_2 = {
@@ -485,6 +490,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
 
@@ -532,6 +538,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_1_new_cache = {
@@ -543,6 +550,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_2 = {
@@ -554,6 +562,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_3_stored_cache = {
@@ -565,6 +574,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_3_new_cache = {
@@ -576,6 +586,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
 
@@ -641,6 +652,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_2 = {
@@ -652,6 +664,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_3_stored_cache = {
@@ -663,6 +676,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_3_new_cache = {
@@ -674,6 +688,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_4 = {
@@ -685,6 +700,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
         device_info_5 = {
@@ -696,6 +712,7 @@ class TestRefreshCache:
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
+                "site_id": 1234
             }
         }
 
