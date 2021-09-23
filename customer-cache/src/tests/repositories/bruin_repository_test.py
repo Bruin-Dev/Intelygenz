@@ -40,6 +40,7 @@ class TestBruinRepository:
         instance_response_message['body'] = {
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
+            'side_id': 1234
         }
         instance_response_message['status'] = 200
 
