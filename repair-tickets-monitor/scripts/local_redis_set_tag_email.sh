@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_PATH=$(dirname $(realpath -s $0))
-RANDOM_KEY=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
+EMAIL_ID="1234_test"
 
 source $SCRIPT_PATH/../src/config/env
 

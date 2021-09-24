@@ -1,0 +1,25 @@
+{
+    "success": true,
+    "message": "Mocked pipeline sucesfull.",
+    "prediction": {
+        "email": {
+            "email_id": "1234_test",
+            "parent_id": "1234_test",
+            "client_id": "sample_client_id",
+            "subject_cleaned": "mocked_subject_cleaned",
+            "body_cleaned": "mocked_body_cleaned",
+            "tag": {
+                "type": "Repair_mock",
+                "probability": 0.9
+            }
+        },
+        "potential_service_numbers": [
+            "mock_sv_1",
+            "mock_sv_2"
+        ],
+        "predicted_class": "mock_class",
+        "predicted_probability": 0.9
+    },
+    "above_threshold": true,
+    "threshold_value": 0.8
+}

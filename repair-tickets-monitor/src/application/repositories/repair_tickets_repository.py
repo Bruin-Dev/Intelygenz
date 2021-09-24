@@ -9,7 +9,7 @@ class RepairTicketsRepository:
         self._storage_repository = storage_repository
 
     def get_pending_repair_emails(self) -> List[dict]:
-        return self._storage_repository.find_all("email_rta_*")
+        return self._storage_repository.find_all("tag_email_*")
 
     def get_feedback_emails(self) -> List[dict]:
         # TODO: retrieve file for a concrete day o range of dates from S3
@@ -21,7 +21,7 @@ class RepairTicketsRepository:
     #     self._logger.info(f"saving email data '{email_id}'")
     #     self._storage_repository.save(key, email_data)
 
-    # def mark_complete(self, email_id: str):
-    #     key = f"email_{email_id}"
-    #     self._logger.info(f"marking email complete '{email_id}'")
-    #     self._storage_repository.remove(key)
+    def mark_complete(self, email_id: str):
+        key = f"tag_email_{email_id}"
+        self._logger.info(f"marking email complete '{email_id}'")
+        self._storage_repository.remove(key)
