@@ -70,12 +70,13 @@ class RepairTicketsMonitor:
         self._logger.info(f"Got {len(repair_emails)} repair emails.")
 
         tasks = [self._process_repair_email(email_data) for email_data in repair_emails]
-        await asyncio.gather(*tasks, return_exceptions=True)
+        output = await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info(
             "RepairTicketsMonitor process finished! Took {:.3f}s".format(
                 time.time() - start_time
             )
         )
+        self._logger.info(f"Output: {output}")
 
     async def _get_prediction(self, email_data):
         prediction_response = await self._repair_tickets_kre_repository.get_prediction(
@@ -140,8 +141,9 @@ class RepairTicketsMonitor:
 
     async def _get_definitive_contact_infos(self, client_id, prediction):
         contact_info_dict = defaultdict(dict)
+        potential_service_numbers = prediction["potential_service_numbers"]
 
-        for service_number in prediction["service_numbers"]:
+        for service_number in potential_service_numbers:
             # /api/Inventory
             client_info = await self._get_client_info(client_id, service_number)
             if not client_info:
@@ -208,14 +210,16 @@ class RepairTicketsMonitor:
                 )
 
     async def _process_repair_email(self, email_data: dict):
+        self._logger.info("Running Repair Email Process")
         # TODO: define the new logic
-        email_id = email_data["email"]["email_id"]
-        client_id = email_data["email"]["client_id"]
-        parent_id = email_data["email"].get("parent_id", None)
-        tag = email_data["tag"]
-        tag_mock = {"tag_id": 0, "confidence": 1.0}
+        email = email_data["email"]
+        email_id = email["email_id"]
+        client_id = email["client_id"]
+        parent_id = email.get("parent_id", None)
+        tag = email["tag"]
 
         async with self._semaphore:
+            self._logger.info("Entering semaphore")
             prediction = await self._get_prediction(email_data)
 
             contact_info_dict = await self._get_definitive_contact_infos(
@@ -233,4 +237,4 @@ class RepairTicketsMonitor:
             #     client_id, site_id, service_number, site_contact_info, prediction)
 
             # Remove from DB
-            # self._repair_tickets_repository.mark_complete(email_id)
+            self._repair_tickets_repository.mark_complete(email_id)
