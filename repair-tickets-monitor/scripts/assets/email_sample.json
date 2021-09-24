@@ -1,0 +1,13 @@
+{
+    "email": {
+        "email_id": "1234_test",
+        "parent_id": "1234_test",
+        "client_id": "sample_client_id",
+        "subject": "sample_sbuject",
+        "body": "sample_body",
+        "tag": {
+            "type": "Repair_mock",
+            "probability": 0.9
+        }
+    }
+}
