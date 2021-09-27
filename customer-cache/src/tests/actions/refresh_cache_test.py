@@ -196,6 +196,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
+            'ha_serial_number': "VCO919191",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234}
         }
         edge_from_bruin_1_with_config = {
@@ -204,6 +205,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
+            'ha_serial_number': "VCO919191",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 [
@@ -222,6 +224,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO202020",
+            'ha_serial_number': "VCO020202",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234}
         }
         edge_from_bruin_2_with_config = {
@@ -230,6 +233,45 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
+            'ha_serial_number': "VCO020202",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE2'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f485',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        edge_from_bruin_3_with_config = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Big Boss",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO919191",
+            'ha_serial_number': "VCO191919",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        edge_from_bruin_4_with_config = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Otacon",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO020202",
+            'ha_serial_number': "VCO191919",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 [
@@ -251,7 +293,12 @@ class TestRefreshCache:
             ]
         }
         stored_cache = [edge_from_bruin_1, edge_from_bruin_2]
-        new_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
+        new_cache = [
+            edge_from_bruin_1_with_config,
+            edge_from_bruin_2_with_config,
+            edge_from_bruin_3_with_config,
+            edge_from_bruin_4_with_config,
+        ]
 
         instance_refresh_cache._invalid_edges = {
             'mettel.velocloud.net': []
@@ -288,6 +335,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
+            'ha_serial_number': "VCO919191",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 {
@@ -304,6 +352,41 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VCO191919",
+            'ha_serial_number': "VCO919191",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
+            'links_configuration':
+                {
+                    'interfaces': ['GE2'],
+                    'internal_id': '00000001-ac48-47a0-81a7-80c8c320f485',
+                    'mode': 'PUBLIC',
+                    'type': 'WIRED',
+                    'last_active': '2020-09-29T04:45:15.000Z'
+                }
+        }
+        edge_from_bruin_3_with_config = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'edge_name': "Big Boss",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO919191",
+            'ha_serial_number': "VCO191919",
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
+            'links_configuration':
+                {
+                    'interfaces': ['GE1'],
+                    'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'mode': 'PUBLIC',
+                    'type': 'WIRED',
+                    'last_active': '2020-09-29T04:45:15.000Z'
+                }
+        }
+        edge_from_bruin_4_with_config = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1920},
+            'edge_name': "Otacon",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': "VCO919191",
+            'ha_serial_number': "VCO191919",
             'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
             'links_configuration':
                 {
@@ -317,9 +400,9 @@ class TestRefreshCache:
         edge_list = [{"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
                      {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991}]
         stored_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
-        new_cache = [edge_from_bruin_1_with_config]
-        crossed_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
-        final_cache = [edge_from_bruin_1_with_config]
+        new_cache = [edge_from_bruin_1_with_config, edge_from_bruin_3_with_config]
+        crossed_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config, edge_from_bruin_3_with_config]
+        final_cache = [edge_from_bruin_1_with_config, edge_from_bruin_3_with_config]
 
         instance_refresh_cache._filter_edge_list = CoroutineMock(side_effect=[
             edge_from_bruin_1_with_config,
@@ -387,6 +470,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VC1919191",
+            'ha_serial_number': "VC9191919",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -403,6 +487,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': "VC1919192",
+            'ha_serial_number': "VC9191912",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -428,6 +513,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VC1919191",
+            'ha_serial_number': "VC9191919",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -444,6 +530,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': "VC1919192",
+            'ha_serial_number': "VC9191912",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -471,6 +558,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': "VC1919191",
+            'ha_serial_number': "VC9191919",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -487,6 +575,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': "VC1919192",
+            'ha_serial_number': "VC9191912",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -535,6 +624,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
+            'ha_serial_number': "VC91919191",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -547,6 +637,7 @@ class TestRefreshCache:
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
+            'ha_serial_number': "VC91919191",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -559,6 +650,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': serial_number_2,
+            'ha_serial_number': "VC91919192",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -571,6 +663,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
+            'ha_serial_number': "VC91919192",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -583,6 +676,7 @@ class TestRefreshCache:
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
+            'ha_serial_number': "VC91919193",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -649,6 +743,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "8456-cg76-sdf3-h64j",
             'serial_number': serial_number_1,
+            'ha_serial_number': "VC91919191",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -661,6 +756,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "9567-dh87-teg4-i75k",
             'serial_number': serial_number_2,
+            'ha_serial_number': "VC91919192",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -673,6 +769,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
+            'ha_serial_number': "VC91919193",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -685,6 +782,7 @@ class TestRefreshCache:
             'last_contact': "2021-03-05 12:35:00",
             'logical_ids': "0678-ei98-ufh5-j86l",
             'serial_number': serial_number_3,
+            'ha_serial_number': "VC91919193",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -697,6 +795,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "1789-hj09-vgi6-k97m",
             'serial_number': serial_number_4,
+            'ha_serial_number': "VC91919194",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -709,6 +808,7 @@ class TestRefreshCache:
             'last_contact': "0000-00-00 00:00:00",
             'logical_ids': "2890-ik10-whj7-l08n",
             'serial_number': serial_number_5,
+            'ha_serial_number': "VC91919195",
             'bruin_client_info': {
                 "client_id": 1991,
                 "client_name": "Sarif Industries",
@@ -745,6 +845,7 @@ class TestRefreshCache:
         bruin_client_info = {'client_id': 'some client info'}
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
+        instance_edges_refresh_cache[0]['ha_serial_number'] = 'VC011'
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['bruin_client_info'] = [bruin_client_info]
@@ -784,6 +885,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+        instance_edges_refresh_cache[0]['edgeHASerialNumber'] = 'VC02'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': None, 'status': 200})
@@ -810,6 +912,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+        instance_edges_refresh_cache[0]['edgeHASerialNumber'] = 'VC02'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': [], 'status': 200})
@@ -841,6 +944,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+        instance_edges_refresh_cache[0]['edgeHASerialNumber'] = 'VC02'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': {'client_id': 'some client info'}, 'status': 400})
@@ -865,6 +969,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+        instance_edges_refresh_cache[0]['edgeHASerialNumber'] = 'VC02'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': [{'client_id': 'some client info'}], 'status': 200})
@@ -890,6 +995,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
         instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+        instance_edges_refresh_cache[0]['edgeHASerialNumber'] = 'VC02'
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
             return_value={'body': [{'client_id': 'some client info'}], 'status': 200})
@@ -921,6 +1027,7 @@ class TestRefreshCache:
         bruin_client_info = {'client_id': 88748}
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
+        instance_edges_refresh_cache[0]['ha_serial_number'] = 'VC02'
         instance_edges_refresh_cache[0]['bruin_client_info'] = [bruin_client_info]
         instance_edges_refresh_cache[0]['edge_name'] = "Big Boss"
         links_configuration = [
@@ -958,3 +1065,71 @@ class TestRefreshCache:
                 EdgeIdentifier(**instance_edges_refresh_cache[0]['edge'])
             ]
         }
+
+    def add_ha_devices_to_cache_test(self, instance_refresh_cache):
+        serial_number_1 = "VC1919191"
+        serial_number_2 = "VC9999999"
+        ha_serial_number_1 = "VC9191919"
+        ha_serial_number_2 = None
+
+        device_1 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'edge_name': "Big Boss",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': serial_number_1,
+            'ha_serial_number': ha_serial_number_1,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        device_2 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 20,
+                "edge_id": 2020
+            },
+            'edge_name': "Big Boss",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': serial_number_2,
+            'ha_serial_number': ha_serial_number_2,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        cache = [
+            device_1,
+            device_2,
+        ]
+
+        instance_refresh_cache._add_ha_devices_to_cache(cache)
+
+        ha_device_1 = {
+            'edge': {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 19,
+                "edge_id": 1919
+            },
+            'edge_name': "Big Boss",
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': ha_serial_number_1,
+            'ha_serial_number': serial_number_1,
+            'bruin_client_info': {
+                "client_id": 1991,
+                "client_name": "Sarif Industries",
+            }
+        }
+        new_cache = [
+            device_1,
+            device_2,
+            ha_device_1,
+        ]
+        assert cache == new_cache

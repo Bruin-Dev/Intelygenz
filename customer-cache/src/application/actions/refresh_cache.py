@@ -1,8 +1,10 @@
 import base64
 import csv
 import json
-from datetime import datetime, timedelta
+from copy import deepcopy
+from datetime import datetime
 from typing import List
+from typing import NoReturn
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -121,6 +123,15 @@ class RefreshCache:
         ]
         self._logger.info(f"Finished filtering edges for host {host}")
 
+        ha_serials = [
+            edge['ha_serial_number']
+            for edge in cache
+            if edge['ha_serial_number'] is not None
+        ]
+        self._logger.info(f"Adding {len(ha_serials)} HA edges as standalone edges to cache of host {host}...")
+        self._add_ha_devices_to_cache(cache)
+        self._logger.info(f"Finished adding HA edges to cache of host {host}")
+
         if len(cache) == 0:
             error_msg = f"Cache for host {host} was empty after cross referencing with Bruin." \
                         f" Check if Bruin is returning errors when asking for management statuses of the host"
@@ -149,6 +160,21 @@ class RefreshCache:
             self._storage_repository.set_cache(host, final_cache)
             await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
             self._logger.info(f"Finished storing cache for host {host}")
+
+    @staticmethod
+    def _add_ha_devices_to_cache(cache: List[dict]) -> NoReturn:
+        new_edges = []
+
+        for edge in cache:
+            ha_serial = edge.get('ha_serial_number')
+            if ha_serial is None:
+                continue
+
+            copy = deepcopy(edge)
+            copy['serial_number'], copy['ha_serial_number'] = copy['ha_serial_number'], copy['serial_number']
+            new_edges.append(copy)
+
+        cache.extend(new_edges)
 
     @staticmethod
     def _cross_stored_cache_and_new_cache(stored_cache: List[dict], new_cache: List[dict]) -> List[dict]:
@@ -181,6 +207,7 @@ class RefreshCache:
             async with self._semaphore:
                 self._logger.info(f"Checking if edge {edge_identifier} should be monitored...")
                 serial_number = edge_with_serial['serial_number']
+                ha_serial_number = edge_with_serial['ha_serial_number']
 
                 client_info_response = await self._bruin_repository.get_client_info(serial_number)
                 client_info_response_status = client_info_response['status']
@@ -223,6 +250,7 @@ class RefreshCache:
                     'last_contact': edge_with_serial['last_contact'],
                     'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,
+                    'ha_serial_number': ha_serial_number,
                     'bruin_client_info': client_info_response_body[0],
                     'links_configuration': edge_with_serial['links_configuration']
                 }

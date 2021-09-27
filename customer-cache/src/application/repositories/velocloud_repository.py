@@ -46,6 +46,7 @@ class VelocloudRepository:
                 'edge_id': edge['edgeId']
             }
             serial_number = edge.get('edgeSerialNumber')
+            ha_serial_number = edge.get('edgeHASerialNumber')
             last_contact = edge.get('edgeLastContact')
             edge_name = edge.get('edgeName')
 
@@ -69,6 +70,7 @@ class VelocloudRepository:
                 'edge': edge_full_id,
                 'edge_name': edge_name,
                 'serial_number': serial_number,
+                'ha_serial_number': ha_serial_number,
                 'last_contact': last_contact,
                 'logical_ids': logical_id
             })

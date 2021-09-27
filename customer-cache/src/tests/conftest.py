@@ -119,6 +119,7 @@ def instance_cache_edges():
             'last_contact': str(datetime.now()),
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC01",
+            'ha_serial_number': "VC011",
             'bruin_client_info': {'client_id': 'some client info'}
         },
         {
@@ -127,6 +128,7 @@ def instance_cache_edges():
             'last_contact': str(datetime.now()),
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC02",
+            'ha_serial_number': "VC022",
             'bruin_client_info': {'client_id': 'some client info'}
         }
     ]
@@ -143,12 +145,14 @@ def instance_edges_refresh_cache():
         {
             'edge': {'host': 'metvco02.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
             'logical_ids': ['list of logical ids'],
-            'serial_number': "VC01"
+            'serial_number': "VC01",
+            'ha_serial_number': "VC011",
         },
         {
             'edge': {'host': 'metvco04.mettel.net', 'enterprise_id': 123, 'edge_id': 321},
             'logical_ids': ['list of logical ids'],
-            'serial_number': "VC02"
+            'serial_number': "VC02",
+            'ha_serial_number': "VC022",
         }
     ]
 
@@ -202,9 +206,9 @@ def instance_velocloud_response():
     return {
         'request_id': '2222',
         'body': [
-            {'host': 'some-host', 'enterpriseId': 1, 'edgeId': 1, 'edgeSerialNumber': 1,
+            {'host': 'some-host', 'enterpriseId': 1, 'edgeId': 1, 'edgeSerialNumber': 1, 'edgeHASerialNumber': 2,
              'edgeLastContact': str(datetime.now() - timedelta(days=31))},
-            {'host': 'some-host', 'enterpriseId': 1, 'edgeId': 2, 'edgeSerialNumber': 1,
+            {'host': 'some-host', 'enterpriseId': 1, 'edgeId': 2, 'edgeSerialNumber': 1, 'edgeHASerialNumber': 2,
              'edgeLastContact': str(datetime.now() - timedelta(days=30))},
         ],
         'status': 200,
