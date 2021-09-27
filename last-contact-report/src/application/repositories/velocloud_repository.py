@@ -1,5 +1,4 @@
 from shortuuid import uuid
-from application import EdgeIdentifier
 
 nats_error_response = {'body': None, 'status': 503}
 
@@ -60,21 +59,16 @@ class VelocloudRepository:
         return return_response
 
     def extract_edge_info(self, links_with_edge_info: list) -> list:
-        edges_by_edge_identifier = {}
+        edges_by_edge_serial = {}
         for link in links_with_edge_info:
-            edge_full_id = {
-                'host': link['host'],
-                'enterprise_id': link['enterpriseId'],
-                'edge_id': link['edgeId']
-            }
-            edge_identifier = EdgeIdentifier(**edge_full_id)
+            serial_number = link['edgeSerialNumber']
 
             if not link['edgeId']:
-                self._logger.info(f"Edge {edge_identifier} doesn't have any ID. Skipping...")
+                self._logger.info(f"Edge {serial_number} doesn't have any ID. Skipping...")
                 continue
 
-            edges_by_edge_identifier.setdefault(
-                edge_identifier,
+            edges_by_edge_serial.setdefault(
+                serial_number,
                 {
                     'enterpriseName': link['enterpriseName'],
                     'enterpriseId': link['enterpriseId'],
@@ -95,7 +89,7 @@ class VelocloudRepository:
                 }
             )
 
-        edges = list(edges_by_edge_identifier.values())
+        edges = list(edges_by_edge_serial.values())
         return edges
 
     async def get_edges(self):

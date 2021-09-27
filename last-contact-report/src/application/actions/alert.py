@@ -1,11 +1,9 @@
 from datetime import datetime
-from shortuuid import uuid
 
 from dateutil import relativedelta
 from collections import OrderedDict
 from apscheduler.util import undefined
 from pytz import timezone
-from application import EdgeIdentifier
 
 from igz.packages.eventbus.eventbus import EventBus
 
@@ -39,16 +37,11 @@ class Alert:
             return
         edges_to_report = []
         for edge in list_edges:
-            edge_full_id = {
-                'host': edge['host'],
-                'enterprise_id': edge['enterpriseId'],
-                'edge_id': edge['edgeId']
-            }
-            edge_identifier = EdgeIdentifier(**edge_full_id)
+            serial_number = edge["edgeSerialNumber"]
             raw_last_contact = edge["edgeLastContact"]
 
             if '0000-00-00 00:00:00' in raw_last_contact:
-                self._logger.info(f'Missing last contact timestamp for edge {edge_identifier}. Skipping...')
+                self._logger.info(f'Missing last contact timestamp for edge {serial_number}. Skipping...')
                 continue
 
             last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -57,13 +50,13 @@ class Alert:
             total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
 
             if time_elapsed.days < 30:
-                self._logger.info(f'Time elapsed is less than 30 days for {edge_identifier}')
+                self._logger.info(f'Time elapsed is less than 30 days for {serial_number}')
                 continue
 
             edge_for_alert = OrderedDict()
             edge_for_alert['edge_name'] = edge['edgeName']
             edge_for_alert['enterprise'] = edge["enterpriseName"]
-            edge_for_alert['serial_number'] = edge["edgeSerialNumber"]
+            edge_for_alert['serial_number'] = serial_number
             edge_for_alert['model number'] = edge['edgeModelNumber']
             edge_for_alert['last_contact'] = edge["edgeLastContact"]
             edge_for_alert['months in SVC'] = total_months_elapsed

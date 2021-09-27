@@ -98,8 +98,7 @@ class TestAlert:
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
         with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
-            with uuid_mock:
-                await alert._alert_process()
+            await alert._alert_process()
 
         alert._template_renderer.compose_email_object.assert_called_once_with(list_edge_alert)
         alert._notifications_repository.send_email.assert_awaited_once_with(email_obj)
@@ -115,8 +114,7 @@ class TestAlert:
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
         with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
-            with uuid_mock:
-                await alert._alert_process()
+            await alert._alert_process()
         alert._notifications_repository.send_email.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -131,8 +129,7 @@ class TestAlert:
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
         with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
-            with uuid_mock:
-                await alert._alert_process()
+            await alert._alert_process()
         alert._template_renderer.compose_email_object.assert_called_once_with(
             [list_edge_alert[1], list_edge_alert[2], list_edge_alert[3]])
         alert._notifications_repository.send_email.assert_awaited_once_with(email_obj)
@@ -150,8 +147,7 @@ class TestAlert:
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
         with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
-            with uuid_mock:
-                await alert._alert_process()
+            await alert._alert_process()
         alert._template_renderer.compose_email_object.assert_called_once_with(
             [list_edge_alert[1], list_edge_alert[2]])
         alert._notifications_repository.send_email.assert_awaited_once_with(email_obj)
