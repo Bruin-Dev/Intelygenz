@@ -1,14 +1,10 @@
-from unittest.mock import Mock
 import copy
+from unittest.mock import Mock
 
 import pytest
-from shortuuid import uuid
 
 from application.actions.edge_monitoring import EdgeMonitoring
-
 from application.repositories.velocloud_repository import VelocloudRepository
-
-from application.repositories import EdgeIdentifier
 from config import testconfig as config
 
 
@@ -77,45 +73,28 @@ def link():
 
 
 @pytest.fixture(scope='function')
-def edge_identifier_1_host_1():
-    edge_info = {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 1,
-        'edge_id': 1
-    }
-    edge_identifier = EdgeIdentifier(**edge_info)
-    return edge_identifier
+def serial_number_1_host_1():
+    return 'VC1111111'
 
 
 @pytest.fixture(scope='function')
-def edge_identifier_2_host_1():
-    edge_info = {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 1,
-        'edge_id': 2
-    }
-    edge_identifier = EdgeIdentifier(**edge_info)
-    return edge_identifier
+def serial_number_2_host_1():
+    return 'VC1222222'
 
 
 @pytest.fixture(scope='function')
-def edge_identifier_3_host_1():
-    edge_info = {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 1,
-        'edge_id': 3
-    }
-    edge_identifier = EdgeIdentifier(**edge_info)
-    return edge_identifier
+def serial_number_3_host_1():
+    return 'VC1333333'
 
 
 @pytest.fixture(scope='function')
-def link_1_host_1(link):
+def link_1_host_1(link, serial_number_1_host_1):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E1'
     updated_edge['enterpriseId'] = 1
     updated_edge['edgeId'] = 1
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_1_host_1
     updated_edge['interface'] = 'GL1'
     updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'mettel.velocloud.net'
@@ -123,12 +102,13 @@ def link_1_host_1(link):
 
 
 @pytest.fixture(scope='function')
-def link_2_host_1(link):
+def link_2_host_1(link, serial_number_1_host_1):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E1'
     updated_edge['enterpriseId'] = 1
     updated_edge['edgeId'] = 1
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_1_host_1
     updated_edge['interface'] = 'GL2'
     updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'mettel.velocloud.net'
@@ -136,12 +116,13 @@ def link_2_host_1(link):
 
 
 @pytest.fixture(scope='function')
-def link_3_host_1(link):
+def link_3_host_1(link, serial_number_2_host_1):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E2'
     updated_edge['enterpriseId'] = 1
     updated_edge['edgeId'] = 2
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_2_host_1
     updated_edge['interface'] = 'GL1'
     updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'mettel.velocloud.net'
@@ -149,27 +130,29 @@ def link_3_host_1(link):
 
 
 @pytest.fixture(scope='function')
-def link_4_host_1(link):
+def link_4_host_1(link, serial_number_3_host_1):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E2'
     updated_edge['enterpriseId'] = 1
     updated_edge['edgeId'] = 1
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_3_host_1
     updated_edge['interface'] = 'GL1'
-    updated_edge['linkState'] = None
+    updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'mettel.velocloud.net'
     return updated_edge
 
 
 @pytest.fixture(scope='function')
-def link_5_host_1(link):
+def link_5_host_1(link, serial_number_3_host_1):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E2'
     updated_edge['enterpriseId'] = 1
-    updated_edge['edgeId'] = None
-    updated_edge['edgeState'] = None
+    updated_edge['edgeId'] = 1
+    updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_3_host_1
     updated_edge['interface'] = 'GL1'
-    updated_edge['linkState'] = None
+    updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'mettel.velocloud.net'
     return updated_edge
 
@@ -270,30 +253,7 @@ def edge_2_host_1(link_3_host_1):
 
 
 @pytest.fixture(scope='function')
-def edge_3_host_1(link_5_host_1):
-    return {
-       'enterpriseName': link_5_host_1['enterpriseName'],
-       'enterpriseId': link_5_host_1['enterpriseId'],
-       'enterpriseProxyId': link_5_host_1['enterpriseProxyId'],
-       'enterpriseProxyName': link_5_host_1['enterpriseProxyName'],
-       'edgeName': link_5_host_1['edgeName'],
-       'edgeState': None,
-       'edgeSystemUpSince': link_5_host_1['edgeSystemUpSince'],
-       'edgeServiceUpSince': link_5_host_1['edgeServiceUpSince'],
-       'edgeLastContact': link_5_host_1['edgeLastContact'],
-       'edgeId': None,
-       'edgeSerialNumber': link_5_host_1['edgeSerialNumber'],
-       'edgeHASerialNumber': link_5_host_1['edgeHASerialNumber'],
-       'edgeModelNumber': link_5_host_1['edgeModelNumber'],
-       'edgeLatitude': link_5_host_1['edgeLatitude'],
-       'edgeLongitude': link_5_host_1['edgeLongitude'],
-       'host': link_5_host_1['host'],
-       "links": []
-    }
-
-
-@pytest.fixture(scope='function')
-def edge_4_host_1(link_5_host_1):
+def edge_3_host_1(link_4_host_1, link_5_host_1):
     return {
        'enterpriseName': link_5_host_1['enterpriseName'],
        'enterpriseId': link_5_host_1['enterpriseId'],
@@ -304,26 +264,66 @@ def edge_4_host_1(link_5_host_1):
        'edgeSystemUpSince': link_5_host_1['edgeSystemUpSince'],
        'edgeServiceUpSince': link_5_host_1['edgeServiceUpSince'],
        'edgeLastContact': link_5_host_1['edgeLastContact'],
-       'edgeId': 4,
+       'edgeId': link_5_host_1['edgeId'],
        'edgeSerialNumber': link_5_host_1['edgeSerialNumber'],
        'edgeHASerialNumber': link_5_host_1['edgeHASerialNumber'],
        'edgeModelNumber': link_5_host_1['edgeModelNumber'],
        'edgeLatitude': link_5_host_1['edgeLatitude'],
        'edgeLongitude': link_5_host_1['edgeLongitude'],
        'host': link_5_host_1['host'],
-       "links": []
+       "links": [
+           {
+               'interface': link_4_host_1['interface'],
+               'internalId': link_4_host_1['internalId'],
+               'linkState': link_4_host_1['linkState'],
+               'linkLastActive': link_4_host_1['linkLastActive'],
+               'linkVpnState': link_4_host_1['linkVpnState'],
+               'linkId': link_4_host_1['linkId'],
+               'linkIpAddress': link_4_host_1['linkIpAddress'],
+               'displayName': link_4_host_1['displayName'],
+               'isp': link_4_host_1['isp'],
+           },
+           {
+               'interface': link_5_host_1['interface'],
+               'internalId': link_5_host_1['internalId'],
+               'linkState': link_5_host_1['linkState'],
+               'linkLastActive': link_5_host_1['linkLastActive'],
+               'linkVpnState': link_5_host_1['linkVpnState'],
+               'linkId': link_5_host_1['linkId'],
+               'linkIpAddress': link_5_host_1['linkIpAddress'],
+               'displayName': link_5_host_1['displayName'],
+               'isp': link_5_host_1['isp'],
+           }
+       ]
     }
 
 
 @pytest.fixture(scope='function')
-def edge_identifier_1_host_2():
-    edge_info = {
-        'host': 'metvco02.mettel.net',
-        'enterprise_id': 2,
-        'edge_id': 1
+def edge_4_host_1(link_4_host_1):
+    return {
+       'enterpriseName': link_4_host_1['enterpriseName'],
+       'enterpriseId': link_4_host_1['enterpriseId'],
+       'enterpriseProxyId': link_4_host_1['enterpriseProxyId'],
+       'enterpriseProxyName': link_4_host_1['enterpriseProxyName'],
+       'edgeName': link_4_host_1['edgeName'],
+       'edgeState': link_4_host_1['edgeState'],
+       'edgeSystemUpSince': link_4_host_1['edgeSystemUpSince'],
+       'edgeServiceUpSince': link_4_host_1['edgeServiceUpSince'],
+       'edgeLastContact': link_4_host_1['edgeLastContact'],
+       'edgeId': link_4_host_1['edgeId'],
+       'edgeSerialNumber': link_4_host_1['edgeSerialNumber'],
+       'edgeHASerialNumber': link_4_host_1['edgeHASerialNumber'],
+       'edgeModelNumber': link_4_host_1['edgeModelNumber'],
+       'edgeLatitude': link_4_host_1['edgeLatitude'],
+       'edgeLongitude': link_4_host_1['edgeLongitude'],
+       'host': link_4_host_1['host'],
+       "links": [],
     }
-    edge_identifier = EdgeIdentifier(**edge_info)
-    return edge_identifier
+
+
+@pytest.fixture(scope='function')
+def serial_number_1_host_2():
+    return 'VC2111111'
 
 
 @pytest.fixture(scope='function')
@@ -362,12 +362,13 @@ def edge_1_host_2(link_1_host_2):
 
 
 @pytest.fixture(scope='function')
-def link_1_host_2(link):
+def link_1_host_2(link, serial_number_1_host_2):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E1'
     updated_edge['enterpriseId'] = 2
     updated_edge['edgeId'] = 1
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_1_host_2
     updated_edge['interface'] = 'GL1'
     updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'metvco02.mettel.net'
@@ -375,14 +376,8 @@ def link_1_host_2(link):
 
 
 @pytest.fixture(scope='function')
-def edge_identifier_1_host_3():
-    edge_info = {
-        'host': 'metvco03.mettel.net',
-        'enterprise_id': 3,
-        'edge_id': 1
-    }
-    edge_identifier = EdgeIdentifier(**edge_info)
-    return edge_identifier
+def serial_number_1_host_3():
+    return 'VC3111111'
 
 
 @pytest.fixture(scope='function')
@@ -421,12 +416,13 @@ def edge_1_host_3(link_1_host_3):
 
 
 @pytest.fixture(scope='function')
-def link_1_host_3(link):
+def link_1_host_3(link, serial_number_1_host_3):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E1'
     updated_edge['enterpriseId'] = 3
     updated_edge['edgeId'] = 1
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_1_host_3
     updated_edge['interface'] = 'GL1'
     updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'metvco03.mettel.net'
@@ -434,23 +430,18 @@ def link_1_host_3(link):
 
 
 @pytest.fixture(scope='function')
-def edge_identifier_1_host_4():
-    edge_info = {
-        'host': 'metvco04.mettel.net',
-        'enterprise_id': 4,
-        'edge_id': 1
-    }
-    edge_identifier = EdgeIdentifier(**edge_info)
-    return edge_identifier
+def serial_number_1_host_4():
+    return 'VC4111111'
 
 
 @pytest.fixture(scope='function')
-def link_1_host_4(link):
+def link_1_host_4(link, serial_number_1_host_4):
     updated_edge = copy.deepcopy(link)
     updated_edge['enterpriseName'] = 'E1'
     updated_edge['enterpriseId'] = 4
     updated_edge['edgeId'] = 1
     updated_edge['edgeState'] = 'CONNECTED'
+    updated_edge['edgeSerialNumber'] = serial_number_1_host_4
     updated_edge['interface'] = 'GL1'
     updated_edge['linkState'] = 'CONNECTED'
     updated_edge['host'] = 'metvco04.mettel.net'

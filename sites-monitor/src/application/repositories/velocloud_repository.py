@@ -1,8 +1,6 @@
 from typing import Dict
 from shortuuid import uuid
 
-from application.repositories import EdgeIdentifier
-
 nats_error_response = {'body': None, 'status': 503}
 
 
@@ -61,21 +59,17 @@ class VelocloudRepository:
         }
         return return_response
 
-    def group_links_by_edge(self, edge_links_list) -> Dict[EdgeIdentifier, dict]:
+    def group_links_by_edge_serial(self, edge_links_list) -> Dict[str, dict]:
         result = {}
         for edge_link in edge_links_list:
-            edge_info = {
-                'host': edge_link['host'],
-                'enterprise_id': edge_link['enterpriseId'],
-                'edge_id': edge_link['edgeId']
-            }
-            edge_identifier = EdgeIdentifier(**edge_info)
+            serial_number = edge_link['edgeSerialNumber']
+
             if not edge_link['edgeId']:
-                self._logger.info(f"Edge {edge_identifier} without edgeId")
+                self._logger.info(f"Edge {serial_number} without edgeId")
                 continue
 
             result.setdefault(
-                edge_identifier,
+                serial_number,
                 {
                     'enterpriseName': edge_link['enterpriseName'],
                     'enterpriseId': edge_link['enterpriseId'],
@@ -98,7 +92,7 @@ class VelocloudRepository:
             )
 
             if not edge_link['linkState']:
-                self._logger.info(f"Edge [{edge_identifier}] with link interface {edge_link['interface']} "
+                self._logger.info(f"Edge [{serial_number}] with link interface {edge_link['interface']} "
                                   f"without state")
                 continue
 
@@ -114,7 +108,7 @@ class VelocloudRepository:
                 'isp': edge_link['isp'],
             }
 
-            result[edge_identifier]["links"].append(edge_link_info)
+            result[serial_number]["links"].append(edge_link_info)
 
         return result
 

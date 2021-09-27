@@ -1,12 +1,9 @@
 import asyncio
 
-from shortuuid import uuid
-from typing import Dict
 from time import perf_counter
 from datetime import datetime
 from pytz import timezone
 from apscheduler.util import undefined
-from application.repositories import EdgeIdentifier
 
 from igz.packages.eventbus.eventbus import EventBus
 
@@ -53,20 +50,20 @@ class EdgeMonitoring:
             edge_links_list = edge_list_response['body']
             self._logger.info(f'Edge list received from event bus')
 
-            edges_with_links: Dict[EdgeIdentifier, dict] = \
-                self._velocloud_repository.group_links_by_edge(edge_links_list)
-            edge_identifiers = set(edges_with_links)
-            self._prometheus_repository.set_cycle_total_edges(len(edge_identifiers))
+            edges_with_links = \
+                self._velocloud_repository.group_links_by_edge_serial(edge_links_list)
+            edge_serials = set(edges_with_links)
+            self._prometheus_repository.set_cycle_total_edges(len(edge_serials))
             if self._edges_cache:
-                edges_missing_set = self._edges_cache - edge_identifiers
+                edges_missing_set = self._edges_cache - edge_serials
                 for edge in edges_missing_set:
                     self._prometheus_repository.dec(self._status_cache[edge]['cache_edge'])
             self._logger.info(f'Splitting and sending edges to the event bus')
-            self._edges_cache = edge_identifiers
+            self._edges_cache = edge_serials
 
             tasks = [
-                self._process_edge(edge_identifier, edge)
-                for edge_identifier, edge in edges_with_links.items()
+                self._process_edge(edge_serial, edge)
+                for edge_serial, edge in edges_with_links.items()
             ]
             start = perf_counter()
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -77,28 +74,28 @@ class EdgeMonitoring:
         except Exception as e:
             self._logger.error(f"Error: Exception in process all edges: {e}")
 
-    async def _process_edge(self, edge_identifier, edge):
+    async def _process_edge(self, edge_serial, edge):
         try:
             async with self._semaphore:
-                self._logger.info(f"Processing edge links: {edge_identifier} with {len(edge['links'])} links")
+                self._logger.info(f"Processing edge links: {edge_serial} with {len(edge['links'])} links")
                 if len(edge['links']) == 0:
-                    self._logger.info(f"Edge with links: {edge_identifier} has not links")
+                    self._logger.info(f"Edge with links: {edge_serial} has not links")
                     return
-                if edge_identifier not in self._status_cache:
+                if edge_serial not in self._status_cache:
                     self._prometheus_repository.inc(edge)
                 else:
-                    if self._status_cache[edge_identifier]['cache_edge']['edgeState'] != edge['edgeState']:
-                        self._prometheus_repository.update_edge(edge, self._status_cache[edge_identifier]['cache_edge'])
+                    if self._status_cache[edge_serial]['cache_edge']['edgeState'] != edge['edgeState']:
+                        self._prometheus_repository.update_edge(edge, self._status_cache[edge_serial]['cache_edge'])
 
                     for link, cache_link in zip(edge['links'],
-                                                self._status_cache[edge_identifier]['cache_edge']['links']):
+                                                self._status_cache[edge_serial]['cache_edge']['links']):
                         if link['linkState'] != cache_link['linkState']:
                             self._prometheus_repository.update_link(edge, link,
-                                                                    self._status_cache[edge_identifier]['cache_edge'],
+                                                                    self._status_cache[edge_serial]['cache_edge'],
                                                                     cache_link)
 
                 cache_data = {"cache_edge": edge}
-                self._status_cache[edge_identifier] = cache_data
+                self._status_cache[edge_serial] = cache_data
 
         except Exception as e:
             self._logger.error(f"Error: Exception in process one edge link: {e}")

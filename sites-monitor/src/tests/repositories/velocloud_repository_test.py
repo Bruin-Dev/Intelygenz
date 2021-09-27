@@ -1,6 +1,4 @@
 from typing import Dict
-from datetime import datetime
-from datetime import timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
 from unittest.mock import call
@@ -12,7 +10,6 @@ from shortuuid import uuid
 
 from application.repositories import velocloud_repository as velocloud_repository_module
 from application.repositories.velocloud_repository import VelocloudRepository
-from application.repositories import EdgeIdentifier
 from config import testconfig
 
 uuid_ = uuid()
@@ -196,18 +193,15 @@ class TestVelocloudRepository:
             call(host=instance_server._config.SITES_MONITOR_CONFIG['velo_servers'][3])
         ])
 
-    def group_links_by_edge_test(self, instance_server, list_all_links_with_edge_info, edge_1_host_1, edge_2_host_1,
-                                 edge_identifier_1_host_1, edge_identifier_2_host_1, edge_identifier_1_host_2,
-                                 edge_1_host_2, edge_identifier_1_host_3, edge_1_host_3, edge_identifier_1_host_4,
-                                 edge_1_host_4):
-        expected: Dict[EdgeIdentifier, dict] = {
-            edge_identifier_1_host_1: edge_1_host_1,
-            edge_identifier_2_host_1: edge_2_host_1,
-            edge_identifier_1_host_2: edge_1_host_2,
-            edge_identifier_1_host_3: edge_1_host_3,
-            edge_identifier_1_host_4: edge_1_host_4
+    def group_links_by_edge_serial_test(self, instance_server, edge_1_host_1, edge_2_host_1, link_1_host_1,
+                                        link_2_host_1, link_3_host_1, serial_number_1_host_1, serial_number_2_host_1):
+        links_with_edge_info = [link_1_host_1, link_2_host_1, link_3_host_1]
+
+        expected = {
+            serial_number_1_host_1: edge_1_host_1,
+            serial_number_2_host_1: edge_2_host_1,
         }
-        result = instance_server._velocloud_repository.group_links_by_edge(list_all_links_with_edge_info['body'])
+        result = instance_server._velocloud_repository.group_links_by_edge_serial(links_with_edge_info)
         assert expected == result
 
     @pytest.mark.asyncio
