@@ -9,7 +9,7 @@ validate-runtime-tnba-dev:
     KRE_RUNTIME_NAME: kre-tnba
     CURRENT_ENVIRONMENT: dev
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       changes:
         - infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
@@ -22,7 +22,7 @@ validate-runtime-email-tagger-dev:
     KRE_RUNTIME_NAME: kre-email-tagger
     CURRENT_ENVIRONMENT: dev
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       changes:
         - infra-as-code/kre-runtimes/runtimes/kre-email-tagger/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
@@ -47,7 +47,7 @@ deploy-runtime-tnba-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -66,7 +66,10 @@ deploy-runtime-tnba-production:
     KRE_RUNTIME_DASHBOARD_PASSWORD: ${TNBA_KRE_RUNTIME_DASHBOARD_PASSWORD}
     CURRENT_ENVIRONMENT: production
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
 
@@ -87,7 +90,7 @@ deploy-runtime-email-tagger-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -106,7 +109,10 @@ deploy-runtime-email-tagger-production:
     KRE_RUNTIME_DASHBOARD_PASSWORD: ${EMAIL_TAGGER_KRE_RUNTIME_DASHBOARD_PASSWORD}
     CURRENT_ENVIRONMENT: production
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
 
@@ -125,7 +131,7 @@ destroy-runtime-tnba-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -143,7 +149,7 @@ destroy-runtime-tnba-production:
     KRE_RUNTIME_DASHBOARD_USER: ${TNBA_KRE_RUNTIME_DASHBOARD_USER}
     KRE_RUNTIME_DASHBOARD_PASSWORD: ${TNBA_KRE_RUNTIME_DASHBOARD_PASSWORD}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -159,7 +165,7 @@ destroy-runtime-email-tagger-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -177,6 +183,6 @@ destroy-runtime-email-tagger-production:
     KRE_RUNTIME_DASHBOARD_USER: ${EMAIL_TAGGER_KRE_RUNTIME_DASHBOARD_USER}
     KRE_RUNTIME_DASHBOARD_PASSWORD: ${EMAIL_TAGGER_KRE_RUNTIME_DASHBOARD_PASSWORD}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(kre\): .*$/'
       when: manual
       allow_failure: true

@@ -1,6 +1,7 @@
 # ====================================================
 # Linter validation jobs for infra-as-code/kre module
 # ====================================================
+
 terraform-validate-basic-infra-kre:
   stage: validation
   extends: .kre_template_validate_basic_infra
@@ -12,7 +13,8 @@ terraform-validate-basic-infra-kre:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+  # only run pipeline if commit is:    "<feat|fix|perf|refactor|build>(kre): anything"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       changes:
         - infra-as-code/kre/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
@@ -20,6 +22,7 @@ terraform-validate-basic-infra-kre:
 # =======================================================
 # Terraform deployment jobs for infra-as-code/kre module
 # =======================================================
+
 basic-infra-kre-dev:
   stage: basic_infra_kre
   extends: .kre_template_deploy_basic_infra
@@ -40,7 +43,7 @@ basic-infra-kre-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -62,10 +65,12 @@ basic-infra-kre-production:
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       when: manual
       allow_failure: true
-
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
 # ===================================================
 # Terraform destroy jobs for infra-as-code/kre module
 # ===================================================
@@ -81,7 +86,7 @@ destroy-basic-infra-kre-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /destroy\(kre\): .*$/'
       when: manual
       allow_failure: true
 
@@ -94,6 +99,6 @@ destroy-basic-infra-kre-production:
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(kre\): .*$/'
       when: manual
       allow_failure: true

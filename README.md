@@ -85,6 +85,7 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 *This specification is inspired by and supersedes the AngularJS commit message format.*
 
 We have very precise rules over how our Git commit messages must be formatted. This format leads to easier to read commit history.
+**If the rules not match, the jobs of the pipeline will not be triggered.**
 
 Each commit message consists of a *header*, a *body*, and a *footer*.
 
@@ -126,16 +127,25 @@ The `<type>` and `<short summary>` fields are mandatory, the `(<scope>)` field i
 **NOTE**: beware with space between `(scope):` and `short summary`, it's necessary for semantic-release functionality.
 
 #### Type
+This part is very important, depend of the type we use, the pipeline will trigger a job or not.
 Must be one of the following:
 
-* **build**: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
-* **ci**: Changes to our CI configuration files and scripts (example scopes: Circle, BrowserStack, SauceLabs)
+* **build**: Changes that affect the build system or external dependencies (example scopes: terraform, npm)
+* **ci**: Changes to our CI configuration files and scripts (example scopes: gitlab-ci.yml files)
 * **docs**: Documentation only changes
 * **feat**: A new feature
 * **fix**: A bug fix
-* **perf**: A code change that improves performance
+* **perf**: A code change that improves performance. (also needs the text `BREAKING CHANGE:` in the commit description to create performance release)
 * **refactor**: A code change that neither fixes a bug nor adds a feature
 * **test**: Adding missing tests or correcting existing tests
+* **destroy**: Destroy resources. Used to trigger pipelines jobs for destroy sensitive resources like basic_infra (manual jobs).
+
+#### Types that trigger jobs in pipelines
+* *feat|fix|perf|refactor* will trigger jobs: `validation`(linters), `unit_tests`, `basic_infra`, `build`, `helm` and `destroy_helm` for *ephemeral environments*
+* *feat|fix|perf|refactor* will trigger jobs: `validation`(linters), `unit_tests`, `basic_infra`, `build`, `semantic-release`, and `helm` for *production environment*
+* *feat|fix|perf|refactor|build(kre)* will trigger jobs: `kre_basic_infra`, `deploy_kre_runtime` and `destroy_kre_runtime` for *development environment* (manual jobs)
+* *feat|fix|perf|refactor|build(kre)* will trigger jobs: `kre_basic_infra` and `deploy_kre_runtime` for *production environment* (manual jobs)
+* *destroy* will trigger jobs: `destroy_basic_infra`, `destroy_helm` and `destroy_kre_basic_infra` and `destroy_kre_runtime` for all environments (manual jobs)
 
 #### Scope
 The scope should be the name of the npm package affected (as perceived by the person reading the changelog generated from commit messages).
@@ -476,6 +486,7 @@ Run:
 
 - Additionaly we use [KRE](https://konstellation-io.github.io/website/) proyect for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
 
+**NOTE:** *to edit KRE environments we need to use specific commits messages to trigger pipeline jobs, see the [Commit Message Format](#commit) for more info.*
 ## Access Control
 
 In the creation and possible updates in the EKS clusters an association is made between IAM roles created for each of the project users and `ClusterRole` and `ClusterRoleBinding` created in these clusters. In this way, each user will have access to certain resources of both clusters.

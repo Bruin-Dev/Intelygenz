@@ -10,10 +10,10 @@ terraform-valite-basic-infra:
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
       changes:
         - infra-as-code/basic-infra/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
 
 # ==============================================================
 # Terraform deployment jobs for infra-as-code/basic-infra module
@@ -44,11 +44,11 @@ basic-infra-dev:
     - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
-      when: manual
-      allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
+      when: manual
+      allow_failure: true
 
 basic-infra-pro:
   stage: basic_infra
@@ -76,9 +76,11 @@ basic-infra-pro:
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
       when: manual
       allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+      when: manual
 
 # ===========================================================
 # Terraform destroy jobs for infra-as-code/basic-infra module
@@ -95,11 +97,11 @@ destroy-basic-infra-dev:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - export TF_VAR_ENVIRONMENT="dev"
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"'
-      when: manual
-      allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /destroy\(.*\): .*$/'
+      when: manual
+      allow_failure: true
 
 destroy-basic-infra-pro:
   stage: destroy
@@ -113,6 +115,6 @@ destroy-basic-infra-pro:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
     - export TF_VAR_ENVIRONMENT="production"
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(.*\): .*$/'
       when: manual
       allow_failure: true
