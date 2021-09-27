@@ -32,12 +32,12 @@ class TestVelocloudRepository:
                 'filter': {
                     "limit": limit,
                     'rules': [
-                                {
-                                    "field": "event",
-                                    "op": "is",
-                                    "values": filter_events_status_list
-                                }
-                            ]
+                        {
+                            "field": "event",
+                            "op": "is",
+                            "values": filter_events_status_list
+                        }
+                    ]
                 }
                 }
         edge_events = await vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
@@ -119,12 +119,12 @@ class TestVelocloudRepository:
                 'filter': {
                     "limit": limit,
                     'rules': [
-                                {
-                                    "field": "event",
-                                    "op": "is",
-                                    "values": filter_events_status_list
-                                }
-                            ]
+                        {
+                            "field": "event",
+                            "op": "is",
+                            "values": filter_events_status_list
+                        }
+                    ]
                 }
                 }
         enterprise_events = await vr.get_all_enterprise_events(enterprise_id, host, start, end, limit,
@@ -649,4 +649,75 @@ class TestVelocloudRepository:
             'body': f'No links configuration was found in WAN module of edge {edge_full_id}',
             'status': 404,
         }
+        assert response == expected
+
+    @pytest.mark.asyncio
+    async def get_network_enterprise_edges_test(self, velocloud_repository, make_network_enterprises_body):
+        velocloud_host = 'test.velocloud.com'
+        enterprise_ids = [3]
+
+        client_response_body = make_network_enterprises_body(enterprise_ids=enterprise_ids, n_edges=2)
+        client_response = {
+            'body': client_response_body,
+            'status': 200
+        }
+
+        get_network_enterprises_mock = CoroutineMock(return_value=client_response)
+        velocloud_repository._velocloud_client.get_network_enterprises = get_network_enterprises_mock
+
+        response = await velocloud_repository.get_network_enterprise_edges(velocloud_host, enterprise_ids)
+
+        get_network_enterprises_mock.assert_awaited_once_with(velocloud_host, enterprise_ids)
+
+        expected_body = client_response_body[0].get('edges')
+
+        expected = {
+            'body': expected_body,
+            'status': 200,
+        }
+
+        assert all('host' in edge.keys() for edge in expected_body)
+        assert response == expected
+        assert response['body'][0]['host'] == velocloud_host
+
+    @pytest.mark.asyncio
+    async def get_network_enterprise_edges_non_200_status_test(self, velocloud_repository):
+        velocloud_host = 'test.velocloud.com'
+        enterprise_ids = [3]
+        client_error_response = {
+            'body': 'Error while connecting to Velocloud API',
+            'status': 500,
+        }
+
+        get_network_enterprises_mock = CoroutineMock(return_value=client_error_response)
+        velocloud_repository._velocloud_client.get_network_enterprises = get_network_enterprises_mock
+
+        response = await velocloud_repository.get_network_enterprise_edges(velocloud_host, enterprise_ids)
+
+        get_network_enterprises_mock.assert_awaited_once_with(velocloud_host, enterprise_ids)
+
+        assert response == client_error_response
+
+    @pytest.mark.asyncio
+    async def get_network_enterprise_edges_404_status_test(self, velocloud_repository, make_network_enterprises_body):
+        velocloud_host = 'test.velocloud.com'
+        enterprise_ids = [3]
+        client_response_body = make_network_enterprises_body(enterprise_ids=enterprise_ids, n_edges=0)
+        client_no_edges_response = {
+            'body': client_response_body,
+            'status': 200
+        }
+
+        get_network_enterprises_mock = CoroutineMock(return_value=client_no_edges_response)
+        velocloud_repository._velocloud_client.get_network_enterprises = get_network_enterprises_mock
+
+        response = await velocloud_repository.get_network_enterprise_edges(velocloud_host, enterprise_ids)
+
+        get_network_enterprises_mock.assert_awaited_once_with(velocloud_host, enterprise_ids)
+
+        expected = {
+            'status': 404,
+            'body': f'No edges found for enterprise ids {enterprise_ids}',
+        }
+
         assert response == expected
