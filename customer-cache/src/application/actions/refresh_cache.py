@@ -179,11 +179,11 @@ class RefreshCache:
     @staticmethod
     def _cross_stored_cache_and_new_cache(stored_cache: List[dict], new_cache: List[dict]) -> List[dict]:
         stored_devices_by_serial = {
-            EdgeIdentifier(**edge['edge']): edge
+            edge['serial_number']: edge
             for edge in stored_cache
         }
         new_devices_by_serial = {
-            EdgeIdentifier(**edge['edge']): edge
+            edge['serial_number']: edge
             for edge in new_cache
         }
 
