@@ -1,10 +1,8 @@
 from datetime import datetime
 from unittest.mock import Mock
-from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
-
 from aiohttp import ClientConnectionError
 from apscheduler.jobstores.base import ConflictingIdError
 from asynctest import CoroutineMock
@@ -1493,5 +1491,107 @@ class TestVelocloudClient:
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
+
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_test(self,
+                                           velocloud_client,
+                                           make_http_response,
+                                           make_network_enterprises_body):
+        velocloud_host = 'mettel.velocloud.net'
+        enterprise_ids = [113]
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+        velocloud_client._clients = clients_by_host
+
+        body_response = make_network_enterprises_body(enterprise_ids=enterprise_ids, n_edges=1)
+        response_mock = make_http_response(status=200, body=body_response)
+
+        expected_response = {
+            'body': body_response,
+            'status': 200
+        }
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            result = await velocloud_client.get_network_enterprises(velocloud_host, enterprise_ids)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_invalid_request_test(self, velocloud_client, make_error_response):
+        enterprise_ids = [1234]
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+        velocloud_client._clients = clients_by_host
+
+        error_message = 'An error occurred while processing your request'
+        error_response = make_error_response(status=400, error_code=-32600, message=error_message)
+
+        expected_result = {
+            'body': f'Got 400 from Velocloud --> {error_message} for enterprise ids: {enterprise_ids}',
+            'status': 400,
+        }
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=error_response)):
+            result = await velocloud_client.get_network_enterprises(velocloud_host, enterprise_ids)
+
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_server_error_test(self, velocloud_client, make_error_response):
+        enterprise_ids = ['1234']
+        velocloud_host = 'mettel.velocloud.net'
+        error_message = 'An error occurred while processing your request'
+        velocloud_headers = {
+            'some': 'header',
+        }
+
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+
+        velocloud_client._clients = clients_by_host
+
+        error_response = make_error_response(status=500, error_code=-32600, message=error_message)
+
+        expected_result = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=error_response)):
+            result = await velocloud_client.get_network_enterprises(velocloud_host, enterprise_ids)
+
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_exception_test(self, velocloud_client):
+        enterprise_ids = [1234]
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+        velocloud_client._clients = clients_by_host
+
+        expected_result = {
+            'body': 'Error while connecting to Velocloud API',
+            'status': 500,
+        }
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
+            result = await velocloud_client.get_network_enterprises(velocloud_host, enterprise_ids)
 
         assert result == expected_result

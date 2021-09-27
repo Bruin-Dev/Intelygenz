@@ -1,3 +1,6 @@
+from typing import Any, Dict, List
+
+
 class VelocloudRepository:
     _config = None
     _clients = None
@@ -121,3 +124,27 @@ class VelocloudRepository:
 
     async def get_edge_links_series(self, host, payload):
         return await self._velocloud_client.get_edge_links_series(host, payload)
+
+    async def get_network_enterprise_edges(self, host: str, enterprise_ids: List[int]) -> Dict[str, Any]:
+        response = await self._velocloud_client.get_network_enterprises(host, enterprise_ids)
+        enterprise_edges_response = dict.fromkeys(['body', 'status'])
+
+        if response['status'] not in range(200, 300):
+            return response
+
+        if not len(response['body']):
+            enterprise_edges_response['body'] = f'No enterprises found for enterprise ids {enterprise_ids}'
+            enterprise_edges_response['status'] = 404
+
+        edges = sum([enterprise_info['edges'] for enterprise_info in response['body']], [])
+
+        if edges:
+            for edge in edges:
+                edge['host'] = host
+            enterprise_edges_response['body'] = edges
+            enterprise_edges_response['status'] = 200
+        else:
+            enterprise_edges_response['body'] = f'No edges found for enterprise ids {enterprise_ids}'
+            enterprise_edges_response['status'] = 404
+
+        return enterprise_edges_response

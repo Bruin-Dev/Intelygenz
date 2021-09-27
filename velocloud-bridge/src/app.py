@@ -16,6 +16,7 @@ from application.actions.get_edge_links_series import GetEdgeLinksSeries
 from application.actions.links_configuration import LinksConfiguration
 from application.actions.links_metric_info import LinksMetricInfo
 from application.actions.links_with_edge_info import LinksWithEdgeInfo
+from application.actions.network_enterprise_edge_list import NetworkEnterpriseEdgeList
 from application.clients.velocloud_client import VelocloudClient
 from application.repositories.velocloud_repository import VelocloudRepository
 from config import config
@@ -46,6 +47,7 @@ class Container:
         self._subscriber_enterprise_event_alert = NATSClient(config, logger=self._logger)
         self._subscriber_links_configuration = NATSClient(config, logger=self._logger)
         self._subscriber_edge_links_series = NATSClient(config, logger=self._logger)
+        self._subscriber_network_enterprise_edge_list = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_enterprise_name_list, consumer_name="enterprise_name_list")
@@ -56,6 +58,9 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_enterprise_edge_list, consumer_name="enterprise_edge_list")
         self._event_bus.add_consumer(self._subscriber_links_configuration, consumer_name="links_configuration")
         self._event_bus.add_consumer(self._subscriber_edge_links_series, consumer_name="edge_links_series")
+        self._event_bus.add_consumer(self._subscriber_network_enterprise_edge_list,
+                                     consumer_name="network_enterprise_edge_list")
+
         self._event_bus.set_producer(self._publisher)
 
         self._edge_events_for_alert = EventEdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
@@ -67,6 +72,8 @@ class Container:
         self._enterprise_name_list = EnterpriseNameList(self._event_bus, self._velocloud_repository, self._logger)
         self._enterprise_edge_list = EnterpriseEdgeList(self._event_bus, self._velocloud_repository, self._logger)
         self._edge_links_series_action = GetEdgeLinksSeries(self._event_bus, self._velocloud_repository, self._logger)
+        self._network_enterprise_edge_list = NetworkEnterpriseEdgeList(self._event_bus, self._velocloud_repository,
+                                                                       self._logger)
 
         self._alert_edge_event = ActionWrapper(self._edge_events_for_alert, "report_edge_event",
                                                is_async=True, logger=self._logger)
@@ -85,6 +92,9 @@ class Container:
                                                   is_async=True, logger=self._logger)
         self._edge_links_series = ActionWrapper(self._edge_links_series_action, "edge_links_series",
                                                 is_async=True, logger=self._logger)
+        self._list_network_enterprise_edge = ActionWrapper(self._network_enterprise_edge_list,
+                                                           "get_enterprise_edge_list",
+                                                           is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -123,6 +133,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="edge_links_series",
                                                  topic="request.edge.links.series",
                                                  action_wrapper=self._edge_links_series,
+                                                 queue="velocloud_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="network_enterprise_edge_list",
+                                                 topic="request.network.enterprise.edges",
+                                                 action_wrapper=self._list_network_enterprise_edge,
                                                  queue="velocloud_bridge")
 
     async def start_server(self):

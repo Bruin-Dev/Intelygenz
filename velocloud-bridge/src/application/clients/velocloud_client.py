@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from typing import Any, Dict, List
+
 import aiohttp
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
@@ -476,6 +478,52 @@ class VelocloudClient:
 
         return result
 
+    async def get_network_enterprises(self,
+                                      velocloud_host: str,
+                                      enterprise_ids: List[int]) -> Dict[str, Any]:
+        result = dict.fromkeys(['body', 'status'])
+        request_body = {
+            'enterprises': enterprise_ids,
+            'with': [
+                'edges'
+            ]
+        }
+
+        target_host_client = self._get_header_by_host(velocloud_host)
+        try:
+            self._logger.info(f'Getting network enterprise ids for {enterprise_ids}...')
+
+            response = await self._session.post(
+                f'https://{velocloud_host}/portal/rest/network/getNetworkEnterprises',
+                json=request_body,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result['body'] = 'Error while connecting to Velocloud API'
+            result['status'] = 500
+        else:
+            status = response.status
+            if status in range(500, 513):
+                result['body'] = 'Got internal error from Velocloud'
+                result['status'] = 500
+            elif status == 400:
+                error = await response.json()
+                message = error['error']['message']
+                result['body'] = f'Got 400 from Velocloud --> {message} for enterprise ids: {enterprise_ids}'
+                result['status'] = 400
+            else:
+                await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+                self._logger.info(
+                    f'Got HTTP {response.status} from Velocloud after getting enterprise ids: {enterprise_ids}'
+                )
+                result['body'] = await response.json()
+                result['status'] = response.status
+
+        self.__log_result(result)
+
+        return result
+
     async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
         if self.__token_expired(response):
             self._logger.info(f'Auth token expired for host {velocloud_host}. Scheduling re-login job...')
@@ -490,7 +538,6 @@ class VelocloudClient:
 
     def __log_result(self, result: dict):
         body, status = result['body'], result['status']
-
         if status == 400:
             self._logger.error(f"Got error from Velocloud -> {body}")
         if status == 401:
