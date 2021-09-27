@@ -14,8 +14,6 @@ from tenacity import retry, wait_exponential, stop_after_delay
 
 from igz.packages.eventbus.eventbus import EventBus
 
-from application.repositories import EdgeIdentifier
-
 
 class Triage:
     __triage_note_regex = re.compile(r"#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
@@ -327,7 +325,6 @@ class Triage:
         working_environment = self._config.TRIAGE_CONFIG['environment']
 
         edge_full_id = edge_data
-        edge_identifier = EdgeIdentifier(**edge_full_id)
 
         last_triage_datetime = parse(last_triage_timestamp).astimezone(utc)
         self._logger.info(
@@ -346,9 +343,8 @@ class Triage:
 
         if not recent_events_response_body:
             self._logger.info(
-                f'No events were found for edge {edge_identifier} (serial: {service_number}) starting from '
-                f'{last_triage_timestamp}. Not appending any new triage notes to detail {ticket_detail_id} of '
-                f'ticket {ticket_id}.'
+                f'No events were found for edge {service_number} starting from {last_triage_timestamp}. Not appending '
+                f'any new triage notes to detail {ticket_detail_id} of ticket {ticket_id}.'
             )
             return
 
@@ -418,7 +414,6 @@ class Triage:
             edge_data = self._cached_info_by_serial[serial_number]
 
             edge_full_id = edge_data['edge']
-            edge_identifier = EdgeIdentifier(**edge_full_id)
 
             past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
 
@@ -433,7 +428,7 @@ class Triage:
 
             if not recent_events_response_body:
                 self._logger.info(
-                    f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
+                    f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
                     f'Not appending the first triage note to ticket {ticket_id}.'
                 )
                 continue

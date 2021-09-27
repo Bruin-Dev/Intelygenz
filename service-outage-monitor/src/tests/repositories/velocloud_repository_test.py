@@ -383,6 +383,9 @@ class TestVelocloudRepository:
         )
 
     def group_links_by_edge_test(self):
+        serial_number_1 = 'VC1111111'
+        serial_number_2 = 'VC2222222'
+
         edge_1_info = {
             'host': 'mettel.velocloud.net',
             'enterpriseName': 'Militaires Sans Frontières',
@@ -395,7 +398,7 @@ class TestVelocloudRepository:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number_1,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,
@@ -413,7 +416,7 @@ class TestVelocloudRepository:
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial_number_2,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
             'edgeLatitude': None,

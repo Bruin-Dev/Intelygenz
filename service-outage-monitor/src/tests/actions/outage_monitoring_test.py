@@ -12,7 +12,6 @@ from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from dateutil.parser import parse
 from shortuuid import uuid
-from application.repositories import EdgeIdentifier
 
 from application.actions import outage_monitoring as outage_monitoring_module
 from application.actions.outage_monitoring import OutageMonitor
@@ -5033,10 +5032,8 @@ class TestServiceOutageMonitor:
             ),
         ])
         outage_monitor._check_for_digi_reboot.assert_has_awaits([
-            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1,
-                 edge_1_full_id),
-            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2,
-                 edge_2_full_id),
+            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1),
+            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2),
         ])
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -5386,9 +5383,9 @@ class TestServiceOutageMonitor:
         ])
         outage_monitor._check_for_failed_digi_reboot.assert_has_awaits([
             call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial,
-                 new_links_grouped_by_edge_1, edge_1_full_id),
+                 new_links_grouped_by_edge_1),
             call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial,
-                 new_links_grouped_by_edge_2, edge_2_full_id),
+                 new_links_grouped_by_edge_2),
         ])
         outage_monitor._attempt_forward_to_asr.assert_has_awaits([
             call(cached_edge_1, new_links_grouped_by_edge_1, outage_ticket_creation_body_1),
@@ -5751,10 +5748,8 @@ class TestServiceOutageMonitor:
             ),
         ])
         outage_monitor._check_for_digi_reboot.assert_has_awaits([
-            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1,
-                 edge_1_full_id),
-            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2,
-                 edge_2_full_id),
+            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1),
+            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2),
         ])
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -7788,10 +7783,8 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        edge_identifier = EdgeIdentifier(**edge_1_full_id)
-
         slack_message = (
-            f'DiGi reboot started for faulty edge {edge_identifier}. Ticket '
+            f'DiGi reboot started for faulty edge {edge_1_serial}. Ticket '
             f'details at https://app.bruin.com/t/{ticket_id}.'
         )
 
@@ -7800,7 +7793,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
         await outage_monitor._check_for_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                    new_links_grouped_by_edge_1, edge_1_full_id)
+                                                    new_links_grouped_by_edge_1)
 
         outage_repository.is_faulty_link.assert_has_calls([
             call(new_links_grouped_by_edge_1['links'][0]['linkState']),
@@ -8053,7 +8046,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
         digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
@@ -8082,8 +8075,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-        edge_identifier = EdgeIdentifier(**edge_1_full_id)
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -8213,7 +8204,7 @@ class TestServiceOutageMonitor:
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
-        slack_message = f'DiGi reboot started for faulty edge {edge_identifier}. Ticket details ' \
+        slack_message = f'DiGi reboot started for faulty edge {serial_number_1}. Ticket details ' \
                         f'at https://app.bruin.com/t/{ticket_id}.'
 
         bruin_repository = Mock()
@@ -8241,7 +8232,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
         digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
@@ -8271,8 +8262,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-        edge_identifier = EdgeIdentifier(**edge_1_full_id)
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -8402,7 +8391,7 @@ class TestServiceOutageMonitor:
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
-        slack_message = f'DiGi reboot started for faulty edge {edge_identifier}. Ticket details ' \
+        slack_message = f'DiGi reboot started for faulty edge {serial_number_1}. Ticket details ' \
                         f'at https://app.bruin.com/t/{ticket_id}.'
 
         bruin_repository = Mock()
@@ -8430,7 +8419,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
         digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
@@ -8459,7 +8448,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -8610,7 +8598,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_not_called()
         digi_repository.get_interface_name_from_digi_note.assert_not_called()
@@ -8637,7 +8625,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -8788,7 +8775,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
         digi_repository.get_interface_name_from_digi_note.assert_has_calls([call(ticket_note_1)])
@@ -8817,7 +8804,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -8967,7 +8953,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
 
@@ -8996,7 +8982,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -9136,7 +9121,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
 
@@ -9163,7 +9148,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -9290,7 +9274,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository)
         await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                           new_links_grouped_by_edge_1, edge_1_full_id)
+                                                           new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
 
@@ -9318,7 +9302,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -9464,7 +9447,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
 
@@ -9491,7 +9474,6 @@ class TestServiceOutageMonitor:
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
         new_links_grouped_by_edge_1 = {
             'host': velocloud_host,
@@ -9638,7 +9620,7 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
-                                                               new_links_grouped_by_edge_1, edge_1_full_id)
+                                                               new_links_grouped_by_edge_1)
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
 

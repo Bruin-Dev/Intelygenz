@@ -1,11 +1,10 @@
+import json
 from datetime import datetime
-from typing import Dict
 
 from pytz import utc
 from shortuuid import uuid
 
 from application.repositories import nats_error_response
-from application.repositories import EdgeIdentifier
 
 
 class VelocloudRepository:
@@ -51,7 +50,6 @@ class VelocloudRepository:
 
     async def get_edge_events(self, edge_full_id: dict, from_: datetime, to: datetime, event_types: list = None):
         err_msg = None
-        edge_identifier = EdgeIdentifier(**edge_full_id)
 
         if not event_types:
             event_types = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
@@ -68,16 +66,19 @@ class VelocloudRepository:
 
         try:
             self._logger.info(
-                f"Getting events of edge {edge_identifier} having any type of {event_types} that took place "
+                f"Getting events of edge {json.dumps(edge_full_id)} having any type of {event_types} that took place "
                 f"between {from_} and {to} from Velocloud..."
             )
             response = await self._event_bus.rpc_request("alert.request.event.edge", request, timeout=180)
             self._logger.info(
-                f"Got events of edge {edge_identifier} having any type in {event_types} that took place "
+                f"Got events of edge {json.dumps(edge_full_id)} having any type in {event_types} that took place "
                 f"between {from_} and {to} from Velocloud!"
             )
         except Exception as e:
-            err_msg = f'An error occurred when requesting edge events from Velocloud for edge {edge_identifier} -> {e}'
+            err_msg = (
+                f'An error occurred when requesting edge events from Velocloud for edge '
+                f'{json.dumps(edge_full_id)} -> {e}'
+            )
             response = nats_error_response
         else:
             response_body = response['body']
@@ -85,9 +86,10 @@ class VelocloudRepository:
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving events of edge {edge_identifier} having any type in {event_types} that '
-                    f'took place between {from_} and {to} in {self._config.TRIAGE_CONFIG["environment"].upper()}'
-                    f'environment: Error {response_status} - {response_body}'
+                    f'Error while retrieving events of edge {json.dumps(edge_full_id)} having any type in '
+                    f'{event_types} that took place between {from_} and {to} in '
+                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
                 )
 
         if err_msg:
@@ -119,21 +121,16 @@ class VelocloudRepository:
 
     @staticmethod
     def group_links_by_edge(links_with_edge_info: list) -> list:
-        edges_by_edge_identifier = {}
+        edges_by_serial_number = {}
 
         for link in links_with_edge_info:
             if not link['edgeId']:
                 continue
 
-            edge_full_id = {
-                'host': link['host'],
-                'enterprise_id': link['enterpriseId'],
-                'edge_id': link['edgeId']
-            }
-            edge_identifier = EdgeIdentifier(**edge_full_id)
+            serial_number = link['edgeSerialNumber']
 
-            edges_by_edge_identifier.setdefault(
-                edge_identifier,
+            edges_by_serial_number.setdefault(
+                serial_number,
                 {
                     'host': link['host'],
                     'enterpriseName': link['enterpriseName'],
@@ -146,7 +143,7 @@ class VelocloudRepository:
                     'edgeServiceUpSince': link['edgeServiceUpSince'],
                     'edgeLastContact': link['edgeLastContact'],
                     'edgeId': link['edgeId'],
-                    'edgeSerialNumber': link['edgeSerialNumber'],
+                    'edgeSerialNumber': serial_number,
                     'edgeHASerialNumber': link['edgeHASerialNumber'],
                     'edgeModelNumber': link['edgeModelNumber'],
                     'edgeLatitude': link['edgeLatitude'],
@@ -167,7 +164,7 @@ class VelocloudRepository:
                 'linkIpAddress': link['linkIpAddress'],
             }
 
-            edges_by_edge_identifier[edge_identifier]["links"].append(link_info)
+            edges_by_serial_number[serial_number]["links"].append(link_info)
 
-        edges = list(edges_by_edge_identifier.values())
+        edges = list(edges_by_serial_number.values())
         return edges

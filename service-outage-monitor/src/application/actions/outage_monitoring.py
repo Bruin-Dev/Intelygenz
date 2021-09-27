@@ -18,8 +18,6 @@ from pytz import timezone
 from pytz import utc
 from shortuuid import uuid
 
-from application.repositories import EdgeIdentifier
-
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
@@ -202,20 +200,20 @@ class OutageMonitor:
         result = []
         self._cached_edges_without_status = []
 
-        cached_edges_by_edge_identifier = {
-            EdgeIdentifier(**elem['edge']): elem
+        cached_edges_by_serial = {
+            elem['serial_number']: elem
             for elem in customer_cache
         }
-        edge_statuses_by_edge_identifier = {
-            EdgeIdentifier(host=elem['host'], enterprise_id=elem['enterpriseId'], edge_id=elem['edgeId']): elem
+        edge_statuses_by_serial = {
+            elem['edgeSerialNumber']: elem
             for elem in edges_status
         }
 
-        for edge_identifier, cached_edge in cached_edges_by_edge_identifier.items():
-            edge_status = edge_statuses_by_edge_identifier.get(edge_identifier)
+        for serial_number, cached_edge in cached_edges_by_serial.items():
+            edge_status = edge_statuses_by_serial.get(serial_number)
             if not edge_status:
-                self._logger.info(f'No edge status was found for cached edge {edge_identifier} and serial'
-                                  f' {cached_edge["serial_number"]}. Skipping...')
+                self._logger.info(f'No edge status was found for cached edge {cached_edge["serial_number"]}. '
+                                  'Skipping...')
                 edge = cached_edge["edge"]
                 if edge["host"] == "metvco03.mettel.net" and edge["enterprise_id"] == 124:
                     self._cached_edges_without_status.append(
@@ -282,12 +280,11 @@ class OutageMonitor:
 
     async def _run_ticket_autoresolve_for_edge(self, edge: dict):
         async with self._semaphore:
-            edge_identifier = EdgeIdentifier(**edge['cached_info']['edge'])
-            self._logger.info(f'[ticket-autoresolve] Starting autoresolve for edge {edge_identifier}...')
-
             serial_number = edge['cached_info']['serial_number']
+            self._logger.info(f'[ticket-autoresolve] Starting autoresolve for edge {serial_number}...')
+
             if serial_number not in self._autoresolve_serials_whitelist:
-                self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} because its '
+                self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {serial_number} because its '
                                   f'serial ({serial_number}) is not whitelisted.')
                 return
 
@@ -301,7 +298,7 @@ class OutageMonitor:
                 return
 
             if not outage_ticket_response_body:
-                self._logger.info(f'[ticket-autoresolve] No outage ticket found for edge {edge_identifier}. '
+                self._logger.info(f'[ticket-autoresolve] No outage ticket found for edge {serial_number}. '
                                   f'Skipping autoresolve...')
                 return
 
@@ -337,7 +334,7 @@ class OutageMonitor:
             ]
             if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
                 self._logger.info(
-                    f'Edge {edge_identifier} has been in outage state for a long time, so detail {ticket_detail_id} '
+                    f'Edge {serial_number} has been in outage state for a long time, so detail {ticket_detail_id} '
                     f'(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping '
                     f'autoresolve...'
                 )
@@ -349,7 +346,7 @@ class OutageMonitor:
             if not can_detail_be_autoresolved_one_more_time:
                 self._logger.info(
                     f'[ticket-autoresolve] Limit to autoresolve detail {ticket_detail_id} (serial {serial_number}) '
-                    f'of ticket {outage_ticket_id} linked to edge {edge_identifier} has been maxed out already. '
+                    f'of ticket {outage_ticket_id} linked to edge {serial_number} has been maxed out already. '
                     'Skipping autoresolve...'
                 )
                 return
@@ -363,13 +360,13 @@ class OutageMonitor:
 
             working_environment = self._config.MONITOR_CONFIG['environment']
             if working_environment != 'production':
-                self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} since the '
+                self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {serial_number} since the '
                                   f'current environment is {working_environment.upper()}.')
                 return
 
             self._logger.info(
                 f'Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge '
-                f'{edge_identifier} with serial number {serial_number}...'
+                f'{serial_number} with serial number {serial_number}...'
             )
             await self._bruin_repository.unpause_ticket_detail(
                 outage_ticket_id,
@@ -385,7 +382,7 @@ class OutageMonitor:
             self._metrics_repository.increment_tickets_autoresolved()
             self._logger.info(
                 f'Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} linked to '
-                f'edge {edge_identifier} was autoresolved!'
+                f'edge {serial_number} was autoresolved!'
             )
 
     @staticmethod
@@ -473,8 +470,6 @@ class OutageMonitor:
                         f'[outage-recheck] Attempting outage ticket creation for serial {serial_number}...'
                     )
 
-                    edge_identifier = EdgeIdentifier(**edge_full_id)
-
                     bruin_client_id = edge['cached_info']['bruin_client_info']['client_id']
                     ticket_creation_response = await self._bruin_repository.create_outage_ticket(
                         bruin_client_id, serial_number
@@ -488,7 +483,7 @@ class OutageMonitor:
                         self._logger.info(f'[outage-recheck] Successfully created outage ticket for edge {edge}.')
                         self._metrics_repository.increment_tickets_created()
                         slack_message = (
-                            f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
+                            f'Outage ticket created for faulty edge {serial_number}. Ticket '
                             f'details at https://app.bruin.com/t/{ticket_creation_response_body}.'
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
@@ -503,10 +498,10 @@ class OutageMonitor:
                                                             serial_number=serial_number,
                                                             edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
-                                                          logical_id_list, serial_number, edge_status, edge_full_id)
+                                                          logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 409:
                         self._logger.info(
-                            f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
+                            f'[outage-recheck] Faulty edge {serial_number} already has an outage ticket in progress '
                             f'(ID = {ticket_creation_response_body}). Skipping outage ticket creation for this edge...'
                         )
                         await self._change_ticket_severity(
@@ -515,12 +510,11 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
                         await self._check_for_failed_digi_reboot(ticket_creation_response_body,
-                                                                 logical_id_list, serial_number, edge_status,
-                                                                 edge_full_id)
+                                                                 logical_id_list, serial_number, edge_status)
                         await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body)
                     elif ticket_creation_response_status == 471:
                         self._logger.info(
-                            f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
+                            f'[outage-recheck] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
@@ -533,10 +527,10 @@ class OutageMonitor:
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
-                                                          logical_id_list, serial_number, edge_status, edge_full_id)
+                                                          logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 472:
                         self._logger.info(
-                            f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
+                            f'[outage-recheck] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
@@ -551,7 +545,7 @@ class OutageMonitor:
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
                             f'[outage-recheck] There is a resolve outage ticket for the same location of faulty edge '
-                            f'{edge_identifier} (ticket ID = {ticket_creation_response_body}). The ticket was'
+                            f'{serial_number} (ticket ID = {ticket_creation_response_body}). The ticket was'
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
@@ -645,7 +639,7 @@ class OutageMonitor:
 
     async def _append_triage_note(self, ticket_id, cached_edge, edge_status):
         edge_full_id = cached_edge['edge']
-        edge_identifier = EdgeIdentifier(**edge_full_id)
+        serial_number = cached_edge['serial_number']
 
         past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
 
@@ -660,7 +654,7 @@ class OutageMonitor:
 
         if not recent_events_response_body:
             self._logger.info(
-                f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
+                f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
                 f'Not appending any triage note to ticket {ticket_id}.'
             )
             return
@@ -673,12 +667,11 @@ class OutageMonitor:
 
         ticket_detail: dict = ticket_details_response['body']['ticketDetails'][0]
         ticket_detail_id = ticket_detail['detailID']
-        service_number = ticket_detail['detailValue']
 
         ticket_note = self._triage_repository.build_triage_note(cached_edge, edge_status, recent_events_response_body)
 
         self._logger.info(
-            f'Appending triage note to detail {ticket_detail_id} (serial {service_number}) of recently created '
+            f'Appending triage note to detail {ticket_detail_id} (serial {serial_number}) of recently created '
             f'ticket {ticket_id}...'
         )
         detail_object = {
@@ -786,9 +779,8 @@ class OutageMonitor:
         seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
         return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
-    async def _check_for_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, edge_full_id):
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-        self._logger.info(f'Checking edge {edge_identifier} for DiGi Links')
+    async def _check_for_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status):
+        self._logger.info(f'Checking edge {serial_number} for DiGi Links')
         digi_links = self._digi_repository.get_digi_links(logical_id_list)
 
         for digi_link in digi_links:
@@ -798,20 +790,19 @@ class OutageMonitor:
                 reboot = await self._digi_repository.reboot_link(serial_number, ticket_id, digi_link['logical_id'])
                 if reboot['status'] in range(200, 300):
                     self._logger.info(f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
-                                      f'in edge {edge_identifier}')
+                                      f'in edge {serial_number}')
                     await self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
                                                                          digi_link['interface_name'])
                     slack_message = (
-                        f'DiGi reboot started for faulty edge {edge_identifier}. Ticket '
+                        f'DiGi reboot started for faulty edge {serial_number}. Ticket '
                         f'details at https://app.bruin.com/t/{ticket_id}.'
                     )
                     await self._notifications_repository.send_slack_message(slack_message)
 
-    async def _check_for_failed_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, edge_full_id):
+    async def _check_for_failed_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status):
         if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
             return
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-        self._logger.info(f'Checking edge {edge_identifier} for DiGi Links')
+        self._logger.info(f'Checking edge {serial_number} for DiGi Links')
         digi_links = self._digi_repository.get_digi_links(logical_id_list)
 
         for digi_link in digi_links:
@@ -848,7 +839,7 @@ class OutageMonitor:
                     return
                 if self._was_digi_rebooted_recently(digi_note):
                     self._logger.info(
-                        f'The last DiGi reboot attempt for Edge {edge_identifier} did not occur '
+                        f'The last DiGi reboot attempt for Edge {serial_number} did not occur '
                         f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"] / 60} or more mins ago.'
                     )
                     return
@@ -875,11 +866,11 @@ class OutageMonitor:
                     if reboot['status'] in range(200, 300):
                         self._logger.info(
                             f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
-                            f'in edge {edge_identifier}')
+                            f'in edge {serial_number}')
                         await self._bruin_repository.append_digi_reboot_note(ticket_id, serial_number,
                                                                              digi_link['interface_name'])
                         slack_message = (
-                            f'DiGi reboot started for faulty edge {edge_identifier}. Ticket '
+                            f'DiGi reboot started for faulty edge {serial_number}. Ticket '
                             f'details at https://app.bruin.com/t/{ticket_id}.'
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
