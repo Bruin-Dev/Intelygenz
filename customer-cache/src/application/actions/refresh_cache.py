@@ -83,6 +83,7 @@ class RefreshCache:
             await asyncio.gather(*tasks, return_exceptions=True)
 
             self._storage_repository.update_refresh_date()
+            await self._send_email_multiple_inventories()
             self._logger.info("Finished refreshing cache!")
 
         try:
@@ -146,7 +147,6 @@ class RefreshCache:
 
             self._logger.info(f"Storing cache of {len(final_cache)} edges to Redis for host {host}")
             self._storage_repository.set_cache(host, final_cache)
-            await self._send_email_multiple_inventories()
             await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
             self._logger.info(f"Finished storing cache for host {host}")
 
