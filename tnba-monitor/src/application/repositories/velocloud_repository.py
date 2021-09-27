@@ -1,7 +1,6 @@
 from shortuuid import uuid
 
 from application.repositories import nats_error_response
-from application.repositories import EdgeIdentifier
 
 
 class VelocloudRepository:
@@ -53,26 +52,21 @@ class VelocloudRepository:
                 self._logger.info(f"Error: could not retrieve edges links by host: {host}")
                 continue
             all_edges += response['body']
-        links_grouped_by_edge = self.group_links_by_edge(all_edges)
+        links_grouped_by_edge = self.group_links_by_serial(all_edges)
         return links_grouped_by_edge
 
     @staticmethod
-    def group_links_by_edge(links_with_edge_info: list) -> list:
-        edges_by_edge_identifier = {}
+    def group_links_by_serial(links_with_edge_info: list) -> list:
+        edges_by_serial = {}
 
         for link in links_with_edge_info:
             if not link['edgeId']:
                 continue
 
-            edge_full_id = {
-                'host': link['host'],
-                'enterprise_id': link['enterpriseId'],
-                'edge_id': link['edgeId']
-            }
-            edge_identifier = EdgeIdentifier(**edge_full_id)
+            serial_number = link['edgeSerialNumber']
 
-            edges_by_edge_identifier.setdefault(
-                edge_identifier,
+            edges_by_serial.setdefault(
+                serial_number,
                 {
                     'host': link['host'],
                     'enterpriseName': link['enterpriseName'],
@@ -106,7 +100,7 @@ class VelocloudRepository:
                 'linkIpAddress': link['linkIpAddress'],
             }
 
-            edges_by_edge_identifier[edge_identifier]["links"].append(link_info)
+            edges_by_serial[serial_number]["links"].append(link_info)
 
-        edges = list(edges_by_edge_identifier.values())
+        edges = list(edges_by_serial.values())
         return edges
