@@ -12,7 +12,6 @@ from dateutil.parser import parse
 from pytz import timezone
 
 from application import AffectingTroubles
-from application.repositories import EdgeIdentifier
 
 
 class ServiceAffectingMonitor:
@@ -84,14 +83,10 @@ class ServiceAffectingMonitor:
         result = []
 
         for link_info in links_metrics:
-            edge_identifier = EdgeIdentifier(
-                host=link_info['link'].get('host'),
-                enterprise_id=link_info['link'].get('enterpriseId'),
-                edge_id=link_info['link'].get('edgeId'),
-            )
+            serial_number = link_info['link']['edgeSerialNumber']
 
             if not link_info['link'].get('edgeId'):
-                self._logger.info(f"Edge {edge_identifier} doesn't have any ID. Skipping...")
+                self._logger.info(f"Edge {serial_number} doesn't have any ID. Skipping...")
                 continue
 
             result.append({
@@ -167,37 +162,27 @@ class ServiceAffectingMonitor:
     def _map_cached_edges_with_links_metrics_and_contact_info(self, links_metrics: list) -> list:
         result = []
 
-        cached_edges_by_edge_identifier = {
-            EdgeIdentifier(**elem['edge']): elem
+        cached_edges_by_serial = {
+            elem['serial_number']: elem
             for elem in self._customer_cache
         }
 
-        links_metrics_by_edge_identifier = {}
+        links_metrics_by_serial = {}
         for elem in links_metrics:
-            edge_identifier = EdgeIdentifier(
-                host=elem['edge_status']['host'],
-                enterprise_id=elem['edge_status']['enterpriseId'],
-                edge_id=elem['edge_status']['edgeId']
-            )
-
-            links_metrics_by_edge_identifier.setdefault(edge_identifier, [])
-            links_metrics_by_edge_identifier[edge_identifier].append(elem)
+            serial_number = elem['edge_status']['edgeSerialNumber']
+            links_metrics_by_serial.setdefault(serial_number, [])
+            links_metrics_by_serial[serial_number].append(elem)
 
         for contact_info in self._config.MONITOR_CONFIG['device_by_id']:
-            edge_identifier = EdgeIdentifier(
-                host=contact_info['host'],
-                enterprise_id=contact_info['enterprise_id'],
-                edge_id=contact_info['edge_id']
-            )
-
-            cached_edge = cached_edges_by_edge_identifier.get(edge_identifier)
+            serial_number = contact_info['serial']
+            cached_edge = cached_edges_by_serial.get(serial_number)
             if not cached_edge:
-                self._logger.info(f'No cached info was found for edge {edge_identifier}. Skipping...')
+                self._logger.info(f'No cached info was found for edge {serial_number}. Skipping...')
                 continue
 
-            links_metrics_for_current_edge = links_metrics_by_edge_identifier.get(edge_identifier)
+            links_metrics_for_current_edge = links_metrics_by_serial.get(serial_number)
             if not links_metrics_for_current_edge:
-                self._logger.info(f'No links metrics were found for edge {edge_identifier}. Skipping...')
+                self._logger.info(f'No links metrics were found for edge {serial_number}. Skipping...')
                 continue
 
             for metric in links_metrics_for_current_edge:
@@ -351,10 +336,10 @@ class ServiceAffectingMonitor:
 
     @staticmethod
     def _group_links_by_edge(links: List[dict]) -> List[dict]:
-        edge_info_by_edge_identifier = {}
+        edge_info_by_serial = {}
 
         for link in links:
-            edge_identifier = EdgeIdentifier(**link['cached_info']['edge'])
+            serial_number = link['cached_info']['serial_number']
 
             edge_info = {
                 'cached_info': link['cached_info'],
@@ -362,15 +347,15 @@ class ServiceAffectingMonitor:
                 'edge_status': link['edge_status'],
                 'links': [],
             }
-            edge_info_by_edge_identifier.setdefault(edge_identifier, edge_info)
+            edge_info_by_serial.setdefault(serial_number, edge_info)
 
             link_info = {
                 'link_status': link['link_status'],
                 'link_metrics': link['link_metrics'],
             }
-            edge_info_by_edge_identifier[edge_identifier]['links'].append(link_info)
+            edge_info_by_serial[serial_number]['links'].append(link_info)
 
-        return list(edge_info_by_edge_identifier.values())
+        return list(edge_info_by_serial.values())
 
     async def _latency_check(self):
         self._logger.info('Looking for latency issues...')
@@ -390,11 +375,11 @@ class ServiceAffectingMonitor:
             link_status = elem['link_status']
             metrics = elem['link_metrics']
 
-            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+            serial_number = cached_info['serial_number']
 
             if self._trouble_repository.are_latency_metrics_within_threshold(metrics):
                 self._logger.info(
-                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed latency thresholds"
+                    f"Link {link_status['interface']} from {serial_number} didn't exceed latency thresholds"
                 )
                 continue
 
@@ -420,11 +405,11 @@ class ServiceAffectingMonitor:
             link_status = elem['link_status']
             metrics = elem['link_metrics']
 
-            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+            serial_number = cached_info['serial_number']
 
             if self._trouble_repository.are_packet_loss_metrics_within_threshold(metrics):
                 self._logger.info(
-                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed packet loss thresholds"
+                    f"Link {link_status['interface']} from {serial_number} didn't exceed packet loss thresholds"
                 )
                 continue
 
@@ -450,11 +435,11 @@ class ServiceAffectingMonitor:
             link_status = elem['link_status']
             metrics = elem['link_metrics']
 
-            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+            serial_number = cached_info['serial_number']
 
             if self._trouble_repository.are_jitter_metrics_within_threshold(metrics):
                 self._logger.info(
-                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed jitter thresholds"
+                    f"Link {link_status['interface']} from {serial_number} didn't exceed jitter thresholds"
                 )
                 continue
 
@@ -491,7 +476,7 @@ class ServiceAffectingMonitor:
             if tx_bandwidth == 0 and rx_bandwidth == 0:
                 continue
 
-            edge_identifier = EdgeIdentifier(**cached_info['edge'])
+            serial_number = cached_info['serial_number']
 
             trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
             scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
@@ -503,7 +488,7 @@ class ServiceAffectingMonitor:
 
             if bandwidth_metrics_are_within_threshold:
                 self._logger.info(
-                    f"Link {link_status['interface']} from {edge_identifier} didn't exceed any bandwidth thresholds"
+                    f"Link {link_status['interface']} from {serial_number} didn't exceed any bandwidth thresholds"
                 )
                 continue
 
