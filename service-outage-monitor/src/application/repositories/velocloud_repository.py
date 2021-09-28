@@ -119,15 +119,30 @@ class VelocloudRepository:
 
         return await self.get_last_edge_events(edge_full_id, since=since, event_types=event_types)
 
-    @staticmethod
-    def group_links_by_edge(links_with_edge_info: list) -> list:
+    def group_links_by_edge(self, links_with_edge_info: list) -> list:
         edges_by_serial_number = {}
 
         for link in links_with_edge_info:
-            if not link['edgeId']:
+            velocloud_host = link['host']
+            enterprise_name = link['enterpriseName']
+            enterprise_id = link['enterpriseId']
+            edge_name = link['edgeName']
+            edge_state = link['edgeState']
+            serial_number = link['edgeSerialNumber']
+
+            if edge_state is None:
+                self._logger.info(
+                    f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has an invalid state. Skipping..."
+                )
                 continue
 
-            serial_number = link['edgeSerialNumber']
+            if edge_state == 'NEVER_ACTIVATED':
+                self._logger.info(
+                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has never been activated. Skipping..."
+                )
+                continue
 
             edges_by_serial_number.setdefault(
                 serial_number,

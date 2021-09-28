@@ -385,6 +385,7 @@ class TestVelocloudRepository:
     def group_links_by_edge_test(self):
         serial_number_1 = 'VC1111111'
         serial_number_2 = 'VC2222222'
+        serial_number_3 = 'VC3333333'
 
         edge_1_info = {
             'host': 'mettel.velocloud.net',
@@ -512,6 +513,33 @@ class TestVelocloudRepository:
             'linkId': None,
             'linkIpAddress': None,
         }
+        link_with_never_activated_edge_info = {
+            'host': 'mettel.velocloud.net',
+            'enterpriseName': 'Sarif Industries',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Travis Touchdown',
+            'edgeState': 'NEVER_ACTIVATED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 1,
+            'edgeSerialNumber': serial_number_3,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'Augmented',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
 
         links_with_edge_info = [
             link_1_with_edge_1_info,
@@ -519,9 +547,17 @@ class TestVelocloudRepository:
             link_1_with_edge_2_info,
             link_2_with_edge_2_info,
             invalid_link_with_edge_info,
+            link_with_never_activated_edge_info,
         ]
 
-        result = VelocloudRepository.group_links_by_edge(links_with_edge_info)
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        event_bus = Mock()
+
+        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+
+        result = velocloud_repository.group_links_by_edge(links_with_edge_info)
 
         expected = [
             {
