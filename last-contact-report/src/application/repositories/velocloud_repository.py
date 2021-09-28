@@ -61,10 +61,24 @@ class VelocloudRepository:
     def extract_edge_info(self, links_with_edge_info: list) -> list:
         edges_by_edge_serial = {}
         for link in links_with_edge_info:
+            velocloud_host = link['host']
+            enterprise_name = link['enterpriseName']
+            enterprise_id = link['enterpriseId']
+            edge_name = link['edgeName']
             serial_number = link['edgeSerialNumber']
 
-            if not link['edgeId']:
-                self._logger.info(f"Edge {serial_number} doesn't have any ID. Skipping...")
+            if link['edgeState'] is None:
+                self._logger.info(
+                    f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has an invalid state. Skipping..."
+                )
+                continue
+
+            if link['edgeState'] == 'NEVER_ACTIVATED':
+                self._logger.info(
+                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has never been activated. Skipping..."
+                )
                 continue
 
             edges_by_edge_serial.setdefault(

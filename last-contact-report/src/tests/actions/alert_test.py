@@ -133,21 +133,3 @@ class TestAlert:
         alert._template_renderer.compose_email_object.assert_called_once_with(
             [list_edge_alert[1], list_edge_alert[2], list_edge_alert[3]])
         alert._notifications_repository.send_email.assert_awaited_once_with(email_obj)
-
-    @pytest.mark.asyncio
-    async def alert_process_bad_last_contact_test(self, alert, edge_link_list, email_obj, list_edge_alert):
-        edge_link_list[3]['edgeLastContact'] = '0000-00-00 00:00:00'
-        alert._velocloud_repository.get_edges = CoroutineMock(return_value=edge_link_list)
-        alert._event_bus.publish_message = CoroutineMock(return_value=None)
-        datetime_mock = Mock()
-        datetime_now = datetime.now()
-        datetime_mock.now = Mock(return_value=datetime_now)
-        late_date = datetime_now - timedelta(days=40)
-        datetime_mock.strptime = Mock(side_effect=[datetime_now, late_date, late_date, late_date])
-        alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
-        alert._notifications_repository.send_email = CoroutineMock()
-        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
-            await alert._alert_process()
-        alert._template_renderer.compose_email_object.assert_called_once_with(
-            [list_edge_alert[1], list_edge_alert[2]])
-        alert._notifications_repository.send_email.assert_awaited_once_with(email_obj)

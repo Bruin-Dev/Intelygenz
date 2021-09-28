@@ -39,11 +39,6 @@ class Alert:
         for edge in list_edges:
             serial_number = edge["edgeSerialNumber"]
             raw_last_contact = edge["edgeLastContact"]
-
-            if '0000-00-00 00:00:00' in raw_last_contact:
-                self._logger.info(f'Missing last contact timestamp for edge {serial_number}. Skipping...')
-                continue
-
             last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
             time_elapsed = datetime.now() - last_contact
             relative_time_elapsed = relativedelta.relativedelta(datetime.now(), last_contact)

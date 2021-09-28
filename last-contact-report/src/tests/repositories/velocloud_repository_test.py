@@ -149,11 +149,11 @@ class TestVelocloudRepository:
         assert len(edge_list) == 1
 
     @pytest.mark.asyncio
-    async def get_edges_bad_id_test(self, velocloud_repository, edge_link_list):
-        edge_link_list[0]['edgeId'] = None
-        edge_link_list[1]['edgeId'] = None
-        edge_link_list[2]['edgeId'] = None
-        edge_link_list[3]['edgeId'] = None
+    async def get_edges_bad_state_test(self, velocloud_repository, edge_link_list):
+        edge_link_list[0]['edgeState'] = None
+        edge_link_list[1]['edgeState'] = None
+        edge_link_list[2]['edgeState'] = None
+        edge_link_list[3]['edgeState'] = None
         velocloud_repository.get_all_edges_links = CoroutineMock(
             return_value={'body': edge_link_list})
         edge_list = await velocloud_repository.get_edges()
