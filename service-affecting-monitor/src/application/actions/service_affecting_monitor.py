@@ -83,10 +83,24 @@ class ServiceAffectingMonitor:
         result = []
 
         for link_info in links_metrics:
-            serial_number = link_info['link']['edgeSerialNumber']
+            velocloud_host = link_info['link']['host']
+            enterprise_name = link_info['link']['enterpriseName']
+            enterprise_id = link_info['link']['enterpriseId']
+            edge_name = link_info['link']['edgeName']
+            edge_state = link_info['link']['edgeState']
 
-            if not link_info['link'].get('edgeId'):
-                self._logger.info(f"Edge {serial_number} doesn't have any ID. Skipping...")
+            if edge_state is None:
+                self._logger.info(
+                    f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has an invalid state. Skipping..."
+                )
+                continue
+
+            if edge_state == 'NEVER_ACTIVATED':
+                self._logger.info(
+                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has never been activated. Skipping..."
+                )
                 continue
 
             result.append({

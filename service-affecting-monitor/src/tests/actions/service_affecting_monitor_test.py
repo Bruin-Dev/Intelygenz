@@ -147,14 +147,13 @@ class TestServiceAffectingMonitor:
                                          make_link_with_edge_info, make_link_with_metrics, make_metrics_for_link,
                                          make_list_of_links_with_metrics, make_structured_metrics_object,
                                          make_list_of_structured_metrics_objects):
-        edge_id = 1
         link_1_id = 1
         link_2_id = 2
 
         metric_set_1 = make_metrics()
         metric_set_2 = make_metrics()
 
-        edge = make_edge(id_=edge_id)
+        edge = make_edge(edge_state='CONNECTED')
         link_1 = make_link(id_=link_1_id)
         link_2 = make_link(id_=link_2_id)
         metric_set_1_with_link_1_info = make_metrics_for_link(link_id=link_1, metrics=metric_set_1)
@@ -177,17 +176,47 @@ class TestServiceAffectingMonitor:
         expected = make_list_of_structured_metrics_objects(structured_metrics_1, structured_metrics_2)
         assert result == expected
 
-    def structure_links_metrics__bad_edge_id_test(self, service_affecting_monitor, make_edge, make_link,
-                                                  make_metrics, make_link_with_edge_info, make_link_with_metrics,
-                                                  make_metrics_for_link, make_list_of_links_with_metrics):
-        edge_id = 0
+    def structure_links_metrics__invalid_edge_state_test(self, service_affecting_monitor, make_edge, make_link,
+                                                         make_metrics, make_link_with_edge_info, make_link_with_metrics,
+                                                         make_metrics_for_link, make_list_of_links_with_metrics):
         link_1_id = 1
         link_2_id = 2
 
         metric_set_1 = make_metrics()
         metric_set_2 = make_metrics()
 
-        edge = make_edge(id_=edge_id)
+        edge = make_edge(edge_state=None)
+        link_1 = make_link(id_=link_1_id)
+        link_2 = make_link(id_=link_2_id)
+        metric_set_1_with_link_1_info = make_metrics_for_link(link_id=link_1, metrics=metric_set_1)
+        metric_set_2_with_link_2_info = make_metrics_for_link(link_id=link_2, metrics=metric_set_2)
+
+        link_1_with_edge_info = make_link_with_edge_info(link_info=link_1, edge_info=edge)
+        link_2_with_edge_info = make_link_with_edge_info(link_info=link_2, edge_info=edge)
+        link_1_info_with_metrics = make_link_with_metrics(
+            link_info=link_1_with_edge_info, metrics=metric_set_1_with_link_1_info,
+        )
+        link_2_info_with_metrics = make_link_with_metrics(
+            link_info=link_2_with_edge_info, metrics=metric_set_2_with_link_2_info,
+        )
+        links_info_with_metrics = make_list_of_links_with_metrics(link_1_info_with_metrics, link_2_info_with_metrics)
+
+        result = service_affecting_monitor._structure_links_metrics(links_info_with_metrics)
+
+        expected = []
+        assert result == expected
+
+    def structure_links_metrics__edge_not_activated_yet_test(self, service_affecting_monitor, make_edge, make_link,
+                                                             make_metrics, make_link_with_edge_info,
+                                                             make_link_with_metrics, make_metrics_for_link,
+                                                             make_list_of_links_with_metrics):
+        link_1_id = 1
+        link_2_id = 2
+
+        metric_set_1 = make_metrics()
+        metric_set_2 = make_metrics()
+
+        edge = make_edge(edge_state='NEVER_ACTIVATED')
         link_1 = make_link(id_=link_1_id)
         link_2 = make_link(id_=link_2_id)
         metric_set_1_with_link_1_info = make_metrics_for_link(link_id=link_1, metrics=metric_set_1)
@@ -370,7 +399,7 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
             make_rpc_response):
-        edge = make_edge(id_=0)  # Make it an invalid edge so crossing data produces an empty dataset
+        edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
         links_metric_sets = make_list_of_link_metrics(link_metric_set)
@@ -402,7 +431,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_latency_ms_tx=0, best_latency_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -441,7 +470,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_latency_ms_tx=9999, best_latency_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -496,7 +525,7 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
             make_rpc_response):
-        edge = make_edge(id_=0)  # Make it an invalid edge so crossing data produces an empty dataset
+        edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
         links_metric_sets = make_list_of_link_metrics(link_metric_set)
@@ -528,7 +557,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_packet_loss_tx=0, best_packet_loss_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -567,7 +596,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_packet_loss_tx=9999, best_packet_loss_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -622,7 +651,7 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
             make_rpc_response):
-        edge = make_edge(id_=0)  # Make it an invalid edge so crossing data produces an empty dataset
+        edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
         links_metric_sets = make_list_of_link_metrics(link_metric_set)
@@ -654,7 +683,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_jitter_ms_tx=0, best_jitter_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -693,7 +722,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_jitter_ms_tx=9999, best_jitter_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -747,7 +776,7 @@ class TestServiceAffectingMonitor:
     async def bandwidth_check__empty_dataset_after_structuring_and_crossing_info_test(
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects, make_rpc_response):
-        edge = make_edge(id_=0)  # Make it an invalid edge so crossing data produces an empty dataset
+        edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
         links_metric_sets = make_list_of_link_metrics(link_metric_set)
@@ -779,7 +808,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics()
         edge_link_metric_set = make_metrics_for_link(
@@ -821,7 +850,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(bps_of_best_path_tx=0, bps_of_best_path_rx=0)
         edge_link_metric_set = make_metrics_for_link(
@@ -863,7 +892,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(bps_of_best_path_tx=100, bps_of_best_path_rx=100)
         edge_link_metric_set = make_metrics_for_link(
@@ -908,7 +937,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(
             bytes_tx=999999, bytes_rx=999999,
@@ -1642,7 +1671,7 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects,
             make_list_of_structured_metrics_objects_with_cache_and_contact_info, make_rpc_response):
-        edge = make_edge(id_=0)  # Make it an invalid edge so crossing data produces an empty dataset
+        edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
         links_metric_sets = make_list_of_link_metrics(link_metric_set)
@@ -1678,7 +1707,7 @@ class TestServiceAffectingMonitor:
 
         edge_serial_number = edge_contact_info['serial']
 
-        edge = make_edge(serial_number=edge_serial_number, id_=edge_contact_info['edge_id'])
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
         edge_link_1_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_1_metrics = make_metrics()
         edge_link_1_metric_set = make_metrics_for_link(
