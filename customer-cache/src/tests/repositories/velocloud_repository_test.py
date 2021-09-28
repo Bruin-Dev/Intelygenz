@@ -150,9 +150,6 @@ class TestVelocloudRepository:
             call('get.links.with.edge.info', {'request_id': uuid_, 'body': {'host': host2}}, timeout=300),
             call('get.links.with.edge.info', {'request_id': uuid_, 'body': {'host': host3}}, timeout=300),
             call('get.links.with.edge.info', {'request_id': uuid_, 'body': {'host': host4}}, timeout=300),
-            call('request.enterprises.edges', {'request_id': uuid_, 'body': {'host': host1, 'enterprise_id': 1}},
-                 timeout=90)
-
         ])
         assert len(edges_with_serial) == 0
 

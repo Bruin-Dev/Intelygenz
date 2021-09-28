@@ -1,10 +1,8 @@
+import json
 import time
-from datetime import datetime
 
-import asyncio
 from shortuuid import uuid
 
-from application.repositories import EdgeIdentifier
 from application.repositories import nats_error_response
 
 
@@ -49,14 +47,6 @@ class VelocloudRepository:
             ha_serial_number = edge.get('edgeHASerialNumber')
             last_contact = edge.get('edgeLastContact')
             edge_name = edge.get('edgeName')
-
-            if last_contact == '0000-00-00 00:00:00' or last_contact is None:
-                self._logger.info(f"Edge {EdgeIdentifier(**edge_full_id)} lastContact has an invalid value: "
-                                  f"{last_contact}")
-                continue
-            if not serial_number:
-                self._logger.info(f"Edge {EdgeIdentifier(**edge_full_id)} doesn't have a serial")
-                continue
 
             logical_id_list = next((logical_id_edge for logical_id_edge in logical_ids_by_edge_list
                                     if logical_id_edge['host'] == edge['host']
@@ -195,26 +185,43 @@ class VelocloudRepository:
         return return_response
 
     def extract_edge_info(self, links_with_edge_info: list) -> list:
-        edges_by_edge_identifier = {}
+        edges_by_serial = {}
         for link in links_with_edge_info:
+            velocloud_host = link['host']
+            enterprise_name = link['enterpriseName']
+            enterprise_id = link['enterpriseId']
+            edge_name = link['edgeName']
+            edge_state = link['edgeState']
+            serial_number = link['edgeSerialNumber']
+
+            if edge_state is None:
+                self._logger.info(
+                    f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has an invalid state. Skipping..."
+                )
+                continue
+
+            if edge_state == 'NEVER_ACTIVATED':
+                self._logger.info(
+                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has never been activated. Skipping..."
+                )
+                continue
+
             edge_full_id = {
                 'host': link['host'],
-                'enterprise_id': link['enterpriseId'],
+                'enterprise_id': enterprise_id,
                 'edge_id': link['edgeId']
             }
-            edge_identifier = EdgeIdentifier(**edge_full_id)
-
             blacklist_edges = self._config.REFRESH_CONFIG["blacklisted_edges"]
             if edge_full_id in blacklist_edges:
-                self._logger.info(f"Edge {edge_identifier} is in blacklist. Skipping...")
+                self._logger.info(
+                    f"Edge {json.dumps(edge_full_id)} (serial: {serial_number}) is in blacklist. Skipping..."
+                )
                 continue
 
-            if not link['edgeId']:
-                self._logger.info(f"Edge {edge_identifier} doesn't have any ID. Skipping...")
-                continue
-
-            edges_by_edge_identifier.setdefault(
-                edge_identifier,
+            edges_by_serial.setdefault(
+                serial_number,
                 {
                     'enterpriseName': link['enterpriseName'],
                     'enterpriseId': link['enterpriseId'],
@@ -235,7 +242,7 @@ class VelocloudRepository:
                 }
             )
 
-        edges = list(edges_by_edge_identifier.values())
+        edges = list(edges_by_serial.values())
         return edges
 
     async def _get_logical_id_by_edge_list(self, edge_list):

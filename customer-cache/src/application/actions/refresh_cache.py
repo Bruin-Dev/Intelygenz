@@ -197,6 +197,8 @@ class RefreshCache:
 
     async def _filter_edge_list(self, edge_with_serial):
         host = edge_with_serial['edge']['host']
+        serial_number = edge_with_serial['serial_number']
+
         edge_identifier = EdgeIdentifier(**edge_with_serial['edge'])
 
         @retry(wait=wait_exponential(multiplier=self._config.REFRESH_CONFIG['multiplier'],
@@ -205,9 +207,7 @@ class RefreshCache:
                reraise=True)
         async def _filter_edge_list():
             async with self._semaphore:
-                self._logger.info(f"Checking if edge {edge_identifier} should be monitored...")
-                serial_number = edge_with_serial['serial_number']
-                ha_serial_number = edge_with_serial['ha_serial_number']
+                self._logger.info(f"Checking if edge {serial_number} should be monitored...")
 
                 client_info_response = await self._bruin_repository.get_client_info(serial_number)
                 client_info_response_status = client_info_response['status']
@@ -242,7 +242,7 @@ class RefreshCache:
                                           f"client_id: {client_id}. Skipping...")
                         self._invalid_edges[host].append(edge_identifier)
                         return
-                    self._logger.info(f'Management status for {edge_identifier} seems active')
+                    self._logger.info(f'Management status for {serial_number} seems active')
 
                 return {
                     'edge': edge_with_serial['edge'],
@@ -250,7 +250,7 @@ class RefreshCache:
                     'last_contact': edge_with_serial['last_contact'],
                     'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,
-                    'ha_serial_number': ha_serial_number,
+                    'ha_serial_number': edge_with_serial['ha_serial_number'],
                     'bruin_client_info': client_info_response_body[0],
                     'links_configuration': edge_with_serial['links_configuration']
                 }
@@ -259,7 +259,7 @@ class RefreshCache:
             return await _filter_edge_list()
         except Exception as e:
             self._logger.error(
-                f"An error occurred while checking if edge {edge_identifier} should be cached or not -> {e}"
+                f"An error occurred while checking if edge {serial_number} should be cached or not -> {e}"
             )
 
     async def _send_email_snapshot(self, host, old_cache, new_cache):
