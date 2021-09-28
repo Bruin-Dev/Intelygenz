@@ -110,8 +110,8 @@ class TestVelocloudRepository:
             velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=host)
         velocloud_repository.group_links_by_serial.assert_called_once_with(links_with_edge_info)
 
-    def group_links_by_serial_test(self, make_link_with_edge_info, make_edge_with_links_info, edge_1_connected,
-                                 link_1_stable, link_2_stable):
+    def group_links_by_serial_test(self, velocloud_repository, make_link_with_edge_info, make_edge_with_links_info,
+                                   edge_1_connected, link_1_stable, link_2_stable):
         link_1_with_edge_info = make_link_with_edge_info(edge_info=edge_1_connected, link_info=link_1_stable)
         link_2_with_edge_info = make_link_with_edge_info(edge_info=edge_1_connected, link_info=link_2_stable)
         links_with_edge_info = [
@@ -119,7 +119,7 @@ class TestVelocloudRepository:
             link_2_with_edge_info,
         ]
 
-        result = VelocloudRepository.group_links_by_serial(links_with_edge_info)
+        result = velocloud_repository.group_links_by_serial(links_with_edge_info)
 
         expected = [
             make_edge_with_links_info(edge_info=edge_1_connected, links_info=[link_1_stable, link_2_stable]),

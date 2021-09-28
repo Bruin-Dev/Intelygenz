@@ -55,15 +55,30 @@ class VelocloudRepository:
         links_grouped_by_edge = self.group_links_by_serial(all_edges)
         return links_grouped_by_edge
 
-    @staticmethod
-    def group_links_by_serial(links_with_edge_info: list) -> list:
+    def group_links_by_serial(self, links_with_edge_info: list) -> list:
         edges_by_serial = {}
 
         for link in links_with_edge_info:
-            if not link['edgeId']:
+            velocloud_host = link['host']
+            enterprise_name = link['enterpriseName']
+            enterprise_id = link['enterpriseId']
+            edge_name = link['edgeName']
+            edge_state = link['edgeState']
+            serial_number = link['edgeSerialNumber']
+
+            if edge_state is None:
+                self._logger.info(
+                    f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has an invalid state. Skipping..."
+                )
                 continue
 
-            serial_number = link['edgeSerialNumber']
+            if edge_state == 'NEVER_ACTIVATED':
+                self._logger.info(
+                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has never been activated. Skipping..."
+                )
+                continue
 
             edges_by_serial.setdefault(
                 serial_number,
