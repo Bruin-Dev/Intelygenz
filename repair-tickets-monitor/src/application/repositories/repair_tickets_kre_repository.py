@@ -29,7 +29,9 @@ class RepairTicketsKRERepository:
         async def get_prediction():
             err_msg = None
 
-            self._logger.info(f"Sending email data to get prediction: {email_id}")
+            self._logger.info(
+                f"Sending email data to get prediction for email_id={email_id}"
+            )
             request_msg = {"request_id": uuid(), "body": email_data}
             try:
                 response = await self._event_bus.rpc_request(

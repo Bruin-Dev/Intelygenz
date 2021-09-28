@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"(\n\x03Tag\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"|\n\x05\x45mail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x1c\n\x03tag\x18\x06 \x01(\x0b\x32\x0f.entrypoint.Tag\"\x95\x01\n\x0eProcessedEmail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x17\n\x0fsubject_cleaned\x18\x04 \x01(\t\x12\x14\n\x0c\x62ody_cleaned\x18\x05 \x01(\t\x12\x1c\n\x03tag\x18\x06 \x01(\x0b\x32\x0f.entrypoint.Tag\"\xa7\x01\n\x1f\x43lassifyOutageVsAffectingOutput\x12)\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x1a.entrypoint.ProcessedEmail\x12!\n\x19potential_service_numbers\x18\x02 \x03(\t\x12\x17\n\x0fpredicted_class\x18\x03 \x01(\t\x12\x1d\n\x15predicted_probability\x18\x04 \x01(\x02\"5\n\x11PredictionRequest\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\"\xc4\x01\n\x12PredictionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12?\n\nprediction\x18\x03 \x01(\x0b\x32+.entrypoint.ClassifyOutageVsAffectingOutput\x12\x17\n\x0f\x61\x62ove_threshold\x18\x04 \x01(\x08\x12\x17\n\x0fthreshold_value\x18\x05 \x01(\x02\x12\x19\n\x11in_validation_set\x18\x06 \x01(\x08\x32^\n\nEntrypoint\x12P\n\rGetPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"(\n\x03Tag\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"|\n\x05\x45mail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x1c\n\x03tag\x18\x06 \x01(\x0b\x32\x0f.entrypoint.Tag\"\x95\x01\n\x0eProcessedEmail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x17\n\x0fsubject_cleaned\x18\x04 \x01(\t\x12\x14\n\x0c\x62ody_cleaned\x18\x05 \x01(\t\x12\x1c\n\x03tag\x18\x06 \x01(\x0b\x32\x0f.entrypoint.Tag\"\xf4\x01\n\x1f\x43lassifyOutageVsAffectingOutput\x12)\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x1a.entrypoint.ProcessedEmail\x12!\n\x19potential_service_numbers\x18\x02 \x03(\t\x12\x17\n\x0fpredicted_class\x18\x03 \x01(\t\x12\x1d\n\x15predicted_probability\x18\x04 \x01(\x02\x12\x17\n\x0f\x61\x62ove_threshold\x18\x05 \x01(\x08\x12\x17\n\x0fthreshold_value\x18\x06 \x01(\x02\x12\x19\n\x11in_validation_set\x18\x07 \x01(\x08\"5\n\x11PredictionRequest\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\"w\n\x12PredictionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12?\n\nprediction\x18\x03 \x01(\x0b\x32+.entrypoint.ClassifyOutageVsAffectingOutput2^\n\nEntrypoint\x12P\n\rGetPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -234,6 +234,27 @@ _CLASSIFYOUTAGEVSAFFECTINGOUTPUT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='above_threshold', full_name='entrypoint.ClassifyOutageVsAffectingOutput.above_threshold', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='threshold_value', full_name='entrypoint.ClassifyOutageVsAffectingOutput.threshold_value', index=5,
+      number=6, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='in_validation_set', full_name='entrypoint.ClassifyOutageVsAffectingOutput.in_validation_set', index=6,
+      number=7, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -247,7 +268,7 @@ _CLASSIFYOUTAGEVSAFFECTINGOUTPUT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=355,
-  serialized_end=522,
+  serialized_end=599,
 )
 
 
@@ -278,8 +299,8 @@ _PREDICTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=524,
-  serialized_end=577,
+  serialized_start=601,
+  serialized_end=654,
 )
 
 
@@ -312,27 +333,6 @@ _PREDICTIONRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='above_threshold', full_name='entrypoint.PredictionResponse.above_threshold', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='threshold_value', full_name='entrypoint.PredictionResponse.threshold_value', index=4,
-      number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='in_validation_set', full_name='entrypoint.PredictionResponse.in_validation_set', index=5,
-      number=6, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -345,8 +345,8 @@ _PREDICTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=580,
-  serialized_end=776,
+  serialized_start=656,
+  serialized_end=775,
 )
 
 _EMAIL.fields_by_name['tag'].message_type = _TAG
@@ -413,8 +413,8 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=778,
-  serialized_end=872,
+  serialized_start=777,
+  serialized_end=871,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetPrediction',

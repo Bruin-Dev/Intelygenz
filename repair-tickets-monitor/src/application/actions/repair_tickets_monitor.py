@@ -145,7 +145,45 @@ class RepairTicketsMonitor:
 
         for service_number in potential_service_numbers:
             # /api/Inventory
-            client_info = await self._get_client_info(client_id, service_number)
+            # client_info = await self._get_client_info(client_id, service_number)
+            client_info = [
+                {
+                    "clientID": 0,
+                    "clientName": "string",
+                    "vendor": "string",
+                    "accountNumber": "string",
+                    "subAccountNumber": "string",
+                    "inventoryID": "string",
+                    "serviceNumber": "string",
+                    "siteId": 0,
+                    "siteLabel": "string",
+                    "address": {
+                        "address": "string",
+                        "city": "string",
+                        "state": "string",
+                        "zip": "string",
+                        "country": "string",
+                    },
+                    "hierarchy": "string",
+                    "costCenter": "string",
+                    "assignee": "string",
+                    "description": "string",
+                    "installDate": "2021-09-28T10:02:43.735Z",
+                    "disconnectDate": "2021-09-28T10:02:43.735Z",
+                    "status": "string",
+                    "verified": "string",
+                    "productCategory": "string",
+                    "productType": "string",
+                    "items": [{"itemName": "string", "primaryIndicator": "string"}],
+                    "contractIdentifier": "string",
+                    "rateCardIdentifier": "string",
+                    "lastInvoiceUsageDate": "2021-09-28T10:02:43.735Z",
+                    "lastUsageDate": "2021-09-28T10:02:43.735Z",
+                    "longitude": 0,
+                    "latitude": 0,
+                }
+            ]
+
             if not client_info:
                 continue
 
@@ -155,10 +193,15 @@ class RepairTicketsMonitor:
                     "Client Info response contains more than one element. Using just the first one."
                 )
             client_info = client_info[0]
-            site_id = client_info["siteID"]
+            site_id = client_info["siteId"]
 
             # /api/Site
-            site_contact_info = self._get_site_contact_info(client_id, site_id)
+            # site_contact_info = self._get_site_contact_info(client_id, site_id)
+            site_contact_info = {
+                "name": "primaryContactName",
+                "phone": "primaryContactPhone",
+                "email": "primaryContactEmail",
+            }
             contact_info_dict = self._update_contactinfo_dict(
                 contact_info_dict, site_id, site_contact_info, service_number
             )
@@ -170,44 +213,64 @@ class RepairTicketsMonitor:
         return contact_info_dict
 
     def _create_outage_ticket(self, client_id, service_numbers, site_contact_info):
-        response = self._bruin_repository.create_outage_ticket(
-            client_id, service_numbers, site_contact_info
-        )
+        # response = self._bruin_repository.create_outage_ticket(
+        #     client_id, service_numbers, site_contact_info
+        # )
+
+        # TODO: Remove mock
+        response = {"status": 200, "body": {}}
+
         if response["status"] not in range(200, 300):
             self._logger.error("TODO: error creating voo ticket")
 
         self._logger.info(
-            f"VOO Ticket created for client_id {client_id} and service_number {service_number} - "
+            f"VOO Ticket created for client_id {client_id} and service_number {service_numbers} - "
             f"{response.get('body')}"
         )
 
     def _create_affecting_ticket(self, client_id, service_numbers, site_contact_info):
-        response = self._bruin_repository.create_affecting_ticket(
-            client_id, service_numbers, site_contact_info
-        )
+        # response = self._bruin_repository.create_affecting_ticket(
+        #     client_id, service_numbers, site_contact_info
+        # )
+
+        # TODO: Remove mock
+        response = {"status": 200, "body": {}}
+
         if response["status"] not in range(200, 300):
             self._logger.error("TODO: error creating vas ticket")
 
         self._logger.info(
-            f"VAS Ticket created for client_id {client_id} and service_number {service_number} - "
+            f"VAS Ticket created for client_id {client_id} and service_number {service_numbers} - "
             f"{response.get('body')}"
         )
 
     def _create_ticket(self, client_id, contact_info, prediction):
         site_contact_info = contact_info["site_contact_info"]
         service_numbers = contact_info["service_numbers"]
+        predicted_class = prediction["predicted_class"]
 
-        if prediction["prediction_class"] == "VOO":
-            if prediction["above_threshold"] and not prediction["in_validation_set"]:
+        in_validation_set_flag = prediction.get("in_validation_set", False)
+        if in_validation_set_flag:
+            self._logger.info(
+                "Flag in_validation_set is true. Skipping ticket creation."
+            )
+            return None
+
+        if predicted_class == "VOO":
+            if prediction["above_threshold"]:
                 self._create_outage_ticket(
                     client_id, service_numbers, site_contact_info
                 )
 
-        elif prediction["prediction_class"] == "VAS":
-            if prediction["above_threshold"] and not prediction["in_validation_set"]:
+        elif predicted_class == "VAS":
+            if prediction["above_threshold"]:
                 self._create_affecting_ticket(
                     client_id, service_numbers, site_contact_info
                 )
+        else:
+            msg_error = f'Unknow predicted class "{predicted_class}"'
+            self._logger.error(msg_error)
+            raise Exception(msg_error)
 
     async def _process_repair_email(self, email_data: dict):
         self._logger.info("Running Repair Email Process")
@@ -219,7 +282,6 @@ class RepairTicketsMonitor:
         tag = email["tag"]
 
         async with self._semaphore:
-            self._logger.info("Entering semaphore")
             prediction = await self._get_prediction(email_data)
 
             contact_info_dict = await self._get_definitive_contact_infos(
@@ -227,7 +289,7 @@ class RepairTicketsMonitor:
             )
 
             self._logger.info(
-                f"email_id: {email_id} client_id: {client_id} prediction class {prediction['prediction_class']}"
+                f"email_id: {email_id} client_id: {client_id} prediction class {prediction['predicted_class']}"
             )
 
             for site_id, contact_info in contact_info_dict.items():

@@ -1,7 +1,6 @@
 {
-    "success": true,
-    "message": "Mocked pipeline sucesfull.",
-    "prediction": {
+    "request_id": "9hhMaLftcGFmDoZWqcFvGC",
+    "body": {
         "email": {
             "email_id": "1234_test",
             "parent_id": "1234_test",
@@ -17,9 +16,11 @@
             "mock_sv_1",
             "mock_sv_2"
         ],
-        "predicted_class": "mock_class",
-        "predicted_probability": 0.9
+        "predicted_class": "VAS",
+        "predicted_probability": 0.9,
+        "above_threshold": true,
+        "threshold_value": 0.8,
+        "in_validation_set": true
     },
-    "above_threshold": true,
-    "threshold_value": 0.8
+    "status": 200
 }
