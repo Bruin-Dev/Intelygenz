@@ -32,7 +32,7 @@ helm.sh/chart: {{ include "email-tagger-kre-bridge.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 project: mettel-automation
-component: cts-bridge
+component: email-tagger-kre-bridge
 microservice-type: capability
 environment-name: "{{ .Values.global.environment }}"
 current-environment: {{ .Values.global.current_environment }}

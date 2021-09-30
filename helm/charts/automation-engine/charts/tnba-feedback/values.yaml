@@ -42,10 +42,6 @@ config:
     # will be created in the microservice deployment that will wait until the
     # bruin-bridge service responds correctly to healthcheck calls.
     bruin_bridge: true
-    # -- Indicate if cts-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # cts-bridge service responds correctly to healthcheck calls.
-    cts_bridge: true
     # -- Indicate if customer-cache is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # customer-cache service responds correctly to healthcheck calls.
@@ -66,10 +62,6 @@ config:
     # will be created in the microservice deployment that will wait until the
     # hawkeye-customer-cache service responds correctly to healthcheck calls.
     hawkeye_customer_cache: true
-    # -- Indicate if lit-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # lit-bridge service responds correctly to healthcheck calls.
-    lit_bridge: true
     # -- Indicate if notifier is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
