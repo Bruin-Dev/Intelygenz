@@ -7,6 +7,7 @@ COPY email-tagger-kre-bridge/requirements.txt /service/app/
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN wget https://grpcio-certs.s3.amazonaws.com/root-certificates.txt -O /tmp/root-certificates.txt
 
 COPY email-tagger-kre-bridge/ /service/app
 
