@@ -24,6 +24,8 @@ helm-branches:
       when: never
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
       allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
+      allow_failure: true
 
 helm-master:
   stage: helm
@@ -74,7 +76,10 @@ destroy-helm-branches:
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
       when: manual
       allow_failure: true
-
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
+      when: manual
+      allow_failure: true
+          
 destroy-helm-master:
   stage: destroy
   extends: .helm_template_destroy_chart
