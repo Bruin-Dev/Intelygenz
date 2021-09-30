@@ -769,6 +769,64 @@ notifier:
     targetMemoryUtilizationPercentage: 80
 
 
+# -- repair-tickets-kre-bridge subchart specific configuration
+repair-tickets-kre-bridge:
+  enabled: ${REPAIR_TICKETS_KRE_BRIDGE_ENABLED}
+  replicaCount: ${REPAIR_TICKETS_KRE_BRIDGE_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "repair-tickets-kre-bridge-${REPAIR_TICKETS_KRE_BRIDGE_BUILD_NUMBER}"
+    # -- Base URL for KRE API
+    kre_base_url: ${KRE_EMAIL_TAGGER_BASE_URL}
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${REPAIR_TICKETS_KRE_BRIDGE_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: ${REPAIR_TICKETS_KRE_BRIDGE_ENABLED}
+    minReplicas: ${REPAIR_TICKETS_KRE_BRIDGE_DESIRED_TASKS}
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
+# -- repair-tickets-monitor subchart specific configuration
+repair-tickets-monitor:
+  enabled: ${REPAIR_TICKETS_MONITOR_ENABLED}
+  replicaCount: ${REPAIR_TICKETS_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "repair-tickets-monitor-${REPAIR_TICKETS_MONITOR_BUILD_NUMBER}"
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${REPAIR_TICKETS_MONITOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
 # -- service-affecting-monitor subchart specific configuration
 service-affecting-monitor:
   enabled: ${SERVICE_AFFECTING_MONITOR_ENABLED}

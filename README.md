@@ -18,6 +18,8 @@
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| repair-tickets-kre-bridge|[![repair-tickets-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| repair-tickets-monitor|[![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -116,8 +118,9 @@ Any line of the commit message cannot be longer than 50 characters.
   │       └─⫸ Commit Scope: infra-as-code|ci-cd|helm|bruin-bridge|ci-utils|customer-cache|digi-bridge|
   │                          digi-reboot-report|email-tagger-kre-bridge|email-tagger-kre-monitor|
   │                          hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
-  │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
-  |                          links-metrics-collector|lumin-billing-report|notifier|service-affecting-monitor|
+  │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|
+  |                          links-metrics-api|links-metrics-collector|lumin-billing-report|notifier|
+  |                          repair-tickets-kre-bridge|repair-tickets-monitor|service-affecting-monitor|
   |                          service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
   |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
   │

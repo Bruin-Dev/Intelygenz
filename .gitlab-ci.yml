@@ -45,6 +45,8 @@ variables:
   NATS_SERVER_1_DESIRED_TASKS: "1"
   NATS_SERVER_2_DESIRED_TASKS: "1"
   NOTIFIER_DESIRED_TASKS: "1"
+  REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS: "1"
+  REPAIR_TICKET_MONITOR_DESIRED_TASKS: "1"
   SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "1"
   SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: "1"
   SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS: "1"
@@ -99,6 +101,8 @@ include:
   - local: 'links-metrics-collector/.gitlab-ci.yml'
   - local: 'lumin-billing-report/.gitlab-ci.yml'
   - local: 'notifier/.gitlab-ci.yml'
+  - local: 'repair-tickets-kre-bridge/.gitlab-ci.yml'
+  - local: 'repair-tickets-monitor/.gitlab-ci.yml'
   - local: 'service-affecting-monitor/.gitlab-ci.yml'
   - local: 'service-outage-monitor/.gitlab-ci.yml'
   - local: 'sites-monitor/.gitlab-ci.yml'

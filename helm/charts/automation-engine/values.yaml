@@ -50,6 +50,10 @@ nats:
     # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # t7-bridge service responds correctly to healthcheck calls.
+    repair_tickets_kre_bridge: true
+    # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # t7-bridge service responds correctly to healthcheck calls.
     t7_bridge: true
     # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
@@ -871,6 +875,71 @@ notifier:
     maxReplicas: 2
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
+
+
+# -- repair-tickets-kre-bridge subchart specific configuration
+repair-tickets-kre-bridge:
+  # -- Field to indicate if the repair-tickets-kre-bridge module is going to be deployed
+  enabled: true
+  # -- Number of replicas of repair-tickets-kre-bridge module
+  replicaCount: 1
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
+    # -- Base URL for KRE API
+    kre_base_url: ""
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # -- repair-tickets-kre-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
+# -- repair-tickets-monitor subchart specific configuration
+repair-tickets-monitor:
+  # -- Field to indicate if the repair-tickets-monitor module is going to be deployed
+  enabled: true
+  # -- Number of replicas of repair-tickets-monitor module
+  replicaCount: 1
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    # -- Redis chache for email-tagger
+    redis_cache_hostname: ""
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
 
 
 # -- service-affecting-monitor subchart specific configuration

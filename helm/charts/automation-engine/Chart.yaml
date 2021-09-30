@@ -27,6 +27,18 @@ dependencies:
   - name: nats
     version: 0.7.2
     repository: https://nats-io.github.io/k8s/helm/charts/
+  - name: bouncing-detector-1
+    version: '*.*.*'
+    condition: bouncing-detector-1.enabled
+  - name: bouncing-detector-2
+    version: '*.*.*'
+    condition: bouncing-detector-2.enabled
+  - name: bouncing-detector-3
+    version: '*.*.*'
+    condition: bouncing-detector-3.enabled
+  - name: bouncing-detector-4
+    version: '*.*.*'
+    condition: bouncing-detector-4.enabled
   - name: bruin-bridge
     version: '*.*.*'
     condition: bruin-bridge.enabled
@@ -78,6 +90,12 @@ dependencies:
   - name: notifier
     version: '*.*.*'
     condition: notifier.enabled
+  - name: repair-tickets-kre-bridge
+    version: '*.*.*'
+    condition: repair-tickets-kre-bridge.enabled
+  - name: repair-tickets-monitor
+    version: '*.*.*'
+    condition: repair-tickets-monitor.enabled
   - name: service-affecting-monitor
     version: '*.*.*'
     condition: service-affecting-monitor.enabled
