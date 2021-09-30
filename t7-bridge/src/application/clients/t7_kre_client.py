@@ -13,7 +13,9 @@ class T7KREClient:
         self._logger = logger
 
     def _create_stub(self):
-        credentials = grpc.ssl_channel_credentials()
+        certificates_file = open('/tmp/root-certificates.txt', 'w+')
+        root_certificates = bytes(certificates_file.read(), 'utf-8')
+        credentials = grpc.ssl_channel_credentials(root_certificates=root_certificates)
         c = grpc.secure_channel(f"{self._config.KRE_CONFIG['base_url']}", credentials=credentials)
         return pb2_grpc.EntrypointStub(c)
 
