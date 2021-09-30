@@ -3,7 +3,7 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='repair-ticket-kre-bridge',
+    name='repair-tickets-kre-bridge',
     version='1.0.0',
     description='MetTel\'s automation bridge for KRE Repair Ticket',
     packages=find_packages(exclude=['*tests']),

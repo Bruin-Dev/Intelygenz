@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='repair-ticket-monitor',
+    name='repair-tickets-monitor',
     version='1.0.0',
-    description='MetTel\'s automation bridge for repair-ticket-monitor',
+    description='MetTel\'s automation bridge for repair-tickets-monitor',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

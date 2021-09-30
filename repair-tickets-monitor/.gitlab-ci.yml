@@ -1,57 +1,57 @@
 # =======================================================
-# Linter validation jobs for repair-ticket-monitor module
+# Linter validation jobs for repair-tickets-monitor module
 # =======================================================
-repair-ticket-monitor-linter:
+repair-tickets-monitor-linter:
   variables:
-    MODULE: repair-ticket-monitor
+    MODULE: repair-tickets-monitor
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - repair-ticket-monitor/src/application/**/*
-        - repair-ticket-monitor/src/config/**/*
-        - repair-ticket-monitor/src/app.py
-        - repair-ticket-monitor/Dockerfile
-        - repair-ticket-monitor/requirements.txt
+        - repair-tickets-monitor/src/application/**/*
+        - repair-tickets-monitor/src/config/**/*
+        - repair-tickets-monitor/src/app.py
+        - repair-tickets-monitor/Dockerfile
+        - repair-tickets-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
 # ================================================
-# Unit tests jobs for repair-ticket-monitor module
+# Unit tests jobs for repair-tickets-monitor module
 # ================================================
-repair-ticket-monitor-test:
+repair-tickets-monitor-test:
   variables:
-    MODULE: repair-ticket-monitor
+    MODULE: repair-tickets-monitor
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - repair-ticket-monitor/src/application/**/*
-        - repair-ticket-monitor/src/config/**/*
-        - repair-ticket-monitor/src/app.py
-        - repair-ticket-monitor/Dockerfile
-        - repair-ticket-monitor/requirements.txt
+        - repair-tickets-monitor/src/application/**/*
+        - repair-tickets-monitor/src/config/**/*
+        - repair-tickets-monitor/src/app.py
+        - repair-tickets-monitor/Dockerfile
+        - repair-tickets-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
-  needs: ["repair-ticket-monitor-linter"]
+  needs: ["repair-tickets-monitor-linter"]
 
 # ===================================================
-# Images builds jobs for repair-ticket-monitor module
+# Images builds jobs for repair-tickets-monitor module
 # ===================================================
-repair-ticket-monitor-build:
+repair-tickets-monitor-build:
   stage: build
   variables:
-    MODULE_NAME: repair-ticket-monitor
+    MODULE_NAME: repair-tickets-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - repair-ticket-monitor/src/application/**/*
-        - repair-ticket-monitor/src/config/**/*
-        - repair-ticket-monitor/src/app.py
-        - repair-ticket-monitor/Dockerfile
-        - repair-ticket-monitor/requirements.txt
+        - repair-tickets-monitor/src/application/**/*
+        - repair-tickets-monitor/src/config/**/*
+        - repair-tickets-monitor/src/app.py
+        - repair-tickets-monitor/Dockerfile
+        - repair-tickets-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
-    - job: repair-ticket-monitor-test
+    - job: repair-tickets-monitor-test
     - job: semantic-release
       optional: true
