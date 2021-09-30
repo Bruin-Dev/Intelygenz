@@ -62,10 +62,26 @@ class VelocloudRepository:
     def group_links_by_edge_serial(self, edge_links_list) -> Dict[str, dict]:
         result = {}
         for edge_link in edge_links_list:
+            velocloud_host = edge_link['host']
+            enterprise_name = edge_link['enterpriseName']
+            enterprise_id = edge_link['enterpriseId']
+            edge_name = edge_link['edgeName']
+            edge_state = edge_link['edgeState']
             serial_number = edge_link['edgeSerialNumber']
+            link_state = edge_link['linkState']
 
-            if not edge_link['edgeId']:
-                self._logger.info(f"Edge {serial_number} without edgeId")
+            if edge_state is None:
+                self._logger.info(
+                    f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has an invalid state. Skipping..."
+                )
+                continue
+
+            if link_state is None:
+                self._logger.info(
+                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
+                    f"has no links. Skipping..."
+                )
                 continue
 
             result.setdefault(
@@ -90,11 +106,6 @@ class VelocloudRepository:
                     "links": []
                 }
             )
-
-            if not edge_link['linkState']:
-                self._logger.info(f"Edge [{serial_number}] with link interface {edge_link['interface']} "
-                                  f"without state")
-                continue
 
             edge_link_info = {
                 'interface': edge_link['interface'],

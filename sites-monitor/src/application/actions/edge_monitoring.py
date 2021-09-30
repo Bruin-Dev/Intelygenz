@@ -78,9 +78,7 @@ class EdgeMonitoring:
         try:
             async with self._semaphore:
                 self._logger.info(f"Processing edge links: {edge_serial} with {len(edge['links'])} links")
-                if len(edge['links']) == 0:
-                    self._logger.info(f"Edge with links: {edge_serial} has not links")
-                    return
+
                 if edge_serial not in self._status_cache:
                     self._prometheus_repository.inc(edge)
                 else:
