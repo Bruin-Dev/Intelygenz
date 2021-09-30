@@ -95,14 +95,16 @@ class RepairTicketsMonitor:
         )
         if client_info_response["status"] not in range(200, 300):
             self._logger.info(
-                f"Error retrieving client_info from Bruin for client_id={client_id} with service_number={service_number}"
+                f"Error retrieving client_info from Bruin for client_id={client_id} with \
+                  service_number={service_number}"
             )
             return None
 
         client_info = client_info_response.get("body", [])
         if not client_info:
             self._logger.info(
-                f"Empty body when retrieving client_info from Bruin for client_id={client_id} with service_number={service_number}"
+                f"Empty body when retrieving client_info from Bruin for client_id={client_id} with \
+                  service_number={service_number}"
             )
             return None
 

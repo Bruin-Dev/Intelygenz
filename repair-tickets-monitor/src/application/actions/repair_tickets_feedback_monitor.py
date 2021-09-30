@@ -52,7 +52,8 @@ class RepairTicketsFeedbackMonitor:
             for email_data in feedback_emails
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info("RepairTicketsFeedbackMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
+        self._logger.info("RepairTicketsFeedbackMonitor process finished! Took {:.3f}s".format(time.time()
+                          - start_time))
 
     async def _process_repair_email(self, email_data: dict):
         # TODO: define the new logic
