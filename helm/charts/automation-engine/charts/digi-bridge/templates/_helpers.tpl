@@ -33,7 +33,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 project: mettel-automation
-component: bruin-bridge
+component: digi-bridge
 microservice-type: capability
 environment-name: "{{ .Values.global.environment }}"
 current-environment: {{ .Values.global.current_environment }}

@@ -32,7 +32,7 @@ helm.sh/chart: {{ include "hawkeye-bridge.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 project: mettel-automation
-component: cts-bridge
+component: hawkeye-bridge
 microservice-type: capability
 environment-name: "{{ .Values.global.environment }}"
 current-environment: {{ .Values.global.current_environment }}

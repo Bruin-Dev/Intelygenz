@@ -23,10 +23,6 @@ nats:
     # will be created in the microservice deployment that will wait until the
     # bruin-bridge service responds correctly to healthcheck calls.
     bruin_bridge: ${BRUIN_BRIDGE_ENABLED}
-    # -- Indicate if cts-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # cts-bridge service responds correctly to healthcheck calls.
-    cts_bridge: ${CTS_BRIDGE_ENABLED}
     # -- Indicate if digi-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # digi-bridge service responds correctly to healthcheck calls.
@@ -39,10 +35,6 @@ nats:
     # will be created in the microservice deployment that will wait until the
     # hawkeye-bridge service responds correctly to healthcheck calls.
     hawkeye_bridge: ${HAWKEYE_BRIDGE_ENABLED}
-    # -- Indicate if lit-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # lit-bridge service responds correctly to healthcheck calls.
-    lit_bridge: ${LIT_BRIDGE_ENABLED}
     # -- Indicate if notifier is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
@@ -297,55 +289,6 @@ bruin-bridge:
       memory: 128Mi
 
 
-# -- cts-bridge subchart specific configuration
-cts-bridge:
-  replicaCount: ${CTS_BRIDGE_DESIRED_TASKS}
-  # -- Field to indicate if the cts-bridge module is going to be deployed
-  enabled: ${CTS_BRIDGE_ENABLED}
-  # cts-bridge specific configuration variables
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "cts-bridge-${CTS_BRIDGE_BUILD_NUMBER}"
-    # -- Client ID credentials for CTS API
-    cts_client_id: ${CTS_CLIENT_ID}
-    # -- Client Secret credentials for CTS API
-    cts_client_secret: ${CTS_CLIENT_SECRET}
-    # -- Username credentials for CTS API
-    cts_client_username: ${CTS_CLIENT_USERNAME}
-    # -- Password credentials for CTS API
-    cts_client_password: ${CTS_CLIENT_PASSWORD}
-    # -- Security Token credentials for CTS API
-    cts_client_security_token: ${CTS_CLIENT_SECURITY_TOKEN}
-    # -- Login URL for CTS API
-    cts_login_url: ${CTS_LOGIN_URL}
-    # -- Domain URL for CTS API
-    cts_domain: ${CTS_DOMAIN}
-  # -- cts-bridge image details
-  image:
-    # -- cts-bridge
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/cts-bridge
-    pullPolicy: Always
-    # -- cts-bridge tag of docker image
-    tag: ${CTS_BRIDGE_BUILD_NUMBER}
-  # -- cts-bridge service details
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  autoscaling:
-    enabled: ${CTS_BRIDGE_ENABLED}
-    minReplicas: ${CTS_BRIDGE_DESIRED_TASKS}
-    maxReplicas: 2
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
-
-
 # -- customer-cache subchart specific configuration
 customer-cache:
   enabled: ${CUSTOMER_CACHE_ENABLED}
@@ -448,54 +391,6 @@ digi-reboot-report:
     requests:
       cpu: 200m
       memory: 256Mi
-
-
-# -- dispatch-portal-backend subchart specific configuration
-dispatch-portal-backend:
-  enabled: ${DISPATCH_PORTAL_BACKEND_ENABLED}
-  replicaCount: ${DISPATCH_PORTAL_BACKEND_DESIRED_TASKS}
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "dispatch-portal-backend-${DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}"
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    dispatch_portal_server_port: 5000
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-backend
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-
-# -- dispatch-portal-frontend subchart specific configuration
-dispatch-portal-frontend:
-  enabled: ${DISPATCH_PORTAL_FRONTEND_ENABLED}
-  replicaCount: ${DISPATCH_PORTAL_FRONTEND_DESIRED_TASKS}
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dispatch-portal-frontend
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 3000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
 
 
 # -- email-tagger-kre-bridge subchart specific configuration
@@ -795,51 +690,6 @@ links-metrics-collector:
       memory: 256Mi
 
 
-# -- lit-bridge subchart specific configuration
-lit-bridge:
-  enabled: ${LIT_BRIDGE_ENABLED}
-  # -- Number of lit-bridge pods to do calls to LIT API.
-  replicaCount: ${LIT_BRIDGE_DESIRED_TASKS}
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "lit-bridge-${LIT_BRIDGE_BUILD_NUMBER}"
-    # -- Client ID credentials for LIT API
-    lit_client_id: ${LIT_CLIENT_ID}
-    # -- Client Secret credentials for LIT API
-    lit_client_secret: ${LIT_CLIENT_SECRET
-    # -- Username credentials for LIT API
-    lit_client_username: ${LIT_CLIENT_USERNAME}
-    # -- Password credentials for LIT API
-    lit_client_password: ${LIT_CLIENT_PASSWORD}
-    # -- Security token credentials for LIT API
-    lit_client_security_token: ${LIT_CLIENT_SECURITY_TOKEN}
-    # -- Login URL for LIT API
-    lit_login_url: ${LIT_LOGIN_URL}
-    # -- Domain for LIT API
-    lit_domain: ${LIT_DOMAIN}
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lit-bridge
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${LIT_BRIDGE_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  autoscaling:
-    enabled: ${LIT_BRIDGE_ENABLED}
-    minReplicas: ${LIT_BRIDGE_DESIRED_TASKS}
-    maxReplicas: 2
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
-
-
 # -- lumin-billing-report subchart specific configuration
 lumin-billing-report:
   enabled: ${LUMIN_BILLING_REPORT_ENABLED}
@@ -944,32 +794,6 @@ service-affecting-monitor:
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-
-# -- service-dispatch-monitor subchart specific configuration
-service-dispatch-monitor:
-  enabled: ${SERVICE_DISPATCH_MONITOR_ENABLED}
-  replicaCount: ${SERVICE_DISPATCH_MONITOR_DESIRED_TASKS}
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "service-dispatch-monitor-${SERVICE_DISPATCH_MONITOR_BUILD_NUMBER}"
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-dispatch-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${SERVICE_DISPATCH_MONITOR_BUILD_NUMBER}
   service:
     type: ClusterIP
     port: 5000
