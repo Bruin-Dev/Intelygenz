@@ -2,62 +2,68 @@
 <img src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&v=beta&t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"  width="200" height="200">
 </div>
 
-| Module      | Coverage |
-|:-----------:|:--------:|
-| bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| customer-cache |[![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| digi-bridge |[![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| digi-reboot-report |[![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| email-tagger-kre-bridge |[![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| email-tagger-monitor |[![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| hawkeye-affecting-monitor |[![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| hawkeye-bridge |[![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| hawkeye-customer-cache |[![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| hawkeye-outage-monitor |[![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| intermapper-outage-monitor |[![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| repair-tickets-kre-bridge|[![repair-tickets-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| repair-tickets-monitor|[![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| tnba-feedback|[![tnba-feedback-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-feedback-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| tnba-monitor|[![tnba-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+|           Module           |                                                                                                              Coverage                                                                                                              |
+| :------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|        bruin-bridge        |               [![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
+|       customer-cache       |             [![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
+|        digi-bridge         |                [![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                |
+|     digi-reboot-report     |         [![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)         |
+|  email-tagger-kre-bridge   |    [![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)    |
+|    email-tagger-monitor    |       [![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
+| hawkeye-affecting-monitor  |  [![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
+|       hawkeye-bridge       |             [![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
+|   hawkeye-customer-cache   |     [![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
+|   hawkeye-outage-monitor   |     [![hawkeye-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
+| intermapper-outage-monitor | [![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
+|    last-contact-report     |        [![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
+|    lumin-billing-report    |         [![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)          |
+|          notifier          |                   [![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                   |
+| service-affecting-monitor  |  [![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
+|   service-outage-monitor   |     [![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
+|       sites-monitor        |              [![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
+|         t7-bridge          |                  [![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                  |
+|       tnba-feedback        |              [![tnba-feedback-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-feedback-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
+|        tnba-monitor        |               [![tnba-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
+|      velocloud-bridge      |           [![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)           |
 
 # Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
-  - [Commit Message Format](#commit-message-format)
-  - [Adding new microservice to the system](#adding-new-microservices-to-the-system)
+  - [<a name="commit"></a> Commit Message Format](#-commit-message-format)
+    - [<a name="commit-header"></a>Commit Message Header](#commit-message-header)
+      - [Type](#type)
+      - [Types that trigger jobs in pipelines](#types-that-trigger-jobs-in-pipelines)
+      - [Scope](#scope)
+      - [Short summary](#short-summary)
+    - [<a name="commit-body"></a>Commit Message Body](#commit-message-body)
+    - [<a name="commit-footer"></a>Commit Message Footer](#commit-message-footer)
+    - [Revert commits](#revert-commits)
+    - [Example](#example)
+  - [Adding new microservices to the system](#adding-new-microservices-to-the-system)
+    - [automation-engine](#automation-engine)
+    - [infra-as-code](#infra-as-code)
+    - [helm](#helm)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
   - [Deploying just a subset of microservices](#deploying-just-a-subset-of-microservices)
   - [DOD(Definition of Done)](#doddefinition-of-done)
-  - [Custom packages](#custom-packages)
-    - [Creation and testing](#creation-and-testing)
-    - [Import and installation in microservices](#import-and-installation-in-microservices)
-    - [Changes and debugging](#changes-and-debugging)
 - [Running the project](#running-the-project)
-  - [Python 3.6](#python-3.6)
+  - [Python 3.6](#python-36)
   - [Docker and Docker Compose](#docker-and-docker-compose)
   - [Docker ECR private repository](#docker-ecr-private-repository)
-  - [Docker custom images and python libraries](#docker-custom-images-and-python-libraries)
+  - [Docker custom images and Python Libraries](#docker-custom-images-and-python-libraries)
   - [Env files](#env-files)
   - [Finish up](#finish-up)
-- [EKS and KRE](#EKS and KRE)
+- [EKS and KRE](#eks-and-kre)
   - [Access Control](#access-control)
     - [Roles](#roles)
-    - [Roles assigned to users](#roles-assigned-to-users)
+    - [Roles assigned to Users](#roles-assigned-to-users)
   - [Access Configuration](#access-configuration)
     - [Prerequisites](#prerequisites)
     - [Setup](#setup)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
-  - [Packages](#packages)
   - [Microservices](#microservices)
   - [Acceptance Tests](#acceptance-tests)
 - [Processes' overview](#processes-overview)
@@ -66,7 +72,7 @@
     - [Process flow](#process-flow)
 - [Good Practices](#good-practices)
 - [Setting up logs with Papertrail](#setting-up-logs-with-papertrail)
-- [Testing device](#testing-device)  
+- [Testing device](#testing-device)
 - [METRICS](#metrics)
 
 # Project structure
@@ -118,9 +124,8 @@ Any line of the commit message cannot be longer than 50 characters.
   │       └─⫸ Commit Scope: infra-as-code|ci-cd|helm|bruin-bridge|ci-utils|customer-cache|digi-bridge|
   │                          digi-reboot-report|email-tagger-kre-bridge|email-tagger-kre-monitor|
   │                          hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
-  │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|
-  |                          links-metrics-api|links-metrics-collector|lumin-billing-report|notifier|
-  |                          repair-tickets-kre-bridge|repair-tickets-monitor|service-affecting-monitor|
+  │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
+  |                          links-metrics-collector|lumin-billing-report|notifier|service-affecting-monitor|
   |                          service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
   |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
   │
@@ -191,11 +196,11 @@ The content of the commit message body should contain:
 
 The table below shows which commit message gets you which release type when semantic-release runs (using the default configuration):
 
-| Commit message                                                                                                                                                                                | Release type               | Tag        |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |----------- |
-| `fix(bruin-bridge): stop 'something' breaking when too much pressure applied`                                                                                                                 | Patch Release              | 1.0.**1**  |
-| `feat(bruin-bridge): add 'something' option to 20`                                                                                                                                            | ~~Minor~~ Feature Release  | 1.**1**.0  |
-| `perf(bruin-bridge): remove something option`<br><br>`BREAKING CHANGE: The something option has been removed.`<br>`The default something value of 10 is always used for performance reasons.` | ~~Major~~ Breaking Release | **2**.0.0  |
+| Commit message                                                                                                                                                                                | Release type               | Tag       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------- |
+| `fix(bruin-bridge): stop 'something' breaking when too much pressure applied`                                                                                                                 | Patch Release              | 1.0.**1** |
+| `feat(bruin-bridge): add 'something' option to 20`                                                                                                                                            | ~~Minor~~ Feature Release  | 1.**1**.0 |
+| `perf(bruin-bridge): remove something option`<br><br>`BREAKING CHANGE: The something option has been removed.`<br>`The default something value of 10 is always used for performance reasons.` | ~~Major~~ Breaking Release | **2**.0.0 |
 
 ## Adding new microservices to the system
 In addition to creating the microservice folder and all the standards files inside that folder, you must add this
@@ -506,24 +511,24 @@ IAM roles are created for each of the users, although these are distinguished in
 
 Below are the roles created for each of the users actually, as well as the category to which they belong from those explained above:
 
-| IAM User Name | Role in Project | IAM role created |
-|---------------|-----------------|------------------|
-| alberto.iglesias | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alberto.iglesias |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias |
-| alejandro.aceituna | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alejandro.aceituna |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna |
-| angel.costales | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.costales |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales |
-| angel.luis.piquero | devops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.luis.piquero |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero |
-| brandon.samudio | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation--brandon.samudio |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio |
-| daniel.fernandez | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-daniel.fernandez |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
-| joseluis.vega | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega |
-| marc.vivancos | developer | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-marc.vivancos |
-|  |  | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-marc.vivancos |
+| IAM User Name      | Role in Project | IAM role created                                                                                         |
+| ------------------ | --------------- | -------------------------------------------------------------------------------------------------------- |
+| alberto.iglesias   | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alberto.iglesias    |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias    |
+| alejandro.aceituna | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alejandro.aceituna  |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna  |
+| angel.costales     | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.costales      |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales      |
+| angel.luis.piquero | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.luis.piquero  |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero  |
+| brandon.samudio    | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation--brandon.samudio |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio  |
+| daniel.fernandez   | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-daniel.fernandez |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
+| joseluis.vega      | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega    |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega    |
+| marc.vivancos      | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-marc.vivancos    |
+|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-marc.vivancos    |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
 
@@ -773,4 +778,4 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
   - [Link](https://grafana.com/docs/reference/dashboard/) to the documentation to the dashboard's json file.
   - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
     area for the [local docker-compose](docker-compose.yml). Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
-    grafana dashboard.
+    grafana dashboard. 
