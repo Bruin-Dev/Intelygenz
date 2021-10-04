@@ -68,7 +68,7 @@ data:
         auth_basic_user_file /etc/apache2/.htpasswd;
 
         location ~ ^/dashboard(.*)$ {
-            return 302 https://$host/measurements/${KRE_RUNTIME_NAME}/sources/${KRE_RUNTIME_INFLUX_SOURCE}/dashboards/28?refresh=Paused&present=true&$1$args;
+            return 302 https://$host/measurements/${KRE_RUNTIME_NAME}/sources/${KRE_RUNTIME_INFLUX_SOURCE}/dashboards/${KRE_RUNTIME_DASHBOARD}$1$args;
         }
 
         location ~ ^/measurements/${KRE_RUNTIME_NAME}/(.*)$ {
