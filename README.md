@@ -3,7 +3,10 @@
 </div>
 
 |           Module           |                                                                                                              Coverage                                                                                                              |
-| :------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| :------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: 
+|
+|     bouncing-detector      |               [![bouncing-detector](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bouncing-detector)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               
+|
 |        bruin-bridge        |               [![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
 |       customer-cache       |             [![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
 |        digi-bridge         |                [![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                |
