@@ -5,6 +5,8 @@ metadata:
   namespace: kube-system
   labels:
     {{- include "fluent-bit-custom.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
 spec:
   selector:
     matchLabels:
