@@ -471,6 +471,14 @@ class OutageMonitor:
         node_to_node_status: str = 'DOWN' if device_info['nodetonode']['status'] == 0 else 'UP'
         real_service_status: str = 'DOWN' if device_info['realservice']['status'] == 0 else 'UP'
 
+        node_to_node_last_update = device_info['nodetonode']['lastUpdate']
+        if node_to_node_last_update != 'never':
+            node_to_node_last_update = str(parse(node_to_node_last_update).astimezone(tz_object))
+
+        real_service_last_update = device_info['realservice']['lastUpdate']
+        if real_service_last_update != 'never':
+            real_service_last_update = str(parse(real_service_last_update).astimezone(tz_object))
+
         triage_note = os.linesep.join([
             "#*MetTel's IPA*#",
             "Triage (Ixia)",
@@ -485,9 +493,9 @@ class OutageMonitor:
             f"Hawkeye ID: {device_info['probeId']}",
             "",
             f"Device Node to Node Status: {node_to_node_status}",
-            f"Node to Node Last Update: {str(parse(device_info['nodetonode']['lastUpdate']).astimezone(tz_object))}",
+            f"Node to Node Last Update: {node_to_node_last_update}",
             f"Device Real Service Status: {real_service_status}",
-            f"Real Service Last Update: {str(parse(device_info['realservice']['lastUpdate']).astimezone(tz_object))}",
+            f"Real Service Last Update: {real_service_last_update}",
             "",
             f"TimeStamp: {str(current_datetime)}",
         ])
