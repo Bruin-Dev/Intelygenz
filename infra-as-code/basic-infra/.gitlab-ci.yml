@@ -49,6 +49,9 @@ basic-infra-dev:
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
       when: manual
       allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
 
 basic-infra-pro:
   stage: basic_infra
