@@ -188,13 +188,19 @@ class TestVelocloudRepository:
             ],
             'status': 400,
         }
+        response_3 = {
+            'request_id': uuid_,
+            'body': [
+            ],
+            'status': 400,
+        }
         event_bus = Mock()
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
 
         velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_links_metrics_by_host = CoroutineMock(side_effect=[response_1, response_2])
+        velocloud_repository.get_links_metrics_by_host = CoroutineMock(side_effect=[response_1, response_2, response_3])
 
         with uuid_mock:
             result = await velocloud_repository.get_all_links_metrics(interval)
