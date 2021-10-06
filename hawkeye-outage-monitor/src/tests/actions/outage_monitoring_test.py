@@ -3677,7 +3677,7 @@ class TestServiceOutageMonitor:
             },
             "nodetonode": {
                 "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
+                "lastUpdate": "never"
             },
             "realservice": {
                 "status": 1,
@@ -3717,7 +3717,7 @@ class TestServiceOutageMonitor:
             'Hawkeye ID: 1',
             '',
             'Device Node to Node Status: DOWN',
-            'Node to Node Last Update: 2020-11-11 08:00:11-05:00',
+            'Node to Node Last Update: never',
             'Device Real Service Status: UP',
             'Real Service Last Update: 2020-11-15 05:18:28-05:00',
             '',
