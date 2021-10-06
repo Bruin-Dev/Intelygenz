@@ -53,6 +53,10 @@ class RefreshCache:
             self._logger.info("Refreshing cache for hawkeye")
             cache = []
             for device in probes_list:
+                if device['nodetonode']['lastUpdate'] == 'never' and device['realservice']['lastUpdate'] == 'never':
+                    self._logger.info(f"Device {device['serialNumber']} has never been contacted. Skipping...")
+                    continue
+
                 filter_device = await self._bruin_repository.filter_probe(device)
                 if filter_device:
                     cache.append(filter_device)
