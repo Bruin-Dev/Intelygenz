@@ -141,7 +141,10 @@ class BruinRepository:
                     'probe_uid': probe['uid'],
                     'probe_group': probe['probeGroup'],
                     'device_type_name': probe['typeName'],
-                    'last_contact': max(probe['nodetonode']['lastUpdate'], probe['realservice']['lastUpdate']),
+                    'last_contact': max(
+                        '' if probe['nodetonode']['lastUpdate'] == 'never' else probe['nodetonode']['lastUpdate'],
+                        '' if probe['realservice']['lastUpdate'] == 'never' else probe['realservice']['lastUpdate'],
+                    ),
                     'serial_number': serial_number,
                     'bruin_client_info': client_info_response_body[0]
                 }
