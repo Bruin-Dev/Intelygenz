@@ -111,7 +111,7 @@ include:
 
 semantic-release:
   stage: release
-  image: node:15.3-alpine
+  image: node:16.10-alpine
   environment:
     name: production
   script:
