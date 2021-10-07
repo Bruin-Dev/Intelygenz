@@ -526,7 +526,7 @@ Below are the roles created for each of the users actually, as well as the categ
 |                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero  |
 | brandon.samudio    | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation--brandon.samudio |
 |                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio  |
-| daniel.fernandez   | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-daniel.fernandez |
+| daniel.fernandez   | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-daniel.fernandez    |
 |                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
 | joseluis.vega      | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega    |
 |                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega    |
