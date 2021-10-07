@@ -225,6 +225,51 @@ class BruinRepository:
 
         return response
 
+    async def change_detail_work_queue(self, ticket_id: int, task_result: str, *, serial_number: str = None,
+                                       detail_id: int = None):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "ticket_id": ticket_id,
+                "queue_name": task_result
+            },
+        }
+        if serial_number:
+            request['body']["service_number"] = serial_number
+        if detail_id:
+            request['body']["detail_id"] = detail_id
+        try:
+            self._logger.info(
+                f'Changing task result for ticket {ticket_id} and detail id {detail_id} for device '
+                f'{serial_number} to {task_result}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when changing task result for ticket {ticket_id} and serial {serial_number}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f'Ticket {ticket_id} and serial {serial_number} task result changed to  {task_result}')
+            else:
+                err_msg = (
+                    f'Error while changing task result for ticket {ticket_id} and serial {serial_number} in '
+                    f'{self._config.BOUNCING_DETECTOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def append_reopening_note_to_ticket(self, ticket_id: int, affecting_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.BOUNCING_DETECTOR_CONFIG['timezone']))
         reopening_note = os.linesep.join([
@@ -244,3 +289,33 @@ class BruinRepository:
                 ticket_details = detail
                 break
         return ticket_details
+
+    def are_there_any_other_troubles(self, ticket_notes) -> bool:
+        troubles_list = ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization']
+        trouble_notes = [
+            note
+            for note in ticket_notes
+            if "Trouble:" in note["noteValue"]
+            if any(trouble for trouble in troubles_list if trouble in note["noteValue"])
+        ]
+
+        return len(trouble_notes) > 0
+
+    async def append_asr_forwarding_note(self, ticket_id, link, serial_number):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.BOUNCING_DETECTOR_CONFIG['timezone']))
+
+        note_lines = [
+            f"#*MetTel's IPA*#",
+        ]
+
+        note_lines.append(
+            f'Status of Wired Link {link["interface"]} ({link["displayName"]}) is {link["linkState"]}.'
+        )
+
+        note_lines += [
+            f'Moving task to: ASR Investigate',
+            f'TimeStamp: {current_datetime_tz_aware}',
+        ]
+
+        task_result_note = os.linesep.join(note_lines)
+        return await self.append_note_to_ticket(ticket_id, task_result_note, service_numbers=[serial_number])

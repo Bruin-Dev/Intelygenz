@@ -29,6 +29,7 @@ BOUNCING_DETECTOR_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'velocloud_host': os.environ["VELOCLOUD_HOSTS"],
+    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned'],
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

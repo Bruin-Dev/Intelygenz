@@ -3,7 +3,8 @@ import time
 from collections import OrderedDict
 from collections import defaultdict
 from datetime import datetime
-from typing import Callable
+from ipaddress import ip_address
+from typing import Callable, Optional
 
 from apscheduler.util import undefined
 from pytz import timezone
@@ -138,7 +139,9 @@ class BouncingDetector:
 
                 ticket_dict = self._get_link_ticket_dict(cached_edge_info, link_info["link"], interface,
                                                          len(link_down_events[interface]))
-                await self._create_bouncing_ticket(cached_edge_info, ticket_dict, serial)
+                ticket_id = await self._create_bouncing_ticket(cached_edge_info, ticket_dict, serial)
+                if ticket_id is not None:
+                    await self._attempt_forward_to_asr(cached_edge_info, link_info["link"], ticket_id)
 
     def _get_edge_ticket_dict(self, edge_info, length_of_events):
 
@@ -195,7 +198,7 @@ class BouncingDetector:
             f'/monitor/edge/{cached_edge_info["edge"]["edge_id"]}/links/] \n'
         return edge_overview
 
-    async def _create_bouncing_ticket(self, edge_cached_info, ticket_dict, serial):
+    async def _create_bouncing_ticket(self, edge_cached_info, ticket_dict, serial) -> Optional[int]:
         self._logger.info(f'Attempting service affecting ticket creation for edge with serial {serial}')
 
         ticket_note = self._ticket_object_to_string(ticket_dict)
@@ -205,16 +208,16 @@ class BouncingDetector:
 
             ticket = await self._bruin_repository.get_affecting_ticket(client_id, serial)
             if ticket is None:
-                return
-            if len(ticket) == 0:
+                return None
+            if ticket == {}:
                 contact_info = self._get_contact_info(serial)
                 if contact_info is None:
                     self._logger.info(f'No contact info found for serial {serial}. Skipping ticket creation ..')
-                    return
+                    return None
                 response = await self._bruin_repository.create_affecting_ticket(client_id, serial,
                                                                                 contact_info["contacts"])
                 if response["status"] not in range(200, 300):
-                    return
+                    return None
                 ticket_id = response["body"]["ticketIds"][0]
 
                 await self._bruin_repository.append_note_to_ticket(ticket_id=ticket_id,
@@ -228,12 +231,12 @@ class BouncingDetector:
 
                 self._logger.info(f'Ticket created with ticket id: {ticket_id}')
 
-                return
+                return ticket_id
             else:
                 ticket_details = self._bruin_repository.find_detail_by_serial(ticket, serial)
                 if not ticket_details:
                     self._logger.error(f"No ticket details matching the serial number {serial}")
-                    return
+                    return None
                 if self._is_ticket_resolved(ticket_details):
                     self._logger.info(f'A resolved service Affecting ticket '
                                       f'detected in edge with serial {serial}. '
@@ -242,7 +245,7 @@ class BouncingDetector:
                     detail_id = ticket_details['detailID']
                     open_ticket_response = await self._bruin_repository.open_ticket(ticket_id, detail_id)
                     if open_ticket_response['status'] not in range(200, 300):
-                        return
+                        return None
                     slack_message = (
                         f'Affecting ticket {ticket_id} reopened through bouncing-detector service. '
                         f'Details at https://app.bruin.com/t/{ticket_id}'
@@ -251,7 +254,6 @@ class BouncingDetector:
 
                     await self._notifications_repository.send_slack_message(slack_message)
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, reopen_ticket_note)
-
                 else:
                     self._logger.info(f'A unresolved service Affecting ticket '
                                       f'detected in edge with serial {serial}. '
@@ -264,6 +266,82 @@ class BouncingDetector:
                                     f'https://app.bruin.com/t/{ticket_id} , in ' \
                                     f'{self._config.BOUNCING_DETECTOR_CONFIG["environment"]}'
                     await self._notifications_repository.send_slack_message(slack_message)
+                return ticket_id
+
+    async def _attempt_forward_to_asr(self, cached_edge, link_info, ticket_id):
+        serial_number = cached_edge['serial_number']
+        self._logger.info(
+            f'Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...'
+        )
+        interface = link_info["interface"]
+        links_configuration = cached_edge['links_configuration']
+        link_interface_type = ''
+        for link_configuration in links_configuration:
+            if interface in link_configuration['interfaces']:
+                link_interface_type = link_configuration['type']
+        if link_interface_type != 'WIRED':
+            self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED')
+            return
+
+        self._logger.info(f'Filtering out any of the wired links of serial {serial_number} that contains any of the '
+                          f'following: '
+                          f'{self._config.BOUNCING_DETECTOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]} '
+                          f'in the link label')
+        should_be_forwarded = self._should_be_forwarded_to_asr(link_info)
+        if should_be_forwarded is False:
+            self._logger.info(
+                f'No links with whitelisted labels were found for serial {serial_number}. '
+                f'Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate.'
+            )
+            return
+
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details_response_body = ticket_details_response['body']
+        ticket_details_response_status = ticket_details_response['status']
+        if ticket_details_response_status not in range(200, 300):
+            return
+
+        details_from_ticket = ticket_details_response_body['ticketDetails']
+        ticket_details = self._get_first_element_matching(
+            details_from_ticket,
+            lambda detail: detail['detailValue'] == serial_number,
+        )
+
+        notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+
+        ticket_notes = [
+            note
+            for note in notes_from_outage_ticket
+            if serial_number in note['serviceNumber']
+            if note['noteValue'] is not None
+        ]
+        ticket_detail_id = ticket_details['detailID']
+
+        other_troubles_in_ticket = self._bruin_repository.are_there_any_other_troubles(ticket_notes)
+
+        if other_troubles_in_ticket:
+            self._logger.info(f'Other service affecting troubles were found in ticket id {ticket_id}. Skipping forward'
+                              f'to asr...')
+            return
+        task_result = "No Trouble Found - Carrier Issue"
+        task_result_note = self._find_note(ticket_notes, 'ASR Investigate')
+
+        if task_result_note is not None:
+            self._logger.info(
+                f'Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to '
+                f'"{task_result}"'
+            )
+            return
+
+        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
+            ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
+        if change_detail_work_queue_response['status'] in range(200, 300):
+            await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_info, serial_number)
+            slack_message = (
+                f'Detail of Circuit Instability ticket {ticket_id} related to serial {serial_number} '
+                f'was successfully forwarded to {task_result} queue!'
+            )
+            await self._notifications_repository.send_slack_message(slack_message)
 
     def _ticket_object_to_string(self, ticket_dict, watermark=None):
         edge_triage_str = "#*MetTel's IPA*#\n"
@@ -287,6 +365,29 @@ class BouncingDetector:
 
     def _is_ticket_resolved(self, ticket_detail: dict) -> bool:
         return ticket_detail['detailStatus'] == 'R'
+
+    def _is_link_label_an_ip(self, link_label):
+        try:
+            return bool(ip_address(link_label))
+        except ValueError:
+            return False
+
+    def _is_link_label_black_listed(self, link_label):
+        blacklisted_link_labels = self._config.BOUNCING_DETECTOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]
+        return any(label for label in blacklisted_link_labels if label in link_label)
+
+    def _should_be_forwarded_to_asr(self, link) -> bool:
+        if self._is_link_label_black_listed(link['displayName']) is False and \
+               self._is_link_label_an_ip(link['displayName']) is False:
+            return True
+        return False
+
+    def _find_note(self, ticket_notes, watermark):
+        return self._get_first_element_matching(
+            iterable=ticket_notes,
+            condition=lambda note: watermark in note.get('noteValue'),
+            fallback=None
+        )
 
     @staticmethod
     def _get_first_element_matching(iterable, condition: Callable, fallback=None):
