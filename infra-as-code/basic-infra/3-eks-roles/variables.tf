@@ -2,7 +2,6 @@ variable "eks_developer_users" {
   type    = list(string)
   default = [
     "brandon.samudio",
-    "daniel.fernandez",
     "joseluis.vega",
     "marc.vivancos",
     "ricardo.hortelano",
@@ -17,7 +16,8 @@ variable "eks_devops_users" {
   default = [
     "alberto.iglesias",
     "angel.luis.piquero",
-    "alejandro.aceituna"
+    "alejandro.aceituna",
+    "daniel.fernandez",
   ]
 }
 
