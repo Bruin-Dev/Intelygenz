@@ -26,6 +26,7 @@ BOUNCING_DETECTOR_CONFIG = {
     'environment': ENVIRONMENT_NAME,
     'timezone': 'US/Eastern',
     'velocloud_host': 'mettel.velocloud.net',
+    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned'],
 }
 
 

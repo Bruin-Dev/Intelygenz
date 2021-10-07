@@ -632,6 +632,7 @@ class TestBouncingDetector:
 
     @pytest.mark.asyncio
     async def check_for_bouncing_events_test(self):
+        ticket_id = 124
         enterprise_id_1 = 1
         edge_name_1 = 'test'
         edge_name_2 = 'test_2'
@@ -779,7 +780,8 @@ class TestBouncingDetector:
         bouncing_detector._link_metrics_response = [link_metric_1, link_metric_2]
         bouncing_detector._get_edge_ticket_dict = Mock(return_value=edge_ticket_dict)
         bouncing_detector._get_link_ticket_dict = Mock(return_value=link_ticket_dict)
-        bouncing_detector._create_bouncing_ticket = CoroutineMock()
+        bouncing_detector._create_bouncing_ticket = CoroutineMock(return_value=ticket_id)
+        bouncing_detector._attempt_forward_to_asr = CoroutineMock()
 
         await bouncing_detector._check_for_bouncing_events(events_by_serial)
 
@@ -790,6 +792,172 @@ class TestBouncingDetector:
                                                                           edge_serial_2),
                                                                      call(cached_edge_1, link_ticket_dict,
                                                                           edge_serial_1)])
+        bouncing_detector._attempt_forward_to_asr.assert_awaited_once_with(cached_edge_1, link_metric_1["link"],
+                                                                           ticket_id)
+
+    @pytest.mark.asyncio
+    async def check_for_bouncing_events_none_ticket_id_return_test(self):
+        ticket_id = None
+        enterprise_id_1 = 1
+        edge_name_1 = 'test'
+        edge_name_2 = 'test_2'
+        edge_full_id_1 = {"host": "metvco04.mettel.net", "enterprise_id": enterprise_id_1, "edge_id": 1234}
+        edge_full_id_2 = {"host": "metvco04.mettel.net", "enterprise_id": enterprise_id_1, "edge_id": 1235}
+
+        edge_serial_1 = 'VC01'
+        edge_serial_2 = 'VC012'
+
+        cached_edge_1 = {
+            'edge': edge_full_id_1,
+            'edge_name': edge_name_2,
+            'serial_number': edge_serial_1,
+            'last_contact': '2020-08-27T15:25:42.000',
+            'logical_ids': ['logical_ids'],
+            'links_configuration': ['link_configuaration'],
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'Aperture Science',
+            }
+        }
+        cached_edge_2 = {
+            'edge': edge_full_id_2,
+            'edge_name': edge_name_1,
+            'serial_number': edge_serial_2,
+            'last_contact': '2020-08-27T15:25:42.000',
+            'logical_ids': ['logical_ids'],
+            'links_configuration': ['link_configuaration'],
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'Aperture Science',
+            }
+        }
+
+        event_1 = {
+            'event': 'EDGE_DOWN',
+            'category': 'NETWORK',
+            'eventTime': '2019-07-30 07:38:00+00:00',
+            'message': 'Edge dead',
+            'edgeName': edge_name_1
+        }
+        event_2 = {
+            'event': 'LINK_DEAD',
+            'category': 'NETWORK',
+            'eventTime': '2019-07-30 07:38:00+00:00',
+            'message': 'Link GE1 is now DEAD',
+            'edgeName': edge_name_2
+        }
+
+        event_3 = {
+            'event': 'LINK_DEAD',
+            'category': 'NETWORK',
+            'eventTime': '2019-07-30 07:38:00+00:00',
+            'message': 'Link GE2 is now DEAD',
+            'edgeName': edge_name_2
+        }
+        event_4 = {
+            'event': 'LINK_DEAD',
+            'category': 'NETWORK',
+            'eventTime': '2019-07-30 07:38:00+00:00',
+            'message': 'Link GE3 is now DEAD',
+            'edgeName': edge_name_2
+        }
+
+        events_by_serial = {
+            edge_serial_2: [event_1, event_1, event_1, event_1, event_1,
+                            event_1, event_1, event_1, event_1, event_1, event_1],
+            edge_serial_1: [event_2, event_2, event_2, event_2, event_2, event_2,
+                            event_2, event_2, event_2, event_2, event_2, event_3,
+                            event_4, event_4, event_4, event_4, event_4, event_4,
+                            event_4, event_4, event_4, event_4, event_4]
+        }
+
+        edge_ticket_dict = {'test': 'name'}
+        link_ticket_dict = {'test': 'name'}
+
+        link_metric_1 = {"link": {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial_1,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        }
+        link_metric_2 = {"link": {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial_1,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'GE2',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        }
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+        bouncing_detector._customer_cache = [cached_edge_1, cached_edge_2]
+        bouncing_detector._link_metrics_response = [link_metric_1, link_metric_2]
+        bouncing_detector._get_edge_ticket_dict = Mock(return_value=edge_ticket_dict)
+        bouncing_detector._get_link_ticket_dict = Mock(return_value=link_ticket_dict)
+        bouncing_detector._create_bouncing_ticket = CoroutineMock(return_value=ticket_id)
+        bouncing_detector._attempt_forward_to_asr = CoroutineMock()
+
+        await bouncing_detector._check_for_bouncing_events(events_by_serial)
+
+        bouncing_detector._get_edge_ticket_dict.assert_called_once_with(cached_edge_2, 11)
+        bouncing_detector._get_link_ticket_dict.assert_called_once_with(cached_edge_1, link_metric_1["link"],
+                                                                        "GE1", 11)
+        bouncing_detector._create_bouncing_ticket.assert_has_awaits([call(cached_edge_2, edge_ticket_dict,
+                                                                          edge_serial_2),
+                                                                     call(cached_edge_1, link_ticket_dict,
+                                                                          edge_serial_1)])
+        bouncing_detector._attempt_forward_to_asr.assert_not_awaited()
 
     def get_edge_ticket_dict_test(self):
         edge_full_id_1 = {"host": "metvco04.mettel.net", "enterprise_id": 2, "edge_id": 1234}
@@ -1054,12 +1222,15 @@ class TestBouncingDetector:
         bruin_repository.create_affecting_ticket = CoroutineMock(return_value={'body': {'ticketIds': [ticket_id]},
                                                                                'status': 200})
         bouncing_detector._ticket_object_to_string = Mock(return_value=mock_ticket_note)
+        bouncing_detector._attempt_forward_to_asr = CoroutineMock()
+
         notifications_repository.send_slack_message = CoroutineMock()
 
         with patch.dict(config.BOUNCING_DETECTOR_CONFIG, custom_monitor_config):
             await bouncing_detector._create_bouncing_ticket(cached_edge_1, ticket_dict, edge_serial_1)
 
         bouncing_detector._ticket_object_to_string.assert_called_once_with(ticket_dict)
+        bouncing_detector._attempt_forward_to_asr.assert_not_awaited()
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(client_id, edge_serial_1)
         bruin_repository.create_affecting_ticket.assert_awaited_once_with(client_id, edge_serial_1,
                                                                           mock_device_by_id[0]["contacts"])
@@ -1496,12 +1667,14 @@ class TestBouncingDetector:
                                                                                'status': 200})
         bruin_repository.find_detail_by_serial = Mock(return_value=ticket_mock["ticketDetails"][0])
         bouncing_detector._ticket_object_to_string = Mock(return_value=mock_ticket_note)
+        bouncing_detector._attempt_forward_to_asr = CoroutineMock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         with patch.dict(config.BOUNCING_DETECTOR_CONFIG, custom_monitor_config):
             await bouncing_detector._create_bouncing_ticket(cached_edge_1, ticket_dict, edge_serial_1)
 
         bouncing_detector._ticket_object_to_string.assert_called_once_with(ticket_dict)
+        bouncing_detector._attempt_forward_to_asr.assert_not_awaited()
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(client_id, edge_serial_1)
         bruin_repository.find_detail_by_serial.assert_called_once_with(ticket_mock, edge_serial_1)
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, mock_ticket_note)
@@ -1567,6 +1740,7 @@ class TestBouncingDetector:
         bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
         bouncing_detector._ticket_object_to_string = Mock(return_value=mock_ticket_note)
         bouncing_detector._ticket_object_to_string_without_watermark = Mock(return_value=mock_reopen_ticket_note)
+        bouncing_detector._attempt_forward_to_asr = CoroutineMock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         with patch.dict(config.BOUNCING_DETECTOR_CONFIG, custom_monitor_config):
@@ -1574,6 +1748,7 @@ class TestBouncingDetector:
 
         bouncing_detector._ticket_object_to_string.assert_called_once_with(ticket_dict)
         bouncing_detector._ticket_object_to_string_without_watermark.assert_called_once_with(ticket_dict)
+        bouncing_detector._attempt_forward_to_asr.assert_not_awaited()
         bruin_repository.get_affecting_ticket.assert_awaited_once_with(client_id, edge_serial_1)
         bruin_repository.find_detail_by_serial.assert_called_once_with(ticket_mock, edge_serial_1)
         bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_id)
@@ -1649,4 +1824,906 @@ class TestBouncingDetector:
         bruin_repository.find_detail_by_serial.assert_called_once_with(ticket_mock, edge_serial_1)
         bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_id)
         bruin_repository.append_reopening_note_to_ticket.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": edge_serial,
+            "detailStatus": "I",
+        }
+        current_datetime = datetime.now()
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                edge_serial,
+            ],
+            "createdDate": current_datetime,
+        }
+
+        ticket_notes = [ticket_note_1]
+
+        ticket_details_response = {
+                                    'body': {
+                                        'ticketDetails': [
+                                            ticket_detail_1,
+                                        ],
+                                        'ticketNotes': ticket_notes,
+                                    },
+                                    'status': 200
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        slack_message = (
+             f'Detail of Circuit Instability ticket {ticket_id} related to serial {edge_serial} '
+             f'was successfully forwarded to {task_result} queue!'
+        )
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.are_there_any_other_troubles.assert_called_once_with(ticket_notes)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, task_result,
+                                                                           serial_number=edge_serial,
+                                                                           detail_id=ticket_detail_1['detailID'])
+        bruin_repository.append_asr_forwarding_note.assert_awaited_once_with(
+            ticket_id, link_info, edge_serial
+        )
+        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_wireless_link_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRELESS',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        current_datetime = datetime.now()
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.are_there_any_other_troubles.assert_not_called()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_no_type_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE2'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.are_there_any_other_troubles.assert_not_called()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_blacklisted_label_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'BYOB Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.are_there_any_other_troubles.assert_not_called()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_ip_label_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.are_there_any_other_troubles.assert_not_called()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_failed_ticket_details_rpc_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": edge_serial,
+            "detailStatus": "I",
+        }
+        current_datetime = datetime.now()
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                edge_serial,
+            ],
+            "createdDate": current_datetime,
+        }
+
+        ticket_notes = [ticket_note_1]
+
+        ticket_details_response = {
+                                    'body': {},
+                                    'status': 400
+        }
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        slack_message = (
+             f'Detail of Circuit Instability ticket {ticket_id} related to serial {edge_serial} '
+             f'was successfully forwarded to {task_result} queue!'
+        )
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.are_there_any_other_troubles.assert_not_called()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_failed_other_troubles_found_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": edge_serial,
+            "detailStatus": "I",
+        }
+        current_datetime = datetime.now()
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                edge_serial,
+            ],
+            "createdDate": current_datetime,
+        }
+
+        ticket_notes = [ticket_note_1]
+
+        ticket_details_response = {
+                                    'body': {
+                                        'ticketDetails': [
+                                            ticket_detail_1,
+                                        ],
+                                        'ticketNotes': ticket_notes,
+                                    },
+                                    'status': 200
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=True)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.are_there_any_other_troubles.assert_called_once_with(ticket_notes)
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_already_forwarded_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": edge_serial,
+            "detailStatus": "I",
+        }
+
+        current_datetime = datetime.now()
+        task_result_note = f"#*MetTel's IPA*#\nStatus of Wired Link GE1 is DISCONNECTED after 1 hour.\n" \
+                           f"Moving task to: ASR Investigate\nTimeStamp: {current_datetime}"
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                edge_serial,
+            ],
+            "createdDate": current_datetime,
+        }
+
+        ticket_note_2 = {
+            "noteId": 68246614,
+            "noteValue": task_result_note,
+            "serviceNumber": [
+                edge_serial,
+            ],
+            "createdDate": current_datetime,
+        }
+
+        ticket_notes = [ticket_note_1, ticket_note_2]
+
+        ticket_details_response = {
+                                    'body': {
+                                        'ticketDetails': [
+                                            ticket_detail_1,
+                                        ],
+                                        'ticketNotes': ticket_notes,
+                                    },
+                                    'status': 200
+        }
+
+        change_detail_work_queue_response = {'body': "Success", 'status': 200}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.are_there_any_other_troubles.assert_called_once_with(ticket_notes)
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_failed_work_queue_change_rpc_test(self):
+        ticket_id = 12345
+        edge_serial = 'VC5678901'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link_info = {
+            'host': 'some-host',
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': 'Test Name',
+            'isp': None,
+            'interface': 'GE1',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+
+        cached_edge = {
+            'edge': {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            'last_contact': "0000-00-00 00:00:00",
+            'logical_ids': "8456-cg76-sdf3-h64j",
+            'serial_number': edge_serial,
+            'bruin_client_info': {"client_id": 1991, "client_name": "Tet Corporation"},
+            'links_configuration':
+                [
+                    {
+                        'interfaces': ['GE1'],
+                        'internal_id': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'mode': 'PUBLIC',
+                        'type': 'WIRED',
+                        'last_active': '2020-09-29T04:45:15.000Z'
+                    }
+                ]
+        }
+        ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": edge_serial,
+            "detailStatus": "I",
+        }
+        current_datetime = datetime.now()
+
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                edge_serial,
+            ],
+            "createdDate": current_datetime,
+        }
+
+        ticket_notes = [ticket_note_1]
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    ticket_detail_1,
+                ],
+                'ticketNotes': ticket_notes,
+            },
+            'status': 200
+        }
+
+        change_detail_work_queue_response = {'body': "Fail", 'status': 400}
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.append_asr_forwarding_note = CoroutineMock()
+        bruin_repository.are_there_any_other_troubles = Mock(return_value=False)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        custom_monitor_config = config.BOUNCING_DETECTOR_CONFIG.copy()
+        custom_monitor_config["environment"] = "production"
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+
+        bouncing_detector = BouncingDetector(event_bus, logger, scheduler, config, bruin_repository,
+                                             velocloud_repository, customer_cache_repository, notifications_repository)
+
+        await bouncing_detector._attempt_forward_to_asr(cached_edge, link_info, ticket_id)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.are_there_any_other_troubles.assert_called_once_with(ticket_notes)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, task_result,
+                                                                           serial_number=edge_serial,
+                                                                           detail_id=ticket_detail_1['detailID'])
+        bruin_repository.append_asr_forwarding_note.assert_not_awaited()
         notifications_repository.send_slack_message.assert_not_awaited()
