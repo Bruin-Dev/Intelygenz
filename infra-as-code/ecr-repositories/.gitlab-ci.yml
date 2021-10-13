@@ -8,7 +8,7 @@ terraform-valite-ecr-repositories:
   variables:
     MODULE: "infra-as-code/ecr-repositories"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
       changes:
         - infra-as-code/ecr-repositories/**/*
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
