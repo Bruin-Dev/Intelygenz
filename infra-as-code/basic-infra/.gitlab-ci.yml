@@ -4,7 +4,7 @@
 
 terraform-valite-basic-infra:
   stage: validation
-  extends: .terraform_dirs_validate_template
+  extends: .terraform_template_dirs_validate
   variables:
     MODULE: "infra-as-code/basic-infra"
   before_script:
