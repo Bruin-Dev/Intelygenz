@@ -5,10 +5,43 @@ import os
 import logging
 import json
 import boto3
+from botocore.exceptions import ClientError
 from datetime import datetime, timedelta
 
-logging.basicConfig(level=logging.INFO)
+## Email configuration
+SENDER = "Mettel Production Pipeline <mettel@intelygenz.com>"
+RECIPIENT = "mettel@intelygenz.com"
+AWS_REGION = "us-east-1"
+CHARSET = "UTF-8"
+BODY_TEXT = ("WARNING:\r\n"
+             "This microservice will not be deployed."
+             "Review the HELM pipeline job to get more"
+             "information.\n\n"
+             "If you do not want to deploy this microservice,"
+             "this warning may be a false positive because it is"
+             "a new service that has no releases yet, to avoid"
+             "this warning in future versions upload an image for"
+             "the microservice with tag 1.0.0"
+            )
+BODY_HTML = """<html>
+<head></head>
+<body>
+  <h1>WARNING:</h1>
+  <p>This microservice will not be deployed. Review the 
+    <a href='https://gitlab.intelygenz.com/mettel/automation-engine/-/pipelines'>
+    HELM pipeline job</a> to get more information.<br><br>
+    If you do not want to deploy this microservice,
+    this warning may be a false positive because it is
+    a new service that has no releases yet, to avoid
+    this warning in future versions upload an image for
+    the microservice with tag 1.0.0
+    .</p>
+</body>
+</html>
+            """
+## END Email configuration
 
+logging.basicConfig(level=logging.INFO)
 
 class EcrUtil:
     _client = boto3.client('ecr', region_name='us-east-1')
@@ -166,8 +199,43 @@ class EcrUtil:
                     }
                 )
             else:
-                logging.error(f"No docker images found in repository {repository} for environment {environment}")
-                exit(1)
+                logging.warning(f"No docker images found in repository {repository} for environment {environment}")
+                # Create a new SES resource and specify a region.
+                client = boto3.client('ses',region_name=AWS_REGION)
+
+                # Try to send the email.
+                try:
+                    #Provide the contents of the email.
+                    response = client.send_email(
+                        Destination={
+                            'ToAddresses': [
+                                RECIPIENT,
+                            ],
+                        },
+                        Message={
+                            'Body': {
+                                'Html': {
+                                    'Charset': CHARSET,
+                                    'Data': BODY_HTML,
+                                },
+                                'Text': {
+                                    'Charset': CHARSET,
+                                    'Data': BODY_TEXT,
+                                },
+                            },
+                            'Subject': {
+                                'Charset': CHARSET,
+                                'Data': f"WARNING: Could not get the latest version of the {repository} repository",
+                            },
+                        },
+                        Source=SENDER,
+                    )
+                # Display an error if something goes wrong.	
+                except ClientError as e:
+                    print(e.response['Error']['Message'])
+                else:
+                    print("Email sent! Message ID:"),
+                    print(response['MessageId'])
         return latest_docker_images_in_repository
 
     def _obtain_latest_image_of_repositories_from_environment(self, environment, repositories):

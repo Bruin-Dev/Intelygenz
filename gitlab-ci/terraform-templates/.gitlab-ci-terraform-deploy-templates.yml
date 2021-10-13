@@ -103,3 +103,15 @@
         envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
         helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml        
       fi
+
+.terraform_template_deploy_one_folder: &terraform_template_deploy_one_folder
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - cd "${MODULE}" || exit 1
+    - terraform init -backend=true -get=true -input=false
+    - terraform refresh
+    - terraform plan && terraform apply -auto-approve
