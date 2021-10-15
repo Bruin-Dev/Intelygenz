@@ -75,7 +75,7 @@ class PapertrailProvisioner:
                             if "repository" in search:
                                 repository = search['repository']
                                 build_number = self._get_build_number_query(repository)
-                                if not build_number:
+                                if build_number is None:
                                     continue
                                 query = query.replace('<BUILD_NUMBER>', build_number)
                             subprocess.call([papertrail_cli_exec, '-a', 'd', '-g', group_name, '-w', wildcard, '-S',
