@@ -16,6 +16,7 @@ class PapertrailProvisioner:
         self._papertrail_dashboard_config = config.PAPERTRAIL_PROVISIONING
         self._papertrail_cli_donwload_url = config.PAPERTRAIL_CLI_DONWLOAD_URL
         self._current_directory = os.getcwd()
+        self._tag_data = self._load_tag_data()
 
     def _download_go_papertrail_cli(self):
         files = []
@@ -44,15 +45,27 @@ class PapertrailProvisioner:
             subprocess.call(['rm', file_to_delete])
 
     @staticmethod
-    def _get_build_number_query(repository):
+    def _load_tag_data():
         docker_images_file = parser.parse_args().docker_images_file
         with open(docker_images_file) as json_file:
             data = json.load(json_file)
+        tag_data_dict = {}
+        for element in data:
+            try:
+                repository = element['repository']
+                image_tag = element['image_tag']
+                tag_data_dict[repository] = image_tag
+            except KeyError:
+                continue
+
+        return tag_data_dict
+
+    def _get_build_number_query(self, repository):
         try:
-            image_tag = [elem['image_tag'] for elem in data if elem['repository'] == repository]
+            return self._tag_data[repository]
         except KeyError:
+            print(f'WARNING repository tag not found for: {repository}')
             return None
-        return image_tag[0]
 
     def papertrail_provision(self):
         file_exec = "go-papertrail-cli"
@@ -72,10 +85,10 @@ class PapertrailProvisioner:
                         search_name = search['search_name']
                         query = search['query']
                         if not is_alarm_group and not is_notifications_group:
-                            if "repository" in search:
+                            if "repository" in search.keys():
                                 repository = search['repository']
                                 build_number = self._get_build_number_query(repository)
-                                if build_number is None:
+                                if not build_number:
                                     continue
                                 query = query.replace('<BUILD_NUMBER>', build_number)
                             subprocess.call([papertrail_cli_exec, '-a', 'd', '-g', group_name, '-w', wildcard, '-S',
