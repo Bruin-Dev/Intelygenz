@@ -48,9 +48,9 @@ class PapertrailProvisioner:
         docker_images_file = parser.parse_args().docker_images_file
         with open(docker_images_file) as json_file:
             data = json.load(json_file)
-
-        image_tag = [elem['image_tag'] for elem in data if elem['repository'] == repository]
-        if not image_tag:
+        try:
+            image_tag = [elem['image_tag'] for elem in data if elem['repository'] == repository]
+        except KeyError:
             return None
         return image_tag[0]
 
