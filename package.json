@@ -40,13 +40,53 @@
       [
         "@semantic-release/commit-analyzer",
         {
-          "preset": "angular"
+          "preset": "angular",
+          "releaseRules": [
+            {
+              "type": "refactor",
+              "release": "minor"
+            }
+          ]
         }
       ],
       [
         "@semantic-release/release-notes-generator",
         {
-          "preset": "angular"
+          "preset": "conventionalCommits",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES",
+              "BREAKING"
+            ]
+          },
+          "presetConfig": {
+            "types": [
+              {
+                "type": "feat",
+                "section": "Features"
+              },
+              {
+                "type": "fix",
+                "section": "Bug Fixes"
+              },
+              {
+                "type": "chore",
+                "section": "Internal",
+                "hidden": false
+              },
+              {
+                "type": "refactor",
+                "section": "Internal",
+                "hidden": false
+              },
+              {
+                "type": "perf",
+                "section": "Internal",
+                "hidden": false
+              }
+            ]
+          }
         }
       ],
       [
