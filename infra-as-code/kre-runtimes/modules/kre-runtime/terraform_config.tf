@@ -1,10 +1,9 @@
 # Global Terraform config with providers
-
 terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "=3.47.0"
+      version = "= 3.47.0"
     }
     external = {
       source = "hashicorp/external"
@@ -12,7 +11,7 @@ terraform {
     }
     local = {
       source = "hashicorp/local"
-      version = "= 1.4.0"
+      version = "= 2.1.0"
     }
     null = {
       source = "hashicorp/null"
@@ -31,9 +30,8 @@ terraform {
       version = "= 2.2.0"
     }
   }
-  required_version = "= 0.14.4"
+  required_version = ">= 1.0.1, < 1.1"
 }
-
 # AWS provider config
 provider "aws" {
   region      = "us-east-1"
