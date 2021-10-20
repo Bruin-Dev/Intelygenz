@@ -1,4 +1,4 @@
-module "kre-tnba-runtime" {
+module "kre-email-tagger" {
   source = "../../modules/kre-runtime"
 
   RUNTIME_NAME = "kre-email-tagger"
