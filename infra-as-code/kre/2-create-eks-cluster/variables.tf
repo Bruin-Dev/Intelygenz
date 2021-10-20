@@ -26,7 +26,7 @@ variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
 }
 
 variable "HOSTPATH_HELM_CHART_VERSION" {
-  default     = "0.2.3"
+  default     = "0.2.9"
   description = "Helm chart version used for hostpath"
 }
 

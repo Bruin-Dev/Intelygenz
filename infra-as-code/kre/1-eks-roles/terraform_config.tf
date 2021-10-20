@@ -9,6 +9,10 @@ terraform {
       source = "hashicorp/local"
       version = "= 2.1.0"
     }
+    template = {
+      source = "hashicorp/template"
+      version = "= 2.1.0"
+    }
   }
   required_version = ">= 1.0.1, < 1.1"
 }
