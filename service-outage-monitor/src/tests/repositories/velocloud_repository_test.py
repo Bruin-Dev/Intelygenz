@@ -307,6 +307,163 @@ class TestVelocloudRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def get_network_enterprises_with_no_enterprise_ids_specified_test(self):
+        host = 'mettel.velocloud.net'
+        enterprise_ids = []
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'host': host,
+                'enterprise_ids': enterprise_ids,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': [
+                {
+                    # Some fields omitted for simplicity
+                    'edgeState': 'CONNECTED',
+                    'enterpriseId': 1,
+                    'haSerialNumber': 'VC9999999',
+                    'haState': 'READY',
+                    'id': 123,
+                    'name': 'Travis Touchdown',
+                    'serialNumber': 'VC1234567',
+                }
+            ],
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await velocloud_repository.get_network_enterprises(host)
+
+        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_with_enterprise_ids_specified_test(self):
+        host = 'mettel.velocloud.net'
+        enterprise_ids = [1, 2, 3]
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'host': host,
+                'enterprise_ids': enterprise_ids,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': [
+                {
+                    # Some fields omitted for simplicity
+                    'edgeState': 'CONNECTED',
+                    'enterpriseId': 1,
+                    'haSerialNumber': 'VC9999999',
+                    'haState': 'READY',
+                    'id': 123,
+                    'name': 'Travis Touchdown',
+                    'serialNumber': 'VC1234567',
+                }
+            ],
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await velocloud_repository.get_network_enterprises(host, enterprise_ids=enterprise_ids)
+
+        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_with_rpc_request_failing_test(self):
+        host = 'mettel.velocloud.net'
+        enterprise_ids = []
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'host': host,
+                'enterprise_ids': enterprise_ids,
+            },
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await velocloud_repository.get_network_enterprises(host)
+
+        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_network_enterprises_with_rpc_request_returning_non_2xx_status_test(self):
+        host = 'mettel.velocloud.net'
+        enterprise_ids = []
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'host': host,
+                'enterprise_ids': enterprise_ids,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await velocloud_repository.get_network_enterprises(host)
+
+        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == response
+
+    @pytest.mark.asyncio
     async def get_edges_for_triage_test(self):
         event_bus = Mock()
         logger = Mock()

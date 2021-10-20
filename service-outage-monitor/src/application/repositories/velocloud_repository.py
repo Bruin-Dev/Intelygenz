@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from typing import List
 
 from pytz import utc
 from shortuuid import uuid
@@ -90,6 +91,61 @@ class VelocloudRepository:
                     f'{event_types} that took place between {from_} and {to} in '
                     f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
                     f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def get_network_enterprises(self, velocloud_host: str, *, enterprise_ids: List[int] = None):
+        err_msg = None
+
+        if not enterprise_ids:
+            enterprise_ids = []
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                'host': velocloud_host,
+                'enterprise_ids': enterprise_ids,
+            },
+        }
+
+        try:
+            if enterprise_ids:
+                self._logger.info(
+                    f"Getting network information for all edges belonging to enterprises "
+                    f"{', '.join(map(str, enterprise_ids))} in host {velocloud_host}..."
+                )
+            else:
+                self._logger.info(
+                    "Getting network information for all edges belonging to all enterprises in host "
+                    f"{velocloud_host}..."
+                )
+            response = await self._event_bus.rpc_request("request.network.enterprise.edges", request, timeout=30)
+        except Exception as e:
+            err_msg = f'An error occurred when requesting network info from Velocloud host {velocloud_host} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                if enterprise_ids:
+                    self._logger.info(
+                        f"Got network information for all edges belonging to enterprises "
+                        f"{', '.join(map(str, enterprise_ids))} in host {velocloud_host}!"
+                    )
+                else:
+                    self._logger.info(
+                        f"Got network information for all edges belonging to all enterprises in host {velocloud_host}!"
+                    )
+            else:
+                err_msg = (
+                    f'Error while retrieving network info from Velocloud host {velocloud_host} in '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
                 )
 
         if err_msg:

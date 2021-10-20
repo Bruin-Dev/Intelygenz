@@ -1,13 +1,14 @@
 import os
 import re
 
-from collections import OrderedDict
+from datetime import datetime
 from typing import List
 
 from dateutil.parser import parse
 from pytz import timezone
 
-empty_str = str()
+from application import Outages
+
 
 EVENT_INTERFACE_NAME_REGEX = re.compile(
     r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'
@@ -26,7 +27,8 @@ class TriageRepository:
         interface_name_found = match.group('interface_name') or match.group('interface_name2')
         return interface_name == interface_name_found
 
-    def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict]) -> str:
+    def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict],
+                          outage_type: Outages) -> str:
         tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
 
         edge_full_id = cached_edge['edge']
@@ -37,6 +39,12 @@ class TriageRepository:
         edge_name = edge_status['edgeName']
         edge_state = edge_status['edgeState']
         edge_serial = edge_status['edgeSerialNumber']
+        edge_is_ha_primary = edge_status['edgeIsHAPrimary']
+
+        is_ha_outage = outage_type.name.startswith('HA_')
+        ha_partner_serial = edge_status['edgeHASerialNumber']
+        ha_partner_state = edge_status['edgeHAState']
+        ha_partner_is_primary = not edge_is_ha_primary
 
         edge_links = edge_status['links']
         links_configuration = cached_edge.get('links_configuration', [])
@@ -47,6 +55,15 @@ class TriageRepository:
         ticket_note_lines = [
             "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
+            '',
+        ]
+
+        if outage_type is Outages.HA_SOFT_DOWN:
+            ticket_note_lines.append('High Availability - Edge Offline\n')
+        elif outage_type is Outages.HA_HARD_DOWN:
+            ticket_note_lines.append('High Availability - Location Offline\n')
+
+        ticket_note_lines += [
             f'Orchestrator Instance: {host}',
             f'Edge Name: {edge_name}',
             (
@@ -54,10 +71,30 @@ class TriageRepository:
                 f'[Edge|{velocloud_edge_base_url}/] - [QoE|{velocloud_edge_base_url}/qoe/] - '
                 f'[Transport|{velocloud_edge_base_url}/links/] - [Events|{velocloud_base_url}/events/]'
             ),
-            f'Serial: {edge_serial}',
             '',
-            f'Edge Status: {edge_state}',
         ]
+
+        if outage_type is Outages.HA_HARD_DOWN:
+            ticket_note_lines.append('Both primary and secondary edges are DISCONNECTED.\n')
+
+        if is_ha_outage:
+            if edge_is_ha_primary:
+                primary_serial = edge_serial
+                primary_state = edge_state
+            else:
+                primary_serial = ha_partner_serial
+                primary_state = ha_partner_state
+
+            ticket_note_lines += [
+                f'Serial: {primary_serial}',
+                f'Edge Status: {primary_state}',
+                'HA Role: Primary',
+            ]
+        else:
+            ticket_note_lines += [
+                f'Serial: {edge_serial}',
+                f'Edge Status: {edge_state}',
+            ]
 
         last_online_event_for_edge = self._utils_repository.get_first_element_matching(
             iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_UP'
@@ -79,6 +116,23 @@ class TriageRepository:
             )
         else:
             ticket_note_lines.append("Last Edge Offline: Unknown\n")
+
+        if is_ha_outage:
+            if ha_partner_is_primary:
+                standby_serial = edge_serial
+                standby_state = edge_state
+            else:
+                standby_serial = ha_partner_serial
+                standby_state = ha_partner_state
+
+            ticket_note_lines += [
+                f'Serial: {standby_serial}',
+                f'Edge Status: {"STANDBY READY" if standby_state == "CONNECTED" else standby_state}',
+                'HA Role: Standby',
+            ]
+            if standby_state == 'OFFLINE':
+                ticket_note_lines.append(f'Timestamp: {datetime.now(tz_object)}')
+            ticket_note_lines.append('')
 
         for link in edge_links:
             if not link:

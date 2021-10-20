@@ -1,7 +1,9 @@
 # You must replicate the structure of config.py, changing os.environ calls for mock values
 import logging
 import sys
-import os
+
+from application import Outages
+
 
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
@@ -31,10 +33,15 @@ MONITOR_CONFIG = {
     'timezone': "US/Eastern",
     'jobs_intervals': {
         'outage_monitor': 60 * 3,
-        'quarantine_edge_outage': quarantine_time,
-        'quarantine_link_outage': quarantine_time,
         'build_cache': 60 * 60,
         'forward_to_hnoc': 60,
+    },
+    'quarantine': {
+        Outages.LINK_DOWN: quarantine_time,
+        Outages.HARD_DOWN: quarantine_time,
+        Outages.HA_LINK_DOWN: quarantine_time,
+        Outages.HA_SOFT_DOWN: quarantine_time,
+        Outages.HA_HARD_DOWN: quarantine_time,
     },
     'velocloud_instances_filter': {
         "some-host": [],

@@ -18,6 +18,8 @@ from pytz import timezone
 from pytz import utc
 from shortuuid import uuid
 
+from application import Outages
+
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
@@ -25,7 +27,7 @@ REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-ope
 class OutageMonitor:
     def __init__(self, event_bus, logger, scheduler, config, outage_repository, bruin_repository, velocloud_repository,
                  notifications_repository, triage_repository, customer_cache_repository, metrics_repository,
-                 digi_repository):
+                 digi_repository, ha_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -38,6 +40,7 @@ class OutageMonitor:
         self._customer_cache_repository = customer_cache_repository
         self._metrics_repository = metrics_repository
         self._digi_repository = digi_repository
+        self._ha_repository = ha_repository
         self._cached_edges_without_status = []
 
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
@@ -122,48 +125,84 @@ class OutageMonitor:
         if links_with_edge_info_response['status'] not in range(200, 300):
             return
 
+        network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
+        if network_enterprises_response['status'] not in range(200, 300):
+            return
+
         links_with_edge_info: list = links_with_edge_info_response['body']
+        edges_network_enterprises: list = network_enterprises_response['body']
+
         self._velocloud_links_by_host[host] = links_with_edge_info
         self._logger.info(f"Link status with edge info from Velocloud: {links_with_edge_info}")
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
-        edges_full_info = self._map_cached_edges_with_edges_status(host_cache, links_grouped_by_edge)
+
+        self._logger.info(
+            'Adding HA info to existing edges, and putting standby edges under monitoring as if they were '
+            'standalone edges...'
+        )
+        edges_with_ha_info = self._ha_repository.map_edges_with_ha_info(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        all_edges = self._ha_repository.get_edges_with_standbys_as_standalone_edges(edges_with_ha_info)
+
+        serials_with_ha_disabled = [
+            edge['edgeSerialNumber']
+            for edge in all_edges
+            if not self._ha_repository.is_ha_enabled(edge)
+        ]
+        serials_with_ha_enabled = [
+            edge['edgeSerialNumber']
+            for edge in all_edges
+            if self._ha_repository.is_ha_enabled(edge)
+        ]
+        primary_serials = [
+            edge['edgeSerialNumber']
+            for edge in all_edges
+            if self._ha_repository.is_ha_primary(edge)
+        ]
+        standby_serials = [
+            edge['edgeSerialNumber']
+            for edge in all_edges
+            if self._ha_repository.is_ha_standby(edge)
+        ]
+        self._logger.info(f'Service Outage monitoring is about to check {len(all_edges)} edges')
+        self._logger.info(f'{len(serials_with_ha_disabled)} edges have HA disabled: {serials_with_ha_disabled}')
+        self._logger.info(f'{len(serials_with_ha_enabled)} edges have HA enabled: {serials_with_ha_enabled}')
+        self._logger.info(f'{len(primary_serials)} edges are the primary of a HA pair: {primary_serials}')
+        self._logger.info(f'{len(standby_serials)} edges are the standby of a HA pair: {standby_serials}')
+
+        edges_full_info = self._map_cached_edges_with_edges_status(host_cache, all_edges)
         self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
         mapped_serials_w_status = [edge["cached_info"]["serial_number"] for edge in edges_full_info]
         self._logger.info(f"Mapped cache serials with status: {mapped_serials_w_status}")
 
-        outage_edges = [edge for edge in edges_full_info
-                        if self._outage_repository.is_faulty_edge(edge['status']['edgeState'])]
+        for outage_type in Outages:
+            down_edges = self._outage_repository.filter_edges_by_outage_type(edges_full_info, outage_type)
+            self._logger.info(f'{outage_type.value} serials: {[e["status"]["edgeSerialNumber"] for e in down_edges]}')
 
-        outage_serials = [edge["cached_info"]["serial_number"] for edge in outage_edges]
-        outage_links = [edge for edge in edges_full_info
-                        if not self._outage_repository.is_faulty_edge(edge['status']['edgeState'])
-                        if self._outage_repository.is_any_link_disconnected(edge['status']['links'])]
-        outage_link_serials = [edge["cached_info"]["serial_number"] for edge in outage_links]
-        healthy_edges = [edge for edge in edges_full_info if edge not in outage_edges if edge not in outage_links]
-        healthy_serials = [edge["cached_info"]["serial_number"] for edge in healthy_edges]
-        self._logger.info(f"Faulty Edge serials: {outage_serials}")
-        self._logger.info(f"Edge with faulty links serials: {outage_link_serials}")
-        self._logger.info(f"Healthy serials: {healthy_serials}")
-
-        if outage_edges:
+            relevant_down_edges = [
+                edge
+                for edge in down_edges
+                if self._outage_repository.should_document_outage(edge['status'])
+            ]
             self._logger.info(
-                f"{len(outage_edges)} edges were detected in outage state. Scheduling re-check job for all of them..."
+                f'{outage_type.value} serials that should be documented: '
+                f'{[e["status"]["edgeSerialNumber"] for e in relevant_down_edges]}'
             )
-            self._schedule_recheck_job_for_edges(outage_edges, self._config.MONITOR_CONFIG['jobs_intervals'][
-                                                     'quarantine_edge_outage'], 'edges')
-        else:
-            self._logger.info("No edges were detected in outage state. Re-check job won't be scheduled")
 
-        if outage_links:
-            self._logger.info(
-                f"{len(outage_links)} edges with links that were detected in outage state. "
-                f"Scheduling re-check job for all of them..."
-            )
-            self._schedule_recheck_job_for_edges(outage_links, self._config.MONITOR_CONFIG['jobs_intervals'][
-                                                     'quarantine_link_outage'], 'links')
-        else:
-            self._logger.info("No edges with links were detected in outage state. Re-check job won't be scheduled")
+            if relevant_down_edges:
+                self._logger.info(
+                    f"{len(relevant_down_edges)} edges were detected in {outage_type.value} state. Scheduling "
+                    "re-check job for all of them..."
+                )
+                self._schedule_recheck_job_for_edges(relevant_down_edges, outage_type)
+            else:
+                self._logger.info(
+                    f"No edges were detected in {outage_type.value} state. Re-check job won't be scheduled"
+                )
 
+        healthy_edges = [edge for edge in edges_full_info if self._outage_repository.is_edge_up(edge['status'])]
+        self._logger.info(f'Healthy serials: {[e["status"]["edgeSerialNumber"] for e in healthy_edges]}')
         if healthy_edges:
             self._logger.info(
                 f"{len(healthy_edges)} edges were detected in healthy state. Running autoresolve for all of them..."
@@ -176,25 +215,23 @@ class OutageMonitor:
         stop = perf_counter()
         self._logger.info(f"Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes")
 
-    def _schedule_recheck_job_for_edges(self, edges: list, quarantine_time, outage_type):
-        if outage_type == 'links':
-            self._logger.info(f'Scheduling recheck job for {len(edges)} edges with faulty links in outage state...')
-        else:
-            self._logger.info(f'Scheduling recheck job for {len(edges)} edges in outage state...')
+    def _schedule_recheck_job_for_edges(self, edges: list, outage_type: Outages):
+        self._logger.info(f'Scheduling recheck job for {len(edges)} edges in {outage_type.value} state...')
 
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
         current_datetime = datetime.now(tz)
+        quarantine_time = self._config.MONITOR_CONFIG['quarantine'][outage_type]
         run_date = current_datetime + timedelta(seconds=quarantine_time)
 
         self._scheduler.add_job(self._recheck_edges_for_ticket_creation, 'date',
-                                args=[edges],
+                                args=[edges, outage_type],
                                 run_date=run_date,
                                 replace_existing=False,
                                 misfire_grace_time=9999,
-                                id=f'{outage_type}_ticket_creation_recheck',
+                                id=f'{outage_type.value}_ticket_creation_recheck',
                                 )
 
-        self._logger.info(f'Edges scheduled for recheck successfully')
+        self._logger.info(f'Edges in {outage_type.value} state scheduled for recheck successfully')
 
     def _map_cached_edges_with_edges_status(self, customer_cache: list, edges_status: list) -> list:
         result = []
@@ -414,9 +451,11 @@ class OutageMonitor:
         message = f'Outage ticket {ticket_id} was autoresolved. Details at https://app.bruin.com/t/{ticket_id}'
         await self._notifications_repository.send_slack_message(message)
 
-    async def _recheck_edges_for_ticket_creation(self, outage_edges: list):
-        self._logger.info(f'Re-checking {len(outage_edges)} edges in outage state prior to ticket creation...')
-        self._logger.info(f"[outage-recheck] Edges in outage before quarantine recheck: {outage_edges}")
+    async def _recheck_edges_for_ticket_creation(self, outage_edges: list, outage_type: Outages):
+        self._logger.info(
+            f'[{outage_type.value}] Re-checking {len(outage_edges)} edges in outage state prior to ticket creation...'
+        )
+        self._logger.info(f"[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}")
 
         # This method is never called with an empty outage_edges, so no IndexError should be raised
         host = outage_edges[0]['status']['host']
@@ -424,50 +463,56 @@ class OutageMonitor:
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response['status'] not in range(200, 300):
             return
-        self._logger.info(f"[outage-recheck] Velocloud edge status response in quarantine recheck: "
+
+        network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
+        if network_enterprises_response['status'] not in range(200, 300):
+            return
+
+        self._logger.info(f"[{outage_type.value}] Velocloud edge status response in quarantine recheck: "
                           f"{links_with_edge_info_response}")
         links_with_edge_info: list = links_with_edge_info_response['body']
+        edges_network_enterprises: list = network_enterprises_response['body']
+
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
 
-        customer_cache_for_outage_edges = [elem['cached_info'] for elem in outage_edges]
-        edges_full_info = self._map_cached_edges_with_edges_status(
-            customer_cache_for_outage_edges, links_grouped_by_edge
+        self._logger.info(
+            f'[{outage_type.value}] Adding HA info to existing edges, and putting standby edges under monitoring as if '
+            'they were standalone edges...'
         )
-        self._logger.info(f"[outage-recheck] Current edge status of edges that were in outage: {edges_full_info}")
+        edges_with_ha_info = self._ha_repository.map_edges_with_ha_info(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        all_edges = self._ha_repository.get_edges_with_standbys_as_standalone_edges(edges_with_ha_info)
 
-        edges_still_in_outage = [
-            edge
-            for edge in edges_full_info
-            if self._outage_repository.is_there_an_outage(edge['status'])
-        ]
-        serials_still_in_outage = [
-            edge['status']['edgeSerialNumber']
-            for edge in edges_still_in_outage
-        ]
-        self._logger.info(f"[outage-recheck] Edges still in outage after recheck: {edges_still_in_outage}")
-        self._logger.info(f"[outage-recheck] Serials still in outage after recheck: {serials_still_in_outage}")
-        healthy_edges = [edge for edge in edges_full_info if edge not in edges_still_in_outage]
-        healthy_serials = [
-            edge['status']['edgeSerialNumber']
-            for edge in healthy_edges
-        ]
-        self._logger.info(f"[outage-recheck] Edges that are healthy after recheck: {healthy_edges}")
-        self._logger.info(f"[outage-recheck] Serials that are healthy after recheck: {healthy_serials}")
-        if edges_still_in_outage:
+        customer_cache_for_outage_edges = [elem['cached_info'] for elem in outage_edges]
+        edges_full_info = self._map_cached_edges_with_edges_status(customer_cache_for_outage_edges, all_edges)
+        self._logger.info(f"[{outage_type.value}] Current status of edges that were in outage state: {edges_full_info}")
+
+        edges_still_down = self._outage_repository.filter_edges_by_outage_type(edges_full_info, outage_type)
+        serials_still_down = [edge['status']['edgeSerialNumber'] for edge in edges_still_down]
+        self._logger.info(f"[{outage_type.value}] Edges still in outage state after recheck: {edges_still_down}")
+        self._logger.info(f"[{outage_type.value}] Serials still in outage state after recheck: {serials_still_down}")
+
+        healthy_edges = [edge for edge in edges_full_info if self._outage_repository.is_edge_up(edge['status'])]
+        healthy_serials = [edge['status']['edgeSerialNumber'] for edge in healthy_edges]
+        self._logger.info(f"[{outage_type.value}] Edges that are healthy after recheck: {healthy_edges}")
+        self._logger.info(f"[{outage_type.value}] Serials that are healthy after recheck: {healthy_serials}")
+
+        if edges_still_down:
             self._logger.info(
-                f"{len(edges_still_in_outage)} edges were detected as still in outage state after re-check. "
-                f"Attempting outage ticket creation for all of them..."
+                f"[{outage_type.value}] {len(edges_still_down)} edges are still in outage state after re-check. "
+                "Attempting outage ticket creation for all of them..."
             )
 
             working_environment = self._config.MONITOR_CONFIG['environment']
             if working_environment == 'production':
-                for edge in edges_still_in_outage:
+                for edge in edges_still_down:
                     cached_edge = edge['cached_info']
                     edge_full_id = cached_edge['edge']
                     edge_status = edge['status']
                     serial_number = edge['cached_info']['serial_number']
                     self._logger.info(
-                        f'[outage-recheck] Attempting outage ticket creation for serial {serial_number}...'
+                        f'[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...'
                     )
 
                     bruin_client_id = edge['cached_info']['bruin_client_info']['client_id']
@@ -477,17 +522,19 @@ class OutageMonitor:
                     ticket_creation_response_body = ticket_creation_response['body']
                     ticket_creation_response_status = ticket_creation_response['status']
                     logical_id_list = edge['cached_info']['logical_ids']
-                    self._logger.info(f"[outage-recheck] Bruin response for ticket creation for edge {edge}: "
+                    self._logger.info(f"[{outage_type.value}] Bruin response for ticket creation for edge {edge}: "
                                       f"{ticket_creation_response}")
                     if ticket_creation_response_status in range(200, 300):
-                        self._logger.info(f'[outage-recheck] Successfully created outage ticket for edge {edge}.')
+                        self._logger.info(f'[{outage_type.value}] Successfully created outage ticket for edge {edge}.')
                         self._metrics_repository.increment_tickets_created()
                         slack_message = (
-                            f'Outage ticket created for faulty edge {serial_number}. Ticket '
-                            f'details at https://app.bruin.com/t/{ticket_creation_response_body}.'
+                            f'Service Outage ticket created for edge {serial_number} in {outage_type.value} state: '
+                            f'https://app.bruin.com/t/{ticket_creation_response_body}.'
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
-                        await self._append_triage_note(ticket_creation_response_body, cached_edge, edge_status)
+                        await self._append_triage_note(
+                            ticket_creation_response_body, cached_edge, edge_status, outage_type
+                        )
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
@@ -501,8 +548,9 @@ class OutageMonitor:
                                                           logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 409:
                         self._logger.info(
-                            f'[outage-recheck] Faulty edge {serial_number} already has an outage ticket in progress '
-                            f'(ID = {ticket_creation_response_body}). Skipping outage ticket creation for this edge...'
+                            f'[{outage_type.value}] Faulty edge {serial_number} already has an outage ticket in '
+                            f'progress (ID = {ticket_creation_response_body}). Skipping outage ticket creation for '
+                            'this edge...'
                         )
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
@@ -514,7 +562,7 @@ class OutageMonitor:
                         await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body)
                     elif ticket_creation_response_status == 471:
                         self._logger.info(
-                            f'[outage-recheck] Faulty edge {serial_number} has a resolved outage ticket '
+                            f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
                         await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
@@ -530,7 +578,7 @@ class OutageMonitor:
                                                           logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 472:
                         self._logger.info(
-                            f'[outage-recheck] Faulty edge {serial_number} has a resolved outage ticket '
+                            f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
@@ -544,14 +592,16 @@ class OutageMonitor:
                         )
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
-                            f'[outage-recheck] There is a resolve outage ticket for the same location of faulty edge '
-                            f'{serial_number} (ticket ID = {ticket_creation_response_body}). The ticket was'
+                            f'[{outage_type.value}] There is a resolve outage ticket for the same location of faulty '
+                            f'edge {serial_number} (ticket ID = {ticket_creation_response_body}). The ticket was '
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
-                        await self._append_triage_note(ticket_creation_response_body, cached_edge, edge_status)
+                        await self._append_triage_note(
+                            ticket_creation_response_body, cached_edge, edge_status, outage_type
+                        )
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
@@ -559,26 +609,28 @@ class OutageMonitor:
                         )
             else:
                 self._logger.info(
-                    f'[outage-recheck] Not starting outage ticket creation for {len(edges_still_in_outage)} faulty '
+                    f'[{outage_type.value}] Not starting outage ticket creation for {len(edges_still_down)} faulty '
                     f'edges because the current working environment is {working_environment.upper()}.'
                 )
         else:
-            self._logger.info("[outage-recheck] No edges were detected in outage state after re-check. "
+            self._logger.info(f"[{outage_type.value}] No edges were detected in outage state after re-check. "
                               "Outage tickets won't be created")
 
         if healthy_edges:
             self._logger.info(
-                f"[outage-recheck] {len(healthy_edges)} edges were detected in healthy state after re-check. '"
+                f"[{outage_type.value}] {len(healthy_edges)} edges were detected in healthy state after re-check. '"
                 "Running autoresolve for all of them..."
             )
-            self._logger.info(f"[outage-recheck] Edges that are going to be attempted to autoresolve: {healthy_edges}")
+            self._logger.info(
+                f"[{outage_type.value}] Edges that are going to be attempted to autoresolve: {healthy_edges}"
+            )
             autoresolve_tasks = [self._run_ticket_autoresolve_for_edge(edge) for edge in healthy_edges]
             await asyncio.gather(*autoresolve_tasks)
         else:
-            self._logger.info("[outage-recheck] No edges were detected in healthy state. "
+            self._logger.info(f"[{outage_type.value}] No edges were detected in healthy state. "
                               "Autoresolve won't be triggered")
 
-        self._logger.info(f'[outage-recheck] Re-check process finished for {len(outage_edges)} edges')
+        self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
     def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
@@ -637,7 +689,7 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
 
-    async def _append_triage_note(self, ticket_id, cached_edge, edge_status):
+    async def _append_triage_note(self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages):
         edge_full_id = cached_edge['edge']
         serial_number = cached_edge['serial_number']
 
@@ -668,7 +720,9 @@ class OutageMonitor:
         ticket_detail: dict = ticket_details_response['body']['ticketDetails'][0]
         ticket_detail_id = ticket_detail['detailID']
 
-        ticket_note = self._triage_repository.build_triage_note(cached_edge, edge_status, recent_events_response_body)
+        ticket_note = self._triage_repository.build_triage_note(
+            cached_edge, edge_status, recent_events_response_body, outage_type
+        )
 
         self._logger.info(
             f'Appending triage note to detail {ticket_detail_id} (serial {serial_number}) of recently created '

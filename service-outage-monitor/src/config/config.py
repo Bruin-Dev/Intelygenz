@@ -6,6 +6,8 @@ import logging
 import sys
 import json
 
+from application import Outages
+
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'subscriber': {
@@ -49,10 +51,15 @@ MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
     'jobs_intervals': {
         'outage_monitor': 60 * 10,
-        'quarantine_edge_outage': quarantine_time,
-        'quarantine_link_outage': quarantine_time,
         'build_cache': 60 * 240,
         'forward_to_hnoc': 60,
+    },
+    'quarantine': {
+        Outages.LINK_DOWN: quarantine_time,
+        Outages.HARD_DOWN: quarantine_time,
+        Outages.HA_LINK_DOWN: quarantine_time,
+        Outages.HA_SOFT_DOWN: quarantine_time,
+        Outages.HA_HARD_DOWN: quarantine_time,
     },
     'velocloud_instances_filter': velocloud_hosts_and_filters,
     'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned'],

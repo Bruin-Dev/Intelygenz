@@ -13,6 +13,7 @@ from asynctest import CoroutineMock
 from dateutil.parser import parse
 from shortuuid import uuid
 
+from application import Outages
 from application.actions import outage_monitoring as outage_monitoring_module
 from application.actions.outage_monitoring import OutageMonitor
 from config import testconfig
@@ -35,11 +36,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         assert outage_monitor._event_bus is event_bus
         assert outage_monitor._logger is logger
@@ -53,6 +55,7 @@ class TestServiceOutageMonitor:
         assert outage_monitor._customer_cache_repository is customer_cache_repository
         assert outage_monitor._metrics_repository is metrics_repository
         assert outage_monitor._digi_repository is digi_repository
+        assert outage_monitor._ha_repository is ha_repository
 
         assert outage_monitor._autoresolve_serials_whitelist == set()
 
@@ -70,11 +73,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -105,11 +109,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor.start_service_outage_monitoring(exec_on_start=False)
 
@@ -137,6 +142,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
@@ -144,7 +150,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         try:
             await outage_monitor.start_service_outage_monitoring(exec_on_start=False)
@@ -176,6 +182,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         velocloud_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
@@ -183,7 +190,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._process_velocloud_host = CoroutineMock()
 
         await outage_monitor._outage_monitoring_process()
@@ -209,6 +216,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         velocloud_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
@@ -216,7 +224,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._process_velocloud_host = CoroutineMock()
 
         await outage_monitor._outage_monitoring_process()
@@ -253,6 +261,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
@@ -267,7 +276,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._outage_monitoring_process()
@@ -327,6 +336,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
@@ -334,7 +344,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._process_velocloud_host = CoroutineMock()
 
         datetime_mock = Mock()
@@ -356,7 +366,22 @@ class TestServiceOutageMonitor:
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC8901234'
         edge_3_serial = 'VC5678901'
-        edge_4_serial = 'VC56789011'
+
+        edge_1_ha_serial = 'VC99999999'
+        edge_2_ha_serial = 'VC88888888'
+        edge_3_ha_serial = None
+
+        edge_1_state = 'OFFLINE'
+        edge_2_state = 'OFFLINE'
+        edge_3_state = 'CONNECTED'
+
+        edge_1_ha_state = 'FAILED'
+        edge_2_ha_state = 'READY'
+        edge_3_ha_state = None
+
+        edge_1_ha_state_normalized = 'OFFLINE'
+        edge_2_ha_state_normalized = 'CONNECTED'
+        edge_3_ha_state_normalized = None
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
@@ -364,14 +389,11 @@ class TestServiceOutageMonitor:
 
         edge_2_enterprise_id = 2
         edge_2_id = 1
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
 
         edge_3_enterprise_id = 3
         edge_3_id = 1
         edge_3_full_id = {'host': velocloud_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
-
-        edge_4_enterprise_id = 4
-        edge_4_id = 1
-        edge_4_full_id = {'host': velocloud_host, 'enterprise_id': edge_4_enterprise_id, 'edge_id': edge_4_id}
 
         bruin_client_info = {
             'client_id': 9994,
@@ -382,266 +404,182 @@ class TestServiceOutageMonitor:
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
         cached_edge_3 = {
             'edge': edge_3_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_3_serial,
+            'ha_serial_number': edge_3_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
-        cached_edge_4 = {
-            'edge': edge_4_full_id,
+        cached_edge_1_ha_partner = {
+            'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_4_serial,
+            'serial_number': edge_1_ha_serial,
+            'ha_serial_number': edge_1_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_2_ha_partner = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_ha_serial,
+            'ha_serial_number': edge_2_serial,
             'bruin_client_info': bruin_client_info,
         }
         customer_cache_for_velocloud_host = [
             cached_edge_1,
+            cached_edge_2,
             cached_edge_3,
-            cached_edge_4
+            cached_edge_1_ha_partner,
+            cached_edge_2_ha_partner,
         ]
 
         links_with_edge_1_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_2_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_3_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
             'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Adam Jensen',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_3_state,
             'edgeId': edge_3_id,
             'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_3_ha_serial,
             'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
-        }
-        links_with_edge_4_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_4_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_4_id,
-            'edgeSerialNumber': edge_4_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_info = [
             links_with_edge_1_info,
             links_with_edge_2_info,
             links_with_edge_3_info,
-            links_with_edge_4_info
         ]
         links_with_edge_info_response = {
             'body': links_with_edge_info,
             'status': 200,
         }
 
-        links_grouped_by_edge_1 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'GladOS',
+            'serialNumber': edge_2_serial,
+        }
+        edge_3_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_3_state,
+            'enterpriseId': edge_3_enterprise_id,
+            'haSerialNumber': edge_3_ha_serial,
+            'haState': edge_3_ha_state,
+            'id': edge_3_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_3_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+            edge_3_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge_3 = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
             'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Adam Jensen',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_3_state,
             'edgeId': edge_3_id,
             'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_3_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        links_grouped_by_edge_4 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_4_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_4_id,
-            'edgeSerialNumber': edge_4_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
@@ -649,39 +587,99 @@ class TestServiceOutageMonitor:
             links_grouped_by_edge_1,
             links_grouped_by_edge_2,
             links_grouped_by_edge_3,
-            links_grouped_by_edge_4
+        ]
+
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_3_with_ha_info = {
+            **links_grouped_by_edge_3,
+            'edgeHAState': edge_3_ha_state_normalized,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+            links_grouped_by_edge_3_with_ha_info,
+        ]
+
+        edge_1_ha_partner = {
+            **links_grouped_by_edge_1_with_ha_info,
+            'edgeSerialNumber': edge_1_ha_serial,
+            'edgeState': edge_1_ha_state_normalized,
+            'edgeHASerialNumber': edge_1_serial,
+            'edgeHAState': edge_1_state,
+            'edgeIsHAPrimary': False,
+        }
+        edge_2_ha_partner = {
+            **links_grouped_by_edge_2_with_ha_info,
+            'edgeSerialNumber': edge_2_ha_serial,
+            'edgeState': edge_2_ha_state_normalized,
+            'edgeHASerialNumber': edge_2_serial,
+            'edgeHAState': edge_2_state,
+            'edgeIsHAPrimary': False,
+        }
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+            links_grouped_by_edge_3_with_ha_info,
+            edge_1_ha_partner,
+            edge_2_ha_partner,
         ]
 
         edge_1_full_info = {
             'cached_info': cached_edge_1,
             'status': links_grouped_by_edge_1,
         }
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
+        }
         edge_3_full_info = {
             'cached_info': cached_edge_3,
             'status': links_grouped_by_edge_3,
         }
-        edge_4_full_info = {
-            'cached_info': cached_edge_4,
-            'status': links_grouped_by_edge_4,
+        edge_1_ha_partner_full_info = {
+            'cached_info': cached_edge_1_ha_partner,
+            'status': edge_1_ha_partner,
+        }
+        edge_2_ha_partner_full_info = {
+            'cached_info': cached_edge_2_ha_partner,
+            'status': edge_2_ha_partner,
         }
         edges_full_info = [
             edge_1_full_info,
+            edge_2_full_info,
             edge_3_full_info,
-            edge_4_full_info
+            edge_1_ha_partner_full_info,
+            edge_2_ha_partner_full_info,
         ]
 
-        is_edge_1_in_outage_state = False
-        is_edge_3_in_outage_state = True
-        is_edge_4_in_outage_state = False
-
-        edges_in_healthy_state = [
+        link_down_edges = [
+            edge_3_full_info,
+        ]
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = [
+            edge_2_full_info,
+        ]
+        ha_hard_down_edges = [
             edge_1_full_info,
+            edge_1_ha_partner_full_info,
         ]
-        edges_in_outage_state = [
-            edge_3_full_info,
+        healthy_edges = [
+            edge_2_ha_partner_full_info,
         ]
-        edges_with_links_in_outage_state = [
-            edge_4_full_info
+
+        relevant_ha_hard_down_edges = [
+            edge_1_full_info,
         ]
 
         event_bus = Mock()
@@ -697,23 +695,39 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
         outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
-            is_edge_4_in_outage_state,
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
-            is_edge_4_in_outage_state,
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges,
+            hard_down_edges,
+            ha_link_down_edges,
+            ha_soft_down_edges,
+            ha_hard_down_edges,
         ])
-        outage_repository.is_any_link_disconnected = Mock(side_effect=[False, True])
+        outage_repository.should_document_outage = Mock(side_effect=[
+            True,
+            True,
+            True,
+            False,
+        ])
+        outage_repository.is_edge_up = Mock(side_effect=[
+            False,
+            False,
+            False,
+            False,
+            True,
+        ])
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
         outage_monitor._schedule_recheck_job_for_edges = Mock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
@@ -721,19 +735,25 @@ class TestServiceOutageMonitor:
         await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
 
         velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
         velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            links_grouped_by_edge_with_ha_info
+        )
         outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
-            customer_cache_for_velocloud_host, links_grouped_by_edge
+            customer_cache_for_velocloud_host, all_edges
         )
 
         outage_monitor._schedule_recheck_job_for_edges.assert_has_calls([
-            call(edges_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'],
-                 'edges'),
-            call(edges_with_links_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'],
-                 'links')
+            call(link_down_edges, Outages.LINK_DOWN),
+            call(ha_soft_down_edges, Outages.HA_SOFT_DOWN),
+            call(relevant_ha_hard_down_edges, Outages.HA_HARD_DOWN),
         ])
-
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edges_in_healthy_state[0])
+        for edge in healthy_edges:
+            outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge)
 
     @pytest.mark.asyncio
     async def process_velocloud_host_with_links_request_returning_non_2xx_status_test(self):
@@ -788,6 +808,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
@@ -795,11 +816,187 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._schedule_recheck_job_for_edges = Mock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
         await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+        outage_monitor._schedule_recheck_job_for_edges.assert_not_called()
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_velocloud_host_with_network_enterprises_request_returning_non_2xx_status_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC8901234'
+        edge_3_serial = 'VC5678901'
+
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+
+        edge_2_enterprise_id = 2
+        edge_2_id = 1
+
+        edge_3_enterprise_id = 3
+        edge_3_id = 1
+        edge_3_full_id = {'host': velocloud_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
+
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        cached_edge_1 = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_3 = {
+            'edge': edge_3_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_3_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        customer_cache_for_velocloud_host = [
+            cached_edge_1,
+            cached_edge_3,
+        ]
+
+        links_with_edge_1_info = {
+            'host': velocloud_host,
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': edge_1_enterprise_id,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'REX',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        links_with_edge_2_info = {
+            'host': velocloud_host,
+            'enterpriseName': 'Aperture Science',
+            'enterpriseId': edge_2_enterprise_id,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'GladOS',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'Wheatley',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        links_with_edge_3_info = {
+            'host': velocloud_host,
+            'enterpriseName': 'Sarif Industries',
+            'enterpriseId': edge_3_enterprise_id,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Adam Jensen',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': edge_3_id,
+            'edgeSerialNumber': edge_3_serial,
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'Augmented',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+            links_with_edge_3_info,
+        ]
+        links_with_edge_info_response = {
+            'body': links_with_edge_info,
+            'status': 200,
+        }
+
+        network_enterprises_response = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
+        velocloud_repository.group_links_by_edge = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock()
+        outage_repository.is_any_link_disconnected = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._map_cached_edges_with_edges_status = Mock()
+        outage_monitor._schedule_recheck_job_for_edges = Mock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+
+        await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+        velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.group_links_by_edge.assert_not_called()
+        outage_monitor._map_cached_edges_with_edges_status.assert_not_called()
 
         outage_monitor._schedule_recheck_job_for_edges.assert_not_called()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -809,19 +1006,27 @@ class TestServiceOutageMonitor:
         velocloud_host = 'mettel.velocloud.net'
 
         edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC8901234'
-        edge_3_serial = 'VC5678901'
+        edge_2_serial = 'VC5678901'
+
+        edge_1_ha_serial = 'VC99999999'
+        edge_2_ha_serial = None
+
+        edge_1_state = 'CONNECTED'
+        edge_2_state = 'CONNECTED'
+
+        edge_1_ha_state = 'READY'
+        edge_2_ha_state = None
+
+        edge_1_ha_state_normalized = 'CONNECTED'
+        edge_2_ha_state_normalized = None
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
         edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
-        edge_2_enterprise_id = 2
+        edge_2_enterprise_id = 3
         edge_2_id = 1
-
-        edge_3_enterprise_id = 3
-        edge_3_id = 1
-        edge_3_full_id = {'host': velocloud_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
 
         bruin_client_info = {
             'client_id': 9994,
@@ -832,228 +1037,188 @@ class TestServiceOutageMonitor:
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
-        cached_edge_3 = {
-            'edge': edge_3_full_id,
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_3_serial,
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_1_ha_partner = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_ha_serial,
+            'ha_serial_number': edge_1_serial,
             'bruin_client_info': bruin_client_info,
         }
         customer_cache_for_velocloud_host = [
             cached_edge_1,
-            cached_edge_3,
+            cached_edge_2,
+            cached_edge_1_ha_partner,
         ]
 
         links_with_edge_1_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_2_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
-        }
-        links_with_edge_3_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_3_id,
-            'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
+            'linkState': 'DISCONNECTED',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_info = [
             links_with_edge_1_info,
             links_with_edge_2_info,
-            links_with_edge_3_info,
         ]
         links_with_edge_info_response = {
             'body': links_with_edge_info,
             'status': 200,
         }
 
-        links_grouped_by_edge_1 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        links_grouped_by_edge_3 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_3_id,
-            'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
+                    'linkState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge = [
             links_grouped_by_edge_1,
             links_grouped_by_edge_2,
-            links_grouped_by_edge_3,
+        ]
+
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state_normalized,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+
+        edge_1_ha_partner = {
+            **links_grouped_by_edge_1_with_ha_info,
+            'edgeSerialNumber': edge_1_ha_serial,
+            'edgeState': edge_1_ha_state_normalized,
+            'edgeHASerialNumber': edge_1_serial,
+            'edgeHAState': edge_1_state,
+            'edgeIsHAPrimary': False,
+        }
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+            edge_1_ha_partner,
         ]
 
         edge_1_full_info = {
             'cached_info': cached_edge_1,
             'status': links_grouped_by_edge_1,
         }
-        edge_3_full_info = {
-            'cached_info': cached_edge_3,
-            'status': links_grouped_by_edge_3,
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
+        }
+        edge_1_ha_partner_full_info = {
+            'cached_info': cached_edge_1_ha_partner,
+            'status': edge_1_ha_partner,
         }
         edges_full_info = [
             edge_1_full_info,
-            edge_3_full_info,
+            edge_2_full_info,
+            edge_1_ha_partner_full_info,
         ]
 
-        is_edge_1_in_outage_state = False
-        is_edge_3_in_outage_state = False
-
-        edges_in_healthy_state = [
+        link_down_edges = []
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = []
+        ha_hard_down_edges = []
+        healthy_edges = [
             edge_1_full_info,
-            edge_3_full_info,
+            edge_1_ha_partner_full_info,
+            edge_2_full_info,
         ]
 
         event_bus = Mock()
@@ -1069,21 +1234,23 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
         outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges,
         ])
-        outage_repository.is_any_link_disconnected = Mock(return_value=False)
+        outage_repository.is_edge_up = Mock(return_value=True)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
         outage_monitor._schedule_recheck_job_for_edges = Mock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
@@ -1091,35 +1258,45 @@ class TestServiceOutageMonitor:
         await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
 
         velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
         velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            links_grouped_by_edge_with_ha_info
+        )
         outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
-            customer_cache_for_velocloud_host, links_grouped_by_edge
+            customer_cache_for_velocloud_host, all_edges
         )
 
         outage_monitor._schedule_recheck_job_for_edges.assert_not_called()
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_has_awaits([
-            call(edges_in_healthy_state[0]),
-            call(edges_in_healthy_state[1]),
-        ], any_order=True)
+        for edge in healthy_edges:
+            outage_monitor._run_ticket_autoresolve_for_edge.assert_any_await(edge)
 
     @pytest.mark.asyncio
-    async def process_velocloud_host_with_just_edges_in_outage_state_test(self):
+    async def process_velocloud_host_with_just_edges_in_link_down_state_test(self):
         velocloud_host = 'mettel.velocloud.net'
 
         edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC8901234'
-        edge_3_serial = 'VC5678901'
+        edge_2_serial = 'VC5678901'
+
+        edge_1_ha_serial = None
+        edge_2_ha_serial = None
+
+        edge_1_state = 'CONNECTED'
+        edge_2_state = 'CONNECTED'
+
+        edge_1_ha_state = None
+        edge_2_ha_state = None
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
         edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
-        edge_2_enterprise_id = 2
+        edge_2_enterprise_id = 3
         edge_2_id = 1
-
-        edge_3_enterprise_id = 3
-        edge_3_id = 1
-        edge_3_full_id = {'host': velocloud_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
 
         bruin_client_info = {
             'client_id': 9994,
@@ -1130,229 +1307,165 @@ class TestServiceOutageMonitor:
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
-        cached_edge_3 = {
-            'edge': edge_3_full_id,
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_3_serial,
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
         customer_cache_for_velocloud_host = [
             cached_edge_1,
-            cached_edge_3,
+            cached_edge_2,
         ]
 
         links_with_edge_1_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_2_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
-        }
-        links_with_edge_3_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_3_id,
-            'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_info = [
             links_with_edge_1_info,
             links_with_edge_2_info,
-            links_with_edge_3_info,
         ]
         links_with_edge_info_response = {
             'body': links_with_edge_info,
             'status': 200,
         }
 
-        links_grouped_by_edge_1 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
+                    'linkState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        links_grouped_by_edge_3 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_3_id,
-            'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge = [
             links_grouped_by_edge_1,
             links_grouped_by_edge_2,
-            links_grouped_by_edge_3,
+        ]
+
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
         ]
 
         edge_1_full_info = {
             'cached_info': cached_edge_1,
             'status': links_grouped_by_edge_1,
         }
-        edge_3_full_info = {
-            'cached_info': cached_edge_3,
-            'status': links_grouped_by_edge_3,
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
         }
         edges_full_info = [
             edge_1_full_info,
-            edge_3_full_info,
+            edge_2_full_info,
         ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_3_in_outage_state = True
-
-        edges_in_outage_state = [
+        link_down_edges = [
             edge_1_full_info,
-            edge_3_full_info,
+            edge_2_full_info,
         ]
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = []
+        ha_hard_down_edges = []
 
         event_bus = Mock()
         scheduler = Mock()
@@ -1367,21 +1480,24 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
         outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
         ])
-        outage_repository.is_any_link_disconnected = Mock(return_value=False)
+        outage_repository.should_document_outage = Mock(return_value=True)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
         outage_monitor._schedule_recheck_job_for_edges = Mock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
@@ -1389,34 +1505,47 @@ class TestServiceOutageMonitor:
         await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
 
         velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
         velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            links_grouped_by_edge_with_ha_info
+        )
         outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
-            customer_cache_for_velocloud_host, links_grouped_by_edge
+            customer_cache_for_velocloud_host, all_edges
         )
 
-        outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
-            edges_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_edge_outage'],
-            'edges')
+        outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(link_down_edges, Outages.LINK_DOWN)
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_velocloud_host_with_just_links_in_outage_state_test(self):
+    async def process_velocloud_host_with_just_edges_in_hard_down_state_test(self):
         velocloud_host = 'mettel.velocloud.net'
 
         edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC8901234'
-        edge_3_serial = 'VC5678901'
+        edge_2_serial = 'VC5678901'
+
+        edge_1_ha_serial = None
+        edge_2_ha_serial = None
+
+        edge_1_state = 'OFFLINE'
+        edge_2_state = 'OFFLINE'
+
+        edge_1_ha_state = None
+        edge_2_ha_state = None
+
+        edge_1_ha_state_normalized = None
+        edge_2_ha_state_normalized = None
 
         edge_1_enterprise_id = 1
         edge_1_id = 1
         edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
 
-        edge_2_enterprise_id = 2
+        edge_2_enterprise_id = 3
         edge_2_id = 1
-
-        edge_3_enterprise_id = 3
-        edge_3_id = 1
-        edge_3_full_id = {'host': velocloud_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
 
         bruin_client_info = {
             'client_id': 9994,
@@ -1427,228 +1556,464 @@ class TestServiceOutageMonitor:
             'edge': edge_1_full_id,
             'last_contact': '2020-08-17T02:23:59',
             'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
-        cached_edge_3 = {
-            'edge': edge_3_full_id,
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_3_serial,
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
             'bruin_client_info': bruin_client_info,
         }
         customer_cache_for_velocloud_host = [
             cached_edge_1,
-            cached_edge_3,
+            cached_edge_2,
         ]
 
         links_with_edge_1_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_2_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
-        }
-        links_with_edge_3_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_3_id,
-            'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
             'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
             'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
         }
         links_with_edge_info = [
             links_with_edge_1_info,
             links_with_edge_2_info,
-            links_with_edge_3_info,
         ]
         links_with_edge_info_response = {
             'body': links_with_edge_info,
             'status': 200,
         }
 
-        links_grouped_by_edge_1 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
             'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeState': edge_1_state,
             'edgeId': edge_1_id,
             'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_1_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
             'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
             'edgeId': edge_2_id,
             'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_2_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
-        links_grouped_by_edge_3 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_3_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_3_id,
-            'edgeSerialNumber': edge_3_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
                     'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 },
             ],
         }
         links_grouped_by_edge = [
             links_grouped_by_edge_1,
             links_grouped_by_edge_2,
-            links_grouped_by_edge_3,
+        ]
+
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state_normalized,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state_normalized,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
         ]
 
         edge_1_full_info = {
             'cached_info': cached_edge_1,
             'status': links_grouped_by_edge_1,
         }
-        edge_3_full_info = {
-            'cached_info': cached_edge_3,
-            'status': links_grouped_by_edge_3,
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
         }
         edges_full_info = [
             edge_1_full_info,
-            edge_3_full_info,
+            edge_2_full_info,
         ]
 
-        is_edge_1_in_outage_state = False
-        is_edge_3_in_outage_state = False
-
-        edges_with_links_in_outage_state = [
+        link_down_edges = []
+        hard_down_edges = [
             edge_1_full_info,
-            edge_3_full_info,
+            edge_2_full_info,
+        ]
+        ha_soft_down_edges = []
+        ha_link_down_edges = []
+        ha_hard_down_edges = []
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
+        velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
+        ])
+        outage_repository.should_document_outage = Mock(return_value=True)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
+        outage_monitor._schedule_recheck_job_for_edges = Mock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+
+        await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+        velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            links_grouped_by_edge_with_ha_info
+        )
+        outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
+            customer_cache_for_velocloud_host, all_edges
+        )
+
+        outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(hard_down_edges, Outages.HARD_DOWN)
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_velocloud_host_with_just_edges_in_HA_link_down_state_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC5678901'
+
+        edge_1_ha_serial = 'VC99999999'
+        edge_2_ha_serial = 'VC88888888'
+
+        edge_1_state = 'CONNECTED'
+        edge_2_state = 'CONNECTED'
+
+        edge_1_ha_state = 'READY'
+        edge_2_ha_state = 'READY'
+
+        edge_1_ha_state_normalized = 'CONNECTED'
+        edge_2_ha_state_normalized = 'CONNECTED'
+
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+
+        edge_2_enterprise_id = 3
+        edge_2_id = 1
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        cached_edge_1 = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_1_ha_partner = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_ha_serial,
+            'ha_serial_number': edge_1_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_2_ha_partner = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-27T02:23:59',
+            'serial_number': edge_2_ha_serial,
+            'ha_serial_number': edge_2_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        customer_cache_for_velocloud_host = [
+            cached_edge_1,
+            cached_edge_2,
+            cached_edge_1_ha_partner,
+            cached_edge_2_ha_partner,
+        ]
+
+        links_with_edge_1_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'interface': 'REX',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_2_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'interface': 'Augmented',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+        ]
+        links_with_edge_info_response = {
+            'body': links_with_edge_info,
+            'status': 200,
+        }
+
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
+            'enterpriseId': edge_1_enterprise_id,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'links': [
+                {
+                    'interface': 'REX',
+                    'linkState': 'DISCONNECTED',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'links': [
+                {
+                    'interface': 'Augmented',
+                    'linkState': 'DISCONNECTED',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge = [
+            links_grouped_by_edge_1,
+            links_grouped_by_edge_2,
+        ]
+
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+
+        edge_1_ha_partner = {
+            **links_grouped_by_edge_1_with_ha_info,
+            'edgeSerialNumber': edge_1_ha_serial,
+            'edgeState': edge_1_ha_state_normalized,
+            'edgeHASerialNumber': edge_1_serial,
+            'edgeHAState': edge_1_state,
+            'edgeIsHAPrimary': False,
+        }
+        edge_2_ha_partner = {
+            **links_grouped_by_edge_2_with_ha_info,
+            'edgeSerialNumber': edge_2_ha_serial,
+            'edgeState': edge_2_ha_state_normalized,
+            'edgeHASerialNumber': edge_2_serial,
+            'edgeHAState': edge_2_state,
+            'edgeIsHAPrimary': False,
+        }
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+            edge_1_ha_partner,
+            edge_2_ha_partner,
+        ]
+
+        edge_1_full_info = {
+            'cached_info': cached_edge_1,
+            'status': links_grouped_by_edge_1,
+        }
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
+        }
+        edge_1_ha_partner_full_info = {
+            'cached_info': cached_edge_1_ha_partner,
+            'status': edge_1_ha_partner,
+        }
+        edge_2_ha_partner_full_info = {
+            'cached_info': cached_edge_2_ha_partner,
+            'status': edge_2_ha_partner,
+        }
+        edges_full_info = [
+            edge_1_full_info,
+            edge_2_full_info,
+            edge_1_ha_partner_full_info,
+            edge_2_ha_partner_full_info,
+        ]
+
+        link_down_edges = []
+        hard_down_edges = []
+        ha_link_down_edges = [
+            edge_1_full_info,
+            edge_2_full_info,
+            edge_1_ha_partner_full_info,
+            edge_2_ha_partner_full_info,
+        ]
+        ha_soft_down_edges = []
+        ha_hard_down_edges = []
+
+        relevant_ha_link_down_edges = [
+            edge_1_full_info,
+            edge_2_full_info,
         ]
 
         event_bus = Mock()
@@ -1664,21 +2029,29 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
         outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
-            is_edge_1_in_outage_state,
-            is_edge_3_in_outage_state,
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
         ])
-        outage_repository.is_any_link_disconnected = Mock(return_value=True)
+        outage_repository.should_document_outage = Mock(side_effect=[
+            True,
+            True,
+            False,
+            False,
+        ])
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
         outage_monitor._schedule_recheck_job_for_edges = Mock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
@@ -1686,14 +2059,528 @@ class TestServiceOutageMonitor:
         await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
 
         velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
         velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            links_grouped_by_edge_with_ha_info
+        )
         outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
-            customer_cache_for_velocloud_host, links_grouped_by_edge
+            customer_cache_for_velocloud_host, all_edges
         )
 
         outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
-            edges_with_links_in_outage_state, config.MONITOR_CONFIG['jobs_intervals']['quarantine_link_outage'],
-            'links')
+            relevant_ha_link_down_edges, Outages.HA_LINK_DOWN
+        )
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_velocloud_host_with_just_edges_in_HA_soft_down_state_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+
+        edge_serial = 'VC1234567'
+        edge_ha_serial = 'VC99999999'
+        edge_state = 'CONNECTED'
+        edge_ha_state = 'FAILED'
+        edge_ha_state_normalized = 'OFFLINE'
+
+        edge_enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': edge_enterprise_id, 'edge_id': edge_id}
+
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        cached_edge = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_serial,
+            'ha_serial_number': edge_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_ha_partner = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_ha_serial,
+            'ha_serial_number': edge_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        customer_cache_for_velocloud_host = [
+            cached_edge,
+            cached_edge_ha_partner,
+        ]
+
+        links_with_edge_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': edge_ha_serial,
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_info,
+        ]
+        links_with_edge_info_response = {
+            'body': links_with_edge_info,
+            'status': 200,
+        }
+
+        edge_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_state,
+            'enterpriseId': edge_enterprise_id,
+            'haSerialNumber': edge_ha_serial,
+            'haState': edge_ha_state,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_serial,
+        }
+        edges_network_enterprises = [
+            edge_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_serial,
+            'edgeHASerialNumber': edge_ha_serial,
+            'links': [
+                {
+                    'interface': 'REX',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        all_links_grouped_by_edge = [
+            links_grouped_by_edge,
+        ]
+
+        links_grouped_by_edge_with_ha_info = {
+            **links_grouped_by_edge,
+            'edgeHAState': edge_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_with_ha_info,
+        ]
+
+        edge_ha_partner = {
+            **links_grouped_by_edge_with_ha_info,
+            'edgeSerialNumber': edge_ha_serial,
+            'edgeState': edge_ha_state_normalized,
+            'edgeHASerialNumber': edge_serial,
+            'edgeHAState': edge_state,
+            'edgeIsHAPrimary': False,
+        }
+        all_edges = [
+            links_grouped_by_edge_with_ha_info,
+            edge_ha_partner,
+        ]
+
+        edge_full_info = {
+            'cached_info': cached_edge,
+            'status': links_grouped_by_edge,
+        }
+        edge_ha_partner_full_info = {
+            'cached_info': cached_edge_ha_partner,
+            'status': edge_ha_partner,
+        }
+        edges_full_info = [
+            edge_full_info,
+            edge_ha_partner_full_info,
+        ]
+
+        link_down_edges = []
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = [
+            edge_ha_partner_full_info,
+        ]
+        ha_hard_down_edges = []
+        healthy_edges = [
+            edge_full_info,
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
+        velocloud_repository.group_links_by_edge = Mock(return_value=all_links_grouped_by_edge)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
+        ])
+        outage_repository.is_edge_up = Mock(side_effect=[
+            True,
+            False,
+        ])
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=all_links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
+        outage_monitor._schedule_recheck_job_for_edges = Mock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+
+        await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+        velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            all_links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            all_links_grouped_by_edge_with_ha_info
+        )
+        outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
+            customer_cache_for_velocloud_host, all_edges
+        )
+
+        outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(ha_soft_down_edges, Outages.HA_SOFT_DOWN)
+        for edge in healthy_edges:
+            outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge)
+
+    @pytest.mark.asyncio
+    async def process_velocloud_host_with_just_edges_in_HA_hard_down_state_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC5678901'
+
+        edge_1_ha_serial = 'VC99999999'
+        edge_2_ha_serial = 'VC88888888'
+
+        edge_1_state = 'OFFLINE'
+        edge_2_state = 'OFFLINE'
+
+        edge_1_ha_state = 'FAILED'
+        edge_2_ha_state = 'FAILED'
+
+        edge_1_ha_state_normalized = 'OFFLINE'
+        edge_2_ha_state_normalized = 'OFFLINE'
+
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+
+        edge_2_enterprise_id = 3
+        edge_2_id = 1
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        cached_edge_1 = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_1_ha_partner = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_ha_serial,
+            'ha_serial_number': edge_1_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        cached_edge_2_ha_partner = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_ha_serial,
+            'ha_serial_number': edge_2_serial,
+            'bruin_client_info': bruin_client_info,
+        }
+        customer_cache_for_velocloud_host = [
+            cached_edge_1,
+            cached_edge_2,
+            cached_edge_1_ha_partner,
+            cached_edge_2_ha_partner,
+        ]
+
+        links_with_edge_1_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'interface': 'REX',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_2_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'interface': 'Augmented',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+        ]
+        links_with_edge_info_response = {
+            'body': links_with_edge_info,
+            'status': 200,
+        }
+
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
+            'enterpriseId': edge_1_enterprise_id,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'links': [
+                {
+                    'interface': 'REX',
+                    'linkState': 'DISCONNECTED',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'links': [
+                {
+                    'interface': 'Augmented',
+                    'linkState': 'DISCONNECTED',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge = [
+            links_grouped_by_edge_1,
+            links_grouped_by_edge_2,
+        ]
+
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+
+        edge_1_ha_partner = {
+            **links_grouped_by_edge_1_with_ha_info,
+            'edgeSerialNumber': edge_1_ha_serial,
+            'edgeState': edge_1_ha_state_normalized,
+            'edgeHASerialNumber': edge_1_serial,
+            'edgeHAState': edge_1_state,
+            'edgeIsHAPrimary': False,
+        }
+        edge_2_ha_partner = {
+            **links_grouped_by_edge_2_with_ha_info,
+            'edgeSerialNumber': edge_2_ha_serial,
+            'edgeState': edge_2_ha_state_normalized,
+            'edgeHASerialNumber': edge_2_serial,
+            'edgeHAState': edge_2_state,
+            'edgeIsHAPrimary': False,
+        }
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+            edge_1_ha_partner,
+            edge_2_ha_partner,
+        ]
+
+        edge_1_full_info = {
+            'cached_info': cached_edge_1,
+            'status': links_grouped_by_edge_1,
+        }
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
+        }
+        edge_1_ha_partner_full_info = {
+            'cached_info': cached_edge_1_ha_partner,
+            'status': edge_1_ha_partner,
+        }
+        edge_2_ha_partner_full_info = {
+            'cached_info': cached_edge_2_ha_partner,
+            'status': edge_2_ha_partner,
+        }
+        edges_full_info = [
+            edge_1_full_info,
+            edge_2_full_info,
+            edge_1_ha_partner_full_info,
+            edge_2_ha_partner_full_info,
+        ]
+
+        link_down_edges = []
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = []
+        ha_hard_down_edges = [
+            edge_1_full_info,
+            edge_2_full_info,
+            edge_1_ha_partner_full_info,
+            edge_2_ha_partner_full_info,
+        ]
+
+        relevant_ha_hard_down_edges = [
+            edge_1_full_info,
+            edge_2_full_info,
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
+        velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
+        ])
+        outage_repository.should_document_outage = Mock(side_effect=[
+            True,
+            True,
+            False,
+            False,
+        ])
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
+        outage_monitor._schedule_recheck_job_for_edges = Mock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+
+        await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+        velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+        ha_repository.map_edges_with_ha_info.assert_called_once_with(
+            links_grouped_by_edge, edges_network_enterprises
+        )
+        ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+            links_grouped_by_edge_with_ha_info
+        )
+        outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
+            customer_cache_for_velocloud_host, all_edges
+        )
+
+        outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
+            relevant_ha_hard_down_edges, Outages.HA_HARD_DOWN
+        )
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     def map_cached_edges_with_edges_status_test(self):
@@ -1859,11 +2746,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         result = outage_monitor._map_cached_edges_with_edges_status(
             customer_cache_for_velocloud_host, links_grouped_by_edge
@@ -1882,7 +2770,7 @@ class TestServiceOutageMonitor:
         assert result == expected
 
     def schedule_recheck_job_for_edges_test(self):
-        quarantine_time = 5
+        outage_type = Outages.HARD_DOWN  # We can use whatever outage type
         edges = [
             {
                 'cached_info': {
@@ -1946,27 +2834,28 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                outage_monitor._schedule_recheck_job_for_edges(edges, quarantine_time, 'edges')
+                outage_monitor._schedule_recheck_job_for_edges(edges, outage_type)
 
-        expected_run_date = next_run_time + timedelta(seconds=quarantine_time)
+        expected_run_date = next_run_time + timedelta(seconds=config.MONITOR_CONFIG['quarantine'][outage_type])
         scheduler.add_job.assert_called_once_with(
             outage_monitor._recheck_edges_for_ticket_creation, 'date',
-            args=[edges],
+            args=[edges, outage_type],
             run_date=expected_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
-            id=f'edges_ticket_creation_recheck',
+            id=f'{outage_type.value}_ticket_creation_recheck',
         )
 
     @pytest.mark.asyncio
@@ -2031,6 +2920,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock()
@@ -2038,7 +2928,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = set()
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -2111,6 +3001,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_last_down_edge_events = CoroutineMock()
@@ -2122,7 +3013,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -2197,6 +3088,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -2205,7 +3097,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -2293,6 +3185,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -2301,7 +3194,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
 
@@ -2399,6 +3292,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -2407,7 +3301,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
@@ -2575,6 +3469,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -2583,7 +3478,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
 
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -2749,6 +3644,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -2760,7 +3656,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -2920,6 +3816,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -2933,7 +3830,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -3106,6 +4003,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -3120,7 +4018,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -3299,6 +4197,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -3317,7 +4216,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -3499,6 +4398,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -3517,7 +4417,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -3587,11 +4487,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
@@ -3653,10 +4554,11 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
@@ -3716,10 +4618,11 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
@@ -3769,10 +4672,11 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         datetime_mock = Mock()
 
@@ -3824,10 +4728,11 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         datetime_mock = Mock()
 
@@ -3865,6 +4770,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -3872,7 +4778,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._notify_successful_autoresolve(ticket_id)
 
@@ -3917,112 +4823,90 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_edges_with_links_request_returning_non_2xx_status_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_state = 'OFFLINE'
+        edge_standby_state = 'OFFLINE'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         bruin_client_info = {
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
 
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
-        }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
-            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
         }
-        links_grouped_by_edge_2 = {
+        edge_standby_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_standby_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeHASerialNumber': edge_primary_serial,
+        }
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
+            ],
+        }
+        edge_with_links_standby = {
+            **edge_standby_info,
+            'links': [
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_with_links_and_ha_info_primary = {
+            **edge_with_links_primary,
+            'edgeHAState': edge_standby_state,
+            'edgeIsHAPrimary': True,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
+        edge_with_links_and_ha_info_standby = {
+            **edge_with_links_standby,
+            'edgeHAState': edge_primary_state,
+            'edgeIsHAPrimary': False,
         }
 
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_and_ha_info_primary,
+        }
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
         links_with_edge_info_response = {
@@ -4039,289 +4923,330 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
+        outage_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock()
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._reopen_outage_ticket = CoroutineMock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+
+        await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
+
+        velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_not_awaited()
+        bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor._reopen_outage_ticket.assert_not_awaited()
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def recheck_edges_with_networks_enterprises_request_returning_non_2xx_status_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_state = 'OFFLINE'
+        edge_standby_state = 'OFFLINE'
+
+        velocloud_host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        cached_edge_primary = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+        }
+
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+        }
+        edge_standby_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_standby_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeHASerialNumber': edge_primary_serial,
+        }
+        edge_with_links_primary = {
+            **edge_primary_info,
+            'links': [
+                edge_link_1_info,
+            ],
+        }
+        edge_with_links_standby = {
+            **edge_standby_info,
+            'links': [
+                edge_link_1_info,
+            ],
+        }
+
+        edge_with_links_and_ha_info_primary = {
+            **edge_with_links_primary,
+            'edgeHAState': edge_standby_state,
+            'edgeIsHAPrimary': True,
+        }
+
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_and_ha_info_primary,
+        }
+        outage_edges = [
+            edge_primary_full_info,
+        ]
+
+        link_1_with_edge_info = {
+            **edge_primary_info,
+            **edge_link_1_info,
+        }
+        links_with_edge_info_response = {
+            'body': [
+                link_1_with_edge_info,
+            ],
+            'status': 200,
+        }
+
+        network_enterprises_response = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
+
+        bruin_repository = Mock()
+        bruin_repository.create_outage_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
-        await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_not_called()
+        velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(velocloud_host=velocloud_host)
+        velocloud_repository.get_network_enterprises.assert_awaited_once_with(velocloud_host=velocloud_host)
         bruin_repository.create_outage_ticket.assert_not_awaited()
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def recheck_edges_with_just_edges_in_healthy_state_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'CONNECTED'
+        edge_standby_new_state_raw = 'READY'
+        edge_standby_new_state_normalized = 'CONNECTED'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         bruin_client_info = {
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
 
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
 
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        is_edge_1_in_outage_state = False
-        is_edge_2_in_outage_state = False
-
+        edges_in_same_outage_state = []
         edges_in_healthy_state = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
         event_bus = Mock()
@@ -4336,297 +5261,207 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=True)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
-        await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
         bruin_repository.create_outage_ticket.assert_not_awaited()
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_has_awaits([
-            call(edges_in_healthy_state[0]),
-            call(edges_in_healthy_state[1]),
-        ], any_order=True)
+        for edge in edges_in_healthy_state:
+            outage_monitor._run_ticket_autoresolve_for_edge.assert_any_await(edge)
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_just_edges_in_outage_state_and_no_production_env_test(self):
+    async def recheck_edges_with_edge_state_switching_to_a_different_outage_type_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        # Edge transitioned from HA_HARD_DOWN to HA_SOFT_DOWN
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'READY'
+        edge_standby_new_state_normalized = 'CONNECTED'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         bruin_client_info = {
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
 
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
 
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_2_in_outage_state = True
+        edges_in_same_outage_state = []
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         notifications_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
@@ -4635,351 +5470,456 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
         bruin_repository.create_outage_ticket.assert_not_awaited()
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_just_edges_in_outage_state_and_ticket_creation_returning_200_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_no_production_env_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+
         velocloud_host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
 
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+        cached_edge_primary = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+        }
+        cached_edge_standby = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+        }
 
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        edge_with_links_primary = {
+            **edge_primary_info,
+            'links': [
+                edge_link_1_info,
+            ],
+        }
+
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
+        }
+        outage_edges = [
+            edge_primary_full_info,
+        ]
+
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
+        }
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
+        }
+        new_links_with_edge_info = [
+            new_links_with_primary_edge_info,
+        ]
+        links_with_edge_info_response = {
+            'body': new_links_with_edge_info,
+            'status': 200,
+        }
+
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'links': [
+                edge_link_1_info
+            ],
+        }
+        new_links_grouped_by_edge = [
+            new_links_grouped_by_primary_edge,
+        ]
+
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
+        }
+        new_edges_full_info = [
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
+        ]
+
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
+        velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
+
+        bruin_repository = Mock()
+        bruin_repository.create_outage_ticket = CoroutineMock()
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
+        outage_monitor._reopen_outage_ticket = CoroutineMock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+
+        custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'dev'
+        with patch.dict(testconfig.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
+
+        bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor._reopen_outage_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_200_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+
+        velocloud_host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         client_id = 9994
         bruin_client_info = {
             'client_id': client_id,
             'client_name': 'METTEL/NEW YORK',
         }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
 
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
 
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_2_in_outage_state = True
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
 
-        outage_ticket_creation_body_1 = 12345  # Ticket ID
-        outage_ticket_creation_status_1 = 200
-        outage_ticket_creation_response_1 = {
+        ticket_id = 12345
+        ticket_creation_response = {
             'request_id': uuid_,
-            'body': outage_ticket_creation_body_1,
-            'status': outage_ticket_creation_status_1,
-        }
-
-        outage_ticket_creation_body_2 = 22345  # Ticket ID
-        outage_ticket_creation_status_2 = 200
-        outage_ticket_creation_response_2 = {
-            'request_id': uuid_,
-            'body': outage_ticket_creation_body_2,
-            'status': outage_ticket_creation_status_2,
+            'body': ticket_id,
+            'status': 200,
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(side_effect=[
-            outage_ticket_creation_response_1,
-            outage_ticket_creation_response_2,
-        ])
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
@@ -4987,71 +5927,45 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
 
-        ticket_detail_1 = {
-            'detailID': 12345,
-            'detailValue': edge_1_serial,
-        }
-        ticket_details_response = {
-            'body': {
-                'ticketDetails': [
-                    ticket_detail_1,
-                ],
-                'ticketNotes': [],
-            },
-            'status': 200,
-        }
-        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        outage_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
-            return_value={'status': 200, 'body': 'change work'})
+        custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        with patch.dict(testconfig.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
-
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(client_id, edge_1_serial),
-            call(client_id, edge_2_serial),
-        ])
-        outage_monitor._append_triage_note.assert_has_awaits([
-            call(outage_ticket_creation_body_1, cached_edge_1, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, cached_edge_2, new_links_grouped_by_edge_2),
-        ])
-        outage_monitor._change_ticket_severity.assert_has_awaits([
-            call(
-                ticket_id=outage_ticket_creation_body_1,
-                edge_status=new_links_grouped_by_edge_1,
-                check_ticket_tasks=False,
-            ),
-            call(
-                ticket_id=outage_ticket_creation_body_2,
-                edge_status=new_links_grouped_by_edge_2,
-                check_ticket_tasks=False,
-            ),
-        ])
-        outage_monitor._check_for_digi_reboot.assert_has_awaits([
-            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2),
-        ])
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._append_triage_note.assert_awaited_once_with(
+            ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
+        )
+        outage_monitor._change_ticket_severity.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            edge_status=links_grouped_by_primary_edge_with_ha_info,
+            check_ticket_tasks=False,
+        )
+        outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_just_edges_in_outage_state_and_ticket_creation_returning_409_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_409_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         client_id = 9994
         bruin_client_info = {
@@ -5059,265 +5973,159 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
 
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_2_in_outage_state = True
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
 
-        outage_ticket_creation_body_1 = 12345  # Ticket ID
-        outage_ticket_creation_status_1 = 409
-        outage_ticket_creation_response_1 = {
+        ticket_id = 12345
+        ticket_creation_response = {
             'request_id': uuid_,
-            'body': outage_ticket_creation_body_1,
-            'status': outage_ticket_creation_status_1,
-        }
-
-        outage_ticket_creation_body_2 = 22345  # Ticket ID
-        outage_ticket_creation_status_2 = 409
-        outage_ticket_creation_response_2 = {
-            'request_id': uuid_,
-            'body': outage_ticket_creation_body_2,
-            'status': outage_ticket_creation_status_2,
+            'body': ticket_id,
+            'status': 409,
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
@@ -5325,90 +6133,75 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(side_effect=[
-            outage_ticket_creation_response_1,
-            outage_ticket_creation_response_2,
-        ])
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
-        outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
-        outage_monitor._attempt_forward_to_asr = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
+        outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        with patch.dict(testconfig.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(client_id, edge_1_serial),
-            call(client_id, edge_2_serial),
-        ])
-        outage_monitor._change_ticket_severity.assert_has_awaits([
-            call(
-                ticket_id=outage_ticket_creation_body_1,
-                edge_status=new_links_grouped_by_edge_1,
-                check_ticket_tasks=True,
-            ),
-            call(
-                ticket_id=outage_ticket_creation_body_2,
-                edge_status=new_links_grouped_by_edge_2,
-                check_ticket_tasks=True,
-            ),
-        ])
-        outage_monitor._check_for_failed_digi_reboot.assert_has_awaits([
-            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial,
-                 new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial,
-                 new_links_grouped_by_edge_2),
-        ])
-        outage_monitor._attempt_forward_to_asr.assert_has_awaits([
-            call(cached_edge_1, new_links_grouped_by_edge_1, outage_ticket_creation_body_1),
-            call(cached_edge_2, new_links_grouped_by_edge_2, outage_ticket_creation_body_2),
-        ])
-        outage_monitor._append_triage_note.assert_not_awaited()
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._change_ticket_severity.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            edge_status=links_grouped_by_primary_edge_with_ha_info,
+            check_ticket_tasks=True,
+        )
+        outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
+        outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
+            cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, ticket_id,
+        )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_just_edges_in_outage_state_and_ticket_creation_returning_471_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_471_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         client_id = 9994
         bruin_client_info = {
@@ -5416,269 +6209,159 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
-        change_detail_work_queue_response = {
-            'body': 'ok',
-            'status': 200,
-        }
 
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_2_in_outage_state = True
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
 
-        outage_ticket_creation_body_1 = 12345  # Ticket ID
-        outage_ticket_creation_status_1 = 471
-        outage_ticket_creation_response_1 = {
+        ticket_id = 12345
+        ticket_creation_response = {
             'request_id': uuid_,
-            'body': outage_ticket_creation_body_1,
-            'status': outage_ticket_creation_status_1,
-        }
-
-        outage_ticket_creation_body_2 = 22345  # Ticket ID
-        outage_ticket_creation_status_2 = 471
-        outage_ticket_creation_response_2 = {
-            'request_id': uuid_,
-            'body': outage_ticket_creation_body_2,
-            'status': outage_ticket_creation_status_2,
+            'body': ticket_id,
+            'status': 471,
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
@@ -5686,87 +6369,73 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(side_effect=[
-            outage_ticket_creation_response_1,
-            outage_ticket_creation_response_2,
-        ])
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
-        outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
-        outage_monitor.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         outage_monitor._change_ticket_severity = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        with patch.dict(testconfig.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(client_id, edge_1_serial),
-            call(client_id, edge_2_serial),
-        ])
-        outage_monitor._append_triage_note.assert_not_awaited()
-        outage_monitor._reopen_outage_ticket.assert_has_awaits([
-            call(outage_ticket_creation_body_1, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, new_links_grouped_by_edge_2),
-        ])
-        outage_monitor._change_ticket_severity.assert_has_awaits([
-            call(
-                ticket_id=outage_ticket_creation_body_1,
-                edge_status=new_links_grouped_by_edge_1,
-                check_ticket_tasks=True,
-            ),
-            call(
-                ticket_id=outage_ticket_creation_body_2,
-                edge_status=new_links_grouped_by_edge_2,
-                check_ticket_tasks=True,
-            ),
-        ])
-        outage_monitor._check_for_digi_reboot.assert_has_awaits([
-            call(outage_ticket_creation_body_1, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, logical_id_list, edge_2_serial, new_links_grouped_by_edge_2),
-        ])
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._change_ticket_severity.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            edge_status=links_grouped_by_primary_edge_with_ha_info,
+            check_ticket_tasks=True,
+        )
+        outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
+        outage_monitor._reopen_outage_ticket.assert_awaited_once_with(
+            ticket_id, links_grouped_by_primary_edge_with_ha_info,
+        )
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_just_edges_in_outage_state_and_ticket_creation_returning_472_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_472_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         client_id = 9994
         bruin_client_info = {
@@ -5774,352 +6443,231 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
 
-        change_detail_work_queue_response = {'status': 200, 'body': 'ok'}
-
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_2_in_outage_state = True
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
 
-        outage_ticket_creation_body_1 = 12345  # Ticket ID
-        outage_ticket_creation_status_1 = 472
-        outage_ticket_creation_response_1 = {
+        ticket_id = 12345
+        ticket_creation_response = {
             'request_id': uuid_,
-            'body': outage_ticket_creation_body_1,
-            'status': outage_ticket_creation_status_1,
-        }
-
-        outage_ticket_creation_body_2 = 22345  # Ticket ID
-        outage_ticket_creation_status_2 = 472
-        outage_ticket_creation_response_2 = {
-            'request_id': uuid_,
-            'body': outage_ticket_creation_body_2,
-            'status': outage_ticket_creation_status_2,
+            'body': ticket_id,
+            'status': 472,
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        digi_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(side_effect=[
-            outage_ticket_creation_response_1,
-            outage_ticket_creation_response_2,
-        ])
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
-        digi_repository = Mock()
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
-        outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._post_note_in_outage_ticket = CoroutineMock()
-        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         outage_monitor._change_ticket_severity = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        with patch.dict(testconfig.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(client_id, edge_1_serial),
-            call(client_id, edge_2_serial),
-        ])
-        outage_monitor._change_ticket_severity.assert_has_awaits([
-            call(
-                ticket_id=outage_ticket_creation_body_1,
-                edge_status=new_links_grouped_by_edge_1,
-                check_ticket_tasks=True,
-            ),
-            call(
-                ticket_id=outage_ticket_creation_body_2,
-                edge_status=new_links_grouped_by_edge_2,
-                check_ticket_tasks=True,
-            ),
-        ])
-        outage_monitor._append_triage_note.assert_not_awaited()
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._change_ticket_severity.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            edge_status=links_grouped_by_primary_edge_with_ha_info,
+            check_ticket_tasks=True,
+        )
+        outage_monitor._post_note_in_outage_ticket.assert_awaited_once_with(
+            ticket_id, links_grouped_by_primary_edge_with_ha_info,
+        )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
-        outage_monitor._post_note_in_outage_ticket.assert_has_awaits([
-            call(outage_ticket_creation_body_1, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, new_links_grouped_by_edge_2),
-        ])
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_just_edges_in_outage_state_and_ticket_creation_returning_473_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_473_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+
         velocloud_host = 'mettel.velocloud.net'
-
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC5678901'
-
-        edge_1_enterprise_id = 1
-        edge_1_id = 1
-        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
-
-        edge_2_enterprise_id = 3
-        edge_2_id = 1
-        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
 
         client_id = 9994
         bruin_client_info = {
@@ -6127,342 +6675,221 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
+        cached_edge_primary = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
+        cached_edge_standby = {
+            'edge': edge_full_id,
             'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list
+            'logical_ids': logical_id_list,
         }
 
-        links_grouped_by_edge_1 = {
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+        edge_with_links_primary = {
+            **edge_primary_info,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
+                edge_link_1_info,
             ],
         }
 
-        edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': links_grouped_by_edge_1,
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
         }
-        edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': links_grouped_by_edge_2,
-        }
-
         outage_edges = [
-            edge_1_full_info,
-            edge_2_full_info,
+            edge_primary_full_info,
         ]
 
-        new_links_with_edge_1_info = {
-            'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
         }
-        new_links_with_edge_2_info = {
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Wheatley',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'DISCONNECTED',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'DISCONNECTED',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
         }
         new_links_with_edge_info = [
-            new_links_with_edge_1_info,
-            new_links_with_edge_2_info,
+            new_links_with_primary_edge_info,
         ]
         links_with_edge_info_response = {
             'body': new_links_with_edge_info,
             'status': 200,
         }
 
-        new_links_grouped_by_edge_1 = {
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': edge_1_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
+            'enterpriseId': enterprise_id,
             'edgeName': 'Big Boss',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_1_id,
-            'edgeSerialNumber': edge_1_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
             'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-        new_links_grouped_by_edge_2 = {
-            'host': velocloud_host,
-            'enterpriseName': 'Aperture Science',
-            'enterpriseId': edge_2_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'GladOS',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_2_id,
-            'edgeSerialNumber': edge_2_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Wheatley',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
+                edge_link_1_info
+            ],
         }
         new_links_grouped_by_edge = [
-            new_links_grouped_by_edge_1,
-            new_links_grouped_by_edge_2,
+            new_links_grouped_by_primary_edge,
         ]
 
-        new_edge_1_full_info = {
-            'cached_info': cached_edge_1,
-            'status': new_links_grouped_by_edge_1,
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
         }
-        new_edge_2_full_info = {
-            'cached_info': cached_edge_2,
-            'status': new_links_grouped_by_edge_2,
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
         }
         new_edges_full_info = [
-            new_edge_1_full_info,
-            new_edge_2_full_info,
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
         ]
 
-        change_detail_work_queue_response = {'status': 200, 'body': 'ok'}
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
 
-        is_edge_1_in_outage_state = True
-        is_edge_2_in_outage_state = True
-
-        outage_ticket_creation_body_1 = 12345  # Ticket ID
-        outage_ticket_creation_status_1 = 473
-        outage_ticket_creation_response_1 = {
+        ticket_id = 12345
+        ticket_creation_response = {
             'request_id': uuid_,
-            'body': outage_ticket_creation_body_1,
-            'status': outage_ticket_creation_status_1,
-        }
-
-        outage_ticket_creation_body_2 = 22345  # Ticket ID
-        outage_ticket_creation_status_2 = 473
-        outage_ticket_creation_response_2 = {
-            'request_id': uuid_,
-            'body': outage_ticket_creation_body_2,
-            'status': outage_ticket_creation_status_2,
+            'body': ticket_id,
+            'status': 473,
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        digi_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
+        velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(side_effect=[
-            outage_ticket_creation_response_1,
-            outage_ticket_creation_response_2,
-        ])
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+
+        outage_repository = Mock()
+        outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_repository.is_edge_up = Mock(return_value=False)
+
+        ha_repository = Mock()
+        ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_primary_edges_with_ha_info)
+        ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=[
-            is_edge_1_in_outage_state,
-            is_edge_2_in_outage_state,
-        ])
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
-        digi_repository = Mock()
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
-        outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges)
+        custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        with patch.dict(testconfig.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(new_links_grouped_by_edge_1),
-            call(new_links_grouped_by_edge_2),
-        ])
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(client_id, edge_1_serial),
-            call(client_id, edge_2_serial),
-        ])
-        outage_monitor._change_ticket_severity.assert_has_awaits([
-            call(
-                ticket_id=outage_ticket_creation_body_1,
-                edge_status=new_links_grouped_by_edge_1,
-                check_ticket_tasks=False,
-            ),
-            call(
-                ticket_id=outage_ticket_creation_body_2,
-                edge_status=new_links_grouped_by_edge_2,
-                check_ticket_tasks=False,
-            ),
-        ])
-        outage_monitor._append_triage_note.assert_has_awaits([
-            call(outage_ticket_creation_body_1, cached_edge_1, new_links_grouped_by_edge_1),
-            call(outage_ticket_creation_body_2, cached_edge_2, new_links_grouped_by_edge_2),
-        ])
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._change_ticket_severity.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            edge_status=links_grouped_by_primary_edge_with_ha_info,
+            check_ticket_tasks=False,
+        )
+        outage_monitor._append_triage_note.assert_awaited_once_with(
+            ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
+        )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def append_triage_note_with_retrieval_of_edge_events_returning_non_2xx_status_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 1
         edge_id = 1
         edge_serial = 'VC1234567'
+        edge_ha_serial = 'VC9999999'
 
         ticket_id = 12345
         edge_full_id = {
@@ -6484,35 +6911,24 @@ class TestServiceOutageMonitor:
             'logical_ids': logical_id_list
         }
         edge_status = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
             'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': edge_id,
             'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
+                    # Some fields omitted for simplicity
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 }
-            ]
+            ],
+            'edgeHAState': 'OFFLINE',
+            'edgeIsHAPrimary': True,
         }
 
         edge_events_response = {
@@ -6530,6 +6946,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
@@ -6540,7 +6957,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -6548,7 +6965,7 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
@@ -6558,10 +6975,13 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def append_triage_note_with_no_edge_events_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 1
         edge_id = 1
         edge_serial = 'VC1234567'
+        edge_ha_serial = 'VC9999999'
 
         ticket_id = 12345
         edge_full_id = {
@@ -6583,35 +7003,24 @@ class TestServiceOutageMonitor:
             'logical_ids': logical_id_list
         }
         edge_status = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
             'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': edge_id,
             'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
+                    # Some fields omitted for simplicity
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 }
-            ]
+            ],
+            'edgeHAState': 'OFFLINE',
+            'edgeIsHAPrimary': True,
         }
 
         edge_events_response = {
@@ -6629,6 +7038,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
@@ -6639,7 +7049,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -6647,7 +7057,7 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
@@ -6657,10 +7067,13 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def append_triage_note_with_events_sorted_before_building_triage_note_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 1
         edge_id = 1
         edge_serial = 'VC1234567'
+        edge_ha_serial = 'VC9999999'
 
         ticket_id = 12345
         edge_full_id = {
@@ -6682,35 +7095,24 @@ class TestServiceOutageMonitor:
             'logical_ids': logical_id_list
         }
         edge_status = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
             'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': edge_id,
             'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
+                    # Some fields omitted for simplicity
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 }
-            ]
+            ],
+            'edgeHAState': 'OFFLINE',
+            'edgeIsHAPrimary': True,
         }
 
         event_1 = {
@@ -6771,6 +7173,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
@@ -6785,7 +7188,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -6797,23 +7200,26 @@ class TestServiceOutageMonitor:
         custom_triage_config['environment'] = 'dev'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
-            cached_edge, edge_status, events_sorted_by_event_time
+            cached_edge, edge_status, events_sorted_by_event_time, outage_type
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
 
     @pytest.mark.asyncio
     async def append_triage_note_with_events_error_appending_triage_note_test(self):
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
         velocloud_host = 'mettel.velocloud.net'
         enterprise_id = 1
         edge_id = 1
         edge_serial = 'VC1234567'
+        edge_ha_serial = 'VC9999999'
 
         ticket_id = 12345
         edge_full_id = {
@@ -6835,35 +7241,24 @@ class TestServiceOutageMonitor:
             'logical_ids': logical_id_list
         }
         edge_status = {
+            # Some fields omitted for simplicity
             'host': velocloud_host,
-            'enterpriseName': 'Militaires Sans Frontières',
             'enterpriseId': enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
             'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
             'edgeId': edge_id,
             'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            'edgeHASerialNumber': edge_ha_serial,
             'links': [
                 {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
+                    # Some fields omitted for simplicity
                     'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
                     'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
                     'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
                 }
-            ]
+            ],
+            'edgeHAState': 'OFFLINE',
+            'edgeIsHAPrimary': True,
         }
 
         event_1 = {
@@ -6920,6 +7315,7 @@ class TestServiceOutageMonitor:
         outage_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         triage_repository = Mock()
         triage_repository.build_triage_note = Mock(return_value=triage_note)
@@ -6940,7 +7336,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -6952,14 +7348,14 @@ class TestServiceOutageMonitor:
         custom_triage_config['environment'] = 'dev'
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status)
+                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
-            cached_edge, edge_status, events_sorted_by_event_time
+            cached_edge, edge_status, events_sorted_by_event_time, outage_type
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
         metrics_repository.increment_first_triage_errors.assert_called_once()
@@ -7055,6 +7451,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_result)
         bruin_repository.open_ticket = CoroutineMock(return_value=reopen_ticket_result)
         digi_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -7062,7 +7459,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._reopen_outage_ticket(ticket_id, edge_status)
 
@@ -7157,6 +7554,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_result)
@@ -7168,7 +7566,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._post_note_in_outage_ticket = CoroutineMock()
 
         await outage_monitor._reopen_outage_ticket(ticket_id, edge_status)
@@ -7242,6 +7640,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
@@ -7249,7 +7648,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
@@ -7322,6 +7721,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
@@ -7329,7 +7729,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
@@ -7406,6 +7806,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
@@ -7413,7 +7814,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
@@ -7494,6 +7895,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
@@ -7501,7 +7903,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
@@ -7658,6 +8060,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(side_effect=[False, True, True])
@@ -7666,7 +8069,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         result = outage_monitor._get_outage_causes(edge_status_1)
         assert result is None
@@ -7704,6 +8107,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         success_reboot = {
             'body': 'Success',
@@ -7791,7 +8195,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         await outage_monitor._check_for_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
                                                     new_links_grouped_by_edge_1)
 
@@ -7832,11 +8236,12 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         outage_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         result = outage_monitor._get_last_element_matching(iterable=payload, condition=cond)
         expected = 10
@@ -7868,11 +8273,12 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         outage_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         result = outage_monitor._get_last_element_matching(iterable=payload, condition=cond, fallback=fallback_value)
 
@@ -8018,6 +8424,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -8041,7 +8448,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -8201,6 +8608,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -8227,7 +8635,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -8388,6 +8796,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -8414,7 +8823,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -8570,6 +8979,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -8593,7 +9003,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -8747,6 +9157,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -8770,7 +9181,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -8925,6 +9336,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -8948,7 +9360,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -9097,6 +9509,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -9116,7 +9529,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -9253,6 +9666,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -9272,7 +9686,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         await outage_monitor._check_for_failed_digi_reboot(ticket_id, logical_id_list, edge_1_serial,
                                                            new_links_grouped_by_edge_1)
 
@@ -9425,6 +9839,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -9442,7 +9857,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -9598,6 +10013,7 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        ha_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -9615,7 +10031,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
@@ -9680,11 +10096,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         current_datetime = datetime.now()
         forward_task_run_date = current_datetime + timedelta(
@@ -9728,6 +10145,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_queue_ticket_response)
@@ -9737,7 +10155,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -9770,6 +10188,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_queue_ticket_response)
@@ -9779,7 +10198,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -9842,6 +10261,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
 
@@ -9851,7 +10271,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_monitor.change_detail_work_queue = CoroutineMock()
         next_run_time = datetime.now()
@@ -9946,6 +10366,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
 
@@ -9955,7 +10376,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_monitor._outage_repository.is_any_link_disconnected = Mock(return_value=True)
         outage_monitor.change_detail_work_queue = CoroutineMock()
@@ -10036,6 +10457,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
 
@@ -10045,7 +10467,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_monitor.change_detail_work_queue = CoroutineMock()
         outage_monitor._bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
@@ -10073,11 +10495,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         forward_link_outage_wait_time = timedelta(seconds=config.MONITOR_CONFIG['forward_link_outage_seconds'])
 
@@ -10267,11 +10690,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10365,11 +10789,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10458,11 +10883,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10585,11 +11011,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10683,11 +11110,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -10853,11 +11281,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -11010,11 +11439,12 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id)
 
@@ -11066,6 +11496,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
@@ -11077,7 +11508,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
@@ -11152,6 +11583,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
@@ -11164,7 +11596,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
@@ -11257,6 +11689,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
@@ -11270,7 +11703,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=False)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
@@ -11356,6 +11789,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
@@ -11369,7 +11803,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
@@ -11437,6 +11871,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
@@ -11450,7 +11885,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
@@ -11489,6 +11924,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
@@ -11500,7 +11936,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
@@ -11543,6 +11979,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
@@ -11554,7 +11991,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=True)
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
@@ -11574,13 +12011,14 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
+        ha_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository)
+                                       digi_repository, ha_repository)
 
         ticket_tasks = [
             {
