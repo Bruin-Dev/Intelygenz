@@ -488,6 +488,78 @@ class TestVelocloudRepository:
         velocloud_repository.group_links_by_edge.assert_called_once_with(full_edge_list)
 
     @pytest.mark.asyncio
+    async def get_network_enterprises_for_triage_test(self):
+        velocloud_hosts = testconfig.TRIAGE_CONFIG['velo_hosts']
+
+        edge_1 = {
+            # Some fields omitted for simplicity
+            'edgeState': 'CONNECTED',
+            'enterpriseId': 1,
+            'haSerialNumber': 'VC9999999',
+            'haState': 'FAILED',
+            'id': 1,
+            'name': 'Big Boss',
+            'serialNumber': 'VC1234567',
+        }
+        edge_2 = {
+            # Some fields omitted for simplicity
+            'edgeState': 'CONNECTED',
+            'enterpriseId': 1,
+            'haSerialNumber': 'VC8888888',
+            'haState': 'READY',
+            'id': 1,
+            'name': 'Sniper Wolf',
+            'serialNumber': 'VC8901234',
+        }
+
+        host_1_edges = [
+            edge_1,
+        ]
+        host_3_edges = [
+            edge_2,
+        ]
+        host_1_response = {
+            'body': host_1_edges,
+            'status': 200,
+        }
+        host_2_response = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+        host_3_response = {
+            'body': host_3_edges,
+            'status': 200,
+        }
+        host_4_response = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository.get_network_enterprises = CoroutineMock(side_effect=[
+            host_1_response,
+            host_2_response,
+            host_3_response,
+            host_4_response,
+        ])
+
+        result = await velocloud_repository.get_network_enterprises_for_triage()
+
+        for host in velocloud_hosts:
+            velocloud_repository.get_network_enterprises.assert_any_await(velocloud_host=host)
+
+        expected = [
+            edge_1,
+            edge_2,
+        ]
+        assert result == expected
+
+    @pytest.mark.asyncio
     async def get_last_edge_events_test(self):
         edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
         current_datetime = datetime.now()

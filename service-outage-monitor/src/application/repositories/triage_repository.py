@@ -41,7 +41,8 @@ class TriageRepository:
         edge_serial = edge_status['edgeSerialNumber']
         edge_is_ha_primary = edge_status['edgeIsHAPrimary']
 
-        is_ha_outage = outage_type.name.startswith('HA_')
+        is_outage_happening = outage_type is not None
+        is_ha_outage = is_outage_happening and outage_type.name.startswith('HA_')
         ha_partner_serial = edge_status['edgeHASerialNumber']
         ha_partner_state = edge_status['edgeHAState']
         ha_partner_is_primary = not edge_is_ha_primary
@@ -77,7 +78,7 @@ class TriageRepository:
         if outage_type is Outages.HA_HARD_DOWN:
             ticket_note_lines.append('Both primary and secondary edges are DISCONNECTED.\n')
 
-        if is_ha_outage:
+        if not is_outage_happening or is_ha_outage:
             if edge_is_ha_primary:
                 primary_serial = edge_serial
                 primary_state = edge_state
@@ -117,7 +118,7 @@ class TriageRepository:
         else:
             ticket_note_lines.append("Last Edge Offline: Unknown\n")
 
-        if is_ha_outage:
+        if not is_outage_happening or is_ha_outage:
             if ha_partner_is_primary:
                 standby_serial = edge_serial
                 standby_state = edge_state

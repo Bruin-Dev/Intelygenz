@@ -79,7 +79,8 @@ class Container:
                               config, self._outage_repository,
                               self._customer_cache_repository, self._bruin_repository,
                               self._velocloud_repository, self._notifications_repository,
-                              self._triage_repository, self._triage_metrics_repository)
+                              self._triage_repository, self._triage_metrics_repository,
+                              self._ha_repository)
         self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
                                              config, self._outage_repository, self._bruin_repository,
                                              self._velocloud_repository, self._notifications_repository,

@@ -165,6 +165,19 @@ class VelocloudRepository:
         links_grouped_by_edge = self.group_links_by_edge(all_edges)
         return links_grouped_by_edge
 
+    async def get_network_enterprises_for_triage(self):
+        edges = []
+
+        for host in self._config.TRIAGE_CONFIG["velo_hosts"]:
+            response = await self.get_network_enterprises(velocloud_host=host)
+            if response['status'] not in range(200, 300):
+                self._logger.error(f"Could not retrieve network enterprises for triage using host {host}")
+                continue
+
+            edges += response['body']
+
+        return edges
+
     async def get_last_edge_events(self, edge_full_id: dict, since: datetime, event_types: list = None):
         current_datetime = datetime.now(utc)
 

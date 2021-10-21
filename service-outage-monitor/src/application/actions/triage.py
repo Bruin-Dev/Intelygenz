@@ -20,7 +20,7 @@ class Triage:
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, outage_repository,
                  customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
-                 triage_repository, metrics_repository):
+                 triage_repository, metrics_repository, ha_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -32,6 +32,7 @@ class Triage:
         self._notifications_repository = notifications_repository
         self._triage_repository = triage_repository
         self._metrics_repository = metrics_repository
+        self._ha_repository = ha_repository
         self._edges_status_by_serial = {}
         self._cached_info_by_serial = {}
         self.__reset_customer_cache()
@@ -98,7 +99,11 @@ class Triage:
 
     async def _build_edges_status_by_serial(self):
         edge_list = await self._velocloud_repository.get_edges_for_triage()
-        for edge in edge_list:
+        edges_network_enterprises = await self._velocloud_repository.get_network_enterprises_for_triage()
+        edges_with_ha_info = self._ha_repository.map_edges_with_ha_info(edge_list, edges_network_enterprises)
+        all_edges = self._ha_repository.get_edges_with_standbys_as_standalone_edges(edges_with_ha_info)
+
+        for edge in all_edges:
             serial_number = edge["edgeSerialNumber"]
             if serial_number in self._cached_info_by_serial.keys():
                 self._edges_status_by_serial[serial_number] = edge
@@ -420,13 +425,13 @@ class Triage:
             recent_events_response = await self._velocloud_repository.get_last_edge_events(
                 edge_full_id, since=past_moment_for_events_lookup
             )
-            recent_events_response_body = recent_events_response['body']
             recent_events_response_status = recent_events_response['status']
 
             if recent_events_response_status not in range(200, 300):
                 continue
 
-            if not recent_events_response_body:
+            recent_events = recent_events_response['body']
+            if not recent_events:
                 self._logger.info(
                     f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
                     f'Not appending the first triage note to ticket {ticket_id}.'
@@ -438,11 +443,25 @@ class Triage:
             if edge_status is None:
                 continue
 
-            recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
+            recent_events.sort(key=lambda event: event['eventTime'], reverse=True)
 
-            ticket_note = self._triage_repository.build_triage_note(edge_data, edge_status,
-                                                                    recent_events_response_body)
+            outage_type = self._outage_repository.get_outage_type_by_edge_status(edge_status)
+            if not outage_type:
+                self._logger.info(
+                    f"Edge {serial_number} is no longer down, so the initial triage note won't be posted to ticket "
+                    f"{ticket_id}. Skipping..."
+                )
+                continue
 
+            if not self._outage_repository.should_document_outage(edge_status):
+                self._logger.info(
+                    f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
+                    f"ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and "
+                    "standbys in outage state are only documented in the event of a Soft Down. Skipping..."
+                )
+                continue
+
+            ticket_note = self._triage_repository.build_triage_note(edge_data, edge_status, recent_events, outage_type)
             note_appended = await self._bruin_repository.append_triage_note(detail, ticket_note)
 
             if note_appended == 200:
