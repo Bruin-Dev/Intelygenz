@@ -6,7 +6,8 @@ variable "eks_developer_users" {
     "marc.vivancos",
     "ricardo.hortelano",
     "juancarlos.gomez",
-    "julia.hossu"
+    "julia.hossu",
+    "sergio.delpuerto"
   ]
 }
 
