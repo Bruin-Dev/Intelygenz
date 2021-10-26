@@ -2738,163 +2738,7 @@ class TestTriage:
         )
 
     @pytest.mark.asyncio
-    async def process_ticket_details_without_triage_with_edge_events_request_not_having_2xx_status_test(self):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC1111111'
-
-        edge_1_ha_partner_serial = 'VC9999999'
-        edge_2_ha_partner_serial = None
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-
-        links_configuration = [
-            {
-                "mode": "PUBLIC",
-                "type": "WIRED",
-                "interfaces": [
-                    "GE7"
-                ],
-            },
-            {
-                "mode": "PUBLIC",
-                "type": "WIRED",
-                "interfaces": [
-                    "GE1"
-                ],
-            },
-            {
-                "mode": "PRIVATE",
-                "type": "WIRED",
-                "interfaces": [
-                    "INTERNET3"
-                ],
-            }
-        ]
-        client_id = 9994
-        bruin_client_info = {
-            'client_id': client_id,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
-            'ha_serial_number': edge_1_ha_partner_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list,
-            'links_configuration': links_configuration
-        }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
-            'ha_serial_number': edge_2_ha_partner_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list,
-            'links_configuration': links_configuration
-        }
-        cached_edge_1_ha_partner = {
-            'edge': edge_1_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_ha_partner_serial,
-            'ha_serial_number': edge_1_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list,
-            'links_configuration': links_configuration
-        }
-        cached_edges_by_serial = {
-            edge_1_serial: cached_edge_1,
-            edge_2_serial: cached_edge_2,
-            edge_1_ha_partner_serial: cached_edge_1_ha_partner,
-        }
-
-        ticket_detail_1_ticket_id = 12345
-        ticket_detail_1_detail = {
-            "detailID": 2746930,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_1_note = {
-            "noteId": 41894040,
-            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-30T06:38:13.503-05:00",
-            "createdDate": '2019-07-30T06:38:13.503-05:00',
-        }
-        ticket_detail_1 = {
-            'ticket_id': ticket_detail_1_ticket_id,
-            'ticket_detail': ticket_detail_1_detail,
-            'ticket_notes': [ticket_detail_1_note]
-        }
-
-        ticket_detail_2_id = 67890
-        ticket_detail_2_detail = {
-            "detailID": 6895947,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_2_note = {
-            "noteId": 8793897,
-            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-18T06:38:13.503-05:00",
-            "createdDate": '2019-07-18T06:38:13.503-05:00',
-        }
-        ticket_detail_2 = {
-            'ticket_id': ticket_detail_2_id,
-            'ticket_detail': ticket_detail_2_detail,
-            'ticket_notes': [ticket_detail_2_note]
-        }
-
-        tickets = [
-            ticket_detail_1,
-            ticket_detail_2,
-        ]
-
-        last_events_response = {
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        metrics_repository = Mock()
-        triage_repository = Mock()
-        ha_repository = Mock()
-
-        velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
-
-        bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
-                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
-                        triage_repository, metrics_repository, ha_repository)
-        triage._cached_info_by_serial = cached_edges_by_serial
-
-        current_datetime = datetime.now()
-        past_moment_for_events_lookup = current_datetime - timedelta(days=7)
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-
-        with patch.object(triage_module, 'datetime', new=datetime_mock):
-            with patch.object(triage_module, 'utc', new=Mock()):
-                await triage._process_ticket_details_without_triage(tickets)
-
-        velocloud_repository.get_last_edge_events.assert_has_awaits([
-            call(edge_1_full_id, since=past_moment_for_events_lookup),
-            call(edge_2_full_id, since=past_moment_for_events_lookup),
-        ])
-        outage_repository.get_outage_type_by_edge_status.assert_not_called()
-        outage_repository.should_document_outage.assert_not_called()
-        triage_repository.build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def process_ticket_details_without_triage_with_edge_events_list_empty_test(self):
+    async def process_ticket_details_without_triage_with_edge_status_not_found_test(self):
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC1111111'
 
@@ -3002,200 +2846,6 @@ class TestTriage:
             ticket_detail_1,
             ticket_detail_2,
         ]
-
-        edge_1_events = []
-        edge_2_events = []
-        edge_1_last_events_response = {
-            'body': edge_1_events,
-            'status': 200,
-        }
-        edge_2_last_events_response = {
-            'body': edge_2_events,
-            'status': 200,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        triage_repository = Mock()
-        ha_repository = Mock()
-        metrics_repository = Mock()
-
-        velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(side_effect=[
-            edge_1_last_events_response,
-            edge_2_last_events_response,
-        ])
-
-        bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
-                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
-                        triage_repository, metrics_repository, ha_repository)
-        triage._cached_info_by_serial = cached_edges_by_serial
-
-        current_datetime = datetime.now()
-        past_moment_for_events_lookup = current_datetime - timedelta(days=7)
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-
-        with patch.object(triage_module, 'datetime', new=datetime_mock):
-            with patch.object(triage_module, 'utc', new=Mock()):
-                await triage._process_ticket_details_without_triage(tickets)
-
-        velocloud_repository.get_last_edge_events.assert_has_awaits([
-            call(edge_1_full_id, since=past_moment_for_events_lookup),
-            call(edge_2_full_id, since=past_moment_for_events_lookup),
-        ])
-        outage_repository.get_outage_type_by_edge_status.assert_not_called()
-        outage_repository.should_document_outage.assert_not_called()
-        triage_repository.build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def process_ticket_details_without_triage_with_edge_status_not_found_for_serials_test(self):
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC1111111'
-
-        edge_1_ha_partner_serial = 'VC9999999'
-        edge_2_ha_partner_serial = None
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-
-        links_configuration = [
-            {
-                "mode": "PUBLIC",
-                "type": "WIRED",
-                "interfaces": [
-                    "GE7"
-                ],
-            },
-            {
-                "mode": "PUBLIC",
-                "type": "WIRED",
-                "interfaces": [
-                    "GE1"
-                ],
-            },
-            {
-                "mode": "PRIVATE",
-                "type": "WIRED",
-                "interfaces": [
-                    "INTERNET3"
-                ],
-            }
-        ]
-        client_id = 9994
-        bruin_client_info = {
-            'client_id': client_id,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
-        cached_edge_1 = {
-            'edge': edge_1_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_serial,
-            'ha_serial_number': edge_1_ha_partner_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list,
-            'links_configuration': links_configuration
-        }
-        cached_edge_2 = {
-            'edge': edge_2_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_2_serial,
-            'ha_serial_number': edge_2_ha_partner_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list,
-            'links_configuration': links_configuration
-        }
-        cached_edge_1_ha_partner = {
-            'edge': edge_1_full_id,
-            'last_contact': '2020-08-17T02:23:59',
-            'serial_number': edge_1_ha_partner_serial,
-            'ha_serial_number': edge_1_serial,
-            'bruin_client_info': bruin_client_info,
-            'logical_ids': logical_id_list,
-            'links_configuration': links_configuration
-        }
-        cached_edges_by_serial = {
-            edge_1_serial: cached_edge_1,
-            edge_2_serial: cached_edge_2,
-            edge_1_ha_partner_serial: cached_edge_1_ha_partner,
-        }
-
-        ticket_detail_1_ticket_id = 12345
-        ticket_detail_1_detail = {
-            "detailID": 2746930,
-            "detailValue": edge_1_serial,
-        }
-        ticket_detail_1_note = {
-            "noteId": 41894040,
-            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-30T06:38:13.503-05:00",
-            "createdDate": '2019-07-30T06:38:13.503-05:00',
-        }
-        ticket_detail_1 = {
-            'ticket_id': ticket_detail_1_ticket_id,
-            'ticket_detail': ticket_detail_1_detail,
-            'ticket_notes': [ticket_detail_1_note]
-        }
-
-        ticket_detail_2_ticket_id = 67890
-        ticket_detail_2_detail = {
-            "detailID": 6895947,
-            "detailValue": edge_2_serial,
-        }
-        ticket_detail_2_note = {
-            "noteId": 8793897,
-            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-18T06:38:13.503-05:00",
-            "createdDate": '2019-07-18T06:38:13.503-05:00',
-        }
-        ticket_detail_2 = {
-            'ticket_id': ticket_detail_2_ticket_id,
-            'ticket_detail': ticket_detail_2_detail,
-            'ticket_notes': [ticket_detail_2_note]
-        }
-
-        tickets = [
-            ticket_detail_1,
-            ticket_detail_2,
-        ]
-
-        event_1 = {
-            'event': 'LINK_DEAD',
-            'category': 'NETWORK',
-            'eventTime': '2019-07-30 07:30:00+00:00',
-            'message': 'Link GE2 is now DEAD'
-        }
-        event_2 = {
-            'event': 'LINK_DEAD',
-            'category': 'NETWORK',
-            'eventTime': '2019-07-30 07:38:00+00:00',
-            'message': 'Link GE1 is now DEAD'
-        }
-        event_3 = {
-            'event': 'LINK_DEAD',
-            'category': 'NETWORK',
-            'eventTime': '2019-07-30 07:40:00+00:00',
-            'message': 'Link GE1 is no longer DEAD'
-        }
-        edge_1_events = [event_1, event_2]
-        edge_2_events = [event_3]
-        edge_1_last_events_response = {
-            'body': edge_1_events,
-            'status': 200,
-        }
-        edge_2_last_events_response = {
-            'body': edge_2_events,
-            'status': 200,
-        }
 
         edge_status_by_serial = {}
 
@@ -3211,10 +2861,7 @@ class TestTriage:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(side_effect=[
-            edge_1_last_events_response,
-            edge_2_last_events_response,
-        ])
+        velocloud_repository.get_last_edge_events = CoroutineMock()
 
         bruin_repository = Mock()
         bruin_repository.append_triage_note = CoroutineMock()
@@ -3224,6 +2871,7 @@ class TestTriage:
                         triage_repository, metrics_repository, ha_repository)
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
+        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3235,11 +2883,9 @@ class TestTriage:
             with patch.object(triage_module, 'utc', new=Mock()):
                 await triage._process_ticket_details_without_triage(tickets)
 
-        velocloud_repository.get_last_edge_events.assert_has_awaits([
-            call(edge_1_full_id, since=past_moment_for_events_lookup),
-            call(edge_2_full_id, since=past_moment_for_events_lookup),
-        ])
         outage_repository.get_outage_type_by_edge_status.assert_not_called()
+        triage._append_new_triage_notes_based_on_recent_events.assert_not_awaited()
+        velocloud_repository.get_last_edge_events.assert_not_awaited()
         outage_repository.should_document_outage.assert_not_called()
         triage_repository.build_triage_note.assert_not_called()
         bruin_repository.append_triage_note.assert_not_awaited()
@@ -3354,35 +3000,6 @@ class TestTriage:
             ticket_detail_2,
         ]
 
-        event_1 = {
-            'event': 'LINK_DEAD',
-            'category': 'NETWORK',
-            'eventTime': '2019-07-30 07:30:00+00:00',
-            'message': 'Link GE2 is now DEAD'
-        }
-        event_2 = {
-            'event': 'LINK_DEAD',
-            'category': 'NETWORK',
-            'eventTime': '2019-07-30 07:38:00+00:00',
-            'message': 'Link GE1 is now DEAD'
-        }
-        event_3 = {
-            'event': 'LINK_DEAD',
-            'category': 'NETWORK',
-            'eventTime': '2019-07-30 07:40:00+00:00',
-            'message': 'Link GE1 is no longer DEAD'
-        }
-        edge_1_events = [event_1, event_2]
-        edge_2_events = [event_3]
-        edge_1_last_events_response = {
-            'body': edge_1_events,
-            'status': 200,
-        }
-        edge_2_last_events_response = {
-            'body': edge_2_events,
-            'status': 200,
-        }
-
         edge_1_status = {
             # Some fields omitted for simplicity
             'host': 'some-host',
@@ -3457,10 +3074,7 @@ class TestTriage:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(side_effect=[
-            edge_1_last_events_response,
-            edge_2_last_events_response,
-        ])
+        velocloud_repository.get_last_edge_events = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.get_outage_type_by_edge_status = Mock(return_value=None)
@@ -3473,6 +3087,237 @@ class TestTriage:
                         triage_repository, metrics_repository, ha_repository)
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
+        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+
+        current_datetime = datetime.now()
+        past_moment_for_events_lookup = current_datetime - timedelta(days=1)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        with patch.object(triage_module, 'datetime', new=datetime_mock):
+            with patch.object(triage_module, 'utc', new=Mock()):
+                await triage._process_ticket_details_without_triage(tickets)
+
+        outage_repository.get_outage_type_by_edge_status.assert_has_calls([
+            call(edge_1_status),
+            call(edge_2_status),
+        ])
+        triage._append_new_triage_notes_based_on_recent_events.assert_has_awaits([
+            call(ticket_detail_1, str(past_moment_for_events_lookup), edge_1_full_id),
+            call(ticket_detail_2, str(past_moment_for_events_lookup), edge_2_full_id),
+        ])
+        velocloud_repository.get_last_edge_events.assert_not_awaited()
+        outage_repository.should_document_outage.assert_not_called()
+        triage_repository.build_triage_note.assert_not_called()
+        bruin_repository.append_triage_note.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_ticket_details_without_triage_with_outage_detected_and_events_request_not_having_2xx_status_test(
+            self):
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC1111111'
+
+        edge_1_ha_partner_serial = 'VC9999999'
+        edge_2_ha_partner_serial = None
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+
+        links_configuration = [
+            {
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "interfaces": [
+                    "GE7"
+                ],
+            },
+            {
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "interfaces": [
+                    "GE1"
+                ],
+            },
+            {
+                "mode": "PRIVATE",
+                "type": "WIRED",
+                "interfaces": [
+                    "INTERNET3"
+                ],
+            }
+        ]
+        client_id = 9994
+        bruin_client_info = {
+            'client_id': client_id,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
+        cached_edge_1 = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_partner_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration
+        }
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_partner_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration
+        }
+        cached_edge_1_ha_partner = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_ha_partner_serial,
+            'ha_serial_number': edge_1_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration
+        }
+        cached_edges_by_serial = {
+            edge_1_serial: cached_edge_1,
+            edge_2_serial: cached_edge_2,
+            edge_1_ha_partner_serial: cached_edge_1_ha_partner,
+        }
+
+        ticket_detail_1_ticket_id = 12345
+        ticket_detail_1_detail = {
+            "detailID": 2746930,
+            "detailValue": edge_1_serial,
+        }
+        ticket_detail_1_note = {
+            "noteId": 41894040,
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-30T06:38:13.503-05:00",
+            "createdDate": '2019-07-30T06:38:13.503-05:00',
+        }
+        ticket_detail_1 = {
+            'ticket_id': ticket_detail_1_ticket_id,
+            'ticket_detail': ticket_detail_1_detail,
+            'ticket_notes': [ticket_detail_1_note]
+        }
+
+        ticket_detail_2_id = 67890
+        ticket_detail_2_detail = {
+            "detailID": 6895947,
+            "detailValue": edge_2_serial,
+        }
+        ticket_detail_2_note = {
+            "noteId": 8793897,
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-18T06:38:13.503-05:00",
+            "createdDate": '2019-07-18T06:38:13.503-05:00',
+        }
+        ticket_detail_2 = {
+            'ticket_id': ticket_detail_2_id,
+            'ticket_detail': ticket_detail_2_detail,
+            'ticket_notes': [ticket_detail_2_note]
+        }
+
+        tickets = [
+            ticket_detail_1,
+            ticket_detail_2,
+        ]
+
+        edge_1_status = {
+            # Some fields omitted for simplicity
+            'host': 'some-host',
+            'enterpriseId': 1,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_partner_serial,
+            'links': [
+                {
+                    'interface': 'GE1',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+            'edgeHAState': 'CONNECTED',
+            'edgeIsHAPrimary': True,
+        }
+        edge_2_status = {
+            # Some fields omitted for simplicity
+            'host': 'some-host',
+            'enterpriseId': 1,
+            'edgeName': 'Sniper Wolf',
+            'edgeState': 'CONNECTED',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_partner_serial,
+            'links': [
+                {
+                    'interface': 'GE1',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+            'edgeHAState': None,
+            'edgeIsHAPrimary': None,
+        }
+        edge_1_ha_partner_status = {
+            # Some fields omitted for simplicity
+            'host': 'some-host',
+            'enterpriseId': 1,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_1_ha_partner_serial,
+            'edgeHASerialNumber': edge_1_serial,
+            'links': [
+                {
+                    'interface': 'GE1',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+            'edgeHAState': 'CONNECTED',
+            'edgeIsHAPrimary': False,
+        }
+        edge_status_by_serial = {
+            edge_1_serial: edge_1_status,
+            edge_2_serial: edge_2_status,
+            edge_1_ha_partner_serial: edge_1_ha_partner_status,
+        }
+
+        outage_type = Outages.HA_HARD_DOWN
+
+        last_events_response = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+        metrics_repository = Mock()
+        triage_repository = Mock()
+        ha_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.get_outage_type_by_edge_status = Mock(return_value=outage_type)
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+
+        bruin_repository = Mock()
+        bruin_repository.append_triage_note = CoroutineMock()
+
+        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
+                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
+                        triage_repository, metrics_repository, ha_repository)
+        triage._cached_info_by_serial = cached_edges_by_serial
+        triage._edges_status_by_serial = edge_status_by_serial
+        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3484,20 +3329,259 @@ class TestTriage:
             with patch.object(triage_module, 'utc', new=Mock()):
                 await triage._process_ticket_details_without_triage(tickets)
 
-        velocloud_repository.get_last_edge_events.assert_has_awaits([
-            call(edge_1_full_id, since=past_moment_for_events_lookup),
-            call(edge_2_full_id, since=past_moment_for_events_lookup),
-        ])
         outage_repository.get_outage_type_by_edge_status.assert_has_calls([
             call(edge_1_status),
             call(edge_2_status),
+        ])
+        triage._append_new_triage_notes_based_on_recent_events.assert_not_awaited()
+        velocloud_repository.get_last_edge_events.assert_has_awaits([
+            call(edge_1_full_id, since=past_moment_for_events_lookup),
+            call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         outage_repository.should_document_outage.assert_not_called()
         triage_repository.build_triage_note.assert_not_called()
         bruin_repository.append_triage_note.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_ticket_details_without_triage_with_outage_that_should_not_be_documented_test(self):
+    async def process_ticket_details_without_triage_with_outage_detected_and_edge_events_list_empty_test(self):
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC1111111'
+
+        edge_1_ha_partner_serial = 'VC9999999'
+        edge_2_ha_partner_serial = None
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+
+        links_configuration = [
+            {
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "interfaces": [
+                    "GE7"
+                ],
+            },
+            {
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "interfaces": [
+                    "GE1"
+                ],
+            },
+            {
+                "mode": "PRIVATE",
+                "type": "WIRED",
+                "interfaces": [
+                    "INTERNET3"
+                ],
+            }
+        ]
+        client_id = 9994
+        bruin_client_info = {
+            'client_id': client_id,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        logical_id_list = [{'interface_name': 'GE1', 'logical_id': '123'}]
+        cached_edge_1 = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_partner_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration
+        }
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_partner_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration
+        }
+        cached_edge_1_ha_partner = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_ha_partner_serial,
+            'ha_serial_number': edge_1_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration
+        }
+        cached_edges_by_serial = {
+            edge_1_serial: cached_edge_1,
+            edge_2_serial: cached_edge_2,
+            edge_1_ha_partner_serial: cached_edge_1_ha_partner,
+        }
+
+        ticket_detail_1_ticket_id = 12345
+        ticket_detail_1_detail = {
+            "detailID": 2746930,
+            "detailValue": edge_1_serial,
+        }
+        ticket_detail_1_note = {
+            "noteId": 41894040,
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-30T06:38:13.503-05:00",
+            "createdDate": '2019-07-30T06:38:13.503-05:00',
+        }
+        ticket_detail_1 = {
+            'ticket_id': ticket_detail_1_ticket_id,
+            'ticket_detail': ticket_detail_1_detail,
+            'ticket_notes': [ticket_detail_1_note]
+        }
+
+        ticket_detail_2_ticket_id = 67890
+        ticket_detail_2_detail = {
+            "detailID": 6895947,
+            "detailValue": edge_2_serial,
+        }
+        ticket_detail_2_note = {
+            "noteId": 8793897,
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving detail\nTimeStamp: 2019-07-18T06:38:13.503-05:00",
+            "createdDate": '2019-07-18T06:38:13.503-05:00',
+        }
+        ticket_detail_2 = {
+            'ticket_id': ticket_detail_2_ticket_id,
+            'ticket_detail': ticket_detail_2_detail,
+            'ticket_notes': [ticket_detail_2_note]
+        }
+
+        tickets = [
+            ticket_detail_1,
+            ticket_detail_2,
+        ]
+
+        edge_1_status = {
+            # Some fields omitted for simplicity
+            'host': 'some-host',
+            'enterpriseId': 1,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_partner_serial,
+            'links': [
+                {
+                    'interface': 'GE1',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+            'edgeHAState': 'CONNECTED',
+            'edgeIsHAPrimary': True,
+        }
+        edge_2_status = {
+            # Some fields omitted for simplicity
+            'host': 'some-host',
+            'enterpriseId': 1,
+            'edgeName': 'Sniper Wolf',
+            'edgeState': 'CONNECTED',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_partner_serial,
+            'links': [
+                {
+                    'interface': 'GE1',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+            'edgeHAState': None,
+            'edgeIsHAPrimary': None,
+        }
+        edge_1_ha_partner_status = {
+            # Some fields omitted for simplicity
+            'host': 'some-host',
+            'enterpriseId': 1,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeId': 1,
+            'edgeSerialNumber': edge_1_ha_partner_serial,
+            'edgeHASerialNumber': edge_1_serial,
+            'links': [
+                {
+                    'interface': 'GE1',
+                    'linkState': 'STABLE',
+                    'linkId': 5293,
+                },
+            ],
+            'edgeHAState': 'CONNECTED',
+            'edgeIsHAPrimary': False,
+        }
+        edge_status_by_serial = {
+            edge_1_serial: edge_1_status,
+            edge_2_serial: edge_2_status,
+            edge_1_ha_partner_serial: edge_1_ha_partner_status,
+        }
+
+        outage_type = Outages.HA_HARD_DOWN
+
+        edge_1_events = []
+        edge_2_events = []
+        edge_1_last_events_response = {
+            'body': edge_1_events,
+            'status': 200,
+        }
+        edge_2_last_events_response = {
+            'body': edge_2_events,
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+        triage_repository = Mock()
+        ha_repository = Mock()
+        metrics_repository = Mock()
+
+        outage_repository = Mock()
+        outage_repository.get_outage_type_by_edge_status = Mock(return_value=outage_type)
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_last_edge_events = CoroutineMock(side_effect=[
+            edge_1_last_events_response,
+            edge_2_last_events_response,
+        ])
+
+        bruin_repository = Mock()
+        bruin_repository.append_triage_note = CoroutineMock()
+
+        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
+                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
+                        triage_repository, metrics_repository, ha_repository)
+        triage._cached_info_by_serial = cached_edges_by_serial
+        triage._edges_status_by_serial = edge_status_by_serial
+        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+
+        current_datetime = datetime.now()
+        past_moment_for_events_lookup = current_datetime - timedelta(days=7)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        with patch.object(triage_module, 'datetime', new=datetime_mock):
+            with patch.object(triage_module, 'utc', new=Mock()):
+                await triage._process_ticket_details_without_triage(tickets)
+
+        outage_repository.get_outage_type_by_edge_status.assert_has_calls([
+            call(edge_1_status),
+            call(edge_2_status),
+        ])
+        triage._append_new_triage_notes_based_on_recent_events.assert_not_awaited()
+        velocloud_repository.get_last_edge_events.assert_has_awaits([
+            call(edge_1_full_id, since=past_moment_for_events_lookup),
+            call(edge_2_full_id, since=past_moment_for_events_lookup),
+        ])
+        outage_repository.should_document_outage.assert_not_called()
+        triage_repository.build_triage_note.assert_not_called()
+        bruin_repository.append_triage_note.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_ticket_details_without_triage_with_outage_detected_that_should_not_be_documented_test(self):
         edge_serial = 'VC1234567'
         edge_ha_partner_serial = 'VC9999999'
 
@@ -3663,6 +3747,7 @@ class TestTriage:
                         triage_repository, metrics_repository, ha_repository)
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
+        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3674,16 +3759,17 @@ class TestTriage:
             with patch.object(triage_module, 'utc', new=Mock()):
                 await triage._process_ticket_details_without_triage(tickets)
 
+        outage_repository.get_outage_type_by_edge_status.assert_called_once_with(edge_ha_partner_status)
+        triage._append_new_triage_notes_based_on_recent_events.assert_not_awaited()
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        outage_repository.get_outage_type_by_edge_status.assert_called_once_with(edge_ha_partner_status)
         outage_repository.should_document_outage.assert_called_once_with(edge_ha_partner_status)
         triage_repository.build_triage_note.assert_not_called()
         bruin_repository.append_triage_note.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_ticket_details_without_triage_with_error_appending_triage_note_test(self):
+    async def process_ticket_details_without_triage_with_outage_detected_and_error_appending_triage_note_test(self):
         edge_serial = 'VC1234567'
         edge_ha_partner_serial = 'VC9999999'
 
@@ -3854,6 +3940,7 @@ class TestTriage:
                         triage_repository, metrics_repository, ha_repository)
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
+        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3865,17 +3952,18 @@ class TestTriage:
             with patch.object(triage_module, 'utc', new=Mock()):
                 await triage._process_ticket_details_without_triage(tickets)
 
+        outage_repository.get_outage_type_by_edge_status.assert_called_once_with(edge_status)
+        triage._append_new_triage_notes_based_on_recent_events.assert_not_awaited()
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        outage_repository.get_outage_type_by_edge_status.assert_called_once_with(edge_status)
         outage_repository.should_document_outage.assert_called_once_with(edge_status)
         triage_repository.build_triage_note.assert_called_once_with(cached_edge, edge_status, edge_events, outage_type)
         bruin_repository.append_triage_note.assert_awaited_once_with(ticket_detail_1, triage_note)
         metrics_repository.increment_note_append_errors.assert_called_once()
 
     @pytest.mark.asyncio
-    async def process_ticket_details_without_triage_ok_test(self):
+    async def process_ticket_details_without_triage_with_outage_detected_ok_test(self):
         edge_serial = 'VC1234567'
         edge_ha_partner_serial = 'VC9999999'
 

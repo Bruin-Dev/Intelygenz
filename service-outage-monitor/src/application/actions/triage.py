@@ -319,8 +319,8 @@ class Triage:
 
         return (current_datetime - ticket_note_creation_datetime) <= timedelta(minutes=30)
 
-    async def _append_new_triage_notes_based_on_recent_events(self, ticket_detail, last_triage_timestamp: str,
-                                                              edge_data):
+    async def _append_new_triage_notes_based_on_recent_events(self, ticket_detail, events_lookup_timestamp: str,
+                                                              edge_full_id):
         ticket_id = ticket_detail['ticket_id']
         ticket_detail_id = ticket_detail['ticket_detail']['detailID']
         service_number = ticket_detail['ticket_detail']['detailValue']
@@ -329,16 +329,14 @@ class Triage:
 
         working_environment = self._config.TRIAGE_CONFIG['environment']
 
-        edge_full_id = edge_data
-
-        last_triage_datetime = parse(last_triage_timestamp).astimezone(utc)
+        past_moment = parse(events_lookup_timestamp).astimezone(utc)
         self._logger.info(
             f'Getting events for serial {service_number} (detail {ticket_detail_id}) in ticket '
             f'{ticket_id} before applying triage...'
         )
 
         recent_events_response = await self._velocloud_repository.get_last_edge_events(
-            edge_full_id, since=last_triage_datetime
+            edge_full_id, since=past_moment
         )
         recent_events_response_body = recent_events_response['body']
         recent_events_response_status = recent_events_response['status']
@@ -348,8 +346,8 @@ class Triage:
 
         if not recent_events_response_body:
             self._logger.info(
-                f'No events were found for edge {service_number} starting from {last_triage_timestamp}. Not appending '
-                f'any new triage notes to detail {ticket_detail_id} of ticket {ticket_id}.'
+                f'No events were found for edge {service_number} starting from {events_lookup_timestamp}. '
+                f'Not appending any new triage notes to detail {ticket_detail_id} of ticket {ticket_id}.'
             )
             return
 
@@ -417,57 +415,64 @@ class Triage:
             self._logger.info(f'Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...')
 
             edge_data = self._cached_info_by_serial[serial_number]
-
             edge_full_id = edge_data['edge']
 
-            past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-
-            recent_events_response = await self._velocloud_repository.get_last_edge_events(
-                edge_full_id, since=past_moment_for_events_lookup
-            )
-            recent_events_response_status = recent_events_response['status']
-
-            if recent_events_response_status not in range(200, 300):
-                continue
-
-            recent_events = recent_events_response['body']
-            if not recent_events:
-                self._logger.info(
-                    f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
-                    f'Not appending the first triage note to ticket {ticket_id}.'
-                )
-                continue
-
             edge_status = self._edges_status_by_serial.get(serial_number)
-
             if edge_status is None:
                 continue
-
-            recent_events.sort(key=lambda event: event['eventTime'], reverse=True)
 
             outage_type = self._outage_repository.get_outage_type_by_edge_status(edge_status)
             if not outage_type:
                 self._logger.info(
                     f"Edge {serial_number} is no longer down, so the initial triage note won't be posted to ticket "
-                    f"{ticket_id}. Skipping..."
+                    f"{ticket_id}. Posting events of the last 24 hours to the ticket so it's not blank..."
                 )
-                continue
 
-            if not self._outage_repository.should_document_outage(edge_status):
+                timestamp_for_events_lookup = str(datetime.now(utc) - timedelta(days=1))
+                await self._append_new_triage_notes_based_on_recent_events(
+                    detail, timestamp_for_events_lookup, edge_full_id
+                )
+            else:
                 self._logger.info(
-                    f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
-                    f"ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and "
-                    "standbys in outage state are only documented in the event of a Soft Down. Skipping..."
+                    f"Edge {serial_number} is in {outage_type.value} state. Posting initial triage note to ticket "
+                    f"{ticket_id}..."
                 )
-                continue
 
-            ticket_note = self._triage_repository.build_triage_note(edge_data, edge_status, recent_events, outage_type)
-            note_appended = await self._bruin_repository.append_triage_note(detail, ticket_note)
+                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+                recent_events_response = await self._velocloud_repository.get_last_edge_events(
+                    edge_full_id, since=past_moment_for_events_lookup
+                )
 
-            if note_appended == 200:
-                self._metrics_repository.increment_tickets_without_triage_processed()
-            if note_appended == 503:
-                self._metrics_repository.increment_note_append_errors()
+                if recent_events_response['status'] not in range(200, 300):
+                    continue
+
+                recent_events = recent_events_response['body']
+                if not recent_events:
+                    self._logger.info(
+                        f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
+                        f'Not appending the first triage note to ticket {ticket_id}.'
+                    )
+                    continue
+
+                if not self._outage_repository.should_document_outage(edge_status):
+                    self._logger.info(
+                        f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
+                        f"ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and "
+                        "standbys in outage state are only documented in the event of a Soft Down. Skipping..."
+                    )
+                    continue
+
+                recent_events.sort(key=lambda event: event['eventTime'], reverse=True)
+
+                ticket_note = self._triage_repository.build_triage_note(
+                    edge_data, edge_status, recent_events, outage_type
+                )
+                note_appended = await self._bruin_repository.append_triage_note(detail, ticket_note)
+
+                if note_appended == 200:
+                    self._metrics_repository.increment_tickets_without_triage_processed()
+                if note_appended == 503:
+                    self._metrics_repository.increment_note_append_errors()
 
             self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
 
