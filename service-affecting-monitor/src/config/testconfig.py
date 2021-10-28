@@ -14,10 +14,16 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
+velo_filter = {
+                "mettel.velocloud.net": [],
+                "metvco03.mettel.net": [],
+                "metvco04.mettel.net": []
+}
 
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
-    'device_by_id': contact_info.devices_by_id,
+    'contact_by_host_and_client_id': contact_info.contact_by_host_and_client_id,
+    'velo_filter': velo_filter,
     'environment': "test",
     'timezone': 'US/Eastern',
     'monitoring_minutes_interval': 10,

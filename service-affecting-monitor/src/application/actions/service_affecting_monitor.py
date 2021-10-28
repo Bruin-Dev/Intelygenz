@@ -1,16 +1,17 @@
-import asyncio
 import time
-
+from collections import ChainMap
 from datetime import datetime
 from datetime import timedelta
 from typing import List
 from typing import Optional
 
+import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 
+from application import ALL_FIS_CLIENTS
 from application import AffectingTroubles
 
 
@@ -58,7 +59,7 @@ class ServiceAffectingMonitor:
     async def _service_affecting_monitor_process(self):
         self.__reset_state()
 
-        self._logger.info(f"Processing all links of {len(self._config.MONITOR_CONFIG['device_by_id'])} edges...")
+        self._logger.info(f"Starting Service Affecting Monitor process now...")
         start_time = time.time()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
@@ -69,6 +70,12 @@ class ServiceAffectingMonitor:
         if not self._customer_cache:
             self._logger.info('Got an empty customer cache. Process cannot keep going.')
             return
+        self._default_contact_info_by_client = self._get_default_contact_info_by_client()
+        self._customer_cache: list = [
+            edge
+            for edge in customer_cache_response['body']
+            if edge['bruin_client_info']['client_id'] in self._default_contact_info_by_client.keys()
+        ]
 
         await self._latency_check()
         await self._packet_loss_check()
@@ -78,6 +85,27 @@ class ServiceAffectingMonitor:
         await self._run_autoresolve_process()
 
         self._logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
+
+    def _get_default_contact_info_by_client(self):
+
+        contact_info_by_client = dict(ChainMap(*[
+            default_contact_info_by_client_id
+            for default_contact_info_by_client_id in
+            self._config.MONITOR_CONFIG['contact_by_host_and_client_id'].values()]))
+
+        if ALL_FIS_CLIENTS in contact_info_by_client.keys():
+            fis_contact_info = contact_info_by_client.pop(ALL_FIS_CLIENTS)
+            fis_contact_info_by_client = {
+                edge['bruin_client_info']['client_id']: fis_contact_info
+                for edge in self._customer_cache
+                if edge['edge']['host'] == 'metvco04.mettel.net'
+            }
+            contact_info_by_client = {
+                **contact_info_by_client,
+                **fis_contact_info_by_client,
+            }
+
+        return contact_info_by_client
 
     def _structure_links_metrics(self, links_metrics: list) -> list:
         result = []
@@ -173,7 +201,7 @@ class ServiceAffectingMonitor:
 
         return result
 
-    def _map_cached_edges_with_links_metrics_and_contact_info(self, links_metrics: list) -> list:
+    async def _map_cached_edges_with_links_metrics_and_contact_info(self, links_metrics: list) -> list:
         result = []
 
         cached_edges_by_serial = {
@@ -181,30 +209,26 @@ class ServiceAffectingMonitor:
             for elem in self._customer_cache
         }
 
-        links_metrics_by_serial = {}
         for elem in links_metrics:
             serial_number = elem['edge_status']['edgeSerialNumber']
-            links_metrics_by_serial.setdefault(serial_number, [])
-            links_metrics_by_serial[serial_number].append(elem)
-
-        for contact_info in self._config.MONITOR_CONFIG['device_by_id']:
-            serial_number = contact_info['serial']
             cached_edge = cached_edges_by_serial.get(serial_number)
             if not cached_edge:
                 self._logger.info(f'No cached info was found for edge {serial_number}. Skipping...')
                 continue
-
-            links_metrics_for_current_edge = links_metrics_by_serial.get(serial_number)
-            if not links_metrics_for_current_edge:
-                self._logger.info(f'No links metrics were found for edge {serial_number}. Skipping...')
+            site_id = cached_edge['bruin_client_info']['site_id']
+            client_id = cached_edge['bruin_client_info']['client_id']
+            contact_info = await self._bruin_repository.get_contact_info(client_id,
+                                                                         site_id,
+                                                                         self._default_contact_info_by_client)
+            if contact_info is None:
+                self._logger.info(f'No contact info found for edge {serial_number}. Skipping...')
                 continue
 
-            for metric in links_metrics_for_current_edge:
-                result.append({
-                    'cached_info': cached_edge,
-                    'contact_info': contact_info['contacts'],
-                    **metric,
-                })
+            result.append({
+                'cached_info': cached_edge,
+                'contact_info': contact_info,
+                **elem,
+            })
 
         return result
 
@@ -219,7 +243,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+            links_metrics)
         edges_with_links_info = self._group_links_by_edge(metrics_with_cache_and_contact_info)
 
         self._logger.info(f'Running auto-resolve for {len(edges_with_links_info)} edges')
@@ -382,7 +407,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await \
+            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             cached_info = elem['cached_info']
@@ -412,7 +438,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await \
+            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             cached_info = elem['cached_info']
@@ -442,7 +469,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await \
+            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             cached_info = elem['cached_info']
@@ -472,7 +500,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await \
+            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             cached_info = elem['cached_info']
@@ -495,9 +524,10 @@ class ServiceAffectingMonitor:
             trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
             scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
             bandwidth_metrics_are_within_threshold = (
-                (rx_bandwidth == 0 or self._trouble_repository.is_bandwidth_rx_within_threshold(metrics, scan_interval))
-                and
-                (tx_bandwidth == 0 or self._trouble_repository.is_bandwidth_tx_within_threshold(metrics, scan_interval))
+                (rx_bandwidth == 0 or self._trouble_repository.is_bandwidth_rx_within_threshold(metrics,
+                                                                                                scan_interval)) and (
+                    tx_bandwidth == 0 or self._trouble_repository.is_bandwidth_tx_within_threshold(metrics,
+                                                                                                   scan_interval))
             )
 
             if bandwidth_metrics_are_within_threshold:

@@ -53,10 +53,7 @@ class VelocloudRepository:
         return response
 
     async def get_all_links_metrics(self, interval: dict) -> dict:
-        velocloud_hosts = set(
-            edge['host']
-            for edge in self._config.MONITOR_CONFIG['device_by_id']
-        )
+        velocloud_hosts = self._config.MONITOR_CONFIG['velo_filter'].keys()
 
         all_links_metrics = []
         for host in velocloud_hosts:

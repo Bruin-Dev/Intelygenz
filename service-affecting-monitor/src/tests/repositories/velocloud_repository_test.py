@@ -121,29 +121,10 @@ class TestVelocloudRepository:
         velocloud_host_1_enterprise_2_id = 10000
         velocloud_host_2_enterprise_1_id = 1000000
 
-        edge_1_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_1,
-            "enterprise_id": velocloud_host_1_enterprise_1_id,
-            "edge_id": 1,
+        velo_filter_mock = {
+            velocloud_host_1: [velocloud_host_1_enterprise_1_id, velocloud_host_2_enterprise_1_id],
+            velocloud_host_2: [velocloud_host_1_enterprise_2_id]
         }
-        edge_2_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_1,
-            "enterprise_id": velocloud_host_1_enterprise_2_id,
-            "edge_id": 2,
-        }
-        edge_3_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_2,
-            "enterprise_id": velocloud_host_2_enterprise_1_id,
-            "edge_id": 3,
-        }
-        contact_info = [
-            edge_1_contact_info,
-            edge_2_contact_info,
-            edge_3_contact_info,
-        ]
 
         interval = {
             'start': datetime.now() - timedelta(minutes=30),
@@ -160,7 +141,7 @@ class TestVelocloudRepository:
         velocloud_repository.get_links_metrics_by_host.return_value = velocloud_500_response
 
         custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['device_by_id'] = contact_info
+        custom_monitor_config['velo_filter'] = velo_filter_mock
         with patch.dict(velocloud_repository._config.MONITOR_CONFIG, custom_monitor_config):
             with uuid_mock:
                 result = await velocloud_repository.get_all_links_metrics(interval)
@@ -178,29 +159,10 @@ class TestVelocloudRepository:
         velocloud_host_1_enterprise_2_id = 10000
         velocloud_host_2_enterprise_1_id = 1000000
 
-        edge_1_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_1,
-            "enterprise_id": velocloud_host_1_enterprise_1_id,
-            "edge_id": 1,
+        velo_filter_mock = {
+            velocloud_host_1: [velocloud_host_1_enterprise_1_id, velocloud_host_2_enterprise_1_id],
+            velocloud_host_2: [velocloud_host_1_enterprise_2_id]
         }
-        edge_2_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_1,
-            "enterprise_id": velocloud_host_1_enterprise_2_id,
-            "edge_id": 2,
-        }
-        edge_3_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_2,
-            "enterprise_id": velocloud_host_2_enterprise_1_id,
-            "edge_id": 3,
-        }
-        contact_info = [
-            edge_1_contact_info,
-            edge_2_contact_info,
-            edge_3_contact_info,
-        ]
 
         interval = {
             'start': datetime.now() - timedelta(minutes=30),
@@ -236,7 +198,7 @@ class TestVelocloudRepository:
         ]
 
         custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['device_by_id'] = contact_info
+        custom_monitor_config['velo_filter'] = velo_filter_mock
         with patch.dict(velocloud_repository._config.MONITOR_CONFIG, custom_monitor_config):
             with uuid_mock:
                 result = await velocloud_repository.get_all_links_metrics(interval)

@@ -118,30 +118,6 @@ class TestCustomerCacheRepository:
         velocloud_host_1_enterprise_2_id = 10000
         velocloud_host_2_enterprise_1_id = 1000000
 
-        edge_1_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_1,
-            "enterprise_id": velocloud_host_1_enterprise_1_id,
-            "edge_id": 1,
-        }
-        edge_2_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_1,
-            "enterprise_id": velocloud_host_1_enterprise_2_id,
-            "edge_id": 2,
-        }
-        edge_3_contact_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host_2,
-            "enterprise_id": velocloud_host_2_enterprise_1_id,
-            "edge_id": 3,
-        }
-        contact_info = [
-            edge_1_contact_info,
-            edge_2_contact_info,
-            edge_3_contact_info,
-        ]
-
         filter_ = {
             velocloud_host_1: [
                 velocloud_host_1_enterprise_1_id,
@@ -153,7 +129,7 @@ class TestCustomerCacheRepository:
         }
 
         custom_monitor_config = customer_cache_repository._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['device_by_id'] = contact_info
+        custom_monitor_config['velo_filter'] = filter_
         with patch.dict(customer_cache_repository._config.MONITOR_CONFIG, custom_monitor_config):
             await customer_cache_repository.get_cache_for_affecting_monitoring()
 

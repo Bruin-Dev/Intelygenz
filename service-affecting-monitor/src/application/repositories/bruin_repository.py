@@ -213,7 +213,7 @@ class BruinRepository:
 
         return response
 
-    async def create_affecting_ticket(self, client_id: int, service_number: str, contact_info: dict):
+    async def create_affecting_ticket(self, client_id: int, service_number: str, contact_info: list):
         err_msg = None
         ticket_details = {
             "request_id": uuid(),
@@ -225,20 +225,7 @@ class BruinRepository:
                         "serviceNumber": service_number
                     }
                 ],
-                "contacts": [
-                    {
-                        "email": contact_info['site']['email'],
-                        "phone": contact_info['site']['phone'],
-                        "name": contact_info['site']['name'],
-                        "type": "site"
-                    },
-                    {
-                        "email": contact_info['ticket']['email'],
-                        "phone": contact_info['ticket']['phone'],
-                        "name": contact_info['ticket']['name'],
-                        "type": "ticket"
-                    }
-                ]
+                "contacts": contact_info
             }
         }
 
@@ -396,6 +383,70 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    async def get_site_details(self, client_id, site_id):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'site_id': site_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting site details of site_id {site_id} and client_id {client_id}...')
+            response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
+        except Exception as e:
+            err_msg = f'An error occurred while getting site details of site_id {site_id} ' \
+                      f'and client_id {client_id}... -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Got site details of site_id {site_id} and client_id {client_id} successfully!')
+            else:
+                err_msg = (
+                    f'Error while getting site details of site_id {site_id} and client_id {client_id} in '
+                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def get_contact_info(self, client_id, site_id, default_contact_info):
+        contact_info = default_contact_info.get(client_id)
+        site_details_response = await self.get_site_details(client_id, site_id)
+        if site_details_response['status'] in range(200, 300):
+            site_detail_name = site_details_response["body"]["primaryContactName"]
+            site_detail_phone = site_details_response["body"]["primaryContactPhone"]
+            site_detail_email = site_details_response["body"]["primaryContactEmail"]
+            if site_detail_name is not None and site_detail_email is not None:
+                contact_info = [
+                    {
+                        "email": site_detail_email,
+                        "name": site_detail_name,
+                        "type": "ticket",
+                    },
+                    {
+                        "email": site_detail_email,
+                        "name": site_detail_name,
+                        "type": "site",
+                    }
+                ]
+
+                if site_detail_phone is not None:
+                    contact_info[0]["phone"] = site_detail_phone
+                    contact_info[1]["phone"] = site_detail_phone
+
+        return contact_info
 
     async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
         ticket_topic = 'VAS'

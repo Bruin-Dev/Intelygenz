@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+ALL_FIS_CLIENTS = object()
 
 
 class AffectingTroubles(Enum):

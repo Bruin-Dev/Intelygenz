@@ -16,6 +16,10 @@ from tests.fixtures._constants import VELOCLOUD_API_TIMEZONE
 # as a valid value for any field
 _undefined = object()
 
+# Use this sentinel as a default value for arguments of fixtures' factories, so users can
+# exclude the field with this value from the object built by the factory if necessary
+_missing = object()
+
 
 def bruinize_date(dt: datetime) -> str:
     """

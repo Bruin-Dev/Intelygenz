@@ -9,10 +9,11 @@ from tests.fixtures._helpers import velocloudize_date
 # Factories
 @pytest.fixture(scope='session')
 def make_bruin_client_info():
-    def _inner(*, client_id: int = 0, client_name: str = ''):
+    def _inner(*, client_id: int = 0, client_name: str = '', site_id: int = 0):
         return {
             'client_id': client_id,
             'client_name': client_name,
+            'site_id': site_id,
         }
 
     return _inner

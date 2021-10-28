@@ -54,17 +54,5 @@ class CustomerCacheRepository:
         return response
 
     async def get_cache_for_affecting_monitoring(self):
-        velocloud_filter = {}
-
-        target_edges: list = self._config.MONITOR_CONFIG['device_by_id']
-        for edge in target_edges:
-            host = edge['host']
-            enterprise_id = edge['enterprise_id']
-
-            velocloud_filter.setdefault(host, set())
-            velocloud_filter[host].add(enterprise_id)
-
-        for host in velocloud_filter:
-            velocloud_filter[host] = list(velocloud_filter[host])
-
+        velocloud_filter = self._config.MONITOR_CONFIG['velo_filter']
         return await self.get_cache(velo_filter=velocloud_filter)

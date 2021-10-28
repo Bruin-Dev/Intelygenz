@@ -5,6 +5,7 @@ from typing import Optional
 import pytest
 
 from tests.fixtures._helpers import _undefined
+from tests.fixtures._helpers import _missing
 from tests.fixtures._helpers import bruinize_date
 
 
@@ -103,6 +104,58 @@ def make_ticket_note():
     return _inner
 
 
+@pytest.fixture(scope='session')
+def make_site_details(make_address):
+    def _inner(*, client_id: int = 0, client_name: str = '', site_id: int = 0, site_label: str = '',
+               site_add_date: str = '', address: dict = None, longitude: float = 0.0, latitude: float = 0.0,
+               business_hours: str = '', timezone: str = '0', contact_name: Optional[str] = '',
+               contact_phone: Optional[str] = '', contact_email: Optional[str] = ''):
+        address = address or make_address()
+        site_add_date = site_add_date or bruinize_date(datetime.now())
+
+        return {
+            "clientID": client_id,
+            "clientName": client_name,
+            "siteID": site_id,
+            "siteLabel": site_label,
+            "siteAddDate": site_add_date,
+            "address": address,
+            "longitude": longitude,
+            "latitude": latitude,
+            "businessHours": business_hours,
+            "timeZone": timezone,
+            "primaryContactName": contact_name,
+            "primaryContactPhone": contact_phone,
+            "primaryContactEmail": contact_email,
+        }
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_contact_info():
+    def _inner(*, email: Optional[str] = '', phone: str = _missing, name: Optional[str] = ''):
+        obj = [
+            {
+                "email": email,
+                "name": name,
+                "type": "ticket",
+            },
+            {
+                "email": email,
+                "name": name,
+                "type": "site",
+            },
+        ]
+
+        if phone is not _missing:
+            obj[0]["phone"] = phone
+            obj[1]["phone"] = phone
+
+        return obj
+
+    return _inner
+
+
 # RPC requests
 @pytest.fixture(scope='session')
 def make_get_tickets_request(make_rpc_request):
@@ -177,20 +230,10 @@ def make_unpause_ticket_detail_request(make_rpc_request):
 
 
 @pytest.fixture(scope='session')
-def make_create_ticket_request(make_rpc_request):
-    def _inner(*, request_id: str = '', bruin_client_id: int = 0, service_number: str = '', contact_info: dict = None):
-        contact_info = contact_info or {
-            'site': {
-                'email': '',
-                'phone': '',
-                'name': '',
-            },
-            'ticket': {
-                'email': '',
-                'phone': '',
-                'name': '',
-            },
-        }
+def make_create_ticket_request(make_contact_info, make_rpc_request):
+    def _inner(*, request_id: str = '', bruin_client_id: int = 0, service_number: str = '', contact_info: list = None):
+
+        contact_info = contact_info or make_contact_info()
 
         payload = {
             'clientId': bruin_client_id,
@@ -200,20 +243,7 @@ def make_create_ticket_request(make_rpc_request):
                     'serviceNumber': service_number,
                 }
             ],
-            'contacts': [
-                {
-                    "email": contact_info['site']['email'],
-                    "phone": contact_info['site']['phone'],
-                    "name": contact_info['site']['name'],
-                    "type": "site"
-                },
-                {
-                    "email": contact_info['ticket']['email'],
-                    "phone": contact_info['ticket']['phone'],
-                    "name": contact_info['ticket']['name'],
-                    "type": "ticket"
-                },
-            ]
+            'contacts': contact_info
         }
 
         return make_rpc_request(
@@ -249,6 +279,22 @@ def make_change_detail_work_queue_request(make_rpc_request):
             'detail_id': detail_id,
             'service_number': service_number,
             'queue_name': target_queue,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_get_site_details_request(make_rpc_request):
+    def _inner(*, request_id: str = '', client_id: int = 0, site_id: int = 0):
+        payload = {
+            'client_id': client_id,
+            'site_id': site_id,
         }
 
         return make_rpc_request(

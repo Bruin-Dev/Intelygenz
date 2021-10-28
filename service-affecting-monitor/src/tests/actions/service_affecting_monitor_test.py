@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from pytz import utc
 from shortuuid import uuid
 
 from application import AffectingTroubles
@@ -120,9 +121,12 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process__ok_test(self, service_affecting_monitor, make_customer_cache,
-                                                         make_cached_edge, make_rpc_response):
-        edge_1 = make_cached_edge()
-        edge_2 = make_cached_edge()
+                                                         make_cached_edge, make_bruin_client_info, make_rpc_response):
+        edge_bruin_client_info_1 = make_bruin_client_info(client_id=83109)
+        edge_bruin_client_info_2 = make_bruin_client_info(client_id=88480)
+
+        edge_1 = make_cached_edge(bruin_client_info=edge_bruin_client_info_1)
+        edge_2 = make_cached_edge(bruin_client_info=edge_bruin_client_info_2)
         customer_cache = make_customer_cache(edge_1, edge_2)
 
         get_cache_response = make_rpc_response(
@@ -237,144 +241,120 @@ class TestServiceAffectingMonitor:
         expected = []
         assert result == expected
 
-    def map_cached_edges_with_links_metrics_and_contact_info__no_edges_in_contact_info_test(
-            self, service_affecting_monitor, make_edge, make_link, make_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects):
-        edge = make_edge()
-        link_1 = make_link()
-        link_2 = make_link()
-
-        link_1_metric_set = make_metrics()
-        link_2_metric_set = make_metrics()
-
-        structured_metrics_1 = make_structured_metrics_object(
-            edge_info=edge, link_info=link_1, metrics=link_1_metric_set,
-        )
-        structured_metrics_2 = make_structured_metrics_object(
-            edge_info=edge, link_info=link_2, metrics=link_2_metric_set,
-        )
-        structured_metrics = make_list_of_structured_metrics_objects(structured_metrics_1, structured_metrics_2)
-
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['devices_by_id'] = []
-
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
-            result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(structured_metrics)
-
-        expected = []
-        assert result == expected
-
-    def map_cached_edges_with_links_metrics_and_contact_info__edge_in_cache_and_in_contact_info_but_not_in_metrics_test(
+    @pytest.mark.asyncio
+    async def map_cached_edges_with_links_metrics_and_contact_info_test(
             self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_structured_metrics_object_with_cache_and_contact_info,
             make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+            make_contact_info
     ):
-        # Let's just pick a couple of edges from the contact_info object to use them as a reference
-        edge_1_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
-        edge_2_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][1]
 
-        edge_1_serial_number = edge_1_contact_info['serial']
-        edge_2_serial_number = edge_2_contact_info['serial']
+        site_detail_email = "test@email.com"
+        site_detail_phone = "510-111-111"
+        site_detail_name = "Help Desk"
 
-        edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
-        edge_2_cache_info = make_cached_edge(serial_number=edge_2_serial_number)
+        edge_contact_info = make_contact_info(email=site_detail_email,
+                                              phone=site_detail_phone,
+                                              name=site_detail_name)
 
-        edge_2 = make_edge(serial_number=edge_2_serial_number)
-        edge_2_structured_metrics = make_structured_metrics_object(edge_info=edge_2)
-        structured_metrics = make_list_of_structured_metrics_objects(edge_2_structured_metrics)
-
-        customer_cache = make_customer_cache(edge_1_cache_info, edge_2_cache_info)
-        service_affecting_monitor._customer_cache = customer_cache
-
-        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(structured_metrics)
-
-        edge_2_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
-            metrics_object=edge_2_structured_metrics,
-            cache_info=edge_2_cache_info,
-            contact_info=edge_2_contact_info['contacts'],
-        )
-        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_2_complete_info)
-        assert result == expected
-
-    def map_cached_edges_with_links_metrics_and_contact_info__edge_in_metrics_and_in_contact_info_but_not_in_cache_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-    ):
-        # Let's just pick a couple of edges from the contact_info object to use them as a reference
-        edge_1_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
-        edge_2_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][1]
-
-        edge_1_serial_number = edge_1_contact_info['serial']
-        edge_2_serial_number = edge_2_contact_info['serial']
+        edge_1_serial_number = 'VCO123'
 
         edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
 
         edge_1 = make_edge(serial_number=edge_1_serial_number)
-        edge_2 = make_edge(serial_number=edge_2_serial_number)
+
         edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
-        edge_2_structured_metrics = make_structured_metrics_object(edge_info=edge_2)
         structured_metrics = make_list_of_structured_metrics_objects(
-            edge_1_structured_metrics, edge_2_structured_metrics,
+            edge_1_structured_metrics
         )
 
         customer_cache = make_customer_cache(edge_1_cache_info)
         service_affecting_monitor._customer_cache = customer_cache
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(structured_metrics)
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+
+        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+            structured_metrics)
 
         edge_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=edge_1_structured_metrics,
             cache_info=edge_1_cache_info,
-            contact_info=edge_1_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
-        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
+
+        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
+            edge_1_complete_info
+        )
+        service_affecting_monitor._bruin_repository.get_contact_info.assert_awaited_once()
+
         assert result == expected
 
-    def map_cached_edges_with_links_metrics_and_contact_info__edge_in_metrics_and_in_contact_info_and_in_cache_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
+    @pytest.mark.asyncio
+    async def map_cached_edges_with_links_metrics_and_contact_info__no_cached_edge_test(
+            self, service_affecting_monitor, make_edge, make_link, make_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-    ):
-        # Let's just pick a couple of edges from the contact_info object to use them as a reference
-        edge_1_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
-        edge_2_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][1]
+            make_cached_edge, make_customer_cache):
 
-        edge_1_serial_number = edge_1_contact_info['serial']
-        edge_2_serial_number = edge_2_contact_info['serial']
+        edge_1_serial_number = 'VCO123'
+        edge_2_serial_number = 'VCO1234'
 
-        edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
-        edge_2_cache_info = make_cached_edge(serial_number=edge_2_serial_number)
+        edge = make_edge(serial_number=edge_1_serial_number)
+        link_1 = make_link()
 
-        edge_1 = make_edge(serial_number=edge_1_serial_number)
-        edge_2 = make_edge(serial_number=edge_2_serial_number)
-        edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
-        edge_2_structured_metrics = make_structured_metrics_object(edge_info=edge_2)
-        structured_metrics = make_list_of_structured_metrics_objects(
-            edge_1_structured_metrics, edge_2_structured_metrics,
+        link_1_metric_set = make_metrics()
+
+        structured_metrics_1 = make_structured_metrics_object(
+            edge_info=edge, link_info=link_1, metrics=link_1_metric_set,
         )
+        structured_metrics = make_list_of_structured_metrics_objects(structured_metrics_1)
 
-        customer_cache = make_customer_cache(edge_1_cache_info, edge_2_cache_info)
+        edge_1_cache_info = make_cached_edge(serial_number=edge_2_serial_number)
+        customer_cache = make_customer_cache(edge_1_cache_info)
         service_affecting_monitor._customer_cache = customer_cache
 
-        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(structured_metrics)
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
-        edge_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
-            metrics_object=edge_1_structured_metrics,
-            cache_info=edge_1_cache_info,
-            contact_info=edge_1_contact_info['contacts'],
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = None
+
+        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+                                                                                                    structured_metrics)
+        service_affecting_monitor._bruin_repository.get_contact_info.assert_not_awaited()
+        expected = []
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def map_cached_edges_with_links_metrics_and_contact_info__no_contact_info_test(
+            self, service_affecting_monitor, make_edge, make_link, make_metrics,
+            make_structured_metrics_object, make_list_of_structured_metrics_objects,
+            make_cached_edge, make_customer_cache):
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
+        link_1 = make_link()
+
+        link_1_metric_set = make_metrics()
+
+        structured_metrics_1 = make_structured_metrics_object(
+            edge_info=edge, link_info=link_1, metrics=link_1_metric_set,
         )
-        edge_2_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
-            metrics_object=edge_2_structured_metrics,
-            cache_info=edge_2_cache_info,
-            contact_info=edge_2_contact_info['contacts'],
-        )
-        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
-            edge_1_complete_info, edge_2_complete_info,
-        )
+        structured_metrics = make_list_of_structured_metrics_objects(structured_metrics_1)
+
+        edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+        customer_cache = make_customer_cache(edge_1_cache_info)
+        service_affecting_monitor._customer_cache = customer_cache
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = None
+
+        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+                                                                                                    structured_metrics)
+        service_affecting_monitor._bruin_repository.get_contact_info.assert_awaited_once()
+        expected = []
         assert result == expected
 
     @pytest.mark.asyncio
@@ -411,6 +391,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._latency_check()
 
@@ -425,13 +407,14 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_cached_edge, make_customer_cache,
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_latency_ms_tx=0, best_latency_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -440,7 +423,8 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -449,6 +433,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._latency_check()
 
@@ -464,13 +450,12 @@ class TestServiceAffectingMonitor:
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
+        edge_contact_info = make_contact_info()
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_1_serial_number = 'VCO123'
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_latency_ms_tx=9999, best_latency_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -479,13 +464,14 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+
         customer_cache = make_customer_cache(edge_cache_info)
 
         link_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -494,6 +480,9 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._latency_check()
 
@@ -537,6 +526,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -551,13 +542,14 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_cached_edge, make_customer_cache,
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_packet_loss_tx=0, best_packet_loss_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -566,7 +558,8 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -575,6 +568,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -590,13 +585,14 @@ class TestServiceAffectingMonitor:
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_packet_loss_tx=9999, best_packet_loss_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -605,13 +601,14 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+
         customer_cache = make_customer_cache(edge_cache_info)
 
         link_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -620,6 +617,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -663,6 +662,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._jitter_check()
 
@@ -677,13 +678,14 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_cached_edge, make_customer_cache,
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_jitter_ms_tx=0, best_jitter_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -692,7 +694,8 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -701,6 +704,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._jitter_check()
 
@@ -716,13 +721,14 @@ class TestServiceAffectingMonitor:
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         metrics = make_metrics(best_jitter_ms_tx=9999, best_jitter_ms_rx=0)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info, metrics=metrics)
@@ -731,13 +737,14 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
+
         customer_cache = make_customer_cache(edge_cache_info)
 
         link_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -746,6 +753,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._jitter_check()
 
@@ -788,6 +797,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -802,13 +813,14 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics()
         edge_link_metric_set = make_metrics_for_link(
@@ -821,7 +833,7 @@ class TestServiceAffectingMonitor:
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
         edge_bruin_client_info = make_bruin_client_info(client_id=30000)  # MetTel's client ID in Bruin
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -830,6 +842,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -844,13 +858,14 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(bps_of_best_path_tx=0, bps_of_best_path_rx=0)
         edge_link_metric_set = make_metrics_for_link(
@@ -863,7 +878,7 @@ class TestServiceAffectingMonitor:
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
         edge_bruin_client_info = make_bruin_client_info(client_id=83109)  # RSI's client ID in Bruin
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -872,6 +887,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -886,13 +903,14 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][1]
+            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(bps_of_best_path_tx=100, bps_of_best_path_rx=100)
         edge_link_metric_set = make_metrics_for_link(
@@ -907,7 +925,7 @@ class TestServiceAffectingMonitor:
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
         edge_bruin_client_info = make_bruin_client_info(client_id=83109)  # RSI's client ID in Bruin
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -916,6 +934,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -931,13 +951,14 @@ class TestServiceAffectingMonitor:
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
             make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][1]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(
             bytes_tx=999999, bytes_rx=999999,
@@ -955,13 +976,13 @@ class TestServiceAffectingMonitor:
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
         edge_bruin_client_info = make_bruin_client_info(client_id=83109)  # RSI's client ID in Bruin
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
         link_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
 
         service_affecting_monitor._customer_cache = customer_cache
@@ -970,6 +991,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -1650,7 +1673,10 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_process__no_metrics_found_test(
-            self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response):
+            self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response, make_contact_info):
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+
         links_metrics = make_list_of_link_metrics()
 
         service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = \
@@ -1670,7 +1696,10 @@ class TestServiceAffectingMonitor:
     async def run_autoresolve_process__empty_dataset_after_structuring_and_crossing_info_and_grouping_by_edge_test(
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info, make_rpc_response):
+            make_list_of_structured_metrics_objects_with_cache_and_contact_info, make_rpc_response, make_contact_info):
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+
         edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -1684,6 +1713,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._run_autoresolve_process()
 
@@ -1701,13 +1732,14 @@ class TestServiceAffectingMonitor:
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
             make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
             make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_rpc_response):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_rpc_response, make_contact_info):
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge_1_serial_number = 'VCO123'
+
+        edge = make_edge(serial_number=edge_1_serial_number)
         edge_link_1_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_1_metrics = make_metrics()
         edge_link_1_metric_set = make_metrics_for_link(
@@ -1727,18 +1759,18 @@ class TestServiceAffectingMonitor:
             link_1_structured_metrics_object, link_2_structured_metrics_object,
         )
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
         customer_cache = make_customer_cache(edge_cache_info)
 
         link_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=link_1_structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
         link_2_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=link_2_structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
             link_1_complete_info, link_2_complete_info,
@@ -1750,6 +1782,8 @@ class TestServiceAffectingMonitor:
                 body=links_metric_sets,
                 status=200,
             )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._run_autoresolve_process()
 
@@ -1766,13 +1800,13 @@ class TestServiceAffectingMonitor:
             make_structured_metrics_object_with_cache_and_contact_info,
             make_list_of_structured_metrics_objects_with_cache_and_contact_info,
             make_link_status_and_metrics_object, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_list_of_links_by_edge_objects):
-        # Let's just pick an edge from the contact_info object to use it as a reference
-        edge_contact_info = service_affecting_monitor._config.MONITOR_CONFIG['device_by_id'][0]
+            make_links_by_edge_object, make_list_of_links_by_edge_objects, make_contact_info):
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
 
-        edge_serial_number = edge_contact_info['serial']
+        edge_1_serial_number = 'VCO123'
 
-        edge = make_edge(serial_number=edge_serial_number)
+        edge = make_edge(serial_number=edge_1_serial_number)
         link_1 = make_link()
         link_2 = make_link()
 
@@ -1782,17 +1816,17 @@ class TestServiceAffectingMonitor:
         link_1_structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=edge_link_1_metrics)
         link_2_structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=edge_link_2_metrics)
 
-        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        edge_cache_info = make_cached_edge(serial_number=edge_1_serial_number)
 
         link_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=link_1_structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
         link_2_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=link_2_structured_metrics_object,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
         )
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
             link_1_complete_info, link_2_complete_info,
@@ -1808,7 +1842,7 @@ class TestServiceAffectingMonitor:
         links_grouped_by_edge_obj = make_links_by_edge_object(
             edge_info=edge,
             cache_info=edge_cache_info,
-            contact_info=edge_contact_info['contacts'],
+            contact_info=edge_contact_info,
             links=links_status_and_metrics,
         )
         expected = make_list_of_links_by_edge_objects(links_grouped_by_edge_obj)
@@ -2021,7 +2055,7 @@ class TestServiceAffectingMonitor:
 
         ticket = make_ticket(
             created_by='Intelygenz Ai',
-            create_date=str(datetime.now() - timedelta(days=30)),
+            create_date=str(datetime.now(utc) - timedelta(days=30)),
         )
         open_affecting_tickets = make_list_of_tickets(ticket)
 
@@ -2082,7 +2116,7 @@ class TestServiceAffectingMonitor:
         note_1 = make_ticket_note(
             text=f"#*MetTel's IPA*#\nTrouble: Latency",
             service_numbers=[serial_number],
-            creation_date=str(datetime.now() - timedelta(days=30)),
+            creation_date=str(datetime.now(utc) - timedelta(days=30)),
         )
         notes = make_list_of_ticket_notes(note_1)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
@@ -2131,7 +2165,7 @@ class TestServiceAffectingMonitor:
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(datetime.now()))
+        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(datetime.now(utc)))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(value=serial_number)
@@ -2195,7 +2229,7 @@ class TestServiceAffectingMonitor:
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(datetime.now()))
+        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(datetime.now(utc)))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(value=serial_number, status='R')
@@ -2247,7 +2281,7 @@ class TestServiceAffectingMonitor:
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(datetime.now()))
+        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(datetime.now(utc)))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(value=serial_number)
@@ -2304,7 +2338,7 @@ class TestServiceAffectingMonitor:
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(datetime.now()))
+        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(datetime.now(utc)))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(id_=ticket_detail_id, value=serial_number)
@@ -2366,7 +2400,7 @@ class TestServiceAffectingMonitor:
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(datetime.now()))
+        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(datetime.now(utc)))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(id_=ticket_detail_id, value=serial_number)
