@@ -53,10 +53,8 @@ class VelocloudRepository:
         return response
 
     async def get_all_links_metrics(self, interval: dict) -> dict:
-        velocloud_hosts = self._config.MONITOR_CONFIG['velo_filter'].keys()
-
         all_links_metrics = []
-        for host in velocloud_hosts:
+        for host in self._config.VELOCLOUD_HOSTS:
             response = await self.get_links_metrics_by_host(host=host, interval=interval)
             if response['status'] not in range(200, 300):
                 self._logger.info(f"Error: could not retrieve links metrics from Velocloud host {host}")

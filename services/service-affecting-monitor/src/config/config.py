@@ -19,17 +19,15 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-velo_filter = {
-                "mettel.velocloud.net": [],
-                "metvco02.mettel.net": [],
-                "metvco03.mettel.net": [],
-                "metvco04.mettel.net": []
-}
-
 MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'contact_by_host_and_client_id': contact_info.contact_by_host_and_client_id,
-    'velo_filter': velo_filter,
+    'velo_filter': {
+        'mettel.velocloud.net': [],
+        'metvco02.mettel.net': [],
+        'metvco03.mettel.net': [],
+        'metvco04.mettel.net': []
+    },
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'monitoring_minutes_interval': 10,
@@ -104,3 +102,5 @@ REDIS = {
 METRICS_SERVER_CONFIG = {
     'port': 9090
 }
+
+VELOCLOUD_HOSTS = contact_info.contact_by_host_and_client_id.keys()
