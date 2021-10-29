@@ -99,6 +99,15 @@ class TroubleRepository:
         tx_bandwidth = link_metrics['bpsOfBestPathTx']
         return self.__is_bandwidth_within_threshold(tx_bytes, tx_bandwidth, lookup_interval_minutes)
 
+    @staticmethod
+    def is_valid_bps_metric(metric: int) -> bool:
+        return metric > 0
+
+    def are_bps_metrics_valid(self, link_metrics: dict) -> bool:
+        is_tx_bandwidth_valid = self.is_valid_bps_metric(link_metrics['bpsOfBestPathTx'])
+        is_rx_bandwidth_valid = self.is_valid_bps_metric(link_metrics['bpsOfBestPathRx'])
+        return is_tx_bandwidth_valid and is_rx_bandwidth_valid
+
     def are_bandwidth_metrics_within_threshold(self, link_metrics: dict, lookup_interval_minutes: int) -> bool:
         return (
             self.is_bandwidth_rx_within_threshold(link_metrics, lookup_interval_minutes)
@@ -112,22 +121,15 @@ class TroubleRepository:
         for link in edge_data['links']:
             metrics = link['link_metrics']
 
-            bandwidth_within_threshold = True
-            if check_bandwidth_troubles:
-                tx_bandwidth = metrics['bpsOfBestPathTx']
-                rx_bandwidth = metrics['bpsOfBestPathRx']
-
-                if tx_bandwidth > 0 and rx_bandwidth > 0:
-                    bandwidth_within_threshold = self.are_bandwidth_metrics_within_threshold(
-                        metrics,
-                        lookup_interval_minutes=lookup_interval_minutes,
-                    )
-
-            all_metrics_within_thresholds &= all([
+            checks = [
                 self.are_latency_metrics_within_threshold(metrics),
                 self.are_packet_loss_metrics_within_threshold(metrics),
                 self.are_jitter_metrics_within_threshold(metrics),
-                bandwidth_within_threshold,
-            ])
+            ]
+
+            if check_bandwidth_troubles and self.are_bps_metrics_valid(metrics):
+                checks.append(self.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes))
+
+            all_metrics_within_thresholds &= all(checks)
 
         return all_metrics_within_thresholds

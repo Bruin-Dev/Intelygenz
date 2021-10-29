@@ -324,7 +324,7 @@ class TicketRepository:
         ]
 
         rx_bandwidth = link_metrics['bpsOfBestPathRx']
-        if rx_bandwidth > 0:
+        if self._trouble_repository.is_valid_bps_metric(rx_bandwidth):
             if not self._trouble_repository.is_bandwidth_rx_within_threshold(link_metrics, scan_interval):
                 rx_throughput = self._trouble_repository.get_bandwidth_throughput_bps(
                     total_bytes=link_metrics['bytesRx'],
@@ -339,7 +339,7 @@ class TicketRepository:
                 ]
 
         tx_bandwidth = link_metrics['bpsOfBestPathTx']
-        if tx_bandwidth > 0:
+        if self._trouble_repository.is_valid_bps_metric(tx_bandwidth):
             if not self._trouble_repository.is_bandwidth_tx_within_threshold(link_metrics, scan_interval):
                 tx_throughput = self._trouble_repository.get_bandwidth_throughput_bps(
                     total_bytes=link_metrics['bytesTx'],

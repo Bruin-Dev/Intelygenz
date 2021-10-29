@@ -524,21 +524,26 @@ class ServiceAffectingMonitor:
             tx_bandwidth = metrics['bpsOfBestPathTx']
             rx_bandwidth = metrics['bpsOfBestPathRx']
 
-            if tx_bandwidth == 0 and rx_bandwidth == 0:
-                continue
+            is_tx_bandwidth_valid = self._trouble_repository.is_valid_bps_metric(tx_bandwidth)
+            is_rx_bandwidth_valid = self._trouble_repository.is_valid_bps_metric(rx_bandwidth)
 
             serial_number = cached_info['serial_number']
-
             trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
             scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-            bandwidth_metrics_are_within_threshold = (
-                (rx_bandwidth == 0 or self._trouble_repository.is_bandwidth_rx_within_threshold(metrics,
-                                                                                                scan_interval)) and (
-                    tx_bandwidth == 0 or self._trouble_repository.is_bandwidth_tx_within_threshold(metrics,
-                                                                                                   scan_interval))
-            )
 
-            if bandwidth_metrics_are_within_threshold:
+            if is_tx_bandwidth_valid and is_rx_bandwidth_valid:
+                within_threshold = self._trouble_repository.are_bandwidth_metrics_within_threshold(metrics,
+                                                                                                   scan_interval)
+            elif is_tx_bandwidth_valid and not is_rx_bandwidth_valid:
+                within_threshold = self._trouble_repository.is_tx_bandwidth_within_threshold(metrics,
+                                                                                             scan_interval)
+            elif is_rx_bandwidth_valid and not is_tx_bandwidth_valid:
+                within_threshold = self._trouble_repository.is_bandwidth_rx_within_threshold(metrics,
+                                                                                             scan_interval)
+            else:
+                continue
+
+            if within_threshold:
                 self._logger.info(
                     f"Link {link_status['interface']} from {serial_number} didn't exceed any bandwidth thresholds"
                 )
