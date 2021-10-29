@@ -1,33 +1,5 @@
 version: '3.6'
 services:
-  nats-server:
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: nats-server/Dockerfile
-    env_file:
-      - nats-server/env
-    ports:
-      - 4222:4222
-      - 8222:8222
-    hostname: nats-server
-  nats-server-1:
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: nats-server/Dockerfile
-    env_file:
-      - nats-server/nats-server-1-env
-    hostname: nats-server-1
-  nats-server-2:
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: nats-server/Dockerfile
-    env_file:
-      - nats-server/nats-server-2-env
-    hostname: nats-server-2
-
   # EXAMPLE OF BASE-MICROSERVICE
   # ============================
   base-microservice:
@@ -48,170 +20,6 @@ services:
     ports:
       - 9100:9100
   # ============================
-  sites-monitor:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: sites-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - sites-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5000:5000
-      - 9110:9090
-
-  velocloud-bridge:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: velocloud-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - velocloud-bridge/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5001:5000
-
-  notifier:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: notifier/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - notifier/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5002:5000
-
-  last-contact-report:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: last-contact-report/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - last-contact-report/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5003:5000
-
-  hawkeye-bridge:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: hawkeye-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - hawkeye-bridge/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5507:5000
-
-  bruin-bridge:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: bruin-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - bruin-bridge/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5006:5000
-
-  service-outage-monitor-1:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - service-outage-monitor/src/config/env-outage-monitor-1
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5107:5000
-      - 9140:9090
-
-  service-outage-monitor-2:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - service-outage-monitor/src/config/env-outage-monitor-2
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5207:5000
-      - 9150:9090
-
-  service-outage-monitor-3:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - service-outage-monitor/src/config/env-outage-monitor-3
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5307:5000
-      - 9160:9090
-
-  service-outage-monitor-4:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - service-outage-monitor/src/config/env-outage-monitor-4
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5407:5000
-      - 9170:9090
 
   bouncing-detector-1:
     build:
@@ -281,88 +89,21 @@ services:
       - 5407:5000
       - 9170:9090
 
-  service-outage-monitor-triage:
+  bruin-bridge:
     build:
       # Context must be the root of the monorepo
       context: .
-      dockerfile: service-outage-monitor/Dockerfile
+      dockerfile: bruin-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
-      - service-outage-monitor/src/config/env-triage
+      - bruin-bridge/src/config/env
     depends_on:
       - "nats-server"
       - redis
     ports:
-      - 5007:5000
-      - 9180:9090
-
-  service-affecting-monitor:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: service-affecting-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - service-affecting-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5008:5000
-      - 9130:9090
-
-  tnba-feedback:
-    build:
-      # Context must be the root of the monorepo since we need to copy custompackages
-      context: .
-      dockerfile: tnba-feedback/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - tnba-feedback/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-      - redis-tnba-feedback
-    ports:
-      - 5014:5000
-
-  tnba-monitor:
-    build:
-      # Context must be the root of the monorepo since we need to copy custompackages
-      context: .
-      dockerfile: tnba-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - tnba-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5012:5000
-
-  t7-bridge:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: t7-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - t7-bridge/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5009:5000
+      - 5006:5000
 
   customer-cache:
     build:
@@ -397,22 +138,6 @@ services:
     ports:
       - 5015:5000
 
-  intermapper-outage-monitor:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: intermapper-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - intermapper-outage-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5017:5000
-
   digi-reboot-report:
     build:
       # Context must be the root of the monorepo
@@ -425,6 +150,77 @@ services:
       - digi-reboot-report/src/config/env
     ports:
       - 5016:5000
+
+  email-tagger-kre-bridge:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: email-tagger-kre-bridge/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - email-tagger-kre-bridge/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5056:5000
+
+    # NOTE: Extra hosts is needed only for local development with a KRE local
+    #       Change to your host IP
+    # extra_hosts:
+    #  - "host.docker.internal:192.168.1.51"
+
+  email-tagger-monitor:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: email-tagger-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - email-tagger-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+      - redis-email-tagger
+    ports:
+      - 5055:5000
+
+  hawkeye-affecting-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: hawkeye-affecting-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - hawkeye-affecting-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5707:5000
+      - 9770:9090
+
+  hawkeye-bridge:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: hawkeye-bridge/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - hawkeye-bridge/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5507:5000
 
   hawkeye-customer-cache:
     build:
@@ -442,6 +238,365 @@ services:
       - redis-customer-cache
     ports:
       - 5023:5000
+
+  hawkeye-outage-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: hawkeye-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - hawkeye-outage-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5607:5000
+      - 9270:9090
+
+  intermapper-outage-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: intermapper-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - intermapper-outage-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5017:5000
+
+  last-contact-report:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: last-contact-report/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - last-contact-report/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5003:5000
+
+  links-metrics-api:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: links-metrics-api/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - links-metrics-api/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5019:5000
+
+  links-metrics-collector:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: links-metrics-collector/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - links-metrics-collector/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5018:5000
+
+  lumin-billing-report:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: lumin-billing-report/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - lumin-billing-report/src/config/env
+    ports:
+      - 5099:5000
+
+  nats-server:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: nats-server/Dockerfile
+    env_file:
+      - nats-server/env
+    ports:
+      - 4222:4222
+      - 8222:8222
+    hostname: nats-server
+  nats-server-1:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: nats-server/Dockerfile
+    env_file:
+      - nats-server/nats-server-1-env
+    hostname: nats-server-1
+  nats-server-2:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: nats-server/Dockerfile
+    env_file:
+      - nats-server/nats-server-2-env
+    hostname: nats-server-2
+
+  notifier:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: notifier/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - notifier/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5002:5000
+
+  service-affecting-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: service-affecting-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - service-affecting-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5008:5000
+      - 9130:9090
+
+  service-outage-monitor-1:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: service-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - service-outage-monitor/src/config/env-outage-monitor-1
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5107:5000
+      - 9140:9090
+
+  service-outage-monitor-2:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: service-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - service-outage-monitor/src/config/env-outage-monitor-2
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5207:5000
+      - 9150:9090
+
+  service-outage-monitor-3:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: service-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - service-outage-monitor/src/config/env-outage-monitor-3
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5307:5000
+      - 9160:9090
+
+  service-outage-monitor-4:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: service-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - service-outage-monitor/src/config/env-outage-monitor-4
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5407:5000
+      - 9170:9090
+
+  service-outage-monitor-triage:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: service-outage-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - service-outage-monitor/src/config/env-triage
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5007:5000
+      - 9180:9090
+
+  sites-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: sites-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - sites-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5000:5000
+      - 9110:9090
+
+  t7-bridge:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: t7-bridge/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - t7-bridge/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5009:5000
+
+  ticket-collector:
+    build:
+      context: .
+      dockerfile: ticket-collector/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
+        IGZ_PACKAGES_VERSION: 2.0.4
+    env_file:
+      - ticket-collector/src/config/env
+    depends_on:
+      - mongo
+    volumes:
+    - ./ticket-collector:/service/app
+    ports:
+      - 5617:5000
+
+  ticket-statistics:
+    build:
+      context: .
+      dockerfile: ticket-statistics/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
+        IGZ_PACKAGES_VERSION: 2.0.4
+    env_file:
+      - ticket-statistics/src/config/env
+    depends_on:
+      - ticket-collector
+      - mongo
+    volumes:
+    - ./ticket-statistics:/service/app
+    ports:
+      - 3000:3000
+
+  tnba-feedback:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: tnba-feedback/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - tnba-feedback/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+      - redis-tnba-feedback
+    ports:
+      - 5014:5000
+
+  tnba-monitor:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: tnba-monitor/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - tnba-monitor/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5012:5000
+      
+  velocloud-bridge:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: velocloud-bridge/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+    env_file:
+      - velocloud-bridge/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5001:5000
 
   redis:
     image: redis:5.0.4
@@ -545,128 +700,6 @@ services:
     ports:
       - 19091:19091
 
-  lumin-billing-report:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: lumin-billing-report/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - lumin-billing-report/src/config/env
-    ports:
-      - 5099:5000
-
-  hawkeye-affecting-monitor:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: hawkeye-affecting-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - hawkeye-affecting-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5707:5000
-      - 9770:9090
-
-  hawkeye-outage-monitor:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: hawkeye-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - hawkeye-outage-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5607:5000
-      - 9270:9090
-
-  email-tagger-monitor:
-    build:
-      # Context must be the root of the monorepo since we need to copy custompackages
-      context: .
-      dockerfile: email-tagger-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - email-tagger-monitor/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-      - redis-email-tagger
-    ports:
-      - 5055:5000
-
-  email-tagger-kre-bridge:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: email-tagger-kre-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - email-tagger-kre-bridge/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5056:5000
-
-    # NOTE: Extra hosts is needed only for local development with a KRE local
-    #       Change to your host IP
-    # extra_hosts:
-    #  - "host.docker.internal:192.168.1.51"
-
-  ticket-collector:
-    build:
-      context: .
-      dockerfile: ticket-collector/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
-        IGZ_PACKAGES_VERSION: 2.0.4
-    env_file:
-      - ticket-collector/src/config/env
-    depends_on:
-      - mongo
-    volumes:
-    - ./ticket-collector:/service/app
-    ports:
-      - 5617:5000
-
-  ticket-statistics:
-    build:
-      context: .
-      dockerfile: ticket-statistics/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
-        IGZ_PACKAGES_VERSION: 2.0.4
-    env_file:
-      - ticket-statistics/src/config/env
-    depends_on:
-      - ticket-collector
-      - mongo
-    volumes:
-    - ./ticket-statistics:/service/app
-    ports:
-      - 3000:3000
-
   mongo:
     image: mongo:latest
     restart: always
@@ -691,38 +724,6 @@ services:
       MONGO_INITDB_DATABASE: metrics
     volumes:
       - ./databases/link_metrics/mongodb:/data/db
-
-  links-metrics-collector:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: links-metrics-collector/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - links-metrics-collector/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5018:5000
-
-  links-metrics-api:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: links-metrics-api/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - links-metrics-api/src/config/env
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5019:5000
 
   # Mongo Express Web-based MongoDB admin interface
   mongo-express:

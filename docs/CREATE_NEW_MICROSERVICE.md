@@ -24,15 +24,15 @@ new microservice repo, by that way we can deploy our microservice later in dev b
     * this is an example:
     ````bash
     resource "aws_ecr_repository" "new-microservice-repository" {
-    name = "new-microservice"
+    name = "new-bridge"
     tags = {
         Project       = var.common_info.project
         Provisioning  = var.common_info.provisioning
-        Module        = "new-microservice"
+        Module        = "new-bridge"
     }
     }
     ````
-  * merge the new repository to Master branch. The pipeline will run and create the new ECR repo.
+  * merge the new repository to Master branch. The pipeline will run and create the new ECR repo `new-bridge`
 
 ## 2. Create our new microservice folder
 
@@ -167,7 +167,32 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
   ...
   ````
 
-## 3. Add option to enable or disable our microservice
+## 3. Update docker-compose to enable local deployments
+* `docker-compose.yml` here we define our container along with the rest of the microservices. Just add the definition of our container respecting the alphabetical order:
+  ````
+  ...
+  new-bridge:                                                          ¯│
+    build:                                                              │
+      # Context must be the root of the monorepo                        │
+      context: .                                                        │
+      dockerfile: new-bridge/Dockerfile                                 │
+      args:                                                             │
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com    ├──────────────> here!
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0                                │
+    env_file:                                                           │
+      - new-bridge/src/config/env                                       │
+    depends_on:                                                         │
+      - "nats-server"                                                   │
+      - redis                                                           │
+    ports:                                                              │
+      - 5006:5000                                                      _│
+
+  notifier:
+    build:
+  ...
+  ````
+
+## 4. Add option to enable or disable our microservice
 
 * `helm/charts/automation-engine/Chart.yaml` in this file we define our Automation-engine chart version and his dependencies. Let's add a condition for our microservice to have the possibility of disable or enable in our future deployments.
   ````
@@ -184,7 +209,7 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
   ...
   ````
 
-## 4. Helm templates
+## 5. Helm templates and variables
 
 Here we will define the infraestructure part of our microservice with a helm chart. Is very important to know that this "how to" is only to copy an existing microservice, therefore, we take the following statements for granted:
 1. The microservice will not have a public endpoint (except email-tagger-monitor)
@@ -501,3 +526,4 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     * `add the variables in gitlab-ci` finaly, we have all the path until the real value in gitlab.. let's go to the repository [settings/ci-cd](https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd) section and create the new varaibles:
     ![IMAGE: gitlab_add_new_var](./img/system_overview/gitlab_add_new_var.png)
 
+That's all, with this and the proper [commit message](README.md#commit) the pipeline will run and deploy an ephimeral environment.
