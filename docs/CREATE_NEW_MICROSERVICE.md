@@ -23,7 +23,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
   * create a new terraform ECR repo file in the folder: `infra-as-code/ecr-repositories` you can copy any of the other repos to have an example.
     * this is an example:
     ````bash
-    resource "aws_ecr_repository" "new-microservice-repository" {
+    resource "aws_ecr_repository" "new-bridge-repository" {
     name = "new-bridge"
     tags = {
         Project       = var.common_info.project
