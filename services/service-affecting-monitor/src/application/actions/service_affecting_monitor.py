@@ -107,7 +107,7 @@ class ServiceAffectingMonitor:
 
         return contact_info_by_client
 
-    def _structure_links_metrics(self, links_metrics: list) -> list:
+    def _structure_links_metrics(self, links_metrics: list, events: dict = None) -> list:
         result = []
 
         for link_info in links_metrics:
@@ -131,7 +131,7 @@ class ServiceAffectingMonitor:
                 )
                 continue
 
-            result.append({
+            structured_link = {
                 'edge_status': {
                     'enterpriseName': link_info['link']['enterpriseName'],
                     'enterpriseId': link_info['link']['enterpriseId'],
@@ -197,7 +197,14 @@ class ServiceAffectingMonitor:
                     'signalStrength': link_info['signalStrength'],
                     'state': link_info['state'],
                 }
-            })
+            }
+
+            if events is not None:
+                serial = structured_link['edge_status']['edgeSerialNumber']
+                interface = structured_link['link_status']['interface']
+                structured_link['link_events'] = events[serial][interface]
+
+            result.append(structured_link)
 
         return result
 

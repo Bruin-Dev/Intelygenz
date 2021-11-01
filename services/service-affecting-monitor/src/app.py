@@ -60,6 +60,7 @@ class Container:
         self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                  notifications_repository=self._notifications_repository)
         self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                         utils_repository=self._utils_repository,
                                                          notifications_repository=self._notifications_repository)
         self._customer_cache_repository = CustomerCacheRepository(
             event_bus=self._event_bus, logger=self._logger, config=config,
