@@ -68,6 +68,8 @@ class TicketRepository:
             return self.build_jitter_trouble_note
         elif trouble is AffectingTroubles.BANDWIDTH_OVER_UTILIZATION:
             return self.build_bandwidth_trouble_note
+        elif trouble is AffectingTroubles.BOUNCING:
+            return self.build_bouncing_trouble_note
 
     def build_latency_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
         edge_status = link_data["edge_status"]
@@ -362,4 +364,66 @@ class TicketRepository:
                 f'[Transport|{velocloud_edge_base_url}/links/] - [Events|{velocloud_base_url}/events/]'
             ),
         ]
+        return os.linesep.join(note_lines)
+
+    def build_bouncing_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
+        edge_status = link_data["edge_status"]
+        link_events = link_data["link_events"]
+
+        edge_cached_info = link_data["cached_info"]
+        links_configuration = edge_cached_info['links_configuration']
+
+        link_status = link_data["link_status"]
+        link_interface = link_status['interface']
+
+        trouble = AffectingTroubles.BOUNCING
+        scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+        edge_full_id = edge_cached_info["edge"]
+        velocloud_base_url = (
+            f'https://{edge_full_id["host"]}/#!/operator/customer/{edge_full_id["enterprise_id"]}/monitor'
+        )
+        velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_full_id["edge_id"]}'
+
+        note_lines = [
+            "#*MetTel's IPA*#",
+        ]
+
+        if is_reopen_note:
+            note_lines += [
+                'Re-opening ticket.',
+                '',
+            ]
+
+        link_config = self._utils_repository.get_first_element_matching(
+            links_configuration,
+            lambda config: link_interface in config['interfaces'],
+        )
+        if link_config:
+            link_interface_type = f"{link_config['mode'].capitalize()} {link_config['type'].capitalize()}"
+        else:
+            link_interface_type = "Unknown"
+
+        note_lines += [
+            f'Trouble: {trouble.value}',
+            '',
+            f'Edge Name: {edge_status["edgeName"]}',
+            f'Name: {link_status["displayName"]}',
+            f'Interface: {link_status["interface"]}',
+            f'Link Type: {link_interface_type}',
+            '',
+            f'Interval for Scan: {scan_interval} minutes',
+            f'Threshold: {metrics_threshold} events',
+            f'Events: {len(link_events)}',
+            '',
+            f'Scan Time: {datetime.now(timezone(self._config.MONITOR_CONFIG["timezone"]))}',
+            (
+                'Links: '
+                f'[Edge|{velocloud_edge_base_url}/] - '
+                f'[QoE|{velocloud_edge_base_url}/qoe/] - '
+                f'[Transport|{velocloud_edge_base_url}/links/]'
+            ),
+        ]
+
         return os.linesep.join(note_lines)

@@ -33,3 +33,8 @@ NOTE_REGEX_BY_TROUBLE = {
     )
     for trouble in AffectingTroubles
 }
+
+EVENT_INTERFACE_REGEX = re.compile(
+    r'(^Interface (?P<interface>[a-zA-Z0-9]+) is (up|down)$)|'
+    r'(^Link (?P<link_interface>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'
+)

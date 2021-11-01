@@ -81,6 +81,7 @@ class ServiceAffectingMonitor:
         await self._packet_loss_check()
         await self._jitter_check()
         await self._bandwidth_check()
+        await self._bouncing_check()
 
         await self._run_autoresolve_process()
 
@@ -247,7 +248,8 @@ class ServiceAffectingMonitor:
             self._logger.info("List of links metrics arrived empty while running auto-resolve process. Skipping...")
             return
 
-        links_metrics = self._structure_links_metrics(links_metrics)
+        events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
+        links_metrics = self._structure_links_metrics(links_metrics, events)
         metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics)
         edges_with_links_info = self._group_links_by_edge(metrics_with_cache_and_contact_info)
@@ -398,6 +400,7 @@ class ServiceAffectingMonitor:
             link_info = {
                 'link_status': link['link_status'],
                 'link_metrics': link['link_metrics'],
+                'link_events': link['link_events'],
             }
             edge_info_by_serial[serial_number]['links'].append(link_info)
 
@@ -414,8 +417,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await \
-            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+            links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             await asyncio.sleep(0)
@@ -447,8 +450,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await \
-            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+            links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             await asyncio.sleep(0)
@@ -480,8 +483,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await \
-            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+            links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             await asyncio.sleep(0)
@@ -513,8 +516,8 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await \
-            self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
+        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+            links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
             await asyncio.sleep(0)
@@ -560,6 +563,45 @@ class ServiceAffectingMonitor:
 
         self._logger.info("Finished looking for bandwidth issues!")
 
+    async def _bouncing_check(self):
+        self._logger.info('Looking for bouncing issues...')
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bouncing_checks()
+        links_metrics: list = links_metrics_response['body']
+
+        if not links_metrics:
+            self._logger.info("List of links arrived empty while checking bouncing issues. Skipping...")
+            return
+
+        events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
+        links_metrics = self._structure_links_metrics(links_metrics, events)
+        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+            links_metrics)
+
+        for elem in metrics_with_cache_and_contact_info:
+            cached_info = elem['cached_info']
+            link_status = elem['link_status']
+            events = elem['link_events']
+
+            serial_number = cached_info['serial_number']
+
+            if not events:
+                self._logger.info(
+                    f"No events were found for {link_status['interface']} from {serial_number} "
+                    f"while looking for bouncing troubles"
+                )
+                continue
+
+            if self._trouble_repository.are_bouncing_events_within_threshold(events):
+                self._logger.info(
+                    f"Link {link_status['interface']} from {serial_number} didn't exceed bouncing thresholds"
+                )
+                continue
+
+            await self._process_bouncing_trouble(elem)
+
+        self._logger.info("Finished looking for bouncing issues!")
+
     async def _process_latency_trouble(self, link_data: dict):
         trouble = AffectingTroubles.LATENCY
         await self._process_affecting_trouble(link_data, trouble)
@@ -574,6 +616,10 @@ class ServiceAffectingMonitor:
 
     async def _process_bandwidth_trouble(self, link_data: dict):
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
+        await self._process_affecting_trouble(link_data, trouble)
+
+    async def _process_bouncing_trouble(self, link_data: dict):
+        trouble = AffectingTroubles.BOUNCING
         await self._process_affecting_trouble(link_data, trouble)
 
     async def _process_affecting_trouble(self, link_data: dict, trouble: AffectingTroubles):

@@ -1,5 +1,7 @@
 from typing import Callable
 
+from application import EVENT_INTERFACE_REGEX
+
 
 class UtilsRepository:
     @staticmethod
@@ -22,3 +24,8 @@ class UtilsRepository:
             return f'{round((bps / 1000000000), 3)} Gbps'
 
         return f'{round(bps, 3)} bps'
+
+    @staticmethod
+    def get_interface_from_event(event):
+        match = EVENT_INTERFACE_REGEX.match(event['message'])
+        return match.group('interface') or match.group('link_interface')
