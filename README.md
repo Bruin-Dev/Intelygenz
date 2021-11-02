@@ -215,33 +215,7 @@ You will need to add/modify files in the folders of the
 Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
 specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
 
-**It's necessary run the `basic-infra` job the first time a new microservice is created in the project**
-> This has been done because ECR repositories are global resources and are stored in the same tfstate file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added
-
-### automation-engine
-In the automation-engine root folder it is necessary update the following files:
-- [.gitlab-ci.yml](.gitlab-ci.yml)
-- [README.md](README.md)
-- [docker-compose.yml](docker-compose.yml)
-- [package.json](package.json) (*semantic-release functionality*)
-- [path/to/miceoservice/package.json](bruin-bridge/package.json) (*semantic-release functionality*)
-
-### infra-as-code
-In infra-as-code you will need to make the changes to the following locations:
-- Add desired amount and any new env variables here: [.gitlab-ci.yml](infra-as-code/.gitlab-ci.yml)
-
-- basic infra folder    
-    - [0-ecr_repositories](infra-as-code/basic-infra/0-ecr_repositories) *NOTE: to add new ecr image*
-
-### helm
-If your microservices adds any new env variables you will need to make changes to the following files:
-- One or both of these places:
-    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/configmap.yaml](helm/charts/automation-engine/charts) *NOTE: The variable will be save in plain text (make sure that you create variable as ".Values.config.<var>")*
-    * [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/templates/secret.yaml](helm/charts/automation-engine/charts) *NOTE: The variable have sensitive data and will be save in base64-encoded string.*
-- [helm/charts/automation-engine/charts/<ANY_MICROSERVICE>/values.yaml](helm/charts/automation-engine/charts) *NOTE: this only need to define the variable empty*
-- [helm/charts/automation-engine/charts/values.yaml](helm/charts/automation-engine/charts/values.yaml) *NOTE: this only need to define the variable empty*
-- [helm/charts/automation-engine/charts/values.yaml.tpl](helm/charts/automation-engine/charts/values.yaml.tpl) *NOTE: here you put the variable and the value that will be replaced by pipeline to deploy*
-- [ci-utils/environments/deploy_environment_vars.sh](ci-utils/environments/deploy_environment_vars.sh) *NOTE: make sure the variable exist in gitlab-ci variables.*
+[FOLLOW THIS HOWTO](docs/CREATE_NEW_MICROSERVICE.md). explains step by step the whole process to create a new microservice that can be deployed in any environment with pipelines.
 
 # Technologies used
 

@@ -1,4 +1,5 @@
 from config import confie_contact_info
+from config import fis_contact_info
 from config import oreilly_contact_info
 from config import rotech_contact_info
 from config import royal_brass_contact_info
@@ -9,6 +10,7 @@ confie_devices = confie_contact_info.devices_by_id
 tenet_devices = tenet_contact_info.devices_by_id
 rotech_devices = rotech_contact_info.devices_by_id
 royal_brass_devices = royal_brass_contact_info.devices_by_id
+fis_devices = fis_contact_info.devices_by_id
 
 contact_info = [
     # Titan America edges
@@ -11847,4 +11849,4 @@ contact_info = [
 # When customers wants to reenable Confie Seguros monitoring append it to the existing aggregate list
 # devices_by_id = contact_info + ..... + confie_devices
 
-devices_by_id = contact_info + oreilly_devices + tenet_devices + royal_brass_devices + rotech_devices
+devices_by_id = contact_info + oreilly_devices + tenet_devices + royal_brass_devices + rotech_devices + fis_devices

@@ -5,13 +5,13 @@ validate-runtime-tnba-dev:
   stage: validation
   extends: .kre_template_validate_runtime
   variables:
-    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba
     KRE_RUNTIME_NAME: kre-tnba
     CURRENT_ENVIRONMENT: dev
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
       changes:
-        - infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime/**/*
+        - infra-as-code/kre-runtimes/runtimes/kre-tnba/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
 
 validate-runtime-email-tagger-dev:
@@ -27,6 +27,19 @@ validate-runtime-email-tagger-dev:
         - infra-as-code/kre-runtimes/runtimes/kre-email-tagger/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
 
+validate-runtime-rta-dev:
+  stage: validation
+  extends: .kre_template_validate_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-rta
+    KRE_RUNTIME_NAME: kre-rta
+    CURRENT_ENVIRONMENT: dev
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
+      changes:
+        - infra-as-code/kre-runtimes/runtimes/kre-rta/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+
 # ================================================================
 # Terraform deployment jobs for infra-as-code/kre-runtimes module
 # ================================================================
@@ -34,7 +47,7 @@ deploy-runtime-tnba-dev:
   stage: deploy_kre_runtimes
   extends: .kre_template_deploy_runtime
   variables:
-    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba
     KRE_RUNTIME_NAME: kre-tnba
     EKS_CLUSTER_NAME: mettel-automation-kre-dev
     BASE_DOMAIN_NAME: "kre-tnba-dev.mettel-automation.net"
@@ -55,7 +68,7 @@ deploy-runtime-tnba-production:
   stage: deploy_kre_runtimes
   extends: .kre_template_deploy_runtime
   variables:
-    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba
     KRE_RUNTIME_NAME: kre-tnba
     EKS_CLUSTER_NAME: mettel-automation-kre
     BASE_DOMAIN_NAME: "kre-tnba.mettel-automation.net"
@@ -116,6 +129,49 @@ deploy-runtime-email-tagger-production:
       when: manual
       allow_failure: true
 
+deploy-runtime-rta-dev:
+  stage: deploy_kre_runtimes
+  extends: .kre_template_deploy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-rta
+    KRE_RUNTIME_NAME: kre-rta
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    BASE_DOMAIN_NAME: "kre-rta-dev.mettel-automation.net"
+    KRE_HELM_CHART_V: ${KRE_RTA_HELM_CHART_V_DEV}
+    KRE_RUNTIME_INFLUX_SOURCE: ${RTA_KRE_RUNTIME_INFLUX_SOURCE}
+    KRE_RUNTIME_DASHBOARD: ${RTA_KRE_RUNTIME_DASHBOARD}
+    KRE_RUNTIME_DASHBOARD_USER: ${RTA_KRE_RUNTIME_DASHBOARD_USER}
+    KRE_RUNTIME_DASHBOARD_PASSWORD: ${RTA_KRE_RUNTIME_DASHBOARD_PASSWORD}
+    CURRENT_ENVIRONMENT: dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
+      when: manual
+      allow_failure: true
+
+deploy-runtime-rta-production:
+  stage: deploy_kre_runtimes
+  extends: .kre_template_deploy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-rta
+    KRE_RUNTIME_NAME: kre-rta
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    BASE_DOMAIN_NAME: "kre-rta.mettel-automation.net"
+    KRE_HELM_CHART_V: ${KRE_RTA_HELM_CHART_V_PRO}
+    KRE_RUNTIME_INFLUX_SOURCE: ${RTA_KRE_RUNTIME_INFLUX_SOURCE}
+    KRE_RUNTIME_DASHBOARD: ${RTA_KRE_RUNTIME_DASHBOARD}
+    KRE_RUNTIME_DASHBOARD_USER: ${RTA_KRE_RUNTIME_DASHBOARD_USER}
+    KRE_RUNTIME_DASHBOARD_PASSWORD: ${RTA_KRE_RUNTIME_DASHBOARD_PASSWORD}
+    CURRENT_ENVIRONMENT: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+
 # ================================================================
 # Terraform destroy jobs for infra-as-code/kre-runtimes module
 # ================================================================
@@ -123,7 +179,7 @@ destroy-runtime-tnba-dev:
   stage: destroy
   extends: .kre_template_destroy_runtime
   variables:
-    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba
     KRE_RUNTIME_NAME: kre-tnba
     EKS_CLUSTER_NAME: mettel-automation-kre-dev
     CURRENT_ENVIRONMENT: dev
@@ -139,7 +195,7 @@ destroy-runtime-tnba-production:
   stage: destroy
   extends: .kre_template_destroy_runtime
   variables:
-    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba-runtime
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-tnba
     KRE_RUNTIME_NAME: kre-tnba
     EKS_CLUSTER_NAME: mettel-automation-kre
     CURRENT_ENVIRONMENT: production
@@ -182,6 +238,40 @@ destroy-runtime-email-tagger-production:
     KRE_RUNTIME_DASHBOARD: ${EMAIL_TAGGER_KRE_RUNTIME_DASHBOARD}
     KRE_RUNTIME_DASHBOARD_USER: ${EMAIL_TAGGER_KRE_RUNTIME_DASHBOARD_USER}
     KRE_RUNTIME_DASHBOARD_PASSWORD: ${EMAIL_TAGGER_KRE_RUNTIME_DASHBOARD_PASSWORD}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(kre\): .*$/'
+      when: manual
+      allow_failure: true
+
+destroy-runtime-rta-dev:
+  stage: destroy
+  extends: .kre_template_destroy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-rta
+    KRE_RUNTIME_NAME: kre-rta
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    CURRENT_ENVIRONMENT: dev
+    HOSTED_ZONE_NAME: "kre-rta-dev.mettel-automation.net."
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(kre\): .*$/'
+      when: manual
+      allow_failure: true
+
+destroy-runtime-rta-production:
+  stage: destroy
+  extends: .kre_template_destroy_runtime
+  variables:
+    MODULE: infra-as-code/kre-runtimes/runtimes/kre-rta
+    KRE_RUNTIME_NAME: kre-rta
+    EKS_CLUSTER_NAME: mettel-automation-kre
+    CURRENT_ENVIRONMENT: production
+    HOSTED_ZONE_NAME: "kre-rta.mettel-automation.net"
+    KRE_RUNTIME_INFLUX_SOURCE: ${RTA_KRE_RUNTIME_INFLUX_SOURCE}
+    KRE_RUNTIME_DASHBOARD: ${RTA_KRE_RUNTIME_DASHBOARD}
+    KRE_RUNTIME_DASHBOARD_USER: ${RTA_KRE_RUNTIME_DASHBOARD_USER}
+    KRE_RUNTIME_DASHBOARD_PASSWORD: ${RTA_KRE_RUNTIME_DASHBOARD_PASSWORD}
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(kre\): .*$/'
       when: manual

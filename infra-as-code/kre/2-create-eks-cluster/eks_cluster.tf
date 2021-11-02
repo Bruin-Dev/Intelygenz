@@ -26,5 +26,5 @@ module "mettel-automation-eks-cluster" {
     Provisioning = var.common_info.provisioning
   }
 
-  version = "12.2.0"
+  version = "15.2.0"
 }
