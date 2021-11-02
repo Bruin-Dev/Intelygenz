@@ -106,3 +106,7 @@ METRICS_SERVER_CONFIG = {
 }
 
 VELOCLOUD_HOSTS = contact_info.contact_by_host_and_client_id.keys()
+
+ASR_CONFIG = {
+    'link_labels_blacklist': ['BYOB', 'Customer Owned', 'customer owned']
+}

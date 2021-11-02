@@ -685,3 +685,16 @@ class BruinRepository:
             if report['trouble'] in active_reports and report['number_of_tickets'] >= threshold:
                 filter_reports.append(report)
         return filter_reports
+
+    async def append_asr_forwarding_note(self, ticket_id, link, serial_number):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+
+        note_lines = [
+            f"#*MetTel's IPA*#",
+            f'Status of Wired Link {link["interface"]} ({link["displayName"]}) is {link["linkState"]}.',
+            f'Moving task to: ASR Investigate',
+            f'TimeStamp: {current_datetime_tz_aware}',
+        ]
+
+        task_result_note = os.linesep.join(note_lines)
+        return await self.append_note_to_ticket(ticket_id, task_result_note, service_numbers=[serial_number])

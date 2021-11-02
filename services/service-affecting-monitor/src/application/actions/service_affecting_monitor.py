@@ -620,12 +620,13 @@ class ServiceAffectingMonitor:
 
     async def _process_bouncing_trouble(self, link_data: dict):
         trouble = AffectingTroubles.BOUNCING
-        await self._process_affecting_trouble(link_data, trouble)
+        ticket_id = await self._process_affecting_trouble(link_data, trouble)
+        await self._attempt_forward_to_asr(link_data, ticket_id)
 
-    async def _process_affecting_trouble(self, link_data: dict, trouble: AffectingTroubles):
+    async def _process_affecting_trouble(self, link_data: dict, trouble: AffectingTroubles) -> Optional[int]:
         trouble_processed = False
-        open_affecting_ticket = None
         resolved_affecting_ticket = None
+        ticket_id = None
 
         serial_number = link_data['cached_info']['serial_number']
         interface = link_data['link_status']['interface']
@@ -697,12 +698,14 @@ class ServiceAffectingMonitor:
         # If not a single ticket was found for the serial, create a new one
         if not trouble_processed and not open_affecting_ticket and not resolved_affecting_ticket:
             self._logger.info(f'No open or resolved Service Affecting ticket was found for edge {serial_number}')
-            await self._create_affecting_ticket(trouble, link_data)
+            ticket_id = await self._create_affecting_ticket(trouble, link_data)
 
         self._logger.info(
             f'Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge '
             f'{serial_number} has been processed'
         )
+
+        return ticket_id
 
     async def _get_oldest_affecting_ticket_for_serial_number(self, tickets: List[dict],
                                                              serial_number: str) -> Optional[dict]:
@@ -830,7 +833,7 @@ class ServiceAffectingMonitor:
         )
         self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
-    async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict):
+    async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
         serial_number = link_data['cached_info']['serial_number']
         interface = link_data['link_status']['interface']
         client_id = link_data['cached_info']['bruin_client_info']['client_id']
@@ -878,6 +881,8 @@ class ServiceAffectingMonitor:
         )
         self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
+        return ticket_id
+
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
         current_datetime = datetime.now(tz)
@@ -901,6 +906,103 @@ class ServiceAffectingMonitor:
         await self._notifications_repository.notify_successful_ticket_forward(
             ticket_id=ticket_id, serial_number=serial_number
         )
+
+    async def _attempt_forward_to_asr(self, link_data: dict, ticket_id: Optional[int]):
+        if not ticket_id:
+            return
+
+        serial_number = link_data['cached_info']['serial_number']
+        self._logger.info(
+            f'Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...'
+        )
+
+        interface = link_data['link_status']['interface']
+        links_configuration = link_data['cached_info']['links_configuration']
+        link_interface_type = ''
+
+        for link_configuration in links_configuration:
+            if interface in link_configuration['interfaces']:
+                link_interface_type = link_configuration['type']
+
+        if link_interface_type != 'WIRED':
+            self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED')
+            return
+
+        self._logger.info(f'Filtering out any of the wired links of serial {serial_number} that contains any of the '
+                          f'following: '
+                          f'{self._config.ASR_CONFIG["link_labels_blacklist"]} '
+                          f'in the link label')
+
+        if not self._should_be_forwarded_to_asr(link_data):
+            self._logger.info(
+                f'No links with whitelisted labels were found for serial {serial_number}. '
+                f'Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate.'
+            )
+            return
+
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details_response_body = ticket_details_response['body']
+        ticket_details_response_status = ticket_details_response['status']
+        if ticket_details_response_status not in range(200, 300):
+            return
+
+        details_from_ticket = ticket_details_response_body['ticketDetails']
+        ticket_details = self._utils_repository.get_first_element_matching(
+            details_from_ticket,
+            lambda detail: detail['detailValue'] == serial_number,
+        )
+
+        notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
+
+        ticket_notes = [
+            note
+            for note in notes_from_outage_ticket
+            if serial_number in note['serviceNumber']
+            if note['noteValue'] is not None
+        ]
+        ticket_detail_id = ticket_details['detailID']
+
+        other_troubles_in_ticket = self._ticket_repository.are_there_any_other_troubles(ticket_notes,
+                                                                                        AffectingTroubles.BOUNCING)
+
+        if other_troubles_in_ticket:
+            self._logger.info(f'Other service affecting troubles were found in ticket id {ticket_id}. Skipping forward'
+                              f'to asr...')
+            return
+
+        watermark = 'ASR Investigate'
+        task_result = 'No Trouble Found - Carrier Issue'
+        task_result_note = self._utils_repository.get_first_element_matching(
+            ticket_notes,
+            lambda note: watermark in note.get('noteValue')
+        )
+
+        if task_result_note is not None:
+            self._logger.info(
+                f'Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to '
+                f'"{task_result}"'
+            )
+            return
+
+        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
+            ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
+        if change_detail_work_queue_response['status'] in range(200, 300):
+            await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_data['link_status'], serial_number)
+            slack_message = (
+                f'Detail of Circuit Instability ticket {ticket_id} related to serial {serial_number} '
+                f'was successfully forwarded to {task_result} queue!'
+            )
+            await self._notifications_repository.send_slack_message(slack_message)
+
+    def _should_be_forwarded_to_asr(self, link_data: dict) -> bool:
+        link_label = link_data['link_status']['displayName']
+        is_blacklisted = self._is_link_label_blacklisted(link_label)
+        is_ip_address = self._utils_repository.is_ip_address(link_label)
+        return not is_blacklisted and not is_ip_address
+
+    def _is_link_label_blacklisted(self, link_label: str) -> bool:
+        blacklisted_link_labels = self._config.ASR_CONFIG['link_labels_blacklist']
+        return any(label for label in blacklisted_link_labels if label in link_label)
 
     @staticmethod
     def _is_rep_services_client_id(client_id: int):

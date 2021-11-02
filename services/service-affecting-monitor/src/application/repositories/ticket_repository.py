@@ -59,6 +59,14 @@ class TicketRepository:
         )
         return affecting_trouble_note is not None
 
+    def are_there_any_other_troubles(self, ticket_notes: list, observed_trouble: AffectingTroubles) -> bool:
+        for trouble in AffectingTroubles:
+            if trouble is observed_trouble:
+                continue
+            if self.is_there_any_note_for_trouble(ticket_notes, trouble):
+                return True
+        return False
+
     def get_build_note_fn_by_trouble(self, trouble: AffectingTroubles) -> Callable:
         if trouble is AffectingTroubles.LATENCY:
             return self.build_latency_trouble_note

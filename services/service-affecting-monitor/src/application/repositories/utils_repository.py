@@ -1,3 +1,4 @@
+from ipaddress import ip_address
 from typing import Callable
 
 from application import EVENT_INTERFACE_REGEX
@@ -29,3 +30,10 @@ class UtilsRepository:
     def get_interface_from_event(event):
         match = EVENT_INTERFACE_REGEX.match(event['message'])
         return match.group('interface') or match.group('link_interface')
+
+    @staticmethod
+    def is_ip_address(string: str) -> bool:
+        try:
+            return bool(ip_address(string))
+        except ValueError:
+            return False
