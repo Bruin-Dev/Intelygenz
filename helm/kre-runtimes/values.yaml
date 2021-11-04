@@ -22,6 +22,10 @@ chronograf:
     storageClass: "hostpath"
 
 influxdb:
+  config:
+    data: 
+      max-values-per-tag: 0
+      max-series-per-database: 0
   persistence:
     storageClass: "hostpath"
 
