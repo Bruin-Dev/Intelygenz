@@ -6413,7 +6413,7 @@ class TestServiceOutageMonitor:
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
         )
         outage_monitor._reopen_outage_ticket.assert_awaited_once_with(
-            ticket_id, links_grouped_by_primary_edge_with_ha_info,
+            ticket_id, links_grouped_by_primary_edge_with_ha_info, cached_edge_primary, outage_type
         )
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -6629,7 +6629,7 @@ class TestServiceOutageMonitor:
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._post_note_in_outage_ticket = CoroutineMock()
+        outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
 
         custom_monitor_config = testconfig.MONITOR_CONFIG.copy()
@@ -6643,8 +6643,9 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
-        outage_monitor._post_note_in_outage_ticket.assert_awaited_once_with(
-            ticket_id, links_grouped_by_primary_edge_with_ha_info,
+        outage_monitor._append_triage_note.assert_awaited_once_with(
+            ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
+            is_reopen_note=True,
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -7207,7 +7208,7 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
-            cached_edge, edge_status, events_sorted_by_event_time, outage_type
+            cached_edge, edge_status, events_sorted_by_event_time, outage_type, is_reopen_note=False,
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
 
@@ -7355,7 +7356,7 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         triage_repository.build_triage_note.assert_called_once_with(
-            cached_edge, edge_status, events_sorted_by_event_time, outage_type
+            cached_edge, edge_status, events_sorted_by_event_time, outage_type, is_reopen_note=False,
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
         metrics_repository.increment_first_triage_errors.assert_called_once()
@@ -7366,12 +7367,16 @@ class TestServiceOutageMonitor:
         detail_1_id = 9876543
         detail_2_id = 1112223
 
+        host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        edge_id = 1
+
         serial_number_1 = 'VC1234567'
         serial_number_2 = 'VC7654321'
         edge_status = {
-            'host': 'mettel.velocloud.net',
+            'host': host,
             'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
+            'enterpriseId': enterprise_id,
             'enterpriseProxyId': None,
             'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
@@ -7379,7 +7384,7 @@ class TestServiceOutageMonitor:
             'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
+            'edgeId': edge_id,
             'edgeSerialNumber': serial_number_1,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
@@ -7397,8 +7402,22 @@ class TestServiceOutageMonitor:
                     'linkId': 5293,
                     'linkIpAddress': '70.59.5.185',
                 }
-            ]
+            ],
+            'edgeHAState': None,
+            'edgeIsHAPrimary': None,
         }
+        cached_edge = {
+            'edge': {'host': host, 'enterprise_id': enterprise_id, 'edge_id': edge_id},
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': serial_number_1,
+            'ha_serial_number': None,
+            'bruin_client_info': {
+                'client_id': 30000,
+                'client_name': 'MetTel',
+            },
+            'logical_ids': [],
+        }
+        outage_type = Outages.HARD_DOWN  # We can use whatever outage type
 
         ticket_details_result = {
             'request_id': uuid_,
@@ -7460,11 +7479,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._append_triage_note = CoroutineMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, edge_status)
+        await outage_monitor._reopen_outage_ticket(ticket_id, edge_status, cached_edge, outage_type)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_2_id)
+        outage_monitor._append_triage_note.assert_not_awaited()
         logger.error.assert_called()
 
     @pytest.mark.asyncio
@@ -7473,12 +7494,16 @@ class TestServiceOutageMonitor:
         detail_1_id = 9876543
         detail_2_id = 1112223
 
+        host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        edge_id = 1
+
         serial_number_1 = 'VC1234567'
         serial_number_2 = 'VC7654321'
         edge_status = {
-            'host': 'mettel.velocloud.net',
+            'host': host,
             'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
+            'enterpriseId': enterprise_id,
             'enterpriseProxyId': None,
             'enterpriseProxyName': None,
             'edgeName': 'Big Boss',
@@ -7486,7 +7511,7 @@ class TestServiceOutageMonitor:
             'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
             'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
             'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
+            'edgeId': edge_id,
             'edgeSerialNumber': serial_number_1,
             'edgeHASerialNumber': None,
             'edgeModelNumber': 'edge520',
@@ -7504,8 +7529,22 @@ class TestServiceOutageMonitor:
                     'linkId': 5293,
                     'linkIpAddress': '70.59.5.185',
                 }
-            ]
+            ],
+            'edgeHAState': None,
+            'edgeIsHAPrimary': None,
         }
+        cached_edge = {
+            'edge': {'host': host, 'enterprise_id': enterprise_id, 'edge_id': edge_id},
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': serial_number_1,
+            'ha_serial_number': None,
+            'bruin_client_info': {
+                'client_id': 30000,
+                'client_name': 'MetTel',
+            },
+            'logical_ids': [],
+        }
+        outage_type = Outages.HARD_DOWN  # We can use whatever outage type
 
         ticket_details_result = {
             'request_id': uuid_,
@@ -7567,518 +7606,18 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        outage_monitor._post_note_in_outage_ticket = CoroutineMock()
+        outage_monitor._append_triage_note = CoroutineMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, edge_status)
+        await outage_monitor._reopen_outage_ticket(ticket_id, edge_status, cached_edge, outage_type)
 
-        outage_monitor._post_note_in_outage_ticket.assert_called_once_with(ticket_id, edge_status)
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_2_id)
+        outage_monitor._append_triage_note.assert_awaited_once_with(
+            ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True
+        )
         notifications_repository.send_slack_message.assert_called_once_with(
             f'Detail {detail_2_id} of outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}'
         )
-
-    @pytest.mark.asyncio
-    async def post_note_in_outage_ticket_with_no_outage_causes_test(self):
-        ticket_id = 1234567
-
-        serial_number = 'VC1234567'
-        edge_status = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'FAKE STATE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'FAKE STATE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'FAKE STATE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'FAKE STATE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'FAKE STATE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        outage_causes = None
-        ticket_note_outage_causes = 'Outage causes: Could not determine causes.'
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        ha_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-        outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
-
-        await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
-
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
-            ticket_id, serial_number, ticket_note_outage_causes
-        )
-
-    @pytest.mark.asyncio
-    async def post_note_in_outage_ticket_with_outage_causes_and_only_faulty_edge_test(self):
-        ticket_id = 1234567
-
-        serial_number = 'VC1234567'
-        edge_state = 'OFFLINE'
-        edge_status = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': edge_state,
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'STABLE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'STABLE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'FAKE STATE',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'FAKE STATE',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        outage_causes = {'edge': edge_state}
-
-        ticket_note_outage_causes = f'Outage causes: Edge was {edge_state}.'
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        ha_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-        outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
-
-        await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
-
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
-            ticket_id, serial_number, ticket_note_outage_causes
-        )
-
-    @pytest.mark.asyncio
-    async def post_note_in_outage_ticket_with_outage_causes_and_only_faulty_links_test(self):
-        ticket_id = 1234567
-
-        link_1_interface = 'REX'
-        link_2_interface = 'RAY'
-        links_state = 'DISCONNECTED'
-        serial_number = 'VC1234567'
-        edge_status = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': link_1_interface,
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': links_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': links_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': link_2_interface,
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': links_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': links_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        outage_causes = {'links': {link_1_interface: links_state, link_2_interface: links_state}}
-
-        ticket_note_outage_causes = (
-            f'Outage causes: Link {link_1_interface} was {links_state}. Link {link_2_interface} was {links_state}.'
-        )
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        ha_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-        outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
-
-        await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
-
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
-            ticket_id, serial_number, ticket_note_outage_causes
-        )
-
-    @pytest.mark.asyncio
-    async def post_note_in_outage_ticket_with_outage_causes_and_faulty_edge_and_faulty_links_test(self):
-        ticket_id = 1234567
-
-        edge_state = 'OFFLINE'
-        link_1_interface = 'REX'
-        link_2_interface = 'RAY'
-        links_state = 'DISCONNECTED'
-        serial_number = 'VC1234567'
-        edge_status = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': edge_state,
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': link_1_interface,
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': links_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': links_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': link_2_interface,
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': links_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': links_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        outage_causes = {
-            'edge': edge_state,
-            'links': {link_1_interface: links_state, link_2_interface: links_state}
-        }
-        ticket_note_outage_causes = (
-            f'Outage causes: Edge was {edge_state}. '
-            f'Link {link_1_interface} was {links_state}. Link {link_2_interface} was {links_state}.'
-        )
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        ha_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-        outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
-
-        await outage_monitor._post_note_in_outage_ticket(ticket_id, edge_status)
-
-        bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
-            ticket_id, serial_number, ticket_note_outage_causes
-        )
-
-    def get_outage_causes_test(self):
-        edge_1_state = 'CONNECTED'
-        edge_1_link_1_state = edge_1_link_2_state = 'STABLE'
-        edge_status_1 = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': edge_1_state,
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': edge_1_link_1_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': edge_1_link_1_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': edge_1_link_2_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': edge_1_link_2_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        edge_2_state = 'OFFLINE'
-        edge_2_link_1_state = edge_2_link_2_state = 'DISCONNECTED'
-        edge_status_2 = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': edge_2_state,
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': edge_2_link_1_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': edge_2_link_1_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': edge_2_link_2_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': edge_2_link_2_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        edge_3_state = 'OFFLINE'
-        edge_3_link_1_state = 'STABLE'
-        edge_3_link_2_state = 'DISCONNECTED'
-        edge_status_3 = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': edge_3_state,
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': 'VC1234567',
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'REX',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': edge_3_link_1_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': edge_3_link_1_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'RAY',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': edge_3_link_2_state,
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': edge_3_link_2_state,
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                }
-            ]
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        event_bus = Mock()
-        config = testconfig
-        velocloud_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        ha_repository = Mock()
-
-        outage_repository = Mock()
-        outage_repository.is_faulty_edge = Mock(side_effect=[False, True, True])
-        outage_repository.is_faulty_link = Mock(side_effect=[False, False, True, True, False, True])
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-
-        result = outage_monitor._get_outage_causes(edge_status_1)
-        assert result is None
-
-        result = outage_monitor._get_outage_causes(edge_status_2)
-        assert result == {'edge': 'OFFLINE', 'links': {'REX': edge_2_link_1_state, 'RAY': edge_2_link_2_state}}
-
-        result = outage_monitor._get_outage_causes(edge_status_3)
-        assert result == {'edge': 'OFFLINE', 'links': {'RAY': edge_2_link_2_state}}
 
     def is_detail_resolved_test(self):
         ticket_detail = {

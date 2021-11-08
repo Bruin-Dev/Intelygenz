@@ -28,7 +28,7 @@ class TriageRepository:
         return interface_name == interface_name_found
 
     def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict],
-                          outage_type: Outages) -> str:
+                          outage_type: Outages, *, is_reopen_note=False) -> str:
         tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
 
         edge_full_id = cached_edge['edge']
@@ -55,9 +55,18 @@ class TriageRepository:
 
         ticket_note_lines = [
             "#*MetTel's IPA*#",
-            'Triage (VeloCloud)',
-            '',
         ]
+
+        if is_reopen_note:
+            ticket_note_lines += [
+                'Re-opening ticket.',
+                '',
+            ]
+        else:
+            ticket_note_lines += [
+                'Triage (VeloCloud)',
+                '',
+            ]
 
         if outage_type is Outages.HA_SOFT_DOWN:
             ticket_note_lines.append('High Availability - Edge Offline\n')

@@ -565,7 +565,9 @@ class OutageMonitor:
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
-                        await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
+                        await self._reopen_outage_ticket(
+                            ticket_creation_response_body, edge_status, cached_edge, outage_type
+                        )
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
@@ -584,7 +586,9 @@ class OutageMonitor:
                         )
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
-                        await self._post_note_in_outage_ticket(ticket_creation_response_body, edge_status)
+                        await self._append_triage_note(
+                            ticket_creation_response_body, cached_edge, edge_status, outage_type, is_reopen_note=True,
+                        )
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
@@ -689,7 +693,8 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
 
-    async def _append_triage_note(self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages):
+    async def _append_triage_note(self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages, *,
+                                  is_reopen_note=False):
         edge_full_id = cached_edge['edge']
         serial_number = cached_edge['serial_number']
 
@@ -721,12 +726,11 @@ class OutageMonitor:
         ticket_detail_id = ticket_detail['detailID']
 
         ticket_note = self._triage_repository.build_triage_note(
-            cached_edge, edge_status, recent_events_response_body, outage_type
+            cached_edge, edge_status, recent_events_response_body, outage_type, is_reopen_note=is_reopen_note
         )
 
         self._logger.info(
-            f'Appending triage note to detail {ticket_detail_id} (serial {serial_number}) of recently created '
-            f'ticket {ticket_id}...'
+            f'Appending triage note to detail {ticket_detail_id} (serial {serial_number}) of ticket {ticket_id}...'
         )
         detail_object = {
             'ticket_id': ticket_id,
@@ -737,7 +741,7 @@ class OutageMonitor:
         if note_appended == 503:
             self._metrics_repository.increment_first_triage_errors()
 
-    async def _reopen_outage_ticket(self, ticket_id, edge_status):
+    async def _reopen_outage_ticket(self, ticket_id: int, edge_status: dict, cached_edge: dict, outage_type: Outages):
         serial_number = edge_status['edgeSerialNumber']
         self._logger.info(f'Reopening outage ticket {ticket_id} for serial {serial_number}...')
 
@@ -763,47 +767,11 @@ class OutageMonitor:
                 f'https://app.bruin.com/t/{ticket_id}'
             )
             await self._notifications_repository.send_slack_message(slack_message)
-            await self._post_note_in_outage_ticket(ticket_id, edge_status)
+            await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True)
 
             self._metrics_repository.increment_tickets_reopened()
         else:
             self._logger.error(f'Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.')
-
-    async def _post_note_in_outage_ticket(self, ticket_id, edge_status):
-        outage_causes = self._get_outage_causes(edge_status)
-        ticket_note_outage_causes = 'Outage causes:'
-        if outage_causes is not None:
-            edge_state = outage_causes.get('edge')
-            if edge_state is not None:
-                ticket_note_outage_causes += f' Edge was {edge_state}.'
-
-            links_states = outage_causes.get('links')
-            if links_states is not None:
-                for interface, state in links_states.items():
-                    ticket_note_outage_causes += f' Link {interface} was {state}.'
-        else:
-            ticket_note_outage_causes += ' Could not determine causes.'
-
-        serial_number = edge_status['edgeSerialNumber']
-        await self._bruin_repository.append_reopening_note_to_ticket(
-            ticket_id, serial_number, ticket_note_outage_causes
-        )
-
-    def _get_outage_causes(self, edge_status):
-        outage_causes = {}
-
-        edge_state = edge_status["edgeState"]
-        if self._outage_repository.is_faulty_edge(edge_state):
-            outage_causes['edge'] = edge_state
-
-        for link in edge_status['links']:
-            link_state = link['linkState']
-
-            if self._outage_repository.is_faulty_link(link_state):
-                outage_links_states = outage_causes.setdefault('links', {})
-                outage_links_states[link['interface']] = link_state
-
-        return outage_causes or None
 
     def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
         current_datetime = datetime.now(utc)
