@@ -31,12 +31,14 @@ MONITOR_CONFIG = {
         AffectingTroubles.PACKET_LOSS: 8,                  # packets
         AffectingTroubles.JITTER: 50,                      # milliseconds
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,  # percentage of total bandwidth
+        AffectingTroubles.BOUNCING: 10,                    # number of down / dead events
     },
     'monitoring_minutes_per_trouble': {
         AffectingTroubles.LATENCY: 30,
         AffectingTroubles.PACKET_LOSS: 30,
         AffectingTroubles.JITTER: 30,
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
+        AffectingTroubles.BOUNCING: 60,
     },
     'forward_to_hnoc': 60,
     'autoresolve': {
@@ -82,4 +84,10 @@ LOG_CONFIG = {
 QUART_CONFIG = {
     'title': 'service-affecting-monitor',
     'port': 5000
+}
+
+VELOCLOUD_HOSTS = contact_info.contact_by_host_and_client_id.keys()
+
+ASR_CONFIG = {
+    'link_labels_blacklist': ['BYOB', 'Customer Owned', 'customer owned']
 }

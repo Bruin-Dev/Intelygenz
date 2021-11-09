@@ -306,7 +306,7 @@ class TestTroubleRepository:
         assert result is False
 
     def are_all_metrics_within_thresholds__bandwidth_metrics_ignored_test(
-            self, trouble_repository, make_metrics, make_link_status_and_metrics_object,
+            self, trouble_repository, make_metrics, make_link_status_and_metrics_object_with_events,
             make_list_of_link_status_and_metrics_objects, make_links_by_edge_object):
         lookup_interval_minutes = 30
 
@@ -317,7 +317,7 @@ class TestTroubleRepository:
             bytes_tx=1000000000, bps_of_best_path_tx=100,
             bytes_rx=1000000000, bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
@@ -333,7 +333,7 @@ class TestTroubleRepository:
             bytes_tx=1000000000, bps_of_best_path_tx=100,
             bytes_rx=1000000000, bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
@@ -343,7 +343,7 @@ class TestTroubleRepository:
         assert result is False
 
     def are_all_metrics_within_thresholds__bandwidth_metrics_taken_into_account_test(
-            self, trouble_repository, make_metrics, make_link_status_and_metrics_object,
+            self, trouble_repository, make_metrics, make_link_status_and_metrics_object_with_events,
             make_list_of_link_status_and_metrics_objects, make_links_by_edge_object):
         lookup_interval_minutes = 30
 
@@ -354,7 +354,7 @@ class TestTroubleRepository:
             bytes_tx=1, bps_of_best_path_tx=100,
             bytes_rx=1, bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
@@ -370,7 +370,7 @@ class TestTroubleRepository:
             bytes_tx=1000000000, bps_of_best_path_tx=100,
             bytes_rx=1000000000, bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
@@ -380,7 +380,7 @@ class TestTroubleRepository:
         assert result is False
 
     def are_all_metrics_within_thresholds__invalid_bandwidth_metrics_taken_into_account_test(
-            self, trouble_repository, make_metrics, make_link_status_and_metrics_object,
+            self, trouble_repository, make_metrics, make_link_status_and_metrics_object_with_events,
             make_list_of_link_status_and_metrics_objects, make_links_by_edge_object):
         lookup_interval_minutes = 30
 
@@ -391,7 +391,7 @@ class TestTroubleRepository:
             bytes_tx=1000000000, bps_of_best_path_tx=0,
             bytes_rx=1000000000, bps_of_best_path_rx=0,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
@@ -407,7 +407,7 @@ class TestTroubleRepository:
             bytes_tx=1000000000, bps_of_best_path_tx=0,
             bytes_rx=1000000000, bps_of_best_path_rx=0,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(

@@ -116,7 +116,7 @@ class TestVelocloudRepository:
     async def get_all_links_metrics__all_rpc_requests_have_not_2xx_status_test(
             self, velocloud_repository, make_list_of_link_metrics, make_rpc_response, velocloud_500_response):
         velocloud_host_1 = "mettel.velocloud.net"
-        velocloud_host_2 = "metvco02.mettel.net"
+        velocloud_host_2 = "metvco03.mettel.net"
         velocloud_host_1_enterprise_1_id = 100
         velocloud_host_1_enterprise_2_id = 10000
         velocloud_host_2_enterprise_1_id = 1000000
@@ -154,7 +154,8 @@ class TestVelocloudRepository:
     async def get_all_links_metrics__all_rpc_requests_succeed_test(
             self, velocloud_repository, make_metrics_for_link, make_list_of_link_metrics, make_rpc_response):
         velocloud_host_1 = "mettel.velocloud.net"
-        velocloud_host_2 = "metvco02.mettel.net"
+        velocloud_host_2 = "metvco03.mettel.net"
+        velocloud_host_3 = "metvco04.mettel.net"
         velocloud_host_1_enterprise_1_id = 100
         velocloud_host_1_enterprise_2_id = 10000
         velocloud_host_2_enterprise_1_id = 1000000
@@ -185,7 +186,15 @@ class TestVelocloudRepository:
             status=200,
         )
 
-        links_metrics = make_list_of_link_metrics(link_1_metrics, link_2_metrics)
+        link_3_metrics = make_metrics_for_link(link_id=3)
+        links_metrics_rpc_3 = make_list_of_link_metrics(link_3_metrics)
+        rpc_3_response = make_rpc_response(
+            request_id=uuid_,
+            body=links_metrics_rpc_3,
+            status=200,
+        )
+
+        links_metrics = make_list_of_link_metrics(link_1_metrics, link_2_metrics, link_3_metrics)
         response = make_rpc_response(
             request_id=uuid_,
             body=links_metrics,
@@ -195,6 +204,7 @@ class TestVelocloudRepository:
         velocloud_repository.get_links_metrics_by_host.side_effect = [
             rpc_1_response,
             rpc_2_response,
+            rpc_3_response,
         ]
 
         custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
@@ -205,6 +215,7 @@ class TestVelocloudRepository:
 
         velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_1, interval=interval)
         velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_2, interval=interval)
+        velocloud_repository.get_links_metrics_by_host.assert_any_await(host=velocloud_host_3, interval=interval)
         assert result == response
 
     @pytest.mark.asyncio

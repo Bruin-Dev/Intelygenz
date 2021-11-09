@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 from typing import Optional
 
@@ -6,6 +5,7 @@ import pytest
 
 from tests.fixtures._helpers import _undefined
 from tests.fixtures._helpers import velocloudize_date
+from tests.fixtures._constants import CURRENT_DATETIME
 
 
 # Factories
@@ -19,9 +19,9 @@ def make_edge():
                longitude: float = 0.0):
         enterprise_proxy_id = enterprise_proxy_id if enterprise_proxy_id is not _undefined else 0
         enterprise_proxy_name = enterprise_proxy_name if enterprise_proxy_name is not _undefined else ''
-        system_up_since = system_up_since or velocloudize_date(datetime.now())
-        service_up_since = service_up_since or velocloudize_date(datetime.now())
-        last_contact = last_contact or velocloudize_date(datetime.now())
+        system_up_since = system_up_since or velocloudize_date(CURRENT_DATETIME)
+        service_up_since = service_up_since or velocloudize_date(CURRENT_DATETIME)
+        last_contact = last_contact or velocloudize_date(CURRENT_DATETIME)
         ha_serial_number = ha_serial_number if ha_serial_number is not _undefined else ''
 
         return {
@@ -52,7 +52,7 @@ def make_link():
                internal_id: str = '', state: str = '', last_active: str = '', vpn_state: str = '',
                id_: int = 0, ip_address: str = ''):
         isp = isp if isp is not _undefined else ''
-        last_active = last_active or velocloudize_date(datetime.now())
+        last_active = last_active or velocloudize_date(CURRENT_DATETIME)
 
         return {
             'displayName': display_name,
@@ -152,8 +152,8 @@ def make_list_of_link_metrics():
 @pytest.fixture(scope='session')
 def make_lookup_interval():
     def _inner(*, start: str = '', end: str = ''):
-        start = start or datetime.now()
-        end = end or datetime.now()
+        start = start or CURRENT_DATETIME
+        end = end or CURRENT_DATETIME
 
         return {
             'start': start,

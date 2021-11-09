@@ -1,5 +1,3 @@
-from copy import deepcopy
-from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch, call
 
@@ -12,6 +10,7 @@ from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories import notifications_repository as notifications_repository_module
 from config import testconfig
+from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
@@ -856,20 +855,19 @@ class TestBruinRepository:
     async def append_autoresolve_note_to_ticket_test(self, bruin_repository, bruin_generic_200_response):
         serial_number = 'VC1234567'
 
-        current_datetime = datetime.now()
         ticket_id = 11111
         ticket_note = (
             "#*MetTel's IPA*#\n"
-            'All Service Affecting conditions (Latency, Packet Loss, Jitter and Bandwidth Over Utilization) '
-            'have stabilized.\n'
+            'All Service Affecting conditions (Latency, Packet Loss, Jitter, Bandwidth Over Utilization '
+            'and Circuit Instability) have stabilized.\n'
             f'Auto-resolving task for serial: {serial_number}\n'
-            f'TimeStamp: {current_datetime}'
+            f'TimeStamp: {CURRENT_DATETIME}'
         )
 
         bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
         datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
+        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
         with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
             with patch.object(bruin_repository_module, 'timezone', new=Mock()):
                 result = await bruin_repository.append_autoresolve_note_to_ticket(ticket_id, serial_number)

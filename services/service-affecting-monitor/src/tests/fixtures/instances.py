@@ -64,10 +64,11 @@ def bruin_repository(logger, event_bus, notifications_repository):
 
 
 @pytest.fixture(scope='function')
-def velocloud_repository(logger, event_bus, notifications_repository):
+def velocloud_repository(logger, event_bus, utils_repository, notifications_repository):
     instance = VelocloudRepository(
         logger=logger,
         event_bus=event_bus,
+        utils_repository=utils_repository,
         notifications_repository=notifications_repository,
         config=config,
     )
