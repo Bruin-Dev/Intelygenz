@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List
 
 import pytest
@@ -91,6 +92,16 @@ def make_list_of_structured_metrics_objects():
 
 
 @pytest.fixture(scope='session')
+def make_structured_metrics_object_with_events(make_structured_metrics_object):
+    def _inner(*, events: list = None, **kwargs):
+        result = make_structured_metrics_object(**kwargs)
+        result['link_events'] = events or []
+        return result
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
 def make_structured_metrics_object_with_cache_and_contact_info(make_structured_metrics_object, make_cached_edge):
     def _inner(*, metrics_object: dict = None, cache_info: dict = None, contact_info: dict = None):
         cache_info = cache_info or make_cached_edge()
@@ -129,6 +140,16 @@ def make_link_status_and_metrics_object(make_link, make_metrics):
 
 
 @pytest.fixture(scope='session')
+def make_link_status_and_metrics_object_with_events(make_link_status_and_metrics_object):
+    def _inner(*, events: list = None, **kwargs):
+        result = make_link_status_and_metrics_object(**kwargs)
+        result['link_events'] = events or []
+        return result
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
 def make_list_of_link_status_and_metrics_objects():
     def _inner(*link_status_and_metrics_objects: List[dict]):
         return list(link_status_and_metrics_objects)
@@ -158,6 +179,22 @@ def make_links_by_edge_object(make_edge, make_cached_edge):
 def make_list_of_links_by_edge_objects():
     def _inner(*links_by_edge_objects: List[dict]):
         return list(links_by_edge_objects)
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_events_by_serial_and_interface():
+    def _inner(*, serials: list = None, interfaces: list = None):
+        serials = serials or []
+        interfaces = interfaces or []
+        events = defaultdict(lambda: defaultdict(list))
+
+        for serial in serials:
+            for interface in interfaces:
+                events[serial][interface] = []
+
+        return events
 
     return _inner
 
