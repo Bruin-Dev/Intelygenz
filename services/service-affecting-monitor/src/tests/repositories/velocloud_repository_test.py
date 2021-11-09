@@ -283,6 +283,22 @@ class TestVelocloudRepository:
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
     @pytest.mark.asyncio
+    async def get_links_metrics_for_bouncing_checks_test(self, velocloud_repository, frozen_datetime):
+        trouble = AffectingTroubles.BOUNCING
+        current_datetime = frozen_datetime.now()
+
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        interval = {
+            'start': current_datetime - timedelta(minutes=lookup_interval),
+            'end': current_datetime,
+        }
+
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_bouncing_checks()
+
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+
+    @pytest.mark.asyncio
     async def get_links_metrics_for_autoresolve_test(self, velocloud_repository, frozen_datetime):
         current_datetime = frozen_datetime.now()
 
@@ -296,3 +312,229 @@ class TestVelocloudRepository:
             await velocloud_repository.get_links_metrics_for_autoresolve()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+
+    @pytest.mark.asyncio
+    async def get_enterprise_events__events_retrieved_test(self, velocloud_repository, frozen_datetime,
+                                                           make_get_enterprise_events_request, make_rpc_response):
+        host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        event_types = ['LINK_DEAD']
+        events = []
+
+        config = velocloud_repository._config
+        now = frozen_datetime.now()
+        minutes = config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        past_moment = now - timedelta(minutes=minutes)
+
+        request = make_get_enterprise_events_request(
+            request_id=uuid_,
+            host=host,
+            enterprise_id=enterprise_id,
+            start_date=past_moment,
+            end_date=now,
+            filter_=event_types,
+        )
+        response = make_rpc_response(
+            request_id=uuid_,
+            body=events,
+            status=200,
+        )
+
+        velocloud_repository._event_bus.rpc_request.return_value = response
+
+        with uuid_mock:
+            with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+                result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
+
+        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "alert.request.event.enterprise", request, timeout=180
+        )
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def get_enterprise_events__rpc_request_failing_test(self, velocloud_repository, frozen_datetime,
+                                                              make_get_enterprise_events_request):
+        host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        event_types = ['LINK_DEAD']
+
+        now = frozen_datetime.now()
+        config = velocloud_repository._config
+        minutes = config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        past_moment = now - timedelta(minutes=minutes)
+
+        request = make_get_enterprise_events_request(
+            request_id=uuid_,
+            host=host,
+            enterprise_id=enterprise_id,
+            start_date=past_moment,
+            end_date=now,
+            filter_=event_types,
+        )
+
+        velocloud_repository._event_bus.rpc_request.side_effect = Exception
+        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+                result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
+
+        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "alert.request.event.enterprise", request, timeout=180
+        )
+        velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        velocloud_repository._logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_enterprise_events__rpc_request_has_not_2xx_status_test(self, velocloud_repository, frozen_datetime,
+                                                                         make_get_enterprise_events_request,
+                                                                         velocloud_500_response):
+        host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        event_types = ['LINK_DEAD']
+
+        now = frozen_datetime.now()
+        config = velocloud_repository._config
+        minutes = config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        past_moment = now - timedelta(minutes=minutes)
+
+        request = make_get_enterprise_events_request(
+            request_id=uuid_,
+            host=host,
+            enterprise_id=enterprise_id,
+            start_date=past_moment,
+            end_date=now,
+            filter_=event_types,
+        )
+
+        velocloud_repository._event_bus.rpc_request.return_value = velocloud_500_response
+        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+                result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
+
+        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "alert.request.event.enterprise", request, timeout=180
+        )
+        velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        velocloud_repository._logger.error.assert_called_once()
+        assert result == velocloud_500_response
+
+    @pytest.mark.asyncio
+    async def get_events_by_serial_and_interface__all_rpc_requests_have_not_2xx_status_test(self, velocloud_repository,
+                                                                                            make_edge_full_id,
+                                                                                            make_cached_edge,
+                                                                                            make_customer_cache,
+                                                                                            velocloud_500_response):
+        host_1 = 'mettel.velocloud.net'
+        host_2 = 'metvco03.mettel.net'
+
+        enterprise_id_1 = 1
+        enterprise_id_2 = 2
+
+        edge_1_full_id = make_edge_full_id(host=host_1, enterprise_id=enterprise_id_1)
+        edge_2_full_id = make_edge_full_id(host=host_1, enterprise_id=enterprise_id_2)
+        edge_3_full_id = make_edge_full_id(host=host_2, enterprise_id=enterprise_id_1)
+
+        edge_1 = make_cached_edge(full_id=edge_1_full_id)
+        edge_2 = make_cached_edge(full_id=edge_2_full_id)
+        edge_3 = make_cached_edge(full_id=edge_3_full_id)
+
+        customer_cache = make_customer_cache(edge_1, edge_2, edge_3)
+
+        velocloud_repository.get_enterprise_events.return_value = velocloud_500_response
+
+        with uuid_mock:
+            result = await velocloud_repository.get_events_by_serial_and_interface(customer_cache)
+
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_1)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_2)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1)
+
+        expected = {}
+
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_events_by_serial_and_interface__all_rpc_requests_succeed_test(self, velocloud_repository, make_event,
+                                                                                make_edge_full_id, make_cached_edge,
+                                                                                make_customer_cache, make_rpc_response):
+        edge_name_1 = 'Edge 1'
+        edge_name_2 = 'Edge 2'
+
+        event_1 = make_event(edge_name=edge_name_1, message='Link GE1 is now DEAD')
+        event_2 = make_event(edge_name=edge_name_2)
+
+        host_1 = 'mettel.velocloud.net'
+        host_2 = 'metvco03.mettel.net'
+
+        enterprise_id_1 = 1
+        enterprise_id_2 = 2
+
+        edge_1_full_id = make_edge_full_id(host=host_1, enterprise_id=enterprise_id_1)
+        edge_2_full_id = make_edge_full_id(host=host_1, enterprise_id=enterprise_id_2)
+        edge_3_full_id = make_edge_full_id(host=host_2, enterprise_id=enterprise_id_1)
+
+        edge_1_serial = 'VC1111111'
+        edge_2_serial = 'VC2222222'
+        edge_3_serial = 'VC3333333'
+
+        edge_1 = make_cached_edge(full_id=edge_1_full_id, serial_number=edge_1_serial, name=edge_name_1)
+        edge_2 = make_cached_edge(full_id=edge_2_full_id, serial_number=edge_2_serial)
+        edge_3 = make_cached_edge(full_id=edge_3_full_id, serial_number=edge_3_serial)
+
+        customer_cache = make_customer_cache(edge_1, edge_2, edge_3)
+
+        rpc_1_response = make_rpc_response(request_id=uuid_, status=200, body=[event_1])
+        rpc_2_response = make_rpc_response(request_id=uuid_, status=200, body=[event_2])
+        rpc_3_response = make_rpc_response(request_id=uuid_, status=200, body=[])
+
+        velocloud_repository.get_enterprise_events.side_effect = [
+            rpc_1_response,
+            rpc_2_response,
+            rpc_3_response,
+        ]
+
+        with uuid_mock:
+            result = await velocloud_repository.get_events_by_serial_and_interface(customer_cache)
+
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_1)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_2)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1)
+
+        expected = {
+            edge_1_serial: {
+                'GE1': [event_1]
+            },
+        }
+
+        assert result == expected
+
+    def structure_edges_by_host_and_enterprise_test(self, velocloud_repository, make_edge_full_id, make_cached_edge,
+                                                    make_customer_cache):
+        edge_1_full_id = make_edge_full_id(host='mettel.velocloud.net', enterprise_id=1)
+        edge_2_full_id = make_edge_full_id(host='mettel.velocloud.net', enterprise_id=2)
+        edge_3_full_id = make_edge_full_id(host='metvco03.mettel.net', enterprise_id=1)
+        edge_4_full_id = make_edge_full_id(host='metvco03.mettel.net', enterprise_id=1)
+
+        edge_1 = make_cached_edge(full_id=edge_1_full_id)
+        edge_2 = make_cached_edge(full_id=edge_2_full_id)
+        edge_3 = make_cached_edge(full_id=edge_3_full_id)
+        edge_4 = make_cached_edge(full_id=edge_4_full_id)
+
+        customer_cache = make_customer_cache(edge_1, edge_2, edge_3, edge_4)
+        result = velocloud_repository._structure_edges_by_host_and_enterprise(customer_cache)
+
+        expected = {
+            'mettel.velocloud.net': {
+                1: [edge_1],
+                2: [edge_2],
+            },
+            'metvco03.mettel.net': {
+                1: [edge_3, edge_4],
+            },
+        }
+
+        assert result == expected

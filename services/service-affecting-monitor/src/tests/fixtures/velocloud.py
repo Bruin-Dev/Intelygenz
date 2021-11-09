@@ -163,6 +163,27 @@ def make_lookup_interval():
     return _inner
 
 
+@pytest.fixture(scope='session')
+def make_event():
+    def _inner(*, id_: int = 0, event_time: str = velocloudize_date(CURRENT_DATETIME), event_type: str = 'LINK_DEAD',
+               category: str = '', severity: str = '', message: str = '', edge_name: str = '',
+               enterprise_username: Optional[str] = '', segment_name: Optional[str] = '', detail: Optional[str] = ''):
+        return {
+            'id': id_,
+            'eventTime': event_time,
+            'event': event_type,
+            'category': category,
+            'severity': severity,
+            'message': message,
+            'edgeName': edge_name,
+            'enterpriseUsername': enterprise_username,
+            'segmentName': segment_name,
+            'detail': detail,
+        }
+
+    return _inner
+
+
 # RPC requests
 @pytest.fixture(scope='session')
 def make_get_links_metrics_request(make_rpc_request, make_lookup_interval):
@@ -172,6 +193,27 @@ def make_get_links_metrics_request(make_rpc_request, make_lookup_interval):
         payload = {
             'host': velocloud_host,
             'interval': interval,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_get_enterprise_events_request(make_rpc_request):
+    def _inner(*, request_id: str = '', host: str = '', enterprise_id: int = 0, filter_: list = None,
+               start_date: str = velocloudize_date(CURRENT_DATETIME),
+               end_date: str = velocloudize_date(CURRENT_DATETIME)):
+        payload = {
+            'host': host,
+            'enterprise_id': enterprise_id,
+            'filter': filter_,
+            'start_date': start_date,
+            'end_date': end_date,
         }
 
         return make_rpc_request(
