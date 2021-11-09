@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "automation-engine"
+version = "1.0.0"
+description = "Poetry automation-engine monorepo configuration"
+authors = []
+
+[tool.poetry.dependencies]
+python = "3.6.15"
+APScheduler = "3.6.0"
+prometheus-client = "0.6.0"
+python-dateutil = "2.8.2"
+igzpackages = {url = "https://s3pypi.mettel-automation.net/igzpackages/igzpackages-2.0.1.tar.gz"}
+
+[tool.poetry.dev-dependencies]
+pycodestyle = "2.8.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

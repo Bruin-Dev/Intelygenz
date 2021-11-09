@@ -5,7 +5,9 @@ branch = True
 omit =
     .*
     */env/*
+    */.venv/*
     */*-env/*
+    */pypoetry/virtualenvs/*
     */config/*
     *setup.py*
     *__init__.py**
