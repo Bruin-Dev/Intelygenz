@@ -567,16 +567,6 @@ class BruinRepository:
         return all_serials
 
     @staticmethod
-    def search_interfaces_in_details(ticket_details):
-        interfaces = set()
-        for detail_object in ticket_details:
-            for note in detail_object['ticket_notes']:
-                interface = INTERFACE_NOTE_REGEX.search(note['noteValue'])
-                if interface:
-                    interfaces.add(interface['interface_name'])
-        return list(interfaces)
-
-    @staticmethod
     def search_interfaces_and_count_in_details(ticket_details):
         interfaces_by_trouble = dict()
         for detail_object in ticket_details:
