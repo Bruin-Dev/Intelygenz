@@ -6,7 +6,7 @@ helm-branches:
   extends: .helm_template_deploy_chart
   environment:
     name: development
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
+    url: http://grafana-dev.mettel-automation.net/
     on_stop: destroy-helm-branches
   variables:
     DOCKER_IMAGES_FILE: "/tmp/latest_images_for_ecr_repositories.json"
@@ -34,7 +34,7 @@ helm-master:
   extends: .helm_template_deploy_chart
   environment:
     name: production
-    url: http://master.mettel-automation.net/
+    url: https://grafana.mettel-automation.net/
     on_stop: destroy-helm-master
   variables:
     DOCKER_IMAGES_FILE: "/tmp/latest_images_for_ecr_repositories.json"
@@ -47,13 +47,30 @@ helm-master:
     - export CURRENT_ENVIRONMENT=production
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-helm-master
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+
+helm-master-logs:
+  stage: helm
+  extends: .helm_template_deploy_logs
+  environment:
+    name: production
+    url: https://grafana.mettel-automation.net/
+  variables:
+    DOCKER_IMAGES_FILE: "/tmp/latest_images_for_ecr_repositories.json"
+    HELM_CHART_FLUENT_BIT_DIR: "helm/charts/fluent-bit-custom"
+  before_script:   
+    # DECLARE NECESSARY ENVIRONMENT VARIABLES
+    - export ENVIRONMENT_SLUG=production
+    - export CURRENT_ENVIRONMENT=production
+    - export EKS_CLUSTER_NAME="mettel-automation"
+    - export ENVIRONMENT_NAME=production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+  needs:
+    - job: semantic-release
 
 # ============================================
 # Destroy Helm jobs
@@ -96,9 +113,6 @@ destroy-helm-master:
     - export CURRENT_ENVIRONMENT=production
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    action: stop
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(.*\): .*$/'
       when: manual

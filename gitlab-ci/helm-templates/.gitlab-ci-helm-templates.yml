@@ -39,15 +39,12 @@
     - echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
     - echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
     - echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
-    # DEPLOY HELM CHART
+    # DEPLOY HELM CHART - PAPERTRAIL LOGS - CLOUDWATCH
     - >
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
-          -f values.yaml -n ${HELM_CHART_RELEASE_NAME}
-        python3 ci-utils/papertrail-provisioning/app.py -f "$DOCKER_IMAGES_FILE"
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}
       else
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} \
-          -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
       fi
 
 .helm_template_destroy_chart: &helm_template_destroy_chart
@@ -73,3 +70,23 @@
       else
         kubectl delete namespace ${HELM_CHART_RELEASE_NAME}
       fi
+
+#
+# AFTER NEW RELEASE UPDATE LOGS IN PRODUCTION ENV
+#
+
+.helm_template_deploy_logs: &helm_template_deploy_logs
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # UPDATE PAPERTRAIL LOGS
+    - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_NAME} -g -a -p -f "$DOCKER_IMAGES_FILE"
+    - python3 ci-utils/papertrail-provisioning/app.py -f "$DOCKER_IMAGES_FILE"
+    # UPDATE FLUENT-BIT HELM CHART
+    - envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
+    - helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml  

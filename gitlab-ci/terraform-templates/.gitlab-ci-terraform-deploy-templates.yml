@@ -97,12 +97,6 @@
     # DEPLOY PROMETHEUS HELM CHART
     - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
-    # DEPLOY FLUENT-BIT HELM CHART
-    - >
-      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
-        envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
-        helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml        
-      fi
 
 .terraform_template_deploy_one_folder: &terraform_template_deploy_one_folder
   image:
