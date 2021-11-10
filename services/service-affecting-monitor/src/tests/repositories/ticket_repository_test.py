@@ -139,6 +139,21 @@ class TestTicketRepository:
         result = ticket_repository.is_there_any_note_for_trouble(notes, trouble)
         assert result is True
 
+    def are_there_any_other_troubles_test(self, ticket_repository, make_ticket_note):
+        trouble = AffectingTroubles.BOUNCING
+
+        note = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Latency")
+        result = ticket_repository.are_there_any_other_troubles(ticket_notes=[note], observed_trouble=trouble)
+        assert result is True
+
+        note = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Circuit Instability")
+        result = ticket_repository.are_there_any_other_troubles(ticket_notes=[note], observed_trouble=trouble)
+        assert result is False
+
+        note = make_ticket_note(text="Dummy note")
+        result = ticket_repository.are_there_any_other_troubles(ticket_notes=[note], observed_trouble=trouble)
+        assert result is False
+
     def get_build_note_fn_by_trouble_test(self, ticket_repository):
         trouble = AffectingTroubles.LATENCY
         result = ticket_repository.get_build_note_fn_by_trouble(trouble)
@@ -155,6 +170,10 @@ class TestTicketRepository:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
         result = ticket_repository.get_build_note_fn_by_trouble(trouble)
         assert result is ticket_repository.build_bandwidth_trouble_note
+
+        trouble = AffectingTroubles.BOUNCING
+        result = ticket_repository.get_build_note_fn_by_trouble(trouble)
+        assert result is ticket_repository.build_bouncing_trouble_note
 
     def build_latency_trouble_note_test(
             self, ticket_repository, frozen_datetime, make_edge_full_id, make_cached_edge, make_links_configuration,
@@ -470,5 +489,81 @@ class TestTicketRepository:
                 "[QoE|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/qoe/] - "
                 "[Transport|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/links/] - "
                 "[Events|https://mettel.velocloud.net/#!/operator/customer/1/monitor/events/]",
+            ])
+            assert result == expected
+
+    def build_bouncing_trouble_note_test(
+            self, ticket_repository, frozen_datetime, make_edge_full_id, make_cached_edge, make_links_configuration,
+            make_list_of_links_configurations, make_edge, make_link, make_metrics, make_event,
+            make_structured_metrics_object_with_events, make_structured_metrics_object_with_cache_and_contact_info):
+        edge = make_edge(name='Travis Touchdown')
+
+        edge_full_id = make_edge_full_id(host='mettel.velocloud.net', enterprise_id=1, edge_id=1)
+        links_configuration = make_links_configuration(
+            interfaces=['REX', 'RAY'],
+            mode='PUBLIC',
+            type_='WIRELESS',
+        )
+        links_configurations = make_list_of_links_configurations(links_configuration)
+        edge_cache_info = make_cached_edge(
+            full_id=edge_full_id,
+            links_configuration=links_configurations,
+        )
+
+        link = make_link(interface='REX', display_name='Metal Gear REX')
+        link_metrics = make_metrics(best_latency_ms_tx=101010, best_latency_ms_rx=202020)
+        event = make_event()
+        events = [event] * 12
+
+        structured_metrics = make_structured_metrics_object_with_events(edge_info=edge, link_info=link,
+                                                                        metrics=link_metrics, events=events)
+        link_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=structured_metrics,
+            cache_info=edge_cache_info,
+        )
+
+        current_datetime = frozen_datetime.now()
+        with patch.multiple(ticket_repository_module, datetime=frozen_datetime, timezone=Mock()):
+            result = ticket_repository.build_bouncing_trouble_note(link_complete_info)
+            expected = os.linesep.join([
+                "#*MetTel's IPA*#",
+                "Trouble: Circuit Instability",
+                "",
+                "Edge Name: Travis Touchdown",
+                "Name: Metal Gear REX",
+                "Interface: REX",
+                "Link Type: Public Wireless",
+                "",
+                "Interval for Scan: 60 minutes",
+                "Threshold: 10 events",
+                "Events: 12",
+                "",
+                f"Scan Time: {str(current_datetime)}",
+                "Links: [Edge|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/] - "
+                "[QoE|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/qoe/] - "
+                "[Transport|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/links/]"
+            ])
+            assert result == expected
+
+            result = ticket_repository.build_bouncing_trouble_note(link_complete_info, is_reopen_note=True)
+            expected = os.linesep.join([
+                "#*MetTel's IPA*#",
+                "Re-opening ticket.",
+                "",
+                "Trouble: Circuit Instability",
+                "",
+                "Edge Name: Travis Touchdown",
+                "Name: Metal Gear REX",
+                "Interface: REX",
+                "Link Type: Public Wireless",
+                "",
+                "Interval for Scan: 60 minutes",
+                "Threshold: 10 events",
+                "Events: 12",
+                "",
+                f"Scan Time: {str(current_datetime)}",
+                "Links: [Edge|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/] - "
+                "[QoE|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/qoe/] - "
+                "[Transport|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/links/]"
             ])
             assert result == expected
