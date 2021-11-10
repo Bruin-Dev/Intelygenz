@@ -274,6 +274,32 @@ class TestTroubleRepository:
         result = trouble_repository.is_bandwidth_tx_within_threshold(metrics, lookup_interval_minutes)
         assert result is False
 
+    def is_valid_bps_metric_test(self, trouble_repository):
+        metric = 100
+        result = trouble_repository.is_valid_bps_metric(metric)
+        assert result is True
+
+        metric = 0
+        result = trouble_repository.is_valid_bps_metric(metric)
+        assert result is False
+
+    def are_bps_metrics_valid_test(self, trouble_repository, make_metrics):
+        metrics = make_metrics(bps_of_best_path_tx=100, bps_of_best_path_rx=100)
+        result = trouble_repository.are_bps_metrics_valid(metrics)
+        assert result is True
+
+        metrics = make_metrics(bps_of_best_path_tx=0, bps_of_best_path_rx=100)
+        result = trouble_repository.are_bps_metrics_valid(metrics)
+        assert result is False
+
+        metrics = make_metrics(bps_of_best_path_tx=100, bps_of_best_path_rx=0)
+        result = trouble_repository.are_bps_metrics_valid(metrics)
+        assert result is False
+
+        metrics = make_metrics(bps_of_best_path_tx=0, bps_of_best_path_rx=0)
+        result = trouble_repository.are_bps_metrics_valid(metrics)
+        assert result is False
+
     def are_bandwidth_metrics_within_threshold_test(self, trouble_repository, make_metrics):
         lookup_interval_minutes = 30
 
@@ -303,6 +329,15 @@ class TestTroubleRepository:
             bytes_rx=1000000000, bps_of_best_path_rx=100,
         )
         result = trouble_repository.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes)
+        assert result is False
+
+    def are_bouncing_events_within_threshold_test(self, trouble_repository, make_event):
+        events = [make_event()] * 5
+        result = trouble_repository.are_bouncing_events_within_threshold(events)
+        assert result is True
+
+        events = [make_event()] * 10
+        result = trouble_repository.are_bouncing_events_within_threshold(events)
         assert result is False
 
     def are_all_metrics_within_thresholds__bandwidth_metrics_ignored_test(
