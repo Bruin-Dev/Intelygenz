@@ -103,6 +103,7 @@ include:
   - local: 'service-affecting-monitor/.gitlab-ci.yml'
   - local: 'service-outage-monitor/.gitlab-ci.yml'
   - local: 'sites-monitor/.gitlab-ci.yml'
+  - local: 'repair-tickets-monitor/.gitlab-ci.yml'
   - local: 't7-bridge/.gitlab-ci.yml'
   - local: 'tnba-feedback/.gitlab-ci.yml'
   - local: 'tnba-monitor/.gitlab-ci.yml'
