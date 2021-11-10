@@ -104,3 +104,23 @@ class TestUtilsRepository:
         result = UtilsRepository.humanize_bps(bps)
         expected = '1000000.0 Gbps'
         assert result == expected
+
+    def get_interface_from_event_test(self):
+        event = {'message': 'Link GE1 is now DEAD'}
+        result = UtilsRepository.get_interface_from_event(event)
+        expected = 'GE1'
+        assert result == expected
+
+        event = {'message': 'Interface GE1 is down'}
+        result = UtilsRepository.get_interface_from_event(event)
+        expected = 'GE1'
+        assert result == expected
+
+    def is_ip_address_test(self):
+        result = UtilsRepository.is_ip_address('Some random text')
+        expected = False
+        assert result == expected
+
+        result = UtilsRepository.is_ip_address('127.0.0.1')
+        expected = True
+        assert result == expected
