@@ -6,7 +6,6 @@ class StorageRepository:
         self._config = config
         self._logger = logger
         self._redis = redis
-
         self._redis_key_prefix = config.ENVIRONMENT_NAME
 
     def get(self, key):
@@ -35,6 +34,11 @@ class StorageRepository:
     def increment(self, key):
         key = f'{self._redis_key_prefix}-{key}'
         return self._redis.incr(key, amount=1)
+
+    def copy(self, key, new_key):
+        key = f'{self._redis_key_prefix}-{key}'
+        new_key = f'{self._redis_key_prefix}-{new_key}'
+        self._redis.copy(key, new_key)
 
     def remove(self, *keys):
         keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
