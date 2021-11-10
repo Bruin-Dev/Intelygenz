@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application import AffectingTroubles
@@ -1041,6 +1042,166 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._process_bandwidth_trouble.assert_awaited_once_with(link_complete_info)
 
     @pytest.mark.asyncio
+    async def bouncing_check__no_metrics_found_test(self, service_affecting_monitor, make_list_of_link_metrics,
+                                                    make_rpc_response):
+        links_metrics = make_list_of_link_metrics()
+
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+            make_rpc_response(
+                body=links_metrics,
+                status=200,
+            )
+
+        await service_affecting_monitor._bouncing_check()
+
+        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.assert_not_called()
+        service_affecting_monitor._structure_links_metrics.assert_not_called()
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
+        service_affecting_monitor._process_bouncing_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def bouncing_check__empty_dataset_after_structuring_and_crossing_info_test(
+            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
+            make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+            make_events_by_serial_and_interface, make_rpc_response, make_contact_info):
+
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+
+        edge = make_edge(edge_state=None)
+        link_with_edge_info = make_link_with_edge_info(edge_info=edge)
+        link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
+        links_metric_sets = make_list_of_link_metrics(link_metric_set)
+        events_by_serial_and_interface = make_events_by_serial_and_interface()
+
+        links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info()
+
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+            make_rpc_response(
+                body=links_metric_sets,
+                status=200,
+            )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+
+        await service_affecting_monitor._bouncing_check()
+
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets,
+                                                                                   events_by_serial_and_interface)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
+            links_complete_info,
+        )
+        service_affecting_monitor._process_bouncing_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def bouncing_check__events_within_threshold_test(
+            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge, make_link,
+            make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics, make_event,
+            make_events_by_serial_and_interface, make_structured_metrics_object_with_events,
+            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
+
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+
+        edge_serial_number = 'VCO123'
+        interface = 'GE1'
+
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        link = make_link(interface=interface)
+        link_with_edge_info = make_link_with_edge_info(edge_info=edge, link_info=link)
+        link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
+        links_metric_sets = make_list_of_link_metrics(link_metric_set)
+
+        event = make_event()
+        events = [event]
+        events_by_serial_and_interface = make_events_by_serial_and_interface()
+        events_by_serial_and_interface[edge_serial_number][interface] = events
+        structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link,
+                                                                               events=events)
+        structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
+
+        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        customer_cache = make_customer_cache(edge_cache_info)
+
+        service_affecting_monitor._customer_cache = customer_cache
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+            make_rpc_response(
+                body=links_metric_sets,
+                status=200,
+            )
+        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = \
+            events_by_serial_and_interface
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+
+        await service_affecting_monitor._bouncing_check()
+
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets,
+                                                                                   events_by_serial_and_interface)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
+            structured_metrics_objects,
+        )
+        service_affecting_monitor._process_bouncing_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def bouncing_check__trouble_detected_test(
+            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge, make_link,
+            make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics, make_event,
+            make_events_by_serial_and_interface, make_structured_metrics_object_with_events,
+            make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
+            make_rpc_response, make_contact_info):
+
+        edge_contact_info = make_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+
+        edge_serial_number = 'VCO123'
+        interface = 'GE1'
+
+        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        link = make_link(interface=interface)
+        link_with_edge_info = make_link_with_edge_info(edge_info=edge, link_info=link)
+        link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
+        links_metric_sets = make_list_of_link_metrics(link_metric_set)
+
+        event = make_event()
+        events = [event] * 10
+        events_by_serial_and_interface = make_events_by_serial_and_interface(serials=[edge_serial_number],
+                                                                             interfaces=[interface])
+        events_by_serial_and_interface[edge_serial_number][interface] = events
+        structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link,
+                                                                               events=events)
+        structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
+
+        edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
+        customer_cache = make_customer_cache(edge_cache_info)
+
+        link_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=structured_metrics_object,
+            cache_info=edge_cache_info,
+            contact_info=edge_contact_info,
+        )
+
+        service_affecting_monitor._customer_cache = customer_cache
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+            make_rpc_response(
+                body=links_metric_sets,
+                status=200,
+            )
+        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = \
+            events_by_serial_and_interface
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+
+        await service_affecting_monitor._bouncing_check()
+
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets,
+                                                                                   events_by_serial_and_interface)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
+            structured_metrics_objects,
+        )
+        service_affecting_monitor._process_bouncing_trouble.assert_awaited_once_with(link_complete_info)
+
+    @pytest.mark.asyncio
     async def process_latency_trouble_test(
             self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
         trouble = AffectingTroubles.LATENCY
@@ -1079,6 +1240,17 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_bandwidth_trouble(link_info)
 
         service_affecting_monitor._process_affecting_trouble.assert_awaited_once_with(link_info, trouble)
+
+    @pytest.mark.asyncio
+    async def process_bouncing_trouble_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        trouble = AffectingTroubles.BOUNCING
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+
+        await service_affecting_monitor._process_bouncing_trouble(link_info)
+
+        service_affecting_monitor._process_affecting_trouble.assert_awaited_once_with(link_info, trouble)
+        service_affecting_monitor._attempt_forward_to_asr.assert_awaited_once_with(link_info, None)
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__get_open_affecting_tickets_request_has_not_2xx_status_test(
@@ -2493,3 +2665,70 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited_once_with(
             ticket_id, serial_number,
         )
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            ticket_id, task_result, serial_number=serial, detail_id=detail_item['detailID']
+        )
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_awaited_once_with(
+            ticket_id, link_data['link_status'], serial
+        )
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_awaited_once()
+
+    def should_be_forwarded_to_asr_test(self, service_affecting_monitor, make_link, make_structured_metrics_object):
+        link = make_link(display_name='Test link')
+        link_data = make_structured_metrics_object(link_info=link)
+        result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
+        assert result is True
+
+        link = make_link(display_name='BYOB')
+        link_data = make_structured_metrics_object(link_info=link)
+        result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
+        assert result is False
+
+        link = make_link(display_name='127.0.0.1')
+        link_data = make_structured_metrics_object(link_info=link)
+        result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
+        assert result is False
+
+    def is_link_label_blacklisted_test(self, service_affecting_monitor):
+        result = service_affecting_monitor._is_link_label_blacklisted('Test link')
+        assert result is False
+
+        result = service_affecting_monitor._is_link_label_blacklisted('BYOB')
+        assert result is True
