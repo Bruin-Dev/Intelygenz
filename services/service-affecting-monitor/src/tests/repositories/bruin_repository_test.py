@@ -1075,3 +1075,30 @@ class TestBruinRepository:
         bruin_repository._event_bus.rpc_request.assert_has_awaits([
             call("bruin.ticket.request", ticket_request_msg, timeout=90)
         ])
+
+    @pytest.mark.asyncio
+    async def append_asr_forwarding_note_test(self, bruin_repository, make_link, bruin_generic_200_response):
+        ticket_id = 11111
+        serial_number = 'VC1234567'
+        link = make_link(interface='GE1', display_name='Test', state='KO')
+
+        ticket_note = (
+            "#*MetTel's IPA*#\n"
+            'Status of Wired Link GE1 (Test) is KO.\n'
+            'Moving task to: ASR Investigate\n'
+            f'TimeStamp: {CURRENT_DATETIME}'
+        )
+
+        bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            with patch.object(bruin_repository_module, 'timezone', new=Mock()):
+                result = await bruin_repository.append_asr_forwarding_note(ticket_id, link, serial_number)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, ticket_note, service_numbers=[serial_number]
+        )
+
+        assert result == bruin_generic_200_response
