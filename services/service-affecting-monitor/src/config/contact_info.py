@@ -1,17 +1,5 @@
 from application import ALL_FIS_CLIENTS
 
-fis_contact_info = {
-        "ticket": {
-            "email": 'az_phx_team-sdwan-support@fisglobal.com',
-            "phone": '6023875757',
-            "name": "Pronet spoc Support team"
-        },
-        "site": {
-            "email": 'az_phx_team-sdwan-support@fisglobal.com',
-            "phone": '6023875757',
-            "name": "Pronet spoc Support team"
-        }
-}
 
 contact_by_host_and_client_id = {
     "mettel.velocloud.net": {
@@ -165,15 +153,19 @@ contact_by_host_and_client_id = {
         ],
     },
     "metvco04.mettel.net": {
-
-        89180: fis_contact_info,
-        89342: fis_contact_info,
-        87955: fis_contact_info,
-        89138: fis_contact_info,
-        89336: fis_contact_info,
-        89134: fis_contact_info,
-        87903: fis_contact_info,
-        88912: fis_contact_info,
-
+        ALL_FIS_CLIENTS: [
+            {
+                "email": 'az_phx_team-sdwan-support@fisglobal.com',
+                "phone": '6023875757',
+                "name": "Pronet spoc Support team",
+                "type": "ticket",
+            },
+            {
+                "email": 'az_phx_team-sdwan-support@fisglobal.com',
+                "phone": '6023875757',
+                "name": "Pronet spoc Support team",
+                "type": "site",
+            }
+        ],
     }
 }
