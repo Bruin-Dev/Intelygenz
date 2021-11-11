@@ -35,11 +35,11 @@ class StorageRepository:
         key = f'{self._redis_key_prefix}-{key}'
         return self._redis.incr(key, amount=1)
 
-    def copy(self, key, new_key):
-        key = f'{self._redis_key_prefix}-{key}'
-        new_key = f'{self._redis_key_prefix}-{new_key}'
-        self._redis.copy(key, new_key)
-
     def remove(self, *keys):
         keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
         self._redis.delete(*keys)
+
+    def rename(self, key, new_key):
+        key = f'{self._redis_key_prefix}-{key}'
+        new_key = f'{self._redis_key_prefix}-{new_key}'
+        self._redis.rename(key, new_key)

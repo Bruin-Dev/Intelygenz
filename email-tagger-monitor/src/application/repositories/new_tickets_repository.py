@@ -61,11 +61,10 @@ class NewTicketsRepository:
         ticket_id = ticket_data['ticket_id']
         self._logger.info(f"adding email data '{email_id}' and '{ticket_id}'")
         key = f"ticket_{email_id}_{ticket_id}"
-        feedback_key = f"feedback_{email_id}_{ticket_id}"
         self._storage_repository.save(key, {"email": email_data, "ticket": ticket_data})
-        self._storage_repository.copy(key, feedback_key)
 
     def mark_complete(self, email_id: str, ticket_id: str):
         self._logger.info(f"marking email complete '{email_id}' and '{ticket_id}' ")
         key = f"ticket_{email_id}_{ticket_id}"
-        self._storage_repository.remove(key)
+        archive_key = f"archived_ticket_{email_id}_{ticket_id}"
+        self._storage_repository.rename(key, archive_key)
