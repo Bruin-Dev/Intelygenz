@@ -601,6 +601,66 @@ class TestTNBAMonitor:
         t7_repository.post_metrics.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def send_ticket_task_history_to_t7_no_assets_test(self):
+        ticket_id = 123
+
+        task_history = [{
+                          "ClientName": "Le Duff Management ",
+                          "Ticket Entered Date": "202008242225",
+                          "EnteredDate": "2020-08-24T22:25:09.953-04:00",
+                          "CallTicketID": 4774915,
+                          "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
+                          "DetailID": 5180688,
+                          "Product": "SD-WAN",
+                          "Address1": "1320 W Campbell Rd",
+                          "Address2": None,
+                          "City": "Richardson",
+                          "State": "TX",
+                          "Zip": "75080-2814",
+                          "Site Name": "01106 Coit Campbell",
+                          "NoteType": "ADN",
+                          "Notes": "#*MetTel's IPA*#\nAI\n\n",
+                          "Note Entered Date": "202008251726",
+                          "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
+                          "Note Entered By": "Intelygenz Ai",
+                          "Task Assigned To": None,
+                          "Task": None,
+                          "Task Result": None,
+                          "SLA": 1,
+                          "Ticket Status": "Resolved"
+                        }]
+
+        task_history_response = {
+                                    "request_id": uuid(),
+                                    "body": task_history,
+                                    "status": 200
+                                }
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        customer_cache_repository = Mock()
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+
+        t7_repository = Mock()
+        t7_repository.post_metrics = CoroutineMock()
+
+        redis_client = Mock()
+        redis_client.get = Mock(return_value=None)
+        redis_client.set = Mock()
+
+        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
+                                     bruin_repository, notifications_repository, redis_client)
+
+        await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
+
+        bruin_repository.get_ticket_task_history.assert_awaited_once()
+        t7_repository.post_metrics.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def send_ticket_task_history_to_t7_exception_test(self):
         ticket_id = 123
 

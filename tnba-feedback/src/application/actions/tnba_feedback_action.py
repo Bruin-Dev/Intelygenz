@@ -1,9 +1,7 @@
 import asyncio
 import time
-import os
 
 from datetime import datetime
-from typing import List
 from typing import Set
 
 from apscheduler.jobstores.base import ConflictingIdError
@@ -120,7 +118,7 @@ class TNBAFeedback:
                 redis_key = f'{self._config.ENVIRONMENT_NAME}-{ticket_id}'
 
                 ticket_task_history = await self._bruin_repository.get_ticket_task_history(ticket_id)
-                ticket_task_history_body = ticket_task_history["body"]
+                ticket_task_history_body: list = ticket_task_history["body"]
                 ticket_task_history_status = ticket_task_history["status"]
                 if ticket_task_history_status not in range(200, 300):
                     self._logger.info(f"Ticket task status returned {ticket_task_history_status}"
@@ -130,6 +128,11 @@ class TNBAFeedback:
                 ticket_task_history_tnba_check = self._t7_repository.tnba_note_in_task_history(ticket_task_history_body)
                 if ticket_task_history_tnba_check is False:
                     self._logger.info(f"No TNBA note found in task history of ticket id {ticket_id}. Skipping ...")
+                    return
+
+                any_ticket_row_has_asset = any(row.get('Asset') for row in ticket_task_history_body)
+                if any_ticket_row_has_asset is False:
+                    self._logger.info(f"No asset in history of ticket id {ticket_id}. Skipping ...")
                     return
 
                 if self._redis_client.get(redis_key) is not None:
