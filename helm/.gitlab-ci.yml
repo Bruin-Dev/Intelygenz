@@ -67,8 +67,13 @@ helm-master-logs:
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - "*/src/application/**/*"
+        - "*/src/config/**/*"
+        - "*/src/app.py"
+        - "*/Dockerfile"
+        - "*/requirements.txt"
   needs:
     - job: semantic-release
 
