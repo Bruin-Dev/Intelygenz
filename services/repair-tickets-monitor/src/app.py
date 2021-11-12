@@ -13,6 +13,7 @@ from application.repositories.storage_repository import StorageRepository
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.new_tickets_repository import NewTicketsRepository
+from application.repositories.repair_ticket_repository import RepairTicketRepository
 
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 
@@ -44,6 +45,8 @@ class Container:
         self._notifications_repository = NotificationsRepository(self._event_bus)
         self._new_tickets_repository = NewTicketsRepository(self._logger, config, self._notifications_repository,
                                                             self._storage_repository)
+        self._email_tagger_repository = RepairTicketRepository(self._event_bus, self._logger, config,
+                                                              self._notifications_repository)
 
         self._new_created_tickets_feedback = NewCreatedTicketsFeedback(
             self._event_bus,
@@ -57,7 +60,7 @@ class Container:
 
     async def _start(self):
         await self._event_bus.connect()
-        await self._new_created_tickets_feedback.start_ticket_events_monitor(exec_on_start=True)
+        await self._new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
         self._scheduler.start()
 
     async def run(self):
