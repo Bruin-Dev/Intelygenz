@@ -11,19 +11,20 @@ from pytz import timezone
 
 class NewCreatedTicketsFeedback:
 
-    def __init__(self, event_bus, logger, scheduler, config, new_tickets_repository, email_tagger_repository,
+    def __init__(self, event_bus, logger, scheduler, config, new_tickets_repository,
+                 rta_repository,
                  bruin_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._new_tickets_repository = new_tickets_repository
-        self._email_tagger_repository = email_tagger_repository
+        self._rta_repository = rta_repository
         self._bruin_repository = bruin_repository
-        self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['new_tickets_concurrent'])
+        self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['created_tickets_concurrent'])
 
-    async def start_ticket_events_monitor(self, exec_on_start=False):
-        self._logger.info('Scheduling NewTicketsMonitor feedback job...')
+    async def start_created_ticket_feedback(self, exec_on_start=False):
+        self._logger.info('Scheduling New Created Tickets feedback job...')
         next_run_time = undefined
 
         if exec_on_start:
@@ -37,12 +38,12 @@ class NewCreatedTicketsFeedback:
             self._scheduler.add_job(self._run_new_tickets_polling, 'interval',
                                     seconds=scheduler_seconds,
                                     next_run_time=next_run_time, replace_existing=False,
-                                    id='_run_new_tickets_polling')
+                                    id='_run_created_tickets_polling')
         except ConflictingIdError as conflict:
-            self._logger.info(f'Skipping start of NewTicketsMonitor feedback job. Reason: {conflict}')
+            self._logger.info(f'Skipping start of NewCreatedTicketsFeedback feedback job. Reason: {conflict}')
 
     async def _run_new_tickets_polling(self):
-        self._logger.info('Starting NewTicketsMonitor feedback process...')
+        self._logger.info('Starting NewCreatedTicketsFeedback feedback process...')
 
         start_time = time.time()
 
@@ -51,12 +52,12 @@ class NewCreatedTicketsFeedback:
         self._logger.info(f'Got {len(new_tickets)} tickets that needs processing.')
 
         tasks = [
-            self._save_metrics(data['email'], data['ticket'])
+            self._save_created_ticket_feedback(data['email'], data['ticket'])
             for data in new_tickets
             if self._new_tickets_repository.validate_ticket(data)
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info("NewTicketsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
+        self._logger.info("NewCreatedTicketsFeedback process finished! Took {:.3f}s".format(time.time() - start_time))
 
     def _check_error(self, error_code: int, ticket_id: int, email_id: str):
         if error_code == 404:
@@ -68,7 +69,7 @@ class NewCreatedTicketsFeedback:
                 self._new_tickets_repository.delete_ticket(email_id, ticket_id)
                 self._new_tickets_repository.delete_ticket_error_counter(ticket_id, error_code)
 
-    async def _save_metrics(self, email_data: dict, ticket_data: dict):
+    async def _save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
         ticket_id = int(ticket_data["ticket_id"])
 
@@ -84,8 +85,8 @@ class NewCreatedTicketsFeedback:
                 return
 
             self._logger.info(f"Got ticket info from Bruin: {ticket_response}")
-            # Get tag from KRE
-            response = await self._email_tagger_repository.save_metrics(email_data, ticket_response['body'])
+            #  Save feedback
+            response = await self._rta_repository.save_output(email_data, ticket_response['body'])
             if response["status"] not in range(200, 300):
                 return
 
