@@ -1513,7 +1513,7 @@ class TestServiceAffectingMonitor:
     async def get_oldest_affecting_ticket_for_serial_number__no_notes_found_for_serial_number_test(
             self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
             make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
-            make_detail_item_with_notes_and_ticket_info, make_rpc_response):
+            make_rpc_response):
         service_number = 'VC1234567'
         fake_service_number = 'VC0000000'
 
@@ -1538,17 +1538,13 @@ class TestServiceAffectingMonitor:
             tickets, service_number,
         )
 
-        expected_notes = make_list_of_ticket_notes()
-        expected = make_detail_item_with_notes_and_ticket_info(
-            detail_item=detail_item, notes=expected_notes, ticket_info=ticket,
-        )
-        assert result == expected
+        assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__invalid_notes_found_for_serial_number_test(
             self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
             make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
-            make_detail_item_with_notes_and_ticket_info, make_rpc_response):
+            make_rpc_response):
         service_number = 'VC1234567'
 
         ticket = make_ticket()
@@ -1572,11 +1568,37 @@ class TestServiceAffectingMonitor:
             tickets, service_number,
         )
 
-        expected_notes = make_list_of_ticket_notes()
-        expected = make_detail_item_with_notes_and_ticket_info(
-            detail_item=detail_item, notes=expected_notes, ticket_info=ticket,
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def get_oldest_affecting_ticket_for_serial_number__unrelated_notes_found_for_serial_number_test(
+            self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
+            make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
+            make_rpc_response):
+        service_number = 'VC1234567'
+
+        ticket = make_ticket()
+        tickets = make_list_of_tickets(ticket)
+
+        detail_item = make_detail_item(value=service_number)
+        detail_items = make_list_of_detail_items(detail_item)
+
+        note_1 = make_ticket_note(text="#*MetTel's IPA*#\nPossible Fraud", service_numbers=[service_number])
+        note_2 = make_ticket_note(text="#*MetTel's IPA*#\nPossible Fraud", service_numbers=[service_number])
+        ticket_notes = make_list_of_ticket_notes(note_1, note_2)
+
+        ticket_details = make_ticket_details(detail_items=detail_items, notes=ticket_notes)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
         )
-        assert result == expected
+
+        result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
+            tickets, service_number,
+        )
+
+        assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__valid_notes_found_for_serial_number_test(

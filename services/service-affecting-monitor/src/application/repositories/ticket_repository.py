@@ -5,6 +5,7 @@ from typing import List
 
 from pytz import timezone
 
+from application import AFFECTING_NOTE_REGEX
 from application import AUTORESOLVE_NOTE_REGEX
 from application import NOTE_REGEX_BY_TROUBLE
 from application import REOPEN_NOTE_REGEX
@@ -51,6 +52,13 @@ class TicketRepository:
             ticket_tasks,
             lambda detail: detail['detailValue'] == serial_number,
         )
+
+    def is_ticket_used_for_reoccurring_affecting_troubles(self, ticket_notes: List[dict]) -> bool:
+        affecting_trouble_note = self._utils_repository.get_first_element_matching(
+            ticket_notes,
+            lambda note: AFFECTING_NOTE_REGEX.search(note['noteValue'])
+        )
+        return affecting_trouble_note is not None
 
     def is_there_any_note_for_trouble(self, ticket_notes: List[dict], trouble: AffectingTroubles) -> bool:
         affecting_trouble_note = self._utils_repository.get_first_element_matching(

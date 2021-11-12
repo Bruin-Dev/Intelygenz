@@ -111,6 +111,15 @@ class TestTicketRepository:
         result = ticket_repository.find_task_by_serial_number(detail_items, serial_number)
         assert result is detail_item_1
 
+    def is_ticket_used_for_reoccurring_affecting_troubles_test(self, ticket_repository, make_ticket_note):
+        note = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Latency")
+        result = ticket_repository.is_ticket_used_for_reoccurring_affecting_troubles([note])
+        assert result is True
+
+        note = make_ticket_note(text="Dummy note")
+        result = ticket_repository.is_ticket_used_for_reoccurring_affecting_troubles([note])
+        assert result is False
+
     def is_there_any_note_for_trouble_test(self, ticket_repository, make_ticket_note, make_list_of_ticket_notes):
         trouble = AffectingTroubles.LATENCY
 

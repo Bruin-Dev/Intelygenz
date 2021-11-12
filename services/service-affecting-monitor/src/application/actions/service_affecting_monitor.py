@@ -726,6 +726,9 @@ class ServiceAffectingMonitor:
                 if note['noteValue'] is not None
             ]
 
+            if not self._ticket_repository.is_ticket_used_for_reoccurring_affecting_troubles(relevant_notes):
+                continue
+
             ticket_tasks = ticket_details_response['body']['ticketDetails']
             relevant_task = self._ticket_repository.find_task_by_serial_number(ticket_tasks, serial_number)
             return {
