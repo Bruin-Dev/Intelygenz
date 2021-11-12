@@ -85,6 +85,7 @@
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # UPDATE PAPERTRAIL LOGS
+    - source ci-utils/environments/deploy_environment_vars.sh
     - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_NAME} -g -a -p -f "$DOCKER_IMAGES_FILE"
     - python3 ci-utils/papertrail-provisioning/app.py -f "$DOCKER_IMAGES_FILE"
     # UPDATE FLUENT-BIT HELM CHART
