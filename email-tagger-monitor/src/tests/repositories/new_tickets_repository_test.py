@@ -86,16 +86,17 @@ class TestEmailTaggerRepository:
         assert response is None
 
     def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
-        storage_repository.remove = Mock()
+        storage_repository.rename = Mock()
         new_emails_repository = NewTicketsRepository(logger, testconfig, notifications_repository,
                                                      storage_repository)
 
         email_id = "12345"
         ticket_id = "67890"
         expected_id = "ticket_12345_67890"
+        expected_archive_id = f"archived_ticket_{email_id}_{ticket_id}"
         response = new_emails_repository.mark_complete(email_id, ticket_id)
 
-        storage_repository.remove.assert_called_once_with(expected_id)
+        storage_repository.rename.assert_called_once_with(expected_id, expected_archive_id)
         assert response is None
 
     def increase_ticket_error_counter_ok_test(self, new_emails_repository):
