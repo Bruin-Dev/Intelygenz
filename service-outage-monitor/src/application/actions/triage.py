@@ -438,20 +438,20 @@ class Triage:
                     f"{ticket_id}..."
                 )
 
-                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-                recent_events_response = await self._velocloud_repository.get_last_edge_events(
-                    edge_full_id, since=past_moment_for_events_lookup
-                )
-
-                if recent_events_response['status'] not in range(200, 300):
-                    continue
-
                 if not self._outage_repository.should_document_outage(edge_status):
                     self._logger.info(
                         f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
                         f"ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and "
                         "standbys in outage state are only documented in the event of a Soft Down. Skipping..."
                     )
+                    continue
+
+                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+                recent_events_response = await self._velocloud_repository.get_last_edge_events(
+                    edge_full_id, since=past_moment_for_events_lookup
+                )
+
+                if recent_events_response['status'] not in range(200, 300):
                     continue
 
                 recent_events = recent_events_response['body']
