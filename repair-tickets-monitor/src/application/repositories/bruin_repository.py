@@ -12,12 +12,16 @@ class BruinRepository:
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
-        self._timeout = self._config.MONITOR_CONFIG['nats_request_timeout']['post_email_tag_seconds']
+        self._timeout = self._config.MONITOR_CONFIG['nats_request_timeout']['bruin_request_seconds']
 
     async def get_single_ticket_basic_info(self, ticket_id):
-        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
-                                     min=self._config.NATS_CONFIG['min']),
-               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        @retry(
+            wait=wait_exponential(
+                multiplier=self._config.NATS_CONFIG['multiplier'],
+                min=self._config.NATS_CONFIG['min']
+            ),
+            stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay'])
+        )
         async def get_single_ticket_basic_info():
             err_msg = None
             self._logger.info(f'Getting ticket "{ticket_id}" basic info')
@@ -28,8 +32,12 @@ class BruinRepository:
                 }
             }
             try:
-                response = await self._event_bus.rpc_request("bruin.single_ticket.basic.request", request_msg,
-                                                             timeout=self._timeout)
+                response = await self._event_bus.rpc_request(
+                    "bruin.single_ticket.basic.request",
+                    request_msg,
+                    timeout=self._timeout
+                )
+
             except Exception as err:
                 err_msg = (
                     f'An error occurred when getting basic info from Bruin, '
