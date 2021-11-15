@@ -446,14 +446,6 @@ class Triage:
                 if recent_events_response['status'] not in range(200, 300):
                     continue
 
-                recent_events = recent_events_response['body']
-                if not recent_events:
-                    self._logger.info(
-                        f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
-                        f'Not appending the first triage note to ticket {ticket_id}.'
-                    )
-                    continue
-
                 if not self._outage_repository.should_document_outage(edge_status):
                     self._logger.info(
                         f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
@@ -462,6 +454,7 @@ class Triage:
                     )
                     continue
 
+                recent_events = recent_events_response['body']
                 recent_events.sort(key=lambda event: event['eventTime'], reverse=True)
 
                 ticket_note = self._triage_repository.build_triage_note(
