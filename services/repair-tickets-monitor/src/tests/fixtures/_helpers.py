@@ -33,6 +33,7 @@ def bruinize_date(dt: datetime) -> str:
 
     return '-'.join(fragments)
 
+
 def wrap_all_methods(instance: Any, *, excluded_methods: List[str] = None):
     """
     This helper turns all methods (both static and non-static) of a given instance into mocks so they are

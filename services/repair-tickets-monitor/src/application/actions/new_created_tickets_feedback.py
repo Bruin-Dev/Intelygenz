@@ -21,7 +21,9 @@ class NewCreatedTicketsFeedback:
         self._new_tickets_repository = new_tickets_repository
         self._rta_repository = rta_repository
         self._bruin_repository = bruin_repository
-        self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['created_tickets_concurrent'])
+        self._semaphore = asyncio.BoundedSemaphore(
+            self._config.MONITOR_CONFIG['semaphores']['created_tickets_concurrent']
+        )
 
     async def start_created_ticket_feedback(self, exec_on_start=False):
         self._logger.info('Scheduling New Created Tickets feedback job...')
@@ -31,7 +33,7 @@ class NewCreatedTicketsFeedback:
             added_seconds = dt.timedelta(0, 5)
             tz = timezone(self._config.MONITOR_CONFIG["timezone"])
             next_run_time = datetime.now(tz) + added_seconds
-            self._logger.info('NewTicketsMonitor feedback job is going to be executed immediately')
+            self._logger.info('NewCreatedTicketsFeedback feedback job is going to be executed immediately')
 
         try:
             scheduler_seconds = self._config.MONITOR_CONFIG['scheduler_config']['new_tickets_seconds']
