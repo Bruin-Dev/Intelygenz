@@ -703,20 +703,12 @@ class OutageMonitor:
         recent_events_response = await self._velocloud_repository.get_last_edge_events(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        recent_events_response_body = recent_events_response['body']
-        recent_events_response_status = recent_events_response['status']
 
-        if recent_events_response_status not in range(200, 300):
+        if recent_events_response['status'] not in range(200, 300):
             return
 
-        if not recent_events_response_body:
-            self._logger.info(
-                f'No events were found for edge {serial_number} starting from {past_moment_for_events_lookup}. '
-                f'Not appending any triage note to ticket {ticket_id}.'
-            )
-            return
-
-        recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
+        recent_events = recent_events_response['body']
+        recent_events.sort(key=lambda event: event['eventTime'], reverse=True)
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         if ticket_details_response['status'] not in range(200, 300):
@@ -726,7 +718,7 @@ class OutageMonitor:
         ticket_detail_id = ticket_detail['detailID']
 
         ticket_note = self._triage_repository.build_triage_note(
-            cached_edge, edge_status, recent_events_response_body, outage_type, is_reopen_note=is_reopen_note
+            cached_edge, edge_status, recent_events, outage_type, is_reopen_note=is_reopen_note
         )
 
         self._logger.info(
