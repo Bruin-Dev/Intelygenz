@@ -43,15 +43,3 @@ class TestPredictedTagsRepository:
 
         storage_repository.save.assert_called_once_with(expected_tag, tag_data)
         assert response is None
-
-    def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
-        storage_repository.remove = Mock()
-        predicted_tags_repository = PredictedTagsRepository(logger, testconfig, notifications_repository,
-                                                            storage_repository)
-
-        email_id = "123456"
-        expected_tag_email_id = "tag_email_123456"
-        response = predicted_tags_repository.mark_complete(email_id)
-
-        storage_repository.remove.assert_called_once_with(expected_tag_email_id)
-        assert response is None

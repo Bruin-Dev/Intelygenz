@@ -9,13 +9,23 @@ from pytz import timezone
 
 
 class NewEmailsMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, new_emails_repository, email_tagger_repository,
-                 bruin_repository):
+    def __init__(
+            self,
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            predicted_tag_repository,
+            new_emails_repository,
+            email_tagger_repository,
+            bruin_repository
+    ):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._new_emails_repository = new_emails_repository
+        self._predicted_tag_repository = predicted_tag_repository
         self._email_tagger_repository = email_tagger_repository
         self._bruin_repository = bruin_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['new_emails_concurrent'])
@@ -78,8 +88,11 @@ class NewEmailsMonitor:
                 if not (response["status"] in range(200, 300) or response["status"] == 409):
                     return
 
-            # Remove from DB
+            # Remove from email tagger namespace
             self._new_emails_repository.mark_complete(email_id)
+
+            # add predicted tag to DB
+            self._predicted_tag_repository.save_new_tag(email_id, tag_id)
 
     @staticmethod
     def get_most_probable_tag_id(prediction):
