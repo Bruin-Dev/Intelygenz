@@ -16,12 +16,31 @@ class TestNewCreatedTicketsRepository:
         assert new_created_tickets_repository._config is config
         assert new_created_tickets_repository._storage_repository is storage_repository
 
-    def get_pending_tickets(self, storage_repository, new_created_tickets_repository):
+    def get_pending_tickets_test(self, storage_repository, new_created_tickets_repository):
         storage_repository.find_all.return_value = []
         actual = new_created_tickets_repository.get_pending_tickets()
 
         storage_repository.find_all.assert_called_once()
         assert actual == []
+
+    def increase_ticket_error_counter_test(self, storage_repository, new_created_tickets_repository):
+        ticket_id = 45345
+        error_code = 404
+
+        new_created_tickets_repository.increase_ticket_error_counter(ticket_id, error_code)
+        key = f"archive_error_{error_code}_ticket_{ticket_id}"
+
+        storage_repository.increment.assert_called_once_with(key)
+
+    def delete_ticket_error_counter_test(self, storage_repository, new_created_tickets_repository):
+        ticket_id = 45345
+        error_code = 404
+
+        key = f"archive_error_{error_code}_ticket_{ticket_id}"
+
+        new_created_tickets_repository.delete_ticket_error_counter(ticket_id, error_code)
+
+        storage_repository.remove.assert_called_once_with(key)
 
     def mark_complete_ok_test(self, storage_repository, new_created_tickets_repository):
         email_id = "12345"

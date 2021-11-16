@@ -8,6 +8,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
+from igz.packages.server.api import QuartServer
 
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.bruin_repository import BruinRepository
@@ -15,31 +16,40 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 
+
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 
 
 class Container:
 
     def __init__(self):
+        # LOGGER
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Repair Ticket Monitor starting...")
 
+        # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
-        # Redis for data storage
+        # HEALTHCHECK ENDPOINT
+        self._server = QuartServer(config)
+
+        # REDIS DATA STORAGE
         self._redis_cache_client = redis.Redis(host=config.REDIS_CACHE["host"],
                                                port=6379,
                                                decode_responses=True)
         self._redis_cache_client.ping()
 
+        # SCHEDULER
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.MONITOR_CONFIG["timezone"]))
 
+        # EVENT BUS
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # REPOSITORIES
         self._storage_repository = StorageRepository(config, self._logger, self._redis_cache_client)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._notifications_repository = NotificationsRepository(self._event_bus)
@@ -47,11 +57,11 @@ class Container:
             self._logger,
             config,
             self._notifications_repository,
-            self._storage_repository
         )
         self._repair_ticket_repository = RepairTicketKreRepository(self._event_bus, self._logger, config,
                                                                    self._notifications_repository)
 
+        # ACTIONS
         self._new_created_tickets_feedback = NewCreatedTicketsFeedback(
             self._event_bus,
             self._logger,
@@ -61,6 +71,9 @@ class Container:
             self._repair_ticket_repository,
             self._bruin_repository
         )
+
+    async def start_server(self):
+        await self._server.run_server()
 
     async def _start(self):
         await self._event_bus.connect()
@@ -75,4 +88,5 @@ if __name__ == '__main__':
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
+    asyncio.ensure_future(container.start_server(), loop=loop)
     loop.run_forever()

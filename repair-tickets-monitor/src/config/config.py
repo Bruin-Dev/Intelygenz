@@ -48,6 +48,11 @@ LOG_CONFIG = {
     },
 }
 
+QUART_CONFIG = {
+    'title': 'repair-tickets-automation',
+    'port': 5000
+}
+
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
