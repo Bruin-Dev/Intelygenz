@@ -46,6 +46,9 @@ MONITOR_CONFIG = {
         'metrics_lookup_interval_minutes': 30,
         'last_affecting_trouble_seconds': 75 * 60,
         'max_autoresolves': 3,
+        'thresholds': {
+            AffectingTroubles.BOUNCING: 4,
+        },
     },
 }
 

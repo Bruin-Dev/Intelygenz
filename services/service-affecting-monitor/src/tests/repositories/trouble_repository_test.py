@@ -340,6 +340,10 @@ class TestTroubleRepository:
         result = trouble_repository.are_bouncing_events_within_threshold(events)
         assert result is False
 
+        events = [make_event()] * 5
+        result = trouble_repository.are_bouncing_events_within_threshold(events, autoresolve=True)
+        assert result is False
+
     def are_all_metrics_within_thresholds__bandwidth_metrics_ignored_test(
             self, trouble_repository, make_metrics, make_link_status_and_metrics_object_with_events,
             make_list_of_link_status_and_metrics_objects, make_links_by_edge_object):

@@ -114,9 +114,14 @@ class TroubleRepository:
             and self.is_bandwidth_tx_within_threshold(link_metrics, lookup_interval_minutes)
         )
 
-    def are_bouncing_events_within_threshold(self, events):
+    def are_bouncing_events_within_threshold(self, events, autoresolve=False):
         trouble = AffectingTroubles.BOUNCING
-        threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+
+        if autoresolve:
+            threshold = self._config.MONITOR_CONFIG['autoresolve']['thresholds'][trouble]
+        else:
+            threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+
         return len(events) < threshold
 
     def are_all_metrics_within_thresholds(self, edge_data: dict, *, lookup_interval_minutes: int,
@@ -131,7 +136,7 @@ class TroubleRepository:
                 self.are_latency_metrics_within_threshold(metrics),
                 self.are_packet_loss_metrics_within_threshold(metrics),
                 self.are_jitter_metrics_within_threshold(metrics),
-                self.are_bouncing_events_within_threshold(events)
+                self.are_bouncing_events_within_threshold(events, autoresolve=True)
             ]
 
             if check_bandwidth_troubles and self.are_bps_metrics_valid(metrics):
