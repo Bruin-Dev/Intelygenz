@@ -36,7 +36,8 @@ class RepairTicketKreRepository:
                                                              timeout=self._timeout)
 
             except Exception as e:
-                err_msg = f"An error occurred when sending emails to RTA for email_id '{email_id}' -> {e}"
+                err_msg = f'An error occurred when sending emails to RTA for ticket_id "{ticket_id}"' \
+                          f' and email_id  "{email_id}" -> {e}'
                 response = nats_error_response
             else:
                 response_body = response['body']
@@ -44,8 +45,8 @@ class RepairTicketKreRepository:
 
                 if response_status not in range(200, 300):
                     err_msg = (
-                        f'Error while saving created ticket feedback for email "{email_id}" in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'Error while saving created ticket feedback for email with ticket_id "{ticket_id}"'
+                        f'and email_id "{email_id}" in {self._config.ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
