@@ -40,6 +40,13 @@ class TemplateRenderer:
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
         template = "src/templates/{}".format(
             kwargs.get("template", "service_affecting_monitor_report.html"))
+
+        recipient_list = reports_config['report_config_by_trouble']['default']
+        if client_id in reports_config['report_config_by_trouble'].keys():
+            recipient_list += reports_config['report_config_by_trouble'][client_id]
+
+        recipient_list = ', '.join(recipient_list)
+
         templateLoader = jinja2.FileSystemLoader(searchpath=".")
         templateEnv = jinja2.Environment(loader=templateLoader)
         templ = templateEnv.get_template(template)
@@ -72,8 +79,7 @@ class TemplateRenderer:
             email = self.build_email(logo=logo, header=header,
                                      subject=f"{client_name} - Reoccurring Service Affecting Trouble - "
                                              f"{date}",
-                                     recipient=' ,'.join(
-                                         reports_config['report_config_by_trouble']['default']['recipient']),
+                                     recipient=recipient_list,
                                      html=email_html)
             return email
         return []

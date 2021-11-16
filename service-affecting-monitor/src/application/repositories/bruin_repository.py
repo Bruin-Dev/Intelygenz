@@ -650,20 +650,16 @@ class BruinRepository:
 
     def prepare_items_for_report(self, all_serials, cached_info_by_serial):
         items_for_report = []
-        bandwidth_config = self._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['bandwidth']
         for serial, ticket_details in all_serials.items():
             interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
             cached_info = cached_info_by_serial[serial]
-            client_id = ticket_details[0]['ticket']['clientID']
             for trouble in interfaces_by_trouble.keys():
                 for interface, ticket_ids in interfaces_by_trouble[trouble].items():
                     self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
                     item_report = self.build_item_report(ticket_details=ticket_details, cached_info=cached_info,
                                                          number_of_tickets=len(ticket_ids),
                                                          interface=interface, trouble=trouble)
-                    if trouble != 'Bandwidth Over Utilization' or \
-                            (client_id in bandwidth_config['client_ids'] and trouble == 'Bandwidth Over Utilization'):
-                        items_for_report.append(item_report)
+                    items_for_report.append(item_report)
 
         return items_for_report
 

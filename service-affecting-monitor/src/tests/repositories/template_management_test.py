@@ -15,6 +15,12 @@ class TestTemplateRenderer:
         template_renderer = TemplateRenderer(testconfig)
         client_id = 83109
         client_name = 'Benchmark Senior Living - Network'
+        default_recipient_list = ' , '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
+                                       'default'])
+        client_id_list = ' , '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
+                                       client_id])
+        combined_recipient_list = default_recipient_list + ' , ' + client_id_list
+
         test_dict = [
             {
                 'customer': {
@@ -60,9 +66,62 @@ class TestTemplateRenderer:
 
         assert 'Reoccurring Service Affecting Trouble ' in email["email_data"]["subject"]
         assert client_name in email["email_data"]["subject"]
-        assert template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['default']["recipient"][
-                   0] in \
-               email["email_data"]["recipient"]
+        assert combined_recipient_list in email["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
+    def ticket_object_to_email_obj_default_test(self):
+        template_renderer = TemplateRenderer(testconfig)
+        client_id = 123
+        client_name = 'Benchmark Senior Living - Network'
+        default_recipient_list = ' , '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
+                                       'default'])
+
+        test_dict = [
+            {
+                'customer': {
+                    'client_id': client_id, 'client_name': client_name
+                },
+                'location': {
+                    'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+                    'country': 'USA'
+                },
+                'serial_number': 'VC05200085762',
+                'edge_name': 'Big Boss',
+                'number_of_tickets': 4,
+                'bruin_tickets_id': [
+                    5081250, 5075176, 5074441, 5073652
+                ],
+                'interfaces': [
+                    'GE1', 'GE2'
+                ],
+                'trouble': 'Bandwidth Over Utilization'
+            },
+            {
+                'customer': {
+                    'client_id': client_id, 'client_name': client_name
+                },
+                'location': {
+                    'address': '621 Hill Ave', 'city': 'Nashville', 'state': 'TN', 'zip': '37210-4714',
+                    'country': 'USA'
+                },
+                'serial_number': 'VC05200085762',
+                'edge_name': 'Otacon',
+                'number_of_tickets': 4,
+                'bruin_tickets_id': [
+                    5081250, 5075176, 5074441, 5073652
+                ],
+                'interfaces': 'GE1',
+                'trouble': 'Jitter'
+            }
+        ]
+
+        email = template_renderer.compose_email_report_object(client_name=client_name,
+                                                              client_id=client_id,
+                                                              report_items=test_dict)
+
+        assert 'Reoccurring Service Affecting Trouble ' in email["email_data"]["subject"]
+        assert client_name in email["email_data"]["subject"]
+        assert default_recipient_list in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def compose_email_object_html_elements_test(self):
