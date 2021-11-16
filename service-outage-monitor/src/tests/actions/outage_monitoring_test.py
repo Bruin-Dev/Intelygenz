@@ -10509,6 +10509,17 @@ class TestServiceOutageMonitor:
                     'linkId': 5293,
                     'linkIpAddress': '70.59.5.185',
                 },
+                {
+                    'displayName': 'PIAB - 70.59.5.185',
+                    'isp': None,
+                    'interface': 'GE1',
+                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                    'linkState': 'DISCONNECTED',
+                    'linkLastActive': '2020-09-29T04:45:15.000Z',
+                    'linkVpnState': 'DISCONNECTED',
+                    'linkId': 5293,
+                    'linkIpAddress': '70.59.5.185',
+                },
             ],
         }
         cached_edge = {

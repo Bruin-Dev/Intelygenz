@@ -62,7 +62,7 @@ MONITOR_CONFIG = {
         Outages.HA_HARD_DOWN: quarantine_time,
     },
     'velocloud_instances_filter': velocloud_hosts_and_filters,
-    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned'],
+    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned', 'PIAB'],
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}

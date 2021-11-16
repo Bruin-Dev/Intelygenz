@@ -46,7 +46,7 @@ MONITOR_CONFIG = {
     'velocloud_instances_filter': {
         "some-host": [],
     },
-    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned'],
+    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned', 'PIAB'],
     'blacklisted_edges': [],
     'forward_link_outage_seconds': 60 * 60,
     'autoresolve_ticket_creation_seconds': 60 * 60,
