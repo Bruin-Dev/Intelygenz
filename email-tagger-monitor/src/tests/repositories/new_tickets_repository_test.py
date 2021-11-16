@@ -16,7 +16,7 @@ def new_emails_repository():
                                 storage_repository)
 
 
-class TestEmailTaggerRepository:
+class TestNewTicketsRepository:
     def instance_test(self):
         logger = Mock()
         config = testconfig

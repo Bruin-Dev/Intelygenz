@@ -1,10 +1,24 @@
 from unittest.mock import Mock
 
+import pytest
+
 from application.repositories.new_emails_repository import NewEmailsRepository
 from config import testconfig
 
 
-class TestEmailTaggerRepository:
+@pytest.fixture
+def new_emails_repository(storage_repository, notifications_repository):
+    logger = Mock()
+
+    return NewEmailsRepository(
+        logger,
+        testconfig,
+        notifications_repository,
+        storage_repository,
+    )
+
+
+class TestNewEmailsRepository:
     def instance_test(self):
         logger = Mock()
         config = testconfig
@@ -19,10 +33,9 @@ class TestEmailTaggerRepository:
         assert new_emails_repository._notifications_repository is notifications_repository
         assert new_emails_repository._storage_repository is storage_repository
 
-    def get_pending_emails_ok_test(self, logger, notifications_repository, storage_repository):
+    def get_pending_emails_ok_test(self, storage_repository, new_emails_repository):
         storage_repository.find_all = Mock(return_value=[])
-        new_emails_repository = NewEmailsRepository(testconfig, logger, notifications_repository,
-                                                    storage_repository)
+
 
         actual = new_emails_repository.get_pending_emails()
 
@@ -49,13 +62,15 @@ class TestEmailTaggerRepository:
         assert response is None
 
     def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
-        storage_repository.remove = Mock()
+        storage_repository.rename = Mock()
         new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository,
                                                     storage_repository)
 
         email_id = "123456"
         expected_email_id = "email_123456"
+        expected_archive_id = "archived_email_123456"
+
         response = new_emails_repository.mark_complete(email_id)
 
-        storage_repository.remove.assert_called_once_with(expected_email_id)
+        storage_repository.rename.assert_called_once_with(expected_email_id, expected_archive_id)
         assert response is None
