@@ -9,6 +9,7 @@ from application.repositories.new_created_tickets_repository import NewCreatedTi
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
+from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from config import testconfig as config
 
 
@@ -24,6 +25,11 @@ def logger():
 
 @pytest.fixture(scope='function')
 def redis():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
+def scheduler():
     return Mock()
 
 
@@ -63,3 +69,23 @@ def new_created_tickets_repository(logger, storage_repository):
 @pytest.fixture(scope='function')
 def repair_ticket_kre_repository(event_bus, logger, notifications_repository):
     return RepairTicketKreRepository(event_bus, logger, config, notifications_repository)
+
+
+@pytest.fixture(scope='function')
+def new_created_tickets_feedback(
+        event_bus,
+        logger,
+        scheduler,
+        new_created_tickets_repository,
+        repair_ticket_kre_repository,
+        bruin_repository
+):
+    return NewCreatedTicketsFeedback(
+        event_bus,
+        logger,
+        scheduler,
+        config,
+        new_created_tickets_repository,
+        repair_ticket_kre_repository,
+        bruin_repository
+    )
