@@ -4,7 +4,6 @@ import pytest
 
 from shortuuid import uuid
 
-from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.notifications_repository import NotificationsRepository
 
 

@@ -31,6 +31,10 @@ class StorageRepository:
         key = f'{self._redis_key_prefix}-{key}'
         self._redis.set(key, json.dumps(data))
 
+    def increment(self, key):
+        key = f'{self._redis_key_prefix}-{key}'
+        return self._redis.incr(key, amount=1)
+
     def remove(self, *keys):
         keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
         self._redis.delete(*keys)
