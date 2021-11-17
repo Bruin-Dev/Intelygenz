@@ -1,29 +1,4 @@
 # ============================================
-# Build control job
-# ============================================
-build-control:
-  stage: build
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  environment:
-    name: production
-  script:
-    - echo "Waiting for the images to be built" && sleep 200 && echo "Build complete"  
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
-      changes:
-        - "*/src/application/**/*"
-        - "*/src/config/**/*"
-        - "*/src/app.py"
-        - "*/Dockerfile"
-        - "*/requirements.txt"
-  needs:
-    - job: semantic-release
-
-# ============================================
 # Helm deploy jobs
 # ============================================
 helm-branches:
@@ -99,9 +74,9 @@ helm-master-logs:
         - "*/src/app.py"
         - "*/Dockerfile"
         - "*/requirements.txt"
-  needs:
-    - job: build-control
-
+    - if: $CI_COMMIT_TAG
+      when: never
+      
 # ============================================
 # Destroy Helm jobs
 # ============================================
