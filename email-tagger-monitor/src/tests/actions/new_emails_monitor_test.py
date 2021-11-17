@@ -108,13 +108,14 @@ class TestNewEmailsMonitor:
             {'email': {'email_id': '101'}},
         ]
         prediction_tag_id = "1001"
+        tag_info = {"id": prediction_tag_id, "probability": 0.9}
 
         new_emails_monitor._new_emails_repository.get_pending_emails = Mock(return_value=pending_emails)
         new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(return_value={
             'status': 200,
             'body': ['prediction_dict_1', 'prediction_dict_2']
         })
-        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=prediction_tag_id)
+        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=tag_info)
         new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock(return_value={'status': 200})
         new_emails_monitor._new_emails_repository.mark_complete = Mock()
 
@@ -155,13 +156,14 @@ class TestNewEmailsMonitor:
         email_id = "TEST101"
         pending_email = {'email': {'email_id': email_id}}
         prediction_tag_id = "1001"
+        tag_info = {"id": prediction_tag_id, "probability": 0.9}
 
         new_emails_monitor._new_emails_repository.get_pending_emails = Mock(return_value=[pending_email])
         new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(return_value={
             'status': 200,
             'body': ['prediction_dict_1', 'prediction_dict_2']
         })
-        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=prediction_tag_id)
+        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=tag_info)
         new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock(return_value={
             'status': 409,
             'body': 'Tag already present'
@@ -209,12 +211,13 @@ class TestNewEmailsMonitor:
             {"tag_id": "TEST", "probability": 0.77},
             {"tag_id": "TEST2", "probability": 0.23},
         ]
+        most_prob_tag_data = {"id": "TEST", "probability": 0.77}
 
         new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(return_value={
             "status": 200,
             "body": prediction_response
         })
-        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=prediction_response[0]['tag_id'])
+        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=most_prob_tag_data)
         new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock(return_value={
             "status": 200,
             "body": "ok"
@@ -310,6 +313,8 @@ class TestNewEmailsMonitor:
             {"tag_id": "TEST2", "probability": 0.23},
         ]
 
+        most_prob_tag = {"id": "TEST", "probability": 0.77}
+
         new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(return_value={
             "status": 200,
             "body": prediction_response
@@ -319,7 +324,7 @@ class TestNewEmailsMonitor:
             "body": "Failed"
         })
 
-        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=prediction_response[0]['tag_id'])
+        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=most_prob_tag)
         new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock()
         new_emails_monitor._new_emails_repository.mark_complete = Mock()
 
@@ -357,4 +362,4 @@ class TestNewEmailsMonitor:
             {'tag_id': 'WRONG3', 'probability': 0.2},
         ])
 
-        assert tag_id == "CORRECT"
+        assert tag_id == {"id": "CORRECT", "probability": 0.5}

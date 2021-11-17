@@ -37,7 +37,8 @@ class TestPredictedTagsRepository:
         expected_tag = "tag_email_123456"
         tag_data = {
             "email_id": "123456",
-            "tag_id": "123"
+            "tag_id": "123",
+            "tag_probability": 0.9
         }
         response = predicted_tags_repository.save_new_tag(**tag_data)
 
