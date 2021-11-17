@@ -24,6 +24,7 @@ MONITOR_CONFIG = {
         'bruin_request_seconds': 30
     },
     'semaphores': {
+        'repair_tickets_concurrent': 10,
         'created_tickets_concurrent': 10,
     },
 }
