@@ -11,11 +11,12 @@ class PredictedTagsRepository:
     def get_pending_tags(self) -> List[dict]:
         return self._storage_repository.find_all("tag_email_*")
 
-    def save_new_tag(self, email_id: str, tag_id: str):
+    def save_new_tag(self, email_id: str, tag_id: str, tag_probability: float):
         key = f"tag_email_{email_id}"
         self._logger.info(f"saving predicted tag_id='{tag_id}' with email_id='{email_id}'")
         new_pred = {
             "email_id": email_id,
-            "tag_id": tag_id
+            "tag_id": tag_id,
+            "tag_probability": tag_probability,
          }
         self._storage_repository.save(key, new_pred)
