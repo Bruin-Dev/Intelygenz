@@ -10,8 +10,8 @@ build-control:
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   environment:
     name: production
-  script:   
-    - echo "Build complete"  
+  script:
+    - echo "Waiting for the images to be built" && sleep 200 && echo "Build complete"  
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -22,8 +22,6 @@ build-control:
         - "*/requirements.txt"
   needs:
     - job: semantic-release
-  when: delayed
-  start_in: 200 seconds
 
 # ============================================
 # Helm deploy jobs
