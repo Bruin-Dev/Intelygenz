@@ -7,7 +7,7 @@ resource "aws_acm_certificate" "ssl_certificate" {
 
   tags = {
     Name        = "SSL Certificate us-east-1"
-    Environment  = var.CURRENT_ENVIRONMENT
+    Environment  = "all"
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
   }

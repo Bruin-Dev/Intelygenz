@@ -5,6 +5,8 @@ locals {
   external-dns-policy-name = "${local.cluster_name}-external-dns-oidc-policy"
   cluster-autoscaler-role-name =  "${local.cluster_name}-cluster-autoscaler-oidc"
   cluster-autoscaler-policy-name = "${local.cluster_name}-cluster-autoscaler-oidc-policy"
+  chartmuseum-role-name =  "${local.cluster_name}-cluster-autoscaler-oidc"
+  chartmuseum-policy-name = "${local.cluster_name}-cluster-autoscaler-oidc-policy"
   fluent-bit-role-name =  "${local.cluster_name}-fluent-bit-oidc"
   fluent-bit-policy-name = "${local.cluster_name}-fluent-bit-oidc-policy"
 }
@@ -41,6 +43,49 @@ resource "aws_iam_policy" "cluster-autoscaler-eks" {
 resource "aws_iam_role_policy_attachment" "cluster-autoscaler-eks-attachment" {
   role       = aws_iam_role.cluster-autoscaler-role-eks.name
   policy_arn = aws_iam_policy.cluster-autoscaler-eks.arn
+}
+
+######################
+#    CHARTMUSEUM     #
+######################
+data "template_file" "chartmuseum-eks-role" {
+  count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  template = file("${path.module}/roles/chartmuseum-role.json")
+
+  vars = {
+    eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
+    account_id = data.aws_caller_identity.current.account_id
+  }
+}
+
+resource "aws_iam_role" "chartmuseum-role-eks" {
+  count                 = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  name                  = local.chartmuseum-role-name
+  assume_role_policy    = data.template_file.chartmuseum-eks-role[0].rendered
+  force_detach_policies = true
+
+  tags                  = local.common_tags
+}
+
+data "template_file" "chartmuseum-eks-policy" {
+  count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  template = file("${path.module}/policies/chartmuseum-policy.json")
+  
+  vars = {
+    bucket_chartmuseum = aws_s3_bucket.bucket_chartmuseum[0].id
+  }
+}
+
+resource "aws_iam_policy" "chartmuseum-eks" {
+  count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  name   = local.chartmuseum-policy-name
+  policy = data.template_file.chartmuseum-eks-policy[0].rendered
+}
+
+resource "aws_iam_role_policy_attachment" "chartmuseum-eks-attachment" {
+  count      = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  role       = aws_iam_role.chartmuseum-role-eks[0].name
+  policy_arn = aws_iam_policy.chartmuseum-eks[0].arn
 }
 
 ##############

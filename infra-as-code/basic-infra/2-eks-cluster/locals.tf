@@ -21,7 +21,8 @@ locals {
 
   // S3 bucket with EKS cluster info local variables
   bucket_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks" : "${var.common_info.project}-eks"
-
+  // S3 bucket for chartmuseum repository
+  chartmuseum_bucket_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-chartmuseum" : "${var.common_info.project}-chartmuseum"
   // common tags
   common_tags = {
     Environment  = terraform.workspace

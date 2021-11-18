@@ -35,6 +35,63 @@ resource "helm_release" "cluster-autoscaler" {
    ]
 }
 
+resource "helm_release" "chartmuseum" {
+  count         = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  name          = "chartmuseum"
+
+  repository    = "https://chartmuseum.github.io/charts"
+  chart         = "chartmuseum"
+
+  version       = var.CHARTMUSEUM_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  wait          = true
+  recreate_pods = false
+
+  values = [
+    file("helm/external-charts/chartmuseum-values.yaml")
+  ]
+
+  set {
+    name = "env.open.STORAGE_AMAZON_BUCKET"
+    value = aws_s3_bucket.bucket_chartmuseum[0].id
+    type  = "string"
+  }
+
+  set {
+    name = "env.open.STORAGE_AMAZON_REGION"
+    value = aws_s3_bucket.bucket_chartmuseum[0].region
+    type  = "string"
+  }
+
+  set {
+    name = "env.secret.BASIC_AUTH_USER"
+    value = var.CHARTMUSEUM_USER
+    type  = "string"
+  }
+
+  set {
+    name = "env.secret.BASIC_AUTH_PASS"
+    value = var.CHARTMUSEUM_PASSWORD
+    type  = "string"
+  }
+
+  set {
+    name = "serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.chartmuseum-role-eks[0].arn
+    type  = "string"
+  }
+
+  depends_on = [
+      aws_s3_bucket.bucket_chartmuseum,
+      aws_iam_role.chartmuseum-role-eks,
+      null_resource.associate-iam-oidc-provider,
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
+   ]
+}
+
 resource "helm_release" "external-dns" {
   name          = "external-dns"
 

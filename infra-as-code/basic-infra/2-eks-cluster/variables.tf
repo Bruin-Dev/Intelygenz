@@ -31,6 +31,11 @@ variable "CLUSTER_AUTOSCALER_HELM_CHART_VERSION" {
   description = "Helm chart version used for cluster-autoscaler"
 }
 
+variable "CHARTMUSEUM_HELM_CHART_VERSION" {
+  default     = "3.3.0"
+  description = "Helm chart version used for chartmuseum"
+}
+
 variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
   default     = "4.8.6"
   description = "Helm chart version used for external-dns"
@@ -73,6 +78,16 @@ variable "GRAFANA_ADMIN_USER" {
 variable "GRAFANA_ADMIN_PASSWORD" {
   default     = ""
   description = "Grafana admin password"
+}
+
+variable "CHARTMUSEUM_USER" {
+  default     = ""
+  description = "Chartmuseum basic auth user"
+}
+
+variable "CHARTMUSEUM_PASSWORD" {
+  default     = ""
+  description = "Chartmuseum basic auth password"
 }
 
 variable "ENABLE_FLUENT_BIT" {

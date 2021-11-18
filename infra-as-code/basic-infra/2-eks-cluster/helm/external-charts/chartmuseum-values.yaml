@@ -1,0 +1,13 @@
+env:
+  open:
+    STORAGE: amazon
+    STORAGE_AMAZON_PREFIX:
+serviceAccount:
+  create: true
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    name: chartmuseum.automation-engine.net
+    path: /
