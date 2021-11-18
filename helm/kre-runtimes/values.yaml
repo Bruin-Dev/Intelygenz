@@ -63,6 +63,12 @@ chronograf:
   persistence:
     storageClass: "local-path"
 
+kapacitor:
+  enabled: true
+  rbac:
+    create: true
+    namespaced: true
+
 config:
   auth:
     verificationCodeDurationInMinutes: 5

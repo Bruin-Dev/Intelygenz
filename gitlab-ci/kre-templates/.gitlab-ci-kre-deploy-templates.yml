@@ -89,6 +89,7 @@
       --set certManager.dns01.route53.accessKeyID=${AWS_ACCESS_KEY_ID}
       --set certManager.dns01.route53.secretAccessKey=${AWS_SECRET_ACCESS_KEY}
       --set certManager.dns01.route53.hostedZoneID=${KRE_HOSTED_ZONE_ID}
+      --set kapacitor.influxURL="http://${KRE_RUNTIME_NAME}-influxdb:8086"
       konstellation-io/kre
     # CREATE / UPDATE PUBLIC DASHBOARDS
     - >
