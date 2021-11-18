@@ -5,8 +5,8 @@ locals {
   external-dns-policy-name = "${local.cluster_name}-external-dns-oidc-policy"
   cluster-autoscaler-role-name =  "${local.cluster_name}-cluster-autoscaler-oidc"
   cluster-autoscaler-policy-name = "${local.cluster_name}-cluster-autoscaler-oidc-policy"
-  chartmuseum-role-name =  "${local.cluster_name}-cluster-autoscaler-oidc"
-  chartmuseum-policy-name = "${local.cluster_name}-cluster-autoscaler-oidc-policy"
+  chartmuseum-role-name =  "${local.cluster_name}-chartmuseum-oidc"
+  chartmuseum-policy-name = "${local.cluster_name}-chartmuseum-oidc-policy"
   fluent-bit-role-name =  "${local.cluster_name}-fluent-bit-oidc"
   fluent-bit-policy-name = "${local.cluster_name}-fluent-bit-oidc-policy"
 }
