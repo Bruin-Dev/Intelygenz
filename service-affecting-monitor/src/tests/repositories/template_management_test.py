@@ -15,11 +15,9 @@ class TestTemplateRenderer:
         template_renderer = TemplateRenderer(testconfig)
         client_id = 83109
         client_name = 'Benchmark Senior Living - Network'
-        default_recipient_list = ' , '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
-                                       'default'])
-        client_id_list = ' , '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
-                                       client_id])
-        combined_recipient_list = default_recipient_list + ' , ' + client_id_list
+        default_recipient_list = template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble']['default']
+        default_recipient_list += template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][client_id]
+        default_recipient_list = ', '.join(default_recipient_list)
 
         test_dict = [
             {
@@ -66,14 +64,14 @@ class TestTemplateRenderer:
 
         assert 'Reoccurring Service Affecting Trouble ' in email["email_data"]["subject"]
         assert client_name in email["email_data"]["subject"]
-        assert combined_recipient_list in email["email_data"]["recipient"]
+        assert default_recipient_list in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def ticket_object_to_email_obj_default_test(self):
         template_renderer = TemplateRenderer(testconfig)
         client_id = 123
         client_name = 'Benchmark Senior Living - Network'
-        default_recipient_list = ' , '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
+        default_recipient_list = ', '.join(template_renderer._config.MONITOR_REPORT_CONFIG['report_config_by_trouble'][
                                        'default'])
 
         test_dict = [
