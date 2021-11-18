@@ -2,8 +2,12 @@ env:
   open:
     STORAGE: amazon
     STORAGE_AMAZON_PREFIX:
+    AWS_SDK_LOAD_CONFIG: true
 serviceAccount:
   create: true
+securityContext: 
+  enabled: true
+  fsGroup: 65534
 ingress:
   enabled: true
   annotations:
