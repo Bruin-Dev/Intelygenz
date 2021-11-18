@@ -9,5 +9,6 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
   hosts:
-    name: chartmuseum.automation-engine.net
-    path: /
+    - name: chartmuseum.mettel-automation.net
+      path: /
+      tls: false
