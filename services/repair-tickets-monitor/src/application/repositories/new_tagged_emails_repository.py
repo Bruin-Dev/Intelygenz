@@ -1,7 +1,7 @@
 from typing import List
 
 
-class NewEmailsRepository:
+class NewTaggedEmailsRepository:
     def __init__(self, logger, config, notifications_repository, storage_repository):
         self._logger = logger
         self._config = config

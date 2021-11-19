@@ -4,6 +4,7 @@ import pytest
 from shortuuid import uuid
 from unittest.mock import Mock
 from unittest.mock import patch
+from asynctest import CoroutineMock
 
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from config import testconfig as config
@@ -37,7 +38,7 @@ class TestNewCreatedTicketsFeedback:
         assert new_created_tickets_feedback._logger is logger
         assert new_created_tickets_feedback._scheduler is scheduler
         assert new_created_tickets_feedback._config is config
-        assert new_created_tickets_feedback.new_created_tickets_repository is new_created_tickets_repository
+        assert new_created_tickets_feedback._new_created_tickets_repository is new_created_tickets_repository
         assert new_created_tickets_feedback._rta_repository is repair_ticket_kre_repository
         assert new_created_tickets_feedback._bruin_repository is bruin_repository
 
@@ -70,8 +71,8 @@ class TestNewCreatedTicketsFeedback:
         ticket_id = 1234
         email_id = 4567
 
-        new_created_tickets_feedback.new_created_tickets_repository = Mock()
-        new_created_tickets_repository = new_created_tickets_feedback.new_created_tickets_repository
+        new_created_tickets_feedback._new_created_tickets_repository = Mock()
+        new_created_tickets_repository = new_created_tickets_feedback._new_created_tickets_repository
         new_created_tickets_repository.increase_ticket_error_counter.return_value = 1000
 
         new_created_tickets_feedback._check_error(error_code, ticket_id, email_id)
@@ -95,13 +96,15 @@ class TestNewCreatedTicketsFeedback:
         email_id = 5678
         email_data = make_email(email_id=email_id)
         ticket_data = make_ticket(ticket_id=ticket_id)
-        response = make_rpc_response(status=404, message="Not found")
+        response = make_rpc_response(status=404, body="Not found")
 
         new_created_tickets_feedback._bruin_repository = Mock()
+        new_created_tickets_feedback._new_created_tickets_repository = Mock()
         bruin_repository = new_created_tickets_feedback._bruin_repository
-        bruin_repository.get_single_ticket_basic_info.return_value = response
+        bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value=response)
+        new_created_tickets_feedback._new_created_tickets_repository.increase_ticket_error_counter.return_value = 1000
 
-        new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_data)
+        await new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_data)
 
         new_created_tickets_feedback._new_created_tickets_repository.mark_complete.assert_not_called()
         bruin_repository.get_single_ticket_basic_info.assert_called_once()

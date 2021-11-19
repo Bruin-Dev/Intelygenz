@@ -43,7 +43,7 @@ class RepairTicketsMonitor:
             )
 
         try:
-            scheduler_seconds = self._config.MONITOR_CONFIG["scheduler_config"]["repair_ticket_seconds"]
+            scheduler_seconds = self._config.MONITOR_CONFIG["scheduler_config"]["repair_ticket_monitor"]
             self._scheduler.add_job(
                 self._run_repair_tickets_polling,
                 "interval",
@@ -101,12 +101,12 @@ class RepairTicketsMonitor:
         self._new_tagged_emails_repository.mark_complete(email['email_id'])
 
     async def _process_repair_email(self, email: dict):
-        # Get inference
+        # TODO: Things left to do
         # Validate information
         # Bucket into site_ids
         # Diff between validate vs ticket creation
         # Diff voo/vas
-        # Save output to kre
+        # save_outputs to kre
         # Remove emails from redis
         email_id = email["email_id"]
         email_data = self._new_tagged_emails_repository.get_email_details(email_id)
