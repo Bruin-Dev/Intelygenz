@@ -27,7 +27,7 @@ MONITOR_CONFIG = {
         "Other": 5
     },
     'scheduler_config': {
-        'repair_ticket_seconds': 10,
+        'repair_ticket_monitor': 10,
         'new_created_tickets_feedback': 10,
     },
     'nats_request_timeout': {

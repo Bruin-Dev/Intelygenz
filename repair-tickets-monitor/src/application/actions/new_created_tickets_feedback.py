@@ -83,7 +83,7 @@ class NewCreatedTicketsFeedback:
 
     async def _save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
-        ticket_id = int(ticket_data["ticket_id"])
+        ticket_id = int(ticket_data["ticketID"])
 
         async with self._semaphore:
 

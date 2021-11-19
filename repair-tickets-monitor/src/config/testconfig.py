@@ -16,7 +16,15 @@ NATS_CONFIG = {
 MONITOR_CONFIG = {
     'timezone': 'US/Eastern',
     'max_retries_error_404': 5,
+    'tag_ids': {
+        "Repair": 1,
+        "New Order": 2,
+        "Change": 3,
+        "Billing": 4,
+        "Other": 5
+    },
     'scheduler_config': {
+        'repair_ticket_monitor': 10,
         'new_created_tickets_feedback': 1,
     },
     'nats_request_timeout': {
