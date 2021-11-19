@@ -1,4 +1,4 @@
 
-from tests.fixtures.bruin import *
-from tests.fixtures.instances import *
-from tests.fixtures.rpc import *
+from fixtures.bruin import *
+from fixtures.instances import *
+from fixtures.rpc import *
