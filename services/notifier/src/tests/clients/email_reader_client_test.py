@@ -364,7 +364,8 @@ class TestEmailReaderClient:
         msg = Mock()
         msg.is_multipart = Mock(return_value=False)
         msg.get_content_charset = Mock(return_value='ascii')
-        msg.get_payload = Mock(return_value=MESSAGE_1['body'])
+        msg.get_payload = Mock()
+        msg.get_payload().decode = Mock(return_value=MESSAGE_1['body'])
 
         mail_client = EmailReaderClient(config, logger)
         unread_messages = mail_client._get_body(msg)
@@ -380,7 +381,7 @@ class TestEmailReaderClient:
         msg.walk = Mock(return_value=[part_mock])
         msg.get_content_charset = Mock(return_value='ascii')
         msg.get_payload = Mock()
-        msg.get_payload.decode = Mock(return_value=MESSAGE_1['body'])
+        msg.get_payload().decode = Mock(return_value=MESSAGE_1['body'])
 
         mail_client = EmailReaderClient(config, logger)
         unread_messages = mail_client._get_body(msg)
