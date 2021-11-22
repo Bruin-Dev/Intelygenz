@@ -119,7 +119,7 @@ class EmailReaderClient:
         except Exception as err:
             self._logger.error(f'Error getting body from message {msg}  due to {err}')
 
-        return body
+        return '\n'.join(body.splitlines())
 
     async def mark_as_read(self, msg_uid, email_account, email_password):
         email_server = self._login(email_account, email_password)
