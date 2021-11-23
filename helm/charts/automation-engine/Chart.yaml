@@ -1,6 +1,6 @@
 apiVersion: v2
 name: automation-engine
-description: A Helm chart for Kubernetes to deploy automation-engine project
+description: Mettel automation-engine project
 
 # A chart can be either an 'application' or a 'library' chart.
 #

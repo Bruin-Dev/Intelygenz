@@ -34,16 +34,24 @@
         export LINKS_METRICS_API_ENABLED=false
         export LINKS_METRICS_COLLECTOR_ENABLED=false
       fi
-    - envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+    # PRINT PIPELINE ENVIRONMENT VARIABLES (FOR DEBUG)
     - echo "the ENVIRONMENT_SLUG is $ENVIRONMENT_SLUG"
     - echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
     - echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
     - echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
-    # DEPLOY HELM CHART - PAPERTRAIL LOGS - CLOUDWATCH
+    # CREATE CHART RELEASE AND DEPLOY
     - >
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}
+        envsubst "$(env | awk -F= '{print "$"$1" "}' | grep -i BUILD_NUMBER | tr -d '\n')" < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+        sed -i -E 's/ \$\{.*\}/ ""/g' ${HELM_CHART_DIR}/values.yaml
+        helm plugin install https://github.com/chartmuseum/helm-push.git
+        helm repo add mettel https://chartmuseum.mettel-automation.net --username="${CHARTMUSEUM_USER}" --password="${CHARTMUSEUM_PASSWORD}"
+        export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
+        helm cm-push ${HELM_CHART_DIR}/ --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" mettel
+        envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}    
       else
+        envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
       fi
 
@@ -90,4 +98,4 @@
     - python3 ci-utils/papertrail-provisioning/app.py -f "$DOCKER_IMAGES_FILE"
     # UPDATE FLUENT-BIT HELM CHART
     - envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
-    - helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml  
+    - helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml

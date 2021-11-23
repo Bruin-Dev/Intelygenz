@@ -949,11 +949,11 @@ service-outage-monitor-1:
     port: 5000
   resources:
     limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
       cpu: 200m
       memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
 
 
 # -- service-outage-monitor-2 subchart specific configuration
@@ -1037,11 +1037,11 @@ service-outage-monitor-3:
     port: 5000
   resources:
     limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
       cpu: 200m
       memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
 
 
 # -- service-outage-monitor-4 subchart specific configuration

@@ -19,6 +19,7 @@ helm-branches:
     - export CURRENT_ENVIRONMENT=dev
     - export EKS_CLUSTER_NAME="mettel-automation-${CURRENT_ENVIRONMENT}"
     - export ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
+    - apk add git coreutils
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
