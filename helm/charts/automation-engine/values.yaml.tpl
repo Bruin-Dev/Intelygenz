@@ -147,17 +147,13 @@ bruin-bridge:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "bruin-bridge-${BRUIN_BRIDGE_BUILD_NUMBER}"
     # -- Client ID credentials for Bruin API
-    bruin_client_id: ${BRUIN_CLIENT_ID}
+    bruin_client_id: ${BRUIN_BRIDGE__BRUIN_CLIENT_ID}
     # -- Client Secret credentials for Bruin API
-    bruin_client_secret: ${BRUIN_CLIENT_SECRET}
-    # -- IP of Bruin Login URL (needed only in dev environments)
-    bruin_login_url_ip: ${BRUIN_LOGIN_URL_IP}
+    bruin_client_secret: ${BRUIN_BRIDGE__BRUIN_CLIENT_SECRET}
     # -- Login URL for Bruin API
-    bruin_login_url: ${BRUIN_LOGIN_URL}
-    # -- Base URL for Bruin API (needed only in dev environments)
-    bruin_base_url_ip: ${BRUIN_BASE_URL_IP}
+    bruin_login_url: ${BRUIN_BRIDGE__BRUIN_LOGIN_URL}
     # -- Base URL for Bruin API
-    bruin_base_url: ${BRUIN_BASE_URL}
+    bruin_base_url: ${BRUIN_BRIDGE__BRUIN_BASE_URL}
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true

@@ -19,10 +19,12 @@ for v in variables:
     var_dict[v.key] = v.value
 
 # Bruin variables
-BRUIN_CLIENT_ID = var_dict["BRUIN_CLIENT_ID_PRO"]
-BRUIN_CLIENT_SECRET = var_dict["BRUIN_CLIENT_SECRET_PRO"]
-BRUIN_LOGIN_URL = var_dict["BRUIN_LOGIN_URL_PRO"]
-BRUIN_BASE_URL = var_dict["BRUIN_BASE_URL_PRO"]
+# We should use PRO__BRUIN_BRIDGE__TEST_* variables here, but their inventories lack lots of data in the TEST env
+# so it's not worth
+BRUIN_CLIENT_ID = var_dict["PRO__BRUIN_BRIDGE__CLIENT_ID"]
+BRUIN_CLIENT_SECRET = var_dict["PRO__BRUIN_BRIDGE__CLIENT_SECRET"]
+BRUIN_LOGIN_URL = var_dict["PRO__BRUIN_BRIDGE__LOGIN_URL"]
+BRUIN_BASE_URL = var_dict["PRO__BRUIN_BRIDGE__BASE_URL"]
 
 # DRI variables
 DRI_ACC_EMAIL = var_dict["DRI_ACC_EMAIL_DEV"]

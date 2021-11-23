@@ -151,12 +151,8 @@ bruin-bridge:
     bruin_client_id: ""
     # -- Client Secret credentials for Bruin API
     bruin_client_secret: ""
-    # -- IP of Bruin Login URL (needed only in dev environments)
-    bruin_login_url_ip: ""
     # -- Login URL for Bruin API
     bruin_login_url: ""
-    # -- Base URL for Bruin API (needed only in dev environments)
-    bruin_base_url_ip: ""
     # -- Base URL for Bruin API
     bruin_base_url: ""
     metrics:
