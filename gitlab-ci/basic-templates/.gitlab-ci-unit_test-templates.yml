@@ -6,7 +6,7 @@
   stage: unit_test
   image: ${CI_REGISTRY}/mettel/docker_images/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
   before_script:
-    - cd ${MODULE}
+    - cd services/${MODULE}
     - pip install -r requirements.txt
   script:
     - pytest --cov

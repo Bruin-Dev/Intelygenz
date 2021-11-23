@@ -18,7 +18,7 @@
       --build-arg REPOSITORY_URL="${REPOSITORY_URL}"
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
-      -f ${MODULE_NAME}/Dockerfile .
+      -f services/${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
     - python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o

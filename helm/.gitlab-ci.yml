@@ -69,11 +69,11 @@ helm-master-logs:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - "*/src/application/**/*"
-        - "*/src/config/**/*"
-        - "*/src/app.py"
-        - "*/Dockerfile"
-        - "*/requirements.txt"
+        - "services/*/src/application/**/*"
+        - "services/*/src/config/**/*"
+        - "services/*/src/app.py"
+        - "services/*/Dockerfile"
+        - "services/*/requirements.txt"
     - if: $CI_COMMIT_TAG
       when: never
       

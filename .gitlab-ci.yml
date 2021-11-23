@@ -77,38 +77,39 @@ include:
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-deploy-templates.yml'
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-destroy-templates.yml'
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-validate-templates.yml'
-  # Gitlab-CI jobs declaration for each microservice/module
-  - local: 'bouncing-detector/.gitlab-ci.yml'
-  - local: 'bruin-bridge/.gitlab-ci.yml'
-  - local: 'customer-cache/.gitlab-ci.yml'
-  - local: 'digi-bridge/.gitlab-ci.yml'
-  - local: 'digi-reboot-report/.gitlab-ci.yml'
-  - local: 'email-tagger-kre-bridge/.gitlab-ci.yml'
-  - local: 'email-tagger-monitor/.gitlab-ci.yml'
-  - local: 'hawkeye-affecting-monitor/.gitlab-ci.yml'
-  - local: 'hawkeye-bridge/.gitlab-ci.yml'
-  - local: 'hawkeye-customer-cache/.gitlab-ci.yml'
-  - local: 'hawkeye-outage-monitor/.gitlab-ci.yml'
+  # Gitlab-CI jobs declaration for infrastructure
   - local: 'helm/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
   - local: 'infra-as-code/ecr-repositories/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
-  - local: 'intermapper-outage-monitor/.gitlab-ci.yml'
-  - local: 'last-contact-report/.gitlab-ci.yml'
-  - local: 'links-metrics-api/.gitlab-ci.yml'
-  - local: 'links-metrics-collector/.gitlab-ci.yml'
-  - local: 'lumin-billing-report/.gitlab-ci.yml'
-  - local: 'notifier/.gitlab-ci.yml'
-  - local: 'service-affecting-monitor/.gitlab-ci.yml'
-  - local: 'service-outage-monitor/.gitlab-ci.yml'
-  - local: 'sites-monitor/.gitlab-ci.yml'
-  - local: 't7-bridge/.gitlab-ci.yml'
-  - local: 'tnba-feedback/.gitlab-ci.yml'
-  - local: 'tnba-monitor/.gitlab-ci.yml'
-  - local: 'ticket-collector/.gitlab-ci.yml'
-  - local: 'ticket-statistics/.gitlab-ci.yml'
-  - local: 'velocloud-bridge/.gitlab-ci.yml'
+  # Gitlab-CI jobs declaration for each microservice/module
+  - local: 'services/bouncing-detector/.gitlab-ci.yml'
+  - local: 'services/bruin-bridge/.gitlab-ci.yml'
+  - local: 'services/customer-cache/.gitlab-ci.yml'
+  - local: 'services/digi-bridge/.gitlab-ci.yml'
+  - local: 'services/digi-reboot-report/.gitlab-ci.yml'
+  - local: 'services/email-tagger-kre-bridge/.gitlab-ci.yml'
+  - local: 'services/email-tagger-monitor/.gitlab-ci.yml'
+  - local: 'services/hawkeye-affecting-monitor/.gitlab-ci.yml'
+  - local: 'services/hawkeye-bridge/.gitlab-ci.yml'
+  - local: 'services/hawkeye-customer-cache/.gitlab-ci.yml'
+  - local: 'services/hawkeye-outage-monitor/.gitlab-ci.yml'
+  - local: 'services/intermapper-outage-monitor/.gitlab-ci.yml'
+  - local: 'services/last-contact-report/.gitlab-ci.yml'
+  - local: 'services/links-metrics-api/.gitlab-ci.yml'
+  - local: 'services/links-metrics-collector/.gitlab-ci.yml'
+  - local: 'services/lumin-billing-report/.gitlab-ci.yml'
+  - local: 'services/notifier/.gitlab-ci.yml'
+  - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
+  - local: 'services/service-outage-monitor/.gitlab-ci.yml'
+  - local: 'services/sites-monitor/.gitlab-ci.yml'
+  - local: 'services/t7-bridge/.gitlab-ci.yml'
+  - local: 'services/tnba-feedback/.gitlab-ci.yml'
+  - local: 'services/tnba-monitor/.gitlab-ci.yml'
+  - local: 'services/ticket-collector/.gitlab-ci.yml'
+  - local: 'services/ticket-statistics/.gitlab-ci.yml'
+  - local: 'services/velocloud-bridge/.gitlab-ci.yml'
 
 semantic-release:
   stage: release
@@ -124,10 +125,10 @@ semantic-release:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - "*/src/application/**/*"
-        - "*/src/config/**/*"
-        - "*/src/app.py"
-        - "*/Dockerfile"
-        - "*/requirements.txt"
+        - "services/*/src/application/**/*"
+        - "services/*/src/config/**/*"
+        - "services/*/src/app.py"
+        - "services/*/Dockerfile"
+        - "services/*/requirements.txt"
     - if: $CI_COMMIT_TAG
       when: never

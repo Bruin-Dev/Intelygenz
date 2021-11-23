@@ -65,13 +65,13 @@ It's important to have the .gitlab-ci.yaml files correctly defined to enable pip
   Here we need to specify to gitlab-ci that we define other jobs in a different directories (the .gitlab-ci.yml of our new repo). So locate the root gitlab file and add a new line with the path of the new micro jobs (do it respecting the alphabetical order)
   ````
   ...
-    - local: 'links-metrics-api/.gitlab-ci.yml'
-    - local: 'links-metrics-collector/.gitlab-ci.yml'
-    - local: 'lumin-billing-report/.gitlab-ci.yml'
-    - local: 'new-bridge/.gitlab-ci.yml'    <─────────────── here!
-    - local: 'notifier/.gitlab-ci.yml'
-    - local: 'service-affecting-monitor/.gitlab-ci.yml'
-    - local: 'service-outage-monitor/.gitlab-ci.yml'
+    - local: 'services/links-metrics-api/.gitlab-ci.yml'
+    - local: 'services/links-metrics-collector/.gitlab-ci.yml'
+    - local: 'services/lumin-billing-report/.gitlab-ci.yml'
+    - local: 'services/new-bridge/.gitlab-ci.yml'    <─────────────── here!
+    - local: 'services/notifier/.gitlab-ci.yml'
+    - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
+    - local: 'services/service-outage-monitor/.gitlab-ci.yml'
   ...
   ````
   Now in the same file, let's define the "desired_tast" variable for this new micro (do it respecting the alphabetical order):
@@ -104,13 +104,13 @@ We need to edit two files, one in the new micro path and other in the root of th
   add to the semantic-release global config our new path to analize version changes (do it respecting the alphabetical order):
   ````
   ...
-      "./links-metrics-api",
-      "./links-metrics-collector",
-      "./lumin-billing-report",
-      "./new-bridge",    <─────────────── here!
-      "./notifier",
-      "./service-affecting-monitor",
-      "./service-outage-monitor",
+      "./services/links-metrics-api",
+      "./services/links-metrics-collector",
+      "./services/lumin-billing-report",
+      "./services/new-bridge",    <─────────────── here!
+      "./services/notifier",
+      "./services/service-affecting-monitor",
+      "./services/service-outage-monitor",
   ...
   ````
 
