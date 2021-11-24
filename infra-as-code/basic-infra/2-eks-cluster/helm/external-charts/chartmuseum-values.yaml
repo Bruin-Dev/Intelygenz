@@ -1,5 +1,6 @@
 env:
   open:
+    ALLOW_OVERWRITE: true
     STORAGE: amazon
     STORAGE_AMAZON_PREFIX:
     AWS_SDK_LOAD_CONFIG: true
