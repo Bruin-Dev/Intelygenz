@@ -74,6 +74,23 @@ contact_by_host_and_client_id = {
             },
         ],
     },
+    "metvco02.mettel.net": {
+        # Signet
+        86937: [
+            {
+                "email": 'itstslevel2_3@signetjewelers.com',
+                "phone": '8008778825',
+                "name": "Itsts Level2_3",
+                "type": "ticket",
+            },
+            {
+                "email": 'itstslevel2_3@signetjewelers.com',
+                "phone": '8008778825',
+                "name": "Itsts Level2_3",
+                "type": "site",
+            }
+        ],
+    },
     "metvco03.mettel.net": {
         # Confie Seguros
         87671: [
