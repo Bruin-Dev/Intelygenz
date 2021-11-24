@@ -384,43 +384,6 @@ class BruinRepository:
 
         return response
 
-    async def get_site_details(self, client_id, site_id):
-        err_msg = None
-
-        request = {
-            'request_id': uuid(),
-            'body': {
-                'client_id': client_id,
-                'site_id': site_id,
-            },
-        }
-
-        try:
-            self._logger.info(f'Getting site details of site_id {site_id} and client_id {client_id}...')
-            response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
-        except Exception as e:
-            err_msg = f'An error occurred while getting site details of site_id {site_id} ' \
-                      f'and client_id {client_id}... -> {e}'
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status in range(200, 300):
-                self._logger.info(f'Got site details of site_id {site_id} and client_id {client_id} successfully!')
-            else:
-                err_msg = (
-                    f'Error while getting site details of site_id {site_id} and client_id {client_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
-                    f'Error {response_status} - {response_body}'
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
-        return response
-
     @staticmethod
     def get_contact_info_for_site(site_details):
         site_detail_name = site_details["primaryContactName"]
