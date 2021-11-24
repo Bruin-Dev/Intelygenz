@@ -21,6 +21,7 @@ NATS_CONFIG = {
 
 velo_filter = {
                 "mettel.velocloud.net": [],
+                "metvco02.mettel.net": [],
                 "metvco03.mettel.net": [],
                 "metvco04.mettel.net": []
 }
@@ -36,7 +37,7 @@ MONITOR_CONFIG = {
         AffectingTroubles.LATENCY: 140,                    # milliseconds
         AffectingTroubles.PACKET_LOSS: 8,                  # packets
         AffectingTroubles.JITTER: 50,                      # milliseconds
-        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,  # percentage of total bandwidth
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 80,  # percentage of total bandwidth
     },
     'monitoring_minutes_per_trouble': {
         AffectingTroubles.LATENCY: 30,

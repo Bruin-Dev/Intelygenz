@@ -16,6 +16,7 @@ NATS_CONFIG = {
 }
 velo_filter = {
                 "mettel.velocloud.net": [],
+                "metvco02.mettel.net": [],
                 "metvco03.mettel.net": [],
                 "metvco04.mettel.net": []
 }
