@@ -209,10 +209,10 @@ function ticket_collector_variables() {
 function velocloud_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # velocloud-bridge environment variables for ephemeral environments
-    export VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
+    export VELOCLOUD_BRIDGE__VELOCLOUD_CREDENTIALS="${DEV__VELOCLOUD_BRIDGE__VELOCLOUD_CREDENTIALS}"
   else
     # velocloud-bridge environment variables for production environment
-    export VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
+    export VELOCLOUD_BRIDGE__VELOCLOUD_CREDENTIALS="${PRO__VELOCLOUD_BRIDGE__VELOCLOUD_CREDENTIALS}"
   fi
 }
 

@@ -1130,7 +1130,7 @@ velocloud-bridge:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "velocloud-bridge-${VELOCLOUD_BRIDGE_BUILD_NUMBER}"
     # -- Velocloud credentials
-    velocloud_credentials: ${VELOCLOUD_CREDENTIALS}
+    velocloud_credentials: ${VELOCLOUD_BRIDGE__VELOCLOUD_CREDENTIALS}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-bridge
     pullPolicy: Always

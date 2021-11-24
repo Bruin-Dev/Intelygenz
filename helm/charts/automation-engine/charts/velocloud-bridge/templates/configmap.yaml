@@ -15,3 +15,4 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
