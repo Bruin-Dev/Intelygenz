@@ -104,7 +104,7 @@ class RefreshCache:
         try:
             self._scheduler.add_job(self._refresh_cache, 'interval',
                                     minutes=self._config.REFRESH_CONFIG['refresh_check_interval_minutes'],
-                                    next_run_time=datetime.now(timezone(self._config.REFRESH_CONFIG['timezone'])),
+                                    next_run_time=datetime.now(timezone(self._config.TIMEZONE)),
                                     replace_existing=False, id='_refresh_cache')
         except ConflictingIdError:
             self._logger.info(f'There is a job scheduled for refreshing the cache already. No new job '

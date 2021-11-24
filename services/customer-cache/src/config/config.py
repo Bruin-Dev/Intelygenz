@@ -1,6 +1,7 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
+import json
 import os
 import logging
 import sys
@@ -16,47 +17,28 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-SCHEDULER_CONFIG = {
-    'timezone': 'US/Eastern'
-}
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+TIMEZONE = os.environ['TIMEZONE']
 
-VELOCLOUD_HOST = [
-    "mettel.velocloud.net",
-    "metvco02.mettel.net",
-    "metvco03.mettel.net",
-    "metvco04.mettel.net",
-]
+CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
+
+VELOCLOUD_HOST = json.loads(os.environ['VELOCLOUD_HOSTS'])
 
 REFRESH_CONFIG = {
-    'timezone': 'US/Eastern',
-    'email_recipient': 'mettel.alerts@intelygenz.com',
+    'email_recipient': os.environ['DUPLICATE_INVENTORIES_RECIPIENT'],
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,
-    'refresh_map_minutes': 60 * 4,
-    'refresh_check_interval_minutes': 5,
-    'blacklisted_edges': [
-        # Federal edge that is inside a non-federal Velocloud instance
-        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
-    ],
-    'blacklisted_client_ids': [83109, 89267, 87671, 88377, 87915, 88854, 87903, 88012, 89242, 89044, 88912, 89180,
-                               89317, 88748, 89401, 88792, 87916, 89309, 89544, 89268, 88434, 88873, 89332, 89416,
-                               89235, 88550, 89160, 89162, 88345, 88803, 89336, 83763, 89024, 88883, 88848, 89322,
-                               89261, 89191, 89190, 88286, 88272, 88509, 88859, 88110, 88926, 89164, 89233, 88417,
-                               88270, 88698, 89134, 88839, 87957, 89279, 87978, 89342, 88987, 89441, 88989, 89195,
-                               82368, 89353, 89305, 89548, 89080, 88271, 89023, 87955, 88715, 89139, 89077, 89341,
-                               88015, 89521, 89665, 88293, 89321, 89501, 89072, 89107, 88187, 89556, 89323, 88416,
-                               89326, 79939],
+    'refresh_map_minutes': int(os.environ['REFRESH_JOB_INTERVAL']) // 60,
+    'refresh_check_interval_minutes': int(os.environ['REFRESH_CHECK_INTERVAL']) // 60,
+    'blacklisted_edges': json.loads(os.environ['BLACKLISTED_EDGES']),
+    'blacklisted_client_ids': json.loads(os.environ['BLACKLISTED_CLIENTS_WITH_PENDING_STATUS']),
     'semaphore': 3,
     'velo_servers': [
-        {"mettel.velocloud.net": []},
-        {"metvco02.mettel.net": []},
-        {"metvco03.mettel.net": []},
-        {"metvco04.mettel.net": []},
+        {host: []}
+        for host in json.loads(os.environ['VELOCLOUD_HOSTS'])
     ],
-    'environment': ENVIRONMENT_NAME,
-    'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
+    'monitorable_management_statuses': json.loads(os.environ['WHITELISTED_MANAGEMENT_STATUSES']),
     "attempts_threshold": 10,
 }
 
@@ -66,10 +48,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
-        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-t7-bridge'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-customer-cache'),
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

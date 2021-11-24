@@ -33,7 +33,7 @@ class Container:
         self._redis_customer_cache_client.ping()
 
         # SCHEDULER
-        self._scheduler = AsyncIOScheduler(timezone=config.SCHEDULER_CONFIG['timezone'])
+        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
         # HEALTHCHECK ENDPOINT
         self._server = QuartServer(config)

@@ -16,9 +16,9 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-SCHEDULER_CONFIG = {
-    'timezone': 'US/Eastern'
-}
+TIMEZONE = 'US/Eastern'
+
+CURRENT_ENVIRONMENT = 'dev'
 ENVIRONMENT_NAME = 'dev'
 
 VELOCLOUD_HOST = [
@@ -29,7 +29,6 @@ VELOCLOUD_HOST = [
 ]
 
 REFRESH_CONFIG = {
-    'timezone': 'US/Eastern',
     'email_recipient': 'mettel.team@intelygenz.com',
     'multiplier': 1,
     'min': 1,
@@ -55,7 +54,6 @@ REFRESH_CONFIG = {
         {"metvco03.mettel.net": []},
         {"metvco04.mettel.net": []},
     ],
-    'environment': ENVIRONMENT_NAME,
     'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
     "attempts_threshold": 10,
 }
