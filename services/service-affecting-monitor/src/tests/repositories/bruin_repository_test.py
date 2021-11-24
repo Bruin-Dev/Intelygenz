@@ -784,134 +784,59 @@ class TestBruinRepository:
         bruin_repository._logger.error.assert_called_once()
         assert result == bruin_500_response
 
-    @pytest.mark.asyncio
-    async def get_contact_info_test(self, bruin_repository, make_site_details, make_contact_info, make_rpc_response):
-        site_id = 12345
-        client_id = 67890
-
+    def get_contact_info_for_site__all_fields_ok_test(self, bruin_repository, make_site_details, make_contact_info):
         site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
         site_detail_name = "Help Desk"
-
-        default_contact = make_contact_info(phone=site_detail_phone)
-        contact_info_by_client_id = {client_id: default_contact}
-
-        default_contact_info_by_client = contact_info_by_client_id
 
         site_details = make_site_details(contact_name=site_detail_name,
                                          contact_phone=site_detail_phone,
                                          contact_email=site_detail_email)
-        response_site_details = make_rpc_response(body=site_details, status=200)
 
-        contact_info_expected = make_contact_info(email=site_detail_email,
-                                                  phone=site_detail_phone,
-                                                  name=site_detail_name)
+        contact_info = bruin_repository.get_contact_info_for_site(site_details)
 
-        bruin_repository.get_site_details = CoroutineMock(return_value=response_site_details)
+        expected = make_contact_info(email=site_detail_email, phone=site_detail_phone, name=site_detail_name)
+        assert contact_info == expected
 
-        contact_info = await bruin_repository.get_contact_info(client_id, site_id, default_contact_info_by_client)
-
-        bruin_repository.get_site_details.assert_awaited_once_with(client_id, site_id)
-        assert contact_info == contact_info_expected
-
-    @pytest.mark.asyncio
-    async def get_contact_info_failed_rpc_test(self, bruin_repository,  make_contact_info, bruin_500_response):
-        site_id = 12345
-        client_id = 67890
-
-        site_detail_email = "test@email.com"
-        site_detail_phone = "510-111-111"
-        site_detail_name = "Help Desk"
-
-        default_contact = make_contact_info(phone=site_detail_phone)
-        contact_info_by_client_id = {client_id: default_contact}
-
-        bruin_repository.get_site_details = CoroutineMock(return_value=bruin_500_response)
-
-        contact_info = await bruin_repository.get_contact_info(client_id, site_id, contact_info_by_client_id)
-
-        bruin_repository.get_site_details.assert_awaited_once_with(client_id, site_id)
-        assert contact_info == default_contact
-
-    @pytest.mark.asyncio
-    async def get_contact_info_no_phone_test(self, bruin_repository, make_site_details, make_contact_info,
-                                             make_rpc_response):
-        site_id = 12345
-        client_id = 67890
-
+    def get_contact_info_for_site__no_phone_test(self, bruin_repository, make_site_details, make_contact_info):
         site_detail_email = "test@email.com"
         site_detail_phone = None
         site_detail_name = "Help Desk"
 
-        default_contact = make_contact_info()
-        contact_info_by_client_id = {client_id: default_contact}
-
-        default_contact_info_by_client = contact_info_by_client_id
-
         site_details = make_site_details(contact_name=site_detail_name,
                                          contact_phone=site_detail_phone,
                                          contact_email=site_detail_email)
-        response_site_details = make_rpc_response(body=site_details, status=200)
 
-        contact_info_expected = make_contact_info(email=site_detail_email,
-                                                  name=site_detail_name)
+        contact_info = bruin_repository.get_contact_info_for_site(site_details)
 
-        bruin_repository.get_site_details = CoroutineMock(return_value=response_site_details)
+        expected = make_contact_info(email=site_detail_email, name=site_detail_name)
+        assert contact_info == expected
 
-        contact_info = await bruin_repository.get_contact_info(client_id, site_id, default_contact_info_by_client)
-
-        bruin_repository.get_site_details.assert_awaited_once_with(client_id, site_id)
-        assert contact_info == contact_info_expected
-
-    @pytest.mark.asyncio
-    async def get_contact_info_no_email_test(self, bruin_repository, make_site_details, make_contact_info,
-                                             make_rpc_response):
-        site_id = 12345
-        client_id = 67890
-
+    def get_contact_info_for_site__no_email_test(self, bruin_repository, make_site_details):
         site_detail_email = None
         site_detail_phone = "510-111-111"
         site_detail_name = "Help Desk"
 
-        default_contact = make_contact_info(phone=site_detail_phone)
-        contact_info_by_client_id = {client_id: default_contact}
-
         site_details = make_site_details(contact_name=site_detail_name,
                                          contact_phone=site_detail_phone,
                                          contact_email=site_detail_email)
-        response_site_details = make_rpc_response(body=site_details, status=200)
 
-        bruin_repository.get_site_details = CoroutineMock(return_value=response_site_details)
+        contact_info = bruin_repository.get_contact_info_for_site(site_details)
 
-        contact_info = await bruin_repository.get_contact_info(client_id, site_id, contact_info_by_client_id)
+        assert contact_info is None
 
-        bruin_repository.get_site_details.assert_awaited_once_with(client_id, site_id)
-        assert contact_info == default_contact
-
-    @pytest.mark.asyncio
-    async def get_contact_info_no_name_test(self, bruin_repository, make_site_details, make_contact_info,
-                                            make_rpc_response):
-        site_id = 12345
-        client_id = 67890
-
-        site_detail_email = "test@gmail.com"
+    def get_contact_info_for_site__no_name_test(self, bruin_repository, make_site_details):
+        site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
         site_detail_name = None
 
-        default_contact = make_contact_info(phone=site_detail_phone)
-        contact_info_by_client_id = {client_id: default_contact}
-
         site_details = make_site_details(contact_name=site_detail_name,
                                          contact_phone=site_detail_phone,
                                          contact_email=site_detail_email)
-        response_site_details = make_rpc_response(body=site_details, status=200)
 
-        bruin_repository.get_site_details = CoroutineMock(return_value=response_site_details)
+        contact_info = bruin_repository.get_contact_info_for_site(site_details)
 
-        contact_info = await bruin_repository.get_contact_info(client_id, site_id, contact_info_by_client_id)
-
-        bruin_repository.get_site_details.assert_awaited_once_with(client_id, site_id)
-        assert contact_info == default_contact
+        assert contact_info is None
 
     @pytest.mark.asyncio
     async def get_affecting_tickets__no_service_number_specified_test(self, bruin_repository):

@@ -42,14 +42,15 @@ def make_list_of_links_configurations():
 
 
 @pytest.fixture(scope='session')
-def make_cached_edge(make_edge_full_id, make_bruin_client_info):
+def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_details):
     def _inner(*, full_id: dict = None, name: str = '', last_contact: str = '',
                logical_ids: List[dict] = None, serial_number: str = '', bruin_client_info: dict = None,
-               links_configuration: List[dict] = None):
+               site_details: dict = None, links_configuration: List[dict] = None):
         full_id = full_id or make_edge_full_id()
         last_contact = last_contact or velocloudize_date(datetime.now())
         logical_ids = logical_ids or []
         bruin_client_info = bruin_client_info or make_bruin_client_info()
+        site_details = site_details or make_site_details()
         links_configuration = links_configuration or []
 
         return {
@@ -59,6 +60,7 @@ def make_cached_edge(make_edge_full_id, make_bruin_client_info):
             'logical_ids': logical_ids,
             'serial_number': serial_number,
             'bruin_client_info': bruin_client_info,
+            'site_details': site_details,
             'links_configuration': links_configuration,
         }
 

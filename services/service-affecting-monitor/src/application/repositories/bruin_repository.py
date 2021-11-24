@@ -421,30 +421,31 @@ class BruinRepository:
 
         return response
 
-    async def get_contact_info(self, client_id, site_id, default_contact_info):
-        contact_info = default_contact_info.get(client_id)
-        site_details_response = await self.get_site_details(client_id, site_id)
-        if site_details_response['status'] in range(200, 300):
-            site_detail_name = site_details_response["body"]["primaryContactName"]
-            site_detail_phone = site_details_response["body"]["primaryContactPhone"]
-            site_detail_email = site_details_response["body"]["primaryContactEmail"]
-            if site_detail_name is not None and site_detail_email is not None:
-                contact_info = [
-                    {
-                        "email": site_detail_email,
-                        "name": site_detail_name,
-                        "type": "ticket",
-                    },
-                    {
-                        "email": site_detail_email,
-                        "name": site_detail_name,
-                        "type": "site",
-                    }
-                ]
+    @staticmethod
+    def get_contact_info_for_site(site_details):
+        site_detail_name = site_details["primaryContactName"]
+        site_detail_phone = site_details["primaryContactPhone"]
+        site_detail_email = site_details["primaryContactEmail"]
 
-                if site_detail_phone is not None:
-                    contact_info[0]["phone"] = site_detail_phone
-                    contact_info[1]["phone"] = site_detail_phone
+        if site_detail_name is None or site_detail_email is None:
+            return None
+
+        contact_info = [
+            {
+                "email": site_detail_email,
+                "name": site_detail_name,
+                "type": "ticket",
+            },
+            {
+                "email": site_detail_email,
+                "name": site_detail_name,
+                "type": "site",
+            }
+        ]
+
+        if site_detail_phone is not None:
+            contact_info[0]["phone"] = site_detail_phone
+            contact_info[1]["phone"] = site_detail_phone
 
         return contact_info
 

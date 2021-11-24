@@ -215,18 +215,16 @@ class ServiceAffectingMonitor:
             if not cached_edge:
                 self._logger.info(f'No cached info was found for edge {serial_number}. Skipping...')
                 continue
-            site_id = cached_edge['bruin_client_info']['site_id']
+
             client_id = cached_edge['bruin_client_info']['client_id']
-            contact_info = await self._bruin_repository.get_contact_info(client_id,
-                                                                         site_id,
-                                                                         self._default_contact_info_by_client)
-            if contact_info is None:
-                self._logger.info(f'No contact info found for edge {serial_number}. Skipping...')
-                continue
+            site_details = cached_edge['site_details']
+
+            default_contacts = self._default_contact_info_by_client.get(client_id)
+            contacts = self._bruin_repository.get_contact_info_for_site(site_details) or default_contacts
 
             result.append({
                 'cached_info': cached_edge,
-                'contact_info': contact_info,
+                'contact_info': contacts,
                 **elem,
             })
 
