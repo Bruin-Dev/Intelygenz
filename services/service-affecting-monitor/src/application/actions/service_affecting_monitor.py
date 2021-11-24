@@ -260,7 +260,9 @@ class ServiceAffectingMonitor:
 
             self._logger.info(f'Starting autoresolve for edge {serial_number}...')
 
-            check_bandwidth_troubles = self._is_rep_services_client_id(client_id)
+            is_rep_services = self._is_rep_services_client_id(client_id)
+            is_signet = self._is_signet_client_id(client_id)
+            check_bandwidth_troubles = is_rep_services or is_signet
             metrics_lookup_interval = self._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
             all_metrics_within_thresholds = self._trouble_repository.are_all_metrics_within_thresholds(
                 edge,
@@ -839,3 +841,7 @@ class ServiceAffectingMonitor:
     @staticmethod
     def _is_rep_services_client_id(client_id: int):
         return client_id == 83109 or client_id == 85940
+
+    @staticmethod
+    def _is_signet_client_id(client_id: int):
+        return client_id == 86937
