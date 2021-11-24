@@ -16,3 +16,6 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
+  REFRESH_JOB_INTERVAL: {{ (int64 .Values.config.refresh_job_interval) | quote }}
+  REFRESH_CHECK_INTERVAL: {{ (int64 .Values.config.refresh_check_interval) | quote }}

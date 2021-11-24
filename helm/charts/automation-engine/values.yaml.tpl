@@ -113,6 +113,8 @@ global:
   papertrail_host: ${PAPERTRAIL_HOST}
   # -- Papertrail port to which the logs will be sent
   papertrail_port: ${PAPERTRAIL_PORT}
+  # -- Timezone used for periodic jobs, timestamps...
+  timezone: ${TIMEZONE}
   # -- Contact email address
   last_contact_recipient: ${LAST_CONTACT_RECIPIENT}
   # -- Email account password
@@ -181,6 +183,20 @@ customer-cache:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "customer-cache-${CUSTOMER_CACHE_BUILD_NUMBER}"
+    # -- VeloCloud hosts whose edges will be stored to the cache
+    velocloud_hosts: ${CUSTOMER_CACHE__VELOCLOUD_HOSTS}
+    # -- E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories
+    duplicate_inventories_recipient: ${CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT}
+    # -- Defines how often the cache is refreshed
+    refresh_job_interval: ${CUSTOMER_CACHE__REFRESH_JOB_INTERVAL}
+    # -- Defines how often the next refresh flag is checked to decide if it's time to refresh the cache or not
+    refresh_check_interval: ${CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL}
+    # -- VeloCloud edges that should be ignored in the caching process
+    blacklisted_edges: ${CUSTOMER_CACHE__BLACKLISTED_EDGES}
+    # -- Client IDs whose edges have Pending management status that should be ignored in the caching process
+    blacklisted_clients_with_pending_status: ${CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS}
+    # -- Management statuses that should be considered in the caching process
+    whitelisted_management_statuses: ${CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

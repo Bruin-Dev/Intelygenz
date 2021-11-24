@@ -52,3 +52,10 @@ Configmap name of customer-cache
 {{- define "customer-cache.configmapName" -}}
 {{ include "customer-cache.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of customer-cache
+*/}}
+{{- define "customer-cache.secretName" -}}
+{{ include "customer-cache.fullname" . }}-secret
+{{- end }}

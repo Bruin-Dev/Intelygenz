@@ -114,6 +114,8 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
+  # -- Timezone used for periodic jobs, timestamps...
+  timezone: ""
   # -- Contact email address
   last_contact_recipient: ""
   # -- Email account password
@@ -185,6 +187,20 @@ customer-cache:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
+    # -- VeloCloud hosts whose edges will be stored to the cache
+    velocloud_hosts: []
+    # -- E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories
+    duplicate_inventories_recipient: ""
+    # -- Defines how often the cache is refreshed
+    refresh_job_interval: 0
+    # -- Defines how often the next refresh flag is checked to decide if it's time to refresh the cache or not
+    refresh_check_interval: 0
+    # -- VeloCloud edges that should be ignored in the caching process
+    blacklisted_edges: []
+    # -- Client IDs whose edges have Pending management status that should be ignored in the caching process
+    blacklisted_clients_with_pending_status: []
+    # -- Management statuses that should be considered in the caching process
+    whitelisted_management_statuses: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

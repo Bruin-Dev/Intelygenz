@@ -1,6 +1,8 @@
 #!/bin/bash
 
 function common_variables_by_environment() {
+  export TIMEZONE=${TIMEZONE}
+
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
@@ -45,6 +47,28 @@ function bruin_bridge_variables() {
     export BRUIN_BRIDGE__BRUIN_BASE_URL="${PRO__BRUIN_BRIDGE__BASE_URL}"
     export BRUIN_BRIDGE__BRUIN_CLIENT_ID="${PRO__BRUIN_BRIDGE__CLIENT_ID}"
     export BRUIN_BRIDGE__BRUIN_CLIENT_SECRET="${PRO__BRUIN_BRIDGE__CLIENT_SECRET}"
+  fi
+}
+
+function customer_cache_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # customer-cache environment variables for ephemeral environments
+    export CUSTOMER_CACHE__VELOCLOUD_HOSTS="$(echo "${DEV__CUSTOMER_CACHE__VELOCLOUD_HOSTS}" | jq . -c)"
+    export CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT="${DEV__CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT}"
+    export CUSTOMER_CACHE__REFRESH_JOB_INTERVAL="${DEV__CUSTOMER_CACHE__REFRESH_JOB_INTERVAL}"
+    export CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL="${DEV__CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL}"
+    export CUSTOMER_CACHE__BLACKLISTED_EDGES="$(echo "${DEV__CUSTOMER_CACHE__BLACKLISTED_EDGES}" | jq . -c)"
+    export CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS="$(echo "${DEV__CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS}" | jq . -c)"
+    export CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES="$(echo "${DEV__CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}" | jq . -c)"
+  else
+    # customer-cache environment variables for production environment
+    export CUSTOMER_CACHE__VELOCLOUD_HOSTS="$(echo "${PRO__CUSTOMER_CACHE__VELOCLOUD_HOSTS}" | jq . -c)"
+    export CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT="${PRO__CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT}"
+    export CUSTOMER_CACHE__REFRESH_JOB_INTERVAL="${PRO__CUSTOMER_CACHE__REFRESH_JOB_INTERVAL}"
+    export CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL="${PRO__CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL}"
+    export CUSTOMER_CACHE__BLACKLISTED_EDGES="$(echo "${PRO__CUSTOMER_CACHE__BLACKLISTED_EDGES}" | jq . -c)"
+    export CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS="$(echo "${PRO__CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS}" | jq . -c)"
+    export CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES="$(echo "${PRO__CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}" | jq . -c)"
   fi
 }
 
@@ -237,6 +261,7 @@ function environments_assign() {
   common_variables_by_environment
   # assign specific environment variables for each subchart
   bruin_bridge_variables
+  customer_cache_variables
   digi_bridge_variables
   digi_reboot_report_variables
   dri_bridge_variables
