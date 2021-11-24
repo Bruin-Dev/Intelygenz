@@ -221,7 +221,9 @@ class RefreshCache:
                     self._logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
                     self._invalid_edges[host].append(edge_identifier)
                     return
-                client_id = client_info_response_body[0].get("client_id")
+
+                bruin_client_info = client_info_response_body[0]
+                client_id = bruin_client_info.get("client_id")
 
                 management_status_response = await self._bruin_repository.get_management_status(
                     client_id, serial_number
@@ -244,6 +246,13 @@ class RefreshCache:
                         return
                     self._logger.info(f'Management status for {serial_number} seems active')
 
+                site_id = bruin_client_info['site_id']
+                site_details_response = await self._bruin_repository.get_site_details(client_id, site_id)
+                if site_details_response['status'] not in range(200, 300):
+                    return
+
+                side_details: dict = site_details_response['body']
+
                 return {
                     'edge': edge_with_serial['edge'],
                     'edge_name': edge_with_serial['edge_name'],
@@ -251,7 +260,8 @@ class RefreshCache:
                     'logical_ids': edge_with_serial['logical_ids'],
                     'serial_number': serial_number,
                     'ha_serial_number': edge_with_serial['ha_serial_number'],
-                    'bruin_client_info': client_info_response_body[0],
+                    'bruin_client_info': bruin_client_info,
+                    'site_details': side_details,
                     'links_configuration': edge_with_serial['links_configuration']
                 }
 

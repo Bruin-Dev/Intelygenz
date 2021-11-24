@@ -87,5 +87,41 @@ class BruinRepository:
 
         return response
 
+    async def get_site_details(self, client_id: int, site_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'site_id': site_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting site details of site {site_id} and client {client_id}...')
+            response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
+        except Exception as e:
+            err_msg = f'An error occurred while getting site details of site {site_id} ' \
+                      f'and client {client_id}... -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Got site details of site {site_id} and client {client_id} successfully!')
+            else:
+                err_msg = (
+                    f'Error while getting site details of site {site_id} and client {client_id} in '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     def is_management_status_active(self, management_status) -> bool:
         return management_status in self._config.REFRESH_CONFIG["monitorable_management_statuses"]

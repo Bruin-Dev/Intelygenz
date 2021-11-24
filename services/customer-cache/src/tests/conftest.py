@@ -120,7 +120,13 @@ def instance_cache_edges():
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC01",
             'ha_serial_number': "VC011",
-            'bruin_client_info': {'client_id': 'some client info'}
+            'bruin_client_info': {'client_id': 30000, 'client_name': 'MetTel', 'site_id': 12345},
+            'site_details': {
+                # Some fields omitted for simplicity
+                "primaryContactName": "Test",
+                "primaryContactPhone": "123-456-7890",
+                "primaryContactEmail": "test@mail.com"
+            }
         },
         {
             'edge': {'host': 'some host', 'enterprise_id': 1, 'edge_id': 321},
@@ -129,7 +135,13 @@ def instance_cache_edges():
             'logical_ids': ['list of logical ids'],
             'serial_number': "VC02",
             'ha_serial_number': "VC022",
-            'bruin_client_info': {'client_id': 'some client info'}
+            'bruin_client_info': {'client_id': 30000, 'client_name': 'MetTel', 'site_id': 12345},
+            'site_details': {
+                # Some fields omitted for simplicity
+                "primaryContactName": "Test",
+                "primaryContactPhone": "123-456-7890",
+                "primaryContactEmail": "test@mail.com"
+            }
         }
     ]
 

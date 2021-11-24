@@ -841,14 +841,25 @@ class TestRefreshCache:
     @pytest.mark.asyncio
     async def filter_edge_list_ok_test(self, instance_refresh_cache,
                                        instance_cache_edges, instance_edges_refresh_cache):
+        client_info = {
+            'client_id': 30000,
+            'client_name': 'MetTel',
+            'site_id': 12345,
+        }
+        site_details = {
+            # Some fields omitted for simplicity
+            "primaryContactName": "Test",
+            "primaryContactPhone": "123-456-7890",
+            "primaryContactEmail": "test@mail.com"
+        }
+
         last_contact = str(datetime.now())
-        bruin_client_info = {'client_id': 'some client info'}
         instance_edges_refresh_cache[0]['last_contact'] = last_contact
         instance_edges_refresh_cache[0]['serial_number'] = 'VC01'
         instance_edges_refresh_cache[0]['ha_serial_number'] = 'VC011'
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
-        instance_edges_refresh_cache[0]['bruin_client_info'] = [bruin_client_info]
+        instance_edges_refresh_cache[0]['bruin_client_info'] = [client_info]
         instance_edges_refresh_cache[0]['edge_name'] = "Big Boss"
         links_configuration = [
             {
@@ -863,10 +874,12 @@ class TestRefreshCache:
         instance_cache_edges[0]['links_configuration'] = links_configuration
 
         instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={'body': [bruin_client_info, bruin_client_info], 'status': 200})
+            return_value={'body': [client_info, client_info], 'status': 200})
         instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
             return_value={'body': ['some management status'], 'status': 200})
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+        instance_refresh_cache._bruin_repository.get_site_details = CoroutineMock(
+            return_value={'body': site_details, 'status': 200})
 
         instance_refresh_cache._storage_repository.set_cache = Mock()
 
@@ -875,6 +888,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
         instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+        instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
 
         assert cache_return == instance_cache_edges[0]
         assert instance_refresh_cache._invalid_edges == {}
@@ -1018,6 +1032,35 @@ class TestRefreshCache:
                 EdgeIdentifier(**instance_edges_refresh_cache[0]['edge'])
             ]
         }
+
+    @pytest.mark.asyncio
+    async def filter_edge_list_site_details_status_non_2xx_test(self, instance_refresh_cache,
+                                                                instance_edges_refresh_cache):
+        last_contact = str(datetime.now())
+
+        instance_edges_refresh_cache[0]['last_contact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeLastContact'] = last_contact
+        instance_edges_refresh_cache[0]['edgeSerialNumber'] = 'VC01'
+        instance_edges_refresh_cache[0]['edgeHASerialNumber'] = 'VC02'
+
+        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+            return_value={'body': [{'client_id': 30000, 'client_name': 'MetTel', 'site_id': 12345}], 'status': 200})
+        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+            return_value={'body': 'some management status', 'status': 200})
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+        instance_refresh_cache._bruin_repository.get_site_details = CoroutineMock(return_value={
+            'body': 'Got internal error from Bruin', 'status': 500,
+        })
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+        instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
+
+        assert cache_return is None
+        assert instance_refresh_cache._invalid_edges == {}
 
     @pytest.mark.asyncio
     async def filter_edge_list_pending_blacklisted_client_id_test(self, instance_refresh_cache,
