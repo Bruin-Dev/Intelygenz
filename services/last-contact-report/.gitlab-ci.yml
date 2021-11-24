@@ -7,11 +7,11 @@ last-contact-report-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - last-contact-report/src/application/**/*
-        - last-contact-report/src/config/**/*
-        - last-contact-report/src/app.py
-        - last-contact-report/Dockerfile
-        - last-contact-report/requirements.txt
+        - services/last-contact-report/src/application/**/*
+        - services/last-contact-report/src/config/**/*
+        - services/last-contact-report/src/app.py
+        - services/last-contact-report/Dockerfile
+        - services/last-contact-report/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ last-contact-report-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - last-contact-report/src/application/**/*
-        - last-contact-report/src/config/**/*
-        - last-contact-report/src/app.py
-        - last-contact-report/Dockerfile
-        - last-contact-report/requirements.txt
+        - services/last-contact-report/src/application/**/*
+        - services/last-contact-report/src/config/**/*
+        - services/last-contact-report/src/app.py
+        - services/last-contact-report/Dockerfile
+        - services/last-contact-report/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["last-contact-report-linter"]
@@ -44,11 +44,11 @@ last-contact-report-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LAST_CONTACT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - last-contact-report/src/application/**/*
-        - last-contact-report/src/config/**/*
-        - last-contact-report/src/app.py
-        - last-contact-report/Dockerfile
-        - last-contact-report/requirements.txt
+        - services/last-contact-report/src/application/**/*
+        - services/last-contact-report/src/config/**/*
+        - services/last-contact-report/src/app.py
+        - services/last-contact-report/Dockerfile
+        - services/last-contact-report/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LAST_CONTACT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

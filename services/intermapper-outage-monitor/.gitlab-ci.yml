@@ -7,11 +7,11 @@ intermapper-outage-monitor-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - intermapper-outage-monitor/src/application/**/*
-        - intermapper-outage-monitor/src/config/**/*
-        - intermapper-outage-monitor/src/app.py
-        - intermapper-outage-monitor/Dockerfile
-        - intermapper-outage-monitor/requirements.txt
+        - services/intermapper-outage-monitor/src/application/**/*
+        - services/intermapper-outage-monitor/src/config/**/*
+        - services/intermapper-outage-monitor/src/app.py
+        - services/intermapper-outage-monitor/Dockerfile
+        - services/intermapper-outage-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ intermapper-outage-monitor-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - intermapper-outage-monitor/src/application/**/*
-        - intermapper-outage-monitor/src/config/**/*
-        - intermapper-outage-monitor/src/app.py
-        - intermapper-outage-monitor/Dockerfile
-        - intermapper-outage-monitor/requirements.txt
+        - services/intermapper-outage-monitor/src/application/**/*
+        - services/intermapper-outage-monitor/src/config/**/*
+        - services/intermapper-outage-monitor/src/app.py
+        - services/intermapper-outage-monitor/Dockerfile
+        - services/intermapper-outage-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["intermapper-outage-monitor-linter"]
@@ -44,11 +44,11 @@ intermapper-outage-monitor-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - intermapper-outage-monitor/src/application/**/*
-        - intermapper-outage-monitor/src/config/**/*
-        - intermapper-outage-monitor/src/app.py
-        - intermapper-outage-monitor/Dockerfile
-        - intermapper-outage-monitor/requirements.txt
+        - services/intermapper-outage-monitor/src/application/**/*
+        - services/intermapper-outage-monitor/src/config/**/*
+        - services/intermapper-outage-monitor/src/app.py
+        - services/intermapper-outage-monitor/Dockerfile
+        - services/intermapper-outage-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

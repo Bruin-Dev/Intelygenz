@@ -7,11 +7,11 @@ email-tagger-kre-bridge-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - email-tagger-kre-bridge/src/application/**/*
-        - email-tagger-kre-bridge/src/config/**/*
-        - email-tagger-kre-bridge/src/app.py
-        - email-tagger-kre-bridge/Dockerfile
-        - email-tagger-kre-bridge/requirements.txt
+        - services/email-tagger-kre-bridge/src/application/**/*
+        - services/email-tagger-kre-bridge/src/config/**/*
+        - services/email-tagger-kre-bridge/src/app.py
+        - services/email-tagger-kre-bridge/Dockerfile
+        - services/email-tagger-kre-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ email-tagger-kre-bridge-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - email-tagger-kre-bridge/src/application/**/*
-        - email-tagger-kre-bridge/src/config/**/*
-        - email-tagger-kre-bridge/src/app.py
-        - email-tagger-kre-bridge/Dockerfile
-        - email-tagger-kre-bridge/requirements.txt
+        - services/email-tagger-kre-bridge/src/application/**/*
+        - services/email-tagger-kre-bridge/src/config/**/*
+        - services/email-tagger-kre-bridge/src/app.py
+        - services/email-tagger-kre-bridge/Dockerfile
+        - services/email-tagger-kre-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["email-tagger-kre-bridge-linter"]
@@ -44,11 +44,11 @@ email-tagger-kre-bridge-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - email-tagger-kre-bridge/src/application/**/*
-        - email-tagger-kre-bridge/src/config/**/*
-        - email-tagger-kre-bridge/src/app.py
-        - email-tagger-kre-bridge/Dockerfile
-        - email-tagger-kre-bridge/requirements.txt
+        - services/email-tagger-kre-bridge/src/application/**/*
+        - services/email-tagger-kre-bridge/src/config/**/*
+        - services/email-tagger-kre-bridge/src/app.py
+        - services/email-tagger-kre-bridge/Dockerfile
+        - services/email-tagger-kre-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

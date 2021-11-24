@@ -7,11 +7,11 @@ sites-monitor-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - sites-monitor/src/application/**/*
-        - sites-monitor/src/config/**/*
-        - sites-monitor/src/app.py
-        - sites-monitor/Dockerfile
-        - sites-monitor/requirements.txt
+        - services/sites-monitor/src/application/**/*
+        - services/sites-monitor/src/config/**/*
+        - services/sites-monitor/src/app.py
+        - services/sites-monitor/Dockerfile
+        - services/sites-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ sites-monitor-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - sites-monitor/src/application/**/*
-        - sites-monitor/src/config/**/*
-        - sites-monitor/src/app.py
-        - sites-monitor/Dockerfile
-        - sites-monitor/requirements.txt
+        - services/sites-monitor/src/application/**/*
+        - services/sites-monitor/src/config/**/*
+        - services/sites-monitor/src/app.py
+        - services/sites-monitor/Dockerfile
+        - services/sites-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["sites-monitor-linter"]
@@ -44,11 +44,11 @@ sites-monitor-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SITES_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - sites-monitor/src/application/**/*
-        - sites-monitor/src/config/**/*
-        - sites-monitor/src/app.py
-        - sites-monitor/Dockerfile
-        - sites-monitor/requirements.txt
+        - services/sites-monitor/src/application/**/*
+        - services/sites-monitor/src/config/**/*
+        - services/sites-monitor/src/app.py
+        - services/sites-monitor/Dockerfile
+        - services/sites-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SITES_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

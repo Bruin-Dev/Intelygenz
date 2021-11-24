@@ -7,11 +7,11 @@ bruin-bridge-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - bruin-bridge/src/application/**/*
-        - bruin-bridge/src/config/**/*
-        - bruin-bridge/src/app.py
-        - bruin-bridge/Dockerfile
-        - bruin-bridge/requirements.txt
+        - services/bruin-bridge/src/application/**/*
+        - services/bruin-bridge/src/config/**/*
+        - services/bruin-bridge/src/app.py
+        - services/bruin-bridge/Dockerfile
+        - services/bruin-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ bruin-bridge-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - bruin-bridge/src/application/**/*
-        - bruin-bridge/src/config/**/*
-        - bruin-bridge/src/app.py
-        - bruin-bridge/Dockerfile
-        - bruin-bridge/requirements.txt
+        - services/bruin-bridge/src/application/**/*
+        - services/bruin-bridge/src/config/**/*
+        - services/bruin-bridge/src/app.py
+        - services/bruin-bridge/Dockerfile
+        - services/bruin-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_alpine
   needs: ["bruin-bridge-linter"]
@@ -44,11 +44,11 @@ bruin-bridge-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - bruin-bridge/src/application/**/*
-        - bruin-bridge/src/config/**/*
-        - bruin-bridge/src/app.py
-        - bruin-bridge/Dockerfile
-        - bruin-bridge/requirements.txt
+        - services/bruin-bridge/src/application/**/*
+        - services/bruin-bridge/src/config/**/*
+        - services/bruin-bridge/src/app.py
+        - services/bruin-bridge/Dockerfile
+        - services/bruin-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

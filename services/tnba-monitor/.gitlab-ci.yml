@@ -7,11 +7,11 @@ tnba-monitor-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - tnba-monitor/src/application/**/*
-        - tnba-monitor/src/config/**/*
-        - tnba-monitor/src/app.py
-        - tnba-monitor/Dockerfile
-        - tnba-monitor/requirements.txt
+        - services/tnba-monitor/src/application/**/*
+        - services/tnba-monitor/src/config/**/*
+        - services/tnba-monitor/src/app.py
+        - services/tnba-monitor/Dockerfile
+        - services/tnba-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ tnba-monitor-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - tnba-monitor/src/application/**/*
-        - tnba-monitor/src/config/**/*
-        - tnba-monitor/src/app.py
-        - tnba-monitor/Dockerfile
-        - tnba-monitor/requirements.txt
+        - services/tnba-monitor/src/application/**/*
+        - services/tnba-monitor/src/config/**/*
+        - services/tnba-monitor/src/app.py
+        - services/tnba-monitor/Dockerfile
+        - services/tnba-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["tnba-monitor-linter"]
@@ -44,11 +44,11 @@ tnba-monitor-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - tnba-monitor/src/application/**/*
-        - tnba-monitor/src/config/**/*
-        - tnba-monitor/src/app.py
-        - tnba-monitor/Dockerfile
-        - tnba-monitor/requirements.txt
+        - services/tnba-monitor/src/application/**/*
+        - services/tnba-monitor/src/config/**/*
+        - services/tnba-monitor/src/app.py
+        - services/tnba-monitor/Dockerfile
+        - services/tnba-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
