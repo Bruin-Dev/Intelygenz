@@ -48,6 +48,7 @@ helm-master:
     - export CURRENT_ENVIRONMENT=production
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production
+    - apk add git coreutils
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
