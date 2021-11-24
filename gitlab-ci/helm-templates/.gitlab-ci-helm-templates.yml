@@ -49,6 +49,7 @@
         export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
         helm cm-push ${HELM_CHART_DIR}/ --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" mettel
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+        helm repo update
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}    
       else
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
