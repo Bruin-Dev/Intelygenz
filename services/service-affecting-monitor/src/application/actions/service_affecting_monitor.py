@@ -411,6 +411,8 @@ class ServiceAffectingMonitor:
             self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
+            await asyncio.sleep(0)
+
             cached_info = elem['cached_info']
             link_status = elem['link_status']
             metrics = elem['link_metrics']
@@ -442,6 +444,8 @@ class ServiceAffectingMonitor:
             self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
+            await asyncio.sleep(0)
+
             cached_info = elem['cached_info']
             link_status = elem['link_status']
             metrics = elem['link_metrics']
@@ -473,6 +477,8 @@ class ServiceAffectingMonitor:
             self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
+            await asyncio.sleep(0)
+
             cached_info = elem['cached_info']
             link_status = elem['link_status']
             metrics = elem['link_metrics']
@@ -504,6 +510,8 @@ class ServiceAffectingMonitor:
             self._map_cached_edges_with_links_metrics_and_contact_info(links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
+            await asyncio.sleep(0)
+
             cached_info = elem['cached_info']
             link_status = elem['link_status']
             metrics = elem['link_metrics']
