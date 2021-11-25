@@ -6,6 +6,7 @@ import logging
 import json
 import boto3
 from botocore.exceptions import ClientError
+from distutils.version import StrictVersion
 from datetime import datetime, timedelta
 
 ## Email configuration
@@ -135,9 +136,16 @@ class EcrUtil:
                 )
             else:
                 cont = False
-        images_of_environment.sort(key=lambda image: image["imageTag"])
-        if images_of_environment:
-            return images_of_environment[-1]
+
+        # This sorts semantic-release versions properly
+        image_tags = [image['imageTag'] for image in images_of_environment]
+        image_tags.sort(key=StrictVersion)
+
+        if image_tags:
+            latest_tag = image_tags[-1]
+            latest_image = [image for image in images_of_environment if image['imageTag'] == latest_tag][0]
+
+            return latest_image
         else:
             logging.error(f"There is no image in production environment for the repository {ecr_repository}")
             return None
