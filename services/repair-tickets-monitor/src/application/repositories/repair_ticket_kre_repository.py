@@ -3,7 +3,7 @@ from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application.repositories import nats_error_response
-from typing import Any, Dict, List
+from typing import Dict, List
 
 
 class RepairTicketKreRepository:
@@ -103,7 +103,7 @@ class RepairTicketKreRepository:
                 "body": request_body}
             try:
                 response = await self._event_bus.rpc_request(
-                    "rta.prediction.request", request_msg, timeout=self._timeout
+                    "rta.save_outputs.request", request_msg, timeout=self._timeout
                 )
 
             except Exception as e:
