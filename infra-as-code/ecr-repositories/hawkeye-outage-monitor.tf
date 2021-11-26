@@ -7,8 +7,8 @@ resource "aws_ecr_repository" "hawkeye-outage-monitor-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-untagged-lifecycle" {
-  repository = aws_ecr_repository.hawkeye-customer-cache-repository.name
+resource "aws_ecr_lifecycle_policy" "hawkeye-outage-monitor-image-untagged-lifecycle" {
+  repository = aws_ecr_repository.hawkeye-outage-monitor-repository.name
 
   policy = <<EOF
 {
@@ -31,8 +31,8 @@ resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-untagged-lifec
 EOF
 }
 
-resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.hawkeye-customer-cache-repository.name
+resource "aws_ecr_lifecycle_policy" "hawkeye-outage-monitor-image-tagged-lifecycle" {
+  repository = aws_ecr_repository.hawkeye-outage-monitor-repository.name
 
   policy = <<EOF
 {
