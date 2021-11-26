@@ -84,6 +84,7 @@ class Container:
             self._logger,
             self._scheduler,
             config,
+            self._bruin_repository,
             self._new_tagged_emails_repository,
             self._repair_ticket_repository,
         )
