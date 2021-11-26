@@ -21,6 +21,10 @@
       -f services/${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+    - >
+      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then 
+        python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o
+      fi
   after_script:
     - source ci-utils/environments/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}

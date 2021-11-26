@@ -6,3 +6,51 @@ resource "aws_ecr_repository" "cts-bridge-repository" {
     Module        = "cts-bridge"
   }
 }
+
+resource "aws_ecr_lifecycle_policy" "cts-bridge-image-untagged-lifecycle" {
+  repository = aws_ecr_repository.cts-bridge-repository.name
+
+  policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Expire images older than 14 days",
+            "selection": {
+                "tagStatus": "untagged",
+                "countType": "sinceImagePushed",
+                "countUnit": "days",
+                "countNumber": 14
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_ecr_lifecycle_policy" "cts-bridge-image-tagged-lifecycle" {
+  repository = aws_ecr_repository.cts-bridge-repository.name
+
+  policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Keep last 10 images",
+            "selection": {
+                "tagStatus": "tagged",
+                "tagPrefixList": ["v"],
+                "countType": "imageCountMoreThan",
+                "countNumber": 10
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
+}

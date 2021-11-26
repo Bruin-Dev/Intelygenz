@@ -6,3 +6,51 @@ resource "aws_ecr_repository" "links-metrics-api-repository" {
     Module        = "links-metrics-api"
   }
 }
+
+resource "aws_ecr_lifecycle_policy" "links-metrics-api-image-untagged-lifecycle" {
+  repository = aws_ecr_repository.links-metrics-api-repository.name
+
+  policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Expire images older than 14 days",
+            "selection": {
+                "tagStatus": "untagged",
+                "countType": "sinceImagePushed",
+                "countUnit": "days",
+                "countNumber": 14
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_ecr_lifecycle_policy" "links-metrics-api-image-tagged-lifecycle" {
+  repository = aws_ecr_repository.links-metrics-api-repository.name
+
+  policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Keep last 10 images",
+            "selection": {
+                "tagStatus": "tagged",
+                "tagPrefixList": ["v"],
+                "countType": "imageCountMoreThan",
+                "countNumber": 10
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
+}
