@@ -80,6 +80,7 @@ basic-infra-pro:
       allow_failure: true
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
       when: manual
+      allow_failure: true
 
 # ===========================================================
 # Terraform destroy jobs for infra-as-code/basic-infra module
