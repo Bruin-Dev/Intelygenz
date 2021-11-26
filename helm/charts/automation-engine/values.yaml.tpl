@@ -107,6 +107,8 @@ global:
   last_contact_recipient: ${LAST_CONTACT_RECIPIENT}
   # -- Email account password
   email_acc_pwd: ${EMAIL_ACC_PWD}
+  # -- Velocloud Hosts to monitor:
+  monitored_velocloud_hosts: [${MONITORED_VELOCLOUD_HOST}]
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
