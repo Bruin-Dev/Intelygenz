@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "service-affecting-monitor-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "service-affecting-monitor-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "service-affecting-monitor-image-lifecycle" {
   repository = aws_ecr_repository.service-affecting-monitor-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "service-affecting-monitor-image-untagged-li
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "service-affecting-monitor-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.service-affecting-monitor-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

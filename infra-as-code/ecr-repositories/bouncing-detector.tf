@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "bouncing-detector-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "bouncing-detector-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "bouncing-detector-image-lifecycle" {
   repository = aws_ecr_repository.bouncing-detector-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "bouncing-detector-image-untagged-lifecycle"
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "bouncing-detector-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.bouncing-detector-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",
@@ -49,7 +38,7 @@ resource "aws_ecr_lifecycle_policy" "bouncing-detector-image-tagged-lifecycle" {
             "action": {
                 "type": "expire"
             }
-        }
+        }        
     ]
 }
 EOF

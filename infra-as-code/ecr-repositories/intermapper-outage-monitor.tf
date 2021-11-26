@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "intermapper-outage-monitor-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "intermapper-outage-monitor-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "intermapper-outage-monitor-image-lifecycle" {
   repository = aws_ecr_repository.intermapper-outage-monitor-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "intermapper-outage-monitor-image-untagged-l
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "intermapper-outage-monitor-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.intermapper-outage-monitor-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

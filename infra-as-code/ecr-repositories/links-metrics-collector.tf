@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "links-metrics-collector-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "links-metrics-collector-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "links-metrics-collector-image-lifecycle" {
   repository = aws_ecr_repository.links-metrics-collector-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "links-metrics-collector-image-untagged-life
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "links-metrics-collector-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.links-metrics-collector-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

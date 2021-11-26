@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "tnba-monitor-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "tnba-monitor-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "tnba-monitor-image-lifecycle" {
   repository = aws_ecr_repository.tnba-monitor-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "tnba-monitor-image-untagged-lifecycle" {
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "tnba-monitor-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.tnba-monitor-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

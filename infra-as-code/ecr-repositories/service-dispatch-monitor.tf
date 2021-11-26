@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "service-dispatch-monitor-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "service-dispatch-monitor-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "service-dispatch-monitor-image-lifecycle" {
   repository = aws_ecr_repository.service-dispatch-monitor-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "service-dispatch-monitor-image-untagged-lif
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "service-dispatch-monitor-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.service-dispatch-monitor-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

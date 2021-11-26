@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "email-tagger-monitor-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "email-tagger-monitor-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "email-tagger-monitor-image-lifecycle" {
   repository = aws_ecr_repository.email-tagger-monitor-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "email-tagger-monitor-image-untagged-lifecyc
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "email-tagger-monitor-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.email-tagger-monitor-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

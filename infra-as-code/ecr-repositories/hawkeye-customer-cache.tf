@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "hawkeye-customer-cache-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-lifecycle" {
   repository = aws_ecr_repository.hawkeye-customer-cache-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-untagged-lifec
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "hawkeye-customer-cache-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.hawkeye-customer-cache-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

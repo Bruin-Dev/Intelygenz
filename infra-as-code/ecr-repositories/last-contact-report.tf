@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "last-contact-report-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "last-contact-report-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "last-contact-report-image-lifecycle" {
   repository = aws_ecr_repository.last-contact-report-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "last-contact-report-image-untagged-lifecycl
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "last-contact-report-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.last-contact-report-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

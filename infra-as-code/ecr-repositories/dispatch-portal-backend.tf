@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "dispatch-portal-backend-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "dispatch-portal-backend-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "dispatch-portal-backend-image-lifecycle" {
   repository = aws_ecr_repository.dispatch-portal-backend-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "dispatch-portal-backend-image-untagged-life
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "dispatch-portal-backend-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.dispatch-portal-backend-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",

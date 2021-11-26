@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "repair-tickets-kre-bridge-repository" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "repair-tickets-kre-bridge-image-untagged-lifecycle" {
+resource "aws_ecr_lifecycle_policy" "repair-tickets-kre-bridge-image-lifecycle" {
   repository = aws_ecr_repository.repair-tickets-kre-bridge-repository.name
 
   policy = <<EOF
@@ -25,20 +25,9 @@ resource "aws_ecr_lifecycle_policy" "repair-tickets-kre-bridge-image-untagged-li
             "action": {
                 "type": "expire"
             }
-        }
-    ]
-}
-EOF
-}
-
-resource "aws_ecr_lifecycle_policy" "repair-tickets-kre-bridge-image-tagged-lifecycle" {
-  repository = aws_ecr_repository.repair-tickets-kre-bridge-repository.name
-
-  policy = <<EOF
-{
-    "rules": [
+        },
         {
-            "rulePriority": 1,
+            "rulePriority": 2,
             "description": "Keep last 10 images",
             "selection": {
                 "tagStatus": "tagged",
