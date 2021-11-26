@@ -36,7 +36,6 @@ class TestNewEmailsRepository:
     def get_pending_emails_ok_test(self, storage_repository, new_emails_repository):
         storage_repository.find_all = Mock(return_value=[])
 
-
         actual = new_emails_repository.get_pending_emails()
 
         storage_repository.find_all.assert_called_once()
