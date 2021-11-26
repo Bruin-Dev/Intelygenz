@@ -75,7 +75,7 @@ class RepairTicketKreRepository:
             created_ticket_ids: List[str],
     ):
         site_ids = list(service_numbers_by_site.keys())
-        service_numbers = [service_number for _, service_number_list in service_numbers_by_site
+        service_numbers = [service_number for _, service_number_list in service_numbers_by_site.items()
                            for service_number in service_number_list]
 
         @retry(

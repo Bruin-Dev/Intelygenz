@@ -1,25 +1,27 @@
 from asynctest import CoroutineMock
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from config import testconfig as config
 
 
 class TestRepairTicketsMonitor:
     def instance_test(
-        self,
-        event_bus,
-        logger,
-        scheduler,
-        new_tagged_emails_repository,
-        repair_ticket_kre_repository,
+            self,
+            event_bus,
+            logger,
+            scheduler,
+            bruin_repository,
+            new_tagged_emails_repository,
+            repair_ticket_kre_repository,
     ):
         repair_tickets_monitor = RepairTicketsMonitor(
             event_bus,
             logger,
             scheduler,
             config,
+            bruin_repository,
             new_tagged_emails_repository,
             repair_ticket_kre_repository,
         )
@@ -28,6 +30,7 @@ class TestRepairTicketsMonitor:
         assert repair_tickets_monitor._logger == logger
         assert repair_tickets_monitor._scheduler == scheduler
         assert repair_tickets_monitor._config == config
+        assert repair_tickets_monitor._bruin_repository == bruin_repository
         assert repair_tickets_monitor._new_tagged_emails_repository == new_tagged_emails_repository
         assert repair_tickets_monitor._repair_tickets_kre_repository == repair_ticket_kre_repository
 
@@ -87,7 +90,7 @@ class TestRepairTicketsMonitor:
         assert response is None
 
     @pytest.mark.asyncio
-    async def _process_other_tags_email_test(self, repair_tickets_monitor, make_email):
+    async def _process_other_tags_email_test(self, repair_tickets_monitor):
         email_id = 1234
         email = {'email_id': email_id}
 
@@ -98,6 +101,38 @@ class TestRepairTicketsMonitor:
 
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
 
-    async def _process_repair_email_test(self):
-        # TODO when this method is finished test when there are more parts
-        pass
+    @pytest.mark.asyncio
+    async def _process_repair_email__ok_test(
+            self,
+            repair_tickets_monitor,
+            make_inference_data,
+            make_email
+    ):
+        email_id = 1234
+        tagged_email = {"email_id": email_id, "tag_id": 1}
+        email = make_email(email_id=email_id)
+        inference_data = make_inference_data()
+        service_numbers_by_site = {
+            '1234': [1234, 5678],
+            '2345': [9101, 1213]
+        }
+
+        created_ticket_ids = [5689]
+        existing_ticket_ids = [1234, 5678]
+        save_outputs_response = {'success': True}
+
+        new_tagged_emails_repository = Mock()
+        repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
+        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+
+        repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
+        repair_tickets_monitor._get_valid_service_numbers_by_site = CoroutineMock(return_value=service_numbers_by_site)
+        repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_ticket_ids)
+        repair_tickets_monitor._create_tickets = CoroutineMock(return_value=created_ticket_ids)
+        repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
+
+        response = await repair_tickets_monitor._process_repair_email(tagged_email)
+
+        new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
+
+        assert response is None

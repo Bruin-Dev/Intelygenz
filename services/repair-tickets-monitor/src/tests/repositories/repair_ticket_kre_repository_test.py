@@ -1,10 +1,8 @@
 from unittest.mock import patch
 
-from asynctest import CoroutineMock
 import pytest
 from shortuuid import uuid
 
-from application.repositories import nats_error_response
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from config import testconfig as config
 
@@ -22,6 +20,14 @@ class TestRepairTicketRepository:
         assert repair_ticket_repository._logger is logger
         assert repair_ticket_repository._config is config
         assert repair_ticket_repository._notifications_repository is notifications_repository
+
+    @pytest.mark.asyncio
+    async def get_email_inference__ok_test(self):
+        pass
+
+    @pytest.mark.asyncio
+    async def get_email_inference__not_2XX_test(self):
+        pass
 
     @pytest.mark.asyncio
     async def save_created_ticket_feedback__ok_test(

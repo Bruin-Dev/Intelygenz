@@ -68,7 +68,7 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_service_number_information__ok_test(
+    async def verify_service_number_information__ok_test(
             self,
             event_bus,
             bruin_repository,
@@ -84,7 +84,7 @@ class TestBruinRepository:
 
         event_bus.rpc_request.return_value = response
         with patch('application.repositories.bruin_repository.uuid', return_value=uuid_):
-            result = await bruin_repository.get_service_number_information(client_id, service_number)
+            result = await bruin_repository.verify_service_number_information(client_id, service_number)
 
         event_bus.rpc_request.assert_awaited_once_with(
             "bruin.customer.get.info",
@@ -95,7 +95,7 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_service_number_information__non_2XX_status_test(
+    async def verify_service_number_information__non_2XX_status_test(
             self,
             event_bus,
             bruin_repository,
@@ -108,6 +108,6 @@ class TestBruinRepository:
 
         event_bus.rpc_request.return_value = response
         with patch('application.repositories.bruin_repository.uuid', return_value=uuid_):
-            result = await bruin_repository.get_service_number_information(client_id, service_number)
+            result = await bruin_repository.verify_service_number_information(client_id, service_number)
 
         assert result == response

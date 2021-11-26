@@ -71,11 +71,11 @@ def new_created_tickets_repository(logger, storage_repository):
 @pytest.fixture(scope='function')
 def new_tagged_emails_repository(logger, storage_repository, notifications_repository):
     return NewTaggedEmailsRepository(
-            logger,
-            config,
-            notifications_repository,
-            storage_repository,
-        )
+        logger,
+        config,
+        notifications_repository,
+        storage_repository,
+    )
 
 
 @pytest.fixture(scope='function')
@@ -104,12 +104,20 @@ def new_created_tickets_feedback(
 
 
 @pytest.fixture(scope='function')
-def repair_tickets_monitor(event_bus, logger, scheduler, new_tagged_emails_repository, repair_ticket_kre_repository):
+def repair_tickets_monitor(
+        event_bus,
+        logger,
+        scheduler,
+        bruin_repository,
+        new_tagged_emails_repository,
+        repair_ticket_kre_repository
+):
     return RepairTicketsMonitor(
         event_bus,
         logger,
         scheduler,
         config,
+        bruin_repository,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
     )

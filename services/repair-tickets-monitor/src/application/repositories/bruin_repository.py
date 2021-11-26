@@ -191,6 +191,9 @@ class BruinRepository:
         # TODO add for ticket creation
         pass
 
+    async def mark_email_as_done(self):
+        pass
+
     async def get_tickets_basic_info(self, client_id: str, ticket_statuses: List[str]):
         @retry(
             wait=wait_exponential(

@@ -10,14 +10,14 @@ from typing import Any, Dict, List, Tuple, Iterator
 
 class RepairTicketsMonitor:
     def __init__(
-        self,
-        event_bus,
-        logger,
-        scheduler,
-        config,
-        bruin_repository,
-        new_tagged_emails_repository,
-        repair_tickets_kre_repository,
+            self,
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            bruin_repository,
+            new_tagged_emails_repository,
+            repair_tickets_kre_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -97,10 +97,31 @@ class RepairTicketsMonitor:
             return
         return prediction_response.get("body")
 
+    async def _save_output(
+            self,
+            email_id: str,
+            service_numbers_by_site: Dict[str, List],
+            existing_tickets_ids: List[str],
+            created_ticket_ids: List[str],
+    ):
+        output_response = await self._repair_tickets_kre_repository.save_outputs(
+            email_id,
+            service_numbers_by_site,
+            existing_tickets_ids,
+            created_ticket_ids
+        )
+        if output_response["status"] not in range(200, 300):
+            self._logger.info(
+                f"Error while saving output response status code {output_response['status']}"
+            )
+            return
+        return output_response.get("body")
+
     async def _process_other_tags_email(self, email: Dict[str, Any]):
         self._new_tagged_emails_repository.mark_complete(email['email_id'])
 
     async def _process_repair_email(self, email: Dict[str, Any]):
+        # TODO add update email status
         email_id = email['email_id']
         email_data = self._new_tagged_emails_repository.get_email_details(email_id)
         client_id = email_data['email']['client_id']
@@ -108,19 +129,22 @@ class RepairTicketsMonitor:
 
         async with self._semaphore:
             inference_data = await self._get_inference(email_data)
+            if not inference_data:
+                return
+
             potential_service_numbers = inference_data['potential_service_numbers']
             service_numbers_by_site = await self._get_valid_service_numbers_by_site(potential_service_numbers)
             existing_tickets_ids = await self._get_existing_tickets(client_id, service_numbers_by_site)
             if self._is_inference_actionable(inference_data):
                 created_ticket_ids = self._create_tickets(inference_data, service_numbers_by_site, existing_tickets_ids)
 
-            response = await self._repair_tickets_kre_repository.save_outputs(
+            save_output_response = await self._save_output(
+                email_id,
                 service_numbers_by_site,
                 existing_tickets_ids,
                 created_ticket_ids,
             )
-            if response["status"] not in range(200, 300):
-                # TODO add proper logging
+            if not save_output_response:
                 return
 
             self._new_tagged_emails_repository.mark_complete(email['email_id'])
@@ -161,9 +185,15 @@ class RepairTicketsMonitor:
         # here be dragons
         pass
 
+    def _update_email_status(self):
+        # TODO: add content
+        pass
+
     @staticmethod
     def _is_inference_actionable(inference_data: Dict[str, Any]) -> bool:
+        # TODO logic to decide if we update/create ticket from existing tickets info
+        is_other = inference_data['classification']['predicted_class'] == 'Other'
         filtered = inference_data['filter_flags']['is_filtered']
         validation_set = inference_data['filter_flags']['is_validation_set']
         tagger_below_threshold = inference_data['filter_flags']['tagger_is_below_threshold']
-        return not any([filtered, validation_set, tagger_below_threshold])
+        return not any([filtered, validation_set, tagger_below_threshold, is_other])
