@@ -799,11 +799,11 @@ service-affecting-monitor:
     port: 5000
   resources:
     limits:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 300m
+      memory: 384Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 150m
+      memory: 192Mi
 
 
 # -- service-outage-monitor-1 subchart specific configuration
@@ -841,11 +841,11 @@ service-outage-monitor-1:
     port: 5000
   resources:
     limits:
-      cpu: 400m
-      memory: 512Mi
+      cpu: 300m
+      memory: 384Mi
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 150m
+      memory: 192Mi
 
 
 # -- service-outage-monitor-2 subchart specific configuration
@@ -925,11 +925,11 @@ service-outage-monitor-3:
     port: 5000
   resources:
     limits:
-      cpu: 400m
-      memory: 512Mi
+      cpu: 300m
+      memory: 384Mi
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 150m
+      memory: 192Mi
 
 
 # -- service-outage-monitor-4 subchart specific configuration
@@ -1009,11 +1009,11 @@ service-outage-monitor-triage:
     port: 5000
   resources:
     limits:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 300m
+      memory: 384Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 150m
+      memory: 192Mi
 
 
 # -- sites-monitor subchart specific configuration
