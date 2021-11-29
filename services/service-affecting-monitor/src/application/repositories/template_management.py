@@ -43,7 +43,7 @@ class TemplateRenderer:
 
         recipient_list = reports_config['report_config_by_trouble']['default']
         if client_id in reports_config['report_config_by_trouble'].keys():
-            recipient_list += reports_config['report_config_by_trouble'][client_id]
+            recipient_list = recipient_list + reports_config['report_config_by_trouble'][client_id]
 
         recipient_list = ', '.join(recipient_list)
 
