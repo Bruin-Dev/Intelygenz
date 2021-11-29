@@ -1063,12 +1063,8 @@ class TestServiceAffectingMonitor:
     async def bouncing_check__empty_dataset_after_structuring_and_crossing_info_test(
             self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
             make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_events_by_serial_and_interface, make_rpc_response, make_contact_info):
-
-        edge_contact_info = make_contact_info()
-        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
-
-        edge = make_edge(edge_state=None)
+            make_events_by_serial_and_interface, make_rpc_response):
+        edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
         links_metric_sets = make_list_of_link_metrics(link_metric_set)
@@ -1101,7 +1097,7 @@ class TestServiceAffectingMonitor:
             make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
 
         edge_contact_info = make_contact_info()
-        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+        service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
         interface = 'GE1'
@@ -1152,7 +1148,7 @@ class TestServiceAffectingMonitor:
             make_rpc_response, make_contact_info):
 
         edge_contact_info = make_contact_info()
-        service_affecting_monitor._bruin_repository.get_contact_info.return_value = edge_contact_info
+        service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
         interface = 'GE1'
