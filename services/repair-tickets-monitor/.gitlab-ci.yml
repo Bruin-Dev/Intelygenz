@@ -27,6 +27,7 @@ repair-tickets-monitor-test:
       changes:
         - services/repair-tickets-monitor/src/application/**/*
         - services/repair-tickets-monitor/src/config/**/*
+        - services/repair-tickets-monitor/src/tests/**/*
         - services/repair-tickets-monitor/src/app.py
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/requirements.txt
