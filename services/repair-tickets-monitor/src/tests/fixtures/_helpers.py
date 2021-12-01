@@ -8,8 +8,8 @@ from unittest.mock import Mock
 from asynctest import CoroutineMock
 from pytz import timezone
 
-from tests.fixtures._constants import BRUIN_API_TIMEZONE
-from tests.fixtures._constants import VELOCLOUD_API_TIMEZONE
+from fixtures._constants import BRUIN_API_TIMEZONE
+from fixtures._constants import VELOCLOUD_API_TIMEZONE
 
 
 # Use this sentinel as a default value for arguments of fixtures' factories, so users can pass None

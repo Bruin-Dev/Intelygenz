@@ -1,7 +1,7 @@
 import pytest
 from asynctest import create_autospec
 from igz.packages.eventbus.eventbus import EventBus
-from tests.fixtures._helpers import wrap_all_methods
+from fixtures._helpers import wrap_all_methods
 from unittest.mock import Mock
 
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
