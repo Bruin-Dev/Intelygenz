@@ -75,7 +75,9 @@ class NewCreatedTicketsFeedback:
         if error_code == 404:
             # Increase error counter for ticket
             error_counter = self._new_created_tickets_repository.increase_ticket_error_counter(
-                ticket_id, error_code)
+                ticket_id,
+                error_code
+            )
             # If max value reached, delete ticket from storage
             if error_counter >= self._config.MONITOR_CONFIG["max_retries_error_404"]:
                 self._new_created_tickets_repository.delete_ticket(email_id, ticket_id)
@@ -83,7 +85,7 @@ class NewCreatedTicketsFeedback:
 
     async def _save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
-        ticket_id = int(ticket_data["ticketID"])
+        ticket_id = int(ticket_data["ticketId"])
 
         async with self._semaphore:
 
