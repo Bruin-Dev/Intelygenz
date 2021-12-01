@@ -1,7 +1,7 @@
-from fixtures.bruin import *
-from fixtures.instances import *
-from fixtures.rta import *
-from fixtures.rpc import *
+from tests.fixtures.bruin import *
+from tests.fixtures.instances import *
+from tests.fixtures.rta import *
+from tests.fixtures.rpc import *
 
 
 @pytest.fixture(scope='function')
