@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from typing import List
 import pytest
 from tests.fixtures._helpers import bruinize_date
 
@@ -36,8 +37,8 @@ def make_ticket(make_address):
         create_date = create_date or bruinize_date(datetime.now())
 
         return {
-            "clientID": client_id,
-            "ticketID": ticket_id,
+            "clientId": client_id,
+            "ticketId": ticket_id,
             "ticketStatus": ticket_status,
             "address": address,
             "createDate": create_date,
@@ -59,6 +60,9 @@ def make_email():
             body: str = '',
             received_date: str = '',
             subject: str = '',
+            from_address: str = '',
+            cc: str = '',
+            to: str = '',
     ):
         received_date = received_date or bruinize_date(datetime.now())
 
@@ -67,9 +71,26 @@ def make_email():
                 "email_id": email_id,
                 "client_id": client_id,
                 "body": body,
+                "from": from_address,
+                "to": to,
+                "cc": cc,
                 "date": received_date,
                 "subject": subject,
             }
+        }
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_ticket_details():
+    def _inner(*, detail_items: List[dict] = None, notes: List[dict] = None):
+        detail_items = detail_items or []
+        notes = notes or []
+
+        return {
+            "ticketDetails": detail_items,
+            "ticketNotes": notes,
         }
 
     return _inner

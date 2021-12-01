@@ -75,7 +75,7 @@ class TestRepairTicketsMonitor:
         assert response == prediction_data
 
     @pytest.mark.asyncio
-    async def _get_inference__400_test(self, repair_tickets_monitor, make_rpc_response):
+    async def _get_inference__not_2XX_test(self, repair_tickets_monitor, make_rpc_response):
         email_data = {}
         rpc_reponse = make_rpc_response(status=400, body='Error in data')
         repair_tickets_kre_repository = CoroutineMock()
@@ -88,6 +88,14 @@ class TestRepairTicketsMonitor:
             email_data
         )
         assert response is None
+
+    @pytest.mark.asyncio
+    async def _save_outputs__ok_test(self):
+        pass
+
+    @pytest.mark.asyncio
+    async def _save_outputs__not_2XX_test(self):
+        pass
 
     @pytest.mark.asyncio
     async def _process_other_tags_email_test(self, repair_tickets_monitor):
@@ -106,19 +114,25 @@ class TestRepairTicketsMonitor:
             self,
             repair_tickets_monitor,
             make_inference_data,
+            make_ticket,
             make_email
     ):
+        # TODO add real data test
         email_id = 1234
         tagged_email = {"email_id": email_id, "tag_id": 1}
         email = make_email(email_id=email_id)
         inference_data = make_inference_data()
-        service_numbers_by_site = {
-            '1234': [1234, 5678],
-            '2345': [9101, 1213]
+        service_number_site_map = {
+            '1234': 'site_1',
+            '2345': 'site_2',
         }
 
-        created_ticket_ids = [5689]
-        existing_ticket_ids = [1234, 5678]
+        tickets_created = [{'site_id': 'site_1', 'service_numbers': ['1234'], 'ticket_id': '5678'}]
+        tickets_updated = [{'site_id': 'site_2', 'service_numbers': ['2345'], 'ticket_id': '1234'}]
+        tickets_not_created = []
+
+        create_ticket_response = (tickets_created, tickets_updated, tickets_not_created)
+        existing_tickets_response = [make_ticket()]
         save_outputs_response = {'success': True}
 
         new_tagged_emails_repository = Mock()
@@ -126,9 +140,52 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
 
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
-        repair_tickets_monitor._get_valid_service_numbers_by_site = CoroutineMock(return_value=service_numbers_by_site)
-        repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_ticket_ids)
-        repair_tickets_monitor._create_tickets = CoroutineMock(return_value=created_ticket_ids)
+        repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(return_value=service_number_site_map)
+        repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
+        repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
+        repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
+
+        # TODO add save outputs test
+        response = await repair_tickets_monitor._process_repair_email(tagged_email)
+
+        new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
+
+        assert response is None
+
+    @pytest.mark.asyncio
+    @pytest.mark.skip
+    async def _process_repair_email__not_actionable_test(
+            self,
+            repair_tickets_monitor,
+            make_inference_data,
+            make_ticket,
+            make_email
+    ):
+        email_id = '1234'
+        tagged_email = {"email_id": email_id, "tag_id": 1}
+        email = make_email(email_id=email_id)
+        inference_data = make_inference_data()
+        service_number_site_map = {
+            '1234': 'site_1',
+            '2345': 'site_2',
+        }
+
+        tickets_created = [{'site_id': 'site_1', 'service_numbers': ['1234'], 'ticket_id': '5678'}]
+        tickets_updated = [{'site_id': 'site_2', 'service_numbers': ['2345'], 'ticket_id': '1234'}]
+        tickets_not_created = []
+
+        create_ticket_response = (tickets_created, tickets_updated, tickets_not_created)
+        existing_tickets_response = [make_ticket()]
+        save_outputs_response = {'success': True}
+
+        new_tagged_emails_repository = Mock()
+        repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
+        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+
+        repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
+        repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(return_value=service_number_site_map)
+        repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
+        repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
 
         response = await repair_tickets_monitor._process_repair_email(tagged_email)

@@ -32,7 +32,7 @@ MONITOR_CONFIG = {
     },
     'nats_request_timeout': {
         'kre_seconds': 10,
-        'bruin_request_seconds': 30
+        'bruin_request_seconds': 30,
     },
     'semaphores': {
         'repair_tickets_concurrent': 10,

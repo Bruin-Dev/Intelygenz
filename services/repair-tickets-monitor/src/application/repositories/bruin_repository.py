@@ -159,7 +159,11 @@ class BruinRepository:
 
             try:
                 self._logger.info(f'Getting details of ticket {ticket_id} from Bruin...')
-                response = await self._event_bus.rpc_request("bruin.ticket.details.request", request, timeout=15)
+                response = await self._event_bus.rpc_request(
+                    "bruin.ticket.details.request",
+                    request,
+                    self._timeout,
+                )
             except Exception as e:
                 err_msg = f'An error occurred when requesting ticket details ' \
                           f'from Bruin API for ticket {ticket_id} -> {e}'
@@ -171,7 +175,7 @@ class BruinRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error while retrieving details of ticket {ticket_id} in '
-                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
@@ -202,12 +206,11 @@ class BruinRepository:
             ),
             stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay'])
         )
-        async def get_tickets():
+        async def get_tickets_basic_info():
             err_msg = None
             request = {
                 'request_id': uuid(),
                 'body': {
-                    # TODO add site id
                     'client_id': client_id,
                     'ticket_statuses': ticket_statuses
                 },
@@ -218,7 +221,11 @@ class BruinRepository:
                     f'Getting all tickets with any status of {ticket_statuses},'
                     f'and belonging to client {client_id} from Bruin...'
                 )
-                response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
+                response = await self._event_bus.rpc_request(
+                    "bruin.ticket.basic.request",
+                    request,
+                    timeout=self._timeout
+                )
             except Exception as e:
                 err_msg = (
                     f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses} '
@@ -239,7 +246,7 @@ class BruinRepository:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses} '
                         f'and belonging to client {client_id} in '
-                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
             if err_msg:
@@ -249,26 +256,38 @@ class BruinRepository:
             return response
 
         try:
-            return await get_tickets()
+            return await get_tickets_basic_info()
         except Exception as e:
             self._logger.error(f"Error getting tickets with client_id {client_id} from Bruin: {e}")
 
-    async def get_open_tickets_with_serial_numbers(self, client_id: str) -> Dict[str, Any]:
+    async def get_open_tickets_with_service_numbers(self, client_id: str) -> Dict[str, Any]:
         ticket_statuses = ['New', 'InProgress', 'Draft']
 
         tickets = await self.get_tickets_basic_info(client_id, ticket_statuses)
-        for idx, ticket in enumerate(tickets):
+        if tickets['status'] not in range(200, 300):
+            return {'status': tickets['status'], 'body': 'Error while retrieving open tickets'}
+        if not tickets['body']:
+            return {'status': 404, 'body': 'No open tickets found'}
+
+        for idx, ticket in enumerate(tickets['body']):
             ticket_id = ticket['ticketId']
             details = await self.get_ticket_details(ticket_id)
-            serial_numbers = self._get_details_serial_numbers(details)
-            ticket[idx]['serial_numbers'] = serial_numbers
+            if details['status'] not in range(200, 300):
+                err_msg = f'Error while retrieving details from ticket {ticket_id}'
+                self._logger(err_msg)
+                self._notifications_repository.send_slack_message(err_msg)
+                tickets['body'][idx]['service_numbers'] = []
+                continue
+            service_numbers = self._get_details_service_numbers(details['body'])
+            tickets['body'][idx]['service_numbers'] = service_numbers
 
-        return tickets
+        return {'status': tickets['status'], 'body': tickets['body']}
 
-    def _get_details_serial_numbers(self, ticket_details: Dict[str, Any]) -> List[str]:
+    def _get_details_service_numbers(self, ticket_details: Dict[str, Any]) -> List[str]:
         notes = ticket_details.get('ticketNotes')
-        unique_serial_numbers = set()
+        unique_service_numbers = set()
         for note in notes:
-            note_serial_numbers = note.get('serviceNumber', [])
-            unique_serial_numbers.add(*note_serial_numbers)
-        return list(unique_serial_numbers)
+            note_service_numbers = note.get('serviceNumber', [])
+            if note_service_numbers:
+                unique_service_numbers.add(*note_service_numbers)
+        return list(unique_service_numbers)
