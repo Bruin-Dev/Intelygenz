@@ -111,7 +111,7 @@ class RepairTicketsMonitor:
             email_id: str,
             service_number_site_map: Dict[str, str],
             tickets_created: List[Dict[str, Any]],
-            ticket_updated: List[Dict[str, Any]],
+            tickets_updated: List[Dict[str, Any]],
             tickets_could_be_created: List[Dict[str, Any]],
             tickets_could_be_updated: List[Dict[str, Any]],
             tickets_cannot_be_created: List[Dict[str, Any]],
@@ -121,7 +121,7 @@ class RepairTicketsMonitor:
             email_id,
             service_number_site_map,
             tickets_created,
-            ticket_updated,
+            tickets_updated,
             tickets_could_be_created,
             tickets_could_be_updated,
             tickets_cannot_be_created,
@@ -149,7 +149,7 @@ class RepairTicketsMonitor:
         tickets_updated = []
         tickets_could_be_created = []
         tickets_could_be_updated = []
-        ticket_cannot_be_created = []
+        tickets_cannot_be_created = []
 
         async with self._semaphore:
             inference_data = await self._get_inference(email_data)
@@ -158,13 +158,16 @@ class RepairTicketsMonitor:
 
             potential_service_numbers = inference_data['potential_service_numbers']
             try:
-                service_number_site_map = await self._get_valid_service_numbers_site_map(potential_service_numbers)
+                service_number_site_map = await self._get_valid_service_numbers_site_map(
+                    client_id,
+                    potential_service_numbers
+                )
                 existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
             except ResponseException as e:
                 self._logger.error(f'Error in bruin {e} could not process email: {email_id}')
                 return
             if self._is_inference_actionable(inference_data):
-                tickets_created, tickets_updated, ticket_cannot_be_created = await self._create_tickets(
+                tickets_created, tickets_updated, tickets_cannot_be_created = await self._create_tickets(
                     inference_data,
                     service_number_site_map,
                     existing_tickets
@@ -183,22 +186,26 @@ class RepairTicketsMonitor:
                 tickets_updated,
                 tickets_could_be_created,
                 tickets_could_be_updated,
-                ticket_cannot_be_created,
+                tickets_cannot_be_created,
             )
             if not save_output_response:
                 return
 
             self._new_tagged_emails_repository.mark_complete(email_id)
 
-    async def _get_valid_service_numbers_site_map(self, potential_service_numbers: List[str]) -> Dict[str, str]:
+    async def _get_valid_service_numbers_site_map(
+            self,
+            client_id: str,
+            potential_service_numbers: List[str]
+    ) -> Dict[str, str]:
         """Give a dictionary with keys as service numbers with their site ids"""
         service_number_site_map = {}
         for potential_service_number in potential_service_numbers:
-            result = await self._bruin_repository.verify_service_number_information(potential_service_number)
+            result = await self._bruin_repository.verify_service_number_information(client_id, potential_service_number)
             if result['status'] not in range(200, 300):
-                ResponseException(f'Exception while verifying service_number: {potential_service_number}')
-            if result['site_id']:
-                service_number_site_map[potential_service_number] = result['site_id']
+                raise ResponseException(f'Exception while verifying service_number: {potential_service_number}')
+            if result['body']['site_id']:
+                service_number_site_map[potential_service_number] = result['body']['site_id']
 
         return service_number_site_map
 
@@ -322,4 +329,13 @@ class RepairTicketsMonitor:
         filtered = inference_data['filter_flags']['is_filtered']
         validation_set = inference_data['filter_flags']['is_validation_set']
         tagger_below_threshold = inference_data['filter_flags']['tagger_is_below_threshold']
-        return not any([filtered, validation_set, tagger_below_threshold, is_other])
+        rta_model1_is_below_threshold = inference_data['filter_flags']['rta_model1_is_below_threshold']
+        rta_model2_is_below_threshold = inference_data['filter_flags']['rta_model2_is_below_threshold']
+        return not any([
+            filtered,
+            validation_set,
+            tagger_below_threshold,
+            is_other,
+            rta_model1_is_below_threshold,
+            rta_model2_is_below_threshold
+        ])

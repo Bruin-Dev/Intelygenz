@@ -148,7 +148,7 @@ class TestRepairTicketRepository:
             event_bus,
             repair_ticket_kre_repository,
             make_save_outputs_request_payload,
-            make_rta_kre_ticket_payload,
+            make_rta_ticket_payload,
             make_rpc_request,
             make_rpc_response
     ):
@@ -156,7 +156,7 @@ class TestRepairTicketRepository:
 
         validated_service_numbers = ["1234", "4567"]
         service_numbers_sites_map = {"1234": "site_1", "5678": "site_1"}
-        tickets_created = make_rta_kre_ticket_payload(
+        tickets_created = make_rta_ticket_payload(
             site_id="site_1",
             service_numbers=validated_service_numbers
         )
@@ -204,14 +204,14 @@ class TestRepairTicketRepository:
             self,
             event_bus,
             repair_ticket_kre_repository,
-            make_rta_kre_ticket_payload,
+            make_rta_ticket_payload,
             make_rpc_response
     ):
         email_id = "1234"
 
         validated_service_numbers = ["1234", "4567"]
         service_numbers_sites_map = {"1234": "site_1", "5678": "site_1"}
-        tickets_created = make_rta_kre_ticket_payload(
+        tickets_created = make_rta_ticket_payload(
             site_id="site_1",
             service_numbers=validated_service_numbers
         )

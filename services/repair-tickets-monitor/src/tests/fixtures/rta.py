@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import pytest
 from typing import Any, Dict, List
+from tests.fixtures._helpers import bruinize_date
 
 
 @pytest.fixture(scope='session')
@@ -18,6 +21,42 @@ def make_filter_flags():
             "rta_model2_is_below_threshold": rta_model2_is_below_threshold,
             "is_filtered": is_filtered,
             "is_validation_set": in_validation_set,
+        }
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_existing_ticket(make_address):
+    def _inner(
+            *,
+            client_id: int = 0,
+            ticket_id: int = 0,
+            ticket_status: str = '',
+            address: dict = None,
+            create_date: str = '',
+            created_by: str = '',
+            call_type: str = '',
+            category: str = '',
+            severity: int = 0,
+            service_numbers: List[str] = None,
+            site_id: str = '',
+    ):
+        address = address or make_address()
+        create_date = create_date or bruinize_date(datetime.now())
+
+        return {
+            "clientId": client_id,
+            "ticketId": ticket_id,
+            "ticketStatus": ticket_status,
+            "address": address,
+            "createDate": create_date,
+            "createdBy": created_by,
+            "callType": call_type,
+            "category": category,
+            "severity": severity,
+            "service_numbers": service_numbers,
+            "site_id": site_id,
         }
 
     return _inner
@@ -68,26 +107,26 @@ def make_inference_request_payload(make_email):
 
 
 @pytest.fixture(scope='session')
-def make_rta_kre_ticket_payload():
+def make_rta_ticket_payload():
     def _inner(
             *,
             site_id: str = None,
             service_numbers: List[str] = None,
             ticket_id: str = None,
-            not_creation_reason: str = None,
+            not_created_reason: str = None,
 
     ):
         return {
             "site_id": site_id,
             "service_numbers": service_numbers,
             "ticket_id": ticket_id,
-            "not_creation_reason": not_creation_reason,
+            "not_created_reason": not_created_reason,
         }
     return _inner
 
 
 @pytest.fixture(scope='session')
-def make_save_outputs_request_payload(make_rta_kre_ticket_payload):
+def make_save_outputs_request_payload(make_rta_ticket_payload):
     def _inner(
             *,
             email_id: str = "",
@@ -101,12 +140,12 @@ def make_save_outputs_request_payload(make_rta_kre_ticket_payload):
     ):
         service_numbers = service_numbers or []
         service_numbers_sites_map = service_numbers_sites_map or {}
-        tickets_created = tickets_created or make_rta_kre_ticket_payload()
-        tickets_updated = tickets_updated or make_rta_kre_ticket_payload()
-        tickets_could_be_created = tickets_could_be_created or make_rta_kre_ticket_payload()
-        tickets_could_be_updated = tickets_could_be_updated or make_rta_kre_ticket_payload()
+        tickets_created = tickets_created or make_rta_ticket_payload()
+        tickets_updated = tickets_updated or make_rta_ticket_payload()
+        tickets_could_be_created = tickets_could_be_created or make_rta_ticket_payload()
+        tickets_could_be_updated = tickets_could_be_updated or make_rta_ticket_payload()
 
-        tickets_cannot_be_created = tickets_cannot_be_created or make_rta_kre_ticket_payload()
+        tickets_cannot_be_created = tickets_cannot_be_created or make_rta_ticket_payload()
         return {
             'email_id': email_id,
             'validated_service_numbers': service_numbers,
