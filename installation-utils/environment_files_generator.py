@@ -529,42 +529,6 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('bouncing-detector', 'src', 'config', 'env-bouncing-detector-1'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_1_HOSTS}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('bouncing-detector', 'src', 'config', 'env-bouncing-detector-2'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_2_HOSTS}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('bouncing-detector', 'src', 'config', 'env-bouncing-detector-3'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_3_HOSTS}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('bouncing-detector', 'src', 'config', 'env-bouncing-detector-4'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_4_HOSTS}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'PAPERTRAIL_ACTIVE=False\n'
-        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
 }
 
 # Creating all files
