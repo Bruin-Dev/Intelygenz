@@ -176,7 +176,7 @@ env_dict = {
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
-    os.path.join('bruin-bridge', 'src', 'config', 'env'):
+    os.path.join('services', 'bruin-bridge', 'src', 'config', 'env'):
         f'CURRENT_ENVIRONMENT={ENVIRONMENT_NAME}\n'
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -189,7 +189,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('digi-bridge', 'src', 'config', 'env'):
+    os.path.join('services', 'digi-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -200,7 +200,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('digi-reboot-report', 'src', 'config', 'env'):
+    os.path.join('services', 'digi-reboot-report', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -208,7 +208,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('customer-cache', 'src', 'config', 'env'):
+    os.path.join('services', 'customer-cache', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -218,7 +218,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('email-tagger-kre-bridge', 'src', 'config', 'env'):
+    os.path.join('services', 'email-tagger-kre-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -226,7 +226,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('email-tagger-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'email-tagger-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -238,7 +238,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('hawkeye-customer-cache', 'src', 'config', 'env'):
+    os.path.join('services', 'hawkeye-customer-cache', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -248,7 +248,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('hawkeye-bridge', 'src', 'config', 'env'):
+    os.path.join('services', 'hawkeye-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
@@ -265,7 +265,7 @@ env_dict = {
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
-    os.path.join('hawkeye-affecting-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'hawkeye-affecting-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -273,7 +273,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('hawkeye-outage-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'hawkeye-outage-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -281,7 +281,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('last-contact-report', 'src', 'config', 'env'):
+    os.path.join('services', 'last-contact-report', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -290,7 +290,7 @@ env_dict = {
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
-    os.path.join('lumin-billing-report', 'src', 'config', 'env'):
+    os.path.join('services', 'lumin-billing-report', 'src', 'config', 'env'):
         f'LUMIN_URI={LUMIN_URI}\n'
         f'LUMIN_TOKEN={LUMIN_TOKEN}\n'
         f'CUSTOMER_NAME={CUSTOMER_NAME}\n'
@@ -325,7 +325,7 @@ env_dict = {
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
         f'PORT={NATS_PORT3}',
-    os.path.join('notifier', 'src', 'config', 'env'):
+    os.path.join('services', 'notifier', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -339,7 +339,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-affecting-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'service-affecting-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -349,7 +349,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-1'):
+    os.path.join('services', 'service-outage-monitor', 'src', 'config', 'env-outage-monitor-1'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -362,7 +362,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-2'):
+    os.path.join('services', 'service-outage-monitor', 'src', 'config', 'env-outage-monitor-2'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -375,7 +375,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-3'):
+    os.path.join('services', 'service-outage-monitor', 'src', 'config', 'env-outage-monitor-3'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -388,7 +388,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-4'):
+    os.path.join('services', 'service-outage-monitor', 'src', 'config', 'env-outage-monitor-4'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -401,7 +401,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env-triage'):
+    os.path.join('services', 'service-outage-monitor', 'src', 'config', 'env-triage'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -414,7 +414,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('sites-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'sites-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
         f'MONITORING_SECONDS={MONITORING_SECONDS}\n'
@@ -423,7 +423,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('t7-bridge', 'src', 'config', 'env'):
+    os.path.join('services', 't7-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -431,7 +431,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('velocloud-bridge', 'src', 'config', 'env'):
+    os.path.join('services', 'velocloud-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -441,7 +441,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('tnba-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'tnba-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -450,7 +450,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('tnba-feedback', 'src', 'config', 'env'):
+    os.path.join('services', 'tnba-feedback', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
@@ -460,7 +460,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('email-tagger-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'email-tagger-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -472,7 +472,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('intermapper-outage-monitor', 'src', 'config', 'env'):
+    os.path.join('services', 'intermapper-outage-monitor', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -480,7 +480,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('ticket-collector', 'src', 'config', 'env'):
+    os.path.join('services', 'ticket-collector', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'MONGODB_HOST={MONGODB_HOST}\n'
@@ -493,7 +493,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('ticket-statistics', 'src', 'config', 'env'):
+    os.path.join('services', 'ticket-statistics', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'MONGODB_HOST={MONGODB_HOST}\n'
         f'MONGODB_USERNAME={MONGODB_USERNAME}\n'
@@ -506,7 +506,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('links-metrics-collector', 'src', 'config', 'env'):
+    os.path.join('services', 'links-metrics-collector', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -517,7 +517,7 @@ env_dict = {
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
-    os.path.join('links-metrics-api', 'src', 'config', 'env'):
+    os.path.join('services', 'links-metrics-api', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
