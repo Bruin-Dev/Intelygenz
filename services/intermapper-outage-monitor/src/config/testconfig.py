@@ -33,6 +33,7 @@ INTERMAPPER_CONFIG = {
     'monitoring_interval': 30,
     'inbox_email': 'fake@gmail.com',
     'sender_emails_list': ['fakesender@email.com'],
+    'concurrent_email_batches': 10,
     'intermapper_down_events': ['Down', 'Critical', 'Alarm', 'Warning', 'Link Warning'],
     'intermapper_up_events': ['Up', 'OK'],
     'autoresolve_last_outage_seconds': 60 * 60,

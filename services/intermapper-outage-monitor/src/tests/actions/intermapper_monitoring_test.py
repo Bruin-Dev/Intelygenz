@@ -122,157 +122,108 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def intermapper_monitoring_process_test(self):
-        asset_id = 123
-        client_id = 83959
-        intermapper_body = os.linesep.join([
-            "Event: Alarm",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+        asset_id = '123'
 
-        intermapper_up_body = os.linesep.join([
-            "Event: Up",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+        email_1 = {'msg_uid': 123, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        email_2 = {'msg_uid': 456, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        emails = [email_1, email_2]
 
-        msg_uid = 123
-        email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
-
-        intermapper_response = {
-            'body': [{'message': email_msg, 'subject': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_up_body, 'msg_uid': msg_uid}],
-            'status': 200
-        }
-        mark_email_as_read_response = {
-            'body': 'Marked as read',
-            'status': 200
-        }
-        circuit_id = 3214
-        circuit_id_response = {
-            "body": {
-                      "clientID": 83959,
-                      "subAccount": "string",
-                      "wtn": circuit_id,
-                      "inventoryID": 0,
-                      "addressID": 0
-            },
-            "status": 200
+        response = {
+            'body': emails,
+            'status': 200,
         }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        bruin_repository = Mock()
         config = testconfig
 
         notifications_repository = Mock()
-        notifications_repository.get_unread_emails = CoroutineMock(return_value=intermapper_response)
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=mark_email_as_read_response)
-
-        bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=circuit_id_response)
+        notifications_repository.get_unread_emails = CoroutineMock(return_value=response)
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository)
-        intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
-        intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=True)
+        intermapper_monitor._process_email_batch = CoroutineMock()
 
         await intermapper_monitor._intermapper_monitoring_process()
 
-        notifications_repository.get_unread_emails.assert_awaited()
-        notifications_repository.mark_email_as_read.assert_has_awaits([
-            call(msg_uid),
-            call(msg_uid)
-        ])
+        notifications_repository.get_unread_emails.assert_awaited_once()
+        intermapper_monitor._process_email_batch.assert_has_awaits([call(emails, asset_id)], any_order=True)
 
-        bruin_repository.get_circuit_id.assert_has_awaits([
-            call(str(asset_id)),
-            call(str(asset_id))
-        ])
-        intermapper_monitor._create_outage_ticket.assert_awaited_once_with(circuit_id, client_id,
-                                                                           intermapper_body)
-        intermapper_monitor._autoresolve_ticket.assert_awaited_once_with(circuit_id, client_id,
-                                                                         intermapper_up_body)
+    def group_emails_by_asset_id_test(self):
+        asset_id_1 = '123'
+        asset_id_2 = '456'
 
-    @pytest.mark.asyncio
-    async def intermapper_monitoring_process_irrelevant_event_test(self):
-        asset_id = 123
-        client_id = 83959
-        intermapper_body = os.linesep.join([
-            "Event: ACK",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+        email_1 = {'body': f"Name: OReilly-HotSpringsAR({asset_id_1})-Site803"}
+        email_2 = {'body': f"Name: OReilly-HotSpringsAR({asset_id_1})-Site803"}
+        email_3 = {'body': f"Name: OReilly-HotSpringsAR({asset_id_2})-Site803"}
+        emails = [email_1, email_2, email_3]
 
-        msg_uid = 123
-        email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
-
-        intermapper_response = {
-            'body': [{'message': email_msg, 'subject': email_msg, 'body': intermapper_body, 'msg_uid': msg_uid}],
-            'status': 200
-        }
-        mark_email_as_read_response = {
-            'body': 'Marked as read',
-            'status': 200
-        }
-        circuit_id = 3214
-        circuit_id_response = {
-            "body": {
-                      "clientID": 83959,
-                      "subAccount": "string",
-                      "wtn": circuit_id,
-                      "inventoryID": 0,
-                      "addressID": 0
-            },
-            "status": 200
+        emails_by_asset_id = {
+            asset_id_1: [email_1, email_2],
+            asset_id_2: [email_3],
         }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = testconfig
-
-        notifications_repository = Mock()
-        notifications_repository.get_unread_emails = CoroutineMock(return_value=intermapper_response)
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=mark_email_as_read_response)
-
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=circuit_id_response)
+        notifications_repository = Mock()
+        config = testconfig
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository)
-        intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
-        intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=True)
 
-        await intermapper_monitor._intermapper_monitoring_process()
-
-        notifications_repository.get_unread_emails.assert_awaited()
-        notifications_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
-
-        bruin_repository.get_circuit_id.assert_awaited_once_with(str(asset_id))
-
-        intermapper_monitor._create_outage_ticket.assert_not_awaited()
-        intermapper_monitor._autoresolve_ticket.assert_not_awaited()
+        result = intermapper_monitor._group_emails_by_asset_id(emails)
+        assert result == emails_by_asset_id
 
     @pytest.mark.asyncio
-    async def intermapper_monitoring_process_failed_unread_rpc_test(self):
+    async def process_email_batch_test(self):
+        asset_id = 123
+        circuit_id = 3214
+        client_id = 83959
 
-        intermapper_response = {
-            'body': 'Failed',
-            'status': 400
+        email_1 = {'msg_uid': 123, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        email_2 = {'msg_uid': 456, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        emails = [email_1, email_2]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        notifications_repository = Mock()
+        config = testconfig
+
+        response = {
+            'body': {
+                'wtn': circuit_id,
+                'clientID': client_id,
+            },
+            'status': 200,
         }
+
+        bruin_repository = Mock()
+        bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._process_email = CoroutineMock()
+
+        await intermapper_monitor._process_email_batch(emails, asset_id)
+
+        intermapper_monitor._bruin_repository.get_circuit_id.assert_awaited_with(asset_id)
+        intermapper_monitor._process_email.assert_has_awaits([
+            call(email_1, circuit_id, client_id),
+            call(email_2, circuit_id, client_id),
+        ])
+
+    @pytest.mark.asyncio
+    async def process_email_batch_no_asset_id_test(self):
+        asset_id = None
+
+        email_1 = {'msg_uid': 123, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        email_2 = {'msg_uid': 456, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        emails = [email_1, email_2]
 
         event_bus = Mock()
         logger = Mock()
@@ -280,7 +231,6 @@ class TestInterMapperMonitor:
         config = testconfig
 
         notifications_repository = Mock()
-        notifications_repository.get_unread_emails = CoroutineMock(return_value=intermapper_response)
         notifications_repository.mark_email_as_read = CoroutineMock()
 
         bruin_repository = Mock()
@@ -288,176 +238,246 @@ class TestInterMapperMonitor:
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository)
-        intermapper_monitor._create_outage_ticket = CoroutineMock()
 
-        await intermapper_monitor._intermapper_monitoring_process()
+        await intermapper_monitor._process_email_batch(emails, asset_id)
 
-        notifications_repository.get_unread_emails.assert_awaited_once()
-        notifications_repository.mark_email_as_read.assert_not_awaited()
-
-        bruin_repository.get_circuit_id.assert_not_awaited()
-        intermapper_monitor._create_outage_ticket.assert_not_awaited()
+        intermapper_monitor._notifications_repository.mark_email_as_read.assert_has_awaits([
+            call(email_1['msg_uid']),
+            call(email_2['msg_uid']),
+        ])
+        intermapper_monitor._bruin_repository.get_circuit_id.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def intermapper_monitoring_process_failed_test(self):
+    async def process_email_batch_non_2xx_test(self):
         asset_id = 123
-        client_id = 83959
-        intermapper_sd_wan_body = os.linesep.join([
-            "Event: Alarm",
-            f"Name: OReilly-HotSpringsAR(SD-WAN)-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
-        intermapper_failed_circuit_id_body = os.linesep.join([
-            "Event: Alarm",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
+        email_1 = {'msg_uid': 123, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        email_2 = {'msg_uid': 456, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        emails = [email_1, email_2]
 
-        intermapper_failed_to_mark_as_read = os.linesep.join([
-            "Event: Down",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
-
-        intermapper_failed_outage_process = os.linesep.join([
-            "Event: Down",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
-
-        intermapper_204_circuit_id_body = os.linesep.join([
-            "Event: Alarm",
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
-            f"Document: O Reilly Auto Parts - South East |{client_id}| Platinum Monitoring",
-            "Address: 1.3.4",
-            "Probe Type: SNMP - Adtran TA900 (SNMPv2c)",
-            "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
-            "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
-
-        msg_uid_0 = 0
-        msg_uid_1 = 1
-        msg_uid_2 = 2
-        msg_uid_3 = 3
-        msg_uid_4 = 4
-        msg_uid_5 = 5
-        msg_uid_6 = 6
-
-        email_msg = '\nSubject: Up: Signet_Piercing_Pagoda_Jewelers_PP00305VC(CCQ22250L1Y)\n'
-
-        intermapper_response = {
-            'body': [{'message': email_msg, 'subject': email_msg, 'body': 'skipped', 'msg_uid': -1},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_sd_wan_body,
-                      'msg_uid': msg_uid_0},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_sd_wan_body,
-                      'msg_uid': msg_uid_1},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_failed_circuit_id_body,
-                      'msg_uid': msg_uid_2},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_failed_to_mark_as_read,
-                      'msg_uid': msg_uid_3},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_failed_outage_process,
-                      'msg_uid': msg_uid_4},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_204_circuit_id_body,
-                      'msg_uid': msg_uid_5},
-                     {'message': email_msg, 'subject': email_msg, 'body': intermapper_204_circuit_id_body,
-                      'msg_uid': msg_uid_6},
-                     ],
-
-            'status': 200
-        }
-        mark_email_as_read_failed_response = {
-            'body': 'Failed to mark as read',
-            'status': 400
-        }
-        mark_email_as_read_success_response = {
-            'body': 'Marked as read',
-            'status': 200
-        }
-        circuit_id_response = {
-            "body": {
-                "clientID": client_id,
-                "subAccount": "string",
-                "wtn": asset_id,
-                "inventoryID": 0,
-                "addressID": 0
-            },
-            "status": 200
-        }
-        circuit_id_failed_response = {
-            "body": 'Failed',
-            "status": 400
-        }
-        circuit_id_204_response = {
-            "body": 'Failed',
-            "status": 204
-        }
         event_bus = Mock()
         logger = Mock()
-        logger.error = Mock()
         scheduler = Mock()
         config = testconfig
 
-        notifications_repository = Mock()
-        notifications_repository.get_unread_emails = CoroutineMock(return_value=intermapper_response)
-        notifications_repository.mark_email_as_read = CoroutineMock(side_effect=[mark_email_as_read_success_response,
-                                                                                 mark_email_as_read_failed_response,
-                                                                                 mark_email_as_read_failed_response,
-                                                                                 mark_email_as_read_success_response,
-                                                                                 mark_email_as_read_failed_response])
+        response = {
+            'body': None,
+            'status': 400,
+        }
 
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(side_effect=[circuit_id_failed_response,
-                                                                     circuit_id_response,
-                                                                     circuit_id_response,
-                                                                     circuit_id_204_response,
-                                                                     circuit_id_204_response])
+        bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock()
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository)
-        intermapper_monitor._create_outage_ticket = CoroutineMock(side_effect=[True, False])
 
-        await intermapper_monitor._intermapper_monitoring_process()
+        await intermapper_monitor._process_email_batch(emails, asset_id)
 
-        notifications_repository.get_unread_emails.assert_awaited_once()
-        notifications_repository.mark_email_as_read.assert_has_awaits([
-            call(msg_uid_0),
-            call(msg_uid_1),
-            call(msg_uid_3),
-            call(msg_uid_5),
-            call(msg_uid_6),
+        intermapper_monitor._bruin_repository.get_circuit_id.assert_awaited_with(asset_id)
+        intermapper_monitor._notifications_repository.mark_email_as_read.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_email_batch_204_test(self):
+        asset_id = 123
+
+        email_1 = {'msg_uid': 123, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        email_2 = {'msg_uid': 456, 'body': f"Name: OReilly-HotSpringsAR({asset_id})-Site803"}
+        emails = [email_1, email_2]
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        response = {
+            'body': None,
+            'status': 204,
+        }
+
+        bruin_repository = Mock()
+        bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock()
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+
+        await intermapper_monitor._process_email_batch(emails, asset_id)
+
+        intermapper_monitor._bruin_repository.get_circuit_id.assert_awaited_with(asset_id)
+        intermapper_monitor._notifications_repository.mark_email_as_read.assert_has_awaits([
+            call(email_1['msg_uid']),
+            call(email_2['msg_uid']),
         ])
 
-        bruin_repository.get_circuit_id.assert_has_awaits([
-            call(str(asset_id)),
-            call(str(asset_id)),
-            call(str(asset_id)),
-            call(str(asset_id)),
-            call(str(asset_id))
-        ])
-        intermapper_monitor._create_outage_ticket.assert_has_awaits([call(asset_id, client_id,
-                                                                          intermapper_failed_to_mark_as_read),
-                                                                     call(asset_id, client_id,
-                                                                          intermapper_failed_outage_process)
-                                                                     ])
+    @pytest.mark.asyncio
+    async def process_email_invalid_test(self):
+        circuit_id = 3214
+        client_id = 83959
 
-        logger.error.assert_called()
+        email = {
+            'msg_uid': 123,
+            'message': None,
+            'subject': '',
+            'body': 'Event: Down',
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock()
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+
+        await intermapper_monitor._process_email(email, circuit_id, client_id)
+
+        intermapper_monitor._logger.error.assert_called_once()
+        notifications_repository.mark_email_as_read.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_email_down_event_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        email = {
+            'msg_uid': 123,
+            'message': '',
+            'subject': '',
+            'body': 'Event: Down',
+        }
+
+        response = {
+            'body': None,
+            'status': 204
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
+
+        await intermapper_monitor._process_email(email, circuit_id, client_id)
+
+        intermapper_monitor._create_outage_ticket.assert_awaited_once_with(circuit_id, client_id, email['body'])
+        notifications_repository.mark_email_as_read.assert_awaited_once_with(email['msg_uid'])
+
+    @pytest.mark.asyncio
+    async def process_email_up_event_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        email = {
+            'msg_uid': 123,
+            'message': '',
+            'subject': '',
+            'body': 'Event: Up',
+        }
+
+        response = {
+            'body': None,
+            'status': 204
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=True)
+
+        await intermapper_monitor._process_email(email, circuit_id, client_id)
+
+        intermapper_monitor._autoresolve_ticket.assert_awaited_once_with(circuit_id, client_id, email['body'])
+        notifications_repository.mark_email_as_read.assert_awaited_once_with(email['msg_uid'])
+
+    @pytest.mark.asyncio
+    async def process_email_irrelevant_event_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        email = {
+            'msg_uid': 123,
+            'message': '',
+            'subject': '',
+            'body': 'Event: ACK',
+        }
+
+        response = {
+            'body': None,
+            'status': 204
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._create_outage_ticket = CoroutineMock()
+        intermapper_monitor._autoresolve_ticket = CoroutineMock()
+
+        await intermapper_monitor._process_email(email, circuit_id, client_id)
+
+        intermapper_monitor._create_outage_ticket.assert_not_awaited()
+        intermapper_monitor._autoresolve_ticket.assert_not_awaited()
+        notifications_repository.mark_email_as_read.assert_awaited_once_with(email['msg_uid'])
+
+    @pytest.mark.asyncio
+    async def process_email_failed_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        email = {
+            'msg_uid': 123,
+            'message': '',
+            'subject': '',
+            'body': 'Event: Up',
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock()
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+        intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=False)
+
+        await intermapper_monitor._process_email(email, circuit_id, client_id)
+
+        notifications_repository.mark_email_as_read.assert_not_awaited()
 
     def parse_email_body_test(self):
         event_bus = Mock()
@@ -2084,3 +2104,55 @@ class TestInterMapperMonitor:
             ticket_notes5, serial_number_2, autoresolve_limit
         )
         assert ticket_bool6 is True
+
+    @pytest.mark.asyncio
+    async def mark_email_as_read_test(self):
+        msg_uid = 123
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        response = {
+            'body': None,
+            'status': 204
+        }
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+
+        await intermapper_monitor._mark_email_as_read(msg_uid)
+
+        intermapper_monitor._notifications_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
+        intermapper_monitor._logger.error.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def mark_email_as_read_non_2xx_test(self):
+        msg_uid = 123
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        response = {
+            'body': None,
+            'status': 400
+        }
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository)
+
+        await intermapper_monitor._mark_email_as_read(msg_uid)
+
+        intermapper_monitor._notifications_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
+        intermapper_monitor._logger.error.assert_called_once()
