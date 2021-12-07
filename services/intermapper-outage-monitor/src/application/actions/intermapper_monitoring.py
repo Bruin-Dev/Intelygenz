@@ -1,3 +1,4 @@
+import asyncio
 import re
 import time
 from datetime import datetime
@@ -22,6 +23,7 @@ class InterMapperMonitor:
         self._config = config
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
+        self._semaphore = asyncio.BoundedSemaphore(self._config.INTERMAPPER_CONFIG['concurrent_email_batches'])
 
     async def start_intermapper_outage_monitoring(self, exec_on_start=False):
         self._logger.info('Scheduling InterMapper Monitor job...')
@@ -51,13 +53,9 @@ class InterMapperMonitor:
             return
 
         emails_by_asset_id = self._group_emails_by_asset_id(unread_emails_body)
+        tasks = [self._process_email_batch(emails, asset_id) for asset_id, emails in emails_by_asset_id.items()]
 
-        for asset_id in emails_by_asset_id:
-            self._logger.info(f'Processing all emails with asset_id {asset_id}')
-            emails = emails_by_asset_id[asset_id]
-
-            for email in emails:
-                await self._process_email(email, asset_id)
+        await asyncio.gather(*tasks)
 
         stop = time.time()
         self._logger.info(f'Finished processing unread emails from {self._config.INTERMAPPER_CONFIG["inbox_email"]}. '
@@ -72,6 +70,15 @@ class InterMapperMonitor:
             emails_by_asset_id[asset_id].append(email)
 
         return emails_by_asset_id
+
+    async def _process_email_batch(self, emails, asset_id):
+        async with self._semaphore:
+            self._logger.info(f'Processing {len(emails)} email(s) with asset_id {asset_id}...')
+
+            for email in emails:
+                await self._process_email(email, asset_id)
+
+            self._logger.info(f'Finished processing all emails with asset_id {asset_id}!')
 
     async def _process_email(self, email, asset_id):
         message = email['message']

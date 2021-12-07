@@ -26,6 +26,7 @@ INTERMAPPER_CONFIG = {
     'monitoring_interval': 30,
     'inbox_email': 'mettel.automation@intelygenz.com',
     'sender_emails_list': ['noreply@mettel.net'],
+    'concurrent_email_batches': 10,
     'intermapper_down_events': ['Down', 'Critical', 'Alarm', 'Warning', 'Link Warning'],
     'intermapper_up_events': ['Up', 'OK'],
     'autoresolve_last_outage_seconds': 60 * 75,
