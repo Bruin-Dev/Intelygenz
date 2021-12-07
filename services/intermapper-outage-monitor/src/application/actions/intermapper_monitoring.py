@@ -45,80 +45,92 @@ class InterMapperMonitor:
         unread_emails_response = await self._notifications_repository.get_unread_emails()
         unread_emails_body = unread_emails_response['body']
         unread_emails_status = unread_emails_response['status']
+
         if unread_emails_status not in range(200, 300):
             return
+
         for email in unread_emails_body:
-            message = email['message']
-            body = email['body']
-            msg_uid = email['msg_uid']
-            if message is None or msg_uid == -1:
-                self._logger.error(f'Invalid message: {email}')
-                continue
-            email_subject = email['subject']
-
-            self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {email_subject}')
-
-            parsed_email_dict = self._parse_email_body(body)
-
-            self._logger.info('Grabbing the asset_id from the InterMapper email')
-            asset_id = self._extract_value_from_field('(', ')', parsed_email_dict['name'])
-
-            if asset_id is None or asset_id == 'SD-WAN' or asset_id == '':
-                mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
-                mark_email_as_read_status = mark_email_as_read_response['status']
-                if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and '
-                                       f'subject: {email_subject} as read')
-                continue
-
-            circuit_id_response = await self._bruin_repository.get_circuit_id(asset_id)
-            circuit_id_status = circuit_id_response['status']
-            if circuit_id_status not in range(200, 300):
-                continue
-            if circuit_id_status == 204:
-                self._logger.error(f'Bruin returned a 204 when getting the circuit id of asset_id {asset_id}.'
-                                   f'Marking email as read')
-                mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
-                mark_email_as_read_status = mark_email_as_read_response['status']
-                if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and '
-                                       f'subject: {email_subject} as read')
-                continue
-            circuit_id_body = circuit_id_response['body']
-            circuit_id = circuit_id_body['wtn']
-            self._logger.info(f'Got circuit_id from bruin: {circuit_id}')
-
-            self._logger.info('Grabbing the client_id from bruin ')
-            client_id = circuit_id_body['clientID']
-            self._logger.info(f'Got client_id {client_id} from bruin')
-            event_processed_successfully = False
-            if parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_up_events']:
-                self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]} there is no need to create'
-                                  f' a new ticket. Checking for autoresolve ...')
-                event_processed_successfully = await self._autoresolve_ticket(circuit_id, client_id, body)
-            elif parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_down_events']:
-                self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
-                                  f'checking for ticket creation ...')
-                event_processed_successfully = await self._create_outage_ticket(circuit_id, client_id, body)
-            else:
-                self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
-                                  f'so no further action is needs to be taken')
-                event_processed_successfully = True
-
-            if event_processed_successfully is True:
-                mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
-                mark_email_as_read_status = mark_email_as_read_response['status']
-                if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and '
-                                       f'subject: {email_subject} as read')
-                self._logger.info(f'Processed email: {msg_uid}')
-            else:
-                self._logger.info(f'An error occurred when doing the process related the event. Skipping the process'
-                                  f'to mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
+            await self._process_email(email)
 
         stop = time.time()
-        self._logger.info(f'Finished processing all unread email from {self._config.INTERMAPPER_CONFIG["inbox_email"]}'
-                          f'Elapsed time:{round((stop - start) / 60, 2)} minutes')
+        self._logger.info(f'Finished processing unread emails from {self._config.INTERMAPPER_CONFIG["inbox_email"]}. '
+                          f'Elapsed time: {round((stop - start) / 60, 2)} minutes')
+
+    async def _process_email(self, email):
+        message = email['message']
+        body = email['body']
+        msg_uid = email['msg_uid']
+        email_subject = email['subject']
+
+        if message is None or msg_uid == -1:
+            self._logger.error(f'Invalid message: {email}')
+            return
+
+        self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {email_subject}')
+
+        parsed_email_dict = self._parse_email_body(body)
+
+        self._logger.info('Grabbing the asset_id from the InterMapper email')
+        asset_id = self._extract_value_from_field('(', ')', parsed_email_dict['name'])
+
+        if asset_id is None or asset_id == 'SD-WAN' or asset_id == '':
+            mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
+            mark_email_as_read_status = mark_email_as_read_response['status']
+
+            if mark_email_as_read_status not in range(200, 300):
+                self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
+
+            return
+
+        circuit_id_response = await self._bruin_repository.get_circuit_id(asset_id)
+        circuit_id_status = circuit_id_response['status']
+
+        if circuit_id_status not in range(200, 300):
+            return
+
+        if circuit_id_status == 204:
+            self._logger.error(f'Bruin returned a 204 when getting the circuit id of asset_id {asset_id}.'
+                               f'Marking email as read')
+            mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
+            mark_email_as_read_status = mark_email_as_read_response['status']
+
+            if mark_email_as_read_status not in range(200, 300):
+                self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
+
+            return
+
+        circuit_id_body = circuit_id_response['body']
+        circuit_id = circuit_id_body['wtn']
+        self._logger.info(f'Got circuit_id from bruin: {circuit_id}')
+
+        self._logger.info('Grabbing the client_id from bruin ')
+        client_id = circuit_id_body['clientID']
+        self._logger.info(f'Got client_id {client_id} from bruin')
+
+        if parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_up_events']:
+            self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]} there is no need to create'
+                              f' a new ticket. Checking for autoresolve ...')
+            event_processed_successfully = await self._autoresolve_ticket(circuit_id, client_id, body)
+        elif parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_down_events']:
+            self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
+                              f'checking for ticket creation ...')
+            event_processed_successfully = await self._create_outage_ticket(circuit_id, client_id, body)
+        else:
+            self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
+                              f'so no further action is needs to be taken')
+            event_processed_successfully = True
+
+        if event_processed_successfully:
+            mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
+            mark_email_as_read_status = mark_email_as_read_response['status']
+
+            if mark_email_as_read_status not in range(200, 300):
+                self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
+
+            self._logger.info(f'Processed email: {msg_uid}')
+        else:
+            self._logger.info(f'An error occurred when doing the process related the event. Skipping the process'
+                              f'to mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
 
     def _parse_email_body(self, body):
         parsed_email_dict = {}
