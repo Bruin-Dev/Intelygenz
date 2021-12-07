@@ -75,56 +75,49 @@ class InterMapperMonitor:
         async with self._semaphore:
             self._logger.info(f'Processing {len(emails)} email(s) with asset_id {asset_id}...')
 
+            if not asset_id or asset_id == 'SD-WAN':
+                for email in emails:
+                    await self._mark_email_as_read(email['msg_uid'])
+
+                self._logger.info(f'Invalid asset_id. Skipping emails with asset_id {asset_id}...')
+                return
+
+            circuit_id_response = await self._bruin_repository.get_circuit_id(asset_id)
+            circuit_id_status = circuit_id_response['status']
+            circuit_id_body = circuit_id_response['body']
+
+            if circuit_id_status not in range(200, 300):
+                self._logger.error(f'Failed to get circuit id. Skipping emails with asset_id {asset_id}...')
+                return
+
+            if circuit_id_status == 204:
+                self._logger.error(f'Bruin returned a 204 when getting the circuit id of asset_id {asset_id}. '
+                                   f'Marking all emails with this asset_id as read')
+
+                for email in emails:
+                    await self._mark_email_as_read(email['msg_uid'])
+
+                return
+
+            circuit_id = circuit_id_body['wtn']
+            client_id = circuit_id_body['clientID']
+
             for email in emails:
-                await self._process_email(email, asset_id)
+                await self._process_email(email, circuit_id, client_id)
 
             self._logger.info(f'Finished processing all emails with asset_id {asset_id}!')
 
-    async def _process_email(self, email, asset_id):
+    async def _process_email(self, email, circuit_id, client_id):
         message = email['message']
         body = email['body']
         msg_uid = email['msg_uid']
-        email_subject = email['subject']
+        subject = email['subject']
 
         if message is None or msg_uid == -1:
             self._logger.error(f'Invalid message: {email}')
             return
 
-        self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {email_subject}')
-
-        if asset_id is None or asset_id == 'SD-WAN' or asset_id == '':
-            mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
-            mark_email_as_read_status = mark_email_as_read_response['status']
-
-            if mark_email_as_read_status not in range(200, 300):
-                self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
-
-            return
-
-        circuit_id_response = await self._bruin_repository.get_circuit_id(asset_id)
-        circuit_id_status = circuit_id_response['status']
-
-        if circuit_id_status not in range(200, 300):
-            return
-
-        if circuit_id_status == 204:
-            self._logger.error(f'Bruin returned a 204 when getting the circuit id of asset_id {asset_id}.'
-                               f'Marking email as read')
-            mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
-            mark_email_as_read_status = mark_email_as_read_response['status']
-
-            if mark_email_as_read_status not in range(200, 300):
-                self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
-
-            return
-
-        circuit_id_body = circuit_id_response['body']
-        circuit_id = circuit_id_body['wtn']
-        self._logger.info(f'Got circuit_id from bruin: {circuit_id}')
-
-        self._logger.info('Grabbing the client_id from bruin ')
-        client_id = circuit_id_body['clientID']
-        self._logger.info(f'Got client_id {client_id} from bruin')
+        self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {subject}')
 
         parsed_email_dict = self._parse_email_body(body)
 
@@ -142,16 +135,11 @@ class InterMapperMonitor:
             event_processed_successfully = True
 
         if event_processed_successfully:
-            mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
-            mark_email_as_read_status = mark_email_as_read_response['status']
-
-            if mark_email_as_read_status not in range(200, 300):
-                self._logger.error(f'Could not mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
-
+            await self._mark_email_as_read(msg_uid)
             self._logger.info(f'Processed email: {msg_uid}')
         else:
-            self._logger.info(f'An error occurred when doing the process related the event. Skipping the process'
-                              f'to mark email with msg_uid: {msg_uid} and subject: {email_subject} as read')
+            self._logger.error(f'Email with msg_uid: {msg_uid} and subject: {subject} '
+                               f'related to circuit ID: {circuit_id} could not be processed')
 
     def _parse_email_body(self, body):
         parsed_email_dict = {}
@@ -364,6 +352,13 @@ class InterMapperMonitor:
                 return False
 
         return True
+
+    async def _mark_email_as_read(self, msg_uid):
+        mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
+        mark_email_as_read_status = mark_email_as_read_response['status']
+
+        if mark_email_as_read_status not in range(200, 300):
+            self._logger.error(f'Could not mark email with msg_uid: {msg_uid} as read')
 
     @staticmethod
     def _get_first_element_matching(iterable, condition: Callable, fallback=None):
