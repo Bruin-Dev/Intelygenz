@@ -1,6 +1,7 @@
 import re
 import time
 from datetime import datetime
+from collections import defaultdict
 from typing import Callable
 
 from apscheduler.jobstores.base import ConflictingIdError
@@ -49,14 +50,30 @@ class InterMapperMonitor:
         if unread_emails_status not in range(200, 300):
             return
 
-        for email in unread_emails_body:
-            await self._process_email(email)
+        emails_by_asset_id = self._group_emails_by_asset_id(unread_emails_body)
+
+        for asset_id in emails_by_asset_id:
+            self._logger.info(f'Processing all emails with asset_id {asset_id}')
+            emails = emails_by_asset_id[asset_id]
+
+            for email in emails:
+                await self._process_email(email, asset_id)
 
         stop = time.time()
         self._logger.info(f'Finished processing unread emails from {self._config.INTERMAPPER_CONFIG["inbox_email"]}. '
                           f'Elapsed time: {round((stop - start) / 60, 2)} minutes')
 
-    async def _process_email(self, email):
+    def _group_emails_by_asset_id(self, emails):
+        emails_by_asset_id = defaultdict(list)
+
+        for email in emails:
+            parsed_email_dict = self._parse_email_body(email['body'])
+            asset_id = self._extract_value_from_field('(', ')', parsed_email_dict['name'])
+            emails_by_asset_id[asset_id].append(email)
+
+        return emails_by_asset_id
+
+    async def _process_email(self, email, asset_id):
         message = email['message']
         body = email['body']
         msg_uid = email['msg_uid']
@@ -67,11 +84,6 @@ class InterMapperMonitor:
             return
 
         self._logger.info(f'Processing email with msg_uid: {msg_uid} and subject: {email_subject}')
-
-        parsed_email_dict = self._parse_email_body(body)
-
-        self._logger.info('Grabbing the asset_id from the InterMapper email')
-        asset_id = self._extract_value_from_field('(', ')', parsed_email_dict['name'])
 
         if asset_id is None or asset_id == 'SD-WAN' or asset_id == '':
             mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
@@ -106,6 +118,8 @@ class InterMapperMonitor:
         self._logger.info('Grabbing the client_id from bruin ')
         client_id = circuit_id_body['clientID']
         self._logger.info(f'Got client_id {client_id} from bruin')
+
+        parsed_email_dict = self._parse_email_body(body)
 
         if parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_up_events']:
             self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]} there is no need to create'
