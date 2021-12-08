@@ -124,8 +124,8 @@ Then it sends both of those values to the email reader repository.
 The repository will first search if the `email_account` exist in the config's `EMAIL_ACCOUNTS` dictionary. It will then 
 return the associated password if found then send both the `email_account`, the associated password, and the `email_filter` to the client.
 
-The client should be returning all the unread email, from the all emails folder of the `email_account` given that were sent
-by email addresses specified in the `email_filter` and that were sent that the day the rpc request was made.
+The client should be returning all the unread email from the all emails folder of the `email_account`, sorted by sent date, given they were sent
+by email addresses specified in the `email_filter` and they were sent the day the rpc request was made.
 
 
 ### Request message <a name="get-unread-emails_request_message"></a>
