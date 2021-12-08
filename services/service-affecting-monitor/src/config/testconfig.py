@@ -64,14 +64,15 @@ MONITOR_REPORT_CONFIG = {
     'trailing_days': 14,
     'monitoring_minutes_interval': 10,
     'timezone': 'US/Eastern',
-    "report_config_by_trouble": {
+    'report_config_by_trouble': {
         'default': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
                     'mettel.automation@intelygenz.com'],
         83959: ['clmillsap@oreillyauto.com', 'mgallion2@oreillyauto.com', 'rbodenhamer@oreillyauto.com',
                 'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net'],
         72959: ['DL_Tenet_Telecom@nttdata.com', 'Jake.Salas@tenethealth.com', 'dshim@mettel.net',
                 'mgoldstein@mettel.net'],
-        83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net']
+        83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net'],
+        86937: ['networkservices@signetjewelers.com', 'pallen@mettel.net'],
     }
 }
 
