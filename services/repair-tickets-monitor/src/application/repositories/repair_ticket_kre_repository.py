@@ -22,13 +22,13 @@ class RepairTicketKreRepository:
             "client_id": email_data["email"]["client_id"],
             "subject": email_data["email"]["client_id"],
             "body": email_data["email"]["body"],
-            "from_address": email_data["email"]["from"],
-            "to": email_data["email"]["to"],
-            "cc": email_data["email"]["cc"],
+            "from_address": email_data["email"]["from_address"],
+            "to": email_data["email"]["to_address"],
+            "cc": email_data["email"]["send_cc"],
             "date": email_data["email"]["date"],
             "tag": {
                 "type": tag_name,
-                "probability": tag_info['probability'],
+                "probability": tag_info['tag_probability'],
             }
         }
 

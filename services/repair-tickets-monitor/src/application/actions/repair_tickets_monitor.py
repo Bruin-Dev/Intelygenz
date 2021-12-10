@@ -1,11 +1,13 @@
 import asyncio
-from collections import defaultdict
 import time
+from collections import ChainMap
+from datetime import datetime
+from typing import Any, Dict, Set, List, Tuple, Iterator
+
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from datetime import datetime
 from pytz import timezone
-from typing import Any, Dict, Set, List, Tuple, Iterator
+
 from application.exceptions import ResponseException
 
 
@@ -66,11 +68,16 @@ class RepairTicketsMonitor:
         start_time = time.time()
 
         self._logger.info("Getting all tagged emails...")
-        tagged_emails = self._new_tagged_emails_repository.get_tagged_pending_emails()
+        tagged_emails_by_stored_key: List[Dict[str, dict]] = \
+            self._new_tagged_emails_repository.get_tagged_pending_emails()
+        tagged_emails: List[Dict[str, Any]] = list(dict(ChainMap(*tagged_emails_by_stored_key)).values())
+        self._logger.info(tagged_emails)
         repair_emails, other_tags_emails = self._triage_emails_by_tag(tagged_emails)
-        self._logger.info(f"Got {len(tagged_emails)} tagged emails of those where {repair_emails} repair emails.")
+        self._logger.info(f"Got {len(tagged_emails)} tagged emails.")
+        self._logger.info(f"Got {len(repair_emails)} Repair emails: {repair_emails}")
+        self._logger.info(f"Got {len(other_tags_emails)} emails with meaningless tags: {other_tags_emails}")
 
-        other_tags_tasks = [self._process_other_tags_email(email_data) for email_data in repair_emails]
+        other_tags_tasks = [self._process_other_tags_email(email_data) for email_data in other_tags_emails]
         repair_tasks = [self._process_repair_email(email_data) for email_data in repair_emails]
         tasks = repair_tasks + other_tags_tasks
 
@@ -82,22 +89,26 @@ class RepairTicketsMonitor:
         )
         self._logger.info(f"Output: {output}")
 
-    def _triage_emails_by_tag(self, tagged_emails) -> Tuple[Iterator, Iterator]:
+    def _triage_emails_by_tag(self, tagged_emails) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """Separate between repair emails and non repair emails"""
         repair_tag_id = self._config.MONITOR_CONFIG["tag_ids"]["Repair"]
-        repair_emails = filter(lambda x: x['tag_id'] == repair_tag_id, tagged_emails)
-        other_tags_emails = filter(lambda x: x['tag_id'] != repair_tag_id, tagged_emails)
+        repair_emails = [e for e in tagged_emails if e['tag_id'] == repair_tag_id]
+        other_tags_emails = [e for e in tagged_emails if e['tag_id'] != repair_tag_id]
 
         return repair_emails, other_tags_emails
 
     async def _process_other_tags_email(self, email: Dict[str, Any]):
         """Process email that are not repair tickets"""
+        tag_name = [tag for tag, id_ in self._config.MONITOR_CONFIG["tag_ids"].items() if id_ == email['tag_id']][0]
+
+        self._logger.info(f"Marking email {email['email_id']} as complete because it's tagged as '{tag_name}'")
         self._new_tagged_emails_repository.mark_complete(email['email_id'])
 
-    async def _get_inference(self, email_data):
+    async def _get_inference(self, email_data, tag_info):
         """Get the models inference for given email data"""
         prediction_response = await self._repair_tickets_kre_repository.get_email_inference(
-            email_data
+            email_data,
+            tag_info,
         )
         if prediction_response["status"] not in range(200, 300):
             self._logger.info(
@@ -152,7 +163,7 @@ class RepairTicketsMonitor:
         tickets_cannot_be_created = []
 
         async with self._semaphore:
-            inference_data = await self._get_inference(email_data)
+            inference_data = await self._get_inference(email_data, email_tag_info)
             if not inference_data:
                 return
 

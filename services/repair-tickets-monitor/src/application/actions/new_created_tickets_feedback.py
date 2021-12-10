@@ -66,7 +66,6 @@ class NewCreatedTicketsFeedback:
         tasks = [
             self._save_created_ticket_feedback(data['email'], data['ticket'])
             for data in new_tickets
-            if self._new_created_tickets_repository.validate_ticket(data)
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info("NewCreatedTicketsFeedback process finished! Took {:.3f}s".format(time.time() - start_time))
@@ -85,7 +84,7 @@ class NewCreatedTicketsFeedback:
 
     async def _save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
-        ticket_id = int(ticket_data["ticketId"])
+        ticket_id = int(ticket_data["ticket_id"])
 
         async with self._semaphore:
 
