@@ -10,12 +10,10 @@ class TestNewTaggedEmailsRepository:
         new_tagged_emails_repository = NewTaggedEmailsRepository(
             logger,
             config,
-            notifications_repository,
             storage_repository,
         )
         assert new_tagged_emails_repository._logger == logger
         assert new_tagged_emails_repository._config == config
-        assert new_tagged_emails_repository._notifications_repository == notifications_repository
         assert new_tagged_emails_repository._storage_repository == storage_repository
 
     def get_tagged_pending_emails_test(self, new_tagged_emails_repository):

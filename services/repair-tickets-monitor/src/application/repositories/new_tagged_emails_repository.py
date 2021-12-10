@@ -2,10 +2,9 @@ from typing import List
 
 
 class NewTaggedEmailsRepository:
-    def __init__(self, logger, config, notifications_repository, storage_repository):
+    def __init__(self, logger, config, storage_repository):
         self._logger = logger
         self._config = config
-        self._notifications_repository = notifications_repository
         self._storage_repository = storage_repository
 
     def get_tagged_pending_emails(self) -> List[dict]:

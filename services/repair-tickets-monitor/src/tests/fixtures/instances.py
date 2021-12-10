@@ -69,11 +69,10 @@ def new_created_tickets_repository(logger, storage_repository):
 
 
 @pytest.fixture(scope='function')
-def new_tagged_emails_repository(logger, storage_repository, notifications_repository):
+def new_tagged_emails_repository(logger, storage_repository):
     return NewTaggedEmailsRepository(
         logger,
         config,
-        notifications_repository,
         storage_repository,
     )
 

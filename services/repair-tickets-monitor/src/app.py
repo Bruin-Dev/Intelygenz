@@ -53,18 +53,17 @@ class Container:
 
         # REPOSITORIES
         self._storage_repository = StorageRepository(config, self._logger, self._redis_cache_client)
-        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._notifications_repository = NotificationsRepository(self._event_bus)
+        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._new_tagged_emails_repository = NewTaggedEmailsRepository(
             self._logger,
             config,
-            self._notifications_repository,
             self._storage_repository,
         )
         self._new_tickets_repository = NewCreatedTicketsRepository(
             self._logger,
             config,
-            self._notifications_repository,
+            self._storage_repository,
         )
         self._repair_ticket_repository = RepairTicketKreRepository(self._event_bus, self._logger, config,
                                                                    self._notifications_repository)
