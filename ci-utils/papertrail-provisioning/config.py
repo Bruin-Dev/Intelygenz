@@ -33,11 +33,6 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[bruin-bridge] - logs",
                     "repository": "bruin-bridge",
                 },
-                # {
-                #     "query": f"cts-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                #     "search_name": f"[cts-bridge] - logs",
-                #     "repository": "cts-bridge"
-                # },
                 {
                     "query": f'customer-cache AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER> AND -"-customer-cache"',
                     "search_name": f"[customer-cache] - logs",
@@ -53,11 +48,6 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[digi-reboot-report] - logs",
                     "repository": "digi-reboot-report",
                 },
-                # {
-                #     "query": f"dispatch-portal-backend AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                #     "search_name": f"[dispatch-portal-backend] - logs",
-                #     "repository": "dispatch-portal-backend"
-                # },
                 # {
                 #     "query": f"grafana AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[grafana] - logs",
@@ -113,11 +103,6 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[links-metrics-collector] - logs",
                     "repository": "links-metrics-collector",
                 },
-                # {
-                #     "query": f"lit-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                #     "search_name": f"[lit-bridge] - logs",
-                #     "repository": "lit-bridge"
-                # },
                 {
                     "query": f"lumin-billing-report AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[lumin-billing-report] - logs",
@@ -129,6 +114,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "notifier",
                 },
                 {
+                    "query": f"repair-tickets-kre-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[repair-tickets-kre-bridge] - logs",
+                    "repository": "repair-tickets-kre-bridge",
+                },
+                {
                     "query": f"NGINX AND <BUILD_NUMBER> AND {ENVIRONMENT_NAME}",
                     "search_name": f"[nginx] - logs",
                     "repository": "dispatch-portal-frontend/nginx",
@@ -138,11 +128,6 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[service-affecting-monitor] - logs",
                     "repository": "service-affecting-monitor",
                 },
-                # {
-                #     "query": f"service-dispatch-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                #     "search_name": f"[service-dispatch-monitor] - logs",
-                #     "repository": "service-dispatch-monitor"
-                # },
                 {
                     "query": f"service-outage-monitor-1 AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor-1] - logs",

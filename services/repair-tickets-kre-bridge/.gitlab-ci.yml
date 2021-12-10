@@ -7,11 +7,11 @@ repair-tickets-kre-bridge-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - repair-tickets-kre-bridge/src/application/**/*
-        - repair-tickets-kre-bridge/src/config/**/*
-        - repair-tickets-kre-bridge/src/app.py
-        - repair-tickets-kre-bridge/Dockerfile
-        - repair-tickets-kre-bridge/requirements.txt
+        - services/repair-tickets-kre-bridge/src/application/**/*
+        - services/repair-tickets-kre-bridge/src/config/**/*
+        - services/repair-tickets-kre-bridge/src/app.py
+        - services/repair-tickets-kre-bridge/Dockerfile
+        - services/repair-tickets-kre-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -24,11 +24,11 @@ repair-tickets-kre-bridge-test:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - repair-tickets-kre-bridge/src/application/**/*
-        - repair-tickets-kre-bridge/src/config/**/*
-        - repair-tickets-kre-bridge/src/app.py
-        - repair-tickets-kre-bridge/Dockerfile
-        - repair-tickets-kre-bridge/requirements.txt
+        - services/repair-tickets-kre-bridge/src/application/**/*
+        - services/repair-tickets-kre-bridge/src/config/**/*
+        - services/repair-tickets-kre-bridge/src/app.py
+        - services/repair-tickets-kre-bridge/Dockerfile
+        - services/repair-tickets-kre-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["repair-tickets-kre-bridge-linter"]
@@ -44,11 +44,11 @@ repair-tickets-kre-bridge-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - repair-tickets-kre-bridge/src/application/**/*
-        - repair-tickets-kre-bridge/src/config/**/*
-        - repair-tickets-kre-bridge/src/app.py
-        - repair-tickets-kre-bridge/Dockerfile
-        - repair-tickets-kre-bridge/requirements.txt
+        - services/repair-tickets-kre-bridge/src/application/**/*
+        - services/repair-tickets-kre-bridge/src/config/**/*
+        - services/repair-tickets-kre-bridge/src/app.py
+        - services/repair-tickets-kre-bridge/Dockerfile
+        - services/repair-tickets-kre-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

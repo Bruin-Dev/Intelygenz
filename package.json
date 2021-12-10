@@ -81,6 +81,7 @@
     "./services/links-metrics-collector",
     "./services/lumin-billing-report",
     "./services/notifier",
+    "./services/repair-tickets-kre-bridge",
     "./services/service-affecting-monitor",
     "./services/service-outage-monitor",
     "./services/sites-monitor",

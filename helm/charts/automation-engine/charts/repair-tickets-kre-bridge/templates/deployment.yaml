@@ -1,60 +1,52 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "repair-tickets-monitor.fullname" . }}
+  name: {{ include "repair-tickets-kre-bridge.fullname" . }}
   labels:
-    {{- include "repair-tickets-monitor.labels" . | nindent 4 }}
+    {{- include "repair-tickets-kre-bridge.labels" . | nindent 4 }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+{{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
+{{- end }}
   selector:
     matchLabels:
-      {{- include "repair-tickets-monitor.selectorLabels" . | nindent 6 }}
+      {{- include "repair-tickets-kre-bridge.selectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "repair-tickets-monitor.selectorLabels" . | nindent 8 }}
+        {{- include "repair-tickets-kre-bridge.labels" . | nindent 8 }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
-      priorityClassName: medium-priority
+      priorityClassName: high-priority
       initContainers:
-        {{- if .Values.config.capabilities_enabled.bruin_bridge }}
-        - name: wait-bruin-bridge
+        - name: wait-nats-server
           image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://bruin-bridge:5000/_health; do echo waiting for bruin-bridge; sleep 2; done']
-        {{- end }}
-        {{- if .Values.config.capabilities_enabled.notifier }}
-        - name: wait-notifier
+          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+          envFrom:
+            - configMapRef:
+                name: {{ include "repair-tickets-kre-bridge.configmapName" . }}
+        - name: wait-redis
           image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']
-        {{- end }}
-        {{- if .Values.config.capabilities_enabled.repair_tickets_kre_bridge }}
-        - name: wait-repair-tickets-kre-bridge
-          image: busybox:1.28
-          command: [ 'sh', '-c', 'until wget --spider -S http://repair-tickets-kre-bridge:5000/_health; do echo waiting for repair-tickets-kre-bridge; sleep 2; done' ]
-        {{- end }}
+          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
+          envFrom:
+            - configMapRef:
+                name: {{ include "repair-tickets-kre-bridge.configmapName" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "repair-tickets-monitor.configmapName" . }}
+                name: {{ include "repair-tickets-kre-bridge.configmapName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-            {{- if .Values.config.metrics.enabled }}
-            - name: {{ .Values.config.metrics.svc.name }}
-              containerPort: {{ .Values.config.metrics.svc.port }}
-              protocol: TCP
-            {{- end }}
           livenessProbe:
             httpGet:
               path: /_health
