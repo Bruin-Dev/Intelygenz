@@ -605,6 +605,43 @@ notifier:
     targetMemoryUtilizationPercentage: 80
 
 
+# -- repair-tickets-monitor subchart specific configuration
+repair-tickets-monitor:
+  enabled: ${REPAIR_TICKETS_MONITOR_ENABLED}
+  replicaCount: ${REPAIR_TICKETS_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "repair-tickets-monitor-${REPAIR_TICKETS_MONITOR_BUILD_NUMBER}"
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${REPAIR_TICKETS_MONITOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 300m
+      memory: 384Mi
+    requests:
+      cpu: 150m
+      memory: 192Mi
+
+
 # -- service-affecting-monitor subchart specific configuration
 service-affecting-monitor:
   enabled: ${SERVICE_AFFECTING_MONITOR_ENABLED}
