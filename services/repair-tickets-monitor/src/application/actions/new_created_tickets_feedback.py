@@ -64,7 +64,7 @@ class NewCreatedTicketsFeedback:
         self._logger.info(f'Got {len(new_tickets)} tickets that needs processing.')
 
         tasks = [
-            self._save_created_ticket_feedback(data['email'], data['ticket'])
+            self._save_created_ticket_feedback(data['email']['email'], data['ticket'])
             for data in new_tickets
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
@@ -83,13 +83,13 @@ class NewCreatedTicketsFeedback:
                 self._new_created_tickets_repository.delete_ticket_error_counter(ticket_id, error_code)
 
     async def _save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
-        email_id = email_data["email"]["email_id"]
+        email_id = email_data["email_id"]
         ticket_id = int(ticket_data["ticket_id"])
 
         async with self._semaphore:
 
             # Get more info from Bruin
-            ticket_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
+            ticket_response = await self._bruin_repository.get_single_ticket_info_with_service_numbers(ticket_id)
 
             if ticket_response["status"] == 404:
                 self._check_error(404, ticket_id, email_id)

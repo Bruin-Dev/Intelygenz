@@ -171,8 +171,12 @@ class RepairTicketKreRepository:
             request_msg = {
                 "request_id": uuid(),
                 "body": {
-                    "original_email": email_data,
-                    "ticket": ticket_data,
+                    "ticket_id": ticket_data['ticket_id'],
+                    "email_id": email_data['email_id'],
+                    "parent_id": email_data['parent_id'],
+                    "client_id": email_data['client_id'],
+                    "real_service_numbers": ticket_data['service_numbers'],
+                    "real_class": ticket_data['category'],
                 }
             }
             try:

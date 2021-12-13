@@ -77,6 +77,25 @@ class BruinRepository:
         except Exception as e:
             self._logger.error(f"Error getting ticket {ticket_id} from Bruin: {e}")
 
+    async def get_single_ticket_info_with_service_numbers(self, ticket_id):
+        basic_info_response = await self.get_single_ticket_basic_info(ticket_id)
+        if basic_info_response['status'] not in range(200, 300):
+            return {'status': basic_info_response['status'], 'body': 'Error while retrieving basic ticket info'}
+        if not basic_info_response['body']:
+            return {'status': 404, 'body': 'Ticket not found'}
+
+        ticket = basic_info_response['body']
+        details = await self.get_ticket_details(ticket['ticket_id'])
+        if details['status'] not in range(200, 300):
+            err_msg = f'Error while retrieving details from ticket {ticket_id}'
+            self._logger(err_msg)
+            self._notifications_repository.send_slack_message(err_msg)
+            return {'status': 500, 'body': 'Error while retrieving ticket service_numbers'}
+        service_numbers = self._get_details_service_numbers(details['body'])
+        ticket['service_numbers'] = service_numbers
+
+        return {'status': 200, 'body': ticket}
+
     async def verify_service_number_information(self, client_id, service_number):
         @retry(
             wait=wait_exponential(
