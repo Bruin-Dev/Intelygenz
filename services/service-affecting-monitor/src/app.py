@@ -13,6 +13,7 @@ from igz.packages.server.api import QuartServer
 
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
+from application.actions.bandwidth_reports import BandwidthReports
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.metrics_repository import MetricsRepository
@@ -86,6 +87,10 @@ class Container:
             customer_cache_repository=self._customer_cache_repository,
         )
 
+        self._bandwidth_reports = BandwidthReports(
+            logger=self._logger, scheduler=self._scheduler, config=config,
+        )
+
     async def _start(self):
         self._start_prometheus_metrics_server()
 
@@ -93,6 +98,7 @@ class Container:
 
         await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
         await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=False)
+        await self._bandwidth_reports.start_bandwidth_reports_job(exec_on_start=False)
 
         self._scheduler.start()
 
