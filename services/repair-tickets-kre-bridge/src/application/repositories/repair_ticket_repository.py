@@ -24,5 +24,40 @@ class RepairTicketRepository:
             'body': response.get('body', {})
         }
 
-    async def save_outputs(self, email_data: dict, ticket_data: dict) -> dict:
-        return await self._kre_client.save_outputs(email_data)
+    async def save_outputs(self, output_data: dict) -> dict:
+        """Perform the actual request to the KRE.
+
+        Args:
+            output_data: information of validation/tickets created.
+
+        Returns:
+            dict: Response from kre
+        """
+        response = await self._kre_client.save_outputs(output_data)
+
+        if response['status'] not in range(200, 300):
+            return response
+
+        return {
+            'status': response['status'],
+            'body': response.get('body', {})
+        }
+
+    async def save_created_ticket_feedback(self, created_ticket_data: dict) -> dict:
+        """Save the created ticket
+
+        Args:
+            created_ticket_data: feedback for the model.
+
+        Returns:
+            dict: Response from kre
+        """
+        response = await self._kre_client.save_created_ticket_feedback(created_ticket_data)
+
+        if response['status'] not in range(200, 300):
+            return response
+
+        return {
+            'status': response['status'],
+            'body': response.get('body', {})
+        }

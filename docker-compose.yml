@@ -99,8 +99,6 @@ services:
     ports:
       - 5056:5000
 
-    # NOTE: Extra hosts is needed only for local development with a KRE local
-    #       Change to your host IP
     # extra_hosts:
     #  - "host.docker.internal:192.168.1.51"
 
@@ -343,8 +341,8 @@ services:
     ports:
       - 5058:5000
       - 9010:9000
-    #extra_hosts:
-    #  - "kre-host:$KREHOST"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   service-affecting-monitor:
     build:

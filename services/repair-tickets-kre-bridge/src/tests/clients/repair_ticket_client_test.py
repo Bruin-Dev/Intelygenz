@@ -135,7 +135,7 @@ class TestRepairTicketClient:
         assert prediction_response == exp_prediction_response
 
     @pytest.mark.asyncio
-    async def post_automation_outputs_200_test(self, valid_output_response, valid_output_request):
+    async def save_outputs_200_test(self, valid_output_response, valid_output_request):
         mock_stub_save_outputs_response = self.__data_to_grpc_message(
             valid_output_response['body'],
             pb2.SaveOutputsResponse()
@@ -162,7 +162,7 @@ class TestRepairTicketClient:
 
     @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
     @pytest.mark.asyncio
-    async def post_automation_outputs_exception_errors_test(
+    async def save_outputs_grpc_exception_errors_test(
             self,
             grpc_code,
             grpc_detail,
@@ -195,7 +195,7 @@ class TestRepairTicketClient:
         assert save_outputs_response == exp_save_outputs_response
 
     @pytest.mark.asyncio
-    async def post_automation_outputs_exception_test(self, valid_output_request):
+    async def save_outputs_exception_test(self, valid_output_request):
         raised_error = 'Error current exception test'
         logger = Mock()
 
@@ -203,7 +203,7 @@ class TestRepairTicketClient:
         stub.SaveOutputs = CoroutineMock()
         stub.SaveOutputs.side_effect = Exception(raised_error)
 
-        exp_save_metric_response = {
+        exp_save_output_response = {
             "body": f"Error: {raised_error}",
             "status": 500,
         }
@@ -217,4 +217,93 @@ class TestRepairTicketClient:
 
         assert logger.info.call_count == 0
         assert logger.error.call_count == 1
-        assert save_outputs_response == exp_save_metric_response
+        assert save_outputs_response == exp_save_output_response
+
+    @pytest.mark.asyncio
+    async def save_created_ticket_feedback_200_test(
+            self,
+            valid_created_ticket_request,
+            valid_created_ticket_response,
+    ):
+        mock_stub_save_create_tickets_feedback_response = self.__data_to_grpc_message(
+            valid_created_ticket_response['body'],
+            pb2.SaveCreatedTicketsFeedbackResponse()
+        )
+
+        logger = Mock()
+
+        stub = Mock()
+        stub.SaveCreatedTicketsFeedback = CoroutineMock(return_value=mock_stub_save_create_tickets_feedback_response)
+
+        kre_client = RepairTicketClient(logger, testconfig)
+
+        with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
+            saved_created_ticket_response = await kre_client.save_created_ticket_feedback(valid_created_ticket_request)
+
+            assert saved_created_ticket_response == valid_created_ticket_response
+            stub.SaveCreatedTicketsFeedback.assert_awaited_once_with(
+                self.__data_to_grpc_message(
+                    valid_created_ticket_request,
+                    pb2.SaveCreatedTicketsFeedbackRequest()
+                ),
+                timeout=120
+            )
+
+    @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
+    @pytest.mark.asyncio
+    async def save_created_ticket_grpc_feedback_exception_test(
+            self,
+            grpc_code,
+            grpc_detail,
+            expected_status,
+            valid_created_ticket_request
+    ):
+        logger = Mock()
+
+        stub = Mock()
+        stub.SaveCreatedTicketsFeedback = CoroutineMock()
+        stub.SaveCreatedTicketsFeedback.side_effect = self.__mock_grpc_exception(
+            grpc_code,
+            grpc_detail
+        )
+
+        exp_save_created_ticket_response = {
+            "body": f"Grpc error details: {grpc_detail}",
+            "status": expected_status,
+        }
+
+        kre_client = RepairTicketClient(logger, testconfig)
+
+        with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
+            save_created_ticket_response = await kre_client.save_created_ticket_feedback(
+                valid_created_ticket_request
+            )
+
+        assert logger.info.call_count == 0
+        assert logger.error.call_count == 1
+        assert save_created_ticket_response == exp_save_created_ticket_response
+
+    @pytest.mark.asyncio
+    async def save_created_ticket_feedback_exception_test(self, valid_created_ticket_request):
+        raised_error = 'Error current exception test'
+        logger = Mock()
+
+        stub = Mock()
+        stub.SaveCreatedTicketsFeedback = CoroutineMock()
+        stub.SaveCreatedTicketsFeedback.side_effect = Exception(raised_error)
+
+        exp_save_created_ticket_response = {
+            "body": f"Error: {raised_error}",
+            "status": 500,
+        }
+
+        kre_client = RepairTicketClient(logger, testconfig)
+
+        with patch.object(pb2_grpc, 'EntrypointStub', return_value=stub):
+            save_created_ticket_response = await kre_client.save_created_ticket_feedback(
+                valid_created_ticket_request,
+            )
+
+        assert logger.info.call_count == 0
+        assert logger.error.call_count == 1
+        assert save_created_ticket_response == exp_save_created_ticket_response

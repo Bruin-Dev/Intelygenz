@@ -24,13 +24,9 @@ class TestPostAutomationMetrics:
 
     @pytest.mark.parametrize(
         "body_in_topic", [
-            None,
-            ({'some-key': 'some-data'}),
-            ({'email_id': 12345}),
+            ({}),
         ], ids=[
-            'without_body',
-            'without_params',
-            'without_email_data',
+            'no_body',
         ]
     )
     @pytest.mark.asyncio
@@ -61,37 +57,18 @@ class TestPostAutomationMetrics:
             response_topic,
             {
                 'request_id': request_id,
-                'body': 'You must specify {.."body": {"original_email": {...}, "ticket": {...}}} in the request',
+                'body': 'You must specify body in the request',
                 'status': 400,
             }
         )
 
     @pytest.mark.asyncio
-    async def save_outputs_ok_test(self):
+    async def save_outputs_ok_test(self, valid_output_request):
         request_id = 123
         response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
-        params = {
-            "original_email": {
-                "email": {
-                    "email_id": "2726244",
-                    "date": "2016-08-29T09:12:33:001Z",
-                    "subject": "email_subject",
-                    "body": "email_body",
-                    "parent_id": "2726243",
-                },
-                "tag_ids": ["4", "3", "2"]
-            },
-            "ticket": {
-                "ticket_id": "123456",
-                "call_type": "chg",
-                "category": "aac",
-                "creation_date": "2016-08-29T09:12:33:001Z"
-            }
-        }
-
         msg_published_in_topic = {
             'request_id': request_id,
-            'body': params,
+            'body': valid_output_request,
             'response_topic': response_topic,
         }
 

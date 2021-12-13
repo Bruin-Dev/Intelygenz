@@ -13,12 +13,12 @@ class TestGetInference:
         event_bus = Mock()
         kre_repository = Mock()
 
-        prediction = GetInference(logger, config, event_bus, kre_repository)
+        inference = GetInference(logger, config, event_bus, kre_repository)
 
-        assert prediction._config == config
-        assert prediction._logger == logger
-        assert prediction._event_bus == event_bus
-        assert prediction._kre_repository == kre_repository
+        assert inference._config == config
+        assert inference._logger == logger
+        assert inference._event_bus == event_bus
+        assert inference._kre_repository == kre_repository
 
     @pytest.mark.parametrize(
         'body_in_topic', [
@@ -47,20 +47,20 @@ class TestGetInference:
         kre_repository = Mock()
         kre_repository.get_email_inference = CoroutineMock()
 
-        prediction_action = GetInference(logger, config, event_bus, kre_repository)
+        inference_action = GetInference(logger, config, event_bus, kre_repository)
 
-        await prediction_action.get_email_inference(msg_published_in_topic)
+        await inference_action.get_email_inference(msg_published_in_topic)
 
         logger.error.assert_called_once()
-        prediction_action._event_bus.publish_message.assert_awaited_once_with(
+        inference_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
                 'request_id': request_id,
-                'body': 'You must specify {.."body": { "email": {"email_id", "subject", ...}}} in the request',
+                'body': 'You must specify {.."body": { "email_id", "subject", ...}} in the request',
                 'status': 400,
             }
         )
-        prediction_action._kre_repository.get_email_inference.assert_not_awaited()
+        inference_action._kre_repository.get_email_inference.assert_not_awaited()
         logger.info.assert_not_called()
 
     @pytest.mark.asyncio
@@ -77,7 +77,7 @@ class TestGetInference:
             'body': request_body,
             'response_topic': response_topic,
         }
-        expected_prediction = {
+        expected_inference = {
             'status': 200,
             'body': make_inference_data()
         }
@@ -86,18 +86,18 @@ class TestGetInference:
         event_bus.publish_message = CoroutineMock()
 
         kre_repository = Mock()
-        kre_repository.get_email_inference = CoroutineMock(return_value=expected_prediction)
+        kre_repository.get_email_inference = CoroutineMock(return_value=expected_inference)
 
-        prediction_action = GetInference(logger, config, event_bus, kre_repository)
+        inference_action = GetInference(logger, config, event_bus, kre_repository)
 
-        await prediction_action.get_email_inference(msg_published_in_topic)
+        await inference_action.get_email_inference(msg_published_in_topic)
 
-        prediction_action._kre_repository.get_email_inference.assert_awaited_once_with(request_body)
-        prediction_action._event_bus.publish_message.assert_awaited_once_with(
+        inference_action._kre_repository.get_email_inference.assert_awaited_once_with(request_body)
+        inference_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
                 'request_id': request_id,
-                **expected_prediction,
+                **expected_inference,
             }
         )
         logger.info.assert_called_once()

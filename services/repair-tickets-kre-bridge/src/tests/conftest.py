@@ -52,3 +52,21 @@ def valid_output_request(make_save_outputs_request_payload, make_rta_ticket_payl
 def valid_output_response():
     payload = {"success": True}
     return {"status": 200, "body": payload}
+
+
+@pytest.fixture
+def valid_created_ticket_request(make_created_ticket_request_payload):
+    return make_created_ticket_request_payload(
+        ticket_id="1245",
+        email_id="5678",
+        parent_id="91011",
+        client_id="10000",
+        real_service_numbers=["125", "568"],
+        real_class="VOO"
+    )
+
+
+@pytest.fixture
+def valid_created_ticket_response():
+    payload = {"success": True}
+    return {"status": 200, "body": payload}

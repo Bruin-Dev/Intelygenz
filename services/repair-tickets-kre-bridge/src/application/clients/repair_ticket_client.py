@@ -3,8 +3,6 @@ import grpc
 from grpc import aio as grpc_aio
 from google.protobuf.json_format import Parse, MessageToDict
 
-from typing import Any, Dict, List
-
 from application.clients.generated_grpc import (
     public_input_pb2_grpc as pb2_grpc,
     public_input_pb2 as pb2,
@@ -47,8 +45,8 @@ class RepairTicketClient:
         try:
             stub = await self._create_stub()
             email_message = Parse(
-                json.dumps(email_data).encode("utf8"),
-                pb2.Email(),
+                json.dumps({'email': email_data}).encode("utf8"),
+                pb2.PredictionRequest(),
                 ignore_unknown_fields=False,
             )
 
@@ -88,7 +86,7 @@ class RepairTicketClient:
 
         return response
 
-    async def save_outputs(self, payload) -> dict:
+    async def save_outputs(self, payload: dict) -> dict:
         try:
             stub = await self._create_stub()
 
@@ -120,6 +118,42 @@ class RepairTicketClient:
             response = {"body": f"Error: {e.args[0]}", "status": 500}
             self._logger.error(
                 f'Got error saving outputs from Konstellation: {response["body"]}'
+            )
+
+        return response
+
+    async def save_created_ticket_feedback(self, payload: dict) -> dict:
+        try:
+            stub = await self._create_stub()
+
+            save_created_ticket_response = await stub.SaveCreatedTicketsFeedback(
+                Parse(
+                    json.dumps(payload).encode("utf8"),
+                    pb2.SaveCreatedTicketsFeedbackRequest(),
+                    ignore_unknown_fields=False,
+                ),
+                timeout=120,
+            )
+
+            response = {"body": {'success': save_created_ticket_response.success}, "status": 200}
+
+            self._logger.info(
+                f'Got response saving created ticket feedback from Konstellation: {response["body"]}'
+            )
+
+        except grpc.RpcError as grpc_e:
+            response = {
+                "body": f"Grpc error details: {grpc_e.details()}",
+                "status": self.__grpc_to_http_status(grpc_e.code()),
+            }
+            self._logger.error(
+                f'Got grpc error saving created ticket feedback from Konstellation: {response["body"]}'
+            )
+
+        except Exception as e:
+            response = {"body": f"Error: {e.args[0]}", "status": 500}
+            self._logger.error(
+                f'Got error saving created tickets feedback from Konstellation: {response["body"]}'
             )
 
         return response

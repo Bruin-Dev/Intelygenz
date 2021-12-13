@@ -159,3 +159,26 @@ def make_save_outputs_request_payload(make_rta_ticket_payload):
         }
 
     return _inner
+
+
+@pytest.fixture
+def make_created_ticket_request_payload():
+    def _inner(
+            ticket_id: str = "",
+            email_id: str = "",
+            parent_id: str = "",
+            client_id: str = "",
+            real_service_numbers: List[str] = None,
+            real_class: str = "",
+    ):
+        real_service_numbers = real_service_numbers or []
+        return {
+            "ticket_id": ticket_id,
+            "email_id": email_id,
+            "parent_id": parent_id,
+            "client_id": client_id,
+            "real_service_numbers": real_service_numbers,
+            "real_class": real_class,
+        }
+
+    return _inner

@@ -34,12 +34,13 @@ class Container:
         self._publisher = NATSClient(config, logger=self._logger)
         self._subscriber_get_email_inference = NATSClient(config, logger=self._logger)
         self._subscriber_save_outputs = NATSClient(config, logger=self._logger)
+        self._subscriber_save_created_ticket_feedback = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_get_email_inference, consumer_name="inference")
         self._event_bus.add_consumer(self._subscriber_save_outputs, consumer_name="outputs")
         self._event_bus.add_consumer(
-            self._subscriber_save_created_tickets_feedback,
+            self._subscriber_save_created_ticket_feedback,
             consumer_name="created_ticket_feedback"
         )
 

@@ -25,8 +25,8 @@ class GetInference:
         msg_body = msg.get("body", {})
         email_id = msg_body.get("email_id")
         if not msg_body or not email_id:
-            self._logger.error(f'Cannot get prediction using {json.dumps(msg)}. JSON malformed')
-            response['body'] = 'You must specify {.."body": { "email": {"email_id", "subject", ...}}} in the request'
+            self._logger.error(f'Cannot get inference using {json.dumps(msg)}. JSON malformed')
+            response['body'] = 'You must specify {.."body": { "email_id", "subject", ...}} in the request'
             response['status'] = 400
             await self._event_bus.publish_message(response_topic, response)
             return
