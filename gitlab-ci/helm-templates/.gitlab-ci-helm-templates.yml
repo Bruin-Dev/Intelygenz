@@ -34,6 +34,7 @@
     - echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
     - echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
     - echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
+    - echo "SOM hosts are $SOM_MONITORED_VELOCLOUD_HOSTS"
     # CREATE CHART RELEASE AND DEPLOY
     - >
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
@@ -45,7 +46,7 @@
         helm cm-push ${HELM_CHART_DIR}/ --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" mettel
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
         helm repo update
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}    
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}
       else
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${NAMESPACE}

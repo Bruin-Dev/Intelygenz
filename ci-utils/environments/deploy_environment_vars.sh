@@ -145,6 +145,16 @@ function notifier_variables() {
   fi
 }
 
+function service_outage_monitor_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # service-outage-monitor (SOM) environment variables for ephemeral environments
+    export SOM_MONITORED_VELOCLOUD_HOSTS="${SOM_MONITORED_VELOCLOUD_HOSTS_DEV}"
+  else
+    # service-outage-monitor (SOM) environment variables for production environment
+    export SOM_MONITORED_VELOCLOUD_HOSTS="${SOM_MONITORED_VELOCLOUD_HOSTS_PRO}"
+  fi
+}
+
 function t7_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # t7-bridge environment variables for ephemeral environments
@@ -211,6 +221,7 @@ function environments_assign() {
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables
+  service_outage_monitor_variables
   t7_bridge_variables
   ticket_collector_variables
   velocloud_bridge_variables

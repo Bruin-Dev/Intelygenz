@@ -1,0 +1,18 @@
+{{- range $som_monitored_velocloud_hosts, $val := .Values.config.som_monitored_velocloud_hosts }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "service-outage-monitor.fullname" $ }}{{ $som_monitored_velocloud_hosts | add1 }}-{{ . | replace "." "-" }}-test-connection"
+  labels:
+    {{- include "service-outage-monitor.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "service-outage-monitor.fullname" $ }}:{{ $.Values.service.port }}']
+  restartPolicy: Never
+{{- end }}

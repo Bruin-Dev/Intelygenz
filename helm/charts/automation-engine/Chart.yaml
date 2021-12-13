@@ -88,18 +88,9 @@ dependencies:
   - name: service-affecting-monitor
     version: '*.*.*'
     condition: service-affecting-monitor.enabled
-  - name: service-outage-monitor-1
+  - name: service-outage-monitor
     version: '*.*.*'
-    condition: service-outage-monitor-1.enabled
-  - name: service-outage-monitor-2
-    version: '*.*.*'
-    condition: service-outage-monitor-2.enabled
-  - name: service-outage-monitor-3
-    version: '*.*.*'
-    condition: service-outage-monitor-3.enabled
-  - name: service-outage-monitor-4
-    version: '*.*.*'
-    condition: service-outage-monitor-4.enabled
+    condition: service-outage-monitor.enabled
   - name: service-outage-monitor-triage
     version: '*.*.*'
     condition: service-outage-monitor-triage.enabled

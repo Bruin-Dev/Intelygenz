@@ -18,7 +18,11 @@ global:
   nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
-  # -- Redis Hostname used to store information used by RTA
+  # -- Redis Hostname used to store information used by customer-cache
+  redis_customer_cache_hostname: "redis"
+  # -- Redis Hostname used to store metrics obtained from tnba-feedback to train the ML model
+  redis_tnba_feedback_hostname: "redis"
+  # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "redis"
   # -- Indicates if the logs will be sent to papertrail or not.
   papertrail_active: "False"
@@ -26,6 +30,10 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
+  # -- Contact email address
+  last_contact_recipient: ""
+  # -- Email account password
+  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"

@@ -7,7 +7,7 @@ replicaCount: 1
 
 enabled: true
 
-# -- Global configuration for all subcharts
+# -- Global configuration
 global:
   # -- Name of environment for EKS cluster and network resources
   current_environment: "dev"
@@ -34,8 +34,6 @@ global:
   last_contact_recipient: ""
   # -- Email account password
   email_acc_pwd: ""
-  # -- Velocloud Hosts to monitor:
-  monitored_velocloud_hosts: []
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"

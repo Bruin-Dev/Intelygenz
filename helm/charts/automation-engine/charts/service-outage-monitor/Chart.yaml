@@ -1,6 +1,6 @@
 apiVersion: v2
-name: service-outage-monitor-3
-description: A Helm chart for Kubernetes to deploy microservice service-outage-monitor with Velocloud host 3 configuration
+name: service-outage-monitor
+description: A Helm chart for Kubernetes to deploy microservice service-outage-monitor to either monitor outages in a single VeloCloud host, or triage all VeloCloud hosts
 
 # A chart can be either an 'application' or a 'library' chart.
 #

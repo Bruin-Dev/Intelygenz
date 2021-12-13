@@ -11,6 +11,8 @@ nats:
 prometheus-nats-exporter:
   # enable or disable prometheus-nats-exporter
   enabled: true
+  nameOverride: prometheus-nats-exporter-${ENVIRONMENT_NAME}
+  fullnameOverride: prometheus-nats-exporter-${ENVIRONMENT_NAME}
   # if using the Prometheus Operator enable serviceMonitor
   serviceMonitor:
     enabled: true
@@ -18,6 +20,14 @@ prometheus-nats-exporter:
     namespace: prometheus
     interval: "15s"
     scrapeTimeout: "10s"
+  # set resources
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   config:
     # Nats data
     nats:
@@ -107,8 +117,6 @@ global:
   last_contact_recipient: ${LAST_CONTACT_RECIPIENT}
   # -- Email account password
   email_acc_pwd: ${EMAIL_ACC_PWD}
-  # -- Velocloud Hosts to monitor:
-  monitored_velocloud_hosts: [${MONITORED_VELOCLOUD_HOST}]
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -756,15 +764,15 @@ service-affecting-monitor:
       memory: 192Mi
 
 
-# -- service-outage-monitor-1 subchart specific configuration
-service-outage-monitor-1:
-  enabled: ${SERVICE_OUTAGE_MONITOR_1_ENABLED}
-  replicaCount: ${SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS}
+# -- service-outage-monitor (SOM) subchart specific configuration
+service-outage-monitor:
+  enabled: ${SERVICE_OUTAGE_MONITOR_ENABLED}
+  replicaCount: ${SERVICE_OUTAGE_MONITOR_DESIRED_TASKS}
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "service-outage-monitor-1-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    # -- SOM Velocloud Hosts to monitor:
+    som_monitored_velocloud_hosts: [${SOM_MONITORED_VELOCLOUD_HOSTS}]
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -777,8 +785,6 @@ service-outage-monitor-1:
       #labels:
       #  servicediscovery: true
     enable_triage_monitoring: "0"
-    # -- Velocloud hosts
-    velocloud_hosts: ${VELOCLOUD_HOST_1}
     # -- Filter for Velocloud hosts
     velocloud_hosts_filter: ${VELOCLOUD_HOST_1_FILTER}
   image:
@@ -796,132 +802,6 @@ service-outage-monitor-1:
     requests:
       cpu: 150m
       memory: 192Mi
-
-
-# -- service-outage-monitor-2 subchart specific configuration
-service-outage-monitor-2:
-  enabled: ${SERVICE_OUTAGE_MONITOR_2_ENABLED}
-  replicaCount: ${SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS}
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "service-outage-monitor-2-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-    enable_triage_monitoring: "0"
-    # -- Velocloud hosts
-    velocloud_hosts: ${VELOCLOUD_HOST_2}
-    # -- Filter for Velocloud hosts
-    velocloud_hosts_filter: ${VELOCLOUD_HOST_2_FILTER}
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-
-# -- service-outage-monitor-3 subchart specific configuration
-service-outage-monitor-3:
-  enabled: ${SERVICE_OUTAGE_MONITOR_3_ENABLED}
-  replicaCount: ${SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS}
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "service-outage-monitor-3-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-    enable_triage_monitoring: "0"
-    # -- Velocloud hosts
-    velocloud_hosts: ${VELOCLOUD_HOST_3}
-    # -- Filter for Velocloud hosts
-    velocloud_hosts_filter: ${VELOCLOUD_HOST_3_FILTER}
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 300m
-      memory: 384Mi
-    requests:
-      cpu: 150m
-      memory: 192Mi
-
-
-# -- service-outage-monitor-4 subchart specific configuration
-service-outage-monitor-4:
-  enabled: ${SERVICE_OUTAGE_MONITOR_4_ENABLED}
-  replicaCount: ${SERVICE_OUTAGE_MONITOR_4_DESIRED_TASKS}
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: "service-outage-monitor-4-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-    enable_triage_monitoring: "0"
-    # -- Velocloud hosts
-    velocloud_hosts: ${VELOCLOUD_HOST_4}
-    # -- Filter for Velocloud hosts
-    velocloud_hosts_filter: ${VELOCLOUD_HOST_4_FILTER}
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
 
 
 # -- service-outage-monitor-triage subchart specific configuration
