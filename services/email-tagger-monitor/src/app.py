@@ -10,6 +10,7 @@ from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 
 from application.repositories.storage_repository import StorageRepository
+from application.repositories.predicted_tags_repository import PredictedTagsRepository
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.email_tagger_repository import EmailTaggerRepository
@@ -53,10 +54,21 @@ class Container:
         self._email_tagger_repository = EmailTaggerRepository(self._event_bus, self._logger, config,
                                                               self._notifications_repository)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
+        self._predicted_tag_repository = PredictedTagsRepository(
+            self._logger,
+            config,
+            self._notifications_repository,
+            self._storage_repository
+        )
 
-        self._new_emails_monitor = NewEmailsMonitor(self._event_bus, self._logger, self._scheduler, config,
-                                                    self._new_emails_repository, self._email_tagger_repository,
-                                                    self._bruin_repository)
+        self._new_emails_monitor = NewEmailsMonitor(self._event_bus,
+                                                    self._logger,
+                                                    self._scheduler,
+                                                    config,
+                                                    self._predicted_tag_repository,
+                                                    self._new_emails_repository,
+                                                    self._email_tagger_repository,
+                                                    self._bruin_repository, )
 
         self._new_tickets_monitor = NewTicketsMonitor(self._event_bus, self._logger, self._scheduler, config,
                                                       self._new_tickets_repository, self._email_tagger_repository,
