@@ -1,5 +1,6 @@
 from shortuuid import uuid
 
+import humps
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application.repositories import nats_error_response
@@ -138,7 +139,11 @@ class BruinRepository:
                         f'{self._config.ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
+                elif not response_body:
+                    response['status'] = 404
+                    response['body'] = "Service number not validated"
                 else:
+                    response['status'] = response_status
                     response['body'] = {
                         'client_id': client_id,
                         'site_id': response['body'].get('site_id'),
@@ -217,7 +222,7 @@ class BruinRepository:
     async def mark_email_as_done(self):
         pass
 
-    async def get_tickets_basic_info(self, client_id: str, ticket_statuses: List[str]):
+    async def get_tickets_basic_info(self, client_id: str, ticket_statuses: List[str], category: str):
         @retry(
             wait=wait_exponential(
                 multiplier=self._config.NATS_CONFIG['multiplier'],
@@ -231,7 +236,8 @@ class BruinRepository:
                 'request_id': uuid(),
                 'body': {
                     'client_id': client_id,
-                    'ticket_statuses': ticket_statuses
+                    'ticket_statuses': ticket_statuses,
+                    'category': category,
                 },
             }
 
@@ -281,26 +287,38 @@ class BruinRepository:
 
     async def get_open_tickets_with_service_numbers(self, client_id: str) -> Dict[str, Any]:
         ticket_statuses = ['New', 'InProgress', 'Draft']
+        categories = ['VOO', 'VAS']
 
-        tickets = await self.get_tickets_basic_info(client_id, ticket_statuses)
-        if tickets['status'] not in range(200, 300):
-            return {'status': tickets['status'], 'body': 'Error while retrieving open tickets'}
-        if not tickets['body']:
+        open_tickets = []
+        for category in categories:
+            tickets = await self.get_tickets_basic_info(client_id, ticket_statuses, category)
+            if tickets['status'] not in range(200, 300):
+                return {'status': tickets['status'], 'body': 'Error while retrieving open tickets'}
+            open_tickets.extend(tickets['body'])
+        if not open_tickets:
             return {'status': 404, 'body': 'No open tickets found'}
 
-        for idx, ticket in enumerate(tickets['body']):
-            ticket_id = ticket['ticketId']
+        processed_tickets = []
+        for ticket in open_tickets:
+            processed_ticket = self._decamelize_ticket(ticket)
+            ticket_id = processed_ticket['ticket_id']
             details = await self.get_ticket_details(ticket_id)
             if details['status'] not in range(200, 300):
                 err_msg = f'Error while retrieving details from ticket {ticket_id}'
                 self._logger(err_msg)
                 self._notifications_repository.send_slack_message(err_msg)
-                tickets['body'][idx]['service_numbers'] = []
                 continue
             service_numbers = self._get_details_service_numbers(details['body'])
-            tickets['body'][idx]['service_numbers'] = service_numbers
+            processed_ticket['service_numbers'] = service_numbers
+            processed_tickets.append(processed_ticket)
 
-        return {'status': tickets['status'], 'body': tickets['body']}
+        return {'status': 200, 'body': processed_tickets}
+
+    def _decamelize_ticket(self, ticket: Dict[str, Any]):
+        decamelized_ticket = humps.decamelize(ticket)
+        decamelized_ticket['ticket_id'] = ticket['ticketID']
+        decamelized_ticket['client_id'] = ticket['clientID']
+        return decamelized_ticket
 
     def _get_details_service_numbers(self, ticket_details: Dict[str, Any]) -> List[str]:
         notes = ticket_details.get('ticketNotes')
@@ -308,5 +326,5 @@ class BruinRepository:
         for note in notes:
             note_service_numbers = note.get('serviceNumber', [])
             if note_service_numbers:
-                unique_service_numbers.add(*note_service_numbers)
+                unique_service_numbers.update(note_service_numbers)
         return list(unique_service_numbers)

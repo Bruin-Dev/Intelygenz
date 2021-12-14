@@ -100,6 +100,7 @@ class NewCreatedTicketsFeedback:
             self._logger.info(f"Got ticket info from Bruin: {ticket_response}")
             #  Save feedback
             response = await self._rta_repository.save_created_ticket_feedback(email_data, ticket_response['body'])
+            self._logger.info(f"Got response from kre {response}")
             if response["status"] not in range(200, 300):
                 return
 

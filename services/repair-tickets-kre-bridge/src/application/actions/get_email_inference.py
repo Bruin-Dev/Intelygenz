@@ -8,7 +8,7 @@ class GetInference:
         self._event_bus = event_bus
         self._kre_repository = repository
 
-    async def get_email_inference(self, msg: dict):
+    async def get_inference(self, msg: dict):
         """Get the email inference from the KRE process and publish it.
 
         Args:

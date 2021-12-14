@@ -15,19 +15,11 @@ class RepairTicketKreRepository:
         self._timeout = self._config.MONITOR_CONFIG['nats_request_timeout']['kre_seconds']
 
     async def get_email_inference(self, email_data: Dict[str, Any], tag_info: Dict[str, Any]):
-        email_id = email_data["email"]["email_id"]
-        tag_name = self._config.MONITOR_CONFIG['tag_ids'].get(tag_info['tag_id'])
+        email_id = email_data["email_id"]
         payload = {
-            "email_id": email_data["email"]["email_id"],
-            "client_id": email_data["email"]["client_id"],
-            "subject": email_data["email"]["client_id"],
-            "body": email_data["email"]["body"],
-            "from_address": email_data["email"]["from_address"],
-            "to": email_data["email"]["to_address"],
-            "cc": email_data["email"]["send_cc"],
-            "date": email_data["email"]["date"],
+            **email_data,
             "tag": {
-                "type": tag_name,
+                "type": "Repair",
                 "probability": tag_info['tag_probability'],
             }
         }
@@ -58,11 +50,18 @@ class RepairTicketKreRepository:
                 response_body = response["body"]
                 response_status = response["status"]
 
-                if response_status not in range(200, 300):
+                if response_status not in range(200, 400):
                     err_msg = (
                         f'Error while getting prediction for email "{email_id}" in '
                         f"{self._config.ENVIRONMENT.upper()} environment: "
                         f"Error {response_status} - {response_body}"
+                    )
+
+                elif response_status == 400:
+                    err_msg = (
+                        f'Cannot get prediction for "{email_id}" in '
+                        f"{self._config.ENVIRONMENT.upper()} environment: "
+                        f"reason {response_body}"
                     )
 
             if err_msg:
@@ -85,14 +84,14 @@ class RepairTicketKreRepository:
     async def save_outputs(
             self,
             email_id: str,
-            service_numbers_site_map: Dict[str, str],
+            service_numbers_sites_map: Dict[str, str],
             tickets_created: List[Dict[str, Any]],
             ticket_updated: List[Dict[str, Any]],
             tickets_could_be_created: List[Dict[str, Any]],
             tickets_could_be_updated: List[Dict[str, Any]],
             tickets_cannot_be_created: List[Dict[str, Any]],
     ):
-        validated_service_numbers = list(service_numbers_site_map.keys())
+        validated_service_numbers = list(service_numbers_sites_map.keys())
 
         @retry(
             wait=wait_exponential(
@@ -111,7 +110,7 @@ class RepairTicketKreRepository:
             request_body = {
                 'email_id': email_id,
                 'validated_service_numbers': validated_service_numbers,
-                'service_numbers_site_map': service_numbers_site_map,
+                'service_numbers_sites_map': service_numbers_sites_map,
                 'tickets_created': tickets_created,
                 'tickets_updated': ticket_updated,
                 'tickets_could_be_created': tickets_could_be_created,
@@ -159,7 +158,7 @@ class RepairTicketKreRepository:
             )
 
     async def save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
-        email_id = email_data['email']['email_id']
+        email_id = email_data['email_id']
         ticket_id = ticket_data['ticket_id']
 
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
@@ -171,7 +170,7 @@ class RepairTicketKreRepository:
             request_msg = {
                 "request_id": uuid(),
                 "body": {
-                    "ticket_id": ticket_data['ticket_id'],
+                    "ticket_id": str(ticket_data['ticket_id']),
                     "email_id": email_data['email_id'],
                     "parent_id": email_data['parent_id'],
                     "client_id": email_data['client_id'],
@@ -180,7 +179,7 @@ class RepairTicketKreRepository:
                 }
             }
             try:
-                response = await self._event_bus.rpc_request("repair_ticket_automation.save_created_tickets.request",
+                response = await self._event_bus.rpc_request("rta.created_ticket_feedback.request",
                                                              request_msg,
                                                              timeout=self._timeout)
 

@@ -1,8 +1,7 @@
 import asyncio
 import time
-from collections import ChainMap
 from datetime import datetime
-from typing import Any, Dict, Set, List, Tuple, Iterator
+from typing import Any, Dict, Set, List, Tuple
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -70,10 +69,9 @@ class RepairTicketsMonitor:
         self._logger.info("Getting all tagged emails...")
         tagged_emails_by_stored_key: List[Dict[str, dict]] = \
             self._new_tagged_emails_repository.get_tagged_pending_emails()
-        tagged_emails: List[Dict[str, Any]] = list(dict(ChainMap(*tagged_emails_by_stored_key)).values())
-        self._logger.info(tagged_emails)
-        repair_emails, other_tags_emails = self._triage_emails_by_tag(tagged_emails)
-        self._logger.info(f"Got {len(tagged_emails)} tagged emails.")
+        self._logger.info(tagged_emails_by_stored_key)
+        repair_emails, other_tags_emails = self._triage_emails_by_tag(tagged_emails_by_stored_key)
+        self._logger.info(f"Got {len(tagged_emails_by_stored_key)} tagged emails.")
         self._logger.info(f"Got {len(repair_emails)} Repair emails: {repair_emails}")
         self._logger.info(f"Got {len(other_tags_emails)} emails with meaningless tags: {other_tags_emails}")
 
@@ -92,8 +90,8 @@ class RepairTicketsMonitor:
     def _triage_emails_by_tag(self, tagged_emails) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """Separate between repair emails and non repair emails"""
         repair_tag_id = self._config.MONITOR_CONFIG["tag_ids"]["Repair"]
-        repair_emails = [e for e in tagged_emails if e['tag_id'] == repair_tag_id]
-        other_tags_emails = [e for e in tagged_emails if e['tag_id'] != repair_tag_id]
+        repair_emails = [e for e in tagged_emails if str(e['tag_id']) == str(repair_tag_id)]
+        other_tags_emails = [e for e in tagged_emails if str(e['tag_id']) != str(repair_tag_id)]
 
         return repair_emails, other_tags_emails
 
@@ -106,8 +104,19 @@ class RepairTicketsMonitor:
 
     async def _get_inference(self, email_data, tag_info):
         """Get the models inference for given email data"""
+        cc_addresses = ', '.join(email_data.get('send_cc')) if email_data.get('send_cc') else ""
+
         prediction_response = await self._repair_tickets_kre_repository.get_email_inference(
-            email_data,
+            {
+                "email_id": email_data['email_id'],
+                "client_id": email_data['client_id'],
+                "subject": email_data['subject'],
+                "body": email_data['body'],
+                "date": email_data['date'],
+                "from_address": email_data['from_address'],
+                "to": email_data['to_address'][0],
+                "cc": cc_addresses,
+            },
             tag_info,
         )
         if prediction_response["status"] not in range(200, 300):
@@ -120,7 +129,7 @@ class RepairTicketsMonitor:
     async def _save_output(
             self,
             email_id: str,
-            service_number_site_map: Dict[str, str],
+            service_number_sites_map: Dict[str, str],
             tickets_created: List[Dict[str, Any]],
             tickets_updated: List[Dict[str, Any]],
             tickets_could_be_created: List[Dict[str, Any]],
@@ -129,8 +138,8 @@ class RepairTicketsMonitor:
     ):
         """Save the output from the ticket creation / inference verification"""
         output_response = await self._repair_tickets_kre_repository.save_outputs(
-            email_id,
-            service_number_site_map,
+            str(email_id),
+            service_number_sites_map,
             tickets_created,
             tickets_updated,
             tickets_could_be_created,
@@ -151,9 +160,9 @@ class RepairTicketsMonitor:
         """
         # TODO add update email status
         email_id = email_tag_info['email_id']
-        email_data = self._new_tagged_emails_repository.get_email_details(email_id)
+        email_data = self._new_tagged_emails_repository.get_email_details(email_id).get('email')
         email_data['tag'] = email_tag_info
-        client_id = email_data['email']['client_id']
+        client_id = email_data['client_id']
         self._logger.info(f'Running Repair Email Process for email_id: {email_id}')
 
         tickets_created = []
@@ -165,6 +174,10 @@ class RepairTicketsMonitor:
         async with self._semaphore:
             inference_data = await self._get_inference(email_data, email_tag_info)
             if not inference_data:
+                self._logger.error(
+                    f"Could not process email {email_id}, marking it as complete"
+                )
+                self._new_tagged_emails_repository.mark_complete(email_id)
                 return
 
             potential_service_numbers = inference_data['potential_service_numbers']
@@ -200,9 +213,11 @@ class RepairTicketsMonitor:
                 tickets_cannot_be_created,
             )
             if not save_output_response:
+                self._logger.error(f'Error while saving output for email: {email_id}')
                 return
 
             self._new_tagged_emails_repository.mark_complete(email_id)
+            return
 
     async def _get_valid_service_numbers_site_map(
             self,
@@ -213,10 +228,12 @@ class RepairTicketsMonitor:
         service_number_site_map = {}
         for potential_service_number in potential_service_numbers:
             result = await self._bruin_repository.verify_service_number_information(client_id, potential_service_number)
-            if result['status'] not in range(200, 300):
-                raise ResponseException(f'Exception while verifying service_number: {potential_service_number}')
-            if result['body']['site_id']:
+            if result['status'] in range(200, 300):
                 service_number_site_map[potential_service_number] = result['body']['site_id']
+            elif result['status'] == 404:
+                continue
+            else:
+                raise ResponseException(f'Exception while verifying service_number: {potential_service_number}')
 
         return service_number_site_map
 
@@ -276,7 +293,7 @@ class RepairTicketsMonitor:
                     self._create_output_ticket_dict(
                         site_id=ticket['site_id'],
                         service_numbers=ticket['service_numbers'],
-                        ticket_id=ticket['ticketId'],
+                        ticket_id=ticket['ticket_id'],
                     )
                 )
                 site_ids.remove(ticket['site_id'])
@@ -318,7 +335,7 @@ class RepairTicketsMonitor:
 
     @staticmethod
     def _should_update_ticket(ticket: Dict[str, Any], site_ids: Set[str], predicted_class: str) -> bool:
-        """Check if exiting ticket should be updated"""
+        """Check if existing ticket should be updated"""
         ticket_category = ticket['category']
         if ticket['site_id'] not in site_ids:
             return False
@@ -338,7 +355,7 @@ class RepairTicketsMonitor:
         """Check if the inference can be used to create/update a ticket"""
         is_other = inference_data['predicted_class'] == 'Other'
         filtered = inference_data['filter_flags']['is_filtered']
-        validation_set = inference_data['filter_flags']['is_validation_set']
+        validation_set = inference_data['filter_flags']['in_validation_set']
         tagger_below_threshold = inference_data['filter_flags']['tagger_is_below_threshold']
         rta_model1_is_below_threshold = inference_data['filter_flags']['rta_model1_is_below_threshold']
         rta_model2_is_below_threshold = inference_data['filter_flags']['rta_model2_is_below_threshold']
