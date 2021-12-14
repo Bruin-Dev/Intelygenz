@@ -56,7 +56,7 @@ global:
   # -- Name of environment for helm charts
   environment: "${ENVIRONMENT_SLUG}"
   # -- NATS cluster endpoint used by bruin-bridge
-  nats_server: "nats://nats:4222"
+  nats_server: "nats://automation-engine-nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: ${REDIS_HOSTNAME}
   # -- Redis hostname used to store information used by customer-cache

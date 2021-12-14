@@ -26,7 +26,7 @@ spec:
       initContainers:
         - name: wait-nats-server
           image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+          command: ['sh', '-c', 'until wget --spider -S http://automation-engine-nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
           envFrom:
             - configMapRef:
                 name: {{ include "email-tagger-kre-bridge.configmapName" . }}

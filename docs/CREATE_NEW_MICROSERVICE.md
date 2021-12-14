@@ -227,7 +227,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
         initContainers:
           - name: wait-nats-server
             image: busybox:1.28
-            command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+            command: ['sh', '-c', 'until wget --spider -S http://automation-engine-nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
           - name: wait-redis
             image: busybox:1.28
             command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
@@ -242,7 +242,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
         initContainers:
           - name: wait-nats-server
             image: busybox:1.28
-            command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+            command: ['sh', '-c', 'until wget --spider -S http://automation-engine-nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
           - name: wait-redis
             image: busybox:1.28
             command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
