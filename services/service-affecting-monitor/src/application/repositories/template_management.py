@@ -17,7 +17,7 @@ class TemplateRenderer:
             'email_data': {
                 'subject': subject,
                 'recipient': recipient,
-                'text': 'this is the accessible text for the email',
+                'text': '',
                 'html': html,
                 'images': [
                     {
