@@ -177,6 +177,7 @@ kubeprometheusstack:
     ## (custom) Grafana Dashboards
     ## name of dashboard without extension
     grafanaDashboards:
+      - nats-statistics
       - mettel-affecting-monitor
       - mettel-current-sdwan-status
       - mettel-outage-monitors

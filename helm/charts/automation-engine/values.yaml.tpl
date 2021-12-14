@@ -1,11 +1,3 @@
-# Default values for bruin-bridge.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-# -- Number of bruin-bridge pods to do calls to Bruin API.
-# Do not set this below 2 unless is going to deploy in dev or local environment.
-replicaCount: 1
-
 # -- nats helm chart configuration
 nats:
   cluster:
@@ -14,6 +6,32 @@ nats:
     enabled: false
   # -- override name to use nats as name for svc, deployment and all created by nats helm chart
   nameOverride: "nats"
+
+
+prometheus-nats-exporter:
+  # if using the Prometheus Operator enable serviceMonitor
+  serviceMonitor:
+    enabled: true
+    additionalLabels: {}
+    namespace: prometheus
+    interval: "15s"
+    scrapeTimeout: "10s"
+  config:
+    # Nats data
+    nats:
+      # See https://github.com/helm/charts/blob/master/stable/nats/templates/monitoring-svc.yaml
+      service: automation-engine-nats
+      namespace: ${NAMESPACE}
+      port: 8222
+    metrics:
+      channelz: false
+      connz: false
+      jsz: false
+      gatewayz: false
+      routez: false
+      serverz: false
+      subz: true
+      varz: true
 
 
 ## YAML anchor to define capabilities_enabled

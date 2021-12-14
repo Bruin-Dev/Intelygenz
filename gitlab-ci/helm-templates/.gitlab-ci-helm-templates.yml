@@ -12,12 +12,7 @@
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # CREATE NAMESPACE IF IS NECESSARY
-    - >
-      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
-        kubectl create namespace ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME} --dry-run -o yaml | kubectl apply -f -
-      else
-        kubectl create namespace ${HELM_CHART_RELEASE_NAME} --dry-run -o yaml | kubectl apply -f -
-      fi
+    - kubectl create namespace ${NAMESPACE} --dry-run -o yaml | kubectl apply -f -
     # INITIALIZE HELM
     - python3 ci-utils/helm/add_helm_repositories.py
     - helm repo update
@@ -50,10 +45,10 @@
         helm cm-push ${HELM_CHART_DIR}/ --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" mettel
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
         helm repo update
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}    
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}    
       else
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
+        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${NAMESPACE}
       fi
 
 .helm_template_destroy_chart: &helm_template_destroy_chart
@@ -66,19 +61,10 @@
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # DESTROY HELM CHART
-    - >
-      if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
-        helm -n ${HELM_CHART_RELEASE_NAME} uninstall ${HELM_CHART_RELEASE_NAME}
-      else
-        helm -n ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME} uninstall ${HELM_CHART_RELEASE_NAME}
-      fi
+    - helm -n ${NAMESPACE} uninstall ${HELM_CHART_RELEASE_NAME}
     # DESTROY NAMESPACE
-    - >
-      if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
-        kubectl delete namespace ${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}
-      else
-        kubectl delete namespace ${HELM_CHART_RELEASE_NAME}
-      fi
+    - kubectl delete namespace ${NAMESPACE}
+
 
 #
 # AFTER NEW RELEASE UPDATE LOGS IN PRODUCTION ENV
