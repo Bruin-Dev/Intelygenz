@@ -97,7 +97,8 @@ class RepairTicketsMonitor:
 
     async def _process_other_tags_email(self, email: Dict[str, Any]):
         """Process email that are not repair tickets"""
-        tag_name = [tag for tag, id_ in self._config.MONITOR_CONFIG["tag_ids"].items() if id_ == email['tag_id']][0]
+        tag_id = str(email['tag_id'])
+        tag_name = [tag for tag, id_ in self._config.MONITOR_CONFIG["tag_ids"].items() if str(id_) == str(tag_id)][0]
 
         self._logger.info(f"Marking email {email['email_id']} as complete because it's tagged as '{tag_name}'")
         self._new_tagged_emails_repository.mark_complete(email['email_id'])
