@@ -85,7 +85,7 @@ BANDWIDTH_REPORT_CONFIG = {
     'timezone': 'US/Eastern',
     'crontab': '0 8 * * *',
     'lookup_interval_hours': 24,
-    'clients': [],
+    'clients': [86937],
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
