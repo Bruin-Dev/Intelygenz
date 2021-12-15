@@ -24,6 +24,10 @@ BRUIN_CONFIG = {
     'login_url': "some.login.url",
 }
 
+AIOHTTP_CONFIG = {
+    'tracers': []
+}
+
 LOG_CONFIG = {
     'name': 'bruin-bridge-test',
     'level': logging.DEBUG,

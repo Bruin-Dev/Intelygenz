@@ -1,0 +1,12 @@
+from prometheus_client import Counter
+
+
+class EndpointsUsageRepository:  # pragma: no cover
+    __counter = Counter(
+        name='bruin_api_usage',
+        documentation='Track HTTP requests made to Bruin API',
+        labelnames=['method', 'endpoint_'],
+    )
+
+    def increment_usage(self, method: str, endpoint: str):
+        self.__counter.labels(method, endpoint).inc()

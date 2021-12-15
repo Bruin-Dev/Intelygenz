@@ -12,7 +12,8 @@ class BruinClient:
         self._logger = logger
 
         self._bearer_token = ""
-        self._session = aiohttp.ClientSession()
+
+        self._session = aiohttp.ClientSession(trace_configs=config.AIOHTTP_CONFIG['tracers'])
 
     async def login(self):
         self._logger.info("Logging into Bruin...")

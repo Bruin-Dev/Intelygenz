@@ -5,6 +5,23 @@ import os
 import logging
 import sys
 
+from aiohttp import TraceConfig
+
+
+def generate_aio_tracers(**kwargs):
+    usage_repository = kwargs['endpoints_usage_repository']
+
+    async def bruin_usage_on_request_cb(session, trace_config_ctx, params):
+        usage_repository.increment_usage(params.method, params.url.path)
+
+    bruin_api_usage = TraceConfig()
+    bruin_api_usage.on_request_start.append(bruin_usage_on_request_cb)
+
+    AIOHTTP_CONFIG['tracers'] = [
+        bruin_api_usage,
+    ]
+
+
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'subscriber': {
@@ -38,9 +55,17 @@ LOG_CONFIG = {
     },
 }
 
+AIOHTTP_CONFIG = {
+    'tracers': []
+}
+
 QUART_CONFIG = {
     'title': 'bruin-bridge',
     'port': 5000
+}
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
 }
 
 REDIS = {

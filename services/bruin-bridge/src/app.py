@@ -1,8 +1,11 @@
 import redis
 
+from prometheus_client import start_http_server
+
 from config import config
 from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
+from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
 from application.actions.change_ticket_severity import ChangeTicketSeverity
 from application.actions.get_circuit_id import GetCircuitID
 from application.actions.get_tickets import GetTicket
@@ -42,6 +45,12 @@ class Container:
 
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
+
+        # Prepare tracers to be used when making HTTP requests
+        self._endpoints_usage_repository = EndpointsUsageRepository()
+        config.generate_aio_tracers(
+            endpoints_usage_repository=self._endpoints_usage_repository,
+        )
 
         self._bruin_client = BruinClient(self._logger, config)
         self._bruin_repository = BruinRepository(self._logger, self._bruin_client)
@@ -192,6 +201,8 @@ class Container:
         self._server = QuartServer(config)
 
     async def start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
         await self._bruin_client.login()
         await self._event_bus.subscribe_consumer(consumer_name="tickets", topic="bruin.ticket.request",
@@ -274,6 +285,9 @@ class Container:
 
     async def start_server(self):
         await self._server.run_server()
+
+    def _start_prometheus_metrics_server(self):
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
 
 if __name__ == '__main__':
