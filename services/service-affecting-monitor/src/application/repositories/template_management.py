@@ -82,6 +82,37 @@ class TemplateRenderer:
             return self._build_email(client_id=client_id, subject=subject, template=template,
                                      template_vars=template_vars)
 
+    def compose_bandwidth_report_email(self, client_id, client_name, report_items):
+        template = 'bandwidth_report.html'
+        template_vars = {}
+        rows = []
+
+        for index, item in enumerate(report_items):
+            rows.append({
+                'type': self._get_row_type(index),
+                '__SERIAL__': item['serial_number'],
+                '__CLIENT__': f"{client_id} | {client_name}",
+                '__EDGE_NAME__': item['edge_name'],
+                '__INTERFACE__': item['interface'],
+                '__BANDWIDTH__': item['bandwidth'],
+                '__THRESHOLD_EXCEEDED__': item['threshold_exceeded'],
+                '__TICKET_IDS__': ',<br>'.join([str(_id) for _id in item['ticket_ids']]),
+            })
+
+        if rows:
+            now = datetime.now(timezone(self._config.BANDWIDTH_REPORT_CONFIG['timezone']))
+            date = now.strftime(DATE_FORMAT)
+            subject = f'{client_name} - Daily Bandwidth Report - {date}'
+
+            template_vars['__DATE__'] = date
+            template_vars['__YEAR__'] = now.year
+            template_vars['__CLIENT_ID__'] = client_id
+            template_vars['__CLIENT_NAME__'] = client_name
+            template_vars['__ROWS__'] = rows
+
+            return self._build_email(client_id=client_id, subject=subject, template=template,
+                                     template_vars=template_vars)
+
     @staticmethod
     def _get_row_type(index):
         return 'even' if index % 2 == 0 else 'odd'
