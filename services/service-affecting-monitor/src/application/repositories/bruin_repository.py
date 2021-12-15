@@ -567,6 +567,22 @@ class BruinRepository:
         return all_serials
 
     @staticmethod
+    def group_ticket_details_by_serial_and_interface(ticket_details):
+        grouped_tickets = defaultdict(lambda: defaultdict(list))
+
+        for detail in ticket_details:
+            serial = detail['ticket_detail']['detailValue']
+
+            for note in detail['ticket_notes']:
+                match = INTERFACE_NOTE_REGEX.search(note['noteValue'])
+
+                if match:
+                    interface = match['interface_name']
+                    grouped_tickets[serial][interface].append(detail)
+
+        return grouped_tickets
+
+    @staticmethod
     def search_interfaces_and_count_in_details(ticket_details):
         interfaces_by_trouble = dict()
         for detail_object in ticket_details:
@@ -636,6 +652,33 @@ class BruinRepository:
             'trouble': trouble
         }
 
+    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details):
+        report_items = []
+
+        for link_metrics in links_metrics:
+            serial_number = link_metrics['link']['edgeSerialNumber']
+            edge_name = link_metrics['link']['edgeName']
+            interface = link_metrics['link']['interface']
+            bandwidth = link_metrics['avgBandwidth']
+            ticket_details = grouped_ticket_details[serial_number][interface]
+            report_item = self.build_bandwidth_report_item(serial_number=serial_number, edge_name=edge_name,
+                                                           interface=interface, bandwidth=bandwidth,
+                                                           ticket_details=ticket_details)
+            report_items.append(report_item)
+
+        return report_items
+
+    @staticmethod
+    def build_bandwidth_report_item(serial_number, edge_name, interface, bandwidth, ticket_details):
+        return {
+            'serial_number': serial_number,
+            'edge_name': edge_name,
+            'interface': interface,
+            'bandwidth': bandwidth,
+            'threshold_exceeded': len(ticket_details),
+            'ticket_ids': set(detail['ticket_id'] for detail in ticket_details),
+        }
+
     @staticmethod
     def filter_ticket_details_by_serials(ticket_details, list_cache_serials):
         return [
@@ -655,7 +698,7 @@ class BruinRepository:
                     if ticket_note["noteValue"]
                     if ('#*Automation Engine*#' in ticket_note["noteValue"] or "#*MetTel's IPA*#" in
                         ticket_note["noteValue"])
-                    if trouble in ticket_note["noteValue"]
+                    if f'Trouble: {trouble}' in ticket_note["noteValue"]
                 ]
 
                 if trouble_notes:

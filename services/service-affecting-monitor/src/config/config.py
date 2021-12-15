@@ -81,8 +81,11 @@ MONITOR_REPORT_CONFIG = {
 }
 
 BANDWIDTH_REPORT_CONFIG = {
+    'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'crontab': '0 8 * * *',
+    'lookup_interval_hours': 24,
+    'clients': [],
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

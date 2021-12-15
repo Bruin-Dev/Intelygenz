@@ -144,6 +144,16 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=interval_for_metrics)
 
+    async def get_links_metrics_for_bandwidth_reports(self) -> dict:
+        now = datetime.now(utc)
+        past_moment = now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG['lookup_interval_hours'])
+
+        interval_for_metrics = {
+            'start': past_moment,
+            'end': now,
+        }
+        return await self.get_all_links_metrics(interval=interval_for_metrics)
+
     async def get_enterprise_events(self, host, enterprise_id):
         err_msg = None
         now = datetime.now(utc)
@@ -239,3 +249,23 @@ class VelocloudRepository:
             edges[host][enterprise_id].append(edge)
 
         return edges
+
+    def filter_links_metrics_by_client(self, links_metrics, client_id, customer_cache):
+        filtered_links_metrics = []
+
+        for link_metrics in links_metrics:
+            edge_full_id = {
+                'host': link_metrics['link']['host'],
+                'enterprise_id': link_metrics['link']['enterpriseId'],
+                'edge_id': link_metrics['link']['edgeId'],
+            }
+
+            matching_edge = self._utils_repository.get_first_element_matching(
+                customer_cache,
+                lambda edge: edge['edge'] == edge_full_id,
+            )
+
+            if matching_edge and matching_edge['bruin_client_info']['client_id'] == client_id:
+                filtered_links_metrics.append(link_metrics)
+
+        return filtered_links_metrics

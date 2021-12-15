@@ -89,6 +89,10 @@ class Container:
 
         self._bandwidth_reports = BandwidthReports(
             logger=self._logger, scheduler=self._scheduler, config=config,
+            velocloud_repository=self._velocloud_repository, bruin_repository=self._bruin_repository,
+            trouble_repository=self._trouble_repository, customer_cache_repository=self._customer_cache_repository,
+            notifications_repository=self._notifications_repository, utils_repository=self._utils_repository,
+            template_renderer=self._template_renderer,
         )
 
     async def _start(self):
