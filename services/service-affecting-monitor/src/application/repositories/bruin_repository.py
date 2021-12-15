@@ -602,7 +602,7 @@ class BruinRepository:
                 })
         return result
 
-    def prepare_items_for_report(self, all_serials, cached_info_by_serial):
+    def prepare_items_for_monitor_report(self, all_serials, cached_info_by_serial):
         items_for_report = []
         for serial, ticket_details in all_serials.items():
             interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
@@ -610,15 +610,15 @@ class BruinRepository:
             for trouble in interfaces_by_trouble.keys():
                 for interface, ticket_ids in interfaces_by_trouble[trouble].items():
                     self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
-                    item_report = self.build_item_report(ticket_details=ticket_details, cached_info=cached_info,
-                                                         number_of_tickets=len(ticket_ids),
-                                                         interface=interface, trouble=trouble)
+                    item_report = self.build_monitor_report_item(ticket_details=ticket_details, cached_info=cached_info,
+                                                                 number_of_tickets=len(ticket_ids), interface=interface,
+                                                                 trouble=trouble)
                     items_for_report.append(item_report)
 
         return items_for_report
 
     @staticmethod
-    def build_item_report(ticket_details, cached_info, number_of_tickets, interface, trouble):
+    def build_monitor_report_item(ticket_details, cached_info, number_of_tickets, interface, trouble):
         return {
             'customer': {
                 'client_id': ticket_details[0]['ticket']['clientID'],

@@ -113,8 +113,8 @@ class ServiceAffectingMonitorReports:
 
             ticket_details_by_serial = self._bruin_repository.group_ticket_details_by_serial(
                 filtered_ticket_details)
-            report_list = self._bruin_repository.prepare_items_for_report(ticket_details_by_serial,
-                                                                          self._cached_info_by_serial)
+            report_list = self._bruin_repository.prepare_items_for_monitor_report(ticket_details_by_serial,
+                                                                                  self._cached_info_by_serial)
 
             final_report_list = self._bruin_repository.filter_trouble_reports(active_reports=active_reports,
                                                                               report_list=report_list,
