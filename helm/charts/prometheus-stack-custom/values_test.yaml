@@ -181,6 +181,7 @@ kubeprometheusstack:
       - mettel-current-sdwan-status
       - mettel-outage-monitors
       - mettel-triage
+      - bruin-api-usage
 
     grafana.ini:
       server:
