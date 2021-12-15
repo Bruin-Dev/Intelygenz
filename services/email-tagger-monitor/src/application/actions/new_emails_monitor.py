@@ -9,23 +9,13 @@ from pytz import timezone
 
 
 class NewEmailsMonitor:
-    def __init__(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            predicted_tag_repository,
-            new_emails_repository,
-            email_tagger_repository,
-            bruin_repository
-    ):
+    def __init__(self, event_bus, logger, scheduler, config, new_emails_repository, email_tagger_repository,
+                 bruin_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._new_emails_repository = new_emails_repository
-        self._predicted_tag_repository = predicted_tag_repository
         self._email_tagger_repository = email_tagger_repository
         self._bruin_repository = bruin_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['new_emails_concurrent'])
@@ -81,22 +71,19 @@ class NewEmailsMonitor:
                     f"parent_id='{parent_id}'] {prediction}"
                 )
                 # Send tag to Bruin
-                tag = self.get_most_probable_tag_id(prediction)
-                response = await self._bruin_repository.post_email_tag(email_id, tag["id"])
+                tag_id = self.get_most_probable_tag_id(prediction)
+                response = await self._bruin_repository.post_email_tag(email_id, tag_id)
 
                 # NOTE: Status 409 means "Tag already present", and the email is treated as complete
                 if not (response["status"] in range(200, 300) or response["status"] == 409):
                     return
 
-            # Remove from email tagger namespace
+            # Remove from DB
             self._new_emails_repository.mark_complete(email_id)
-
-            # add predicted tag to DB
-            self._predicted_tag_repository.save_new_tag(email_id, tag["id"], tag["probability"])
 
     @staticmethod
     def get_most_probable_tag_id(prediction):
         prediction.sort(key=lambda x: x['probability'], reverse=True)
-        tags = [{"id": tag["tag_id"], "probability": tag["probability"]} for tag in prediction]
+        tag_ids = [tag["tag_id"] for tag in prediction]
 
-        return tags[0]
+        return tag_ids[0]

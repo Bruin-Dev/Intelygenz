@@ -47,10 +47,6 @@ nats:
     # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
     notifier: true
-    # -- Indicate if repair-tickets-kre-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # repair-tickets-kre-bridge service responds correctly to healthcheck calls.
-    repair_tickets_kre_bridge: true
     # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # t7-bridge service responds correctly to healthcheck calls.
@@ -693,79 +689,6 @@ notifier:
       cpu: 100m
       memory: 128Mi
   # -- notifier autoscaling configuration
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 2
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
-
-# -- repair-tickets-monitor subchart specific configuration
-repair-tickets-monitor:
-  # -- Field to indicate if the repair-tickets-monitor module is going to be deployed
-  enabled: true
-  # -- Number of replicas of repair-tickets-monitor module
-  replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 300m
-      memory: 384Mi
-    requests:
-      cpu: 150m
-      memory: 192Mi
-
-
-# -- repair-tickets-kre-bridge subchart specific configuration
-repair-tickets-kre-bridge:
-  # -- Field to indicate if the repair-tickets-kre-bridge module is going to be deployed
-  enabled: true
-  # -- Number of replicas of repair-tickets-kre-bridge module
-  replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Base URL for KRE API
-    kre_base_url: ""
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  # -- repair-tickets-kre-bridge autoscaling configuration
   autoscaling:
     enabled: true
     minReplicas: 1

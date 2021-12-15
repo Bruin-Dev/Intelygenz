@@ -66,10 +66,6 @@ config:
     # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
     notifier: true
-    # -- Indicate if repair-tickets-kre-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # repair-tickets-kre-bridge service responds correctly to healthcheck calls.
-    repair_tickets_kre_bridge: true
     # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # t7-bridge service responds correctly to healthcheck calls.

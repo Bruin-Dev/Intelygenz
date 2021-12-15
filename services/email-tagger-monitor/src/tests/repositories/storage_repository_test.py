@@ -99,16 +99,3 @@ class TestStorageRepository:
         counter = storage_repository.increment(key)
         storage_repository._redis.incr.assert_called_once_with(storage_key, amount=1)
         assert counter == value
-
-    def rename_test(self, storage_repository):
-        key_1 = "test_123"
-        fixed_key_1 = f"{storage_repository._config.ENVIRONMENT_NAME}-{key_1}"
-
-        key_2 = "test_234"
-        fixed_key_2 = f"{storage_repository._config.ENVIRONMENT_NAME}-{key_2}"
-
-        storage_repository._redis.rename = Mock()
-
-        storage_repository.rename(key_1, key_2)
-
-        storage_repository._redis.rename.assert_called_once_with(fixed_key_1, fixed_key_2)
