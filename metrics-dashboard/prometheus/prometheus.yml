@@ -16,6 +16,12 @@ scrape_configs:
     static_configs:
       - targets: ['base-microservice:9090']
 
+  - job_name: 'bruin-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['bruin-bridge:9090']
+
   - job_name: 'sites-monitor'
 
     scrape_interval: 5s
