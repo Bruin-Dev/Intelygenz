@@ -125,6 +125,17 @@ bruin-bridge:
     bruin_base_url_ip: ""
     # -- Base URL for Bruin API
     bruin_base_url: ""
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: { }
+      #labels:
+      #  servicediscovery: true
   # -- bruin-bridge resource definition
   resources:
     limits:
