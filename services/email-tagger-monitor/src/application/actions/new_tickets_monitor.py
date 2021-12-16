@@ -92,5 +92,5 @@ class NewTicketsMonitor:
             if response["status"] not in range(200, 300):
                 return
 
-            # Remove from DB
+            # Remove from Email Tagger name space
             self._new_tickets_repository.mark_complete(email_id, ticket_id)
