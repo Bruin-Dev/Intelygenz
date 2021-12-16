@@ -1471,7 +1471,7 @@
           "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes/advanced\", namespace=~\"$namespace\"})",
           "interval": "",
           "legendFormat": "Total",
-          "refId": "A"
+          "refId": "B"
         }
       ],
       "thresholds": [],
