@@ -25,6 +25,7 @@ variables:
   CUSTOMER_CACHE_DESIRED_TASKS: "1"
   DIGI_BRIDGE_DESIRED_TASKS: "1"
   DIGI_REBOOT_REPORT_DESIRED_TASKS: "1"
+  DRI_BRIDGE_DESIRED_TASKS: "1"
   EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS: "1"
   EMAIL_TAGGER_MONITOR_DESIRED_TASKS: "1"
   FRAUD_MONITOR_DESIRED_TASKS: "1"
@@ -84,6 +85,7 @@ include:
   - local: 'services/customer-cache/.gitlab-ci.yml'
   - local: 'services/digi-bridge/.gitlab-ci.yml'
   - local: 'services/digi-reboot-report/.gitlab-ci.yml'
+  - local: 'services/dri-bridge/.gitlab-ci.yml'
   - local: 'services/email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'services/email-tagger-monitor/.gitlab-ci.yml'
   - local: 'services/fraud-monitor/.gitlab-ci.yml'
