@@ -50,28 +50,6 @@ function bruin_bridge_variables() {
   fi
 }
 
-function cts_bridge_variables() {
-  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
-    # cts-bridge environment variables for ephemeral environments
-    export CTS_CLIENT_ID=${CTS_CLIENT_ID_DEV}
-    export CTS_CLIENT_SECRET=${CTS_CLIENT_SECRET_DEV}
-    export CTS_CLIENT_USERNAME=${CTS_CLIENT_USERNAME_DEV}
-    export CTS_CLIENT_PASSWORD=${CTS_CLIENT_PASSWORD_DEV}
-    export CTS_CLIENT_SECURITY_TOKEN=${CTS_CLIENT_SECURITY_TOKEN_DEV}
-    export CTS_LOGIN_URL=${CTS_LOGIN_URL_DEV}
-    export CTS_DOMAIN=${CTS_DOMAIN_DEV}
-  else
-    # cts-bridge environment variables for production environment
-    export CTS_CLIENT_ID=${CTS_CLIENT_ID_PRO}
-    export CTS_CLIENT_SECRET=${CTS_CLIENT_SECRET_PRO}
-    export CTS_CLIENT_USERNAME=${CTS_CLIENT_USERNAME_PRO}
-    export CTS_CLIENT_PASSWORD=${CTS_CLIENT_PASSWORD_PRO}
-    export CTS_CLIENT_SECURITY_TOKEN=${CTS_CLIENT_SECURITY_TOKEN_PRO}
-    export CTS_LOGIN_URL=${CTS_LOGIN_URL_PRO}
-    export CTS_DOMAIN=${CTS_DOMAIN_PRO}
-  fi
-}
-
 function digi_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # digi-bridge environment variables for ephemeral environments
@@ -142,28 +120,6 @@ function links_metrics_api_variables() {
     export TICKET_COLLECTOR_MONGO_PORT=${TICKET_COLLECTOR_MONGO_PORT_PRO}
     export OREILLY_SECURITY_GROUP_ID=${OREILLY_SECURITY_GROUP_ID_PRO}
     export AUTOMATION_SSL_CERTIFICATE_ARN=${AUTOMATION_SSL_CERTIFICATE_ARN}
-  fi
-}
-
-function lit_bridge_variables() {
-  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
-    # lit-bridge environment variables for ephemeral environments
-    export LIT_CLIENT_ID=${LIT_CLIENT_ID_DEV}
-    export LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_DEV}
-    export LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
-    export LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_DEV}
-    export LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
-    export LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
-    export LIT_DOMAIN=${LIT_DOMAIN_DEV}
-  else
-    # lit-bridge environment variables for production environment
-    export LIT_CLIENT_ID=${LIT_CLIENT_ID_PRO}
-    export LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_PRO}
-    export LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_PRO}
-    export LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_PRO}
-    export LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_PRO}
-    export LIT_LOGIN_URL=${LIT_LOGIN_URL_PRO}
-    export LIT_DOMAIN=${LIT_DOMAIN_PRO}
   fi
 }
 
@@ -246,13 +202,11 @@ function environments_assign() {
   common_variables_by_environment
   # assign specific environment variables for each subchart
   bruin_bridge_variables
-  cts_bridge_variables
   digi_bridge_variables
   digi_reboot_report_variables
   email_tagger_monitor_variables
   hawkeye_bridge_variables
   links_metrics_api_variables
-  lit_bridge_variables
   lumin_billing_report_variables
   notifier_variables
   t7_bridge_variables
