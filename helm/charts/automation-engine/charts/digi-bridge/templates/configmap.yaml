@@ -7,17 +7,17 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment}}
-  ENVIRONMENT_NAME: "{{ .Values.global.environment }}"
-  NATS_SERVER1: {{ .Values.global.nats_server }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname }}
-  PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
-  PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
-  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
-  DIGI_IP_PRO: "{{ .Values.config.digi_ip_pro }}"
-  DIGI_RECORD_NAME_PRO: "{{ .Values.config.digi_record_name_pro }}"
-  DIGI_IP_DEV: "{{ .Values.config.digi_ip_dev }}"
-  DIGI_RECORD_NAME_DEV: "{{ .Values.config.digi_record_name_dev }}"
-  DIGI_IP_TEST: "{{ .Values.config.digi_ip_test }}"
-  DIGI_RECORD_NAME_TEST: "{{ .Values.config.digi_record_name_test }}"
+  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
+  ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
+  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
+  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
+  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
+  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
+  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
+  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  DIGI_IP_PRO: {{ .Values.config.digi_ip_pro | quote }}
+  DIGI_RECORD_NAME_PRO: {{ .Values.config.digi_record_name_pro | quote }}
+  DIGI_IP_DEV: {{ .Values.config.digi_ip_dev | quote }}
+  DIGI_RECORD_NAME_DEV: {{ .Values.config.digi_record_name_dev | quote }}
+  DIGI_IP_TEST: {{ .Values.config.digi_ip_test | quote }}
+  DIGI_RECORD_NAME_TEST: {{ .Values.config.digi_record_name_test | quote }}

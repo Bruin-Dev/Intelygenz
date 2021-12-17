@@ -7,12 +7,12 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment }}
-  ENVIRONMENT_NAME: "{{ .Values.global.environment }}"
-  NATS_SERVER1: {{ .Values.global.nats_server }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname }}
-  DIGI_REPORT_RECIPIENT: {{ .Values.config.digi_report_recipient }}
-  PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
-  PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
-  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
+  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
+  ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
+  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
+  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
+  DIGI_REPORT_RECIPIENT: {{ .Values.config.digi_report_recipient | quote }}
+  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
+  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
+  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
+  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
