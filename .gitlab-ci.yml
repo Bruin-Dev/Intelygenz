@@ -125,5 +125,6 @@ semantic-release:
         - "services/*/src/app.py"
         - "services/*/Dockerfile"
         - "services/*/requirements.txt"
+        - "helm/charts/automation-engine/**/*"
     - if: $CI_COMMIT_TAG
       when: never
