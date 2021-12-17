@@ -9,6 +9,8 @@ nats:
 
 
 prometheus-nats-exporter:
+  # enable or disable prometheus-nats-exporter
+  enabled: true
   # if using the Prometheus Operator enable serviceMonitor
   serviceMonitor:
     enabled: true
