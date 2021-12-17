@@ -75,7 +75,7 @@ class TestRepairTicketClient:
 
         assert inference_response == valid_inference_response
         stub.GetPrediction.assert_awaited_once_with(
-            self.__data_to_grpc_message(valid_inference_request, pb2.Email()),
+            self.__data_to_grpc_message({'email': valid_inference_request}, pb2.PredictionRequest()),
             timeout=120
         )
 

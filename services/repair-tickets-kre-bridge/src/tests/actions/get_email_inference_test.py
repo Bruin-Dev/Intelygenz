@@ -49,7 +49,7 @@ class TestGetInference:
 
         inference_action = GetInference(logger, config, event_bus, kre_repository)
 
-        await inference_action.get_email_inference(msg_published_in_topic)
+        await inference_action.get_inference(msg_published_in_topic)
 
         logger.error.assert_called_once()
         inference_action._event_bus.publish_message.assert_awaited_once_with(
@@ -90,7 +90,7 @@ class TestGetInference:
 
         inference_action = GetInference(logger, config, event_bus, kre_repository)
 
-        await inference_action.get_email_inference(msg_published_in_topic)
+        await inference_action.get_inference(msg_published_in_topic)
 
         inference_action._kre_repository.get_email_inference.assert_awaited_once_with(request_body)
         inference_action._event_bus.publish_message.assert_awaited_once_with(
