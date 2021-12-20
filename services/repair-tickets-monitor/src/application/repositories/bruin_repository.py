@@ -129,7 +129,7 @@ class BruinRepository:
                 )
                 response = nats_error_response
             else:
-                response_body = response['body'][0]
+                response_body = response['body']
                 response_status = response['status']
 
                 if response_status not in range(200, 300):
@@ -146,7 +146,7 @@ class BruinRepository:
                     response['status'] = response_status
                     response['body'] = {
                         'client_id': client_id,
-                        'site_id': response_body.get('site_id'),
+                        'site_id': response_body[0].get('site_id'),
                         'service_number': service_number,
                     }
 
