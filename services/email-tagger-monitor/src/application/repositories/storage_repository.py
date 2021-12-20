@@ -6,7 +6,6 @@ class StorageRepository:
         self._config = config
         self._logger = logger
         self._redis = redis
-
         self._redis_key_prefix = config.ENVIRONMENT_NAME
 
     def get(self, key):
@@ -39,3 +38,12 @@ class StorageRepository:
     def remove(self, *keys):
         keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
         self._redis.delete(*keys)
+
+    def rename(self, key, new_key):
+        key = f'{self._redis_key_prefix}-{key}'
+        new_key = f'{self._redis_key_prefix}-{new_key}'
+        self._redis.rename(key, new_key)
+
+    def expire(self, key, seconds):
+        key = f'{self._redis_key_prefix}-{key}'
+        self._redis.expire(key, seconds)

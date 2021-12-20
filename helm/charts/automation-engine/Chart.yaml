@@ -82,6 +82,9 @@ dependencies:
   - name: notifier
     version: '*.*.*'
     condition: notifier.enabled
+  - name: repair-tickets-kre-bridge
+    version: '*.*.*'
+    condition: repair-tickets-kre-bridge.enabled
   - name: service-affecting-monitor
     version: '*.*.*'
     condition: service-affecting-monitor.enabled

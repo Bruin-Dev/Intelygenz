@@ -66,4 +66,5 @@ class NewTicketsRepository:
     def mark_complete(self, email_id: str, ticket_id: str):
         self._logger.info(f"marking email complete '{email_id}' and '{ticket_id}' ")
         key = f"ticket_{email_id}_{ticket_id}"
-        self._storage_repository.remove(key)
+        archive_key = f"archived_ticket_{email_id}_{ticket_id}"
+        self._storage_repository.rename(key, archive_key)

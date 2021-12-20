@@ -19,5 +19,7 @@ class NewEmailsRepository:
 
     def mark_complete(self, email_id: str):
         key = f"email_{email_id}"
+        archive_key = f"archived_email_{email_id}"
         self._logger.info(f"marking email complete '{email_id}'")
-        self._storage_repository.remove(key)
+        self._storage_repository.rename(key, archive_key)
+        self._storage_repository.expire(archive_key, seconds=300)
