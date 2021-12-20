@@ -9,4 +9,5 @@ class EndpointsUsageRepository:  # pragma: no cover
     )
 
     def increment_usage(self, method: str, endpoint: str):
+        endpoint = endpoint.rstrip('/')
         self.__counter.labels(method, endpoint).inc()
