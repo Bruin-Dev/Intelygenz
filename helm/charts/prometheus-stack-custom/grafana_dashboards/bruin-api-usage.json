@@ -1247,13 +1247,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/detail/[0-9]+/status\", namespace=~\"$namespace\"}) by (pod)",
+          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/[0-9]+/status\", namespace=~\"$namespace\"}) by (pod)",
           "interval": "",
           "legendFormat": "Pod: {{pod}}",
           "refId": "A"
         },
         {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/detail/[0-9]+/status\", namespace=~\"$namespace\"})",
+          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/[0-9]+/status\", namespace=~\"$namespace\"})",
           "hide": false,
           "interval": "",
           "legendFormat": "Total",
