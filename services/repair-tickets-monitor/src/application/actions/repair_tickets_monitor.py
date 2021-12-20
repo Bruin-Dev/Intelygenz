@@ -230,7 +230,7 @@ class RepairTicketsMonitor:
         for potential_service_number in potential_service_numbers:
             result = await self._bruin_repository.verify_service_number_information(client_id, potential_service_number)
             if result['status'] in range(200, 300):
-                service_number_site_map[potential_service_number] = result['body']['site_id']
+                service_number_site_map[potential_service_number] = str(result['body']['site_id'])
             elif result['status'] == 404:
                 continue
             else:
@@ -245,8 +245,9 @@ class RepairTicketsMonitor:
     ) -> List[Dict[str, Any]]:
         """Return a list of preexisting tickets in bruin with the given sites"""
         service_numbers = list(service_number_site_map.keys())
+        site_ids = list(set(service_number_site_map.values()))
         existing_tickets = []
-        open_tickets = await self._bruin_repository.get_open_tickets_with_service_numbers(client_id)
+        open_tickets = await self._bruin_repository.get_open_tickets_with_service_numbers(client_id, site_ids)
         if open_tickets['status'] == 404:
             return existing_tickets
         if open_tickets['status'] not in range(200, 300):
@@ -331,7 +332,7 @@ class RepairTicketsMonitor:
             'site_id': site_id,
             'service_numbers': service_numbers,
             'ticket_id': ticket_id,
-            'not_created_reason': reason,
+            'not_creation_reason': reason,
         }
 
     @staticmethod

@@ -122,7 +122,6 @@ class BruinRepository:
                     request_msg,
                     timeout=self._timeout
                 )
-
             except Exception as err:
                 err_msg = (
                     f'An error occurred when getting service number info from Bruin, '
@@ -130,7 +129,7 @@ class BruinRepository:
                 )
                 response = nats_error_response
             else:
-                response_body = response['body']
+                response_body = response['body'][0]
                 response_status = response['status']
 
                 if response_status not in range(200, 300):
@@ -140,13 +139,14 @@ class BruinRepository:
                         f'Error {response_status} - {response_body}'
                     )
                 elif not response_body:
+                    self._logger.info(f'Service number not validated {service_number}')
                     response['status'] = 404
                     response['body'] = "Service number not validated"
                 else:
                     response['status'] = response_status
                     response['body'] = {
                         'client_id': client_id,
-                        'site_id': response['body'].get('site_id'),
+                        'site_id': response_body.get('site_id'),
                         'service_number': service_number,
                     }
 
@@ -222,7 +222,7 @@ class BruinRepository:
     async def mark_email_as_done(self):
         pass
 
-    async def get_tickets_basic_info(self, client_id: str, ticket_statuses: List[str], category: str):
+    async def get_tickets_basic_info(self, client_id: str, ticket_statuses: List[str], site_id: str):
         @retry(
             wait=wait_exponential(
                 multiplier=self._config.NATS_CONFIG['multiplier'],
@@ -237,7 +237,7 @@ class BruinRepository:
                 'body': {
                     'client_id': client_id,
                     'ticket_statuses': ticket_statuses,
-                    'category': category,
+                    'site_id': site_id,
                 },
             }
 
@@ -285,16 +285,18 @@ class BruinRepository:
         except Exception as e:
             self._logger.error(f"Error getting tickets with client_id {client_id} from Bruin: {e}")
 
-    async def get_open_tickets_with_service_numbers(self, client_id: str) -> Dict[str, Any]:
+    async def get_open_tickets_with_service_numbers(self, client_id: str, site_ids: List[str]) -> Dict[str, Any]:
         ticket_statuses = ['New', 'InProgress', 'Draft']
-        categories = ['VOO', 'VAS']
 
         open_tickets = []
-        for category in categories:
-            tickets = await self.get_tickets_basic_info(client_id, ticket_statuses, category)
+        self._logger.info(f'Getting open tickets for site_ids: {site_ids}')
+        for site_id in site_ids:
+            tickets = await self.get_tickets_basic_info(client_id, ticket_statuses, site_id)
             if tickets['status'] not in range(200, 300):
                 return {'status': tickets['status'], 'body': 'Error while retrieving open tickets'}
             open_tickets.extend(tickets['body'])
+
+        self._logger.info(f'Open tickets {open_tickets}')
         if not open_tickets:
             return {'status': 404, 'body': 'No open tickets found'}
 
