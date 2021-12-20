@@ -15,9 +15,222 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1639594382608,
+  "id": 31,
+  "iteration": 1639996565640,
   "links": [],
   "panels": [
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 17,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 20,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "maxPerRow": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "repeatDirection": "h",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/identity/connect/token\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "POST /identity/connect/token",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Inventory",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/Attribute\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Inventory/Attribute",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/circuit\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Inventory/circuit",
+          "refId": "D"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Site\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Site",
+          "refId": "E"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Ticket",
+          "refId": "F"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "POST /api/Ticket",
+          "refId": "G"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/detail/unpause\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "POST /api/Ticket/<id>/detail/unpause",
+          "refId": "H"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/details\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Ticket/<id>/details",
+          "refId": "I"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/[0-9]+/status\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "PUT /api/Ticket/<id>/details/<id>/status",
+          "refId": "J"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/work\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "PUT /api/Ticket/<id>/details/work",
+          "refId": "K"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/nextresult\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Ticket/<id>/nextresult",
+          "refId": "L"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "POST /api/Ticket/<id>/notes",
+          "refId": "M"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes/advanced\", namespace=~\"$namespace\"})",
+          "interval": "",
+          "legendFormat": "POST /api/Ticket/<id>/notes/advanced",
+          "refId": "N"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/severity\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "PUT /api/Ticket/<id>/severity",
+          "refId": "O"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket/basic\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "GET /api/Ticket/basic",
+          "refId": "P"
+        },
+        {
+          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket/repair\", namespace=~\"$namespace\"})",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "POST /api/Ticket/repair",
+          "refId": "Q"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Overview",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
     {
       "aliasColors": {},
       "bars": false,
@@ -38,7 +251,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 3,
@@ -145,7 +358,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 4,
@@ -252,7 +465,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 24
       },
       "hiddenSeries": false,
       "id": 2,
@@ -360,7 +573,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 24
       },
       "hiddenSeries": false,
       "id": 5,
@@ -467,7 +680,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 6,
@@ -574,7 +787,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 7,
@@ -681,7 +894,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 21
+        "y": 38
       },
       "hiddenSeries": false,
       "id": 8,
@@ -788,7 +1001,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 21
+        "y": 38
       },
       "hiddenSeries": false,
       "id": 9,
@@ -895,7 +1108,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 28
+        "y": 45
       },
       "hiddenSeries": false,
       "id": 10,
@@ -1002,7 +1215,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 28
+        "y": 45
       },
       "hiddenSeries": false,
       "id": 11,
@@ -1109,7 +1322,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 52
       },
       "hiddenSeries": false,
       "id": 12,
@@ -1216,7 +1429,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 52
       },
       "hiddenSeries": false,
       "id": 13,
@@ -1323,7 +1536,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 14,
@@ -1430,7 +1643,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 15,
@@ -1536,7 +1749,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 49
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 18,
@@ -1643,7 +1856,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 49
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 17,
@@ -1750,7 +1963,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 56
+        "y": 73
       },
       "hiddenSeries": false,
       "id": 19,
