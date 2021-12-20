@@ -22,3 +22,4 @@ class NewEmailsRepository:
         archive_key = f"archived_email_{email_id}"
         self._logger.info(f"marking email complete '{email_id}'")
         self._storage_repository.rename(key, archive_key)
+        self._storage_repository.expire(archive_key, seconds=300)

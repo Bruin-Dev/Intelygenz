@@ -43,3 +43,7 @@ class StorageRepository:
         key = f'{self._redis_key_prefix}-{key}'
         new_key = f'{self._redis_key_prefix}-{new_key}'
         self._redis.rename(key, new_key)
+
+    def expire(self, key, seconds):
+        key = f'{self._redis_key_prefix}-{key}'
+        self._redis.expire(key, seconds)

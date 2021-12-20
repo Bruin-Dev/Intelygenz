@@ -66,9 +66,6 @@ class NewTicketsMonitor:
             if error_counter >= self._config.MONITOR_CONFIG["max_retries_error_404"]:
                 self._new_tickets_repository.delete_ticket(email_id, ticket_id)
                 self._new_tickets_repository.delete_ticket_error_counter(ticket_id, error_code)
-        else:
-            self._logger.error(f"Deleting ticket from redis {ticket_id} because error: {error_code}")
-            self._new_tickets_repository.delete_ticket(email_id, ticket_id)
 
     async def _save_metrics(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
@@ -83,7 +80,6 @@ class NewTicketsMonitor:
                 self._check_error(404, ticket_id, email_id)
 
             if ticket_response["status"] not in range(200, 300):
-                self._check_error(ticket_response["status"], ticket_id, email_id)
                 return
 
             self._logger.info(f"Got ticket info from Bruin: {ticket_response}")
