@@ -20,3 +20,4 @@ class PredictedTagsRepository:
             "tag_probability": tag_probability,
          }
         self._storage_repository.save(key, new_pred)
+        self._storage_repository.expire(key, seconds=300)
