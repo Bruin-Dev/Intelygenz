@@ -112,3 +112,14 @@ class TestStorageRepository:
         storage_repository.rename(key_1, key_2)
 
         storage_repository._redis.rename.assert_called_once_with(fixed_key_1, fixed_key_2)
+
+    def expire_test(self, storage_repository):
+        key_1 = "test_123"
+        fixed_key_1 = f"{storage_repository._config.ENVIRONMENT_NAME}-{key_1}"
+        timeout = 100
+
+        storage_repository._redis.expire = Mock()
+
+        storage_repository.expire(key_1, timeout)
+
+        storage_repository._redis.expire.assert_called_once_with(fixed_key_1, timeout)

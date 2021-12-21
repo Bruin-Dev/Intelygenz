@@ -68,3 +68,4 @@ class NewTicketsRepository:
         key = f"ticket_{email_id}_{ticket_id}"
         archive_key = f"archived_ticket_{email_id}_{ticket_id}"
         self._storage_repository.rename(key, archive_key)
+        self._storage_repository.expire(archive_key, seconds=300)

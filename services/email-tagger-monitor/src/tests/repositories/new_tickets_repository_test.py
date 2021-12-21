@@ -87,6 +87,8 @@ class TestNewTicketsRepository:
 
     def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.rename = Mock()
+        storage_repository.expire = Mock()
+
         new_emails_repository = NewTicketsRepository(logger, testconfig, notifications_repository,
                                                      storage_repository)
 
@@ -97,6 +99,7 @@ class TestNewTicketsRepository:
         response = new_emails_repository.mark_complete(email_id, ticket_id)
 
         storage_repository.rename.assert_called_once_with(expected_id, expected_archive_id)
+        storage_repository.expire.assert_called_once_with(expected_archive_id, seconds=300)
         assert response is None
 
     def increase_ticket_error_counter_ok_test(self, new_emails_repository):

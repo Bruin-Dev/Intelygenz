@@ -62,6 +62,7 @@ class TestNewEmailsRepository:
 
     def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.rename = Mock()
+        storage_repository.expire = Mock()
         new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository,
                                                     storage_repository)
 
@@ -72,4 +73,5 @@ class TestNewEmailsRepository:
         response = new_emails_repository.mark_complete(email_id)
 
         storage_repository.rename.assert_called_once_with(expected_email_id, expected_archive_id)
+        storage_repository.expire.assert_called_once_with(expected_archive_id, seconds=300)
         assert response is None

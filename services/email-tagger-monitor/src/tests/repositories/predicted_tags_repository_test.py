@@ -31,6 +31,7 @@ class TestPredictedTagsRepository:
 
     def save_new_tag_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.save = Mock()
+        storage_repository.expire = Mock()
         predicted_tags_repository = PredictedTagsRepository(logger, testconfig, notifications_repository,
                                                             storage_repository)
 
@@ -43,4 +44,5 @@ class TestPredictedTagsRepository:
         response = predicted_tags_repository.save_new_tag(**tag_data)
 
         storage_repository.save.assert_called_once_with(expected_tag, tag_data)
+        storage_repository.expire.assert_called_once_with(expected_tag, seconds=300)
         assert response is None
