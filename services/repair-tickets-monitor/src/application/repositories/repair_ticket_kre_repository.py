@@ -92,7 +92,6 @@ class RepairTicketKreRepository:
             tickets_cannot_be_created: List[Dict[str, Any]],
     ):
         validated_service_numbers = list(service_numbers_sites_map.keys())
-
         @retry(
             wait=wait_exponential(
                 multiplier=self._config.NATS_CONFIG["multiplier"],

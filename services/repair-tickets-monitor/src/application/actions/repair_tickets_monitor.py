@@ -130,14 +130,20 @@ class RepairTicketsMonitor:
     async def _save_output(
             self,
             email_id: str,
-            service_number_sites_map: Dict[str, str],
-            tickets_created: List[Dict[str, Any]],
-            tickets_updated: List[Dict[str, Any]],
-            tickets_could_be_created: List[Dict[str, Any]],
-            tickets_could_be_updated: List[Dict[str, Any]],
-            tickets_cannot_be_created: List[Dict[str, Any]],
+            service_number_sites_map: Dict[str, str] = None,
+            tickets_created: List[Dict[str, Any]] = None,
+            tickets_updated: List[Dict[str, Any]] = None,
+            tickets_could_be_created: List[Dict[str, Any]] = None,
+            tickets_could_be_updated: List[Dict[str, Any]] = None,
+            tickets_cannot_be_created: List[Dict[str, Any]] = None,
     ):
         """Save the output from the ticket creation / inference verification"""
+        service_number_sites_map = service_number_sites_map or {}
+        tickets_created = tickets_created or []
+        tickets_updated = tickets_updated or []
+        tickets_could_be_created = tickets_could_be_created or []
+        tickets_could_be_updated = tickets_could_be_updated or []
+        tickets_cannot_be_created = tickets_cannot_be_created or []
         output_response = await self._repair_tickets_kre_repository.save_outputs(
             str(email_id),
             service_number_sites_map,
@@ -190,7 +196,18 @@ class RepairTicketsMonitor:
                 existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
             except ResponseException as e:
                 self._logger.error(f'Error in bruin {e} could not process email: {email_id}')
+                tickets_cannot_be_created.append(
+                    self._create_output_ticket_dict(
+                        service_numbers=[],
+                        site_id="",
+                        reason=e
+                    )
+                )
+
+                await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
+                self._new_tagged_emails_repository.mark_complete(email_id)
                 return
+
             if self._is_inference_actionable(inference_data):
                 tickets_created, tickets_updated, tickets_cannot_be_created = await self._create_tickets(
                     inference_data,
@@ -235,6 +252,9 @@ class RepairTicketsMonitor:
                 continue
             else:
                 raise ResponseException(f'Exception while verifying service_number: {potential_service_number}')
+
+        if not service_number_site_map:
+            raise ResponseException('No validated service numbers')
 
         return service_number_site_map
 
@@ -295,7 +315,7 @@ class RepairTicketsMonitor:
                     self._create_output_ticket_dict(
                         site_id=ticket['site_id'],
                         service_numbers=ticket['service_numbers'],
-                        ticket_id=ticket['ticket_id'],
+                        ticket_id=str(ticket['ticket_id']),
                     )
                 )
                 site_ids.remove(ticket['site_id'])
