@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from datetime import timezone as tz
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -9,7 +9,6 @@ from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application.actions import service_affecting_monitor_reports as service_affecting_monitor_module
-from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
 from config import testconfig
 
 uuid_ = uuid()
@@ -18,19 +17,12 @@ uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=
 
 class TestServiceAffectingMonitorReports:
 
-    def instance_test(
-            self, event_bus, logger, scheduler, template_renderer, bruin_repository, notifications_repository,
-            customer_cache_repository):
-        config = testconfig
-        service_affecting_monitor_reports = ServiceAffectingMonitorReports(
-            event_bus, logger, scheduler, config, template_renderer, bruin_repository, notifications_repository,
-            customer_cache_repository
-        )
-
+    def instance_test(self, service_affecting_monitor_reports, event_bus, logger, scheduler, template_renderer,
+                      bruin_repository, notifications_repository, customer_cache_repository):
         assert service_affecting_monitor_reports._event_bus is event_bus
         assert service_affecting_monitor_reports._logger is logger
         assert service_affecting_monitor_reports._scheduler is scheduler
-        assert service_affecting_monitor_reports._config is config
+        assert service_affecting_monitor_reports._config is testconfig
         assert service_affecting_monitor_reports._template_renderer is template_renderer
         assert service_affecting_monitor_reports._bruin_repository is bruin_repository
         assert service_affecting_monitor_reports._notifications_repository is notifications_repository
@@ -38,7 +30,7 @@ class TestServiceAffectingMonitorReports:
 
     @pytest.mark.asyncio
     async def start_service_affecting_monitor_job_with_exec_on_start_test(self, service_affecting_monitor_reports,
-                                                                          report, response_customer_cache):
+                                                                          response_customer_cache):
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -98,8 +90,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._notifications_repository.send_email.assert_awaited()
 
     @pytest.mark.asyncio
-    async def report_bandwidth_over_utilization_no_cache_test(self, report,
-                                                              service_affecting_monitor_reports,
+    async def report_bandwidth_over_utilization_no_cache_test(self, service_affecting_monitor_reports,
                                                               response_empty_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
 
@@ -115,8 +106,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def report_bandwidth_over_utilization_bad_response_cache_test(self,
-                                                                        service_affecting_monitor_reports,
+    async def report_bandwidth_over_utilization_bad_response_cache_test(self, service_affecting_monitor_reports,
                                                                         response_bad_status_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
 
@@ -135,7 +125,6 @@ class TestServiceAffectingMonitorReports:
     async def service_affecting_monitor_report_bandwidth_over_utilization_no_items_for_report_test(
             self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
-        start_date = end_date - timedelta(days=report['trailing_days'])
 
         datetime_mock = Mock()
         datetime_mock.utcnow = Mock(return_value=end_date)
@@ -164,7 +153,6 @@ class TestServiceAffectingMonitorReports:
             self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets_with_exception,
             response_customer_cache):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
-        start_date = end_date - timedelta(days=report['trailing_days'])
 
         datetime_mock = Mock()
         datetime_mock.utcnow = Mock(return_value=end_date)

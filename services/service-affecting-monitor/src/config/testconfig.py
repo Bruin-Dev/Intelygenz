@@ -52,6 +52,11 @@ MONITOR_CONFIG = {
     },
 }
 
+REPORT_RECIPIENTS = {
+    'default': ['mettel.automation@intelygenz.com'],
+    9994: ['HNOCleaderteam@mettel.net'],
+}
+
 MONITOR_REPORT_CONFIG = {
     "semaphore": 5,
     'wait_fixed': 1,
@@ -64,16 +69,14 @@ MONITOR_REPORT_CONFIG = {
     'trailing_days': 14,
     'monitoring_minutes_interval': 10,
     'timezone': 'US/Eastern',
-    'report_config_by_trouble': {
-        'default': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
-                    'mettel.automation@intelygenz.com'],
-        83959: ['clmillsap@oreillyauto.com', 'mgallion2@oreillyauto.com', 'rbodenhamer@oreillyauto.com',
-                'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net'],
-        72959: ['DL_Tenet_Telecom@nttdata.com', 'Jake.Salas@tenethealth.com', 'dshim@mettel.net',
-                'mgoldstein@mettel.net'],
-        83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net'],
-        86937: ['networkservices@signetjewelers.com', 'pallen@mettel.net'],
-    }
+}
+
+BANDWIDTH_REPORT_CONFIG = {
+    'environment': 'test',
+    'timezone': 'US/Eastern',
+    'crontab': '0 8 * * *',
+    'lookup_interval_hours': 24,
+    'clients': [9994],
 }
 
 ENVIRONMENT_NAME = "dev"
