@@ -78,6 +78,7 @@ helm-master-logs:
         - "services/*/src/app.py"
         - "services/*/Dockerfile"
         - "services/*/requirements.txt"
+        - "ci-utils/papertrail-provisioning/*"
     - if: $CI_COMMIT_TAG
       when: never
       
