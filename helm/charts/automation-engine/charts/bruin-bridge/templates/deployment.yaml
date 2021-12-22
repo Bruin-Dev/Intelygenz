@@ -63,6 +63,15 @@ spec:
             initialDelaySeconds: 15
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if eq .Values.global.current_environment "dev" }}
+      hostAliases:
+        - ip: {{ .Values.config.bruin_login_url_ip }}
+          hostnames:
+            - {{ .Values.config.bruin_login_url | replace "https://" "" }}
+        - ip: {{ .Values.config.bruin_base_url_ip }}
+          hostnames:
+            - {{ .Values.config.bruin_base_url | replace "https://" "" }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

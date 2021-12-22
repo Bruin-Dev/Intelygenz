@@ -156,6 +156,10 @@ bruin-bridge:
     bruin_login_url: ${BRUIN_BRIDGE__BRUIN_LOGIN_URL}
     # -- Base URL for Bruin API
     bruin_base_url: ${BRUIN_BRIDGE__BRUIN_BASE_URL}
+    # -- IP of Bruin DEV Login URL
+    bruin_login_url_ip: ${BRUIN_BRIDGE__BRUIN_LOGIN_URL_IP}
+    # -- IP of Bruin DEV Base URL
+    bruin_base_url_ip: ${BRUIN_BRIDGE__BRUIN_BASE_URL_IP}
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true

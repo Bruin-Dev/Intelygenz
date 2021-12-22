@@ -51,6 +51,10 @@ config:
   bruin_login_url: ""
   # -- Base URL for Bruin API
   bruin_base_url: ""
+  # -- IP of Bruin DEV Login URL
+  bruin_login_url_ip: ""
+  # -- IP of Bruin DEV Base URL
+  bruin_base_url_ip: ""
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/bruin-bridge

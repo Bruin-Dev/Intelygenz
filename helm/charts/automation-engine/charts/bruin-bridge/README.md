@@ -17,6 +17,8 @@ A Helm chart for Kubernetes
 | config.bruin_client_id | string | `""` | Client ID credentials for Bruin API |
 | config.bruin_client_secret | string | `""` | Client Secret credentials for Bruin API |
 | config.bruin_login_url | string | `""` | Login URL for Bruin API |
+| config.bruin_base_url_ip | string | `""` | IP of Bruin DEV Base URL |
+| config.bruin_login_url_ip | string | `""` | IP of Bruin DEV Login URL |
 | enabled | bool | `true` |  |
 | global | object | `{"current_environment":"dev","ecr_registry":{"name":"ecr-registry"},"environment":"automation-test","mode":"aws","nats_server":"nats://nats:4222","papertrail_active":"False","papertrail_host":"logs.papertrailapp.com","papertrail_port":"0","redis_hostname":"redis"}` | Global configuration |
 | global.current_environment | string | `"dev"` | Name of environment for EKS cluster and network resources |

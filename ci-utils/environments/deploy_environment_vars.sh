@@ -41,6 +41,8 @@ function bruin_bridge_variables() {
     export BRUIN_BRIDGE__BRUIN_BASE_URL="${DEV__BRUIN_BRIDGE__BASE_URL}"
     export BRUIN_BRIDGE__BRUIN_CLIENT_ID="${DEV__BRUIN_BRIDGE__CLIENT_ID}"
     export BRUIN_BRIDGE__BRUIN_CLIENT_SECRET="${DEV__BRUIN_BRIDGE__CLIENT_SECRET}"
+    export BRUIN_BRIDGE__BRUIN_LOGIN_URL_IP="${DEV__BRUIN_BRIDGE__LOGIN_URL_IP}"
+    export BRUIN_BRIDGE__BRUIN_BASE_URL_IP="${DEV__BRUIN_BRIDGE__BASE_URL_IP}"
   else
     # bruin-bridge environment variables for production environment
     export BRUIN_BRIDGE__BRUIN_LOGIN_URL="${PRO__BRUIN_BRIDGE__LOGIN_URL}"
