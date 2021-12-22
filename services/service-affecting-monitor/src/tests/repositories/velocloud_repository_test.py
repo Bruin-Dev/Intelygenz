@@ -325,6 +325,21 @@ class TestVelocloudRepository:
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
     @pytest.mark.asyncio
+    async def get_links_metrics_for_bandwidth_reports_test(self, velocloud_repository, frozen_datetime):
+        current_datetime = frozen_datetime.now()
+
+        lookup_interval = velocloud_repository._config.BANDWIDTH_REPORT_CONFIG['lookup_interval_hours']
+        interval = {
+            'start': current_datetime - timedelta(hours=lookup_interval),
+            'end': current_datetime,
+        }
+
+        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            await velocloud_repository.get_links_metrics_for_bandwidth_reports()
+
+        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+
+    @pytest.mark.asyncio
     async def get_enterprise_events__events_retrieved_test(self, velocloud_repository, frozen_datetime,
                                                            make_get_enterprise_events_request, make_rpc_response):
         host = 'mettel.velocloud.net'
@@ -548,4 +563,26 @@ class TestVelocloudRepository:
             },
         }
 
+        assert result == expected
+
+    def filter_links_metrics_by_client_test(self, velocloud_repository, make_edge, make_metrics_for_link,
+                                            make_edge_full_id, make_bruin_client_info, make_cached_edge,
+                                            make_customer_cache):
+        host = 'mettel.velocloud.net'
+        enterprise_id = 123
+        edge_id = 456
+        client_id = 789
+
+        edge = make_edge(host=host, enterprise_id=enterprise_id, id_=edge_id)
+        link_1_metrics = make_metrics_for_link(link_with_edge_info=edge)
+        link_2_metrics = make_metrics_for_link()
+        links_metrics = [link_1_metrics, link_2_metrics]
+
+        edge_full_id = make_edge_full_id(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        cached_edge = make_cached_edge(full_id=edge_full_id, bruin_client_info=bruin_client_info)
+        customer_cache = make_customer_cache(cached_edge)
+
+        result = velocloud_repository.filter_links_metrics_by_client(links_metrics, client_id, customer_cache)
+        expected = [link_1_metrics]
         assert result == expected
