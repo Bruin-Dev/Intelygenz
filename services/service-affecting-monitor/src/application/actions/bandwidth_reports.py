@@ -9,7 +9,7 @@ from application import AffectingTroubles
 class BandwidthReports:
 
     def __init__(self, logger, scheduler, config, velocloud_repository, bruin_repository, trouble_repository,
-                 customer_cache_repository, notifications_repository, utils_repository, template_renderer):
+                 customer_cache_repository, notifications_repository, utils_repository, template_repository):
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
@@ -19,7 +19,7 @@ class BandwidthReports:
         self._customer_cache_repository = customer_cache_repository
         self._notifications_repository = notifications_repository
         self._utils_repository = utils_repository
-        self._template_renderer = template_renderer
+        self._template_repository = template_repository
 
     async def start_bandwidth_reports_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: bandwidth reports')
@@ -93,7 +93,7 @@ class BandwidthReports:
                                   f'since the current environment is not production')
                 continue
 
-            email = self._template_renderer.compose_bandwidth_report_email(
+            email = self._template_repository.compose_bandwidth_report_email(
                 client_id=client_id,
                 client_name=client_names_by_id[client_id],
                 report_items=report_items,

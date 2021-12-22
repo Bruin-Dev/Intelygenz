@@ -22,9 +22,9 @@ from tests.fixtures.velocloud import *
 
 @pytest.fixture(scope='function')
 def service_affecting_monitor_reports(
-        event_bus, logger, scheduler, template_renderer, bruin_repository, notifications_repository,
+        event_bus, logger, scheduler, template_repository, bruin_repository, notifications_repository,
         customer_cache_repository):
-    return ServiceAffectingMonitorReports(event_bus, logger, scheduler, testconfig, template_renderer,
+    return ServiceAffectingMonitorReports(event_bus, logger, scheduler, testconfig, template_repository,
                                           bruin_repository, notifications_repository, customer_cache_repository)
 
 

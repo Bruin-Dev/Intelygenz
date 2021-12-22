@@ -11,7 +11,7 @@ from application.actions.service_affecting_monitor import ServiceAffectingMonito
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.template_management import TemplateRenderer
+from application.repositories.template_repository import TemplateRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
@@ -114,8 +114,8 @@ def ticket_repository(trouble_repository, utils_repository):
 
 
 @pytest.fixture(scope='function')
-def template_renderer():
-    instance = TemplateRenderer(config)
+def template_repository():
+    instance = TemplateRepository(config)
     wrap_all_methods(instance)
 
     return instance

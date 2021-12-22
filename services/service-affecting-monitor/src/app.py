@@ -18,7 +18,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.template_management import TemplateRenderer
+from application.repositories.template_repository import TemplateRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
@@ -56,7 +56,7 @@ class Container:
 
         # REPOSITORIES
         self._utils_repository = UtilsRepository()
-        self._template_renderer = TemplateRenderer(config=config)
+        self._template_repository = TemplateRepository(config=config)
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
         self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                  notifications_repository=self._notifications_repository)
@@ -82,7 +82,7 @@ class Container:
 
         self._service_affecting_monitor_reports = ServiceAffectingMonitorReports(
             event_bus=self._event_bus, logger=self._logger, scheduler=self._scheduler, config=config,
-            template_renderer=self._template_renderer, bruin_repository=self._bruin_repository,
+            template_repository=self._template_repository, bruin_repository=self._bruin_repository,
             notifications_repository=self._notifications_repository,
             customer_cache_repository=self._customer_cache_repository,
         )
@@ -92,7 +92,7 @@ class Container:
             velocloud_repository=self._velocloud_repository, bruin_repository=self._bruin_repository,
             trouble_repository=self._trouble_repository, customer_cache_repository=self._customer_cache_repository,
             notifications_repository=self._notifications_repository, utils_repository=self._utils_repository,
-            template_renderer=self._template_renderer,
+            template_repository=self._template_repository,
         )
 
     async def _start(self):

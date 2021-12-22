@@ -8,7 +8,7 @@ from pytz import timezone
 DATE_FORMAT = '%Y-%m-%d'
 
 
-class TemplateRenderer:
+class TemplateRepository:
     def __init__(self, config):
         self._config = config
 

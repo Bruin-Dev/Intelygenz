@@ -11,13 +11,13 @@ from application.repositories.bruin_repository import BruinRepository
 
 class ServiceAffectingMonitorReports:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, bruin_repository,
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_repository, bruin_repository,
                  notifications_repository, customer_cache_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
-        self._template_renderer = template_renderer
+        self._template_repository = template_repository
         self._bruin_repository = bruin_repository
         self._notifications_repository = notifications_repository
         self._ISO_8601_FORMAT_UTC = "%Y-%m-%dT%H:%M:%SZ"
@@ -134,7 +134,7 @@ class ServiceAffectingMonitorReports:
                     f"{working_environment.upper()}")
                 continue
 
-            email = self._template_renderer.compose_monitor_report_email(
+            email = self._template_repository.compose_monitor_report_email(
                 client_id=client_id,
                 client_name=client_name_by_id[client_id],
                 report_items=final_report_list,

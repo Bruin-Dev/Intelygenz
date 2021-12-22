@@ -17,13 +17,13 @@ uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=
 
 class TestServiceAffectingMonitorReports:
 
-    def instance_test(self, service_affecting_monitor_reports, event_bus, logger, scheduler, template_renderer,
+    def instance_test(self, service_affecting_monitor_reports, event_bus, logger, scheduler, template_repository,
                       bruin_repository, notifications_repository, customer_cache_repository):
         assert service_affecting_monitor_reports._event_bus is event_bus
         assert service_affecting_monitor_reports._logger is logger
         assert service_affecting_monitor_reports._scheduler is scheduler
         assert service_affecting_monitor_reports._config is testconfig
-        assert service_affecting_monitor_reports._template_renderer is template_renderer
+        assert service_affecting_monitor_reports._template_repository is template_repository
         assert service_affecting_monitor_reports._bruin_repository is bruin_repository
         assert service_affecting_monitor_reports._notifications_repository is notifications_repository
         assert service_affecting_monitor_reports._customer_cache_repository is customer_cache_repository
@@ -135,7 +135,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets, None]
         )
-        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object = \
+        service_affecting_monitor_reports._template_repository.compose_email_bandwidth_over_utilization_report_object =\
             Mock()
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
         service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
@@ -144,7 +144,7 @@ class TestServiceAffectingMonitorReports:
             await service_affecting_monitor_reports.monitor_reports()
 
         service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited()
-        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object. \
+        service_affecting_monitor_reports._template_repository.compose_email_bandwidth_over_utilization_report_object. \
             assert_not_called()
         service_affecting_monitor_reports._notifications_repository.send_email.assert_not_awaited()
 
@@ -163,7 +163,7 @@ class TestServiceAffectingMonitorReports:
         )
         service_affecting_monitor_reports._bruin_repository.map_ticket_details_and_notes_with_serial_numbers = Mock()
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report = Mock()
-        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object = \
+        service_affecting_monitor_reports._template_repository.compose_email_bandwidth_over_utilization_report_object =\
             Mock()
         service_affecting_monitor_reports._notifications_repository.send_email = CoroutineMock()
         service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
@@ -178,7 +178,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.map_ticket_details_and_notes_with_serial_numbers \
             .assert_not_called()
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report.assert_not_called()
-        service_affecting_monitor_reports._template_renderer.compose_email_bandwidth_over_utilization_report_object. \
+        service_affecting_monitor_reports._template_repository.compose_email_bandwidth_over_utilization_report_object. \
             assert_not_called()
         service_affecting_monitor_reports._notifications_repository.send_email.assert_not_called()
 
