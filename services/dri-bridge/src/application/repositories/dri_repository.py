@@ -33,7 +33,7 @@ class DRIRepository:
 
             if len(pending_task_ids["body"]) > 0:
                 task_id_response["status"] = pending_task_ids["status"]
-                task_id_response["body"] = pending_task_ids["body"][0]["Ids"]
+                task_id_response["body"] = max(pending_task_ids["body"])
                 self._storage_repository.save(serial_number, task_id_response["body"])
 
             if len(pending_task_ids["body"]) == 0:
@@ -112,7 +112,10 @@ class DRIRepository:
             pending_task_ids_response["status"] = 400
             return pending_task_ids_response
 
-        pending_task_ids = pending_task_ids_response["body"]["data"]["Transactions"]
+        pending_task_ids = [
+            task['Id']
+            for task in pending_task_ids_response["body"]["data"]["Transactions"]
+        ]
         self._logger.info(f"Pending task ids list from DRI for serial {serial_number} found: "
                           f"{pending_task_ids}")
 

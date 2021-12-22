@@ -23,7 +23,7 @@ class TestStorageRepository:
         logger = Mock()
 
         key = "test_123"
-        fixed_key = f"{config.ENVIRONMENT_NAME}-{key}"
+        fixed_key = f"{config.ENVIRONMENT_NAME}-dri-serial-{key}"
         expected = {"test": 12345}
 
         redis = Mock()
@@ -59,7 +59,7 @@ class TestStorageRepository:
         logger = Mock()
 
         key = "test_123"
-        fixed_key = f"{config.ENVIRONMENT_NAME}-{key}"
+        fixed_key = f"{config.ENVIRONMENT_NAME}-dri-serial-{key}"
 
         payload = {"some": "payload"}
 
@@ -77,10 +77,10 @@ class TestStorageRepository:
         logger = Mock()
 
         key_1 = "test_123"
-        fixed_key_1 = f"{config.ENVIRONMENT_NAME}-{key_1}"
+        fixed_key_1 = f"{config.ENVIRONMENT_NAME}-dri-serial-{key_1}"
 
         key_2 = "test_234"
-        fixed_key_2 = f"{config.ENVIRONMENT_NAME}-{key_2}"
+        fixed_key_2 = f"{config.ENVIRONMENT_NAME}-dri-serial-{key_2}"
 
         redis = Mock()
         redis.delete = Mock()

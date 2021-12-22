@@ -7,7 +7,7 @@ class StorageRepository:
         self._logger = logger
         self._redis = redis
 
-        self._redis_key_prefix = config.ENVIRONMENT_NAME
+        self._redis_key_prefix = f'{config.ENVIRONMENT_NAME}-dri-serial'
 
     def get(self, key):
         key = f'{self._redis_key_prefix}-{key}'

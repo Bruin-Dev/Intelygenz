@@ -173,7 +173,7 @@ class TestBruinRepository:
         task_id_return = "1720079"
         task_id_return_1 = "123"
 
-        pending_task_response = {"body": [{"Ids": task_id_return}, {"Ids": task_id_return_1}], "status": 200}
+        pending_task_response = {"body": [task_id_return, task_id_return_1], "status": 200}
 
         storage_repo = Mock()
         storage_repo.get = Mock(return_value=None)
@@ -405,33 +405,6 @@ class TestBruinRepository:
                                          "status": 204}
 
     @pytest.mark.asyncio
-    async def get_task_results_ok_pending_test(self):
-        serial = '700059'
-        task_id = "1720079"
-
-        get_tasks_result_response = {
-            "body": {'status': 'SUCCESS', 'message': 'All Good!', 'data': {'Parameters': [],
-                                                                           'ErrorCode': 100,
-                                                                           'Message': 'Pending'}},
-            "status": 200
-
-        }
-        logger = Mock()
-
-        storage_repo = Mock()
-        storage_repo.remove = Mock()
-
-        dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=get_tasks_result_response)
-
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        task_results_response = await dri_repository._get_task_results(serial, task_id)
-        dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
-        storage_repo.remove.assert_not_called()
-        assert task_results_response == {"body": f"Data is still being fetched from DRI for serial {serial}",
-                                         "status": 204}
-
-    @pytest.mark.asyncio
     async def get_task_results_ko_rejected_test(self):
         serial = '700059'
         task_id = "1720079"
@@ -538,7 +511,7 @@ class TestBruinRepository:
     async def get_pending_task_ids_ok_test(self):
         serial = '700059'
 
-        pending_task_list = [{"Ids": "233"}, {"Ids": "2432"}]
+        pending_task_list = [{"Id": "233"}, {"Id": "2432"}]
         pending_task_ids_response = {
             "body": {'status': 'SUCCESS', 'message': 'All Good!', 'data': {
                 'Transactions': pending_task_list,
@@ -547,6 +520,7 @@ class TestBruinRepository:
             "status": 200
         }
 
+        pending_task_list_body = [task['Id'] for task in pending_task_list]
         logger = Mock()
         storage_repo = Mock()
 
@@ -556,7 +530,7 @@ class TestBruinRepository:
         dri_repository = DRIRepository(logger, storage_repo, dri_client)
         pending_task_response = await dri_repository._get_pending_task_ids(serial)
         dri_client.get_pending_task_ids.assert_awaited_once_with(serial)
-        assert pending_task_response == {"body": pending_task_list, "status": 200}
+        assert pending_task_response == {"body": pending_task_list_body, "status": 200}
 
     @pytest.mark.asyncio
     async def get_pending_task_ids_ko_failed_rpc_test(self):

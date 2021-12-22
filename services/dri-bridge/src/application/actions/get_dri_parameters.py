@@ -17,7 +17,7 @@ class GetDRIParameters:
             'status': None
         }
         if "body" not in msg.keys():
-            self._logger.error(f'Cannot get task id using {json.dumps(msg)}. '
+            self._logger.error(f'Cannot get DRI parameters using {json.dumps(msg)}. '
                                f'JSON malformed')
             response["status"] = 400
             response["body"] = 'You must specify {.."body":{"serial_number", "parameter_set"}...} in the request'
@@ -27,7 +27,7 @@ class GetDRIParameters:
         params = msg['body']
 
         if not all(key in params.keys() for key in ("serial_number", "parameter_set")):
-            self._logger.error(f'Cannot get task id using {json.dumps(params)}. Need "serial_number" and '
+            self._logger.error(f'Cannot get DRI parameters using {json.dumps(params)}. Need "serial_number" and '
                                f'"parameter_set"')
             response["status"] = 400
             response["body"] = 'You must specify "serial_number" and "parameter_set" in the body'
