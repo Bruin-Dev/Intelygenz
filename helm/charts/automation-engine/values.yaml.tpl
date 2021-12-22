@@ -282,6 +282,44 @@ digi-reboot-report:
       memory: 256Mi
 
 
+# -- dri-bridge subchart specific configuration
+dri-bridge:
+  # -- Field to indicate if the dri-bridge module is going to be deployed
+  enabled: ${DRI_BRIDGE_ENABLED}
+  replicaCount: ${DRI_BRIDGE_DESIRED_TASKS}
+  # dri-bridge specific configuration variables
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "dri-bridge-${DRI_BRIDGE_BUILD_NUMBER}"
+    # -- Username to log into Dri API
+    dri_acc_email: "${DRI_ACC_EMAIL}"
+    # -- Password to log into Dri API
+    dri_acc_password: "${DRI_ACC_PASSWORD}"
+    # -- Base URL for Dri API
+    dri_base_url: "${DRI_BASE_URL}"
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dri-bridge
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${DRI_BRIDGE_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: ${DRI_BRIDGE_ENABLED}
+    minReplicas: ${DRI_BRIDGE_DESIRED_TASKS}
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
 # -- email-tagger-kre-bridge subchart specific configuration
 email-tagger-kre-bridge:
   enabled: ${EMAIL_TAGGER_KRE_BRIDGE_ENABLED}

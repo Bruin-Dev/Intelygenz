@@ -294,6 +294,61 @@ digi-reboot-report:
       memory: 256Mi
 
 
+# -- dri-bridge subchart specific configuration
+dri-bridge:
+  # -- Field to indicate if the dri-bridge module is going to be deployed
+  enabled: true
+  # -- Number of replicas of dri-bridge module
+  replicaCount: 1
+  # -- dri-bridge specific configuration variables
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
+    # -- Username to log into Dri API
+    dri_acc_email: ""
+    # -- Password to log into Dri API
+    dri_acc_password: ""
+    # -- Base URL for Dri API
+    dri_base_url: ""
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  # -- dri-bridge image details
+  image:
+    # -- dri-bridge image image
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dri-bridge
+    pullPolicy: Always
+    # -- dri-bridge tag of docker image
+    tag: ""
+  # -- dri-bridge service details
+  service:
+    type: ClusterIP
+    port: 5000
+  # -- dri-bridge resource definition
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # -- dri-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
 # -- ecr-cred-helper subchart specific configuration
 ecr-cred-helper:
   enabled: false

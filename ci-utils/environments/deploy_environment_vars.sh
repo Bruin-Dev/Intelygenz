@@ -82,6 +82,20 @@ function digi_reboot_report_variables() {
   fi
 }
 
+function dri_bridge_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # dri-bridge environment variables for ephemeral environments
+    export DRI_ACC_EMAIL="${DRI_ACC_EMAIL_DEV}"
+    export DRI_ACC_PASSWORD="${DRI_ACC_PASSWORD_DEV}"
+    export DRI_BASE_URL="${DRI_BASE_URL_DEV}"
+  else
+    # dri-bridge environment variables for production environment
+    export DRI_ACC_EMAIL="${DRI_ACC_EMAIL_PRO}"
+    export DRI_ACC_PASSWORD="${DRI_ACC_PASSWORD_PRO}"
+    export DRI_BASE_URL="${DRI_BASE_URL_PRO}"
+  fi
+}
+
 function email_tagger_monitor_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # email-tagger-monitor environment variables for ephemeral environments
@@ -229,6 +243,7 @@ function environments_assign() {
   bruin_bridge_variables
   digi_bridge_variables
   digi_reboot_report_variables
+  dri_bridge_variables
   email_tagger_monitor_variables
   hawkeye_bridge_variables
   links_metrics_api_variables

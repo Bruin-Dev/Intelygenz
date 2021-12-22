@@ -43,6 +43,9 @@ dependencies:
   - name: digi-reboot-report
     version: '*.*.*'
     condition: digi-reboot-report.enabled
+  - name: dri-bridge
+    version: '*.*.*'
+    condition: dri-bridge.enabled
   - name: ecr-cred-helper
     version: '*.*.*'
     condition: ecr-cred-helper.enabled

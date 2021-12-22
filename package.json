@@ -69,6 +69,7 @@
     "./services/customer-cache",
     "./services/digi-bridge",
     "./services/digi-reboot-report",
+    "./services/dri-bridge",
     "./services/email-tagger-kre-bridge",
     "./services/email-tagger-monitor",
     "./services/fraud-monitor",

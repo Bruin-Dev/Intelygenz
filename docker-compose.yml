@@ -96,6 +96,7 @@ services:
       - services/dri-bridge/src/config/env
     ports:
       - 5020:5000
+      - 9290:9090
 
   email-tagger-kre-bridge:
     build:

@@ -48,6 +48,11 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[digi-reboot-report] - logs",
                     "repository": "digi-reboot-report",
                 },
+                {
+                    "query": f"dri-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[dri-bridge] - logs",
+                    "repository": "dri-bridge",
+                },
                 # {
                 #     "query": f"grafana AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                 #     "search_name": f"[grafana] - logs",

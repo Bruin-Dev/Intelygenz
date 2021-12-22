@@ -1,0 +1,15 @@
+{{- if and .Values.config.metrics.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "dri-bridge.fullname" . }}
+  labels:
+    {{- include "dri-bridge.labels" . | nindent 4 }}
+{{ with .Values.config.metrics.labels }}{{ toYaml . | indent 4 }}{{ end }}
+spec:
+  endpoints:
+  - port: {{ .Values.config.metrics.svc.name }}
+  selector:
+    matchLabels:
+      {{- include "dri-bridge.selectorLabels" . | nindent 6 }}
+{{- end }}
