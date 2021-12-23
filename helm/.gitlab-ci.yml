@@ -20,7 +20,6 @@ helm-branches:
     - export EKS_CLUSTER_NAME="mettel-automation-${CURRENT_ENVIRONMENT}"
     - export ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
     - export NAMESPACE="${HELM_CHART_RELEASE_NAME}-${ENVIRONMENT_NAME}"
-    - apk add git coreutils
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
@@ -50,7 +49,6 @@ helm-master:
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export ENVIRONMENT_NAME=production
     - export NAMESPACE="${HELM_CHART_RELEASE_NAME}"
-    - apk add git coreutils
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
@@ -81,7 +79,41 @@ helm-master-logs:
         - "ci-utils/papertrail-provisioning/*"
     - if: $CI_COMMIT_TAG
       when: never
-      
+
+# ============================================
+# Grafana Dashboards jobs
+# ============================================
+
+grafana-dashboards-dev:
+  stage: helm
+  extends: .helm_template_update_dashboards
+  environment:
+    name: development
+    url: http://grafana-dev.mettel-automation.net/
+  variables:
+    EKS_CLUSTER_NAME: "mettel-automation-dev"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+
+grafana-dashboards-pro:
+  stage: helm
+  extends: .helm_template_update_dashboards
+  environment:
+    name: production
+    url: https://grafana.mettel-automation.net/
+  variables:
+    EKS_CLUSTER_NAME: "mettel-automation"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+
 # ============================================
 # Destroy Helm jobs
 # ============================================

@@ -87,3 +87,23 @@
     # UPDATE FLUENT-BIT HELM CHART
     - envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
     - helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
+
+#
+# AFTER NEW RELEASE UPDATE GRAFANA DASHBOARDS
+#
+
+.helm_template_update_dashboards: &helm_template_update_dashboards
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # CREATE GRAFANA DASHBOARDS DYNAMICALLY
+    - kubectl -n prometheus port-forward service/prometheus-kubeprometheuss-prometheus 9090:9090 &
+    - sleep 5
+    - python3 ci-utils/grafana/generate_dashboard.py
+    - envsubst < ci-utils/grafana/importer.yml.tpl > ci-utils/grafana/importer.yml
+    - cd ci-utils/grafana && gdg dash export 

@@ -10,6 +10,7 @@ import aiohttp
 
 # Misc
 resource_id_url_rgx = re.compile(r'\/[1-9]\d+')
+dashboard_path = 'ci-utils/grafana/dashboards/bruin/api-usage.json'
 
 # Metrics lookup config
 usage_metric = 'bruin_api_usage_total'
@@ -127,15 +128,9 @@ def get_panel_template():
     }
 
 
-def get_pods_target(method, endpoint, endpoint_has_resource_id=False):
-    if endpoint_has_resource_id:
-        endpoint = get_endpoint_labelvalue_for_multiple_resource_ids(endpoint)
-        expression = f"sum({usage_metric}{{method=\"{method}\", endpoint_=~\"{endpoint}\", namespace=~\"$namespace\"}}) by (pod)"
-    else:
-        expression = f"{usage_metric}{{method=\"{method}\", endpoint_=\"{endpoint}\", namespace=~\"$namespace\"}}"
-
+def get_pods_target(method, endpoint):
     return {
-        "expr": expression,
+        "expr": f"sum({usage_metric}{{method=\"{method}\", endpoint_=~\"{endpoint}\", namespace=~\"$namespace\"}}) by (pod)",
         "interval": "",
         "legendFormat": "Pod {{pod}}",
         "refId": "API usage per pod"
@@ -144,17 +139,14 @@ def get_pods_target(method, endpoint, endpoint_has_resource_id=False):
 
 def get_totals_target(method, endpoint):
     return {
-        "expr": f"sum({usage_metric}{{method=\"{method}\", endpoint_=\"{endpoint}\", namespace=~\"$namespace\"}})",
+        "expr": f"sum({usage_metric}{{method=\"{method}\", endpoint_=~\"{endpoint}\", namespace=~\"$namespace\"}})",
         "interval": "",
         "legendFormat": "Total",
         "refId": "Total API usage"
     }
 
 
-def get_panel_title(method, endpoint, endpoint_has_resource_id=False):
-    if endpoint_has_resource_id:
-        endpoint = get_endpoint_without_resource_ids(endpoint)
-
+def get_panel_title(method, endpoint):
     return f'{method.upper()} {endpoint}'
 
 
@@ -207,18 +199,28 @@ async def generate_dashboard():
     # Group endpoints by HTTP method
     endpoints_by_http_method = defaultdict(set)
     for s in samples['data']:
-        endpoints_by_http_method[s['method']].add(s['endpoint'])
+        endpoints_by_http_method[s['method']].add(s['endpoint_'])
 
     # Generate panels for the dashboard
+    processed_endpoints = set()
     dashboard_panels = []
     for http_method, endpoints in endpoints_by_http_method.items():
         for e in endpoints:
             panel = get_panel_template()
-            totals_target = get_totals_target(http_method, e)
 
             resource_id_in_endpoint = has_resource_id(e)
-            title = get_panel_title(http_method, e, endpoint_has_resource_id=resource_id_in_endpoint)
-            pods_target = get_pods_target(http_method, e, endpoint_has_resource_id=resource_id_in_endpoint)
+            if resource_id_in_endpoint:
+                endpoint_for_title = get_endpoint_without_resource_ids(e)
+                e = get_endpoint_labelvalue_for_multiple_resource_ids(e)
+            else:
+                endpoint_for_title = e
+
+            if e in processed_endpoints:
+                continue
+
+            title = get_panel_title(http_method, endpoint_for_title)
+            pods_target = get_pods_target(http_method, e)
+            totals_target = get_totals_target(http_method, e)
 
             panel['id'] = len(dashboard_panels) + 1
             panel['title'] = title
@@ -228,9 +230,17 @@ async def generate_dashboard():
             ]
             panel['gridPos'] = get_grid_position(panels_count=len(dashboard_panels))
             dashboard_panels.append(panel)
+            processed_endpoints.add(e)
 
     import json
     print(json.dumps(dashboard_panels, indent=4))
+
+    with open(dashboard_path, 'r') as fd:
+        dashboard = json.load(fd)
+        dashboard['panels'] = dashboard_panels
+
+    with open(dashboard_path, 'w') as fd:
+        json.dump(dashboard, fd)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
