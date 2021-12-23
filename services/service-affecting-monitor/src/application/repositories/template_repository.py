@@ -111,7 +111,7 @@ class TemplateRepository:
             template_vars['__ROWS__'] = rows
 
             return self._build_email(client_id=client_id, subject=subject, template=template,
-                                     template_vars=template_vars)
+                                     template_vars=template_vars, recipients='mettel.automation@intelygenz.com')
 
     @staticmethod
     def _get_row_type(index):
