@@ -74,7 +74,8 @@ class ServiceAffectingMonitorReports:
         if exec_on_start:
             await self.monitor_reports()
 
-        cron = CronTrigger.from_crontab(self._config.MONITOR_REPORT_CONFIG['crontab'], timezone=timezone('UTC'))
+        tz = self._config.MONITOR_REPORT_CONFIG['timezone']
+        cron = CronTrigger.from_crontab(self._config.MONITOR_REPORT_CONFIG['crontab'], timezone=timezone(tz))
         self._scheduler.add_job(self.monitor_reports, cron, id=f'_monitor_reports', replace_existing=True)
 
     async def _service_affecting_monitor_report(self):

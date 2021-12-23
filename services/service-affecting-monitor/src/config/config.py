@@ -73,7 +73,7 @@ MONITOR_REPORT_CONFIG = {
     'semaphore': 5,
     'wait_fixed': 15,
     'stop_after_attempt': 3,
-    'crontab': '0 8 * * 0',
+    'crontab': '0 3 * * 0',
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
@@ -82,7 +82,7 @@ MONITOR_REPORT_CONFIG = {
 BANDWIDTH_REPORT_CONFIG = {
     'environment': os.environ['CURRENT_ENVIRONMENT'],
     'timezone': 'US/Eastern',
-    'crontab': '0 8 * * *',
+    'crontab': '0 3 * * *',
     'lookup_interval_hours': 24,
     'clients': [86937],
 }
