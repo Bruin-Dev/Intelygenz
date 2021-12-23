@@ -68,20 +68,19 @@ REPORT_RECIPIENTS = {
 }
 
 MONITOR_REPORT_CONFIG = {
+    'environment': os.environ['CURRENT_ENVIRONMENT'],
+    'timezone': 'US/Eastern',
     'semaphore': 5,
     'wait_fixed': 15,
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
     'stop_after_attempt': 3,
     'crontab': '0 8 * * 0',
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
-    'monitoring_minutes_interval': 10,
-    'timezone': 'US/Eastern',
 }
 
 BANDWIDTH_REPORT_CONFIG = {
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
+    'environment': os.environ['CURRENT_ENVIRONMENT'],
     'timezone': 'US/Eastern',
     'crontab': '0 8 * * *',
     'lookup_interval_hours': 24,

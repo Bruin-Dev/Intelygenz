@@ -26,11 +26,9 @@ class BandwidthReports:
 
         if exec_on_start:
             await self._bandwidth_reports_job()
-        else:
-            self._scheduler.add_job(self._bandwidth_reports_job,
-                                    CronTrigger.from_crontab(self._config.BANDWIDTH_REPORT_CONFIG['crontab'],
-                                                             timezone=timezone('UTC')),
-                                    id='_bandwidth_reports', replace_existing=True)
+
+        cron = CronTrigger.from_crontab(self._config.BANDWIDTH_REPORT_CONFIG['crontab'], timezone=timezone('UTC'))
+        self._scheduler.add_job(self._bandwidth_reports_job, cron, id='_bandwidth_reports', replace_existing=True)
 
     async def _bandwidth_reports_job(self):
         clients = self._config.BANDWIDTH_REPORT_CONFIG['clients']

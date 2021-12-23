@@ -6,8 +6,6 @@ from pytz import timezone
 
 from igz.packages.eventbus.eventbus import EventBus
 
-from application.repositories.bruin_repository import BruinRepository
-
 
 class ServiceAffectingMonitorReports:
 
@@ -74,18 +72,10 @@ class ServiceAffectingMonitorReports:
         self._logger.info(f'Scheduled task: service affecting monitor reports')
 
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-            self._logger.info(f'It will be executed now the process of creation reports')
-            self._scheduler.add_job(self.monitor_reports, 'interval',
-                                    minutes=self._config.MONITOR_REPORT_CONFIG["monitoring_minutes_interval"],
-                                    next_run_time=next_run_time,
-                                    replace_existing=True,
-                                    id=f"_monitor_reports")
-        else:
-            self._scheduler.add_job(self.monitor_reports,
-                                    CronTrigger.from_crontab(self._config.MONITOR_REPORT_CONFIG["crontab"],
-                                                             timezone=timezone('UTC')),
-                                    id=f"_monitor_reports", replace_existing=True)
+            await self.monitor_reports()
+
+        cron = CronTrigger.from_crontab(self._config.MONITOR_REPORT_CONFIG['crontab'], timezone=timezone('UTC'))
+        self._scheduler.add_job(self.monitor_reports, cron, id=f'_monitor_reports', replace_existing=True)
 
     async def _service_affecting_monitor_report(self):
         self._logger.info(f"Generating all reports for {len(self._affecting_tickets_per_client)} Bruin clients...")
