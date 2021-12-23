@@ -534,19 +534,19 @@ class BruinRepository:
 
             self._logger.info(f"Retrieving affecting tickets between start date: {start_date} and end date: {end_date}")
 
-            all_tickets = await self.get_all_affecting_tickets(client_id=client_id, start_date=start_date,
-                                                               end_date=end_date, ticket_statuses=ticket_statuses)
+            response = await self.get_all_affecting_tickets(client_id=client_id, start_date=start_date,
+                                                            end_date=end_date, ticket_statuses=ticket_statuses)
 
-            if all_tickets and len(all_tickets['body']) > 0:
-                self._logger.info(f"Getting ticket {len(all_tickets['body'])} details")
-                all_tickets_sorted = sorted(all_tickets['body'], key=lambda item: parse(item["createDate"]),
-                                            reverse=True)
-                tasks = [self._get_ticket_details(ticket) for ticket in all_tickets_sorted]
-                ret_tickets = await asyncio.gather(*tasks, return_exceptions=True)
-                ret_tickets = {ticket['ticket']['ticketID']: ticket for ticket in ret_tickets if ticket}
+            if not response:
+                return None
 
-                return ret_tickets
-            return None
+            self._logger.info(f"Getting ticket details for {len(response['body'])} tickets")
+            all_tickets_sorted = sorted(response['body'], key=lambda item: parse(item['createDate']), reverse=True)
+            tasks = [self._get_ticket_details(ticket) for ticket in all_tickets_sorted]
+            tickets = await asyncio.gather(*tasks, return_exceptions=True)
+            tickets = {ticket['ticket']['ticketID']: ticket for ticket in tickets if ticket}
+
+            return tickets
         try:
             return await get_affecting_ticket_for_report()
         except Exception as e:
