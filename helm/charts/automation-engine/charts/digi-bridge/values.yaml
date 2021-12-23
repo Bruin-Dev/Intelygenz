@@ -50,18 +50,16 @@ config:
   digi_client_secret: ""
   # -- Base URL for Digi API
   digi_base_url: ""
-  # -- IP for Digi Production Environment
-  digi_ip_pro: ""
+  # -- Auth tokens TTL
+  digi_token_ttl: 0
+  # -- IP for Digi Environment
+  digi_api_ip: ""
   # -- Record name for Digi Production Environment
-  digi_record_name_pro: ""
-  # -- IP for Digi Dev Environment
-  digi_ip_dev: ""
-  # -- Record name for Digi Dev Environment
-  digi_record_name_dev: ""
+  digi_api_dns_record_name: ""
   # -- IP for Digi Test Environment
-  digi_ip_test: ""
+  digi_api_test_ip: ""
   # -- Record name for Digi Test Environment
-  digi_record_name_test: ""
+  digi_api_test_dns_record_name: ""
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge

@@ -15,9 +15,5 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  DIGI_IP_PRO: {{ .Values.config.digi_ip_pro | quote }}
-  DIGI_RECORD_NAME_PRO: {{ .Values.config.digi_record_name_pro | quote }}
-  DIGI_IP_DEV: {{ .Values.config.digi_ip_dev | quote }}
-  DIGI_RECORD_NAME_DEV: {{ .Values.config.digi_record_name_dev | quote }}
-  DIGI_IP_TEST: {{ .Values.config.digi_ip_test | quote }}
-  DIGI_RECORD_NAME_TEST: {{ .Values.config.digi_record_name_test | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
+  DIGI_TOKEN_TTL: {{ (int64 .Values.config.digi_token_ttl) | quote }}

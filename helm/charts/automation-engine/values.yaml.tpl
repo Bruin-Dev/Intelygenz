@@ -230,23 +230,21 @@ digi-bridge:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "digi-bridge-${DIGI_BRIDGE_BUILD_NUMBER}"
     # -- Client ID credentials for Digi API
-    digi_client_id: ${DIGI_CLIENT_ID}
+    digi_client_id: ${DIGI_BRIDGE__DIGI_REBOOT_API_CLIENT_ID}
     # -- Client Secret credentials for Digi API
-    digi_client_secret: ${DIGI_CLIENT_SECRET}
+    digi_client_secret: ${DIGI_BRIDGE__DIGI_REBOOT_API_CLIENT_SECRET}
     # -- Base URL for Digi API
-    digi_base_url: ${DIGI_BASE_URL}
-    # -- IP for Digi Production Environment
-    digi_ip_pro: ${DIGI_IP_PRO}
+    digi_base_url: ${DIGI_BRIDGE__DIGI_REBOOT_API_BASE_URL}
+    # -- Auth tokens TTL
+    digi_token_ttl: ${DIGI_BRIDGE__DIGI_REBOOT_API_TOKEN_TTL}
+    # -- IP for Digi Environment
+    digi_api_ip: ${DIGI_BRIDGE__DIGI_REBOOT_API_IP}
     # -- Record name for Digi Production Environment
-    digi_record_name_pro: ${DIGI_RECORD_NAME_PRO}
-    # -- IP for Digi Dev Environment
-    digi_ip_dev: ${DIGI_IP_DEV}
-    # -- Record name for Digi Dev Environment
-    digi_record_name_dev: ${DIGI_RECORD_NAME_DEV}
+    digi_api_dns_record_name: ${DIGI_BRIDGE__DIGI_REBOOT_API_DNS_RECORD_NAME}
     # -- IP for Digi Test Environment
-    digi_ip_test: ${DIGI_IP_TEST}
+    digi_api_test_ip: ${DIGI_BRIDGE__DIGI_REBOOT_API_TEST_IP}
     # -- Record name for Digi Test Environment
-    digi_record_name_test: ${DIGI_RECORD_NAME_TEST}
+    digi_api_test_dns_record_name: ${DIGI_BRIDGE__DIGI_REBOOT_API_TEST_DNS_RECORD_NAME}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
     pullPolicy: Always

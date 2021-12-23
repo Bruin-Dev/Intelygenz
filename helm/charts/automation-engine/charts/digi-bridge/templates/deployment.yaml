@@ -61,6 +61,15 @@ spec:
             initialDelaySeconds: 15
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      hostAliases:
+        - ip: {{ .Values.config.digi_api_ip }}
+          hostnames:
+            - {{ .Values.config.digi_api_dns_record_name }}
+        {{- if eq .Values.global.current_environment "dev" }}
+        - ip: {{ .Values.config.digi_api_test_ip }}
+          hostnames:
+            - {{ .Values.config.digi_api_test_dns_record_name }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
