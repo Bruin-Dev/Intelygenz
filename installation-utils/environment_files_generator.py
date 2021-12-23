@@ -154,6 +154,8 @@ TICKET_STATS_SERVER_VERSION = '1.0.0'
 # Other variables
 CURRENT_ENVIRONMENT = 'dev'
 MONITORING_SECONDS = 4500
+EXEC_MONITOR_REPORTS_ON_START = False
+EXEC_BANDWIDTH_REPORTS_ON_START = False
 
 # Getting main directory path
 mettel_path = os.path.abspath(os.path.join(
@@ -348,7 +350,9 @@ env_dict = {
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
+        f'EXEC_MONITOR_REPORTS_ON_START={EXEC_MONITOR_REPORTS_ON_START}\n'
+        f'EXEC_BANDWIDTH_REPORTS_ON_START={EXEC_BANDWIDTH_REPORTS_ON_START}',
     os.path.join('services', 'service-outage-monitor', 'src', 'config', 'env-outage-monitor-1'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'

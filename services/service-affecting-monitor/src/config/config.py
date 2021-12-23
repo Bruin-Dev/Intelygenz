@@ -68,6 +68,7 @@ REPORT_RECIPIENTS = {
 }
 
 MONITOR_REPORT_CONFIG = {
+    'exec_on_start': os.environ['EXEC_MONITOR_REPORTS_ON_START'].lower() == 'true',
     'environment': os.environ['CURRENT_ENVIRONMENT'],
     'timezone': 'US/Eastern',
     'semaphore': 5,
@@ -80,6 +81,7 @@ MONITOR_REPORT_CONFIG = {
 }
 
 BANDWIDTH_REPORT_CONFIG = {
+    'exec_on_start': os.environ['EXEC_BANDWIDTH_REPORTS_ON_START'].lower() == 'true',
     'environment': os.environ['CURRENT_ENVIRONMENT'],
     'timezone': 'US/Eastern',
     'crontab': '0 3 * * *',

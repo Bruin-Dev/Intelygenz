@@ -101,8 +101,12 @@ class Container:
         await self._event_bus.connect()
 
         await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
-        await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=False)
-        await self._bandwidth_reports.start_bandwidth_reports_job(exec_on_start=False)
+        await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
+            exec_on_start=config.MONITOR_REPORT_CONFIG['exec_on_start']
+        )
+        await self._bandwidth_reports.start_bandwidth_reports_job(
+            exec_on_start=config.BANDWIDTH_REPORT_CONFIG['exec_on_start']
+        )
 
         self._scheduler.start()
 

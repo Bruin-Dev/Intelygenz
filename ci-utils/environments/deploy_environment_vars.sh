@@ -145,6 +145,19 @@ function notifier_variables() {
   fi
 }
 
+function service_affecting_monitor_variables() {
+  export EXEC_MONITOR_REPORTS_ON_START=${EXEC_MONITOR_REPORTS_ON_START}
+  export EXEC_BANDWIDTH_REPORTS_ON_START=${EXEC_BANDWIDTH_REPORTS_ON_START}
+
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # service-affecting-monitor environment variables for ephemeral environments
+    : # noop
+  else
+    # service-affecting-monitor environment variables for production environment
+    : # noop
+  fi
+}
+
 function service_outage_monitor_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # service-outage-monitor (SOM) environment variables for ephemeral environments
@@ -221,6 +234,7 @@ function environments_assign() {
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables
+  service_affecting_monitor_variables
   service_outage_monitor_variables
   t7_bridge_variables
   ticket_collector_variables

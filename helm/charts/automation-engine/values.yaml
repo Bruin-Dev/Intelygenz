@@ -824,6 +824,10 @@ service-affecting-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
+    # -- Indicates if the monitor reports process will be executed on start or not
+    exec_monitor_reports_on_start: "False"
+    # -- Indicates if the bandwidth reports process will be executed on start or not
+    exec_bandwidth_reports_on_start: "False"
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:

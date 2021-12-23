@@ -32,6 +32,10 @@ global:
   papertrail_port: "0"
   # -- Contact email address
   last_contact_recipient: ""
+  # -- Indicates if the monitor reports process will be executed on start or not
+  exec_monitor_reports_on_start: "False"
+  # -- Indicates if the bandwidth reports process will be executed on start or not
+  exec_bandwidth_reports_on_start: "False"
   # -- Email account password
   email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,

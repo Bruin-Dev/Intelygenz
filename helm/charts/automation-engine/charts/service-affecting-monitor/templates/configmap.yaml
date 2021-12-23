@@ -16,3 +16,5 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  EXEC_MONITOR_REPORTS_ON_START: {{ .Values.config.exec_monitor_reports_on_start | default "False" | quote }}
+  EXEC_BANDWIDTH_REPORTS_ON_START: {{ .Values.config.exec_bandwidth_reports_on_start | default "False" | quote }}
