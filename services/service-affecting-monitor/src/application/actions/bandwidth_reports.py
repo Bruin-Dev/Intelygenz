@@ -63,7 +63,6 @@ class BandwidthReports:
             client_name = client_names_by_id[client_id]
             await self._generate_bandwidth_report_for_client(client_id, client_name, serial_numbers, links_metrics,
                                                              customer_cache)
-            self._logger.info(f'[bandwidth-reports] Report for client {client_id} sent via email')
 
         end = datetime.now()
         self._logger.info(
@@ -110,6 +109,7 @@ class BandwidthReports:
 
         if email:
             await self._notifications_repository.send_email(email_object=email)
+            self._logger.info(f'[bandwidth-reports] Report for client {client_id} sent via email')
 
     def _add_bandwidth_to_links_metrics(self, links_metrics):
         for link_metrics in links_metrics:
