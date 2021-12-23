@@ -3,6 +3,7 @@ from collections import defaultdict
 import pytest
 
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
+from application.actions.bandwidth_reports import BandwidthReports
 from config import testconfig
 
 from tests.fixtures.bruin import *
@@ -26,6 +27,13 @@ def service_affecting_monitor_reports(
         customer_cache_repository):
     return ServiceAffectingMonitorReports(event_bus, logger, scheduler, testconfig, template_repository,
                                           bruin_repository, notifications_repository, customer_cache_repository)
+
+
+@pytest.fixture(scope='function')
+def bandwidth_reports(logger, scheduler, velocloud_repository, bruin_repository, trouble_repository,
+                      customer_cache_repository, notifications_repository, utils_repository, template_repository):
+    return BandwidthReports(logger, scheduler, testconfig, velocloud_repository, bruin_repository, trouble_repository,
+                            customer_cache_repository, notifications_repository, utils_repository, template_repository)
 
 
 @pytest.fixture(scope='function')
