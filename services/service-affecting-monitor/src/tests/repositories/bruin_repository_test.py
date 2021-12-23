@@ -998,7 +998,7 @@ class TestBruinRepository:
                 response = await service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report(
                     report['client_id'], start_date, end_date)
 
-        assert response is None
+        assert response == {}
 
         service_affecting_monitor_reports._bruin_repository._event_bus.rpc_request.assert_has_awaits([
             call("bruin.ticket.request", ticket_request_msg, timeout=90)

@@ -29,38 +29,18 @@ class TestServiceAffectingMonitorReports:
         assert service_affecting_monitor_reports._customer_cache_repository is customer_cache_repository
 
     @pytest.mark.asyncio
-    async def start_service_affecting_monitor_job_with_exec_on_start_test(self, service_affecting_monitor_reports,
-                                                                          response_customer_cache):
-        next_run_time = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
-            return_value=response_customer_cache)
-        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
-            with patch.object(service_affecting_monitor_module, 'timezone', new=Mock()):
-                await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=True)
-
-        service_affecting_monitor_reports._scheduler.add_job.assert_called_once_with(
-            service_affecting_monitor_reports.monitor_reports, 'interval',
-            minutes=testconfig.MONITOR_CONFIG["monitoring_minutes_interval"],
-            next_run_time=next_run_time,
-            replace_existing=True,
-            id=f"_monitor_reports",
-        )
+    async def start_service_affecting_monitor_job_with_exec_on_start_test(self, service_affecting_monitor_reports):
+        service_affecting_monitor_reports.monitor_reports = CoroutineMock()
+        await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=True)
+        service_affecting_monitor_reports.monitor_reports.assert_awaited_once()
+        service_affecting_monitor_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
-    async def start_service_affecting_monitor_job_with_no_exec_on_start_test(self, service_affecting_monitor_reports,
-                                                                             report, response_customer_cache):
-        crontab_value = CronTrigger.from_crontab(report['crontab'])
-        crontab_mock = Mock(return_value=crontab_value)
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
-            return_value=response_customer_cache)
-        with patch.object(CronTrigger, 'from_crontab', new=crontab_mock):
-            await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=False)
-
-        service_affecting_monitor_reports._scheduler.add_job.assert_called_once_with(
-            service_affecting_monitor_reports.monitor_reports, crontab_value,
-            id=f"_monitor_reports", replace_existing=True)
+    async def start_service_affecting_monitor_job_with_no_exec_on_start_test(self, service_affecting_monitor_reports):
+        service_affecting_monitor_reports.monitor_reports = CoroutineMock()
+        await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job()
+        service_affecting_monitor_reports.monitor_reports.assert_not_awaited()
+        service_affecting_monitor_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_report_bandwidth_over_utilization_test(self, service_affecting_monitor_reports,

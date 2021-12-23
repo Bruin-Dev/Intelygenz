@@ -40,10 +40,13 @@ class TestBandwidthReports:
         bandwidth_reports._bandwidth_reports_job = CoroutineMock()
         await bandwidth_reports.start_bandwidth_reports_job(exec_on_start=True)
         bandwidth_reports._bandwidth_reports_job.assert_awaited_once()
+        bandwidth_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
     async def start_bandwidth_reports_job__schedule_test(self, bandwidth_reports):
+        bandwidth_reports._bandwidth_reports_job = CoroutineMock()
         await bandwidth_reports.start_bandwidth_reports_job()
+        bandwidth_reports._bandwidth_reports_job.assert_not_awaited()
         bandwidth_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio

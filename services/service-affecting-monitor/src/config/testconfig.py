@@ -15,7 +15,7 @@ NATS_CONFIG = {
     }
 }
 MONITOR_CONFIG = {
-    'recipient': "some.recipient@email.com",
+    'recipient': 'some.recipient@email.com',
     'contact_by_host_and_client_id': contact_info.contact_by_host_and_client_id,
     'velo_filter': {
         'mettel.velocloud.net': [],
@@ -23,7 +23,7 @@ MONITOR_CONFIG = {
         'metvco03.mettel.net': [],
         'metvco04.mettel.net': []
     },
-    'environment': "test",
+    'environment': 'test',
     'timezone': 'US/Eastern',
     'monitoring_minutes_interval': 10,
     'thresholds': {
@@ -58,20 +58,22 @@ REPORT_RECIPIENTS = {
 }
 
 MONITOR_REPORT_CONFIG = {
-    "semaphore": 5,
+    'exec_on_start': False,
+    'environment': 'test',
+    'timezone': 'US/Eastern',
+    'semaphore': 5,
     'wait_fixed': 1,
     'stop_after_attempt': 2,
-    'environment': "test",
     'crontab': '0 8 * * *',
     'client_id_bandwidth': 83109,
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
     'monitoring_minutes_interval': 10,
-    'timezone': 'US/Eastern',
 }
 
 BANDWIDTH_REPORT_CONFIG = {
+    'exec_on_start': False,
     'environment': 'test',
     'timezone': 'US/Eastern',
     'crontab': '0 8 * * *',
@@ -79,7 +81,7 @@ BANDWIDTH_REPORT_CONFIG = {
     'clients': [9994],
 }
 
-ENVIRONMENT_NAME = "dev"
+ENVIRONMENT_NAME = 'dev'
 
 LOG_CONFIG = {
     'name': 'test-name',
