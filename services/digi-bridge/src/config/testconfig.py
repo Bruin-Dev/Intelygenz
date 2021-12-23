@@ -17,11 +17,12 @@ NATS_CONFIG = {
     'reconnects': 0
 }
 
+TIMEZONE = 'US/Eastern'
+
 DIGI_CONFIG = {
     'base_url': "some.digi.url",
     'client_id': "client_id",
     'client_secret': "client_secret",
-    'timezone': 'US/Eastern',
     'login_ttl': 60
 }
 

@@ -46,9 +46,12 @@ DRI_ACC_PASSWORD = var_dict["DRI_ACC_PASSWORD_DEV"]
 DRI_BASE_URL = var_dict["DRI_BASE_URL_DEV"]
 
 # DiGi variables
-DIGI_CLIENT_ID = var_dict["DIGI_CLIENT_ID_DEV"]
-DIGI_CLIENT_SECRET = var_dict["DIGI_CLIENT_SECRET_DEV"]
-DIGI_BASE_URL = var_dict["DIGI_BASE_URL_DEV"]
+# DiGi DEV and TEST envs are not exposed to the world, so they're only accessable from ephemeral environments. Local
+# environments can only access PRO
+DIGI_CLIENT_ID = var_dict["PRO__DIGI_BRIDGE__DIGI_REBOOT_API_CLIENT_ID"]
+DIGI_CLIENT_SECRET = var_dict["PRO__DIGI_BRIDGE__DIGI_REBOOT_API_CLIENT_SECRET"]
+DIGI_BASE_URL = var_dict["PRO__DIGI_BRIDGE__DIGI_REBOOT_API_BASE_URL"]
+DIGI_TOKEN_TTL = var_dict["PRO__DIGI_BRIDGE__DIGI_REBOOT_API_TOKEN_TTL"]
 
 # HAWKEYE variables
 HAWKEYE_CLIENT_USERNAME = var_dict["HAWKEYE_CLIENT_USERNAME"]
@@ -219,6 +222,8 @@ env_dict = {
         f'DIGI_CLIENT_ID={DIGI_CLIENT_ID}\n'
         f'DIGI_CLIENT_SECRET={DIGI_CLIENT_SECRET}\n'
         f'DIGI_BASE_URL={DIGI_BASE_URL}\n'
+        f'DIGI_TOKEN_TTL={DIGI_TOKEN_TTL}\n'
+        f'TIMEZONE={TIMEZONE}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',

@@ -16,7 +16,7 @@ class DiGiRepository:
         self._logger.info('Scheduled task: logging in digi api')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config.DIGI_CONFIG['timezone']))
+            next_run_time = datetime.now(timezone(self._config.TIMEZONE))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._digi_client.login, 'interval',
                                 minutes=self._config.DIGI_CONFIG['login_ttl'],

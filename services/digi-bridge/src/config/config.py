@@ -17,12 +17,13 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+TIMEZONE = os.environ["TIMEZONE"]
+
 DIGI_CONFIG = {
     'base_url': os.environ["DIGI_BASE_URL"],
     'client_id': os.environ["DIGI_CLIENT_ID"],
     'client_secret': os.environ["DIGI_CLIENT_SECRET"],
-    'timezone': 'US/Eastern',
-    'login_ttl': 60
+    'login_ttl': int(os.environ["DIGI_TOKEN_TTL"]) // 60,
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
@@ -33,10 +34,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-digi-bridge'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
