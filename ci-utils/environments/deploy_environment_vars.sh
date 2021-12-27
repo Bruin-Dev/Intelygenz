@@ -7,7 +7,6 @@ function common_variables_by_environment() {
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
     export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_DEV}
-    export KRE_EMAIL_TAGGER_BASE_URL=${KRE_EMAIL_TAGGER_BASE_URL_DEV}
     export KRE_REPAIR_TICKETS_BASE_URL=${KRE_REPAIR_TICKETS_BASE_URL_DEV}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_DEV}
     export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_DEV}
@@ -21,7 +20,6 @@ function common_variables_by_environment() {
     # common environment variables for production environment
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
     export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_PRO}
-    export KRE_EMAIL_TAGGER_BASE_URL=${KRE_EMAIL_TAGGER_BASE_URL_PRO}
     export KRE_REPAIR_TICKETS_BASE_URL=${KRE_REPAIR_TICKETS_BASE_URL_PRO}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_PRO}
     export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_PRO}
@@ -121,6 +119,16 @@ function dri_bridge_variables() {
     export DRI_ACC_EMAIL="${DRI_ACC_EMAIL_PRO}"
     export DRI_ACC_PASSWORD="${DRI_ACC_PASSWORD_PRO}"
     export DRI_BASE_URL="${DRI_BASE_URL_PRO}"
+  fi
+}
+
+function email_tagger_kre_bridge_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # email-tagger-kre-bridge environment variables for ephemeral environments
+    export EMAIL_TAGGER_KRE_BRIDGE__KRE_BASE_URL="${DEV__EMAIL_TAGGER_KRE_BRIDGE__KRE_BASE_URL}"
+  else
+    # email-tagger-kre-bridge environment variables for production environment
+    export EMAIL_TAGGER_KRE_BRIDGE__KRE_BASE_URL="${PRO__EMAIL_TAGGER_KRE_BRIDGE__KRE_BASE_URL}"
   fi
 }
 
@@ -273,6 +281,7 @@ function environments_assign() {
   digi_bridge_variables
   digi_reboot_report_variables
   dri_bridge_variables
+  email_tagger_kre_bridge_variables
   email_tagger_monitor_variables
   hawkeye_bridge_variables
   links_metrics_api_variables

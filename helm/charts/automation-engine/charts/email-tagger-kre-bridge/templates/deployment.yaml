@@ -43,6 +43,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "email-tagger-kre-bridge.configmapName" . }}
+            - secretRef:
+                name: {{ include "email-tagger-kre-bridge.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

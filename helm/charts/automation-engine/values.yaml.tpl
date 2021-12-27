@@ -345,8 +345,8 @@ email-tagger-kre-bridge:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "email-tagger-kre-bridge-${EMAIL_TAGGER_KRE_BRIDGE_BUILD_NUMBER}"
-    # -- Base URL for KRE API
-    kre_base_url: ${KRE_EMAIL_TAGGER_BASE_URL}
+    # -- Base URL for E-mail Tagger's KRE
+    kre_base_url: ${EMAIL_TAGGER_KRE_BRIDGE__KRE_BASE_URL}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-kre-bridge
     pullPolicy: Always

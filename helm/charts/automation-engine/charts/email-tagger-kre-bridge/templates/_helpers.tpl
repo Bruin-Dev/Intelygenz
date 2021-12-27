@@ -54,7 +54,7 @@ Configmap name of email-tagger-kre-bridge
 {{- end }}
 
 {{/*
-Secret name of bruin-bridge
+Secret name of email-tagger-kre-bridge
 */}}
 {{- define "email-tagger-kre-bridge.secretName" -}}
 {{ include "email-tagger-kre-bridge.fullname" . }}-secret

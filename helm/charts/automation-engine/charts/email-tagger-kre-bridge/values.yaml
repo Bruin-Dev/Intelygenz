@@ -43,7 +43,7 @@ global:
 
 config:
   papertrail_prefix: ""
-  # -- Base URL for KRE API
+  # -- Base URL for E-mail Tagger's KRE
   kre_base_url: ""
 
 image:
