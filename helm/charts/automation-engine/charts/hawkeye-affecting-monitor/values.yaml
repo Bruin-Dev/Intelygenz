@@ -30,10 +30,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -43,6 +39,12 @@ global:
 
 config:
   papertrail_prefix: ""
+  # -- Defines how often devices are checked to find and report issues
+  monitoring_job_interval: 0
+  # -- Defines how much time back to look for probes' tests results
+  probes_tests_results_lookup_interval: 0
+  # -- Bruin's product category under monitoring
+  monitored_product_category: ""
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

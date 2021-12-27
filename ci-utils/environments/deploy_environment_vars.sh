@@ -154,6 +154,20 @@ function email_tagger_monitor_variables() {
   fi
 }
 
+function hawkeye_affecting_monitor_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # hawkeye-affecting-monitor environment variables for ephemeral environments
+    export HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL="${DEV__HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL}"
+    export HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL="${DEV__HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL}"
+    export HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY="${DEV__HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY}"
+  else
+    # hawkeye-affecting-monitor environment variables for production environment
+    export HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL="${PRO__HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL}"
+    export HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL="${PRO__HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL}"
+    export HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY="${PRO__HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY}"
+  fi
+}
+
 function hawkeye_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # hawkeye-bridge environment variables for ephemeral environments
@@ -293,6 +307,7 @@ function environments_assign() {
   dri_bridge_variables
   email_tagger_kre_bridge_variables
   email_tagger_monitor_variables
+  hawkeye_affecting_monitor_variables
   hawkeye_bridge_variables
   links_metrics_api_variables
   lumin_billing_report_variables

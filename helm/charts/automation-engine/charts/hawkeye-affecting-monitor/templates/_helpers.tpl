@@ -53,3 +53,10 @@ Configmap name of hawkeye-affecting-monitor
 {{- define "hawkeye-affecting-monitor.configmapName" -}}
 {{ include "hawkeye-affecting-monitor.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of hawkeye-affecting-monitor
+*/}}
+{{- define "hawkeye-affecting-monitor.secretName" -}}
+{{ include "hawkeye-affecting-monitor.fullname" . }}-secret
+{{- end }}

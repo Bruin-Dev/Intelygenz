@@ -51,6 +51,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "hawkeye-affecting-monitor.configmapName" . }}
+            - secretRef:
+                name: {{ include "hawkeye-affecting-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

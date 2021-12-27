@@ -443,6 +443,12 @@ hawkeye-affecting-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "hawkeye-affecting-monitor-${HAWKEYE_AFFECTING_MONITOR_BUILD_NUMBER}"
+    # -- Defines how often devices are checked to find and report issues
+    monitoring_job_interval: ${HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL}
+    # -- Defines how much time back to look for probes' tests results
+    probes_tests_results_lookup_interval: ${HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL}
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ${HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
