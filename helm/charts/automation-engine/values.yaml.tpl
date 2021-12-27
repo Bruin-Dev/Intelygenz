@@ -275,10 +275,14 @@ digi-reboot-report:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "digi-reboot-report-${DIGI_REBOOT_REPORT_BUILD_NUMBER}"
+    # -- Defines how often the report is built and sent
+    job_interval: ${DIGI_REBOOT_REPORT__REPORT_JOB_INTERVAL}
+    # -- Defines how much time back to look for DiGi Reboot logs
+    logs_lookup_interval: ${DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL}
+    # -- Email address to send the report
+    recipient: ${DIGI_REBOOT_REPORT__REPORT_RECIPIENT}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-    # -- Email address to send digi-reboot-report
-    digi_report_recipient: ${DIGI_REPORT_RECIPIENT}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-reboot-report
     pullPolicy: Always

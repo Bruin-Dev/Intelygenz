@@ -11,8 +11,10 @@ data:
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
   NATS_SERVER1: {{ .Values.global.nats_server | quote }}
   REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
-  DIGI_REPORT_RECIPIENT: {{ .Values.config.digi_report_recipient | quote }}
   PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
+  JOB_INTERVAL: {{ (int64 .Values.config.job_interval) | quote }}
+  LOGS_LOOKUP_INTERVAL: {{ (int64 .Values.config.logs_lookup_interval) | quote }}

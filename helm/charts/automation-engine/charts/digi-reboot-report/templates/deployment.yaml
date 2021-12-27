@@ -46,6 +46,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "digi-reboot-report.configmapName" . }}
+            - secretRef:
+                name: {{ include "digi-reboot-report.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

@@ -47,8 +47,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Configmap name of customer-cache
+Configmap name of digi-reboot-report
 */}}
 {{- define "digi-reboot-report.configmapName" -}}
 {{ include "digi-reboot-report.fullname" . }}-configmap
+{{- end }}
+
+{{/*
+Secret name of digi-reboot-report
+*/}}
+{{- define "digi-reboot-report.secretName" -}}
+{{ include "digi-reboot-report.fullname" . }}-secret
 {{- end }}

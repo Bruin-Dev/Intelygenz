@@ -99,10 +99,14 @@ function digi_bridge_variables() {
 function digi_reboot_report_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # digi-reboot-report environment variables for ephemeral environments
-    export DIGI_REPORT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    export DIGI_REBOOT_REPORT__REPORT_JOB_INTERVAL="${DEV__DIGI_REBOOT_REPORT__REPORT_JOB_INTERVAL}"
+    export DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL="${DEV__DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL}"
+    export DIGI_REBOOT_REPORT__REPORT_RECIPIENT="${DEV__DIGI_REBOOT_REPORT__REPORT_RECIPIENT}"
   else
     # digi-reboot-report environment variables for production environment
-    export DIGI_REPORT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
+    export DIGI_REBOOT_REPORT__REPORT_JOB_INTERVAL="${PRO__DIGI_REBOOT_REPORT__REPORT_JOB_INTERVAL}"
+    export DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL="${PRO__DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL}"
+    export DIGI_REBOOT_REPORT__REPORT_RECIPIENT="${PRO__DIGI_REBOOT_REPORT__REPORT_RECIPIENT}"
   fi
 }
 
