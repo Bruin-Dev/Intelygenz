@@ -30,10 +30,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -43,12 +39,20 @@ global:
 
 config:
   papertrail_prefix: ""
-  # -- Signature secret key
-  request_signature_secret_key: ""
-  # -- Request api key
-  request_api_key: ""
-  # -- API server endpoint prefix
-  api_server_endpoint_prefix: ""
+  # -- Defines how often new emails received from Bruin are processed
+  new_emails_job_interval: 0
+  # -- Defines how often new tickets received from Bruin are sent to the KRE to train the AI model
+  new_tickets_job_interval: 0
+  # -- Defines how many simultaneous emails are processed
+  max_concurrent_emails: 0
+  # -- Defines how many simultaneous tickets are sent to the KRE to train the AI model
+  max_concurrent_tickets: 0
+  # -- API request key for incoming requests
+  api_request_key: ""
+  # -- API signature secret key for incoming requests
+  api_request_signature_secret_key: ""
+  # -- API server endpoint prefix for incoming requests
+  api_endpoint_prefix: ""
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

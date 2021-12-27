@@ -457,16 +457,22 @@ email-tagger-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
+    # -- Defines how often new emails received from Bruin are processed
+    new_emails_job_interval: 0
+    # -- Defines how often new tickets received from Bruin are sent to the KRE to train the AI model
+    new_tickets_job_interval: 0
+    # -- Defines how many simultaneous emails are processed
+    max_concurrent_emails: 0
+    # -- Defines how many simultaneous tickets are sent to the KRE to train the AI model
+    max_concurrent_tickets: 0
+    # -- API request key for incoming requests
+    api_request_key: ""
+    # -- API signature secret key for incoming requests
+    api_request_signature_secret_key: ""
+    # -- API server endpoint prefix for incoming requests
+    api_endpoint_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-    # -- Redis chache for email-tagger
-    redis_cache_hostname: ""
-    # -- Signature secret key
-    request_signature_secret_key: ""
-    # -- Request api key
-    request_api_key: ""
-    # -- API server endpoint prefix
-    api_server_endpoint_prefix: "/api/email-tagger-webhook"
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-monitor
     pullPolicy: Always

@@ -377,14 +377,22 @@ email-tagger-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "email-tagger-monitor-${EMAIL_TAGGER_MONITOR_BUILD_NUMBER}"
+    # -- Defines how often new emails received from Bruin are processed
+    new_emails_job_interval: ${EMAIL_TAGGER_MONITOR__NEW_EMAILS_JOB_INTERVAL}
+    # -- Defines how often new tickets received from Bruin are sent to the KRE to train the AI model
+    new_tickets_job_interval: ${EMAIL_TAGGER_MONITOR__NEW_TICKETS_JOB_INTERVAL}
+    # -- Defines how many simultaneous emails are processed
+    max_concurrent_emails: ${EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_EMAILS}
+    # -- Defines how many simultaneous tickets are sent to the KRE to train the AI model
+    max_concurrent_tickets: ${EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_TICKETS}
+    # -- API request key for incoming requests
+    api_request_key: ${EMAIL_TAGGER_MONITOR__API_REQUEST_KEY}
+    # -- API signature secret key for incoming requests
+    api_request_signature_secret_key: ${EMAIL_TAGGER_MONITOR__API_REQUEST_SIGNATURE_SECRET_KEY}
+    # -- API server endpoint prefix for incoming requests
+    api_endpoint_prefix: ${EMAIL_TAGGER_MONITOR__API_ENDPOINT_PREFIX}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-    # -- Signature secret key
-    request_signature_secret_key: ${REQUEST_SIGNATURE_SECRET_KEY}
-    # -- Request api key
-    request_api_key: ${REQUEST_API_KEY}
-    # -- API server endpoint prefix
-    api_server_endpoint_prefix: "/api/email-tagger-webhook"
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-monitor
     pullPolicy: Always
