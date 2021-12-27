@@ -10,12 +10,12 @@ nats:
 
 prometheus-nats-exporter:
   # enable or disable prometheus-nats-exporter
-  enabled: true
+  enabled: ${PROMETHEUS_NATS_EXPORTER_ENABLED}
   nameOverride: prometheus-nats-exporter-${ENVIRONMENT_NAME}
   fullnameOverride: prometheus-nats-exporter-${ENVIRONMENT_NAME}
   # if using the Prometheus Operator enable serviceMonitor
   serviceMonitor:
-    enabled: true
+    enabled: ${PROMETHEUS_NATS_EXPORTER_ENABLED}
     additionalLabels: {}
     namespace: prometheus
     interval: "15s"
