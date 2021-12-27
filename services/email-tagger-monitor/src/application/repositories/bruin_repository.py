@@ -48,7 +48,7 @@ class BruinRepository:
                 elif response_status not in range(200, 300):
                     err_msg = (
                         f'Error sending tags {tag_id} belonging to email {email_id} in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
@@ -94,7 +94,7 @@ class BruinRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error getting basic info for ticket {ticket_id} in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:

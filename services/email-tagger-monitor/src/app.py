@@ -38,7 +38,7 @@ class Container:
                                                decode_responses=True)
         self._redis_cache_client.ping()
 
-        self._scheduler = AsyncIOScheduler(timezone=timezone(config.MONITOR_CONFIG["timezone"]))
+        self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)

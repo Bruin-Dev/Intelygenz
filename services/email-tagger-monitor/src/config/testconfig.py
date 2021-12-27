@@ -14,8 +14,9 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+TIMEZONE = 'US/Eastern'
+
 MONITOR_CONFIG = {
-    'timezone': 'US/Eastern',
     'scheduler_config': {
         'new_emails_seconds': 1,
         'new_tickets_seconds': 1
@@ -42,8 +43,7 @@ MONITOR_CONFIG = {
     }
 }
 
-ENVIRONMENT = 'dev'
-
+CURRENT_ENVIRONMENT = 'dev'
 ENVIRONMENT_NAME = 'dev'
 
 LOG_CONFIG = {

@@ -27,7 +27,7 @@ class NewTicketsMonitor:
 
         if exec_on_start:
             added_seconds = dt.timedelta(0, 5)
-            tz = timezone(self._config.MONITOR_CONFIG["timezone"])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz) + added_seconds
             self._logger.info('NewTicketsMonitor feedback job is going to be executed immediately')
 

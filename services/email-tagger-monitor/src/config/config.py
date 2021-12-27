@@ -16,36 +16,36 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+TIMEZONE = os.environ['TIMEZONE']
+
 MONITOR_CONFIG = {
-    'timezone': 'US/Eastern',
     'max_retries_error_404': 5,
     'scheduler_config': {
-        'new_emails_seconds': 10,
-        'new_tickets_seconds': 10
+        'new_emails_seconds': int(os.environ['NEW_EMAILS_JOB_INTERVAL']),
+        'new_tickets_seconds': int(os.environ['NEW_TICKETS_JOB_INTERVAL']),
     },
     'nats_request_timeout': {
         'kre_seconds': 10,
         'post_email_tag_seconds': 30
     },
     'semaphores': {
-        'new_emails_concurrent': 10,
-        'new_tickets_concurrent': 10,
+        'new_emails_concurrent': int(os.environ['MAX_CONCURRENT_EMAILS']),
+        'new_tickets_concurrent': int(os.environ['MAX_CONCURRENT_TICKETS']),
     },
     'api_server': {
         'schema_path': './src/schema.json',
         'swagger_path': './src/swagger.yml',
         'swagger_url_prefix': '/api/doc',
         'swagger_title': 'Email Tagger API Docs',
-        'request_signature_secret_key': os.environ['REQUEST_SIGNATURE_SECRET_KEY'],
+        'request_signature_secret_key': os.environ['API_REQUEST_SIGNATURE_SECRET_KEY'],
         'use_request_api_key_header': False,
-        'request_api_key': os.environ['REQUEST_API_KEY'],
-        'endpoint_prefix': os.environ['API_SERVER_ENDPOINT_PREFIX'],
+        'request_api_key': os.environ['API_REQUEST_KEY'],
+        'endpoint_prefix': os.environ['API_ENDPOINT_PREFIX'],
     }
 }
 
-ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
-
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'email-tagger-monitor',
@@ -53,10 +53,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-email-tagger-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
