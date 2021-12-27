@@ -24,7 +24,7 @@ class DiGiRebootReport:
                           f"{self._config.DIGI_CONFIG['digi_reboot_report_time']/60} hours")
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config.DIGI_CONFIG['timezone']))
+            next_run_time = datetime.now(timezone(self._config.TIMEZONE))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._digi_reboot_report_process, 'interval',
                                 minutes=self._config.DIGI_CONFIG['digi_reboot_report_time'],
@@ -80,7 +80,7 @@ class DiGiRebootReport:
             self._logger.info(f'Parsing all data in the ticket task history for ticket {ticket_id}')
             ticket_info = self._parse_ticket_history(ticket_task_history_response_body)
             if ticket_info['reboot_attempted']:
-                tz = timezone(self._config.DIGI_CONFIG['timezone'])
+                tz = timezone(self._config.TIMEZONE)
                 yesterday_timestamp = datetime.now(tz) - timedelta(days=1)
                 if ticket_info['reboot_time'].date() == yesterday_timestamp.date():
                     ticket_map[ticket_id] = ticket_info
@@ -176,7 +176,7 @@ class DiGiRebootReport:
 
             if ticket_map[ticket_id]['process_end'] is not None:
                 utc_time = utc.localize(ticket_map[ticket_id]['process_end'])
-                tz = timezone(self._config.DIGI_CONFIG['timezone'])
+                tz = timezone(self._config.TIMEZONE)
                 etc_converted_end_time = utc_time.astimezone(tz)
 
                 ticket_map[ticket_id]['process_length'] = (ticket_map[ticket_id]['process_end'] - ticket_map[

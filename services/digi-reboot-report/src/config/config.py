@@ -16,14 +16,15 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
+
+TIMEZONE = os.environ['TIMEZONE']
 
 DIGI_CONFIG = {
-    'days_of_digi_recovery_log': 3,
-    'digi_reboot_report_time': 60 * 24,
-    'recipient': os.environ["DIGI_REPORT_RECIPIENT"],
-    'timezone': 'US/Eastern',
-
+    'days_of_digi_recovery_log': int(os.environ["LOGS_LOOKUP_INTERVAL"]) // 60 // 60 // 24,
+    'digi_reboot_report_time': int(os.environ["JOB_INTERVAL"]) // 60,
+    'recipient': os.environ["RECIPIENT"],
 }
 
 
@@ -33,10 +34,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-last-contact-report'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

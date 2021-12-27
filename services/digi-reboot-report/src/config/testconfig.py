@@ -20,15 +20,15 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
+TIMEZONE = 'US/Eastern'
 
 DIGI_CONFIG = {
     'days_of_digi_recovery_log': 2,
     'digi_reboot_report_time': 60 * 24,
     'recipient': "some.recipient@email.com",
-    'timezone': 'US/Eastern',
-
 }
 
+CURRENT_ENVIRONMENT = 'dev'
 ENVIRONMENT_NAME = 'dev'
 
 QUART_CONFIG = {

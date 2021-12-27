@@ -14,7 +14,7 @@ class DiGiRepository:
 
     async def get_digi_recovery_logs(self):
         err_msg = None
-        tz = timezone(self._config.DIGI_CONFIG['timezone'])
+        tz = timezone(self._config.TIMEZONE)
         start_date_time = datetime.now(tz) - timedelta(days=self._config.DIGI_CONFIG['days_of_digi_recovery_log'])
         request = {
             'request_id': uuid(),
