@@ -9,7 +9,7 @@ import aiohttp
 
 
 # Misc
-resource_id_url_rgx = re.compile(r'\/[1-9]\d+')
+resource_id_url_rgx = re.compile(r'\/\d+')
 dashboard_path = 'ci-utils/grafana/dashboards/bruin/api-usage.json'
 
 # Metrics lookup config
@@ -159,7 +159,7 @@ def get_endpoint_without_resource_ids(endpoint):
 
 
 def get_endpoint_labelvalue_for_multiple_resource_ids(endpoint):
-    return resource_id_url_rgx.sub('/[1-9][0-9]*', endpoint)
+    return resource_id_url_rgx.sub('/[0-9]+', endpoint)
 
 
 def get_grid_position(panels_count):
