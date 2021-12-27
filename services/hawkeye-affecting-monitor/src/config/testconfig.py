@@ -14,14 +14,13 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-quarantine_time = 5
+TIMEZONE = "US/Eastern"
 
 MONITOR_CONFIG = {
     'multiplier': 1,
     'min': 1,
     'stop_delay': 0,
     'environment': "dev",
-    'timezone': "US/Eastern",
     'scan_interval': 60 * 15,
     'jobs_intervals': {
         'affecting_monitor': 60 * 15,
@@ -29,8 +28,10 @@ MONITOR_CONFIG = {
     'semaphores': {
         'bruin': 5,
     },
+    'product_category': 'Network Scout',
 }
 
+CURRENT_ENVIRONMENT = "dev"
 ENVIRONMENT_NAME = "dev"
 
 LOG_CONFIG = {

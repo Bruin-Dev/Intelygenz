@@ -23,7 +23,7 @@ class BruinRepository:
                 'client_id': client_id,
                 'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
-                'product_category': 'Network Scout',
+                'product_category': self._config.MONITOR_CONFIG['product_category'],
             },
         }
 
@@ -70,14 +70,14 @@ class BruinRepository:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic} and belonging to client {client_id} in '
-                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
-                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
@@ -110,7 +110,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
             else:
@@ -211,7 +211,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while appending multiple notes to ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment. '
                     f'Notes were {notes}. Error: Error {response_status} - {response_body}'
                 )
             else:
@@ -247,7 +247,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while unresolving detail {detail_id} of affecting ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
             else:

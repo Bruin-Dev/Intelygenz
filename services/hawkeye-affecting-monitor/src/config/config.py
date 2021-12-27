@@ -17,24 +17,24 @@ NATS_CONFIG = {
     'reconnects': 150,
 }
 
-quarantine_time = 5
+TIMEZONE = os.environ['TIMEZONE']
 
 MONITOR_CONFIG = {
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'timezone': 'US/Eastern',
-    'scan_interval': 60 * 15,
+    'scan_interval': int(os.environ['PROBES_TESTS_RESULTS_LOOKUP_INTERVAL']) // 60,
     'jobs_intervals': {
-        'affecting_monitor': 60 * 15,
+        'affecting_monitor': int(os.environ['MONITORING_JOB_INTERVAL']) // 60,
     },
     'semaphores': {
         'bruin': 5,
     },
+    'product_category': os.environ['MONITORED_PRODUCT_CATEGORY'],
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'hawkeye-affecting-monitor',
@@ -42,10 +42,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-hawkeye-affecting-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

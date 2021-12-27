@@ -26,13 +26,14 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.MONITOR_CONFIG['product_category']
 
         request = {
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'Network Scout',
+                'product_category': product_category,
                 'ticket_topic': ticket_topic,
             },
         }
@@ -54,13 +55,14 @@ class TestBruinRepository:
         service_number = 'B827EB92EB72'
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.MONITOR_CONFIG['product_category']
 
         request = {
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'Network Scout',
+                'product_category': product_category,
                 'ticket_topic': ticket_topic,
                 'service_number': service_number,
             },
@@ -83,13 +85,14 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.MONITOR_CONFIG['product_category']
 
         request = {
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'Network Scout',
+                'product_category': product_category,
                 'ticket_topic': ticket_topic,
             },
         }
@@ -112,13 +115,14 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.MONITOR_CONFIG['product_category']
 
         request = {
             'request_id': uuid_,
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'Network Scout',
+                'product_category': product_category,
                 'ticket_topic': ticket_topic,
             },
         }
@@ -143,6 +147,7 @@ class TestBruinRepository:
         service_number = 'B827EB92EB72'
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.MONITOR_CONFIG['product_category']
 
         bruin_repository.get_tickets.return_value = get_open_affecting_ticket_200_response
 
@@ -162,6 +167,7 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.MONITOR_CONFIG['product_category']
 
         bruin_repository.get_tickets.return_value = get_open_affecting_ticket_200_response
 

@@ -47,7 +47,7 @@ class AffectingMonitor:
         next_run_time = undefined
 
         if exec_on_start:
-            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
             self._logger.info('Hawkeye Affecting Monitor job is going to be executed immediately')
 
@@ -242,7 +242,7 @@ class AffectingMonitor:
 
         ticket_id = self._tickets_by_serial[serial_number]['ticket_id']
 
-        working_environment = self._config.MONITOR_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
         if working_environment != 'production':
             self._logger.info(
                 f'{len(notes_to_append)} affecting notes to append to ticket {ticket_id} were found, but the current '
@@ -359,7 +359,7 @@ class AffectingMonitor:
 
         affecting_ticket = self._tickets_by_serial[serial_number]
         if not affecting_ticket:
-            working_environment = self._config.MONITOR_CONFIG['environment']
+            working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != 'production':
                 self._logger.info(
                     f'Serial {serial_number} is not under any affecting ticket and some troubles were spotted for '

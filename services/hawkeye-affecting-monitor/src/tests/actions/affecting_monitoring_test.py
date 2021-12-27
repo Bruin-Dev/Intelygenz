@@ -661,11 +661,7 @@ class TestServiceAffectingMonitor:
         }
         affecting_monitor._tickets_by_serial = tickets_mapping
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'dev'):
             await affecting_monitor._append_new_notes_for_device(serial_number_1)
 
         affecting_monitor._bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
@@ -730,11 +726,7 @@ class TestServiceAffectingMonitor:
             },
         ]
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production'):
             await affecting_monitor._append_new_notes_for_device(serial_number_1)
 
         affecting_monitor._bruin_repository.append_multiple_notes_to_ticket.assert_awaited_once_with(
@@ -1074,11 +1066,7 @@ class TestServiceAffectingMonitor:
         tickets_mapping = {}
         affecting_monitor._tickets_by_serial = tickets_mapping
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'dev'):
             await affecting_monitor._process_failed_test_result(
                 test_result=failed_network_kpi_test_result_2_on_2020_01_23,
                 device_cached_info=device_cached_info_1,
@@ -1100,11 +1088,7 @@ class TestServiceAffectingMonitor:
         }
         affecting_monitor._tickets_by_serial = tickets_mapping
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'dev'):
             await affecting_monitor._process_failed_test_result(
                 test_result=failed_network_kpi_test_result_2_on_2020_01_23,
                 device_cached_info=device_cached_info_1,
@@ -1128,11 +1112,7 @@ class TestServiceAffectingMonitor:
 
         affecting_monitor._bruin_repository.create_affecting_ticket.return_value = bruin_500_response
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production'):
             await affecting_monitor._process_failed_test_result(
                 test_result=failed_network_kpi_test_result_2_on_2020_01_23,
                 device_cached_info=device_cached_info_1,
@@ -1163,14 +1143,10 @@ class TestServiceAffectingMonitor:
 
         affecting_monitor._bruin_repository.create_affecting_ticket.return_value = create_affecting_ticket_200_response
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
         current_datetime = datetime.utcnow()
         datetime_mock = Mock()
         datetime_mock.utcnow = Mock(return_value=current_datetime)
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production'):
             with patch.object(affecting_monitoring_module, 'datetime', new=datetime_mock):
                 await affecting_monitor._process_failed_test_result(
                     test_result=failed_network_kpi_test_result_2_on_2020_01_23,
