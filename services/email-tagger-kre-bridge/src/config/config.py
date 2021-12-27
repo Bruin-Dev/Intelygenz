@@ -16,7 +16,7 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'email-tagger-kre-bridge',
@@ -24,10 +24,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-email-tagger-kre-bridge'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
