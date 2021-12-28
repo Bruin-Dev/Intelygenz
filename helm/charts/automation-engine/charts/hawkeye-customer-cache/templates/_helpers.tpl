@@ -52,3 +52,10 @@ Configmap name of hawkeye-customer-cache
 {{- define "hawkeye-customer-cache.configmapName" -}}
 {{ include "hawkeye-customer-cache.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of hawkeye-customer-cache
+*/}}
+{{- define "hawkeye-customer-cache.secretName" -}}
+{{ include "hawkeye-customer-cache.fullname" . }}-secret
+{{- end }}

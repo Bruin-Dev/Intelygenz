@@ -52,6 +52,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "hawkeye-customer-cache.configmapName" . }}
+            - secretRef:
+                name: {{ include "hawkeye-customer-cache.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

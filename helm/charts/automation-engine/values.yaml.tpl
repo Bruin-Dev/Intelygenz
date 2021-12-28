@@ -511,6 +511,12 @@ hawkeye-customer-cache:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "hawkeye-customer-cache-${HAWKEYE_CUSTOMER_CACHE_BUILD_NUMBER}"
+    # -- E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories
+    duplicate_inventories_recipient: ${CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT}
+    # -- Defines how often the cache is refreshed
+    refresh_job_interval: ${CUSTOMER_CACHE__REFRESH_JOB_INTERVAL}
+    # -- Management statuses that should be considered in the caching process
+    whitelisted_management_statuses: ${CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

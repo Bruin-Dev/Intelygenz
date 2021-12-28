@@ -182,6 +182,20 @@ function hawkeye_bridge_variables() {
   fi
 }
 
+function hawkeye_customer_cache_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # hawkeye-customer-cache environment variables for ephemeral environments
+    export HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT="${DEV__HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT}"
+    export HAWKEYE_CUSTOMER_CACHE__REFRESH_JOB_INTERVAL="${DEV__HAWKEYE_CUSTOMER_CACHE__REFRESH_JOB_INTERVAL}"
+    export HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES="$(echo "${DEV__HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}" | jq . -c)"
+  else
+    # hawkeye-customer-cache environment variables for production environment
+    export HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT="${PRO__HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT}"
+    export HAWKEYE_CUSTOMER_CACHE__REFRESH_JOB_INTERVAL="${PRO__HAWKEYE_CUSTOMER_CACHE__REFRESH_JOB_INTERVAL}"
+    export HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES="$(echo "${PRO__HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}" | jq . -c)"
+  fi
+}
+
 function links_metrics_api_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # links-metris-api environment variables for ephemeral environments
@@ -308,6 +322,7 @@ function environments_assign() {
   email_tagger_monitor_variables
   hawkeye_affecting_monitor_variables
   hawkeye_bridge_variables
+  hawkeye_customer_cache_variables
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables
