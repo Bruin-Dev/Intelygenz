@@ -30,10 +30,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -43,6 +39,24 @@ global:
 
 config:
   papertrail_prefix: ""
+  # -- Defines how often InterMapper events are checked to find and report issues
+  monitoring_job_interval: 0
+  # -- E-mail account that receives InterMapper events for later analysis
+  observed_inbox_email_address: ""
+  # -- Senders addresses whose e-mail messages represent InterMapper events
+  observed_inbox_senders: []
+  # -- InterMapper events considered as DOWN
+  monitored_down_events: []
+  # -- InterMapper events considered as UP
+  monitored_up_events: []
+  # -- Defines how many simultaneous email batches related to the same InterMapper asset are processed
+  max_concurrent_email_batches: 0
+  # -- Defines which Bruin product categories are taken into account when auto-resolving tickets
+  whitelisted_product_categories_for_autoresolve: []
+  # -- Defines for how long a ticket can be auto-resolved after the last documented outage
+  grace_period_to_autoresolve_after_last_documented_outage: 0
+  # -- Parameters to fetch from DRI to include them in InterMapper notes for PIAB devices
+  dri_parameters_for_piab_notes: []
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

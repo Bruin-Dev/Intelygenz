@@ -41,6 +41,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "intermapper-outage-monitor.configmapName" . }}
+            - secretRef:
+                name: {{ include "intermapper-outage-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

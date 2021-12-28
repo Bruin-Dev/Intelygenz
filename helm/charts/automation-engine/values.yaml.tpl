@@ -576,6 +576,24 @@ intermapper-outage-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "intermapper-outage-monitor-${INTERMAPPER_OUTAGE_MONITOR_BUILD_NUMBER}"
+    # -- Defines how often InterMapper events are checked to find and report issues
+    monitoring_job_interval: ${INTERMAPPER_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL}
+    # -- E-mail account that receives InterMapper events for later analysis
+    observed_inbox_email_address: ${INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS}
+    # -- Senders addresses whose e-mail messages represent InterMapper events
+    observed_inbox_senders: ${INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_SENDERS}
+    # -- InterMapper events considered as DOWN
+    monitored_down_events: ${INTERMAPPER_OUTAGE_MONITOR__MONITORED_DOWN_EVENTS}
+    # -- InterMapper events considered as UP
+    monitored_up_events: ${INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS}
+    # -- Defines how many simultaneous email batches related to the same InterMapper asset are processed
+    max_concurrent_email_batches: ${INTERMAPPER_OUTAGE_MONITOR__MAX_CONCURRENT_EMAIL_BATCHES}
+    # -- Defines which Bruin product categories are taken into account when auto-resolving tickets
+    whitelisted_product_categories_for_autoresolve: ${INTERMAPPER_OUTAGE_MONITOR__WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE}
+    # -- Defines for how long a ticket can be auto-resolved after the last documented outage
+    grace_period_to_autoresolve_after_last_documented_outage: ${INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE}
+    # -- Parameters to fetch from DRI to include them in InterMapper notes for PIAB devices
+    dri_parameters_for_piab_notes: ${INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

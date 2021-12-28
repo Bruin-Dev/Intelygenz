@@ -52,3 +52,10 @@ Configmap name of intermapper-outage-monitor
 {{- define "intermapper-outage-monitor.configmapName" -}}
 {{ include "intermapper-outage-monitor.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of intermapper-outage-monitor
+*/}}
+{{- define "intermapper-outage-monitor.secretName" -}}
+{{ include "intermapper-outage-monitor.fullname" . }}-secret
+{{- end }}
