@@ -51,6 +51,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "hawkeye-outage-monitor.configmapName" . }}
+            - secretRef:
+                name: {{ include "hawkeye-outage-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: 80

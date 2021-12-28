@@ -634,6 +634,14 @@ hawkeye-outage-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
+    # -- Defines how often devices are checked to find and report issues
+    monitoring_job_interval: 0
+    # -- Defines how much time to wait before checking if a particular device is still in outage state
+    quarantine_for_devices_in_outage: 0
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ""
+    # -- Defines for how long a ticket can be auto-resolved after the last documented outage
+    grace_period_to_autoresolve_after_last_documented_outage: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

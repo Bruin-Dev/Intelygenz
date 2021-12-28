@@ -196,6 +196,22 @@ function hawkeye_customer_cache_variables() {
   fi
 }
 
+function hawkeye_outage_monitor_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # hawkeye-outage-monitor environment variables for ephemeral environments
+    export HAWKEYE_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL="${DEV__HAWKEYE_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL}"
+    export HAWKEYE_OUTAGE_MONITOR__QUARANTINE_FOR_DEVICES_IN_OUTAGE="${DEV__HAWKEYE_OUTAGE_MONITOR__QUARANTINE_FOR_DEVICES_IN_OUTAGE}"
+    export HAWKEYE_OUTAGE_MONITOR__MONITORED_PRODUCT_CATEGORY="${DEV__HAWKEYE_OUTAGE_MONITOR__MONITORED_PRODUCT_CATEGORY}"
+    export HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE="${DEV__HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE}"
+  else
+    # hawkeye-outage-monitor environment variables for production environment
+    export HAWKEYE_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL="${PRO__HAWKEYE_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL}"
+    export HAWKEYE_OUTAGE_MONITOR__QUARANTINE_FOR_DEVICES_IN_OUTAGE="${PRO__HAWKEYE_OUTAGE_MONITOR__QUARANTINE_FOR_DEVICES_IN_OUTAGE}"
+    export HAWKEYE_OUTAGE_MONITOR__MONITORED_PRODUCT_CATEGORY="${PRO__HAWKEYE_OUTAGE_MONITOR__MONITORED_PRODUCT_CATEGORY}"
+    export HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE="${PRO__HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE}"
+  fi
+}
+
 function links_metrics_api_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # links-metris-api environment variables for ephemeral environments
@@ -323,6 +339,7 @@ function environments_assign() {
   hawkeye_affecting_monitor_variables
   hawkeye_bridge_variables
   hawkeye_customer_cache_variables
+  hawkeye_outage_monitor_variables
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables

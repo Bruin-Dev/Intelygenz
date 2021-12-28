@@ -52,3 +52,10 @@ Configmap name of hawkeye-outage-monitor
 {{- define "hawkeye-outage-monitor.configmapName" -}}
 {{ include "hawkeye-outage-monitor.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of hawkeye-outage-monitor
+*/}}
+{{- define "hawkeye-outage-monitor.secretName" -}}
+{{ include "hawkeye-outage-monitor.fullname" . }}-secret
+{{- end }}
