@@ -45,7 +45,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while appending note to ticket {ticket_id} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. Note was {note}. Error: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -80,7 +80,7 @@ class BruinRepository:
             if response_status not in range(200, 300) or response_status == 204:
                 err_msg = (
                     f'Getting the translation of circuit_id {circuit_id} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment. Error: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. Error: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -120,7 +120,7 @@ class BruinRepository:
             if not (response_status in range(200, 300) or is_bruin_custom_status):
                 err_msg = (
                     f'Error while creating outage ticket for device {service_number} that belongs to client '
-                    f'{client_id} in {self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'{client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -159,7 +159,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f"'Getting the attribute's serial number of serial number {service_number}'"
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment. Error: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. Error: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -170,7 +170,7 @@ class BruinRepository:
         return response
 
     async def append_intermapper_note(self, ticket_id, parsed_email_dict, is_piab_device):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
             'previous_condition'] else ''
         ip_address = f"Wireless IP Address: {parsed_email_dict['address']}" if is_piab_device else \
@@ -200,7 +200,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, intermapper_note)
 
     async def append_intermapper_up_note(self, ticket_id, wtn, parsed_email_dict, is_piab_device):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
             'previous_condition'] else ''
         ip_address = f"Wireless IP Address: {parsed_email_dict['address']}" if is_piab_device else \
@@ -229,7 +229,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, intermapper_note, wtns=[wtn])
 
     async def append_autoresolve_note(self, ticket_id, wtn):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'Auto-resolving task for {wtn}',
@@ -238,7 +238,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, intermapper_note, wtns=[wtn])
 
     async def append_dri_note(self, ticket_id, dri_body, parsed_email_dict):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(' ')
         sim_note = f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}\n"
         if 'SIM1' in sim_insert:
@@ -302,7 +302,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while resolving ticket {ticket_id} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -353,7 +353,7 @@ class BruinRepository:
                 err_msg = (
                     f'Error while retrieving tickets basic info with any status of {ticket_statuses}, '
                     f'with ticket topic VOO, service number {service_number} and belonging to client {client_id} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -399,7 +399,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while retrieving all tickets of ticket id {ticket_id} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -433,7 +433,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 

@@ -48,7 +48,7 @@ class DRIRepository:
                 else:
                     err_msg = (
                         f'Error while getting DRI parameter of serial number {serial_number} in '
-                        f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment. Error: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment. Error: '
                         f'Error {response_status} - {response_body}'
                     )
                 if response_status == 204:

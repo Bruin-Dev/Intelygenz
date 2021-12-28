@@ -25,11 +25,12 @@ QUART_CONFIG = {
     'port': 5000
 }
 
+CURRENT_ENVIRONMENT = "dev"
 ENVIRONMENT_NAME = "dev"
 
+TIMEZONE = 'US/Eastern'
+
 INTERMAPPER_CONFIG = {
-    'environment': ENVIRONMENT_NAME,
-    'timezone': 'US/Eastern',
     'monitoring_interval': 30,
     'inbox_email': 'fake@gmail.com',
     'sender_emails_list': ['fakesender@email.com'],

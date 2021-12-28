@@ -21,14 +21,14 @@ class Container:
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'InterMapper Outage Monitor starting in {config.INTERMAPPER_CONFIG["environment"]}...')
+        self._logger.info(f'InterMapper Outage Monitor starting in {config.CURRENT_ENVIRONMENT}...')
 
         # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
         # SCHEDULER
-        self._scheduler = AsyncIOScheduler(timezone=config.INTERMAPPER_CONFIG['timezone'])
+        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
         # HEALTHCHECK ENDPOINT
         self._server = QuartServer(config)
@@ -54,7 +54,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        if config.INTERMAPPER_CONFIG["environment"] == 'production':
+        if config.CURRENT_ENVIRONMENT == 'production':
             await self._intermapper_monitoring.start_intermapper_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()

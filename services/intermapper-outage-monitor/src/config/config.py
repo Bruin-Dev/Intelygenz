@@ -18,44 +18,37 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+CURRENT_ENVIRONMENT = os.environ['CURRENT_ENVIRONMENT']
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
+
+TIMEZONE = os.environ['TIMEZONE']
 
 INTERMAPPER_CONFIG = {
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'timezone': 'US/Eastern',
-    'monitoring_interval': 30,
-    'inbox_email': 'mettel.automation@intelygenz.com',
-    'sender_emails_list': ['noreply@mettel.net'],
-    'concurrent_email_batches': 10,
-    'intermapper_down_events': ['Down', 'Critical', 'Alarm', 'Warning', 'Link Warning'],
-    'intermapper_up_events': ['Up', 'OK'],
-    'autoresolve_last_outage_seconds': 60 * 75,
-    'autoresolve_product_category_list': ['Cloud Connect', 'Cloud Firewall', 'POTS in a Box', 'Premise Firewall',
-                                          'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi', 'SD-WAN'],
-    'dri_parameters': [
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei",
-        "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress"
-    ],
+    'monitoring_interval': int(os.environ['MONITORING_JOB_INTERVAL']),
+    'inbox_email': os.environ['OBSERVED_INBOX_EMAIL_ADDRESS'],
+    'sender_emails_list': json.loads(os.environ['OBSERVED_INBOX_SENDERS']),
+    'concurrent_email_batches': int(os.environ['MAX_CONCURRENT_EMAIL_BATCHES']),
+    'intermapper_down_events': json.loads(os.environ['MONITORED_DOWN_EVENTS']),
+    'intermapper_up_events': json.loads(os.environ['MONITORED_UP_EVENTS']),
+    'autoresolve_last_outage_seconds': int(os.environ['GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE']),
+    'autoresolve_product_category_list': json.loads(os.environ['WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE']),
+    'dri_parameters': json.loads(os.environ['DRI_PARAMETERS_FOR_PIAB_NOTES']),
     'stop_after_attempt': 5,
     'wait_multiplier': 1,
     'wait_min': 4,
     'wait_max': 10
-
 }
+
 LOG_CONFIG = {
     'name': 'intermapper-outage-monitor',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-intermapper-outage-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

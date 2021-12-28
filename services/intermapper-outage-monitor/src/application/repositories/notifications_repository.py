@@ -43,7 +43,7 @@ class NotificationsRepository:
             else:
                 err_msg = (
                     f'Error getting the unread emails from the inbox of {email_account} in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -79,7 +79,7 @@ class NotificationsRepository:
             else:
                 err_msg = (
                     f'Error marking message {msg_uid} as read in '
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
