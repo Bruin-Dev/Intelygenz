@@ -22,7 +22,6 @@ HAWKEYE_CONFIG = {
     'base_url': "some.hawkeye.url",
     'client_username': "client_username",
     'client_password': "client_password",
-    'test_result_interval': 15,
 }
 
 LOG_CONFIG = {

@@ -18,13 +18,12 @@ NATS_CONFIG = {
 
 HAWKEYE_CONFIG = {
     'retries': 5,
-    'base_url': os.environ["HAWKEYE_BASE_URL"],
-    'client_username': os.environ["HAWKEYE_CLIENT_USERNAME"],
-    'client_password': os.environ["HAWKEYE_CLIENT_PASSWORD"],
-    'test_result_interval': 15,
+    'base_url': os.environ["BASE_URL"],
+    'client_username': os.environ["CLIENT_USERNAME"],
+    'client_password': os.environ["CLIENT_PASSWORD"],
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'hawkeye-bridge',
@@ -32,10 +31,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-hawkeye-bridge'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
