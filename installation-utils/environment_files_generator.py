@@ -123,6 +123,10 @@ INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES = json.dumps(json.load
     "DEV__INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES"
 ]))
 
+# Last Contact Report variables
+LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS = var_dict["DEV__LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS"]
+LAST_CONTACT_REPORT__RECIPIENT = var_dict["DEV__LAST_CONTACT_REPORT__REPORT_RECIPIENT"]
+
 # Cts variables
 CTS_CLIENT_ID = var_dict["CTS_CLIENT_ID_DEV"]
 CTS_CLIENT_SECRET = var_dict["CTS_CLIENT_SECRET_DEV"]
@@ -433,22 +437,24 @@ env_dict = {
         f'GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE='
         f'{INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE}\n'
         f'DRI_PARAMETERS_FOR_PIAB_NOTES={INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES}',
-    os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
+    os.path.join('services', 'last-contact-report', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
-    os.path.join('services', 'last-contact-report', 'src', 'config', 'env'):
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'TIMEZONE={TIMEZONE}\n'
+        f'MONITORED_VELOCLOUD_HOSTS={LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS}\n'
+        f'RECIPIENT={LAST_CONTACT_REPORT__RECIPIENT}',
+    os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('services', 'lumin-billing-report', 'src', 'config', 'env'):
         f'LUMIN_URI={LUMIN_URI}\n'
         f'LUMIN_TOKEN={LUMIN_TOKEN}\n'

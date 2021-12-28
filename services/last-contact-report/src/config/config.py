@@ -1,6 +1,7 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
+import json
 import os
 import logging
 import sys
@@ -16,21 +17,14 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
-ALERTS_CONFIG = {
-    'last_contact': {
-        'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-    },
-    'timezone': 'US/Eastern'
+TIMEZONE = os.environ['TIMEZONE']
+
+REPORT_CONFIG = {
+    'recipient': os.environ["RECIPIENT"],
+    'monitored_velocloud_hosts': json.loads(os.environ['MONITORED_VELOCLOUD_HOSTS']),
 }
-
-VELOCLOUD_HOST = [
-    "mettel.velocloud.net",
-    "metvco02.mettel.net",
-    "metvco03.mettel.net",
-    "metvco04.mettel.net",
-]
 
 LOG_CONFIG = {
     'name': 'last-contact-report',
@@ -38,10 +32,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-last-contact-report'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

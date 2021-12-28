@@ -42,7 +42,7 @@ def velocloud_repository(event_bus, logger, notifications_repository):
 @pytest.fixture(scope='function')
 def alert(event_bus, logger, notifications_repository):
     scheduler = Mock()
-    template_renderer = TemplateRenderer(testconfig.ALERTS_CONFIG)
+    template_renderer = TemplateRenderer(testconfig.REPORT_CONFIG)
     return Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer,
                  notifications_repository)
 
@@ -149,7 +149,7 @@ def email_obj():
         'request_id': uuid(),
         'email_data': {
             'subject': f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
-            'recipient': testconfig.ALERTS_CONFIG["last_contact"]["recipient"],
+            'recipient': testconfig.REPORT_CONFIG["recipient"],
             'text': 'this is the accessible text for the email',
             'html': email_html,
             'images': [

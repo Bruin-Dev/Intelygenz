@@ -24,7 +24,7 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
-        self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
+        self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
         self._server = QuartServer(config)
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
@@ -37,7 +37,7 @@ class Container:
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
         self._velocloud_repository = VelocloudRepository(self._event_bus, self._logger, config,
                                                          self._notifications_repository)
-        self._template_renderer = TemplateRenderer(config.ALERTS_CONFIG)
+        self._template_renderer = TemplateRenderer(config.REPORT_CONFIG)
 
         self._alert = Alert(self._event_bus, self._scheduler, self._logger,
                             config, self._velocloud_repository, self._template_renderer, self._notifications_repository)

@@ -14,7 +14,7 @@ class TestTemplateRenderer:
         assert test_repo._config == config
 
     def compose_email_object_test(self):
-        config = testconfig.ALERTS_CONFIG
+        config = testconfig.REPORT_CONFIG
         template_renderer = TemplateRenderer(config)
         edges_to_report = [
             {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
@@ -22,7 +22,7 @@ class TestTemplateRenderer:
         email = template_renderer.compose_email_object(edges_to_report)
 
         assert 'Last contact edges' in email["email_data"]["subject"]
-        assert config["last_contact"]["recipient"] in email["email_data"]["recipient"]
+        assert config["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def compose_email_object_html_elements_test(self):
@@ -30,7 +30,7 @@ class TestTemplateRenderer:
         kwargs = dict(template="last_contact.html",
                       logo="logo.png",
                       header="header.jpg")
-        test_repo = TemplateRenderer(config.ALERTS_CONFIG)
+        test_repo = TemplateRenderer(config.REPORT_CONFIG)
         edges_to_report = [
             dict(edge={"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
                  enterprise="Fake Corp")]
@@ -48,7 +48,7 @@ class TestTemplateRenderer:
     def compose_email_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
-        config = testconfig.ALERTS_CONFIG
+        config = testconfig.REPORT_CONFIG
         template_renderer = TemplateRenderer(config)
 
         edges_to_report = [
@@ -57,5 +57,5 @@ class TestTemplateRenderer:
         email = template_renderer.compose_email_object(edges_to_report)
 
         assert 'Last contact edges' in email["email_data"]["subject"]
-        assert config["last_contact"]["recipient"] in email["email_data"]["recipient"]
+        assert config["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]

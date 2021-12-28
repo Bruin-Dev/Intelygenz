@@ -44,7 +44,7 @@ class VelocloudRepository:
 
     async def get_all_edges_links(self):
         all_edges = []
-        for host in self._config.VELOCLOUD_HOST:
+        for host in self._config.REPORT_CONFIG['monitored_velocloud_hosts']:
             response = await self.get_edges_links_by_host(host=host)
             if response['status'] not in range(200, 300):
                 self._logger.info(f"Error: could not retrieve edges links by host: {host}")

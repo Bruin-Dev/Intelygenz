@@ -20,22 +20,19 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
+TIMEZONE = 'US/Eastern'
 
-ALERTS_CONFIG = {
-    'last_contact': {
-        'recipient': "some.recipient@email.com",
-    },
-    'timezone': 'US/Eastern'
+REPORT_CONFIG = {
+    'recipient': "some.recipient@email.com",
+    'monitored_velocloud_hosts': [
+        "mettel.velocloud.net",
+        "metvco02.mettel.net",
+        "metvco03.mettel.net",
+        "metvco04.mettel.net",
+    ],
 }
 
 ENVIRONMENT_NAME = 'dev'
-
-VELOCLOUD_HOST = [
-    "mettel.velocloud.net",
-    "metvco02.mettel.net",
-    "metvco03.mettel.net",
-    "metvco04.mettel.net",
-]
 
 QUART_CONFIG = {
     'title': 'last-contact-report',

@@ -43,7 +43,7 @@ class TemplateRenderer:
             'request_id': uuid(),
             'email_data': {
                 'subject': f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
-                'recipient': self._config["last_contact"]["recipient"],
+                'recipient': self._config["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [

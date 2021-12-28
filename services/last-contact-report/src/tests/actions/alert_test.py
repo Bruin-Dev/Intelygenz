@@ -26,7 +26,7 @@ class TestAlert:
         scheduler = Mock()
         config = Mock()
         velocloud_repository = Mock()
-        template_renderer = TemplateRenderer(config.ALERTS_CONFIG)
+        template_renderer = TemplateRenderer(config.REPORT_CONFIG)
         notifications_repository = Mock()
 
         alert = Alert(event_bus, scheduler, logger, config, velocloud_repository, template_renderer,
