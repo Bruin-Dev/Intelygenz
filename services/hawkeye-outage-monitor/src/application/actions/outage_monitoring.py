@@ -37,7 +37,7 @@ class OutageMonitor:
         next_run_time = undefined
 
         if exec_on_start:
-            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
             self._logger.info('Hawkeye Outage Monitor job is going to be executed immediately')
 
@@ -171,7 +171,7 @@ class OutageMonitor:
                     f'Skipping autoresolve...')
                 return
 
-            working_environment = self._config.MONITOR_CONFIG['environment']
+            working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != 'production':
                 self._logger.info(
                     f'Skipping autoresolve for device {serial_number} since the '
@@ -255,7 +255,7 @@ class OutageMonitor:
     def _schedule_recheck_job_for_devices(self, devices: list):
         self._logger.info(f'Scheduling recheck job for {len(devices)} devices in outage state...')
 
-        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
 
@@ -298,7 +298,7 @@ class OutageMonitor:
         ]
         healthy_devices = [device for device in probes_with_cache_info if device not in devices_still_in_outage]
 
-        working_environment = self._config.MONITOR_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
         if working_environment != 'production':
             self._logger.info(
                 f'Process cannot keep going as the current environment is {working_environment.upper()}. '
@@ -465,7 +465,7 @@ class OutageMonitor:
         return os.linesep.join(lines)
 
     def _build_triage_note(self, device_info: dict) -> str:
-        tz_object = timezone(self._config.MONITOR_CONFIG['timezone'])
+        tz_object = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(utc).astimezone(tz_object)
 
         node_to_node_status: str = 'DOWN' if device_info['nodetonode']['status'] == 0 else 'UP'

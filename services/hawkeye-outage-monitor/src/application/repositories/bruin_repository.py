@@ -71,14 +71,14 @@ class BruinRepository:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic} and belonging to client {client_id} in '
-                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
-                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
@@ -112,7 +112,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -146,7 +146,7 @@ class BruinRepository:
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while resolving ticket {ticket_id} in {self._config.MONITOR_CONFIG["environment"].upper()} '
+                    f'Error while resolving ticket {ticket_id} in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -295,7 +295,7 @@ class BruinRepository:
         return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
 
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         autoresolve_note = os.linesep.join([
             "#*MetTel's IPA*#",
             f'Auto-resolving detail for serial: {serial_number}',
@@ -335,7 +335,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while opening outage ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -379,7 +379,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. '
                     f'Error: Error {response_status} - {response_body}'
                 )
 
@@ -390,7 +390,7 @@ class BruinRepository:
         return response
 
     async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, affecting_causes: str):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         reopening_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'Re-opening detail for serial: {service_number}.',

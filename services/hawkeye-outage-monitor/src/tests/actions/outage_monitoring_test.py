@@ -1173,10 +1173,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
@@ -1194,7 +1191,7 @@ class TestServiceOutageMonitor:
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -1383,10 +1380,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
@@ -1405,7 +1399,7 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note_if_needed = CoroutineMock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -1590,10 +1584,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
@@ -1612,7 +1603,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -1801,10 +1792,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
@@ -1824,7 +1812,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
         outage_monitor._get_outage_causes_for_reopen_note = Mock(return_value=outage_causes)
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -2015,10 +2003,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
@@ -2038,7 +2023,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -2346,10 +2331,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
@@ -2367,7 +2349,7 @@ class TestServiceOutageMonitor:
         outage_monitor._build_triage_note = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -3152,10 +3134,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
-
         config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
@@ -3172,7 +3151,7 @@ class TestServiceOutageMonitor:
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'dev'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -3184,11 +3163,6 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def reopen_outage_ticket_test(self, probes_response, outage_monitor, devices_info, ticket_response_reopen,
                                         bruin_response_ok):
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
         outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_response_reopen)
         outage_monitor._bruin_repository.append_triage_note = CoroutineMock()
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
@@ -3199,7 +3173,7 @@ class TestServiceOutageMonitor:
         outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         outage_monitor._hawkeye_repository.get_probes.assert_awaited_once()
@@ -3721,7 +3695,7 @@ class TestServiceOutageMonitor:
             'Device Real Service Status: UP',
             'Real Service Last Update: 2020-11-15 05:18:28-05:00',
             '',
-            f'TimeStamp: {str(current_datetime.astimezone(timezone(config.MONITOR_CONFIG["timezone"])))}',
+            f'TimeStamp: {str(current_datetime.astimezone(timezone(config.TIMEZONE)))}',
         ])
         assert triage_note == expected_note
 
@@ -4964,15 +4938,12 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        config = testconfig
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock()
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
@@ -4981,7 +4952,7 @@ class TestServiceOutageMonitor:
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'dev'):
             await outage_monitor._run_ticket_autoresolve(device)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
@@ -5158,6 +5129,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        config = testconfig
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -5166,10 +5138,6 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -5177,7 +5145,7 @@ class TestServiceOutageMonitor:
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._run_ticket_autoresolve(device)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
@@ -5358,6 +5326,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        config = testconfig
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
@@ -5365,10 +5334,6 @@ class TestServiceOutageMonitor:
         bruin_repository.unpause_ticket_detail = CoroutineMock()
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
-
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
                                        notifications_repository, customer_cache_repository)
@@ -5378,7 +5343,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._run_ticket_autoresolve(device)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)

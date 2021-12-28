@@ -13,23 +13,21 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-quarantine_time = 5
+TIMEZONE = 'US/Eastern'
 
 MONITOR_CONFIG = {
     'multiplier': 1,
     'min': 1,
     'stop_delay': 0,
-    'environment': "dev",
-    'timezone': "US/Eastern",
     'jobs_intervals': {
         'outage_monitor': 60 * 3,
-        'quarantine': quarantine_time,
+        'quarantine': 5,
     },
     'semaphore': 10,
-    'autoresolve_ticket_creation_seconds': 60 * 60,
     'autoresolve_last_outage_seconds': 60 * 60,
 }
 
+CURRENT_ENVIRONMENT = "dev"
 ENVIRONMENT_NAME = "dev"
 
 LOG_CONFIG = {
