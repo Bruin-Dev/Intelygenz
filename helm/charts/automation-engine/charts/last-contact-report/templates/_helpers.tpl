@@ -47,8 +47,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Configmap name of customer-cache
+Configmap name of last-contact-report
 */}}
 {{- define "last-contact-report.configmapName" -}}
 {{ include "last-contact-report.fullname" . }}-configmap
+{{- end }}
+
+{{/*
+Secret name of last-contact-report
+*/}}
+{{- define "last-contact-report.secretName" -}}
+{{ include "last-contact-report.fullname" . }}-secret
 {{- end }}

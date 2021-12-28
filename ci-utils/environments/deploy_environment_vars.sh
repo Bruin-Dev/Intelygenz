@@ -238,6 +238,18 @@ function intermapper_outage_monitor_variables() {
   fi
 }
 
+function last_contact_report_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # intermapper-outage-monitor environment variables for ephemeral environments
+    export LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS="$(echo "${DEV__LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS}" | jq . -c)"
+    export LAST_CONTACT_REPORT__REPORT_RECIPIENT="${DEV__LAST_CONTACT_REPORT__REPORT_RECIPIENT}"
+  else
+    # intermapper-outage-monitor environment variables for production environment
+    export LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS="$(echo "${PRO__LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS}" | jq . -c)"
+    export LAST_CONTACT_REPORT__REPORT_RECIPIENT="${PRO__LAST_CONTACT_REPORT__REPORT_RECIPIENT}"
+  fi
+}
+
 function links_metrics_api_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # links-metris-api environment variables for ephemeral environments
@@ -367,6 +379,7 @@ function environments_assign() {
   hawkeye_customer_cache_variables
   hawkeye_outage_monitor_variables
   intermapper_outage_monitor_variables
+  last_contact_report_variables
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables

@@ -41,6 +41,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "last-contact-report.configmapName" . }}
+            - secretRef:
+                name: {{ include "last-contact-report.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

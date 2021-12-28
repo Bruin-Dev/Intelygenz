@@ -619,6 +619,10 @@ last-contact-report:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "last-contact-report-${LAST_CONTACT_REPORT_BUILD_NUMBER}"
+    # -- VeloCloud hosts whose edges will be used to build the report
+    monitored_velocloud_hosts: ${LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS}
+    # -- Email address to send the report
+    recipient: ${LAST_CONTACT_REPORT__REPORT_RECIPIENT}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
