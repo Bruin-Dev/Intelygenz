@@ -171,16 +171,15 @@ function hawkeye_affecting_monitor_variables() {
 function hawkeye_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # hawkeye-bridge environment variables for ephemeral environments
-    export HAWKEYE_CLIENT_USERNAME=${HAWKEYE_CLIENT_USERNAME_DEV}
-    export HAWKEYE_CLIENT_PASSWORD_ENC=${HAWKEYE_CLIENT_PASSWORD_DEV}
-    export HAWKEYE_BASE_URL=${HAWKEYE_BASE_URL_DEV}
+    export HAWKEYE_BRIDGE__CLIENT_USERNAME="${DEV__HAWKEYE_BRIDGE__CLIENT_USERNAME}"
+    export HAWKEYE_BRIDGE__CLIENT_PASSWORD="${DEV__HAWKEYE_BRIDGE__CLIENT_PASSWORD}"
+    export HAWKEYE_BRIDGE__BASE_URL="${DEV__HAWKEYE_BRIDGE__BASE_URL}"
   else
     # hawkeye-bridge environment variables for production environment
-    export HAWKEYE_CLIENT_USERNAME=${HAWKEYE_CLIENT_USERNAME_PRO}
-    export HAWKEYE_CLIENT_PASSWORD_ENC=${HAWKEYE_CLIENT_PASSWORD_PRO}
-    export HAWKEYE_BASE_URL=${HAWKEYE_BASE_URL_PRO}
+    export HAWKEYE_BRIDGE__CLIENT_USERNAME="${PRO__HAWKEYE_BRIDGE__CLIENT_USERNAME}"
+    export HAWKEYE_BRIDGE__CLIENT_PASSWORD="${PRO__HAWKEYE_BRIDGE__CLIENT_PASSWORD}"
+    export HAWKEYE_BRIDGE__BASE_URL="${PRO__HAWKEYE_BRIDGE__BASE_URL}"
   fi
-  export HAWKEYE_CLIENT_PASSWORD=$(base64 -d <<< "${HAWKEYE_CLIENT_PASSWORD_ENC}")
 }
 
 function links_metrics_api_variables() {

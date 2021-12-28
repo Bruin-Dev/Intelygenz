@@ -561,11 +561,12 @@ hawkeye-bridge:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
-    hawkeye_client_username: ""
-    # -- Client password credentials for Hawkeye API
-    hawkeye_client_password: ""
-    ## -- Base URL for Hawkeye API
-    hawkeye_base_url: ""
+    # -- Client username to log into Hawkeye API
+    client_username: ""
+    # -- Client password to log into Hawkeye API
+    client_password: ""
+    # -- Base URL to access Hawkeye API
+    base_url: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-bridge
     pullPolicy: Always

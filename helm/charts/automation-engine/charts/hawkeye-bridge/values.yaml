@@ -30,10 +30,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -43,11 +39,12 @@ global:
 
 config:
   papertrail_prefix: ""
-  hawkeye_client_username: ""
-  # -- Client password credentials for Hawkeye API
-  hawkeye_client_password: ""
-  ## -- Base URL for Hawkeye API
-  hawkeye_base_url: ""
+  # -- Client username to log into Hawkeye API
+  client_username: ""
+  # -- Client password to log into Hawkeye API
+  client_password: ""
+  # -- Base URL to access Hawkeye API
+  base_url: ""
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-bridge
