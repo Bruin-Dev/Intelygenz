@@ -1,6 +1,7 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
+import json
 import os
 import logging
 import sys
@@ -16,21 +17,18 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-SCHEDULER_CONFIG = {
-    'timezone': 'US/Eastern'
-}
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
+
+TIMEZONE = os.environ['TIMEZONE']
 
 REFRESH_CONFIG = {
-    'timezone': 'US/Eastern',
     'multiplier': 5,
     'min': 5,
     'email_recipient': 'mettel.alerts@intelygenz.com',
     'stop_delay': 300,
-    'refresh_map_minutes': 60 * 4,
+    'refresh_map_minutes': int(os.environ['REFRESH_JOB_INTERVAL']) // 60,
     'semaphore': 1,
-    'environment': ENVIRONMENT_NAME,
-    'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
+    'monitorable_management_statuses': json.loads(os.environ['WHITELISTED_MANAGEMENT_STATUSES']),
     "attempts_threshold": 10,
 }
 
@@ -40,10 +38,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-t7-bridge'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

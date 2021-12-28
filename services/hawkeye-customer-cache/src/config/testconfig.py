@@ -16,20 +16,17 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-SCHEDULER_CONFIG = {
-    'timezone': 'US/Eastern'
-}
 ENVIRONMENT_NAME = 'dev'
 
+TIMEZONE = 'US/Eastern'
+
 REFRESH_CONFIG = {
-    'timezone': 'US/Eastern',
     'multiplier': 1,
     'min': 1,
     'email_recipient': 'mettel.team@intelygenz.com',
     'stop_delay': 0,
     'refresh_map_minutes': 60 * 4,
     'semaphore': 10,
-    'environment': ENVIRONMENT_NAME,
     'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
     "attempts_threshold": 10,
 }
