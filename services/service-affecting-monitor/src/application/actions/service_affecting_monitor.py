@@ -988,7 +988,7 @@ class ServiceAffectingMonitor:
             return
 
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-            ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
+            ticket_id, task_result, service_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
             await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_data['link_status'], serial_number)
             slack_message = (

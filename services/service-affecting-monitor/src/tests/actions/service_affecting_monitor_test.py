@@ -2721,7 +2721,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            ticket_id, task_result, serial_number=serial, detail_id=detail_item['detailID']
+            ticket_id, task_result, service_number=serial, detail_id=detail_item['detailID']
         )
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_awaited_once_with(
             ticket_id, link_data['link_status'], serial
