@@ -84,7 +84,7 @@ BANDWIDTH_REPORT_CONFIG = {
     'exec_on_start': os.environ['EXEC_BANDWIDTH_REPORTS_ON_START'].lower() == 'true',
     'environment': os.environ['CURRENT_ENVIRONMENT'],
     'timezone': 'US/Eastern',
-    'crontab': '0 3 * * *',
+    'crontab': '0 4 * * *',
     'lookup_interval_hours': 24,
     'clients': [86937],
     'recipients': ['bsullivan@mettel.net', 'efox@mettel.net', 'mettel.automation@intelygenz.com']
