@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 from typing import Set
 
@@ -91,6 +92,8 @@ class ServiceAffectingMonitorReports:
 
         threshold = self._config.MONITOR_REPORT_CONFIG['threshold']
         for client_id, affecting_tickets in self._affecting_tickets_per_client.items():
+            await asyncio.sleep(0)
+
             self._logger.info(f"[service-affecting-monitor-reports] Starting all report for client {client_id}")
             ticket_details = self._bruin_repository.transform_tickets_into_ticket_details(affecting_tickets)
 

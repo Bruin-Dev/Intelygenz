@@ -579,6 +579,8 @@ class ServiceAffectingMonitor:
             links_metrics)
 
         for elem in metrics_with_cache_and_contact_info:
+            await asyncio.sleep(0)
+
             cached_info = elem['cached_info']
             link_status = elem['link_status']
             events = elem['link_events']

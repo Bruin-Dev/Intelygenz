@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 
 from apscheduler.triggers.cron import CronTrigger
@@ -86,11 +87,14 @@ class BandwidthReports:
             ticket_details,
             [AffectingTroubles.BANDWIDTH_OVER_UTILIZATION.value]
         )
+        await asyncio.sleep(0)
 
         links_metrics = self._velocloud_repository.filter_links_metrics_by_client(links_metrics, client_id,
                                                                                   customer_cache)
         links_metrics = self._add_bandwidth_to_links_metrics(links_metrics)
         grouped_ticket_details = self._bruin_repository.group_ticket_details_by_serial_and_interface(ticket_details)
+        await asyncio.sleep(0)
+
         report_items = self._bruin_repository.prepare_items_for_bandwidth_report(
             links_metrics, grouped_ticket_details
         )
