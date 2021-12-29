@@ -7,7 +7,6 @@ function common_variables_by_environment() {
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
     export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_DEV}
-    export KRE_REPAIR_TICKETS_BASE_URL=${KRE_REPAIR_TICKETS_BASE_URL_DEV}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_DEV}
     export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_DEV}
     export REDIS_TNBA_FEEDBACK_HOSTNAME=${REDIS_TNBA_FEEDBACK_HOSTNAME_DEV}
@@ -20,7 +19,6 @@ function common_variables_by_environment() {
     # common environment variables for production environment
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
     export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_PRO}
-    export KRE_REPAIR_TICKETS_BASE_URL=${KRE_REPAIR_TICKETS_BASE_URL_PRO}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_PRO}
     export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_PRO}
     export REDIS_TNBA_FEEDBACK_HOSTNAME=${REDIS_TNBA_FEEDBACK_HOSTNAME_PRO}
@@ -292,6 +290,16 @@ function notifier_variables() {
   fi
 }
 
+function repair_tickets_kre_bridge_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # repair-tickets-kre-bridge environment variables for ephemeral environments
+    export REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL="${DEV__REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL}"
+  else
+    # repair-tickets-kre-bridge environment variables for production environment
+    export REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL="${PRO__REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL}"
+  fi
+}
+
 function service_affecting_monitor_variables() {
   export EXEC_MONITOR_REPORTS_ON_START=${EXEC_MONITOR_REPORTS_ON_START}
   export EXEC_BANDWIDTH_REPORTS_ON_START=${EXEC_BANDWIDTH_REPORTS_ON_START}
@@ -389,6 +397,7 @@ function environments_assign() {
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables
+  repair_tickets_kre_bridge_variables
   service_affecting_monitor_variables
   service_outage_monitor_variables
   t7_bridge_variables

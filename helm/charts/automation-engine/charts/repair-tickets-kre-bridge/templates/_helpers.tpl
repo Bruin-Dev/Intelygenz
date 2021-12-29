@@ -54,7 +54,7 @@ Configmap name of repair-tickets-kre-bridge
 {{- end }}
 
 {{/*
-Secret name of bruin-bridge
+Secret name of repair-tickets-kre-bridge
 */}}
 {{- define "repair-tickets-kre-bridge.secretName" -}}
 {{ include "repair-tickets-kre-bridge.fullname" . }}-secret

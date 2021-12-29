@@ -43,6 +43,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "repair-tickets-kre-bridge.configmapName" . }}
+            - secretRef:
+                name: {{ include "repair-tickets-kre-bridge.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

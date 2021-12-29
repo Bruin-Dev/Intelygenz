@@ -890,6 +890,40 @@ notifier:
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
 
+# -- repair-tickets-kre-bridge subchart specific configuration
+repair-tickets-kre-bridge:
+  # -- Field to indicate if the repair-tickets-kre-bridge module is going to be deployed
+  enabled: true
+  # -- Number of replicas of repair-tickets-kre-bridge module
+  replicaCount: 1
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
+    # -- Base URL for RTA's KRE
+    kre_base_url: ""
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # -- repair-tickets-kre-bridge autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
 # -- repair-tickets-monitor subchart specific configuration
 repair-tickets-monitor:
   # -- Field to indicate if the repair-tickets-monitor module is going to be deployed
@@ -927,41 +961,6 @@ repair-tickets-monitor:
     requests:
       cpu: 150m
       memory: 192Mi
-
-
-# -- repair-tickets-kre-bridge subchart specific configuration
-repair-tickets-kre-bridge:
-  # -- Field to indicate if the repair-tickets-kre-bridge module is going to be deployed
-  enabled: true
-  # -- Number of replicas of repair-tickets-kre-bridge module
-  replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Base URL for KRE API
-    kre_base_url: ""
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  # -- repair-tickets-kre-bridge autoscaling configuration
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 2
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
 
 
 # -- service-affecting-monitor subchart specific configuration

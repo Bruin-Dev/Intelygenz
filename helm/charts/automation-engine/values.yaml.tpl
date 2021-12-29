@@ -797,8 +797,8 @@ repair-tickets-kre-bridge:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "repair-tickets-kre-bridge-${REPAIR_TICKETS_KRE_BRIDGE_BUILD_NUMBER}"
-    # -- Base URL for KRE API
-    kre_base_url: ${KRE_REPAIR_TICKETS_BASE_URL}
+    # -- Base URL for RTA's KRE
+    kre_base_url: ${REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
     pullPolicy: Always
