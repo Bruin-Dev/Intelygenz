@@ -9,7 +9,7 @@ services:
       dockerfile: base-microservice/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
         IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
@@ -28,7 +28,7 @@ services:
       dockerfile: services/bruin-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/bruin-bridge/src/config/env
     depends_on:
@@ -45,7 +45,7 @@ services:
       dockerfile: services/customer-cache/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/customer-cache/src/config/env
     depends_on:
@@ -62,7 +62,7 @@ services:
       dockerfile: services/digi-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/digi-bridge/src/config/env
     depends_on:
@@ -78,7 +78,7 @@ services:
       dockerfile: services/digi-reboot-report/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/digi-reboot-report/src/config/env
     ports:
@@ -91,7 +91,7 @@ services:
       dockerfile: services/email-tagger-kre-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/email-tagger-kre-bridge/src/config/env
     depends_on:
@@ -110,7 +110,7 @@ services:
       dockerfile: services/email-tagger-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/email-tagger-monitor/src/config/env
     depends_on:
@@ -127,7 +127,7 @@ services:
       dockerfile: services/hawkeye-affecting-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/hawkeye-affecting-monitor/src/config/env
     depends_on:
@@ -144,7 +144,7 @@ services:
       dockerfile: services/hawkeye-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/hawkeye-bridge/src/config/env
     depends_on:
@@ -160,7 +160,7 @@ services:
       dockerfile: services/hawkeye-customer-cache/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/hawkeye-customer-cache/src/config/env
     depends_on:
@@ -177,7 +177,7 @@ services:
       dockerfile: services/hawkeye-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/hawkeye-outage-monitor/src/config/env
     depends_on:
@@ -194,7 +194,7 @@ services:
       dockerfile: services/intermapper-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/intermapper-outage-monitor/src/config/env
     depends_on:
@@ -210,7 +210,7 @@ services:
       dockerfile: services/last-contact-report/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/last-contact-report/src/config/env
     depends_on:
@@ -226,7 +226,7 @@ services:
       dockerfile: services/links-metrics-api/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/links-metrics-api/src/config/env
     depends_on:
@@ -242,7 +242,7 @@ services:
       dockerfile: services/links-metrics-collector/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/links-metrics-collector/src/config/env
     depends_on:
@@ -258,7 +258,7 @@ services:
       dockerfile: services/lumin-billing-report/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/lumin-billing-report/src/config/env
     ports:
@@ -299,7 +299,7 @@ services:
       dockerfile: services/notifier/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/notifier/src/config/env
     depends_on:
@@ -315,7 +315,7 @@ services:
       dockerfile: services/repair-tickets-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/repair-tickets-monitor/src/config/env
     depends_on:
@@ -333,7 +333,7 @@ services:
       dockerfile: services/repair-tickets-kre-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/repair-tickets-kre-bridge/src/config/env
     depends_on:
@@ -352,7 +352,7 @@ services:
       dockerfile: services/service-affecting-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/service-affecting-monitor/src/config/env
     depends_on:
@@ -369,7 +369,7 @@ services:
       dockerfile: services/service-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/service-outage-monitor/src/config/env-outage-monitor-1
     depends_on:
@@ -386,7 +386,7 @@ services:
       dockerfile: services/service-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/service-outage-monitor/src/config/env-outage-monitor-2
     depends_on:
@@ -403,7 +403,7 @@ services:
       dockerfile: services/service-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/service-outage-monitor/src/config/env-outage-monitor-3
     depends_on:
@@ -420,7 +420,7 @@ services:
       dockerfile: services/service-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/service-outage-monitor/src/config/env-outage-monitor-4
     depends_on:
@@ -437,7 +437,7 @@ services:
       dockerfile: services/service-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/service-outage-monitor/src/config/env-triage
     depends_on:
@@ -454,7 +454,7 @@ services:
       dockerfile: services/sites-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/sites-monitor/src/config/env
     depends_on:
@@ -471,7 +471,7 @@ services:
       dockerfile: services/t7-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/t7-bridge/src/config/env
     depends_on:
@@ -486,7 +486,7 @@ services:
       dockerfile: services/ticket-collector/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
         IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
@@ -504,7 +504,7 @@ services:
       dockerfile: services/ticket-statistics/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
         IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
@@ -524,7 +524,7 @@ services:
       dockerfile: services/tnba-feedback/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/tnba-feedback/src/config/env
     depends_on:
@@ -541,7 +541,7 @@ services:
       dockerfile: services/tnba-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/tnba-monitor/src/config/env
     depends_on:
@@ -557,7 +557,7 @@ services:
       dockerfile: services/velocloud-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+        DOCKER_BASE_IMAGE_VERSION: 2.3.0
     env_file:
       - services/velocloud-bridge/src/config/env
     depends_on:

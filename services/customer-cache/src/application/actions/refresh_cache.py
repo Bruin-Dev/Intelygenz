@@ -158,7 +158,10 @@ class RefreshCache:
 
             self._logger.info(f"Storing cache of {len(final_cache)} edges to Redis for host {host}")
             self._storage_repository.set_cache(host, final_cache)
-            await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
+
+            # Do not send cache snapshot for GSA's VCO as it will leak edge names, MACs, interface IPs, etc.
+            if host != 'metgsavco-ic1.fedmettel.net':
+                await self._send_email_snapshot(host=host, old_cache=stored_cache, new_cache=crossed_cache)
             self._logger.info(f"Finished storing cache for host {host}")
 
     @staticmethod

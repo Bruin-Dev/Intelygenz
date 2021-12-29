@@ -202,10 +202,17 @@ class VelocloudRepository:
                 continue
 
             if edge_state == 'NEVER_ACTIVATED':
-                self._logger.info(
-                    f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
-                    f"has never been activated. Skipping..."
-                )
+                if velocloud_host == 'metgsavco-ic1.fedmettel.net':
+                    # Do not leak edge name if it's a GSA edge
+                    self._logger.info(
+                        f"Edge {link['edgeId']} in host {velocloud_host} and enterprise {enterprise_name}"
+                        f"(ID: {enterprise_id}) has never been activated. Skipping..."
+                    )
+                else:
+                    self._logger.info(
+                        f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name}"
+                        f"(ID: {enterprise_id}) has never been activated. Skipping..."
+                    )
                 continue
 
             edge_full_id = {

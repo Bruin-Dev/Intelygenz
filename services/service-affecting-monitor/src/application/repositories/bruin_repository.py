@@ -146,25 +146,41 @@ class BruinRepository:
             request['body']['service_numbers'] = service_numbers
 
         try:
-            self._logger.info(f'Appending note to ticket {ticket_id}... Note contents: {note}')
+            if 'metgsavco-ic1.fedmettel.net' in note:
+                # Do not leak edge name present in the ticket note
+                self._logger.info(f'Appending note to ticket {ticket_id}...')
+            else:
+                self._logger.info(f'Appending note to ticket {ticket_id}... Note contents: {note}')
             response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=15)
             self._logger.info(f'Note appended to ticket {ticket_id}!')
         except Exception as e:
-            err_msg = (
-                f'An error occurred when appending a ticket note to ticket {ticket_id}. '
-                f'Ticket note: {note}. Error: {e}'
-            )
+            if 'metgsavco-ic1.fedmettel.net' in note:
+                # Do not leak edge name present in the ticket note
+                err_msg = f'An error occurred when appending a ticket note to ticket {ticket_id}. Error: {e}'
+            else:
+                err_msg = (
+                    f'An error occurred when appending a ticket note to ticket {ticket_id}. '
+                    f'Ticket note: {note}. Error: {e}'
+                )
             response = nats_error_response
         else:
             response_body = response['body']
             response_status = response['status']
 
             if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while appending note to ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
-                    f'Error {response_status} - {response_body}'
-                )
+                if 'metgsavco-ic1.fedmettel.net' in note:
+                    # Do not leak edge name present in the ticket note
+                    err_msg = (
+                        f'Error while appending note to ticket {ticket_id} in '
+                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. Error: '
+                        f'Error {response_status} - {response_body}'
+                    )
+                else:
+                    err_msg = (
+                        f'Error while appending note to ticket {ticket_id} in '
+                        f'{self._config.MONITOR_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
+                        f'Error {response_status} - {response_body}'
+                    )
 
         if err_msg:
             self._logger.error(err_msg)

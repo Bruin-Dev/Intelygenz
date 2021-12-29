@@ -38,10 +38,13 @@ class EventEnterpriseForAlert:
             enterprise_event_response["body"] = events_by_enterprise["body"]
             enterprise_event_response["status"] = events_by_enterprise["status"]
 
-            self._logger.info(
-                f'Enterprise events for alerts published in event bus for request {json.dumps(msg)}. '
-                f"Message published was {enterprise_event_response}"
-            )
+            if host == 'metgsavco-ic1.fedmettel.net':
+                self._logger.info(f'Enterprise events for alerts published in event bus for request {json.dumps(msg)}.')
+            else:
+                self._logger.info(
+                    f'Enterprise events for alerts published in event bus for request {json.dumps(msg)}. '
+                    f"Message published was {enterprise_event_response}"
+                )
         else:
             enterprise_event_response["status"] = 400
             enterprise_event_response["body"] = 'Must include "enterprise_id", "host", "start_date", "end_date" ' \
