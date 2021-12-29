@@ -39,7 +39,7 @@ class BandwidthReports:
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
         customer_cache = customer_cache_response['body']
 
-        if customer_cache_response['status'] not in range(200, 300):
+        if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
             self._logger.error('[bandwidth-reports] Error getting customer cache. Process cannot keep going.')
             return
 
