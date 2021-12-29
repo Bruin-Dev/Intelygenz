@@ -94,6 +94,7 @@ class BandwidthReports:
         report_items = self._bruin_repository.prepare_items_for_bandwidth_report(
             links_metrics, grouped_ticket_details
         )
+        report_items.sort(key=lambda item: (item['serial_number'], item['interface']))
 
         if self._config.BANDWIDTH_REPORT_CONFIG['environment'] != 'production':
             self._logger.info(f'[bandwidth-reports] No report will be sent for client {client_id} '
