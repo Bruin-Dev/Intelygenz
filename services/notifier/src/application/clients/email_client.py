@@ -19,13 +19,16 @@ class EmailClient:
         self._email_server = smtplib.SMTP('smtp.gmail.com:587')
         self._email_server.ehlo()
         self._email_server.starttls()
-        self._email_server.login(self._config.EMAIL_CONFIG['sender_email'], self._config.EMAIL_CONFIG['password'])
+        self._email_server.login(
+            self._config.EMAIL_DELIVERY_CONFIG['email'],
+            self._config.EMAIL_DELIVERY_CONFIG['password'],
+        )
 
     def send_to_email(self, msg):
         try:
             self.email_login()
             mime_msg = MIMEMultipart('related')
-            mime_msg['From'] = self._config.EMAIL_CONFIG['sender_email']
+            mime_msg['From'] = self._config.EMAIL_DELIVERY_CONFIG['email']
             mime_msg['To'] = msg["recipient"]
             mime_msg['Subject'] = msg["subject"]
 
@@ -51,7 +54,7 @@ class EmailClient:
                 attachment.set_payload(base64.b64decode(att["data"].encode('utf-8')), charset=cs)
                 mime_msg.attach(attachment)
 
-            self._email_server.sendmail(self._config.EMAIL_CONFIG['sender_email'],
+            self._email_server.sendmail(self._config.EMAIL_DELIVERY_CONFIG['email'],
                                         msg["recipient"].split(self.EMAIL_SEPARATOR),
                                         mime_msg.as_string())
 

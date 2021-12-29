@@ -66,8 +66,9 @@ class TestEmailReaderRepository:
 
         unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_awaited_once_with(email, config.EMAIL_ACCOUNTS[email],
-                                                                         email_filter)
+        email_reader_client.get_unread_messages.assert_awaited_once_with(
+            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter
+        )
         assert unread_emails == expected_unread_emails_response
 
     @pytest.mark.asyncio
@@ -116,8 +117,9 @@ class TestEmailReaderRepository:
 
         unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_awaited_once_with(email, config.EMAIL_ACCOUNTS[email],
-                                                                         email_filter)
+        email_reader_client.get_unread_messages.assert_awaited_once_with(
+            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter
+        )
         assert unread_emails == expected_unread_emails_response
 
     @pytest.mark.asyncio
@@ -138,8 +140,9 @@ class TestEmailReaderRepository:
 
         unread_emails = await email_reader_repository.get_unread_emails(email, email_filter)
 
-        email_reader_client.get_unread_messages.assert_awaited_once_with(email, config.EMAIL_ACCOUNTS[email],
-                                                                         email_filter)
+        email_reader_client.get_unread_messages.assert_awaited_once_with(
+            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter
+        )
         assert unread_emails == expected_unread_emails_response
 
     @pytest.mark.asyncio
@@ -148,8 +151,8 @@ class TestEmailReaderRepository:
         email_filter = ['filter@gmail.com']
 
         expected_unread_emails_response = {
-                                    'body': f"Email account {email}'s password is not in our EMAIL_ACCOUNTS dict",
-                                    'status': 400
+            'body': f"Email account {email}'s password is not in our MONITORABLE_EMAIL_ACCOUNTS dict",
+            'status': 400
         }
         logger = Mock()
 
@@ -182,7 +185,9 @@ class TestEmailReaderRepository:
 
         mark_as_read_response = await email_reader_repository.mark_as_read(msg_uid, email)
 
-        email_reader_client.mark_as_read.assert_awaited_once_with(msg_uid, email, config.EMAIL_ACCOUNTS[email])
+        email_reader_client.mark_as_read.assert_awaited_once_with(
+            msg_uid, email, config.MONITORABLE_EMAIL_ACCOUNTS[email]
+        )
         assert mark_as_read_response == expected_mark_as_read_response
 
     @pytest.mark.asyncio
@@ -204,7 +209,9 @@ class TestEmailReaderRepository:
 
         mark_as_read_response = await email_reader_repository.mark_as_read(msg_uid, email)
 
-        email_reader_client.mark_as_read.assert_awaited_once_with(msg_uid, email, config.EMAIL_ACCOUNTS[email])
+        email_reader_client.mark_as_read.assert_awaited_once_with(
+            msg_uid, email, config.MONITORABLE_EMAIL_ACCOUNTS[email]
+        )
         assert mark_as_read_response == expected_mark_as_read_response
 
     @pytest.mark.asyncio
@@ -213,8 +220,8 @@ class TestEmailReaderRepository:
         msg_uid = '123'
 
         expected_mark_as_read_response = {
-                                    'body': f"Email account {email}'s password is not in our EMAIL_ACCOUNTS dict",
-                                    'status': 400
+            'body': f"Email account {email}'s password is not in our MONITORABLE_EMAIL_ACCOUNTS dict",
+            'status': 400
         }
 
         logger = Mock()

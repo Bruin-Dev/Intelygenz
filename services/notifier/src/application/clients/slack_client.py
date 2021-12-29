@@ -9,7 +9,7 @@ class SlackClient:
 
     def __init__(self, config, logger):
         self._config = config.SLACK_CONFIG
-        self._url = self._config['webhook'][0]
+        self._url = self._config['webhook']
         self._logger = logger
 
     def send_to_slack(self, msg):

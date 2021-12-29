@@ -121,7 +121,7 @@ The notifier receives a request message from topic `get.email.request`, and then
 `get_unread_emails` function. It then extracts the `email_account` and `email_filter` from the body of the request message if it exists and is not empty.
 Then it sends both of those values to the email reader repository. 
 
-The repository will first search if the `email_account` exist in the config's `EMAIL_ACCOUNTS` dictionary. It will then 
+The repository will first search if the `email_account` exist in the config's `MONITORABLE_EMAIL_ACCOUNTS` dictionary. It will then
 return the associated password if found then send both the `email_account`, the associated password, and the `email_filter` to the client.
 
 The client should be returning all the unread email from the all emails folder of the `email_account`, sorted by sent date, given they were sent
@@ -157,7 +157,7 @@ The notifier receives a request message from topic `mark.email.read.request`, an
 `mark_email_as_read` function. It then extracts the `email_account` and `msg_uid` from the body of the request message if it exists and is not empty.
 Then it sends both of those values to the email reader repository. 
 
-The repository will first search if the `email_account` exist in the config's `EMAIL_ACCOUNTS` dictionary. It will then 
+The repository will first search if the `email_account` exist in the config's `MONITORABLE_EMAIL_ACCOUNTS` dictionary. It will then
 return the associated password if found then send both the `email_account`, the associated password, and the `msg_uid` to the client.
 
 The client should be marking the email with the given `msg_uid` as read. If it is successful it should return a True back
