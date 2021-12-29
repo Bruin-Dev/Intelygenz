@@ -54,19 +54,19 @@ class TemplateRepository:
         template = 'service_affecting_monitor_report.html'
         template_vars = {}
         rows = []
+        headers = ['Trouble', 'Serial Number', 'Edge Name', 'Location', 'Number of tickets', 'Tickets', 'Interfaces']
+        centered_headers = [4]
 
         for index, item in enumerate(report_items):
-            rows.append({
-                'type': self._get_row_type(index),
-                '__KEY__': item['serial_number'],
-                '__CLIENT__': f"{item['customer']['client_id']} | {item['customer']['client_name']}",
-                '__EDGE_NAME__': item['edge_name'],
-                '__LOCATION__': '<br>'.join(list(item['location'].values())),
-                '__NUMBER_OF_TICKETS__': item['number_of_tickets'],
-                '__BRUIN_TICKETS_ID__': ',<br>'.join([str(_id) for _id in item['bruin_tickets_id']]),
-                '__INTERFACES__': str(item['interfaces']),
-                '__TROUBLE__': str(item['trouble']),
-            })
+            rows.append([
+                item['trouble'],
+                item['serial_number'],
+                item['edge_name'],
+                '<br>'.join(item['location'].values()),
+                item['number_of_tickets'],
+                ',<br>'.join([str(_id) for _id in item['bruin_tickets_id']]),
+                item['interfaces'],
+            ])
 
         if rows:
             now = datetime.now(timezone(self._config.MONITOR_REPORT_CONFIG['timezone']))
@@ -77,7 +77,9 @@ class TemplateRepository:
             template_vars['__YEAR__'] = now.year
             template_vars['__CLIENT_ID__'] = client_id
             template_vars['__CLIENT_NAME__'] = client_name
-            template_vars['__OVERVIEW_ROWS__'] = rows
+            template_vars['__ROWS__'] = rows
+            template_vars['__HEADERS__'] = headers
+            template_vars['__CENTERED_HEADERS__'] = centered_headers
 
             return self._build_email(client_id=client_id, subject=subject, template=template,
                                      template_vars=template_vars)
@@ -86,18 +88,19 @@ class TemplateRepository:
         template = 'bandwidth_report.html'
         template_vars = {}
         rows = []
+        headers = ['Serial Number', 'Edge Name', 'Interface', 'Average Bandwidth',
+                   'Bandwidth Trouble Threshold Exceeded', 'Bandwidth Trouble Tickets']
+        centered_headers = [3, 4, 5]
 
         for index, item in enumerate(report_items):
-            rows.append({
-                'type': self._get_row_type(index),
-                '__SERIAL__': item['serial_number'],
-                '__CLIENT__': f"{client_id} | {client_name}",
-                '__EDGE_NAME__': item['edge_name'],
-                '__INTERFACE__': item['interface'],
-                '__BANDWIDTH__': item['bandwidth'],
-                '__THRESHOLD_EXCEEDED__': item['threshold_exceeded'],
-                '__TICKET_IDS__': ',<br>'.join([str(_id) for _id in item['ticket_ids']]),
-            })
+            rows.append([
+                item['serial_number'],
+                item['edge_name'],
+                item['interface'],
+                item['bandwidth'],
+                item['threshold_exceeded'],
+                ',<br>'.join([str(_id) for _id in item['ticket_ids']]),
+            ])
 
         if rows:
             now = datetime.now(timezone(self._config.BANDWIDTH_REPORT_CONFIG['timezone']))
@@ -109,10 +112,8 @@ class TemplateRepository:
             template_vars['__CLIENT_ID__'] = client_id
             template_vars['__CLIENT_NAME__'] = client_name
             template_vars['__ROWS__'] = rows
+            template_vars['__HEADERS__'] = headers
+            template_vars['__CENTERED_HEADERS__'] = centered_headers
 
             return self._build_email(client_id=client_id, subject=subject, template=template,
                                      template_vars=template_vars, recipients='mettel.automation@intelygenz.com')
-
-    @staticmethod
-    def _get_row_type(index):
-        return 'even' if index % 2 == 0 else 'odd'
