@@ -1,6 +1,8 @@
 import os
+import csv
 import jinja2
 import base64
+from io import StringIO
 from shortuuid import uuid
 from datetime import datetime
 from pytz import timezone
@@ -12,14 +14,21 @@ class TemplateRepository:
     def __init__(self, config):
         self._config = config
 
-    def _build_email(self, client_id, subject, template, template_vars, recipients=None):
+    def _build_email(self, client_id, subject, template, template_vars, csv_report=None, recipients=None):
         logo = 'src/templates/images/logo.png'
         header = 'src/templates/images/header.jpg'
+        attachments = []
 
         template = os.path.join('src', 'templates', template)
         template_loader = jinja2.FileSystemLoader(searchpath='.')
         template_env = jinja2.Environment(loader=template_loader)
         template = template_env.get_template(template)
+
+        if csv_report:
+            attachments.append({
+                'name': csv_report['name'],
+                'data': base64.b64encode(csv_report['data'].encode('utf-8')).decode('utf-8')
+            })
 
         return {
             'request_id': uuid(),
@@ -38,7 +47,7 @@ class TemplateRepository:
                         'data': base64.b64encode(open(header, 'rb').read()).decode('utf-8')
                     },
                 ],
-                'attachments': []
+                'attachments': attachments
             }
         }
 
@@ -49,6 +58,17 @@ class TemplateRepository:
             recipients = recipients + self._config.REPORT_RECIPIENTS[client_id]
 
         return ', '.join(recipients)
+
+    def _generate_csv(self, headers, rows):
+        file = StringIO()
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+        writer.writerow(headers)
+
+        for row in rows:
+            clean_row = [str(cell).replace('<br>', ' ') for cell in row]
+            writer.writerow(clean_row)
+
+        return file.getvalue()
 
     def compose_monitor_report_email(self, client_id, client_name, report_items):
         template = 'service_affecting_monitor_report.html'
@@ -73,6 +93,11 @@ class TemplateRepository:
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Reoccurring Service Affecting Trouble - {date}'
 
+            csv_report = {
+                'name': f'reoccurring-service-affecting-trouble_{date}.csv',
+                'data': self._generate_csv(headers, rows)
+            }
+
             template_vars['__DATE__'] = date
             template_vars['__YEAR__'] = now.year
             template_vars['__CLIENT_ID__'] = client_id
@@ -82,7 +107,7 @@ class TemplateRepository:
             template_vars['__CENTERED_HEADERS__'] = centered_headers
 
             return self._build_email(client_id=client_id, subject=subject, template=template,
-                                     template_vars=template_vars)
+                                     template_vars=template_vars, csv_report=csv_report)
 
     def compose_bandwidth_report_email(self, client_id, client_name, report_items):
         template = 'bandwidth_report.html'
@@ -107,6 +132,11 @@ class TemplateRepository:
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Daily Bandwidth Report - {date}'
 
+            csv_report = {
+                'name': f'daily-bandwidth-report_{date}.csv',
+                'data': self._generate_csv(headers, rows)
+            }
+
             template_vars['__DATE__'] = date
             template_vars['__YEAR__'] = now.year
             template_vars['__CLIENT_ID__'] = client_id
@@ -116,4 +146,5 @@ class TemplateRepository:
             template_vars['__CENTERED_HEADERS__'] = centered_headers
 
             return self._build_email(client_id=client_id, subject=subject, template=template,
-                                     template_vars=template_vars, recipients='mettel.automation@intelygenz.com')
+                                     template_vars=template_vars, csv_report=csv_report,
+                                     recipients='mettel.automation@intelygenz.com')
