@@ -40,7 +40,7 @@ class RepairTicketsMonitor:
         next_run_time = undefined
 
         if exec_on_start:
-            tz = timezone(self._config.MONITOR_CONFIG["timezone"])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
             self._logger.info(
                 "RepairTicketsMonitor job is going to be executed immediately"

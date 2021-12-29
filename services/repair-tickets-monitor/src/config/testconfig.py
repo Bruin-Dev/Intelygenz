@@ -13,8 +13,9 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+TIMEZONE = 'US/Eastern'
+
 MONITOR_CONFIG = {
-    'timezone': 'US/Eastern',
     'max_retries_error_404': 5,
     'tag_ids': {
         "Repair": 1,

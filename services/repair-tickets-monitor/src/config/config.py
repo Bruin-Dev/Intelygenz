@@ -1,6 +1,7 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
+import json
 import os
 import logging
 import sys
@@ -16,35 +17,29 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+TIMEZONE = os.environ['TIMEZONE']
+
 MONITOR_CONFIG = {
-    'timezone': 'US/Eastern',
     'max_retries_error_404': 5,
-    'tag_ids': {
-        "Repair": 1,
-        "New Order": 2,
-        "Change": 3,
-        "Billing": 4,
-        "Other": 5
-    },
+    'tag_ids': json.loads(os.environ['TAG_IDS_MAPPING']),
     'scheduler_config': {
-        'repair_ticket_monitor': 10,
-        'new_created_tickets_feedback': 10,
-        'new_closed_tickets_feedback': 60 * 60 * 24,  # A day in seconds
+        'repair_ticket_monitor': int(os.environ['RTA_MONITOR_JOB_INTERVAL']),
+        'new_created_tickets_feedback': int(os.environ['NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL']),
+        'new_closed_tickets_feedback': int(os.environ['NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL']),
     },
     'nats_request_timeout': {
         'kre_seconds': 10,
         'bruin_request_seconds': 30,
     },
     'semaphores': {
-        'closed_tickets_concurrent': 1,
-        'repair_tickets_concurrent': 10,
-        'created_tickets_concurrent': 10,
+        'repair_tickets_concurrent': int(os.environ['MAX_CONCURRENT_EMAILS_FOR_MONITORING']),
+        'created_tickets_concurrent': int(os.environ['MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK']),
+        'closed_tickets_concurrent': int(os.environ['MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK']),
     },
 }
 
-ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
-
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'repair-tickets-monitor',
@@ -52,10 +47,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-repair-tickets-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

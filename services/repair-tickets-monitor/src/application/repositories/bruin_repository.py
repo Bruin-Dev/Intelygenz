@@ -56,7 +56,7 @@ class BruinRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error getting basic info for ticket {ticket_id} in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
@@ -138,7 +138,7 @@ class BruinRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error getting service number info for {service_number} in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 elif not response_body:
@@ -202,7 +202,7 @@ class BruinRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error while retrieving details of ticket {ticket_id} in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
@@ -505,7 +505,7 @@ class BruinRepository:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses} '
                         f'with keyword arguments {kwargs} in '
-                        f'{self._config.ENVIRONMENT.upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
             if err_msg:

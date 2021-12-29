@@ -53,14 +53,14 @@ class RepairTicketKreRepository:
                 if response_status not in range(200, 400):
                     err_msg = (
                         f'Error while getting prediction for email "{email_id}" in '
-                        f"{self._config.ENVIRONMENT.upper()} environment: "
+                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
                         f"Error {response_status} - {response_body}"
                     )
 
                 elif response_status == 400:
                     err_msg = (
                         f'Cannot get prediction for "{email_id}" in '
-                        f"{self._config.ENVIRONMENT.upper()} environment: "
+                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
                         f"reason {response_body}"
                     )
 
@@ -136,7 +136,7 @@ class RepairTicketKreRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error while saving outputs for email "{email_id}" in '
-                        f"{self._config.ENVIRONMENT.upper()} environment: "
+                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
                         f"Error {response_status} - {response_body}"
                     )
 
@@ -195,7 +195,7 @@ class RepairTicketKreRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error while saving created ticket feedback for email with ticket_id "{ticket_id}"'
-                        f'and email_id "{email_id}" in {self._config.ENVIRONMENT.upper()} environment: '
+                        f'and email_id "{email_id}" in {self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
