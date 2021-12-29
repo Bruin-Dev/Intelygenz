@@ -110,6 +110,7 @@ class ServiceAffectingMonitorReports:
             final_report_list = self._bruin_repository.filter_trouble_reports(active_reports=active_reports,
                                                                               report_list=report_list,
                                                                               threshold=threshold)
+            final_report_list.sort(key=lambda item: item['serial_number'])
 
             if not final_report_list:
                 self._logger.info(
