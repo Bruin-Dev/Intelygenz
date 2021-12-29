@@ -52,11 +52,6 @@ MONITOR_CONFIG = {
     },
 }
 
-REPORT_RECIPIENTS = {
-    'default': ['mettel.automation@intelygenz.com'],
-    9994: ['HNOCleaderteam@mettel.net'],
-}
-
 MONITOR_REPORT_CONFIG = {
     'exec_on_start': False,
     'environment': 'test',
@@ -69,7 +64,10 @@ MONITOR_REPORT_CONFIG = {
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
-    'monitoring_minutes_interval': 10,
+    'recipients': {
+        'default': ['mettel.automation@intelygenz.com'],
+        9994: ['HNOCleaderteam@mettel.net'],
+    }
 }
 
 BANDWIDTH_REPORT_CONFIG = {
@@ -79,6 +77,7 @@ BANDWIDTH_REPORT_CONFIG = {
     'crontab': '0 8 * * *',
     'lookup_interval_hours': 24,
     'clients': [9994],
+    'recipients': ['mettel.automation@intelygenz.com']
 }
 
 ENVIRONMENT_NAME = 'dev'

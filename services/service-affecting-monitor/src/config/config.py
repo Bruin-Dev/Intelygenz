@@ -57,16 +57,6 @@ MONITOR_CONFIG = {
     },
 }
 
-REPORT_RECIPIENTS = {
-    'default': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
-                'mettel.automation@intelygenz.com'],
-    83959: ['clmillsap@oreillyauto.com', 'mgallion2@oreillyauto.com', 'rbodenhamer@oreillyauto.com',
-            'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net'],
-    72959: ['DL_Tenet_Telecom@nttdata.com', 'Jake.Salas@tenethealth.com', 'dshim@mettel.net', 'mgoldstein@mettel.net'],
-    83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net'],
-    86937: ['networkservices@signetjewelers.com', 'pallen@mettel.net'],
-}
-
 MONITOR_REPORT_CONFIG = {
     'exec_on_start': os.environ['EXEC_MONITOR_REPORTS_ON_START'].lower() == 'true',
     'environment': os.environ['CURRENT_ENVIRONMENT'],
@@ -78,6 +68,16 @@ MONITOR_REPORT_CONFIG = {
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
+    'recipients': {
+        'default': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
+                    'mettel.automation@intelygenz.com'],
+        83959: ['clmillsap@oreillyauto.com', 'mgallion2@oreillyauto.com', 'rbodenhamer@oreillyauto.com',
+                'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net'],
+        72959: ['DL_Tenet_Telecom@nttdata.com', 'Jake.Salas@tenethealth.com', 'dshim@mettel.net',
+                'mgoldstein@mettel.net'],
+        83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net'],
+        86937: ['networkservices@signetjewelers.com', 'pallen@mettel.net'],
+    }
 }
 
 BANDWIDTH_REPORT_CONFIG = {
@@ -87,6 +87,7 @@ BANDWIDTH_REPORT_CONFIG = {
     'crontab': '0 3 * * *',
     'lookup_interval_hours': 24,
     'clients': [86937],
+    'recipients': ['bsullivan@mettel.net', 'efox@mettel.net', 'mettel.automation@intelygenz.com']
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

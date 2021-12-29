@@ -14,7 +14,7 @@ class TemplateRepository:
     def __init__(self, config):
         self._config = config
 
-    def _build_email(self, client_id, subject, template, template_vars, csv_report=None, recipients=None):
+    def _build_email(self, subject, recipients, template, template_vars, csv_report=None):
         logo = 'src/templates/images/logo.png'
         header = 'src/templates/images/header.jpg'
         attachments = []
@@ -34,7 +34,7 @@ class TemplateRepository:
             'request_id': uuid(),
             'email_data': {
                 'subject': subject,
-                'recipient': recipients or self._get_recipients(client_id),
+                'recipient': ', '.join(recipients),
                 'text': '',
                 'html': template.render(**template_vars),
                 'images': [
@@ -50,14 +50,6 @@ class TemplateRepository:
                 'attachments': attachments
             }
         }
-
-    def _get_recipients(self, client_id):
-        recipients = self._config.REPORT_RECIPIENTS['default']
-
-        if client_id in self._config.REPORT_RECIPIENTS:
-            recipients = recipients + self._config.REPORT_RECIPIENTS[client_id]
-
-        return ', '.join(recipients)
 
     def _generate_csv(self, headers, rows):
         file = StringIO()
@@ -92,6 +84,11 @@ class TemplateRepository:
             now = datetime.now(timezone(self._config.MONITOR_REPORT_CONFIG['timezone']))
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Reoccurring Service Affecting Trouble - {date}'
+            recipients_by_client = self._config.MONITOR_REPORT_CONFIG['recipients']
+            recipients = recipients_by_client['default']
+
+            if client_id in recipients_by_client:
+                recipients = recipients + recipients_by_client[client_id]
 
             csv_report = {
                 'name': f'reoccurring-service-affecting-trouble_{date}.csv',
@@ -106,7 +103,7 @@ class TemplateRepository:
             template_vars['__HEADERS__'] = headers
             template_vars['__CENTERED_HEADERS__'] = centered_headers
 
-            return self._build_email(client_id=client_id, subject=subject, template=template,
+            return self._build_email(subject=subject, recipients=recipients, template=template,
                                      template_vars=template_vars, csv_report=csv_report)
 
     def compose_bandwidth_report_email(self, client_id, client_name, report_items):
@@ -131,6 +128,7 @@ class TemplateRepository:
             now = datetime.now(timezone(self._config.BANDWIDTH_REPORT_CONFIG['timezone']))
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Daily Bandwidth Report - {date}'
+            recipients = self._config.BANDWIDTH_REPORT_CONFIG['recipients']
 
             csv_report = {
                 'name': f'daily-bandwidth-report_{date}.csv',
@@ -145,6 +143,5 @@ class TemplateRepository:
             template_vars['__HEADERS__'] = headers
             template_vars['__CENTERED_HEADERS__'] = centered_headers
 
-            return self._build_email(client_id=client_id, subject=subject, template=template,
-                                     template_vars=template_vars, csv_report=csv_report,
-                                     recipients='mettel.automation@intelygenz.com')
+            return self._build_email(subject=subject, recipients=recipients, template=template,
+                                     template_vars=template_vars, csv_report=csv_report)
