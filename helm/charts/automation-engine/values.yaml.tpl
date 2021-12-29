@@ -829,6 +829,18 @@ repair-tickets-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "repair-tickets-monitor-${REPAIR_TICKETS_MONITOR_BUILD_NUMBER}"
+    # -- Defines how often new emails tagged by the E-mail Tagger are processed
+    rta_monitor_job_interval: ${REPAIR_TICKETS_MONITOR__RTA_MONITOR_JOB_INTERVAL}
+    # -- Defines how often new created tickets fetched from Bruin are sent to the KRE to train the AI model
+    new_created_tickets_feedback_job_interval: ${REPAIR_TICKETS_MONITOR__NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL}
+    # -- Defines how many simultaneous tagged emails are processed
+    max_concurrent_emails_for_monitoring: ${REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_EMAILS_FOR_MONITORING}
+    # -- Defines how many simultaneous new created tickets are sent to the KRE to train the AI model
+    max_concurrent_created_tickets_for_feedback: ${REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK}
+    # -- Defines how many simultaneous new closed tickets are sent to the KRE to train the AI model
+    max_concurrent_closed_tickets_for_feedback: ${REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK}
+    # -- Mapping of tag names and their corresponding numeric ID, as defined in the AI model
+    tag_ids_mapping: ${REPAIR_TICKETS_MONITOR__TAG_IDS_MAPPING}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:

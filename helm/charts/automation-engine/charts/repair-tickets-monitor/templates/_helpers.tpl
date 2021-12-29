@@ -53,3 +53,10 @@ Configmap name of repair-tickets-monitor
 {{- define "repair-tickets-monitor.configmapName" -}}
 {{ include "repair-tickets-monitor.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of repair-tickets-monitor
+*/}}
+{{- define "repair-tickets-monitor.secretName" -}}
+{{ include "repair-tickets-monitor.fullname" . }}-secret
+{{- end }}

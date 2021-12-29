@@ -30,10 +30,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -43,6 +39,18 @@ global:
 
 config:
   papertrail_prefix: ""
+  # -- Defines how often new emails tagged by the E-mail Tagger are processed
+  rta_monitor_job_interval: 0
+  # -- Defines how often new created tickets fetched from Bruin are sent to the KRE to train the AI model
+  new_created_tickets_feedback_job_interval: 0
+  # -- Defines how many simultaneous tagged emails are processed
+  max_concurrent_emails_for_monitoring: 0
+  # -- Defines how many simultaneous new created tickets are sent to the KRE to train the AI model
+  max_concurrent_created_tickets_for_feedback: 0
+  # -- Defines how many simultaneous new closed tickets are sent to the KRE to train the AI model
+  max_concurrent_closed_tickets_for_feedback: 0
+  # -- Mapping of tag names and their corresponding numeric ID, as defined in the AI model
+  tag_ids_mapping: {}
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true
