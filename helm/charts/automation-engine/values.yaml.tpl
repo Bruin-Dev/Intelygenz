@@ -763,15 +763,14 @@ notifier:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "notifier-${NOTIFIER_BUILD_NUMBER}"
-    # -- Slack Webhook URL to send messages
-    slack_url: ${NOTIFIER_SLACK_URL}
-    # -- Telestax URL
-    telestax_url: ${TELESTAX_URL}
-    # -- Telestax account SID
-    telestax_account_sid: ${TELESTAX_ACCOUNT_SID}
-    # -- Telestax auth token credentials
-    telestax_auth_token: ${TELESTAX_AUTH_TOKEN}
-    telestax_from_phone_number: ${TELESTAX_FROM_PHONE_NUMBER}
+    # -- Slack webhook to send messages
+    slack_webhook: ${NOTIFIER__SLACK_WEBHOOK_URL}
+    # -- Email account used to send messages to other accounts (username)
+    email_account_for_message_delivery_username: ${NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}
+    # -- Email account used to send messages to other accounts (password)
+    email_account_for_message_delivery_password: ${NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}
+    # -- Mapping of e-mail addresses and passwords whose inboxes can be read for later analysis
+    monitorable_email_accounts: ${NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS}
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little

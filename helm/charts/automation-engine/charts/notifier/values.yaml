@@ -28,10 +28,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -44,15 +40,14 @@ replicaCount: 1
 
 config:
   papertrail_prefix: ""
-  # -- Slack Webhook URL to send messages
-  slack_url: ""
-  # -- Telestax URL
-  telestax_url: ""
-  # -- Telestax account SID
-  telestax_account_sid: ""
-  # -- Telestax auth token credentials
-  telestax_auth_token: ""
-  telestax_from_phone_number: ""
+  # -- Slack webhook to send messages
+  slack_webhook: ""
+  # -- Email account used to send messages to other accounts (username)
+  email_account_for_message_delivery_username: ""
+  # -- Email account used to send messages to other accounts (password)
+  email_account_for_message_delivery_password: ""
+  # -- Mapping of e-mail addresses and passwords whose inboxes can be read for later analysis
+  monitorable_email_accounts: {}
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
