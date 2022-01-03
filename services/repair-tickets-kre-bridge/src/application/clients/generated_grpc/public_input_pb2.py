@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"(\n\x03Tag\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"\xb8\x01\n\x05\x45mail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x14\n\x0c\x66rom_address\x18\x06 \x01(\t\x12\n\n\x02to\x18\x07 \x01(\t\x12\n\n\x02\x63\x63\x18\x08 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\t \x01(\t\x12\x1c\n\x03tag\x18\n \x01(\x0b\x32\x0f.entrypoint.Tag\"\x83\x01\n\x15PreprocessEmailFields\x12\x17\n\x0fsubject_no_html\x18\x01 \x01(\t\x12\x14\n\x0c\x62ody_no_html\x18\x02 \x01(\t\x12\x1e\n\x16subject_mlp_classifier\x18\x03 \x01(\t\x12\x1b\n\x13\x62ody_mlp_classifier\x18\x04 \x01(\t\"u\n\x15PreprocessEmailOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\"\x9e\x01\n\x1b\x45xtractServiceNumbersOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\"\xec\x01\n\x1f\x43lassifyOutageVsAffectingFields\x12\x17\n\x0fpredicted_class\x18\x01 \x01(\t\x12\'\n\x1fpredicted_class_voovas_vs_other\x18\x02 \x01(\t\x12\x33\n+predicted_class_voovas_vs_other_probability\x18\x03 \x01(\x02\x12\"\n\x1apredicted_class_voo_vs_vas\x18\x04 \x01(\t\x12.\n&predicted_class_voo_vs_vas_probability\x18\x05 \x01(\x02\"\xe7\x01\n\x1f\x43lassifyOutageVsAffectingOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\x12\x43\n\x0e\x63lassification\x18\x04 \x01(\x0b\x32+.entrypoint.ClassifyOutageVsAffectingFields\"\xdb\x02\n\x13PrepareOutputFields\x12\x1e\n\x16tagger_threshold_value\x18\x01 \x01(\x02\x12!\n\x19tagger_is_below_threshold\x18\x02 \x01(\x08\x12\"\n\x1arta_model1_threshold_value\x18\x03 \x01(\x02\x12%\n\x1drta_model1_is_below_threshold\x18\x04 \x01(\x08\x12\"\n\x1arta_model2_threshold_value\x18\x05 \x01(\x02\x12%\n\x1drta_model2_is_below_threshold\x18\x06 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x07 \x01(\x08\x12\x17\n\x0f\x66iltered_reason\x18\x08 \x01(\t\x12\x19\n\x11in_validation_set\x18\t \x01(\x08\x12\"\n\x1avalidation_set_probability\x18\n \x01(\x02\"5\n\x11PredictionRequest\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\"\xb4\x01\n\x11OutputFilterFlags\x12!\n\x19tagger_is_below_threshold\x18\x01 \x01(\x08\x12%\n\x1drta_model1_is_below_threshold\x18\x02 \x01(\x08\x12%\n\x1drta_model2_is_below_threshold\x18\x03 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x04 \x01(\x08\x12\x19\n\x11in_validation_set\x18\x05 \x01(\x08\"\x85\x01\n\x12PredictionResponse\x12!\n\x19potential_service_numbers\x18\x01 \x03(\t\x12\x17\n\x0fpredicted_class\x18\x02 \x01(\t\x12\x33\n\x0c\x66ilter_flags\x18\x03 \x01(\x0b\x32\x1d.entrypoint.OutputFilterFlags\"b\n\x06Ticket\x12\x0f\n\x07site_id\x18\x01 \x01(\t\x12\x17\n\x0fservice_numbers\x18\x02 \x03(\t\x12\x11\n\tticket_id\x18\x03 \x01(\t\x12\x1b\n\x13not_creation_reason\x18\x04 \x01(\t\"\xe4\x03\n\x12SaveOutputsRequest\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12]\n\x19service_numbers_sites_map\x18\x02 \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.ServiceNumbersSitesMapEntry\x12!\n\x19validated_service_numbers\x18\x03 \x03(\t\x12+\n\x0ftickets_created\x18\x04 \x03(\x0b\x32\x12.entrypoint.Ticket\x12+\n\x0ftickets_updated\x18\x05 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_created\x18\x06 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_updated\x18\x07 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x35\n\x19tickets_cannot_be_created\x18\t \x03(\x0b\x32\x12.entrypoint.Ticket\x1a=\n\x1bServiceNumbersSitesMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"&\n\x13SaveOutputsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xa0\x01\n!SaveCreatedTicketsFeedbackRequest\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x10\n\x08\x65mail_id\x18\x02 \x01(\t\x12\x11\n\tparent_id\x18\x03 \x01(\t\x12\x11\n\tclient_id\x18\x04 \x01(\t\x12\x1c\n\x14real_service_numbers\x18\x05 \x03(\t\x12\x12\n\nreal_class\x18\x06 \x01(\t\"5\n\"SaveCreatedTicketsFeedbackResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xaf\x02\n\nEntrypoint\x12P\n\rGetPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveOutputs\x12\x1e.entrypoint.SaveOutputsRequest\x1a\x1f.entrypoint.SaveOutputsResponse\"\x00\x12}\n\x1aSaveCreatedTicketsFeedback\x12-.entrypoint.SaveCreatedTicketsFeedbackRequest\x1a..entrypoint.SaveCreatedTicketsFeedbackResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"(\n\x03Tag\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"\xb8\x01\n\x05\x45mail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x14\n\x0c\x66rom_address\x18\x06 \x01(\t\x12\n\n\x02to\x18\x07 \x03(\t\x12\n\n\x02\x63\x63\x18\x08 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\t \x01(\t\x12\x1c\n\x03tag\x18\n \x01(\x0b\x32\x0f.entrypoint.Tag\"\x83\x01\n\x15PreprocessEmailFields\x12\x17\n\x0fsubject_no_html\x18\x01 \x01(\t\x12\x14\n\x0c\x62ody_no_html\x18\x02 \x01(\t\x12\x1e\n\x16subject_mlp_classifier\x18\x03 \x01(\t\x12\x1b\n\x13\x62ody_mlp_classifier\x18\x04 \x01(\t\"u\n\x15PreprocessEmailOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\"\x9e\x01\n\x1b\x45xtractServiceNumbersOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\"\xec\x01\n\x1f\x43lassifyOutageVsAffectingFields\x12\x17\n\x0fpredicted_class\x18\x01 \x01(\t\x12\'\n\x1fpredicted_class_voovas_vs_other\x18\x02 \x01(\t\x12\x33\n+predicted_class_voovas_vs_other_probability\x18\x03 \x01(\x02\x12\"\n\x1apredicted_class_voo_vs_vas\x18\x04 \x01(\t\x12.\n&predicted_class_voo_vs_vas_probability\x18\x05 \x01(\x02\"\xe7\x01\n\x1f\x43lassifyOutageVsAffectingOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\x12\x43\n\x0e\x63lassification\x18\x04 \x01(\x0b\x32+.entrypoint.ClassifyOutageVsAffectingFields\"\xdb\x02\n\x13PrepareOutputFields\x12\x1e\n\x16tagger_threshold_value\x18\x01 \x01(\x02\x12!\n\x19tagger_is_below_threshold\x18\x02 \x01(\x08\x12\"\n\x1arta_model1_threshold_value\x18\x03 \x01(\x02\x12%\n\x1drta_model1_is_below_threshold\x18\x04 \x01(\x08\x12\"\n\x1arta_model2_threshold_value\x18\x05 \x01(\x02\x12%\n\x1drta_model2_is_below_threshold\x18\x06 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x07 \x01(\x08\x12\x17\n\x0f\x66iltered_reason\x18\x08 \x01(\t\x12\x19\n\x11in_validation_set\x18\t \x01(\x08\x12\"\n\x1avalidation_set_probability\x18\n \x01(\x02\"5\n\x11PredictionRequest\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\"\xb4\x01\n\x11OutputFilterFlags\x12!\n\x19tagger_is_below_threshold\x18\x01 \x01(\x08\x12%\n\x1drta_model1_is_below_threshold\x18\x02 \x01(\x08\x12%\n\x1drta_model2_is_below_threshold\x18\x03 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x04 \x01(\x08\x12\x19\n\x11in_validation_set\x18\x05 \x01(\x08\"\x85\x01\n\x12PredictionResponse\x12!\n\x19potential_service_numbers\x18\x01 \x03(\t\x12\x17\n\x0fpredicted_class\x18\x02 \x01(\t\x12\x33\n\x0c\x66ilter_flags\x18\x03 \x01(\x0b\x32\x1d.entrypoint.OutputFilterFlags\"b\n\x06Ticket\x12\x0f\n\x07site_id\x18\x01 \x01(\t\x12\x17\n\x0fservice_numbers\x18\x02 \x03(\t\x12\x11\n\tticket_id\x18\x03 \x01(\t\x12\x1b\n\x13not_creation_reason\x18\x04 \x01(\t\"\xe4\x03\n\x12SaveOutputsRequest\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12]\n\x19service_numbers_sites_map\x18\x02 \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.ServiceNumbersSitesMapEntry\x12!\n\x19validated_service_numbers\x18\x03 \x03(\t\x12+\n\x0ftickets_created\x18\x04 \x03(\x0b\x32\x12.entrypoint.Ticket\x12+\n\x0ftickets_updated\x18\x05 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_created\x18\x06 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_updated\x18\x07 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x35\n\x19tickets_cannot_be_created\x18\t \x03(\x0b\x32\x12.entrypoint.Ticket\x1a=\n\x1bServiceNumbersSitesMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"&\n\x13SaveOutputsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x9e\x02\n!SaveCreatedTicketsFeedbackRequest\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x10\n\x08\x65mail_id\x18\x02 \x01(\t\x12\x11\n\tparent_id\x18\x03 \x01(\t\x12\x11\n\tclient_id\x18\x04 \x01(\t\x12\x1c\n\x14real_service_numbers\x18\x05 \x03(\t\x12\x12\n\nreal_class\x18\x06 \x01(\t\x12L\n\x08site_map\x18\x07 \x03(\x0b\x32:.entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry\x1a.\n\x0cSiteMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"5\n\"SaveCreatedTicketsFeedbackResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xaf\x02\n\nEntrypoint\x12P\n\rGetPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveOutputs\x12\x1e.entrypoint.SaveOutputsRequest\x1a\x1f.entrypoint.SaveOutputsResponse\"\x00\x12}\n\x1aSaveCreatedTicketsFeedback\x12-.entrypoint.SaveCreatedTicketsFeedbackRequest\x1a..entrypoint.SaveCreatedTicketsFeedbackResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -116,8 +116,8 @@ _EMAIL = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='to', full_name='entrypoint.Email.to', index=6,
-      number=7, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      number=7, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -847,6 +847,44 @@ _SAVEOUTPUTSRESPONSE = _descriptor.Descriptor(
 )
 
 
+_SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY = _descriptor.Descriptor(
+  name='SiteMapEntry',
+  full_name='entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=b'8\001',
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2742,
+  serialized_end=2788,
+)
+
 _SAVECREATEDTICKETSFEEDBACKREQUEST = _descriptor.Descriptor(
   name='SaveCreatedTicketsFeedbackRequest',
   full_name='entrypoint.SaveCreatedTicketsFeedbackRequest',
@@ -897,10 +935,17 @@ _SAVECREATEDTICKETSFEEDBACKREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='site_map', full_name='entrypoint.SaveCreatedTicketsFeedbackRequest.site_map', index=6,
+      number=7, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -910,7 +955,7 @@ _SAVECREATEDTICKETSFEEDBACKREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=2502,
-  serialized_end=2662,
+  serialized_end=2788,
 )
 
 
@@ -941,8 +986,8 @@ _SAVECREATEDTICKETSFEEDBACKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2664,
-  serialized_end=2717,
+  serialized_start=2790,
+  serialized_end=2843,
 )
 
 _EMAIL.fields_by_name['tag'].message_type = _TAG
@@ -962,6 +1007,8 @@ _SAVEOUTPUTSREQUEST.fields_by_name['tickets_updated'].message_type = _TICKET
 _SAVEOUTPUTSREQUEST.fields_by_name['tickets_could_be_created'].message_type = _TICKET
 _SAVEOUTPUTSREQUEST.fields_by_name['tickets_could_be_updated'].message_type = _TICKET
 _SAVEOUTPUTSREQUEST.fields_by_name['tickets_cannot_be_created'].message_type = _TICKET
+_SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY.containing_type = _SAVECREATEDTICKETSFEEDBACKREQUEST
+_SAVECREATEDTICKETSFEEDBACKREQUEST.fields_by_name['site_map'].message_type = _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY
 DESCRIPTOR.message_types_by_name['Tag'] = _TAG
 DESCRIPTOR.message_types_by_name['Email'] = _EMAIL
 DESCRIPTOR.message_types_by_name['PreprocessEmailFields'] = _PREPROCESSEMAILFIELDS
@@ -1087,11 +1134,19 @@ SaveOutputsResponse = _reflection.GeneratedProtocolMessageType('SaveOutputsRespo
 _sym_db.RegisterMessage(SaveOutputsResponse)
 
 SaveCreatedTicketsFeedbackRequest = _reflection.GeneratedProtocolMessageType('SaveCreatedTicketsFeedbackRequest', (_message.Message,), {
+
+  'SiteMapEntry' : _reflection.GeneratedProtocolMessageType('SiteMapEntry', (_message.Message,), {
+    'DESCRIPTOR' : _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY,
+    '__module__' : 'public_input_pb2'
+    # @@protoc_insertion_point(class_scope:entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry)
+    })
+  ,
   'DESCRIPTOR' : _SAVECREATEDTICKETSFEEDBACKREQUEST,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveCreatedTicketsFeedbackRequest)
   })
 _sym_db.RegisterMessage(SaveCreatedTicketsFeedbackRequest)
+_sym_db.RegisterMessage(SaveCreatedTicketsFeedbackRequest.SiteMapEntry)
 
 SaveCreatedTicketsFeedbackResponse = _reflection.GeneratedProtocolMessageType('SaveCreatedTicketsFeedbackResponse', (_message.Message,), {
   'DESCRIPTOR' : _SAVECREATEDTICKETSFEEDBACKRESPONSE,
@@ -1102,6 +1157,7 @@ _sym_db.RegisterMessage(SaveCreatedTicketsFeedbackResponse)
 
 
 _SAVEOUTPUTSREQUEST_SERVICENUMBERSSITESMAPENTRY._options = None
+_SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY._options = None
 
 _ENTRYPOINT = _descriptor.ServiceDescriptor(
   name='Entrypoint',
@@ -1110,8 +1166,8 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2720,
-  serialized_end=3023,
+  serialized_start=2846,
+  serialized_end=3149,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetPrediction',
