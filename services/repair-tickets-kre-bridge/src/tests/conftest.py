@@ -9,7 +9,7 @@ from tests.fixtures.rta import *
 def valid_inference_request(make_email, make_inference_request_payload) -> Dict[str, Any]:
     email_id = "1234"
     client_id = "5689"
-    email_data = make_email(email_id=email_id, client_id=client_id)
+    email_data = make_email(email_id=email_id, client_id=client_id, to=["test@marc.com"])
     tag_info = {'type': 'Repair', 'probability': 0.9}
     return make_inference_request_payload(
         email_data=email_data,
