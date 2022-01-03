@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import pytest
 
@@ -16,8 +17,9 @@ def make_email():
             subject: str = '',
             from_address: str = '',
             cc: str = '',
-            to: str = '',
+            to: List[str] = None,
     ):
+        to = to or []
         received_date = received_date or bruinize_date(datetime.now())
 
         return {
