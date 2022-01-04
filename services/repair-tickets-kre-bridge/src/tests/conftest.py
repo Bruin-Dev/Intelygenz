@@ -62,7 +62,8 @@ def valid_created_ticket_request(make_created_ticket_request_payload):
         parent_id="91011",
         client_id="10000",
         real_service_numbers=["125", "568"],
-        real_class="VOO"
+        real_class="VOO",
+        site_map={"125": "1235", "568": "1235"}
     )
 
 
