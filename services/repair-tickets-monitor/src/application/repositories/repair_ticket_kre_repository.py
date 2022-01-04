@@ -157,7 +157,7 @@ class RepairTicketKreRepository:
                 f"Error trying to get save output from rta KRE [email_id='{email_id}']: {e}"
             )
 
-    async def save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
+    async def save_created_ticket_feedback(self, email_data: dict, ticket_data: dict, site_map: dict):
         email_id = email_data['email_id']
         ticket_id = ticket_data['ticket_id']
 
@@ -176,6 +176,7 @@ class RepairTicketKreRepository:
                     "client_id": email_data['client_id'],
                     "real_service_numbers": ticket_data['service_numbers'],
                     "real_class": ticket_data['category'],
+                    "site_map": site_map,
                 }
             }
             try:
