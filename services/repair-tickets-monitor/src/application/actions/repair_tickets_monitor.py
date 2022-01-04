@@ -115,7 +115,7 @@ class RepairTicketsMonitor:
                 "body": email_data['body'],
                 "date": email_data['date'],
                 "from_address": email_data['from_address'],
-                "to": email_data['to_address'][0],
+                "to": email_data['to_address'],
                 "cc": cc_addresses,
             },
             tag_info,
@@ -207,19 +207,22 @@ class RepairTicketsMonitor:
                 await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
                 self._new_tagged_emails_repository.mark_complete(email_id)
                 return
-
-            if self._is_inference_actionable(inference_data):
+            is_actionable = self._is_inference_actionable(inference_data)
+            if is_actionable:
                 tickets_created, tickets_updated, tickets_cannot_be_created = await self._create_tickets(
                     inference_data,
                     service_number_site_map,
                     existing_tickets
                 )
+            elif not is_actionable and inference_data['predicted_class'] != 'Other':
+                if inference_data['predicted_class'] != 'Other':
+                    tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
+                        inference_data,
+                        service_number_site_map,
+                        existing_tickets,
+                    )
             else:
-                tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
-                    inference_data,
-                    service_number_site_map,
-                    existing_tickets,
-                )
+                tickets_cannot_be_created = self._get_class_other_tickets(service_number_site_map)
 
             save_output_response = await self._save_output(
                 email_id,
@@ -306,6 +309,7 @@ class RepairTicketsMonitor:
         """Get potential updated/created tickets"""
         potential_created_tickets = []
         potential_updated_tickets = []
+
         predicted_class = inference_data['predicted_class']
         site_ids = set(service_number_site_map.values())
 
@@ -335,6 +339,30 @@ class RepairTicketsMonitor:
             )
 
         return potential_created_tickets, potential_updated_tickets
+
+    def _get_class_other_tickets(
+            self,
+            service_number_site_map:  Dict[str, str],
+    ) -> List[Dict[str, Any]]:
+        not_created_tickets = []
+        site_ids = set(service_number_site_map.values())
+
+        for site_id in site_ids:
+            service_numbers_filtered_by_site_id = [
+                service_number
+                for service_number, service_site_id in
+                service_number_site_map.items()
+                if service_site_id == site_id
+            ]
+            not_created_tickets.append(
+                self._create_output_ticket_dict(
+                    site_id=site_id,
+                    service_numbers=service_numbers_filtered_by_site_id,
+                    reason='predicted class is Other'
+                )
+            )
+
+        return not_created_tickets
 
     def _update_email_status(self):
         # TODO: add content
