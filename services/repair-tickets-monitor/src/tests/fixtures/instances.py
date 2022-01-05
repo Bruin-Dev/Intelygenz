@@ -5,6 +5,7 @@ from tests.fixtures._helpers import wrap_all_methods
 from unittest.mock import Mock
 
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
+from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
@@ -119,4 +120,22 @@ def repair_tickets_monitor(
         bruin_repository,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
+    )
+
+
+@pytest.fixture(scope='function')
+def new_closed_tickets_feedback(
+        event_bus,
+        logger,
+        scheduler,
+        repair_ticket_kre_repository,
+        bruin_repository
+):
+    return NewClosedTicketsFeedback(
+        event_bus,
+        logger,
+        scheduler,
+        config,
+        repair_ticket_kre_repository,
+        bruin_repository
     )
