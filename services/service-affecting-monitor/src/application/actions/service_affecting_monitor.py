@@ -596,6 +596,11 @@ class ServiceAffectingMonitor:
         for elem in metrics_with_cache_and_contact_info:
             await asyncio.sleep(0)
 
+            if elem['cached_info']['edge']['host'] == 'metgsavco-ic1.fedmettel.net':
+                # Since we use edge names to match events to edges and we can't cache edge names for GSA edges,
+                # there's no way to detect bouncing for them, so we skip those edges entirely
+                continue
+
             cached_info = elem['cached_info']
             link_status = elem['link_status']
             events = elem['link_events']
