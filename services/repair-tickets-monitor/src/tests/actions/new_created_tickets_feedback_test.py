@@ -81,30 +81,99 @@ class TestNewCreatedTicketsFeedback:
         new_created_tickets_repository.delete_ticket_error_counter.assert_called_once_with(ticket_id, error_code)
 
     @pytest.mark.asyncio
-    async def _save_created_ticket_feedback__ok_test(self):
-        pass
+    async def _save_created_ticket_feedback__ok_test(
+            self,
+            new_created_tickets_feedback,
+            make_email,
+            make_ticket_decamelized,
+            make_rpc_response
+    ):
+        ticket_id = 1234
+        email_id = 5678
+        client_id = 4689
+        email_data = make_email(email_id=email_id, client_id=client_id)['email']
+        ticket_input = {'ticket_id': ticket_id}
+
+        # create ticket data
+        ticket_data = make_ticket_decamelized(ticket_id=ticket_id)
+        ticket_data['service_numbers'] = ["1234"]
+        ticket_response = make_rpc_response(status=200, body=ticket_data)
+
+        # site map response
+        site_map = {"1234": "site_id"}
+
+        rta_response = make_rpc_response(status=200, body={"success": True})
+        get_site_map_mock = CoroutineMock(return_value=site_map)
+
+        new_created_tickets_feedback._bruin_repository = Mock()
+        new_created_tickets_feedback._new_created_tickets_repository = Mock()
+        new_created_tickets_feedback._rta_repository = Mock()
+        new_created_tickets_feedback._get_site_map_for_ticket = get_site_map_mock
+
+        rta_repository = new_created_tickets_feedback._rta_repository
+        rta_repository.save_created_ticket_feedback = CoroutineMock(return_value=rta_response)
+
+        new_created_tickets_repository = new_created_tickets_feedback._new_created_tickets_repository
+
+        bruin_repository = new_created_tickets_feedback._bruin_repository
+        bruin_repository.get_single_ticket_info_with_service_numbers = CoroutineMock(return_value=ticket_response)
+
+        await new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_input)
+
+        get_site_map_mock.assert_awaited_once_with(client_id, ticket_data['service_numbers'])
+        new_created_tickets_repository.mark_complete.assert_called_once_with(email_id, ticket_id)
 
     @pytest.mark.asyncio
     async def _save_created_ticket_feedback__404_ticket_body_test(
             self,
             new_created_tickets_feedback,
             make_email,
-            make_ticket,
+            make_ticket_decamelized,
             make_rpc_response
     ):
         ticket_id = 1234
         email_id = 5678
-        email_data = make_email(email_id=email_id)
-        ticket_data = make_ticket(ticket_id=ticket_id)
+        email_data = make_email(email_id=email_id)['email']
+        ticket_data = make_ticket_decamelized(ticket_id=ticket_id)
         response = make_rpc_response(status=404, body="Not found")
 
         new_created_tickets_feedback._bruin_repository = Mock()
         new_created_tickets_feedback._new_created_tickets_repository = Mock()
         bruin_repository = new_created_tickets_feedback._bruin_repository
-        bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value=response)
+        bruin_repository.get_single_ticket_info_with_service_numbers = CoroutineMock(return_value=response)
         new_created_tickets_feedback._new_created_tickets_repository.increase_ticket_error_counter.return_value = 1000
 
         await new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_data)
 
         new_created_tickets_feedback._new_created_tickets_repository.mark_complete.assert_not_called()
-        bruin_repository.get_single_ticket_basic_info.assert_called_once()
+        bruin_repository.get_single_ticket_info_with_service_numbers.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def _get_site_map_for_ticket__ok_test(self, new_created_tickets_feedback, make_rpc_response):
+        client_id = 1234
+        service_numbers = ["5679"]
+        expected_result = {"5679": "1234"}
+
+        bruin_response = make_rpc_response(status=200, body={"site_id": 1234})
+
+        bruin_repository_mock = Mock()
+        bruin_repository_mock.verify_service_number_information = CoroutineMock(return_value=bruin_response)
+        new_created_tickets_feedback._bruin_repository = bruin_repository_mock
+
+        results = await new_created_tickets_feedback._get_site_map_for_ticket(client_id, service_numbers)
+
+        assert results == expected_result
+
+    @pytest.mark.asyncio
+    async def _get_site_map_for_ticket__all_errors_test(self, new_created_tickets_feedback, make_rpc_response):
+        client_id = 1234
+        service_numbers = ["5679"]
+
+        bruin_response = make_rpc_response(status=400, body="Error")
+
+        bruin_repository_mock = Mock()
+        bruin_repository_mock.verify_service_number_information = CoroutineMock(return_value=bruin_response)
+
+        results = await new_created_tickets_feedback._get_site_map_for_ticket(client_id, service_numbers)
+
+        assert results == {}
