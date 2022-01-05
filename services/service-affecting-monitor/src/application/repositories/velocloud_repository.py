@@ -226,13 +226,21 @@ class VelocloudRepository:
                         lambda edge: edge['edge_name'] == event['edgeName']
                     )
                     if not matching_edge:
-                        self._logger.info(
-                            f'No edge in the customer cache had edge name {event["edgeName"]}. Skipping...')
+                        if host == 'metgsavco-ic1.fedmettel.net':
+                            # Do not leak edge name if it's a GSA edge
+                            self._logger.info(f'No edge in the customer cache matched edge name. Skipping...')
+                        else:
+                            self._logger.info(f'No edge in the customer cache had edge name {event["edgeName"]}. '
+                                              f'Skipping...')
                         continue
 
                     serial = matching_edge['serial_number']
-                    self._logger.info(f'Event with edge name {event["edgeName"]} matches edge from customer cache with'
-                                      f'serial number {serial}')
+                    if host == 'metgsavco-ic1.fedmettel.net':
+                        # Do not leak edge name if it's a GSA edge
+                        self._logger.info(f'Event with matches edge from customer cache with serial number {serial}')
+                    else:
+                        self._logger.info(f'Event with edge name {event["edgeName"]} matches edge from customer cache '
+                                          f'with serial number {serial}')
 
                     interface = self._utils_repository.get_interface_from_event(event)
                     events[serial][interface].append(event)
