@@ -659,6 +659,10 @@ class ServiceAffectingMonitor:
             f'{serial_number}'
         )
 
+        if link_data['cached_info']['edge']['host'] == 'metgsavco-ic1.fedmettel.net':
+            await self._send_email_to_gsa(link_data, trouble)
+            return
+
         open_affecting_tickets_response = await self._bruin_repository.get_open_affecting_tickets(
             client_id, service_number=serial_number
         )
@@ -1040,3 +1044,48 @@ class ServiceAffectingMonitor:
     @staticmethod
     def _is_signet_client_id(client_id: int):
         return client_id == 86937
+
+    async def _send_email_to_gsa(self, link_data: dict, trouble: AffectingTroubles):  # pragma: no cover
+        from shortuuid import uuid
+
+        build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
+        affecting_trouble_note = build_note_fn(link_data)
+
+        serial = link_data['cached_info']['serial_number']
+        interface = link_data['link_status']['interface']
+
+        self._logger.info(f'Edge {serial} belongs to GSA, sending an email to report {trouble.value} trouble')
+
+        email = {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'{trouble.value} detected on {serial} - {interface}',
+                'recipient': 'GSAGICS1@mettel.net',
+                'text': '',
+                'html': self._get_email_html(affecting_trouble_note, serial),
+                'images': [],
+                'attachments': [],
+            }
+        }
+
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if working_environment == 'production':
+            await self._notifications_repository.send_email(email_object=email)
+            self._logger.info(f'Email sent to report {trouble.value} trouble on interface {interface} of edge {serial}')
+        else:
+            self._logger.info(f'Email to report {trouble.value} trouble on interface {interface} of edge {serial} '
+                              f"won't be sent since the current environment is {working_environment.upper()}")
+
+    @staticmethod
+    def _get_email_html(note, serial):  # pragma: no cover
+        import re
+
+        edge_name_pattern = re.compile(r'Edge Name: .+')
+        edge_name_replacement = f'Serial Number: {serial}'
+        note = re.sub(edge_name_pattern, edge_name_replacement, note)
+
+        link_pattern = re.compile(r'\[(\w+)\|(.+?)\]')
+        link_replacement = r'<a href="\2">\1</a>'
+        note = re.sub(link_pattern, link_replacement, note)
+
+        return f'<pre>{note}</pre>'
