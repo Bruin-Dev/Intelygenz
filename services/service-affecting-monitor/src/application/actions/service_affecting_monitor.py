@@ -268,6 +268,9 @@ class ServiceAffectingMonitor:
         self._logger.info('Auto-resolve process finished!')
 
     async def _run_autoresolve_for_edge(self, edge: dict):
+        if edge['cached_info']['edge']['host'] == 'metgsavco-ic1.fedmettel.net':
+            return
+
         async with self.__autoresolve_semaphore:
             serial_number = edge['cached_info']['serial_number']
             client_id = edge['cached_info']['bruin_client_info']['client_id']
