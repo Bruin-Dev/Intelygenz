@@ -71,3 +71,28 @@ def valid_created_ticket_request(make_created_ticket_request_payload):
 def valid_created_ticket_response():
     payload = {"success": True}
     return {"status": 200, "body": payload}
+
+
+@pytest.fixture
+def valid_closed_ticket_request__cancelled(make_closed_ticket_request_payload):
+    return make_closed_ticket_request_payload(
+        ticket_id="1234",
+        client_id="5678",
+        ticket_status="cancelled",
+        cancellation_reasons=["cancelled cause ai", "duplicated ticket"]
+    )
+
+
+@pytest.fixture
+def valid_closed_ticket_request__resolved(make_closed_ticket_request_payload):
+    return make_closed_ticket_request_payload(
+        ticket_id="1234",
+        client_id="5678",
+        ticket_status="resolved"
+    )
+
+
+@pytest.fixture
+def valid_closed_ticket_response():
+    payload = {"success": True}
+    return {"status": 200, "body": payload}

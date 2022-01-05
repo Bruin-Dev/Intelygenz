@@ -6,6 +6,7 @@ from application.repositories.repair_ticket_repository import RepairTicketReposi
 from application.actions.get_email_inference import GetInference
 from application.actions.save_outputs import SaveOutputs
 from application.actions.save_created_ticket_feedback import SaveCreatedTicketFeedback
+from application.actions.save_closed_ticket_feedback import SaveClosedTicketFeedback
 
 from igz.packages.nats.clients import NATSClient
 from igz.packages.eventbus.eventbus import EventBus
@@ -35,6 +36,7 @@ class Container:
         self._subscriber_get_email_inference = NATSClient(config, logger=self._logger)
         self._subscriber_save_outputs = NATSClient(config, logger=self._logger)
         self._subscriber_save_created_ticket_feedback = NATSClient(config, logger=self._logger)
+        self._subscriber_save_closed_ticket_feedback = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_get_email_inference, consumer_name="inference")
@@ -43,12 +45,22 @@ class Container:
             self._subscriber_save_created_ticket_feedback,
             consumer_name="created_ticket_feedback"
         )
+        self._event_bus.add_consumer(
+            self._subscriber_save_closed_ticket_feedback,
+            consumer_name="closed_ticket_feedback"
+        )
 
         self._event_bus.set_producer(self._publisher)
 
         self._get_inference = GetInference(self._logger, config, self._event_bus, self._repair_ticket_repository)
         self._save_outputs = SaveOutputs(self._logger, config, self._event_bus, self._repair_ticket_repository)
         self._save_created_ticket_feedback = SaveCreatedTicketFeedback(
+            self._logger,
+            config,
+            self._event_bus,
+            self._repair_ticket_repository
+        )
+        self._save_closed_ticket_feedback = SaveClosedTicketFeedback(
             self._logger,
             config,
             self._event_bus,
@@ -62,6 +74,12 @@ class Container:
         self._action_save_created_ticket_feedback = ActionWrapper(
             self._save_created_ticket_feedback,
             "save_created_ticket_feedback",
+            is_async=True,
+            logger=self._logger
+        )
+        self._action_save_closed_ticket_feedback = ActionWrapper(
+            self._save_closed_ticket_feedback,
+            "save_closed_ticket_feedback",
             is_async=True,
             logger=self._logger
         )
@@ -85,6 +103,11 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="created_ticket_feedback",
                                                  topic="rta.created_ticket_feedback.request",
                                                  action_wrapper=self._action_save_created_ticket_feedback,
+                                                 queue="rta_kre_bridge")
+
+        await self._event_bus.subscribe_consumer(consumer_name="closed_ticket_feedback",
+                                                 topic="rta.closed_ticket_feedback.request",
+                                                 action_wrapper=self._action_save_closed_ticket_feedback,
                                                  queue="rta_kre_bridge")
 
     async def start_server(self):

@@ -157,3 +157,38 @@ class RepairTicketClient:
             )
 
         return response
+
+    async def save_closed_ticket_feedback(self, payload: dict) -> dict:
+        try:
+            stub = await self._create_stub()
+            save_closed_ticket_response = await stub.SaveClosedTicketsFeedback(
+                Parse(
+                    json.dumps(payload).encode("utf8"),
+                    pb2.SaveClosedTicketsFeedbackRequest(),
+                    ignore_unknown_fields=False,
+                ),
+                timeout=120,
+            )
+
+            response = {"body": {'success': save_closed_ticket_response.success}, "status": 200}
+
+            self._logger.info(
+                f'Got response saving closed ticket feedback from Konstellation: {response["body"]}'
+            )
+
+        except grpc.RpcError as grpc_e:
+            response = {
+                "body": f"Grpc error details: {grpc_e.details()}",
+                "status": self.__grpc_to_http_status(grpc_e.code()),
+            }
+            self._logger.error(
+                f'Got grpc error saving closed ticket feedback from Konstellation: {response["body"]}'
+            )
+
+        except Exception as e:
+            response = {"body": f"Error: {e.args[0]}", "status": 500}
+            self._logger.error(
+                f'Got error saving closed tickets feedback from Konstellation: {response["body"]}'
+            )
+
+        return response

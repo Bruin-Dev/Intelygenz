@@ -61,3 +61,22 @@ class RepairTicketRepository:
             'status': response['status'],
             'body': response.get('body', {})
         }
+
+    async def save_closed_ticket_feedback(self, closed_ticket_data: dict) -> dict:
+        """Save the closed ticket
+
+        Args:
+            closed_ticket_data: feedback for the model.
+
+        Returns:
+            dict: Response from kre
+        """
+        response = await self._kre_client.save_closed_ticket_feedback(closed_ticket_data)
+
+        if response['status'] not in range(200, 300):
+            return response
+
+        return {
+            'status': response['status'],
+            'body': response.get('body', {})
+        }
