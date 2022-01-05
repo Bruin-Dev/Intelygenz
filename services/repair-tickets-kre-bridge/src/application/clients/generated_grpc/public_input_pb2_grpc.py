@@ -29,6 +29,11 @@ class EntrypointStub(object):
                 request_serializer=public__input__pb2.SaveCreatedTicketsFeedbackRequest.SerializeToString,
                 response_deserializer=public__input__pb2.SaveCreatedTicketsFeedbackResponse.FromString,
                 )
+        self.SaveClosedTicketsFeedback = channel.unary_unary(
+                '/entrypoint.Entrypoint/SaveClosedTicketsFeedback',
+                request_serializer=public__input__pb2.SaveClosedTicketsFeedbackRequest.SerializeToString,
+                response_deserializer=public__input__pb2.SaveClosedTicketsFeedbackResponse.FromString,
+                )
 
 
 class EntrypointServicer(object):
@@ -52,6 +57,12 @@ class EntrypointServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SaveClosedTicketsFeedback(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_EntrypointServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -69,6 +80,11 @@ def add_EntrypointServicer_to_server(servicer, server):
                     servicer.SaveCreatedTicketsFeedback,
                     request_deserializer=public__input__pb2.SaveCreatedTicketsFeedbackRequest.FromString,
                     response_serializer=public__input__pb2.SaveCreatedTicketsFeedbackResponse.SerializeToString,
+            ),
+            'SaveClosedTicketsFeedback': grpc.unary_unary_rpc_method_handler(
+                    servicer.SaveClosedTicketsFeedback,
+                    request_deserializer=public__input__pb2.SaveClosedTicketsFeedbackRequest.FromString,
+                    response_serializer=public__input__pb2.SaveClosedTicketsFeedbackResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -128,5 +144,22 @@ class Entrypoint(object):
         return grpc.experimental.unary_unary(request, target, '/entrypoint.Entrypoint/SaveCreatedTicketsFeedback',
             public__input__pb2.SaveCreatedTicketsFeedbackRequest.SerializeToString,
             public__input__pb2.SaveCreatedTicketsFeedbackResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SaveClosedTicketsFeedback(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/entrypoint.Entrypoint/SaveClosedTicketsFeedback',
+            public__input__pb2.SaveClosedTicketsFeedbackRequest.SerializeToString,
+            public__input__pb2.SaveClosedTicketsFeedbackResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
