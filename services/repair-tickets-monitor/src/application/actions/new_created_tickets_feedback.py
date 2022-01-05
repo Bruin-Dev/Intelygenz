@@ -102,7 +102,11 @@ class NewCreatedTicketsFeedback:
             self._logger.info(f"Got ticket info from Bruin: {ticket_response}")
             ticket_data = ticket_response['body']
 
+            # Get site map
             site_map = await self._get_site_map_for_ticket(client_id, ticket_data['service_numbers'])
+            if not site_map:
+                self._logger.error(f"Could not create a site map for ticket {ticket_id}")
+                return
 
             #  Save feedback
             response = await self._rta_repository.save_created_ticket_feedback(email_data, ticket_data, site_map)
