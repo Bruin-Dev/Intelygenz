@@ -227,27 +227,29 @@ class VelocloudRepository:
                 )
                 continue
 
-            edges_by_serial.setdefault(
-                serial_number,
-                {
-                    'enterpriseName': link['enterpriseName'],
-                    'enterpriseId': link['enterpriseId'],
-                    'enterpriseProxyId': link['enterpriseProxyId'],
-                    'enterpriseProxyName': link['enterpriseProxyName'],
-                    'edgeName': link['edgeName'],
-                    'edgeState': link['edgeState'],
-                    'edgeSystemUpSince': link['edgeSystemUpSince'],
-                    'edgeServiceUpSince': link['edgeServiceUpSince'],
-                    'edgeLastContact': link['edgeLastContact'],
-                    'edgeId': link['edgeId'],
-                    'edgeSerialNumber': link['edgeSerialNumber'],
-                    'edgeHASerialNumber': link['edgeHASerialNumber'],
-                    'edgeModelNumber': link['edgeModelNumber'],
-                    'edgeLatitude': link['edgeLatitude'],
-                    'edgeLongitude': link['edgeLongitude'],
-                    'host': link['host'],
-                }
-            )
+            edge = {
+                'enterpriseName': link['enterpriseName'],
+                'enterpriseId': link['enterpriseId'],
+                'enterpriseProxyId': link['enterpriseProxyId'],
+                'enterpriseProxyName': link['enterpriseProxyName'],
+                'edgeName': link['edgeName'],
+                'edgeState': link['edgeState'],
+                'edgeSystemUpSince': link['edgeSystemUpSince'],
+                'edgeServiceUpSince': link['edgeServiceUpSince'],
+                'edgeLastContact': link['edgeLastContact'],
+                'edgeId': link['edgeId'],
+                'edgeSerialNumber': link['edgeSerialNumber'],
+                'edgeHASerialNumber': link['edgeHASerialNumber'],
+                'edgeModelNumber': link['edgeModelNumber'],
+                'edgeLatitude': link['edgeLatitude'],
+                'edgeLongitude': link['edgeLongitude'],
+                'host': link['host'],
+            }
+
+            if edge['host'] == 'metgsavco-ic1.fedmettel.net':
+                edge['edgeName'] = None
+
+            edges_by_serial.setdefault(serial_number, edge)
 
         edges = list(edges_by_serial.values())
         return edges
