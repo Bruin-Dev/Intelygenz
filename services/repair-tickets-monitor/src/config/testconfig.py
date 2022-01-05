@@ -26,12 +26,14 @@ MONITOR_CONFIG = {
     'scheduler_config': {
         'repair_ticket_monitor': 10,
         'new_created_tickets_feedback': 1,
+        'new_closed_tickets_feedback': 60 * 60 * 24,  # A day in seconds
     },
     'nats_request_timeout': {
         'kre_seconds': 10,
         'bruin_request_seconds': 30,
     },
     'semaphores': {
+        'closed_tickets_concurrent': 1,
         'repair_tickets_concurrent': 10,
         'created_tickets_concurrent': 10,
     },

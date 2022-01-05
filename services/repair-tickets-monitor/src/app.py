@@ -19,6 +19,7 @@ from application.repositories.repair_ticket_kre_repository import RepairTicketKr
 
 
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
+from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 
 
@@ -34,7 +35,7 @@ class Container:
         self._redis_client.ping()
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
-        # HEALTHCHECK ENDPOINT
+        # HEALTH CHECK ENDPOINT
         self._server = QuartServer(config)
 
         # REDIS DATA STORAGE
@@ -78,6 +79,14 @@ class Container:
             self._repair_ticket_repository,
             self._bruin_repository
         )
+        self._new_closed_tickets_feedback = NewClosedTicketsFeedback(
+            self._event_bus,
+            self._logger,
+            self._scheduler,
+            config,
+            self._repair_ticket_repository,
+            self._bruin_repository
+        )
         self._repair_tickets_monitor = RepairTicketsMonitor(
             self._event_bus,
             self._logger,
@@ -94,6 +103,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
         await self._new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
+        await self._new_closed_tickets_feedback.start_closed_ticket_feedback(exec_on_start=True)
         await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)
         self._scheduler.start()
 
