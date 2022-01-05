@@ -26,7 +26,8 @@ MONITOR_CONFIG = {
         'mettel.velocloud.net': [],
         'metvco02.mettel.net': [],
         'metvco03.mettel.net': [],
-        'metvco04.mettel.net': []
+        'metvco04.mettel.net': [],
+        'metgsavco-ic1.fedmettel.net': [],
     },
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
