@@ -26,6 +26,7 @@ VELOCLOUD_HOST = [
     "metvco02.mettel.net",
     "metvco03.mettel.net",
     "metvco04.mettel.net",
+    "metgsavco-ic1.fedmettel.net",
 ]
 
 REFRESH_CONFIG = {
@@ -54,6 +55,7 @@ REFRESH_CONFIG = {
         {"metvco02.mettel.net": []},
         {"metvco03.mettel.net": []},
         {"metvco04.mettel.net": []},
+        {"metgsavco-ic1.fedmettel.net": []},
     ],
     'environment': ENVIRONMENT_NAME,
     'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
