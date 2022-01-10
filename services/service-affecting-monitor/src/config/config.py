@@ -1,12 +1,13 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
-import os
+import json
 import logging
+import os
 import sys
+from collections import defaultdict
 
 from application import AffectingTroubles
-from config import contact_info
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -19,47 +20,64 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+# JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
+default_contact_info_raw = json.loads(os.environ['MONITORING__DEFAULT_CONTACT_INFO_PER_CUSTOMER'])
+default_contact_info = defaultdict(dict)
+for host in default_contact_info.keys():
+    default_contact_info.setdefault(host, {})
+    for client_id in default_contact_info_raw[host]:
+        if client_id.isnumeric():
+            default_contact_info[host][int(client_id)] = default_contact_info_raw[host][client_id]
+        else:
+            # Possibly a placeholder that will be replaced by multiple client IDs at run time, these should remain
+            # the same
+            default_contact_info[host][client_id] = default_contact_info_raw[host][client_id]
+
+TIMEZONE = os.environ['TIMEZONE']
+
+PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
+
 MONITOR_CONFIG = {
-    'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-    'contact_by_host_and_client_id': contact_info.contact_by_host_and_client_id,
+    'contact_by_host_and_client_id': default_contact_info,
     'velo_filter': {
-        'mettel.velocloud.net': [],
-        'metvco02.mettel.net': [],
-        'metvco03.mettel.net': [],
-        'metvco04.mettel.net': []
+        host: []
+        for host in json.loads(os.environ['MONITORING__MONITORED_VELOCLOUD_HOSTS'])
     },
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'timezone': 'US/Eastern',
-    'monitoring_minutes_interval': 10,
+    'monitoring_minutes_interval': int(os.environ['MONITORING__MONITORING_JOB_INTERVAL']) // 60,
     'thresholds': {
-        AffectingTroubles.LATENCY: 140,                    # milliseconds
-        AffectingTroubles.PACKET_LOSS: 8,                  # packets
-        AffectingTroubles.JITTER: 50,                      # milliseconds
-        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 80,  # percentage of total bandwidth
-        AffectingTroubles.BOUNCING: 10,                    # number of down / dead events
+        AffectingTroubles.LATENCY: int(os.environ['MONITORING__LATENCY_MONITORING_THRESHOLD']),          # milliseconds
+        AffectingTroubles.PACKET_LOSS: int(os.environ['MONITORING__PACKET_LOSS_MONITORING_THRESHOLD']),  # packets
+        AffectingTroubles.JITTER: int(os.environ['MONITORING__JITTER_MONITORING_THRESHOLD']),            # milliseconds
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: int(
+            os.environ['MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD']),  # percentage of total bandwidth
+        AffectingTroubles.BOUNCING: int(
+            os.environ['MONITORING__CIRCUIT_INSTABILITY_MONITORING_THRESHOLD']),         # number of down / dead events
     },
     'monitoring_minutes_per_trouble': {
-        AffectingTroubles.LATENCY: 30,
-        AffectingTroubles.PACKET_LOSS: 30,
-        AffectingTroubles.JITTER: 30,
-        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
-        AffectingTroubles.BOUNCING: 60,
+        AffectingTroubles.LATENCY: int(os.environ['MONITORING__LATENCY_MONITORING_LOOKUP_INTERVAL']) // 60,
+        AffectingTroubles.PACKET_LOSS: int(os.environ['MONITORING__PACKET_LOSS_MONITORING_LOOKUP_INTERVAL']) // 60,
+        AffectingTroubles.JITTER: int(os.environ['MONITORING__JITTER_MONITORING_LOOKUP_INTERVAL']) // 60,
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: int(
+            os.environ['MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL']) // 60,
+        AffectingTroubles.BOUNCING: int(os.environ['MONITORING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL']) // 60,
     },
     'forward_to_hnoc': 60,
     'autoresolve': {
         'semaphore': 3,
-        'metrics_lookup_interval_minutes': 30,
-        'last_affecting_trouble_seconds': 90 * 60,
-        'max_autoresolves': 3,
+        'metrics_lookup_interval_minutes': int(os.environ['MONITORING__AUTORESOLVE_LOOKUP_INTERVAL']) // 60,
+        'last_affecting_trouble_seconds': int(
+            os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE']),
+        'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
         'thresholds': {
-            AffectingTroubles.BOUNCING: 4,
+            AffectingTroubles.BOUNCING: int(os.environ['MONITORING__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD']),
         }
     },
+    'customers_with_bandwidth_enabled': json.loads(
+        os.environ['MONITORING__CUSTOMERS_WITH_BANDWIDTH_MONITORING_ENABLED']),
 }
 
 MONITOR_REPORT_CONFIG = {
     'exec_on_start': os.environ['EXEC_MONITOR_REPORTS_ON_START'].lower() == 'true',
-    'environment': os.environ['CURRENT_ENVIRONMENT'],
     'timezone': 'US/Eastern',
     'semaphore': 5,
     'wait_fixed': 15,
@@ -91,7 +109,8 @@ BANDWIDTH_REPORT_CONFIG = {
     'recipients': ['bsullivan@mettel.net', 'efox@mettel.net', 'mettel.automation@intelygenz.com']
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+CURRENT_ENVIRONMENT = os.environ['CURRENT_ENVIRONMENT']
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'service-affecting-monitor',
@@ -99,10 +118,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-service-affecting-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
@@ -119,8 +138,6 @@ METRICS_SERVER_CONFIG = {
     'port': 9090
 }
 
-VELOCLOUD_HOSTS = contact_info.contact_by_host_and_client_id.keys()
-
 ASR_CONFIG = {
-    'link_labels_blacklist': ['BYOB', 'Customer Owned', 'customer owned']
+    'link_labels_blacklist': json.loads(os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS']),
 }

@@ -122,10 +122,7 @@ class TestBandwidthReports:
 
         bandwidth_reports._bruin_repository.get_affecting_ticket_for_report.return_value = tickets
 
-        custom_config = testconfig.BANDWIDTH_REPORT_CONFIG.copy()
-        custom_config['environment'] = 'production'
-
-        with patch.dict(bandwidth_reports._config.BANDWIDTH_REPORT_CONFIG, custom_config):
+        with patch.object(bandwidth_reports._config, 'CURRENT_ENVIRONMENT', 'production'):
             await bandwidth_reports._generate_bandwidth_report_for_client(client_id, client_name, {serial_number},
                                                                           links_metrics, customer_cache)
 

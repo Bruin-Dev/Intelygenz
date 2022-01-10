@@ -11,7 +11,6 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 
-from application import ALL_FIS_CLIENTS
 from application import AffectingTroubles
 
 
@@ -44,7 +43,7 @@ class ServiceAffectingMonitor:
         next_run_time = undefined
 
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+            next_run_time = datetime.now(timezone(self._config.TIMEZONE))
             self._logger.info('Service Affecting Monitor job is going to be executed immediately')
 
         try:
@@ -94,8 +93,8 @@ class ServiceAffectingMonitor:
             for default_contact_info_by_client_id in
             self._config.MONITOR_CONFIG['contact_by_host_and_client_id'].values()]))
 
-        if ALL_FIS_CLIENTS in contact_info_by_client.keys():
-            fis_contact_info = contact_info_by_client.pop(ALL_FIS_CLIENTS)
+        if "ALL_FIS_CLIENTS" in contact_info_by_client.keys():
+            fis_contact_info = contact_info_by_client.pop("ALL_FIS_CLIENTS")
             fis_contact_info_by_client = {
                 edge['bruin_client_info']['client_id']: fis_contact_info
                 for edge in self._customer_cache
@@ -267,10 +266,7 @@ class ServiceAffectingMonitor:
 
             self._logger.info(f'Starting autoresolve for edge {serial_number}...')
 
-            is_rep_services = self._is_rep_services_client_id(client_id)
-            is_titan_america = self._is_titan_america_client_id(client_id)
-            is_signet = self._is_signet_client_id(client_id)
-            check_bandwidth_troubles = is_rep_services or is_titan_america or is_signet
+            check_bandwidth_troubles = client_id in self._config.MONITOR_CONFIG['customers_with_bandwidth_enabled']
             metrics_lookup_interval = self._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
             all_metrics_within_thresholds = self._trouble_repository.are_all_metrics_within_thresholds(
                 edge,
@@ -356,7 +352,7 @@ class ServiceAffectingMonitor:
                     )
                     continue
 
-                working_environment = self._config.MONITOR_CONFIG['environment']
+                working_environment = self._config.CURRENT_ENVIRONMENT
                 if working_environment != 'production':
                     self._logger.info(
                         f'Skipping autoresolve for detail of ticket {affecting_ticket_id} related to serial number '
@@ -529,10 +525,7 @@ class ServiceAffectingMonitor:
 
             # TODO: Remove this check as soon as the customer asks to release Bandwidth check for all edges
             client_id = cached_info['bruin_client_info']['client_id']
-            is_rep_services = self._is_rep_services_client_id(client_id)
-            is_titan_america = self._is_titan_america_client_id(client_id)
-            is_signet = self._is_signet_client_id(client_id)
-            check_bandwidth_troubles = is_rep_services or is_titan_america or is_signet
+            check_bandwidth_troubles = client_id in self._config.MONITOR_CONFIG['customers_with_bandwidth_enabled']
             if not check_bandwidth_troubles:
                 continue
 
@@ -775,7 +768,7 @@ class ServiceAffectingMonitor:
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
         affecting_trouble_note = build_note_fn(link_data)
 
-        working_environment = self._config.MONITOR_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == 'production':
             self._logger.info(
                 f'No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble '
@@ -811,7 +804,7 @@ class ServiceAffectingMonitor:
         ticket_id = ticket_info['ticket_overview']['ticketID']
         task_id = ticket_info['ticket_task']['detailID']
 
-        working_environment = self._config.MONITOR_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == 'production':
             self._logger.info(
                 f'Task related to edge {serial_number} of Service Affecting ticket {ticket_id} will not be unresolved '
@@ -854,7 +847,7 @@ class ServiceAffectingMonitor:
             f'of edge {serial_number}...'
         )
 
-        working_environment = self._config.MONITOR_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == 'production':
             self._logger.info(
                 f'No Service Affecting ticket will be created to report a {trouble.value} trouble detected in '
@@ -894,7 +887,7 @@ class ServiceAffectingMonitor:
         return ticket_id
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
-        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         forward_task_run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['forward_to_hnoc'])
 
@@ -1013,15 +1006,3 @@ class ServiceAffectingMonitor:
     def _is_link_label_blacklisted(self, link_label: str) -> bool:
         blacklisted_link_labels = self._config.ASR_CONFIG['link_labels_blacklist']
         return any(label for label in blacklisted_link_labels if label in link_label)
-
-    @staticmethod
-    def _is_rep_services_client_id(client_id: int):
-        return client_id == 83109
-
-    @staticmethod
-    def _is_titan_america_client_id(client_id: int):
-        return client_id == 85940
-
-    @staticmethod
-    def _is_signet_client_id(client_id: int):
-        return client_id == 86937

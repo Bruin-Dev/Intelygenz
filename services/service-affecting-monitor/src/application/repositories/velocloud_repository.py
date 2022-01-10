@@ -56,7 +56,7 @@ class VelocloudRepository:
 
     async def get_all_links_metrics(self, interval: dict) -> dict:
         all_links_metrics = []
-        for host in self._config.VELOCLOUD_HOSTS:
+        for host in self._config.MONITOR_CONFIG['velo_filter']:
             response = await self.get_links_metrics_by_host(host=host, interval=interval)
             if response['status'] not in range(200, 300):
                 self._logger.info(f"Error: could not retrieve links metrics from Velocloud host {host}")
@@ -195,7 +195,7 @@ class VelocloudRepository:
                 err_msg = (
                     f'Error while retrieving events of host {host} and enterprise id {enterprise_id} having any type '
                     f'in {event_types} that took place between {past_moment} and {now} '
-                    f'in {self._config.MONITOR_CONFIG["environment"].upper()}'
+                    f'in {self._config.ENVIRONMENT_NAME.upper()}'
                     f'environment: Error {response_status} - {response_body}'
                 )
 

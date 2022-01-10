@@ -61,7 +61,7 @@ class TestServiceAffectingMonitorReports:
             return_value=response_customer_cache)
 
         service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
-        service_affecting_monitor_reports._config.MONITOR_REPORT_CONFIG['environment'] = 'production'
+        service_affecting_monitor_reports._config.CURRENT_ENVIRONMENT = 'production'
 
         with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
             await service_affecting_monitor_reports.monitor_reports()

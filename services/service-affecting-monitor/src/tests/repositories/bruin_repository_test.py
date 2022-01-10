@@ -31,6 +31,7 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.PRODUCT_CATEGORY
 
         ticket_1 = make_ticket(ticket_id=1, client_id=bruin_client_id)
         ticket_2 = make_ticket(ticket_id=2, client_id=bruin_client_id)
@@ -40,6 +41,7 @@ class TestBruinRepository:
             request_id=uuid_,
             bruin_client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
+            product_category=product_category,
             ticket_topic=ticket_topic,
         )
         response = make_rpc_response(
@@ -66,6 +68,7 @@ class TestBruinRepository:
         service_number = 'VC1234567'
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.PRODUCT_CATEGORY
 
         ticket_1 = make_ticket(ticket_id=1, client_id=bruin_client_id)
         ticket_2 = make_ticket(ticket_id=2, client_id=bruin_client_id)
@@ -75,6 +78,7 @@ class TestBruinRepository:
             request_id=uuid_,
             bruin_client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
+            product_category=product_category,
             ticket_topic=ticket_topic,
             service_number=service_number,
         )
@@ -101,11 +105,13 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.PRODUCT_CATEGORY
 
         request = make_get_tickets_request(
             request_id=uuid_,
             bruin_client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
+            product_category=product_category,
             ticket_topic=ticket_topic,
         )
 
@@ -128,11 +134,13 @@ class TestBruinRepository:
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_topic = "VAS"
+        product_category = bruin_repository._config.PRODUCT_CATEGORY
 
         request = make_get_tickets_request(
             request_id=uuid_,
             bruin_client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
+            product_category=product_category,
             ticket_topic=ticket_topic,
         )
 
@@ -981,7 +989,7 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': report['client_id'],
-                'category': 'SD-WAN',
+                'category': service_affecting_monitor_reports._config.PRODUCT_CATEGORY,
                 'ticket_topic': 'VAS',
                 'start_date': start_date,
                 'end_date': end_date,
@@ -1014,7 +1022,7 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': report['client_id'],
-                'category': 'SD-WAN',
+                'category': service_affecting_monitor_reports._config.PRODUCT_CATEGORY,
                 'ticket_topic': 'VAS',
                 'start_date': start_date,
                 'end_date': end_date,
@@ -1054,7 +1062,7 @@ class TestBruinRepository:
             'request_id': uuid_,
             'body': {
                 'client_id': report['client_id'],
-                'category': 'SD-WAN',
+                'category': bruin_repository._config.PRODUCT_CATEGORY,
                 'ticket_topic': 'VAS',
                 'start_date': start_date,
                 'end_date': end_date,

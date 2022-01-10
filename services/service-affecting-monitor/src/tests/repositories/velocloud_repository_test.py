@@ -163,7 +163,9 @@ class TestVelocloudRepository:
 
         velo_filter_mock = {
             velocloud_host_1: [velocloud_host_1_enterprise_1_id, velocloud_host_2_enterprise_1_id],
-            velocloud_host_2: [velocloud_host_1_enterprise_2_id]
+            velocloud_host_2: [velocloud_host_1_enterprise_2_id],
+            velocloud_host_3: [],
+            velocloud_host_4: [],
         }
 
         interval = {

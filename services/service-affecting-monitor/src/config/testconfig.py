@@ -3,7 +3,6 @@ import logging
 import sys
 
 from application import AffectingTroubles
-from config import contact_info
 
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
@@ -14,17 +13,33 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
+
+TIMEZONE = 'US/Eastern'
+
+PRODUCT_CATEGORY = 'SD-WAN'
+
 MONITOR_CONFIG = {
     'recipient': 'some.recipient@email.com',
-    'contact_by_host_and_client_id': contact_info.contact_by_host_and_client_id,
+    'contact_by_host_and_client_id': {
+        'test-host': {
+            1234: [
+                {
+                    "email": 'test@test.com',
+                    "name": 'Test',
+                    "type": "ticket",
+                },
+                {
+                    "email": 'test@test.com',
+                    "name": 'Test',
+                    "type": "site",
+                },
+            ],
+        },
+    },
     'velo_filter': {
-        'mettel.velocloud.net': [],
-        'metvco02.mettel.net': [],
-        'metvco03.mettel.net': [],
-        'metvco04.mettel.net': []
+        'test-host': [],
     },
     'environment': 'test',
-    'timezone': 'US/Eastern',
     'monitoring_minutes_interval': 10,
     'thresholds': {
         AffectingTroubles.LATENCY: 140,                    # milliseconds
@@ -50,6 +65,7 @@ MONITOR_CONFIG = {
             AffectingTroubles.BOUNCING: 4,
         },
     },
+    'customers_with_bandwidth_enabled': [1, 2, 3],
 }
 
 MONITOR_REPORT_CONFIG = {
@@ -80,6 +96,7 @@ BANDWIDTH_REPORT_CONFIG = {
     'recipients': ['mettel.automation@intelygenz.com']
 }
 
+CURRENT_ENVIRONMENT = 'dev'
 ENVIRONMENT_NAME = 'dev'
 
 LOG_CONFIG = {
@@ -93,8 +110,6 @@ QUART_CONFIG = {
     'title': 'service-affecting-monitor',
     'port': 5000
 }
-
-VELOCLOUD_HOSTS = contact_info.contact_by_host_and_client_id.keys()
 
 ASR_CONFIG = {
     'link_labels_blacklist': ['BYOB', 'Customer Owned', 'customer owned']

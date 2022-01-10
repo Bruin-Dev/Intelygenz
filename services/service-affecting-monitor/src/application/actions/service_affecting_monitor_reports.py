@@ -122,7 +122,7 @@ class ServiceAffectingMonitorReports:
                 )
                 continue
 
-            working_environment = self._config.MONITOR_REPORT_CONFIG['environment']
+            working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != 'production':
                 self._logger.info(
                     f"No report for client {client_id} will be sent as the current environment is "

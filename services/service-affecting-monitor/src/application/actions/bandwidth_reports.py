@@ -100,7 +100,7 @@ class BandwidthReports:
         )
         report_items.sort(key=lambda item: (item['serial_number'], item['interface']))
 
-        if self._config.BANDWIDTH_REPORT_CONFIG['environment'] != 'production':
+        if self._config.CURRENT_ENVIRONMENT != 'production':
             self._logger.info(f'[bandwidth-reports] No report will be sent for client {client_id} '
                               f'since the current environment is not production')
             return

@@ -160,11 +160,11 @@ def make_contact_info():
 @pytest.fixture(scope='session')
 def make_get_tickets_request(make_rpc_request):
     def _inner(*, request_id: str = '', bruin_client_id: int = 0, ticket_statuses: List[str] = None,
-               ticket_topic: str = '', service_number: str = _undefined):
+               product_category: str = '', ticket_topic: str = '', service_number: str = _undefined):
         payload = {
             'client_id': bruin_client_id,
             'ticket_statuses': ticket_statuses,
-            'product_category': 'SD-WAN',
+            'product_category': product_category,
             'ticket_topic': ticket_topic,
         }
 

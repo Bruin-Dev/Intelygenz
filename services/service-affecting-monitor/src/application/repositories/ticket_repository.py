@@ -146,7 +146,7 @@ class TicketRepository:
 
         note_lines += [
             '',
-            f'Scan Time: {datetime.now(timezone(self._config.MONITOR_CONFIG["timezone"]))}',
+            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
             (
                 'Links: '
                 f'[Edge|{velocloud_edge_base_url}/] - [QoE|{velocloud_edge_base_url}/qoe/] - '
@@ -214,7 +214,7 @@ class TicketRepository:
 
         note_lines += [
             '',
-            f'Scan Time: {datetime.now(timezone(self._config.MONITOR_CONFIG["timezone"]))}',
+            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
             (
                 'Links: '
                 f'[Edge|{velocloud_edge_base_url}/] - [QoE|{velocloud_edge_base_url}/qoe/] - '
@@ -282,7 +282,7 @@ class TicketRepository:
 
         note_lines += [
             '',
-            f'Scan Time: {datetime.now(timezone(self._config.MONITOR_CONFIG["timezone"]))}',
+            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
             (
                 'Links: '
                 f'[Edge|{velocloud_edge_base_url}/] - [QoE|{velocloud_edge_base_url}/qoe/] - '
@@ -373,7 +373,7 @@ class TicketRepository:
 
         note_lines += [
             '',
-            f'Scan Time: {datetime.now(timezone(self._config.MONITOR_CONFIG["timezone"]))}',
+            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
             (
                 'Links: '
                 f'[Edge|{velocloud_edge_base_url}/] - [QoE|{velocloud_edge_base_url}/qoe/] - '
@@ -433,7 +433,7 @@ class TicketRepository:
             f'Threshold: {metrics_threshold} events',
             f'Events: {len(link_events)}',
             '',
-            f'Scan Time: {datetime.now(timezone(self._config.MONITOR_CONFIG["timezone"]))}',
+            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
             (
                 'Links: '
                 f'[Edge|{velocloud_edge_base_url}/] - '

@@ -121,9 +121,13 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process__ok_test(self, service_affecting_monitor, make_customer_cache,
-                                                         make_cached_edge, make_bruin_client_info, make_rpc_response):
-        edge_bruin_client_info_1 = make_bruin_client_info(client_id=83109)
-        edge_bruin_client_info_2 = make_bruin_client_info(client_id=88480)
+                                                         make_cached_edge, make_bruin_client_info, make_contact_info,
+                                                         make_rpc_response):
+        client_1_id = 83109
+        client_2_id = 88480
+
+        edge_bruin_client_info_1 = make_bruin_client_info(client_id=client_1_id)
+        edge_bruin_client_info_2 = make_bruin_client_info(client_id=client_2_id)
 
         edge_1 = make_cached_edge(bruin_client_info=edge_bruin_client_info_1)
         edge_2 = make_cached_edge(bruin_client_info=edge_bruin_client_info_2)
@@ -137,7 +141,15 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = \
             get_cache_response
 
-        await service_affecting_monitor._service_affecting_monitor_process()
+        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['contact_by_host_and_client_id'] = {
+            "test-host": {
+                client_1_id: make_contact_info(),
+                client_2_id: make_contact_info(),
+            }
+        }
+        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._service_affecting_monitor_process()
 
         service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited_once()
         service_affecting_monitor._latency_check.assert_awaited_once()
@@ -858,6 +870,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
+        client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -871,7 +884,7 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=edge_link_metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_bruin_client_info = make_bruin_client_info(client_id=30000)  # MetTel's client ID in Bruin
+        edge_bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
@@ -884,7 +897,10 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
-        await service_affecting_monitor._bandwidth_check()
+        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['customers_with_bandwidth_enabled'] = []
+        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._bandwidth_check()
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -903,6 +919,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
+        client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -916,7 +933,7 @@ class TestServiceAffectingMonitor:
         structured_metrics_object = make_structured_metrics_object(edge_info=edge, metrics=edge_link_metrics)
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_bruin_client_info = make_bruin_client_info(client_id=83109)  # RSI's client ID in Bruin
+        edge_bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
@@ -929,7 +946,10 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
-        await service_affecting_monitor._bandwidth_check()
+        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['customers_with_bandwidth_enabled'] = [client_id]
+        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._bandwidth_check()
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -948,6 +968,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
+        client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -963,7 +984,7 @@ class TestServiceAffectingMonitor:
         )
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_bruin_client_info = make_bruin_client_info(client_id=83109)  # RSI's client ID in Bruin
+        edge_bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
@@ -976,7 +997,10 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
-        await service_affecting_monitor._bandwidth_check()
+        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['customers_with_bandwidth_enabled'] = [client_id]
+        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._bandwidth_check()
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -996,6 +1020,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
+        client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -1014,7 +1039,7 @@ class TestServiceAffectingMonitor:
         )
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
-        edge_bruin_client_info = make_bruin_client_info(client_id=83109)  # RSI's client ID in Bruin
+        edge_bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
         customer_cache = make_customer_cache(edge_cache_info)
 
@@ -1033,7 +1058,10 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
-        await service_affecting_monitor._bandwidth_check()
+        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
+        custom_monitor_config['customers_with_bandwidth_enabled'] = [client_id]
+        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._bandwidth_check()
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1675,9 +1703,7 @@ class TestServiceAffectingMonitor:
 
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
             await service_affecting_monitor._append_latest_trouble_to_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
@@ -1698,9 +1724,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._append_latest_trouble_to_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
@@ -1721,9 +1745,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._append_latest_trouble_to_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
@@ -1737,9 +1759,7 @@ class TestServiceAffectingMonitor:
         detail_info = make_detail_item_with_notes_and_ticket_info()
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
@@ -1757,9 +1777,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_500_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
@@ -1778,9 +1796,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
@@ -1794,9 +1810,7 @@ class TestServiceAffectingMonitor:
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_not_awaited()
@@ -1813,9 +1827,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = bruin_500_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -1834,9 +1846,7 @@ class TestServiceAffectingMonitor:
             make_create_ticket_200_response()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -2539,9 +2549,7 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'dev'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
@@ -2597,9 +2605,7 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_500_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
@@ -2663,9 +2669,7 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['environment'] = 'production'
-        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
