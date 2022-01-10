@@ -53,3 +53,10 @@ Configmap name of service-affecting-monitor
 {{- define "service-affecting-monitor.configmapName" -}}
 {{ include "service-affecting-monitor.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of service-affecting-monitor
+*/}}
+{{- define "service-affecting-monitor.secretName" -}}
+{{ include "service-affecting-monitor.fullname" . }}-secret
+{{- end }}

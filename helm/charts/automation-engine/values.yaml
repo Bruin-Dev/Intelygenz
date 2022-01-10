@@ -988,6 +988,46 @@ service-affecting-monitor:
     exec_monitor_reports_on_start: "False"
     # -- Indicates if the bandwidth reports process will be executed on start or not
     exec_bandwidth_reports_on_start: "False"
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ""
+    # -- [Monitoring] Defines how often devices are checked to find and report issues
+    monitoring__monitoring_job_interval: 0
+    # -- [Monitoring] VeloCloud hosts whose edges will be monitored
+    monitoring__monitored_velocloud_hosts: []
+    # -- [Monitoring] Mapping of VeloCloud hosts, Bruin customers and default contact info
+    monitoring__default_contact_info_per_customer: {}
+    # -- [Monitoring] Threshold for Latency troubles
+    monitoring__latency_monitoring_threshold: 0
+    # -- [Monitoring] Threshold for Packet Loss troubles
+    monitoring__packet_loss_monitoring_threshold: 0
+    # -- [Monitoring] Threshold for Jitter troubles
+    monitoring__jitter_monitoring_threshold: 0
+    # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
+    monitoring__bandwidth_over_utilization_monitoring_threshold: 0
+    # -- [Monitoring] Threshold for Circuit Instability troubles
+    monitoring__circuit_instability_monitoring_threshold: 0
+    # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
+    monitoring__circuit_instability_autoresolve_threshold: 0
+    # -- [Monitoring] Defines how much time back to look for Latency metrics in Latency checks
+    monitoring__latency_monitoring_lookup_interval: 0
+    # -- [Monitoring] Defines how much time back to look for Packet Loss metrics in Packet Loss checks
+    monitoring__packet_loss_monitoring_lookup_interval: 0
+    # -- [Monitoring] Defines how much time back to look for Jitter metrics in Jitter checks
+    monitoring__jitter_monitoring_lookup_interval: 0
+    # -- [Monitoring] Defines how much time back to look for Bandwidth metrics in Bandwidth Over Utilization checks
+    monitoring__bandwidth_over_utilization_monitoring_lookup_interval: 0
+    # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
+    monitoring__circuit_instability_monitoring_lookup_interval: 0
+    # -- [Monitoring] Defines how much time back to look for all kinds of metrics while running auto-resolves
+    monitoring__autoresolve_lookup_interval: 0
+    # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented trouble
+    monitoring__grace_period_to_autoresolve_after_last_documented_trouble: 0
+    # -- [Monitoring] Defines how many times a ticket can be auto-resolved
+    monitoring__max_autoresolves_per_ticket: 0
+    # -- [Monitoring] List of client IDs for which Bandwidth Over Utilization checks are enabled
+    monitoring__customers_with_bandwidth_over_utilization_monitoring: []
+    # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
+    monitoring__link_labels_blacklisted_in_asr_forwards: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:

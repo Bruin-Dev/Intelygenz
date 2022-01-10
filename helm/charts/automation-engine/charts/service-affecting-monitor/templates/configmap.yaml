@@ -9,12 +9,27 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  LAST_CONTACT_RECIPIENT: {{ .Values.global.last_contact_recipient | quote }}
   NATS_SERVER1: {{ .Values.global.nats_server | quote }}
   REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
   PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
   EXEC_MONITOR_REPORTS_ON_START: {{ .Values.config.exec_monitor_reports_on_start | default "False" | quote }}
   EXEC_BANDWIDTH_REPORTS_ON_START: {{ .Values.config.exec_bandwidth_reports_on_start | default "False" | quote }}
+  MONITORING__MONITORING_JOB_INTERVAL: {{ (int64 .Values.config.monitoring__monitoring_job_interval) | quote }}
+  MONITORING__LATENCY_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__latency_monitoring_threshold) | quote }}
+  MONITORING__PACKET_LOSS_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__packet_loss_monitoring_threshold) | quote }}
+  MONITORING__JITTER_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__jitter_monitoring_threshold) | quote }}
+  MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__bandwidth_over_utilization_monitoring_threshold) | quote }}
+  MONITORING__CIRCUIT_INSTABILITY_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__circuit_instability_monitoring_threshold) | quote }}
+  MONITORING__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD: {{ (int64 .Values.config.monitoring__circuit_instability_autoresolve_threshold) | quote }}
+  MONITORING__LATENCY_MONITORING_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__latency_monitoring_lookup_interval) | quote }}
+  MONITORING__PACKET_LOSS_MONITORING_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__packet_loss_monitoring_lookup_interval) | quote }}
+  MONITORING__JITTER_MONITORING_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__jitter_monitoring_lookup_interval) | quote }}
+  MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__bandwidth_over_utilization_monitoring_lookup_interval) | quote }}
+  MONITORING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__circuit_instability_monitoring_lookup_interval) | quote }}
+  MONITORING__AUTORESOLVE_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__circuit_instability_monitoring_lookup_interval) | quote }}
+  MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE: {{ (int64 .Values.config.monitoring__grace_period_to_autoresolve_after_last_documented_trouble) | quote }}
+  MONITORING__MAX_AUTORESOLVES_PER_TICKET: {{ (int64 .Values.config.monitoring__max_autoresolves_per_ticket) | quote }}

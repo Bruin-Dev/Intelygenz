@@ -882,6 +882,46 @@ service-affecting-monitor:
     exec_monitor_reports_on_start: ${EXEC_MONITOR_REPORTS_ON_START}
     # -- Indicates if the bandwidth reports process will be executed on start or not
     exec_bandwidth_reports_on_start: ${EXEC_BANDWIDTH_REPORTS_ON_START}
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ${SERVICE_AFFECTING__MONITORED_PRODUCT_CATEGORY}
+    # -- [Monitoring] Defines how often devices are checked to find and report issues
+    monitoring__monitoring_job_interval: ${SERVICE_AFFECTING__MONITOR__MONITORING_JOB_INTERVAL}
+    # -- [Monitoring] VeloCloud hosts whose edges will be monitored
+    monitoring__monitored_velocloud_hosts: ${SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS}
+    # -- [Monitoring] Mapping of VeloCloud hosts, Bruin customers and default contact info
+    monitoring__default_contact_info_per_customer: ${SERVICE_AFFECTING__MONITOR__DEFAULT_CONTACT_INFO_PER_CUSTOMER}
+    # -- [Monitoring] Threshold for Latency troubles
+    monitoring__latency_monitoring_threshold: ${DEV__SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Packet Loss troubles
+    monitoring__packet_loss_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Jitter troubles
+    monitoring__jitter_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
+    monitoring__bandwidth_over_utilization_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Circuit Instability troubles
+    monitoring__circuit_instability_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_THRESHOLD}
+    # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
+    monitoring__circuit_instability_autoresolve_threshold: ${DEV__SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD}
+    # -- [Monitoring] Defines how much time back to look for Latency metrics in Latency checks
+    monitoring__latency_monitoring_lookup_interval: ${SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_LOOKUP_INTERVAL}
+    # -- [Monitoring] Defines how much time back to look for Packet Loss metrics in Packet Loss checks
+    monitoring__packet_loss_monitoring_lookup_interval: ${SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_LOOKUP_INTERVAL}
+    # -- [Monitoring] Defines how much time back to look for Jitter metrics in Jitter checks
+    monitoring__jitter_monitoring_lookup_interval: ${SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_LOOKUP_INTERVAL}
+    # -- [Monitoring] Defines how much time back to look for Bandwidth metrics in Bandwidth Over Utilization checks
+    monitoring__bandwidth_over_utilization_monitoring_lookup_interval: ${SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL}
+    # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
+    monitoring__circuit_instability_monitoring_lookup_interval: ${SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL}
+    # -- [Monitoring] Defines how much time back to look for all kinds of metrics while running auto-resolves
+    monitoring__autoresolve_lookup_interval: ${SERVICE_AFFECTING__MONITOR__AUTORESOLVE_LOOKUP_INTERVAL}
+    # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented trouble
+    monitoring__grace_period_to_autoresolve_after_last_documented_trouble: ${SERVICE_AFFECTING__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE}
+    # -- [Monitoring] Defines how many times a ticket can be auto-resolved
+    monitoring__max_autoresolves_per_ticket: ${SERVICE_AFFECTING__MONITOR__MAX_AUTORESOLVES_PER_TICKET}
+    # -- [Monitoring] List of client IDs for which Bandwidth Over Utilization checks are enabled
+    monitoring__customers_with_bandwidth_over_utilization_monitoring: ${SERVICE_AFFECTING__MONITOR__CUSTOMERS_WITH_BANDWIDTH_OVER_UTILIZATION_MONITORING}
+    # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
+    monitoring__link_labels_blacklisted_in_asr_forwards: ${SERVICE_AFFECTING__MONITOR__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
