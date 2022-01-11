@@ -1028,6 +1028,16 @@ service-affecting-monitor:
     monitoring__customers_with_bandwidth_over_utilization_monitoring: []
     # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
     monitoring__link_labels_blacklisted_in_asr_forwards: []
+    # -- [Reoccurring Trouble Report] Cron expression that determines when to build and deliver this report
+    reoccurring_trouble_report__execution_cron_expression: ""
+    # -- [Reoccurring Trouble Report] Troubles that will be reported
+    reoccurring_trouble_report__reported_troubles: []
+    # -- [Reoccurring Trouble Report] Defines how much time back to look for Bruin tickets
+    reoccurring_trouble_report__tickets_lookup_interval: 0
+    # -- [Reoccurring Trouble Report] Number of different tickets a trouble must appear in for a particular edge and interface to include it in the report
+    reoccurring_trouble_report__reoccurring_trouble_tickets_threshold: 0
+    # -- [Reoccurring Trouble Report] Mapping of Bruin customer IDs and recipients of these reports
+    reoccurring_trouble_report__recipients_per_customer: {}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:

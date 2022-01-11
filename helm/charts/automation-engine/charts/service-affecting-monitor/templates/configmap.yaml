@@ -33,3 +33,7 @@ data:
   MONITORING__AUTORESOLVE_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__circuit_instability_monitoring_lookup_interval) | quote }}
   MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE: {{ (int64 .Values.config.monitoring__grace_period_to_autoresolve_after_last_documented_trouble) | quote }}
   MONITORING__MAX_AUTORESOLVES_PER_TICKET: {{ (int64 .Values.config.monitoring__max_autoresolves_per_ticket) | quote }}
+  REOCCURRING_TROUBLE_REPORT__EXECUTION_CRON_EXPRESSION: {{ .Values.config.reoccurring_trouble_report__execution_cron_expression | quote }}
+  REOCCURRING_TROUBLE_REPORT__REPORTED_TROUBLES: {{ mustToJson .Values.config.reoccurring_trouble_report__reported_troubles | quote }}
+  REOCCURRING_TROUBLE_REPORT__TICKETS_LOOKUP_INTERVAL: {{ (int64 .Values.config.reoccurring_trouble_report__tickets_lookup_interval) | quote }}
+  REOCCURRING_TROUBLE_REPORT__REOCCURRING_TROUBLE_TICKETS_THRESHOLD: {{ (int64 .Values.config.reoccurring_trouble_report__reoccurring_trouble_tickets_threshold) | quote }}
