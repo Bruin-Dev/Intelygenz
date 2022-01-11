@@ -932,6 +932,14 @@ service-affecting-monitor:
     reoccurring_trouble_report__reoccurring_trouble_tickets_threshold: ${SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__REOCCURRING_TROUBLE_TICKETS_THRESHOLD}
     # -- [Reoccurring Trouble Report] Mapping of Bruin customer IDs and recipients of these reports
     reoccurring_trouble_report__recipients_per_customer: ${SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_CUSTOMER}
+    # -- [Daily Bandwidth Report] Cron expression that determines when to build and deliver this report
+    daily_bandwidth_report__execution_cron_expression: ${SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION}
+    # -- [Daily Bandwidth Report] Defines how much time back to look for bandwidth metrics and Bruin tickets
+    daily_bandwidth_report__lookup_interval: ${SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL}
+    # -- [Daily Bandwidth Report] Customers for whom this report will be built
+    daily_bandwidth_report__enabled_customers: ${SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS}
+    # -- [Daily Bandwidth Report] List of recipients that will get these reports
+    daily_bandwidth_report__recipients: ${SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:

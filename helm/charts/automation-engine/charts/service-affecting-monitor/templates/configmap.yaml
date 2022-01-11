@@ -37,3 +37,5 @@ data:
   REOCCURRING_TROUBLE_REPORT__REPORTED_TROUBLES: {{ mustToJson .Values.config.reoccurring_trouble_report__reported_troubles | quote }}
   REOCCURRING_TROUBLE_REPORT__TICKETS_LOOKUP_INTERVAL: {{ (int64 .Values.config.reoccurring_trouble_report__tickets_lookup_interval) | quote }}
   REOCCURRING_TROUBLE_REPORT__REOCCURRING_TROUBLE_TICKETS_THRESHOLD: {{ (int64 .Values.config.reoccurring_trouble_report__reoccurring_trouble_tickets_threshold) | quote }}
+  DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION: {{ .Values.config.daily_bandwidth_report__execution_cron_expression | quote }}
+  DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL: {{ (int64 .Values.config.daily_bandwidth_report__lookup_interval) | quote }}
