@@ -2154,6 +2154,176 @@ class TestGetClientInfo:
             assert result == message
 
 
+class TestGetClientInfoByDID:
+    @pytest.mark.asyncio
+    async def get_client_info_by_did_2xx_status_test(self):
+        did = '+14159999999'
+        request_payload = {'phoneNumber': did, 'phoneNumberType': 'DID'}
+
+        bruin_response_body = {"inventoryId": 12345678, "clientId": 87654, "clientName": "Test Client",
+                               "btn": "9876543210"}
+        bruin_response_status = 200
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_client_info_by_did(did)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/phoneNumber/Lines',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_client_info_by_did_400_status_test(self):
+        did = '+14159999999'
+        request_payload = {'phoneNumber': did, 'phoneNumberType': 'DID'}
+
+        bruin_response_body = 'Invalid'
+        bruin_response_status = 400
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_client_info_by_did(did)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/phoneNumber/Lines',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called_once()
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_client_info_by_did_401_status_test(self):
+        did = '+14159999999'
+        request_payload = {'phoneNumber': did, 'phoneNumberType': 'DID'}
+
+        bruin_response_body = '401 error'
+        bruin_response_status = 401
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_client_info_by_did(did)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/phoneNumber/Lines',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+            bruin_client.login.assert_awaited_once()
+        expected = {
+            "body": "Got 401 from Bruin",
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called_once()
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_client_info_by_did_5xx_status_test(self):
+        did = '+14159999999'
+        request_payload = {'phoneNumber': did, 'phoneNumberType': 'DID'}
+
+        bruin_response_body = 'Internal Error'
+        bruin_response_status = 500
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.get_client_info_by_did(did)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/phoneNumber/Lines',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": "Got internal error from Bruin",
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_client_info_by_did_connection_error_test(self):
+        did = '+14159999999'
+        request_payload = {'phoneNumber': did, 'phoneNumberType': 'DID'}
+
+        bruin_response_body = 'Internal Error'
+        bruin_response_status = 500
+        bruin_response = Mock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+        logger.error = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        cause = "ERROR"
+
+        with patch.object(bruin_client._session, 'get', new=CoroutineMock(side_effect=ClientConnectionError(cause))):
+            result = await bruin_client.get_client_info_by_did(did)
+
+            bruin_client._session.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory/phoneNumber/Lines',
+                params=request_payload,
+                headers=bruin_client._get_request_headers(),
+                ssl=False,
+            )
+
+        expected = {
+            "body": f"Connection error in Bruin API. {cause}",
+            "status": bruin_response_status,
+        }
+        logger.error.assert_called()
+        assert result == expected
+
+
 class TestPostMultipleTicketNotes:
     @pytest.mark.asyncio
     async def post_multiple_ticket_notes_with_connection_error_test(self):

@@ -1172,6 +1172,31 @@ class TestBruinRepository:
         assert result == expected_result
 
     @pytest.mark.asyncio
+    async def get_client_info_by_did_test(self):
+        did = '+14159999999'
+
+        mock_response = {
+            "body": {
+                "inventoryId": 12345678,
+                "clientId": 87654,
+                "clientName": "Test Client",
+                "btn": "9876543210"
+            },
+            "status": 200
+        }
+
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.get_client_info_by_did = CoroutineMock(return_value=mock_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        response = await bruin_repository.get_client_info_by_did(did)
+
+        bruin_client.get_client_info_by_did.assert_awaited_once_with(did)
+        assert response == mock_response
+
+    @pytest.mark.asyncio
     async def get_next_results_for_ticket_detail_test(self):
         ticket_id = 4503440
         detail_id = 4806634
