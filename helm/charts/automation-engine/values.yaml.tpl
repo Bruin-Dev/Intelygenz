@@ -970,15 +970,45 @@ service-affecting-monitor:
       memory: 192Mi
 
 
-# -- service-outage-monitor (SOM) subchart specific configuration
+# -- service-outage-monitor subchart specific configuration
 service-outage-monitor:
   enabled: ${SERVICE_OUTAGE_MONITOR_ENABLED}
   replicaCount: ${SERVICE_OUTAGE_MONITOR_DESIRED_TASKS}
   config:
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ${SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY}
+    # -- [Monitoring] Defines how often devices are checked to find and report issues
+    monitoring__monitoring_job_interval: ${SERVICE_OUTAGE__MONITOR__MONITORING_JOB_INTERVAL}
+    # -- [Monitoring] VeloCloud hosts whose edges will be monitored
+    monitoring__monitored_velocloud_hosts: ${SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS}
+    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Link Down state
+    monitoring__quarantine_for_edges_in_link_down_outage: ${SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE}
+    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Hard Down state
+    monitoring__quarantine_for_edges_in_hard_down_outage: ${SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE}
+    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Link Down (HA) state
+    monitoring__quarantine_for_edges_in_ha_link_down_outage: ${SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE}
+    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Soft Down (HA) state
+    monitoring__quarantine_for_edges_in_ha_soft_down_outage: ${SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE}
+    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Hard Down (HA) state
+    monitoring__quarantine_for_edges_in_ha_hard_down_outage: ${SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE}
+    # -- [Monitoring] E-mail address that will receive a tiny report showing which edges from VeloCloud responses are not in the cache of customers
+    monitoring__missing_edges_from_cache_report_recipient: ${SERVICE_OUTAGE__MONITOR__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT}
+    # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
+    monitoring__link_labels_blacklisted_in_asr_forwards: ${SERVICE_OUTAGE__MONITOR__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS}
+    # -- [Monitoring] List of edges that are excluded from Service Outage monitoring
+    monitoring__blacklisted_edges: ${SERVICE_OUTAGE__MONITOR__BLACKLISTED_EDGES}
+    # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented outage
+    monitoring__grace_period_to_autoresolve_after_last_documented_outage: ${SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE}
+    # -- [Monitoring] Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge
+    monitoring__grace_period_before_attempting_new_digi_reboots: ${SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS}
+    # -- [Monitoring] Severity level for Edge Down outages
+    monitoring__severity_level_for_edge_down_outages: ${SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_EDGE_DOWN_OUTAGES}
+    # -- [Monitoring] Severity level for Link Down outages
+    monitoring__severity_level_for_link_down_outages: ${SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_LINK_DOWN_OUTAGES}
+    # -- [Monitoring] Defines how many times a ticket can be auto-resolved
+    monitoring__max_autoresolves_per_ticket: ${SERVICE_OUTAGE__MONITOR__MAX_AUTORESOLVES_PER_TICKET}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-    # -- SOM Velocloud Hosts to monitor:
-    som_monitored_velocloud_hosts: [${SOM_MONITORED_VELOCLOUD_HOSTS}]
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -990,9 +1020,6 @@ service-outage-monitor:
       labels: {}
       #labels:
       #  servicediscovery: true
-    enable_triage_monitoring: "0"
-    # -- Filter for Velocloud hosts
-    velocloud_hosts_filter: ${VELOCLOUD_HOST_1_FILTER}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always

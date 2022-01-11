@@ -29,10 +29,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -41,8 +37,38 @@ global:
     name: "ecr-registry"
 
 config:
-  # -- SOM Velocloud Hosts to monitor:
-  som_monitored_velocloud_hosts: []
+  # -- Bruin's product category under monitoring
+  monitored_product_category: ""
+  # -- [Monitoring] Defines how often devices are checked to find and report issues
+  monitoring__monitoring_job_interval: 0
+  # -- [Monitoring] VeloCloud hosts whose edges will be monitored
+  monitoring__monitored_velocloud_hosts: []
+  # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Link Down state
+  monitoring__quarantine_for_edges_in_link_down_outage: 0
+  # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Hard Down state
+  monitoring__quarantine_for_edges_in_hard_down_outage: 0
+  # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Link Down (HA) state
+  monitoring__quarantine_for_edges_in_ha_link_down_outage: 0
+  # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Soft Down (HA) state
+  monitoring__quarantine_for_edges_in_ha_soft_down_outage: 0
+  # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Hard Down (HA) state
+  monitoring__quarantine_for_edges_in_ha_hard_down_outage: 0
+  # -- [Monitoring] E-mail address that will receive a tiny report showing which edges from VeloCloud responses are not in the cache of customers
+  monitoring__missing_edges_from_cache_report_recipient: ""
+  # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
+  monitoring__link_labels_blacklisted_in_asr_forwards: []
+  # -- [Monitoring] List of edges that are excluded from Service Outage monitoring
+  monitoring__blacklisted_edges: []
+  # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented outage
+  monitoring__grace_period_to_autoresolve_after_last_documented_outage: 0
+  # -- [Monitoring] Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge
+  monitoring__grace_period_before_attempting_new_digi_reboots: 0
+  # -- [Monitoring] Severity level for Edge Down outages
+  monitoring__severity_level_for_edge_down_outages: 0
+  # -- [Monitoring] Severity level for Link Down outages
+  monitoring__severity_level_for_link_down_outages: 0
+  # -- [Monitoring] Defines how many times a ticket can be auto-resolved
+  monitoring__max_autoresolves_per_ticket: 0
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true
@@ -54,9 +80,6 @@ config:
     labels: {}
     #labels:
     #  servicediscovery: true
-  enable_triage_monitoring: "1"
-  # -- Filter for Velocloud hosts
-  velocloud_hosts_filter: ""
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

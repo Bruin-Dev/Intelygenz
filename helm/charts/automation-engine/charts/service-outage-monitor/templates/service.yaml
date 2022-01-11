@@ -1,13 +1,13 @@
-{{- range $som_monitored_velocloud_hosts, $val := .Values.config.som_monitored_velocloud_hosts }}
+{{- range $index, $host := .Values.config.monitoring__monitored_velocloud_hosts }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: "{{ include "service-outage-monitor.fullname" $ }}{{ $som_monitored_velocloud_hosts | add1 }}-{{ . | replace "." "-" }}"
+  name: "{{ include "service-outage-monitor.fullname" $ }}{{ $index | add1 }}-{{ $host | replace "." "-" }}"
   labels:
-    {{- include "service-outage-monitor.labels" $ | nindent 4 }}-{{ $som_monitored_velocloud_hosts | add1 }}
-    velocloud_host: {{ . | quote }}
-    velocloud_host_id: {{ $som_monitored_velocloud_hosts | add1 | quote }}
+    {{- include "service-outage-monitor.labels" $ | nindent 4 }}-{{ $index | add1 }}
+    velocloud_host: {{ $host | quote }}
+    velocloud_host_id: {{ $index | add1 | quote }}
 spec:
   type: {{ $.Values.service.type }}
   ports:
@@ -19,6 +19,6 @@ spec:
     {{- end }}
   selector:
     {{- include "service-outage-monitor.selectorLabels" $ | nindent 4 }}
-    velocloud_host: {{ . | quote }}
-    velocloud_host_id: {{ $som_monitored_velocloud_hosts | add1 | quote }}
+    velocloud_host: {{ $host | quote }}
+    velocloud_host_id: {{ $index | add1 | quote }}
 {{- end }}
