@@ -125,7 +125,7 @@ class TemplateRepository:
             ])
 
         if rows:
-            now = datetime.now(timezone(self._config.BANDWIDTH_REPORT_CONFIG['timezone']))
+            now = datetime.now(timezone(self._config.TIMEZONE))
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Daily Bandwidth Report - {date}'
             recipients = self._config.BANDWIDTH_REPORT_CONFIG['recipients']

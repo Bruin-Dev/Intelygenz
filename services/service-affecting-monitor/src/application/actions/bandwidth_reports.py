@@ -28,7 +28,7 @@ class BandwidthReports:
         if exec_on_start:
             await self._bandwidth_reports_job()
 
-        tz = self._config.BANDWIDTH_REPORT_CONFIG['timezone']
+        tz = self._config.TIMEZONE
         cron = CronTrigger.from_crontab(self._config.BANDWIDTH_REPORT_CONFIG['crontab'], timezone=timezone(tz))
         self._scheduler.add_job(self._bandwidth_reports_job, cron, id='_bandwidth_reports', replace_existing=True)
 

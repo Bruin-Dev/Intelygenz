@@ -101,11 +101,10 @@ MONITOR_REPORT_CONFIG = {
 BANDWIDTH_REPORT_CONFIG = {
     'exec_on_start': os.environ['EXEC_BANDWIDTH_REPORTS_ON_START'].lower() == 'true',
     'environment': os.environ['CURRENT_ENVIRONMENT'],
-    'timezone': 'US/Eastern',
-    'crontab': '0 4 * * *',
-    'lookup_interval_hours': 24,
-    'clients': [86937],
-    'recipients': ['bsullivan@mettel.net', 'efox@mettel.net', 'mettel.automation@intelygenz.com']
+    'crontab': os.environ['DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION'],
+    'lookup_interval_hours': int(os.environ['DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL']) // 60 // 60,
+    'clients': json.loads(os.environ['DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS']),
+    'recipients': json.loads(os.environ['DAILY_BANDWIDTH_REPORT__RECIPIENTS']),
 }
 
 CURRENT_ENVIRONMENT = os.environ['CURRENT_ENVIRONMENT']
