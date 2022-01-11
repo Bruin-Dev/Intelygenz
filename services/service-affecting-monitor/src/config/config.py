@@ -76,27 +76,26 @@ MONITOR_CONFIG = {
         os.environ['MONITORING__CUSTOMERS_WITH_BANDWIDTH_MONITORING_ENABLED']),
 }
 
+# JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
+recipients_by_customer_raw = json.loads(os.environ['REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_CUSTOMER'])
+recipients_by_customer = defaultdict(dict)
+for client_id in recipients_by_customer.keys():
+    if client_id.isnumeric():
+        recipients_by_customer[int(client_id)] = recipients_by_customer_raw[client_id]
+    else:
+        # Possibly a list of default recipients common to all reports, these should remain the same
+        recipients_by_customer[client_id] = recipients_by_customer_raw[client_id]
+
 MONITOR_REPORT_CONFIG = {
     'exec_on_start': os.environ['EXEC_MONITOR_REPORTS_ON_START'].lower() == 'true',
-    'timezone': 'US/Eastern',
     'semaphore': 5,
     'wait_fixed': 15,
     'stop_after_attempt': 3,
-    'crontab': '0 3 * * 0',
-    'threshold': 3,
-    'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
-    'trailing_days': 14,
-    'recipients': {
-        'default': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
-                    'mettel.automation@intelygenz.com'],
-        83959: ['clmillsap@oreillyauto.com', 'mgallion2@oreillyauto.com', 'rbodenhamer@oreillyauto.com',
-                'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net', 'dshim@mettel.net'],
-        72959: ['DL_Tenet_Telecom@nttdata.com', 'Jake.Salas@tenethealth.com', 'dshim@mettel.net',
-                'mgoldstein@mettel.net'],
-        83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net'],
-        86937: ['networkservices@signetjewelers.com', 'pallen@mettel.net'],
-        85940: ['ta-infrastructure@titanamerica.com'],
-    }
+    'crontab': os.environ['REOCCURRING_TROUBLE_REPORT__EXECUTION_CRON_EXPRESSION'],
+    'threshold': int(os.environ['REOCCURRING_TROUBLE_REPORT__REOCCURRING_TROUBLE_TICKETS_THRESHOLD']),
+    'active_reports': json.loads(os.environ['REOCCURRING_TROUBLE_REPORT__REPORTED_TROUBLES']),
+    'trailing_days': int(os.environ['REOCCURRING_TROUBLE_REPORT__TICKETS_LOOKUP_INTERVAL']) // 60 // 60 // 24,
+    'recipients': recipients_by_customer,
 }
 
 BANDWIDTH_REPORT_CONFIG = {

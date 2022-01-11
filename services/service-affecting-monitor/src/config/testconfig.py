@@ -71,12 +71,10 @@ MONITOR_CONFIG = {
 MONITOR_REPORT_CONFIG = {
     'exec_on_start': False,
     'environment': 'test',
-    'timezone': 'US/Eastern',
     'semaphore': 5,
     'wait_fixed': 1,
     'stop_after_attempt': 2,
     'crontab': '0 8 * * *',
-    'client_id_bandwidth': 83109,
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,

@@ -81,7 +81,7 @@ class TemplateRepository:
             ])
 
         if rows:
-            now = datetime.now(timezone(self._config.MONITOR_REPORT_CONFIG['timezone']))
+            now = datetime.now(timezone(self._config.TIMEZONE))
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Reoccurring Service Affecting Trouble - {date}'
             recipients_by_client = self._config.MONITOR_REPORT_CONFIG['recipients']
