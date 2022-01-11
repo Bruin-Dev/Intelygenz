@@ -19,66 +19,46 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-SEVERITY_LEVELS = {
-    'high': 1,
-    'medium_high': 2,
-    'medium_low': 3,
-    'low': 4,
-}
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
+CURRENT_ENVIRONMENT = os.environ['CURRENT_ENVIRONMENT']
 
-quarantine_time = 60 * 3
+TIMEZONE = os.environ['TIMEZONE']
 
-
-try:
-    velocloud_hosts = os.environ["VELOCLOUD_HOSTS"].replace(' ', '').split(':')
-    velocloud_hosts_filter = os.environ["VELOCLOUD_HOSTS_FILTER"].replace(' ', '').split(':')
-    velocloud_hosts_filter = [json.loads(velo_filter) for velo_filter in velocloud_hosts_filter]
-    velocloud_hosts_and_filters = [
-        (velocloud_hosts[i], velocloud_hosts_filter[i])
-        for i in range(len(velocloud_hosts))
-    ]
-    velocloud_hosts_and_filters = dict(velocloud_hosts_and_filters)
-except Exception as ex:
-    logging.error(f"Error loading velocloud hosts and filters: {ex}")
-    sys.exit(1)
+PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 MONITOR_CONFIG = {
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,
-    'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'timezone': 'US/Eastern',
+    'recipient': os.environ["MONITORING__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT"],
     'jobs_intervals': {
-        'outage_monitor': 60 * 10,
-        'build_cache': 60 * 240,
+        'outage_monitor': int(os.environ['MONITORING__MONITORING_JOB_INTERVAL']),
         'forward_to_hnoc': 60,
     },
     'quarantine': {
-        Outages.LINK_DOWN: quarantine_time,
-        Outages.HARD_DOWN: quarantine_time,
-        Outages.HA_LINK_DOWN: quarantine_time,
-        Outages.HA_SOFT_DOWN: quarantine_time,
-        Outages.HA_HARD_DOWN: quarantine_time,
+        Outages.LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE']),
+        Outages.HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE']),
+        Outages.HA_LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE']),
+        Outages.HA_SOFT_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE']),
+        Outages.HA_HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE']),
     },
-    'velocloud_instances_filter': velocloud_hosts_and_filters,
-    'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned', 'PIAB'],
-    'blacklisted_edges': [
-        # Federal edge that is inside a non-federal Velocloud instance
-        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
-    ],
+    'velocloud_instances_filter': {
+        os.environ['MONITORING__VELOCLOUD_HOST']: [],
+    },
+    'blacklisted_link_labels_for_asr_forwards': json.loads(
+        os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS']),
+    'blacklisted_edges': json.loads(os.environ['MONITORING__BLACKLISTED_EDGES']),
     'forward_link_outage_seconds': 60 * 60,
-    'autoresolve_ticket_creation_seconds': 75 * 60,
-    'autoresolve_last_outage_seconds': 90 * 60,
-    'last_digi_reboot_seconds': 30 * 60,
+    'autoresolve_last_outage_seconds': int(
+        os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE']),
+    'last_digi_reboot_seconds': int(os.environ['MONITORING__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS']),
     'semaphore': 5,
     'severity_by_outage_type': {
-        'edge_down': SEVERITY_LEVELS['medium_high'],
-        'link_down': SEVERITY_LEVELS['medium_low'],
+        'edge_down': int(os.environ['MONITORING__SEVERITY_FOR_EDGE_DOWN_OUTAGES']),
+        'link_down': int(os.environ['MONITORING__SEVERITY_FOR_LINK_DOWN_OUTAGES']),
     },
+    'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
 }
-
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
     'name': 'service-outage-monitor',
@@ -86,10 +66,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-service-outage-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
@@ -103,7 +83,6 @@ REDIS = {
 }
 
 TRIAGE_CONFIG = {
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
     'polling_minutes': 10,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'enable_triage': bool(int(os.environ['ENABLE_TRIAGE_MONITORING'])),

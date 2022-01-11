@@ -392,73 +392,33 @@ services:
       - 5008:5000
       - 9130:9090
 
-  service-outage-monitor-1:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: services/service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - services/service-outage-monitor/src/config/env-outage-monitor-1
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5107:5000
-      - 9140:9090
-
-  service-outage-monitor-2:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: services/service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - services/service-outage-monitor/src/config/env-outage-monitor-2
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5207:5000
-      - 9150:9090
-
-  service-outage-monitor-3:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: services/service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - services/service-outage-monitor/src/config/env-outage-monitor-3
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5307:5000
-      - 9160:9090
-
-  service-outage-monitor-4:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: services/service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - services/service-outage-monitor/src/config/env-outage-monitor-4
-    depends_on:
-      - "nats-server"
-      - redis
-    ports:
-      - 5407:5000
-      - 9170:9090
+# service-outage-monitor instances vary depending on the environment you want to test, so their configuration
+# can't be hardcoded in this docker-compose file
+#
+# Use the following template if you need to spin up such instances:
+# -------------------------------------------------------------------------------------
+#  service-outage-monitor-<id>:
+#    build:
+#      # Context must be the root of the monorepo
+#      context: .
+#      dockerfile: services/service-outage-monitor/Dockerfile
+#      args:
+#        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+#        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+#    env_file:
+#      - services/service-outage-monitor/src/config/<env_filename>
+#    depends_on:
+#      - "nats-server"
+#      - redis
+#    ports:
+#      - <port_mapped_to_quartz>:5000
+#      - <port_mapped_to_metrics_server>:9090
+# -------------------------------------------------------------------------------------
+# where:
+#  - <id> is an identifier for the service
+#  - <env_filename> is the filename of the env file you want to use for the configuration of the service
+#  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
+#  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
 
   service-outage-monitor-triage:
     build:

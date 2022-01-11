@@ -26,7 +26,7 @@ class BruinRepository:
                 'client_id': client_id,
                 'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
-                'product_category': 'SD-WAN',
+                'product_category': self._config.PRODUCT_CATEGORY,
             },
         }
 
@@ -561,7 +561,7 @@ class BruinRepository:
         return response
 
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         autoresolve_note = os.linesep.join([
             "#*MetTel's IPA*#",
             f'Auto-resolving detail for serial: {serial_number}',
@@ -571,7 +571,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[serial_number])
 
     async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, outage_causes: str):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         reopening_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'Re-opening ticket.',
@@ -647,7 +647,7 @@ class BruinRepository:
             return 200
 
     async def append_digi_reboot_note(self, ticket_id, serial_number, interface):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
 
         digi_reboot_note = os.linesep.join([
             f"#*MetTel's IPA*#",
@@ -659,7 +659,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, digi_reboot_note, service_numbers=[serial_number])
 
     async def append_task_result_change_note(self, ticket_id, task_result):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         task_result_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'DiGi reboot failed',
@@ -669,7 +669,7 @@ class BruinRepository:
         return await self.append_note_to_ticket(ticket_id, task_result_note)
 
     async def append_asr_forwarding_note(self, ticket_id, links, serial_number):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
 
         note_lines = [
             f"#*MetTel's IPA*#",

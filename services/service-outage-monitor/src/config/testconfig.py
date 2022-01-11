@@ -22,7 +22,9 @@ SEVERITY_LEVELS = {
     'low': 4,
 }
 
-quarantine_time = 5
+TIMEZONE = 'US/Eastern'
+
+PRODUCT_CATEGORY = 'SD-WAN'
 
 MONITOR_CONFIG = {
     'multiplier': 1,
@@ -30,18 +32,16 @@ MONITOR_CONFIG = {
     'stop_delay': 0,
     'recipient': "some.recipient@email.com",
     'environment': "dev",
-    'timezone': "US/Eastern",
     'jobs_intervals': {
         'outage_monitor': 60 * 3,
-        'build_cache': 60 * 60,
         'forward_to_hnoc': 60,
     },
     'quarantine': {
-        Outages.LINK_DOWN: quarantine_time,
-        Outages.HARD_DOWN: quarantine_time,
-        Outages.HA_LINK_DOWN: quarantine_time,
-        Outages.HA_SOFT_DOWN: quarantine_time,
-        Outages.HA_HARD_DOWN: quarantine_time,
+        Outages.LINK_DOWN: 5,
+        Outages.HARD_DOWN: 5,
+        Outages.HA_LINK_DOWN: 5,
+        Outages.HA_SOFT_DOWN: 5,
+        Outages.HA_HARD_DOWN: 5,
     },
     'velocloud_instances_filter': {
         "some-host": [],
@@ -49,7 +49,6 @@ MONITOR_CONFIG = {
     'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned', 'PIAB'],
     'blacklisted_edges': [],
     'forward_link_outage_seconds': 60 * 60,
-    'autoresolve_ticket_creation_seconds': 60 * 60,
     'autoresolve_last_outage_seconds': 60 * 60,
     'last_digi_reboot_seconds': 30 * 60,
     'semaphore': 1,
@@ -57,6 +56,7 @@ MONITOR_CONFIG = {
         'edge_down': SEVERITY_LEVELS['medium_high'],
         'link_down': SEVERITY_LEVELS['medium_low'],
     },
+    'max_autoresolves': 3,
 }
 
 LOG_CONFIG = {

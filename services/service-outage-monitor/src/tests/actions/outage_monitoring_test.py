@@ -3161,7 +3161,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
@@ -3263,7 +3263,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
@@ -3374,7 +3374,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -3555,7 +3555,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -3671,7 +3671,7 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=3
+            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_not_called()
 
@@ -3736,7 +3736,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -3846,7 +3846,7 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=3
+            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -3914,7 +3914,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -4035,7 +4035,7 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=3
+            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -4103,7 +4103,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -4233,7 +4233,7 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=3
+            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
@@ -4304,7 +4304,7 @@ class TestServiceOutageMonitor:
             "clientID": 12345,
             "clientName": "Aperture Science",
             "ticketID": outage_ticket_1_id,
-            "category": "SD-WAN",
+            "category": testconfig.PRODUCT_CATEGORY,
             "topic": "Service Outage Trouble",
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
@@ -4434,7 +4434,7 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=3
+            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.unpause_ticket_detail.assert_awaited_once_with(

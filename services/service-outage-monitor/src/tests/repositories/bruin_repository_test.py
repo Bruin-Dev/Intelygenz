@@ -41,7 +41,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
             },
         }
@@ -81,7 +81,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
                 'service_number': service_number,
             },
@@ -123,7 +123,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
             },
         }
@@ -158,7 +158,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ticket_statuses,
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
             },
         }

@@ -57,7 +57,7 @@ class OutageMonitor:
         next_run_time = undefined
 
         if exec_on_start:
-            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
             self._logger.info('Service Outage Monitor job is going to be executed immediately')
 
@@ -218,7 +218,7 @@ class OutageMonitor:
     def _schedule_recheck_job_for_edges(self, edges: list, outage_type: Outages):
         self._logger.info(f'Scheduling recheck job for {len(edges)} edges in {outage_type.value} state...')
 
-        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         quarantine_time = self._config.MONITOR_CONFIG['quarantine'][outage_type]
         run_date = current_datetime + timedelta(seconds=quarantine_time)
@@ -378,7 +378,8 @@ class OutageMonitor:
                 return
 
             can_detail_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_detail_auto_resolvable(
-                notes_from_outage_ticket, serial_number, max_autoresolves=3
+                notes_from_outage_ticket, serial_number,
+                max_autoresolves=self._config.MONITOR_CONFIG['max_autoresolves'],
             )
             if not can_detail_be_autoresolved_one_more_time:
                 self._logger.info(
@@ -637,7 +638,7 @@ class OutageMonitor:
         self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
     def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
-        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         forward_task_run_date = current_datetime + timedelta(
             seconds=self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc'])
