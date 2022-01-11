@@ -92,9 +92,14 @@ class FraudMonitor:
 
     async def _process_fraud(self, email_body: str, msg_uid: str) -> bool:
         did = DID_REGEX.search(email_body).group('did')
-        client_id = 0  # TODO: Get actual Client ID from a Bruin endpoint
-        service_number = ''  # TODO: Get actual Service Number from a Bruin endpoint
         email_body = EMAIL_BODY_REGEX.search(email_body).group('email_body')
+
+        client_info_by_did_response = await self._bruin_repository.get_client_info_by_did(did)
+        if client_info_by_did_response['status'] not in range(200, 300):
+            return False
+
+        client_id = client_info_by_did_response['body']['clientId']
+        service_number = client_info_by_did_response['body']['btn']
 
         open_fraud_tickets_response = await self._bruin_repository.get_open_fraud_tickets(client_id, service_number)
         if open_fraud_tickets_response['status'] not in range(200, 300):

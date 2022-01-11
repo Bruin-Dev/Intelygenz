@@ -14,6 +14,41 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
+    async def get_client_info_by_did(self, did: str):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'did': did,
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting client info by DID {did}...')
+            response = await self._event_bus.rpc_request("bruin.customer.get.info_by_did", request, timeout=15)
+        except Exception as e:
+            err_msg = f'An error occurred when getting client info by DID {did} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Got client info by DID {did}!')
+            else:
+                err_msg = (
+                    f'Error while getting client info by DID {did} in '
+                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list, service_number: str):
         err_msg = None
 
