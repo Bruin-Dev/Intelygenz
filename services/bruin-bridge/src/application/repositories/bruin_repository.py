@@ -195,6 +195,9 @@ class BruinRepository:
         response["body"] = response_body
         return response
 
+    async def get_client_info_by_did(self, did):
+        return await self._bruin_client.get_client_info_by_did(did)
+
     async def get_next_results_for_ticket_detail(self, ticket_id, detail_id, service_number):
         get_work_queues_filters = {
             "ServiceNumber": service_number,

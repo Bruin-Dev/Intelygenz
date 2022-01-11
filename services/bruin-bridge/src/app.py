@@ -23,6 +23,7 @@ from application.actions.open_ticket import OpenTicket
 from application.actions.post_outage_ticket import PostOutageTicket
 from application.actions.resolve_ticket import ResolveTicket
 from application.actions.get_client_info import GetClientInfo
+from application.actions.get_client_info_by_did import GetClientInfoByDID
 from application.actions.unpause_ticket import UnpauseTicket
 from application.actions.post_email_tag import PostEmailTag
 from application.actions.get_site import GetSite
@@ -76,6 +77,7 @@ class Container:
         self._subscriber_get_management_status = NATSClient(config, logger=self._logger)
         self._subscriber_post_outage_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_get_client_info = NATSClient(config, logger=self._logger)
+        self._subscriber_get_client_info_by_did = NATSClient(config, logger=self._logger)
         self._subscriber_change_work_queue = NATSClient(config, logger=self._logger)
         self._subscriber_get_ticket_task_history = NATSClient(config, logger=self._logger)
         self._subscriber_get_next_results_for_ticket_detail = NATSClient(config, logger=self._logger)
@@ -110,6 +112,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_get_management_status, consumer_name="get_management_status")
         self._event_bus.add_consumer(self._subscriber_post_outage_ticket, consumer_name="post_outage_ticket")
         self._event_bus.add_consumer(self._subscriber_get_client_info, consumer_name="get_client_info")
+        self._event_bus.add_consumer(self._subscriber_get_client_info_by_did, consumer_name="get_client_info_by_did")
         self._event_bus.add_consumer(self._subscriber_change_work_queue, consumer_name="change_work_queue")
         self._event_bus.add_consumer(self._subscriber_get_ticket_task_history, consumer_name="get_ticket_task_history")
         self._event_bus.add_consumer(
@@ -142,6 +145,7 @@ class Container:
         self._get_management_status = GetManagementStatus(self._logger, self._event_bus, self._bruin_repository)
         self._post_outage_ticket = PostOutageTicket(self._logger, self._event_bus, self._bruin_repository)
         self._get_client_info = GetClientInfo(self._logger, self._event_bus, self._bruin_repository)
+        self._get_client_info_by_did = GetClientInfoByDID(self._logger, self._event_bus, self._bruin_repository)
         self._change_work_queue = ChangeDetailWorkQueue(self._logger, self._event_bus, self._bruin_repository)
         self._get_ticket_task_history = GetTicketTaskHistory(self._logger, self._event_bus, self._bruin_repository)
         self._get_next_results_for_ticket_detail = GetNextResultsForTicketDetail(
@@ -185,6 +189,9 @@ class Container:
         self._action_get_client_info = ActionWrapper(self._get_client_info, "get_client_info",
                                                      is_async=True, logger=self._logger,
                                                      )
+        self._action_get_client_info_by_did = ActionWrapper(self._get_client_info_by_did, "get_client_info_by_did",
+                                                            is_async=True, logger=self._logger,
+                                                            )
         self._action_change_work_queue = ActionWrapper(self._change_work_queue, "change_detail_work_queue",
                                                        is_async=True, logger=self._logger,
                                                        )
@@ -262,6 +269,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="get_client_info",
                                                  topic="bruin.customer.get.info",
                                                  action_wrapper=self._action_get_client_info,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="get_client_info_by_did",
+                                                 topic="bruin.customer.get.info_by_did",
+                                                 action_wrapper=self._action_get_client_info_by_did,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="change_work_queue",
                                                  topic="bruin.ticket.change.work",
