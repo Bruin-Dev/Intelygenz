@@ -135,6 +135,21 @@ def make_detail_item_with_notes_and_ticket_info(make_ticket, make_detail_item):
 
 # RPC requests
 @pytest.fixture(scope='session')
+def make_get_client_info_by_did_request(make_rpc_request):
+    def _inner(*, request_id: str = '', did: str = ''):
+        payload = {
+            'did': did,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
 def make_get_tickets_request(make_rpc_request):
     def _inner(*, request_id: str = '', bruin_client_id: int = 0, ticket_statuses: List[str] = None,
                ticket_topic: str = '', service_number: str = None):
@@ -248,6 +263,23 @@ def make_open_or_resolve_ticket_request(make_rpc_request):
 
 
 # RPC responses
+@pytest.fixture(scope='session')
+def make_get_client_info_by_did_response(make_rpc_response):
+    def _inner(request_id: str = '', service_number: str = '', client_id: int = 0):
+        return make_rpc_response(
+            request_id=request_id,
+            body={
+                'btn': service_number,
+                'clientId': client_id,
+                'clientName': '',
+                'inventoryId': 0
+            },
+            status=200,
+        )
+
+    return _inner
+
+
 @pytest.fixture(scope='session')
 def make_get_tickets_response(make_rpc_response):
     def _inner(request_id: str = '', *tickets: List[dict]):

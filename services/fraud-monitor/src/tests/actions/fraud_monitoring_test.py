@@ -178,7 +178,8 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def process_fraud__append_note_to_ticket_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info, make_get_tickets_response):
+            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
+            make_get_client_info_by_did_response, make_get_tickets_response):
         service_number = ''
         msg_uid = '123456'
 
@@ -199,6 +200,7 @@ class TestFraudMonitor:
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
+        fraud_monitor._bruin_repository.get_client_info_by_did.return_value = make_get_client_info_by_did_response()
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response(ticket)
         fraud_monitor._get_oldest_fraud_ticket.return_value = detail_info
 
@@ -208,7 +210,8 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def process_fraud__reopen_resolved_ticket_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info, make_get_tickets_response):
+            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
+            make_get_client_info_by_did_response, make_get_tickets_response):
         service_number = ''
         msg_uid = '123456'
 
@@ -229,6 +232,7 @@ class TestFraudMonitor:
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
+        fraud_monitor._bruin_repository.get_client_info_by_did.return_value = make_get_client_info_by_did_response()
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response(ticket)
         fraud_monitor._get_oldest_fraud_ticket.return_value = detail_info
         fraud_monitor._ticket_repository.is_task_resolved.return_value = True
@@ -239,7 +243,8 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def process_fraud__reopen_closed_ticket_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info, make_get_tickets_response):
+            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
+            make_get_client_info_by_did_response, make_get_tickets_response):
         service_number = ''
         msg_uid = '123456'
 
@@ -260,6 +265,7 @@ class TestFraudMonitor:
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
+        fraud_monitor._bruin_repository.get_client_info_by_did.return_value = make_get_client_info_by_did_response()
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
         fraud_monitor._bruin_repository.get_resolved_fraud_tickets.return_value = make_get_tickets_response(ticket)
         fraud_monitor._get_oldest_fraud_ticket.side_effect = [None, detail_info]
@@ -269,7 +275,8 @@ class TestFraudMonitor:
         fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, body, msg_uid)
 
     @pytest.mark.asyncio
-    async def process_fraud__create_ticket_test(self, fraud_monitor, make_get_tickets_response):
+    async def process_fraud__create_ticket_test(
+            self, fraud_monitor, make_get_client_info_by_did_response, make_get_tickets_response):
         client_id = 0
         service_number = ''
         msg_uid = '123456'
@@ -288,6 +295,7 @@ class TestFraudMonitor:
             'Fraud Detection System'
         )
 
+        fraud_monitor._bruin_repository.get_client_info_by_did.return_value = make_get_client_info_by_did_response()
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
         fraud_monitor._bruin_repository.get_resolved_fraud_tickets.return_value = make_get_tickets_response()
 

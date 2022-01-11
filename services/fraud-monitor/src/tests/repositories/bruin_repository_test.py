@@ -22,6 +22,57 @@ class TestBruinRepository:
         assert bruin_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
+    async def get_client_info_by_did__rpc_request_success_test(
+            self, bruin_repository, make_get_client_info_by_did_request, bruin_generic_200_response):
+        did = '+14159999999'
+        request = make_get_client_info_by_did_request(request_id=uuid_, did=did)
+
+        bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+
+        with uuid_mock:
+            result = await bruin_repository.get_client_info_by_did(did)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with('bruin.customer.get.info_by_did', request,
+                                                                         timeout=15)
+        assert result == bruin_generic_200_response
+
+    @pytest.mark.asyncio
+    async def get_client_info_by_did__rpc_request_failing_test(
+            self, bruin_repository, make_get_client_info_by_did_request):
+        did = '+14159999999'
+        request = make_get_client_info_by_did_request(request_id=uuid_, did=did)
+
+        bruin_repository._event_bus.rpc_request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.get_client_info_by_did(did)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with('bruin.customer.get.info_by_did', request,
+                                                                         timeout=15)
+        bruin_repository._logger.error.assert_called_once()
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_client_info_by_did__rpc_request_has_not_2xx_status_test(
+            self, bruin_repository, make_get_client_info_by_did_request, bruin_500_response):
+        did = '+14159999999'
+        request = make_get_client_info_by_did_request(request_id=uuid_, did=did)
+
+        bruin_repository._event_bus.rpc_request.return_value = bruin_500_response
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.get_client_info_by_did(did)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with('bruin.customer.get.info_by_did', request,
+                                                                         timeout=15)
+        bruin_repository._logger.error.assert_called_once()
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == bruin_500_response
+
+    @pytest.mark.asyncio
     async def get_tickets__no_service_number_specified_test(
             self, bruin_repository, make_ticket, make_get_tickets_request, make_rpc_response):
         client_id = 12345
