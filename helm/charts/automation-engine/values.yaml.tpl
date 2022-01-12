@@ -1130,12 +1130,8 @@ t7-bridge:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "t7-bridge-${T7_BRIDGE_BUILD_NUMBER}"
-    # -- KRE Base URL to make calls for get tickets predictions
-    kre_base_url: ${KRE_TNBA_BASE_URL}
-    # -- Base URL for T7 API
-    t7_base_url: ${T7_BASE_URL}
-    ## -- Token credentials for T7 API
-    t7_token: ${T7_TOKEN}
+    # -- Base URL for TNBA's KRE
+    kre_base_url: ${T7_BRIDGE__KRE_BASE_URL}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/t7-bridge
     pullPolicy: Always

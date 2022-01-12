@@ -6,7 +6,6 @@ function common_variables_by_environment() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # common variables for ephemeral environments
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_DEV}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_DEV}
     export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_DEV}
     export REDIS_TNBA_FEEDBACK_HOSTNAME=${REDIS_TNBA_FEEDBACK_HOSTNAME_DEV}
@@ -18,7 +17,6 @@ function common_variables_by_environment() {
   else
     # common environment variables for production environment
     export LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
-    export KRE_TNBA_BASE_URL=${KRE_TNBA_BASE_URL_PRO}
     export REDIS_HOSTNAME=${REDIS_HOSTNAME_PRO}
     export REDIS_CUSTOMER_CACHE_HOSTNAME=${REDIS_CUSTOMER_CACHE_HOSTNAME_PRO}
     export REDIS_TNBA_FEEDBACK_HOSTNAME=${REDIS_TNBA_FEEDBACK_HOSTNAME_PRO}
@@ -476,12 +474,10 @@ function sites_monitor_variables() {
 function t7_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # t7-bridge environment variables for ephemeral environments
-    export T7_BASE_URL=${T7_BASE_URL_DEV}
-    export T7_TOKEN=${T7_TOKEN_DEV}
+    export T7_BRIDGE__KRE_BASE_URL="${DEV__T7_BRIDGE__KRE_BASE_URL}"
   else
     # t7-bridge environment variables for production environment
-    export T7_BASE_URL=${T7_BASE_URL_PRO}
-    export T7_TOKEN=${T7_TOKEN_PRO}
+    export T7_BRIDGE__KRE_BASE_URL="${DEV__T7_BRIDGE__KRE_BASE_URL}"
   fi
 }
 

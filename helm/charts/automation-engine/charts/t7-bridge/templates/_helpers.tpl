@@ -56,7 +56,7 @@ Configmap name of t7-bridge
 {{- end }}
 
 {{/*
-Secret name of bruin-bridge
+Secret name of t7-bridge
 */}}
 {{- define "t7-bridge.secretName" -}}
 {{ include "t7-bridge.fullname" . }}-secret

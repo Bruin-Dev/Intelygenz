@@ -9,7 +9,6 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  KRE_BASE_URL: {{ .Values.config.kre_base_url | quote }}
   NATS_SERVER1: {{ .Values.global.nats_server | quote }}
   REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
   PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
