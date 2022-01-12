@@ -30,14 +30,10 @@ ENABLE_TRIAGE_MONITORING = bool(int(os.environ['ENABLE_TRIAGE_MONITORING']))
 
 if ENABLE_TRIAGE_MONITORING:
     TRIAGE_CONFIG = {
-        'polling_minutes': 10,
-        'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-        'enable_triage': bool(int(os.environ['ENABLE_TRIAGE_MONITORING'])),
-        'timezone': 'US/Eastern',
-        'monitoring_seconds': 120,
-        'event_limit': 15,
+        'polling_minutes': int(os.environ['TRIAGE__MONITORING_JOB_INTERVAL']) // 60,
+        'event_limit': int(os.environ['TRIAGE__MAX_EVENTS_PER_EVENT_NOTE']),
         'velo_filter': {},
-        'velo_hosts': ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],
+        'velo_hosts': json.loads(os.environ['TRIAGE__MONITORED_VELOCLOUD_HOSTS']),
         'multiplier': 5,
         'min': 5,
         'stop_delay': 300,

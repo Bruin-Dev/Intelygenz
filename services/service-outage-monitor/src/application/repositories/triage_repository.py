@@ -29,7 +29,7 @@ class TriageRepository:
 
     def build_triage_note(self, cached_edge: dict, edge_status: dict, edge_events: List[dict],
                           outage_type: Outages, *, is_reopen_note=False) -> str:
-        tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
+        tz_object = timezone(self._config.TIMEZONE)
 
         edge_full_id = cached_edge['edge']
         host = edge_full_id['host']
@@ -195,7 +195,7 @@ class TriageRepository:
         return os.linesep.join(ticket_note_lines).strip()
 
     def build_events_note(self, events):
-        tz_object = timezone(self._config.TRIAGE_CONFIG["timezone"])
+        tz_object = timezone(self._config.TIMEZONE)
 
         triage_note_fragments = [
             "#*MetTel's IPA*#",

@@ -75,10 +75,6 @@ QUART_CONFIG = {
 
 TRIAGE_CONFIG = {
     'polling_minutes': 10,
-    'recipient': "some.recipient@email.com",
-    'enable_triage': True,
-    'timezone': 'US/Eastern',
-    'monitoring_seconds': 120,
     'event_limit': 15,
     'velo_filter': {"mettel.velocloud.net": []},
     'velo_hosts': ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],

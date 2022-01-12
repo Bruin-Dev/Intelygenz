@@ -46,7 +46,7 @@ class Triage:
                           f'{self._config.TRIAGE_CONFIG["polling_minutes"]} minutes')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone']))
+            next_run_time = datetime.now(timezone(self._config.TIMEZONE))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._run_tickets_polling, 'interval',
                                 minutes=self._config.TRIAGE_CONFIG["polling_minutes"],

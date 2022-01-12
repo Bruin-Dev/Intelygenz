@@ -174,10 +174,7 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'TIMEZONE', 'UTC'):
             triage_note = triage_repository.build_triage_note(cached_edge, edge_status, events, outage_type)
 
         assert triage_note == os.linesep.join([
@@ -380,10 +377,7 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'TIMEZONE', 'UTC'):
             triage_note = triage_repository.build_triage_note(cached_edge, edge_status, events, outage_type)
 
         assert triage_note == os.linesep.join([
@@ -586,14 +580,11 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
         current_datetime = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(triage_repository_module, 'datetime', new=datetime_mock):
-            with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            with patch.object(config, 'TIMEZONE', 'UTC'):
                 triage_note = triage_repository.build_triage_note(cached_edge, edge_status, events, outage_type)
 
         assert triage_note == os.linesep.join([
@@ -801,14 +792,11 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
         current_datetime = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(triage_repository_module, 'datetime', new=datetime_mock):
-            with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            with patch.object(config, 'TIMEZONE', 'UTC'):
                 triage_note = triage_repository.build_triage_note(cached_edge, edge_status, events, outage_type)
 
         assert triage_note == os.linesep.join([
@@ -1019,14 +1007,11 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
         current_datetime = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(triage_repository_module, 'datetime', new=datetime_mock):
-            with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            with patch.object(config, 'TIMEZONE', 'UTC'):
                 triage_note = triage_repository.build_triage_note(cached_edge, edge_status, events, outage_type)
 
         assert triage_note == os.linesep.join([
@@ -1239,10 +1224,7 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'TIMEZONE', 'UTC'):
             triage_note = triage_repository.build_triage_note(
                 cached_edge, edge_status, events, outage_type, is_reopen_note=True
             )
@@ -1447,14 +1429,11 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
         current_datetime = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(triage_repository_module, 'datetime', new=datetime_mock):
-            with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            with patch.object(config, 'TIMEZONE', 'UTC'):
                 triage_note = triage_repository.build_triage_note(cached_edge, edge_status, events, outage_type)
 
         assert triage_note == os.linesep.join([
@@ -1550,10 +1529,7 @@ class TestTriageRepository:
 
         triage_repository = TriageRepository(config=config, utils_repository=utils_repository)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['timezone'] = 'UTC'
-
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'TIMEZONE', 'UTC'):
             events_note = triage_repository.build_events_note(events)
 
         assert events_note == os.linesep.join([
