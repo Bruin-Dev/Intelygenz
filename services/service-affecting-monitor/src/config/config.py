@@ -72,11 +72,12 @@ MONITOR_REPORT_CONFIG = {
         'default': ['bsullivan@mettel.net', 'jtaylor@mettel.net', 'HNOCleaderteam@mettel.net',
                     'mettel.automation@intelygenz.com'],
         83959: ['clmillsap@oreillyauto.com', 'mgallion2@oreillyauto.com', 'rbodenhamer@oreillyauto.com',
-                'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net'],
+                'tkaufmann@oreillyauto.com', 'mgoldstein@mettel.net', 'dshim@mettel.net'],
         72959: ['DL_Tenet_Telecom@nttdata.com', 'Jake.Salas@tenethealth.com', 'dshim@mettel.net',
                 'mgoldstein@mettel.net'],
         83109: ['JIngwersen@republicservices.com', 'LRozendal@republicservices.com', 'bsherman@mettel.net'],
         86937: ['networkservices@signetjewelers.com', 'pallen@mettel.net'],
+        85940: ['ta-infrastructure@titanamerica.com'],
     }
 }
 
