@@ -239,12 +239,14 @@ class FraudMonitor:
 
     async def _create_fraud_ticket(self, client_id: int, service_number: str, email_body: str, msg_uid: str) -> bool:
         self._logger.info(f'Creating Fraud ticket for client {client_id} and service number {service_number}')
+        contacts = await self._get_contacts(client_id, service_number)
+
+        if not contacts:
+            return False
 
         if self._config.FRAUD_CONFIG['environment'] != 'production':
             self._logger.info(f'No Fraud ticket will be created since the current environment is not production')
             return True
-
-        contacts = []  # TODO: Get actual contacts for the client from a Bruin endpoint
 
         create_fraud_ticket_response = await self._bruin_repository.create_fraud_ticket(client_id, service_number,
                                                                                         contacts)
@@ -264,3 +266,20 @@ class FraudMonitor:
         await self._notifications_repository.notify_successful_note_append(ticket_id, service_number)
 
         return True
+
+    async def _get_contacts(self, client_id: int, service_number: str):
+        client_info_response = await self._bruin_repository.get_client_info(service_number)
+        if client_info_response['status'] not in range(200, 300) or not client_info_response['body']:
+            return
+
+        client_info = client_info_response['body'][0]
+        site_details_response = await self._bruin_repository.get_site_details(client_id, client_info['site_id'])
+        if site_details_response['status'] not in range(200, 300):
+            return
+
+        site_details = site_details_response['body']
+        contact_info = self._bruin_repository.get_contact_info(site_details)
+        contacts = self._bruin_repository.get_contacts(contact_info)
+        default_contacts = self._bruin_repository.get_contacts(self._config.FRAUD_CONFIG['default_contact'])
+
+        return contacts or default_contacts
