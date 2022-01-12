@@ -587,6 +587,126 @@ class TestBruinRepository:
         assert change_status == successful_status_change
 
     @pytest.mark.asyncio
+    async def get_attributes_serial_ok_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 89267,
+            "status": "A",
+            "service_number": "5006950173"
+        }
+        response = {
+            "body":
+                {
+                    "inventoryId": "13983770",
+                    "serviceNumber": "5006950173",
+                    "attributes": [
+                        {
+                            "key": "Serial Number",
+                            "value": "705286"
+                        }
+                    ]
+                },
+            "status": 200,
+        }
+        bruin_client = Mock()
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        response = await bruin_repository.get_attributes_serial(filters)
+        get_attributes_serial = response["body"]
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
+        assert "705286" in get_attributes_serial
+
+    @pytest.mark.asyncio
+    async def get_attributes_serial_no_attributes_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "body":
+                {
+                    "inventoryId": "12796795",
+                    "serviceNumber": "VC05400002265",
+                },
+            "status": 200,
+        }
+        bruin_client = Mock()
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        response_attributes = await bruin_repository.get_attributes_serial(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
+        assert response_attributes == response
+
+    @pytest.mark.asyncio
+    async def get_attributes_serial_ok_no_serial_number_key_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "body":
+                {
+                    "inventoryId": "12796795",
+                    "serviceNumber": "VC05400002265",
+                    "attributes": [
+                        {
+                            "key": "RD1.K3",
+                            "value": "RD Circuit information"
+                        }
+                    ]
+                },
+            "status": 200,
+        }
+        bruin_client = Mock()
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        response = await bruin_repository.get_attributes_serial(filters)
+        get_attributes_serial = response["body"]
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
+        assert get_attributes_serial is None
+
+    @pytest.mark.asyncio
+    async def get_attributes_serial_400_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "body": "empty",
+            "status": 400
+        }
+        bruin_client = Mock()
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        get_attributes_serial = await bruin_repository.get_attributes_serial(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
+        assert get_attributes_serial == response
+
+    @pytest.mark.asyncio
+    async def get_attributes_serial_ko_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "body": "empty",
+            "status": 500
+        }
+        bruin_client = Mock()
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        get_attributes_serial = await bruin_repository.get_attributes_serial(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
+        assert get_attributes_serial == response
+
+    @pytest.mark.asyncio
     async def get_management_status_ok_test(self):
         logger = Mock()
         filters = {
@@ -609,11 +729,11 @@ class TestBruinRepository:
             "status": 200,
         }
         bruin_client = Mock()
-        bruin_client.get_management_status = CoroutineMock(return_value=response)
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         response = await bruin_repository.get_management_status(filters)
         management_status = response["body"]
-        bruin_client.get_management_status.assert_awaited_once_with(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert "Active – Platinum Monitoring" in management_status
 
     @pytest.mark.asyncio
@@ -633,10 +753,10 @@ class TestBruinRepository:
             "status": 200,
         }
         bruin_client = Mock()
-        bruin_client.get_management_status = CoroutineMock(return_value=response)
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         response_management = await bruin_repository.get_management_status(filters)
-        bruin_client.get_management_status.assert_awaited_once_with(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert response_management == response
 
     @pytest.mark.asyncio
@@ -662,11 +782,11 @@ class TestBruinRepository:
             "status": 200,
         }
         bruin_client = Mock()
-        bruin_client.get_management_status = CoroutineMock(return_value=response)
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         response = await bruin_repository.get_management_status(filters)
         management_status = response["body"]
-        bruin_client.get_management_status.assert_awaited_once_with(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert management_status is None
 
     @pytest.mark.asyncio
@@ -681,10 +801,10 @@ class TestBruinRepository:
             "status": 400
         }
         bruin_client = Mock()
-        bruin_client.get_management_status = CoroutineMock(return_value=response)
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         management_status = await bruin_repository.get_management_status(filters)
-        bruin_client.get_management_status.assert_awaited_once_with(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert management_status == response
 
     @pytest.mark.asyncio
@@ -700,10 +820,10 @@ class TestBruinRepository:
             "status": 500
         }
         bruin_client = Mock()
-        bruin_client.get_management_status = CoroutineMock(return_value=response)
+        bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         management_status = await bruin_repository.get_management_status(filters)
-        bruin_client.get_management_status.assert_awaited_once_with(filters)
+        bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert management_status == response
 
     @pytest.mark.asyncio

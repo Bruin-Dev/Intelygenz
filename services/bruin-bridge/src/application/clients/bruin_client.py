@@ -446,9 +446,9 @@ class BruinClient:
                 'status': 500
             }
 
-    async def get_management_status(self, filters):
+    async def get_inventory_attributes(self, filters):
         try:
-            self._logger.info(f'Getting management status for client ID: {filters["client_id"]}')
+            self._logger.info(f'Getting inventory_attributes for client ID: {filters["client_id"]}')
             parsed_filters = humps.pascalize(filters)
             self._logger.info(f'Filters that will be applied (parsed to PascalCase): {json.dumps(parsed_filters)}')
             return_response = dict.fromkeys(["body", "status"])

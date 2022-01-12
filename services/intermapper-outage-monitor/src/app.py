@@ -10,6 +10,7 @@ from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
 from application.repositories.bruin_repository import BruinRepository
+from application.repositories.dri_repository import DRIRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.actions.intermapper_monitoring import InterMapperMonitor
 from config import config
@@ -42,12 +43,13 @@ class Container:
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(self._logger, self._event_bus, config)
+        self._dri_repository = DRIRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
 
         # ACTIONS
         self._intermapper_monitoring = InterMapperMonitor(self._event_bus, self._logger, self._scheduler,
                                                           config, self._notifications_repository,
-                                                          self._bruin_repository)
+                                                          self._bruin_repository, self._dri_repository)
 
     async def _start(self):
         await self._event_bus.connect()

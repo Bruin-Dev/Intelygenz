@@ -16,6 +16,7 @@ from application.actions.get_ticket_overview import GetTicketOverview
 from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
 from application.actions.get_ticket_task_history import GetTicketTaskHistory
 from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
+from application.actions.get_attributes_serial import GetAttributeSerial
 from application.actions.get_management_status import GetManagementStatus
 from application.actions.post_note import PostNote
 from application.actions.post_multiple_notes import PostMultipleNotes
@@ -74,6 +75,7 @@ class Container:
         self._subscriber_post_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_open_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_resolve_ticket = NATSClient(config, logger=self._logger)
+        self._subscriber_get_attributes_serial = NATSClient(config, logger=self._logger)
         self._subscriber_get_management_status = NATSClient(config, logger=self._logger)
         self._subscriber_post_outage_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_get_client_info = NATSClient(config, logger=self._logger)
@@ -109,6 +111,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_post_ticket, consumer_name="post_ticket")
         self._event_bus.add_consumer(self._subscriber_open_ticket, consumer_name="open_ticket")
         self._event_bus.add_consumer(self._subscriber_resolve_ticket, consumer_name="resolve_ticket")
+        self._event_bus.add_consumer(self._subscriber_get_attributes_serial, consumer_name="get_attributes_serial")
         self._event_bus.add_consumer(self._subscriber_get_management_status, consumer_name="get_management_status")
         self._event_bus.add_consumer(self._subscriber_post_outage_ticket, consumer_name="post_outage_ticket")
         self._event_bus.add_consumer(self._subscriber_get_client_info, consumer_name="get_client_info")
@@ -142,6 +145,7 @@ class Container:
         self._post_ticket = PostTicket(self._logger, self._event_bus, self._bruin_repository)
         self._open_ticket = OpenTicket(self._logger, self._event_bus, self._bruin_repository)
         self._resolve_ticket = ResolveTicket(self._logger, self._event_bus, self._bruin_repository)
+        self._get_attributes_serial = GetAttributeSerial(self._logger, self._event_bus, self._bruin_repository)
         self._get_management_status = GetManagementStatus(self._logger, self._event_bus, self._bruin_repository)
         self._post_outage_ticket = PostOutageTicket(self._logger, self._event_bus, self._bruin_repository)
         self._get_client_info = GetClientInfo(self._logger, self._event_bus, self._bruin_repository)
@@ -180,6 +184,9 @@ class Container:
                                                  is_async=True, logger=self._logger)
         self._action_resolve_ticket = ActionWrapper(self._resolve_ticket, "resolve_ticket",
                                                     is_async=True, logger=self._logger)
+        self._action_get_attributes_serial = ActionWrapper(self._get_attributes_serial, "get_attributes_serial",
+                                                           is_async=True, logger=self._logger,
+                                                           )
         self._action_get_management_status = ActionWrapper(self._get_management_status, "get_management_status",
                                                            is_async=True, logger=self._logger,
                                                            )
@@ -257,6 +264,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="resolve_ticket",
                                                  topic="bruin.ticket.status.resolve",
                                                  action_wrapper=self._action_resolve_ticket,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="get_attributes_serial",
+                                                 topic="bruin.inventory.attributes.serial",
+                                                 action_wrapper=self._action_get_attributes_serial,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="get_management_status",
                                                  topic="bruin.inventory.management.status",
