@@ -42,14 +42,14 @@ service-outage-monitor-build:
     MODULE_NAME: service-outage-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" || $SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/service-outage-monitor/src/application/**/*
         - services/service-outage-monitor/src/config/**/*
         - services/service-outage-monitor/src/app.py
         - services/service-outage-monitor/Dockerfile
         - services/service-outage-monitor/requirements.txt
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" || $SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
     - job: service-outage-monitor-test
