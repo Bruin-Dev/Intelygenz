@@ -49,8 +49,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Configmap name of tnba-monitor
+Configmap name of sites-monitor
 */}}
 {{- define "sites-monitor.configmapName" -}}
 {{ include "sites-monitor.fullname" . }}-configmap
+{{- end }}
+
+{{/*
+Secret name of sites-monitor
+*/}}
+{{- define "sites-monitor.secretName" -}}
+{{ include "sites-monitor.fullname" . }}-secret
 {{- end }}

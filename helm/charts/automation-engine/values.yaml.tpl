@@ -1089,6 +1089,10 @@ sites-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "sites-monitor-${SITES_MONITOR_BUILD_NUMBER}"
+    # -- Defines how often to look for links and edges, and write their data to the metrics server
+    monitoring_job_interval: ${SITES_MONITOR__MONITORING_JOB_INTERVAL}
+    # -- VeloCloud hosts whose edges will be monitored
+    monitored_velocloud_hosts: ${SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1102,8 +1106,6 @@ sites-monitor:
       labels: {}
       #labels:
       #  servicediscovery: true
-    # -- Period in second for do monitoring process
-    monitoring_seconds: ${MONITORING_SECONDS}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor
     pullPolicy: Always

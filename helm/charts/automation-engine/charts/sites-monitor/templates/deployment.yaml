@@ -41,6 +41,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "sites-monitor.configmapName" . }}
+            - secretRef:
+                name: {{ include "sites-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

@@ -15,5 +15,5 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  LAST_CONTACT_RECIPIENT: {{ .Values.global.last_contact_recipient | quote }}
-  MONITORING_SECONDS: {{ .Values.config.monitoring_seconds | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
+  MONITORING_JOB_INTERVAL: {{ (int64 .Values.config.monitoring_job_interval) | quote }}
