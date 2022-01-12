@@ -1044,6 +1044,14 @@ service-outage-monitor-triage:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "service-outage-monitor-triage-${SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ${SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY}
+    # -- [Triage] Defines how often tickets are checked to see if it needs an initial triage or events note
+    triage__monitoring_job_interval: ${SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL}
+    # -- [Triage] VeloCloud hosts whose edges will be monitored
+    triage__monitored_velocloud_hosts: ${SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS}
+    # -- [Triage] Defines how many events will be included in events notes
+    triage__max_events_per_event_note: ${SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1057,11 +1065,6 @@ service-outage-monitor-triage:
       labels: {}
       #labels:
       #  servicediscovery: true
-    enable_triage_monitoring: "1"
-    # -- Velocloud hosts
-    velocloud_hosts: ${VELOCLOUD_HOST_TRIAGE}
-    # -- Filter for Velocloud hosts
-    velocloud_hosts_filter: ${VELOCLOUD_HOST_FILTER_TRIAGE}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/service-outage-monitor
     pullPolicy: Always

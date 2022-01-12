@@ -51,6 +51,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "service-outage-monitor-triage.configmapName" . }}
+            - secretRef:
+                name: {{ include "service-outage-monitor-triage.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

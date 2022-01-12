@@ -29,10 +29,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -42,6 +38,14 @@ global:
 
 config:
   papertrail_prefix: ""
+  # -- Bruin's product category under monitoring
+  monitored_product_category: ""
+  # -- [Triage] Defines how often tickets are checked to see if it needs an initial triage or events note
+  triage__monitoring_job_interval: 0
+  # -- [Triage] VeloCloud hosts whose edges will be monitored
+  triage__monitored_velocloud_hosts: []
+  # -- [Triage] Defines how many events will be included in events notes
+  triage__max_events_per_event_note: 0
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true
@@ -53,11 +57,6 @@ config:
     labels: {}
     #labels:
     #  servicediscovery: true
-  enable_triage_monitoring: "1"
-  # -- Velocloud hosts
-  velocloud_hosts: ""
-  # -- Filter for Velocloud hosts
-  velocloud_hosts_filter: ""
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

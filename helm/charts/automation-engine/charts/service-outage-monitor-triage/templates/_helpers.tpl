@@ -52,3 +52,10 @@ Configmap name of service-outage-monitor-triage
 {{- define "service-outage-monitor-triage.configmapName" -}}
 {{ include "service-outage-monitor-triage.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of service-outage-monitor-triage
+*/}}
+{{- define "service-outage-monitor-triage.secretName" -}}
+{{ include "service-outage-monitor-triage.fullname" . }}-secret
+{{- end }}

@@ -15,7 +15,7 @@ data:
   PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  LAST_CONTACT_RECIPIENT: {{ .Values.global.last_contact_recipient }}
-  VELOCLOUD_HOSTS: {{ .Values.config.velocloud_hosts | quote }}
-  VELOCLOUD_HOSTS_FILTER: {{ .Values.config.velocloud_hosts_filter | quote }}
-  ENABLE_TRIAGE_MONITORING: {{ .Values.config.enable_triage_monitoring | quote }}
+  TIMEZONE: {{ .Values.global.timezone | quote }}
+  ENABLE_TRIAGE_MONITORING: {{ 1 | quote }}  # Always enabled
+  TRIAGE__MONITORING_JOB_INTERVAL: {{ (int64 .Values.config.triage__monitoring_job_interval) | quote }}
+  TRIAGE__MAX_EVENTS_PER_EVENT_NOTE: {{ (int64 .Values.config.triage__max_events_per_event_note) | quote }}
