@@ -33,7 +33,7 @@ class EdgeMonitoring:
                           f'{self._config.SITES_MONITOR_CONFIG["monitoring_seconds"]} seconds')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config.SITES_MONITOR_CONFIG['timezone']))
+            next_run_time = datetime.now(timezone(self._config.TIMEZONE))
             self._logger.info(f'It will be executed now')
 
         self._scheduler.add_job(self._edge_monitoring_process, 'interval',

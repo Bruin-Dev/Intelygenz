@@ -1,8 +1,9 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
-import os
+import json
 import logging
+import os
 import sys
 
 NATS_CONFIG = {
@@ -16,19 +17,15 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+TIMEZONE = os.environ['TIMEZONE']
+
 SITES_MONITOR_CONFIG = {
-    'monitoring_seconds': int(os.environ["MONITORING_SECONDS"]),
-    'timezone': 'US/Eastern',
+    'monitoring_seconds': int(os.environ["MONITORING_JOB_INTERVAL"]),
     'semaphore': 3,
-    'velo_servers': [
-        "mettel.velocloud.net",
-        "metvco02.mettel.net",
-        "metvco03.mettel.net",
-        "metvco04.mettel.net"
-    ],
+    'velo_servers': json.loads(os.environ['MONITORED_VELOCLOUD_HOSTS']),
 }
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'sites-monitor',
@@ -36,10 +33,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-sites-monitor'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

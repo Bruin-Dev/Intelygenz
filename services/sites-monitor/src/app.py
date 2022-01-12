@@ -24,7 +24,7 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
-        self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
+        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
         self._server = QuartServer(config)
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)

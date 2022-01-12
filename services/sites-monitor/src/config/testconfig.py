@@ -25,9 +25,10 @@ METRICS_SERVER_CONFIG = {
 
 ENVIRONMENT_NAME = 'dev'
 
+TIMEZONE = 'US/Eastern'
+
 SITES_MONITOR_CONFIG = {
     'monitoring_seconds': 0.01,
-    'timezone': 'US/Eastern',
     'semaphore': 5,
     'jobs_intervals': {
         'edge_monitor': 0.01,
