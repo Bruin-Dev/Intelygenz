@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 from typing import List, Optional
+from config import testconfig
 
 
 # Factories
@@ -93,8 +94,13 @@ def make_ticket_note():
 
 
 @pytest.fixture(scope='session')
-def make_contact_info():
-    def _inner(*, email: Optional[str] = '', phone: str = None, name: Optional[str] = ''):
+def default_contact():
+    return testconfig.FRAUD_CONFIG['default_contact']
+
+
+@pytest.fixture(scope='session')
+def make_contact_info(default_contact):
+    def _inner(*, email: str = default_contact['email'], name: str = default_contact['name'], phone: str = None):
         obj = [
             {
                 "email": email,
@@ -317,6 +323,36 @@ def make_get_tickets_response(make_rpc_response):
         return make_rpc_response(
             request_id=request_id,
             body=tickets,
+            status=200,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_get_client_info_200_response(make_rpc_response):
+    def _inner(*, request_id: str = '', site_id: int = 0):
+        return make_rpc_response(
+            request_id=request_id,
+            body=[{
+                'site_id': site_id,
+            }],
+            status=200,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_get_site_details_200_response(make_rpc_response, default_contact):
+    def _inner(*, request_id: str = '', contact: dict = default_contact):
+        return make_rpc_response(
+            request_id=request_id,
+            body={
+                'primaryContactName': contact.get('name'),
+                'primaryContactEmail': contact.get('email'),
+                'primaryContactPhone': contact.get('phone'),
+            },
             status=200,
         )
 

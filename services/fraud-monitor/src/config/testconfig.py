@@ -20,6 +20,10 @@ FRAUD_CONFIG = {
     'monitoring_interval': 5,
     'inbox_email': 'mettel.automation@intelygenz.com',
     'sender_emails_list': ['amate@mettel.net'],
+    'default_contact': {
+        'name': 'Holmdel NOC',
+        'email': 'holmdelnoc@mettel.net',
+    },
 }
 
 LOG_CONFIG = {
