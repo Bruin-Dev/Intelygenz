@@ -2038,9 +2038,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(
@@ -2072,9 +2070,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'unknown'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'unknown'):
             await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         bruin_repository.append_note_to_ticket.assert_not_awaited()
@@ -2145,9 +2141,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         assert len(bruin_repository.append_note_to_ticket.call_args_list) == 2
@@ -2182,9 +2176,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(
@@ -2222,9 +2214,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(
@@ -2297,9 +2287,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         assert note_appended is None
@@ -2369,9 +2357,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             note_appended = await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         assert note_appended == 503

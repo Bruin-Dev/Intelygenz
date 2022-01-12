@@ -2075,9 +2075,7 @@ class TestTriage:
         ])
         triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await triage._append_new_triage_notes_based_on_recent_events(
                 ticket_detail, last_triage_timestamp, edge_data
             )
@@ -2504,9 +2502,7 @@ class TestTriage:
         ])
         triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await triage._append_new_triage_notes_based_on_recent_events(
                 ticket_detail, last_triage_timestamp, edge_data
             )
@@ -2610,9 +2606,7 @@ class TestTriage:
         ])
         triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await triage._append_new_triage_notes_based_on_recent_events(
                 ticket_detail, last_triage_timestamp, edge_data
             )

@@ -36,7 +36,7 @@ class DiGiRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while attempting a DiGi reboot for ticket {ticket_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 

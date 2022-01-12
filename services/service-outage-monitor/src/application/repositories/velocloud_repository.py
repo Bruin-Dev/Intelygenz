@@ -89,7 +89,7 @@ class VelocloudRepository:
                 err_msg = (
                     f'Error while retrieving events of edge {json.dumps(edge_full_id)} having any type in '
                     f'{event_types} that took place between {from_} and {to} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 

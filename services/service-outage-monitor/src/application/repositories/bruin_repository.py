@@ -73,14 +73,14 @@ class BruinRepository:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic} and belonging to client {client_id} in '
-                        f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
-                        f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
@@ -115,7 +115,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while retrieving info of ticket {ticket_id} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -149,7 +149,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -195,7 +195,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while appending note to ticket {ticket_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment. Note was {note}. Error: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -231,7 +231,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while claiming client info for service number {service_number} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -272,7 +272,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while claiming management status for service number {service_number} and '
-                    f'client {client_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'client {client_id} in {self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -306,7 +306,7 @@ class BruinRepository:
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while resolving ticket {ticket_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} '
+                    f'Error while resolving ticket {ticket_id} in {self._config.CURRENT_ENVIRONMENT.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -341,7 +341,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while opening outage ticket {ticket_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -381,7 +381,7 @@ class BruinRepository:
             if not (response_status in range(200, 300) or is_bruin_custom_status):
                 err_msg = (
                     f'Error while creating outage ticket for device {service_number} that belongs to client '
-                    f'{client_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{client_id} in {self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -426,7 +426,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while changing task result for ticket {ticket_id} and serial {serial_number} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -461,7 +461,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while getting overview for ticket {ticket_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -505,7 +505,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment. '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment. '
                     f'Error: Error {response_status} - {response_body}'
                 )
 
@@ -544,7 +544,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while changing severity of ticket {ticket_id} to {severity_level} in '
-                    f'{self._config.MONITOR_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -600,7 +600,7 @@ class BruinRepository:
         ticket_detail_id = ticket_detail['ticket_detail']['detailID']
         service_number = ticket_detail['ticket_detail']['detailValue']
 
-        if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+        if self._config.CURRENT_ENVIRONMENT == 'dev':
             triage_message = (
                 f'Triage note would have been appended to detail {ticket_detail_id} of ticket {ticket_id}'
                 f'(serial: {service_number}). Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}'
@@ -608,7 +608,7 @@ class BruinRepository:
             self._logger.info(triage_message)
             await self._notifications_repository.send_slack_message(triage_message)
             return None
-        elif self._config.TRIAGE_CONFIG['environment'] == 'production':
+        elif self._config.CURRENT_ENVIRONMENT == 'production':
             if len(ticket_note) < 1500:
 
                 append_note_response = await self.append_note_to_ticket(

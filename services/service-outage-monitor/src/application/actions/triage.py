@@ -327,7 +327,7 @@ class Triage:
 
         self._logger.info(f'Appending new triage note to detail {ticket_detail_id} of ticket {ticket_id}...')
 
-        working_environment = self._config.TRIAGE_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
 
         past_moment = parse(events_lookup_timestamp).astimezone(utc)
         self._logger.info(

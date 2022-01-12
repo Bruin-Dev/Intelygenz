@@ -268,7 +268,7 @@ class OutageMonitor:
         return result
 
     async def _report_cached_edges_without_status(self):
-        working_environment = self._config.MONITOR_CONFIG['environment']
+        working_environment = self._config.CURRENT_ENVIRONMENT
         if len(self._cached_edges_without_status) == 0:
             self._logger.info('No RSI edges were found in customer cache but not in Velocloud response'
                               '. Skipping report...')
@@ -396,7 +396,7 @@ class OutageMonitor:
                 )
                 return
 
-            working_environment = self._config.MONITOR_CONFIG['environment']
+            working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != 'production':
                 self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {serial_number} since the '
                                   f'current environment is {working_environment.upper()}.')
@@ -505,7 +505,7 @@ class OutageMonitor:
                 "Attempting outage ticket creation for all of them..."
             )
 
-            working_environment = self._config.MONITOR_CONFIG['environment']
+            working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment == 'production':
                 for edge in edges_still_down:
                     cached_edge = edge['cached_info']

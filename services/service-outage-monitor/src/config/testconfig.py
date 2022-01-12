@@ -22,6 +22,9 @@ SEVERITY_LEVELS = {
     'low': 4,
 }
 
+ENVIRONMENT_NAME = "dev"
+CURRENT_ENVIRONMENT = "dev"
+
 TIMEZONE = 'US/Eastern'
 
 PRODUCT_CATEGORY = 'SD-WAN'
@@ -31,7 +34,6 @@ MONITOR_CONFIG = {
     'min': 1,
     'stop_delay': 0,
     'recipient': "some.recipient@email.com",
-    'environment': "dev",
     'jobs_intervals': {
         'outage_monitor': 60 * 3,
         'forward_to_hnoc': 60,
@@ -71,10 +73,7 @@ QUART_CONFIG = {
     'port': 5000
 }
 
-ENVIRONMENT_NAME = "dev"
-
 TRIAGE_CONFIG = {
-    'environment': "dev",
     'polling_minutes': 10,
     'recipient': "some.recipient@email.com",
     'enable_triage': True,

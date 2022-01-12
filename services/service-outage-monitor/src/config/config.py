@@ -26,39 +26,57 @@ TIMEZONE = os.environ['TIMEZONE']
 
 PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
-MONITOR_CONFIG = {
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 300,
-    'recipient': os.environ["MONITORING__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT"],
-    'jobs_intervals': {
-        'outage_monitor': int(os.environ['MONITORING__MONITORING_JOB_INTERVAL']),
-        'forward_to_hnoc': 60,
-    },
-    'quarantine': {
-        Outages.LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE']),
-        Outages.HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE']),
-        Outages.HA_LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE']),
-        Outages.HA_SOFT_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE']),
-        Outages.HA_HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE']),
-    },
-    'velocloud_instances_filter': {
-        os.environ['MONITORING__VELOCLOUD_HOST']: [],
-    },
-    'blacklisted_link_labels_for_asr_forwards': json.loads(
-        os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS']),
-    'blacklisted_edges': json.loads(os.environ['MONITORING__BLACKLISTED_EDGES']),
-    'forward_link_outage_seconds': 60 * 60,
-    'autoresolve_last_outage_seconds': int(
-        os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE']),
-    'last_digi_reboot_seconds': int(os.environ['MONITORING__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS']),
-    'semaphore': 5,
-    'severity_by_outage_type': {
-        'edge_down': int(os.environ['MONITORING__SEVERITY_FOR_EDGE_DOWN_OUTAGES']),
-        'link_down': int(os.environ['MONITORING__SEVERITY_FOR_LINK_DOWN_OUTAGES']),
-    },
-    'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
-}
+ENABLE_TRIAGE_MONITORING = bool(int(os.environ['ENABLE_TRIAGE_MONITORING']))
+
+if ENABLE_TRIAGE_MONITORING:
+    TRIAGE_CONFIG = {
+        'polling_minutes': 10,
+        'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
+        'enable_triage': bool(int(os.environ['ENABLE_TRIAGE_MONITORING'])),
+        'timezone': 'US/Eastern',
+        'monitoring_seconds': 120,
+        'event_limit': 15,
+        'velo_filter': {},
+        'velo_hosts': ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],
+        'multiplier': 5,
+        'min': 5,
+        'stop_delay': 300,
+        'semaphore': 1,
+    }
+else:
+    MONITOR_CONFIG = {
+        'multiplier': 5,
+        'min': 5,
+        'stop_delay': 300,
+        'recipient': os.environ["MONITORING__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT"],
+        'jobs_intervals': {
+            'outage_monitor': int(os.environ['MONITORING__MONITORING_JOB_INTERVAL']),
+            'forward_to_hnoc': 60,
+        },
+        'quarantine': {
+            Outages.LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE']),
+            Outages.HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE']),
+            Outages.HA_LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE']),
+            Outages.HA_SOFT_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE']),
+            Outages.HA_HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE']),
+        },
+        'velocloud_instances_filter': {
+            os.environ['MONITORING__VELOCLOUD_HOST']: [],
+        },
+        'blacklisted_link_labels_for_asr_forwards': json.loads(
+            os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS']),
+        'blacklisted_edges': json.loads(os.environ['MONITORING__BLACKLISTED_EDGES']),
+        'forward_link_outage_seconds': 60 * 60,
+        'autoresolve_last_outage_seconds': int(
+            os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE']),
+        'last_digi_reboot_seconds': int(os.environ['MONITORING__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS']),
+        'semaphore': 5,
+        'severity_by_outage_type': {
+            'edge_down': int(os.environ['MONITORING__SEVERITY_FOR_EDGE_DOWN_OUTAGES']),
+            'link_down': int(os.environ['MONITORING__SEVERITY_FOR_LINK_DOWN_OUTAGES']),
+        },
+        'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
+    }
 
 LOG_CONFIG = {
     'name': 'service-outage-monitor',
@@ -80,21 +98,6 @@ QUART_CONFIG = {
 
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
-}
-
-TRIAGE_CONFIG = {
-    'polling_minutes': 10,
-    'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-    'enable_triage': bool(int(os.environ['ENABLE_TRIAGE_MONITORING'])),
-    'timezone': 'US/Eastern',
-    'monitoring_seconds': 120,
-    'event_limit': 15,
-    'velo_filter': {},
-    'velo_hosts': ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 300,
-    'semaphore': 1,
 }
 
 METRICS_SERVER_CONFIG = {
