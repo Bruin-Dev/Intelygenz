@@ -187,6 +187,37 @@ def make_get_ticket_details_request(make_rpc_request):
 
 
 @pytest.fixture(scope='session')
+def make_get_client_info_request(make_rpc_request):
+    def _inner(*, request_id: str = '', service_number: str = ''):
+        payload = {
+            'service_number': service_number,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_get_site_details_request(make_rpc_request):
+    def _inner(*, request_id: str = '', client_id: int = 0, site_id: int = 0):
+        payload = {
+            'client_id': client_id,
+            'site_id': site_id,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
 def make_append_ticket_note_request(make_rpc_request):
     def _inner(*, request_id: str = '', ticket_id: int = 0, note: str = '', service_numbers: List[str] = None):
         payload = {
