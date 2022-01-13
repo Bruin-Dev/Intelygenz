@@ -216,8 +216,8 @@ def get_probes_down(probes_example):
 @pytest.fixture(scope='function')
 def get_probes_down_not_end(probes_example):
     return {
-        "total_count": "12",
-        "count": 12,
+        "total_count": "112",
+        "count": 100,
         "limit": 100,
         "offset": 0,
         "has_more": 1,

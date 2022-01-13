@@ -47,13 +47,12 @@ class HawkeyeRepository:
             'status': 200,
         }
         retries = 0
-        has_more = True
+        remaining_items = -1
         offset = 0
-        limit = 500
-        params['limit'] = limit
+        params['limit'] = params.get('limit') or 100
         self._logger.info(f'Check all pages')
         self._logger.info(f'Fetching all pages using {fn.__name__}...')
-        while has_more:
+        while remaining_items:
             params['offset'] = offset
             response = await fn(params)
             if response['status'] not in range(200, 300):
@@ -65,6 +64,14 @@ class HawkeyeRepository:
                 return result
             retries = 0
             result['body'] += response['body']['records']
-            offset += limit
-            has_more = bool(response['body']['has_more'])
+
+            if offset == 0:
+                remaining_items = int(response['body']['total_count'])
+
+            remaining_items -= response['body']['count']
+            if 0 < remaining_items < params['limit']:
+                offset = int(response['body']['total_count']) - remaining_items
+            else:
+                offset += params['limit']
+
         return result
