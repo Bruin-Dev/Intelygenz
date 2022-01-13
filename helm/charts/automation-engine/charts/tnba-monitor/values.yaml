@@ -29,10 +29,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -42,6 +38,20 @@ global:
 
 config:
   papertrail_prefix: ""
+  # -- Bruin's product category under monitoring
+  monitored_product_category: ""
+  # -- Defines how often tickets are checked to see if they need a new TNBA note
+  monitoring_job_interval: 0
+  # -- VeloCloud hosts whose edges will be monitored
+  monitored_velocloud_hosts: []
+  # -- List of edges that are excluded from TNBA monitoring
+  blacklisted_edges: []
+  # -- Defines for how long a ticket needs to wait since it was opened before appending a new TNBA note
+  grace_period_before_appending_new_tnba_notes: 0
+  # -- Defines for how long a Service Outage ticket needs to wait after the last documented outage to get a new TNBA note appended
+  grace_period_before_monitoring_tickets_based_on_last_documented_outage: 0
+  # -- Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves
+  min_required_confidence_for_request_and_repair_completed_predictions: 0
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

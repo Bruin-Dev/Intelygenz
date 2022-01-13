@@ -52,3 +52,10 @@ Configmap name of tnba-monitor
 {{- define "tnba-monitor.configmapName" -}}
 {{ include "tnba-monitor.fullname" . }}-configmap
 {{- end }}
+
+{{/*
+Secret name of tnba-monitor
+*/}}
+{{- define "tnba-monitor.secretName" -}}
+{{ include "tnba-monitor.fullname" . }}-secret
+{{- end }}

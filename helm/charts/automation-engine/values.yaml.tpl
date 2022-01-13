@@ -1281,6 +1281,20 @@ tnba-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "tnba-monitor-${TNBA_MONITOR_BUILD_NUMBER}"
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ${TNBA_MONITOR__MONITORED_PRODUCT_CATEGORY}
+    # -- Defines how often tickets are checked to see if they need a new TNBA note
+    monitoring_job_interval: ${TNBA_MONITOR__MONITORING_JOB_INTERVAL}
+    # -- VeloCloud hosts whose edges will be monitored
+    monitored_velocloud_hosts: ${TNBA_MONITOR__MONITORED_VELOCLOUD_HOSTS}
+    # -- List of edges that are excluded from TNBA monitoring
+    blacklisted_edges: ${TNBA_MONITOR__BLACKLISTED_EDGES}
+    # -- Defines for how long a ticket needs to wait since it was opened before appending a new TNBA note
+    grace_period_before_appending_new_tnba_notes: ${TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES}
+    # -- Defines for how long a Service Outage ticket needs to wait after the last documented outage to get a new TNBA note appended
+    grace_period_before_monitoring_tickets_based_on_last_documented_outage: ${TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE}
+    # -- Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves
+    min_required_confidence_for_request_and_repair_completed_predictions: ${TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

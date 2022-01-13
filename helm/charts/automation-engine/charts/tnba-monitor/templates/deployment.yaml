@@ -56,6 +56,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "tnba-monitor.configmapName" . }}
+            - secretRef:
+                name: {{ include "tnba-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: 80
