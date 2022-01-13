@@ -47,8 +47,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Configmap name of tnba-monitor
+Configmap name of tnba-feedback
 */}}
 {{- define "tnba-feedback.configmapName" -}}
 {{ include "tnba-feedback.fullname" . }}-configmap
+{{- end }}
+
+{{/*
+Secret name of tnba-feedback
+*/}}
+{{- define "tnba-feedback.secretName" -}}
+{{ include "tnba-feedback.fullname" . }}-secret
 {{- end }}

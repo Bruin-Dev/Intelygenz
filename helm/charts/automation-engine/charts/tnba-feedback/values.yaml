@@ -30,10 +30,6 @@ global:
   papertrail_host: "logs.papertrailapp.com"
   # -- Papertrail port to which the logs will be sent
   papertrail_port: "0"
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -43,6 +39,14 @@ global:
 
 config:
   papertrail_prefix: ""
+  # -- Bruin's product category under monitoring
+  monitored_product_category: ""
+  # -- Defines how often tickets are pulled from Bruin and sent to the KRE to train the predictive model
+  feedback_job_interval: 0
+  # -- VeloCloud hosts whose edges will be monitored
+  monitored_velocloud_hosts: []
+  # -- Defines for how long a ticket needs to wait before being re-sent to the KRE
+  grace_period_before_resending_tickets: 0
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

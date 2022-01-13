@@ -1363,6 +1363,14 @@ tnba-feedback:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
+    # -- Bruin's product category under monitoring
+    monitored_product_category: ""
+    # -- Defines how often tickets are pulled from Bruin and sent to the KRE to train the predictive model
+    feedback_job_interval: 0
+    # -- VeloCloud hosts whose edges will be monitored
+    monitored_velocloud_hosts: []
+    # -- Defines for how long a ticket needs to wait before being re-sent to the KRE
+    grace_period_before_resending_tickets: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

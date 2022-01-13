@@ -497,6 +497,22 @@ function ticket_collector_variables() {
   fi
 }
 
+function tnba_feedback_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # tnba-feedback environment variables for ephemeral environments
+    export TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL="${DEV__TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL}"
+    export TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS="${DEV__TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS}"
+    export TNBA_FEEDBACK__MONITORED_PRODUCT_CATEGORY="${DEV__TNBA_FEEDBACK__MONITORED_PRODUCT_CATEGORY}"
+    export TNBA_FEEDBACK__GRACE_PERIOD_BEFORE_RESENDING_TICKETS="${DEV__TNBA_FEEDBACK__GRACE_PERIOD_BEFORE_RESENDING_TICKETS}"
+  else
+    # tnba-feedback environment variables for production environment
+    export TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL="${PRO__TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL}"
+    export TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS="${PRO__TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS}"
+    export TNBA_FEEDBACK__MONITORED_PRODUCT_CATEGORY="${PRO__TNBA_FEEDBACK__MONITORED_PRODUCT_CATEGORY}"
+    export TNBA_FEEDBACK__GRACE_PERIOD_BEFORE_RESENDING_TICKETS="${PRO__TNBA_FEEDBACK__GRACE_PERIOD_BEFORE_RESENDING_TICKETS}"
+  fi
+}
+
 function velocloud_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # velocloud-bridge environment variables for ephemeral environments
@@ -550,6 +566,7 @@ function environments_assign() {
   sites_monitor_variables
   t7_bridge_variables
   ticket_collector_variables
+  tnba_feedback_variables
   velocloud_bridge_variables
 }
 

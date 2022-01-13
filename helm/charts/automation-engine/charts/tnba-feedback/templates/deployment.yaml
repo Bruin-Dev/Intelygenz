@@ -57,6 +57,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "tnba-feedback.configmapName" . }}
+            - secretRef:
+                name: {{ include "tnba-feedback.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
