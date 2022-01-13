@@ -21,7 +21,7 @@ class BruinRepository:
                 'client_id': client_id,
                 'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
-                'product_category': 'SD-WAN',
+                'product_category': self._config.PRODUCT_CATEGORY,
             },
         }
 
@@ -48,7 +48,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'{ticket_topic} and belonging to client {client_id} in {self._config.ENVIRONMENT.upper()} '
+                    f'{ticket_topic} and belonging to client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -82,7 +82,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.ENVIRONMENT.upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -116,7 +116,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving task history of ticket {ticket_id} in '
-                    f'{self._config.ENVIRONMENT.upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -150,7 +150,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while resolving detail {detail_id} of ticket {ticket_id} in '
-                    f'{self._config.ENVIRONMENT.upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
             else:
@@ -196,7 +196,7 @@ class BruinRepository:
             if not (response_status in range(200, 300) or response_status == 409 or response_status == 471):
                 err_msg = (
                     f'Error while claiming next results for ticket {ticket_id}, detail {detail_id} and '
-                    f'service number {service_number} in {self._config.ENVIRONMENT.upper()} environment: '
+                    f'service number {service_number} in {self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -235,8 +235,9 @@ class BruinRepository:
 
             if not (response_status in range(200, 300) or response_status == 409 or response_status == 471):
                 err_msg = (
-                    f'Error while appending multiple notes to ticket {ticket_id} in {self._config.ENVIRONMENT.upper()} '
-                    f'environment. Notes were {notes}. Error: Error {response_status} - {response_body}'
+                    f'Error while appending multiple notes to ticket {ticket_id} in '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. Notes were {notes}. '
+                    f'Error: Error {response_status} - {response_body}'
                 )
 
         if err_msg:
@@ -284,7 +285,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while changing task result for ticket {ticket_id} and serial: {serial_number} in '
-                    f'environment: {self._config.ENVIRONMENT.upper()}'
+                    f'environment: {self._config.ENVIRONMENT_NAME.upper()}'
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -328,7 +329,8 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id} in '
-                    f'{self._config.ENVIRONMENT.upper()} environment. Error: Error {response_status} - {response_body}'
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. '
+                    f'Error: Error {response_status} - {response_body}'
                 )
 
         if err_msg:

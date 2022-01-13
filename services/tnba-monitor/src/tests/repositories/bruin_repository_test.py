@@ -33,7 +33,7 @@ class TestBruinRepository:
             request_id=uuid_,
             client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
-            product_category='SD-WAN',
+            product_category=testconfig.PRODUCT_CATEGORY,
             ticket_topic=ticket_topic,
         )
         response = make_rpc_response(request_id=uuid_, body=[open_affecting_ticket], status=200)
@@ -58,7 +58,7 @@ class TestBruinRepository:
             request_id=uuid_,
             client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
-            product_category='SD-WAN',
+            product_category=testconfig.PRODUCT_CATEGORY,
             ticket_topic=ticket_topic,
         )
 
@@ -86,7 +86,7 @@ class TestBruinRepository:
             request_id=uuid_,
             client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
-            product_category='SD-WAN',
+            product_category=testconfig.PRODUCT_CATEGORY,
             ticket_topic=ticket_topic,
         )
         response = make_rpc_response(

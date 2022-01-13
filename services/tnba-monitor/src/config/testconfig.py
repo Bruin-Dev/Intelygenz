@@ -16,8 +16,10 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+PRODUCT_CATEGORY = 'SD-WAN'
+
 MONITOR_CONFIG = {
-    'refresh_map_time': 60 * 4,
+    'monitoring_interval_seconds': 60 * 5,
     'blacklisted_edges': [
         {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
     ],
@@ -30,13 +32,11 @@ MONITOR_CONFIG = {
     'request_repair_completed_confidence_threshold': 0.75,
 }
 
-ENVIRONMENT = 'dev'
+CURRENT_ENVIRONMENT = 'dev'
 
 ENVIRONMENT_NAME = "dev"
 
 TIMEZONE = 'US/Eastern'
-
-MONITORING_INTERVAL_SECONDS = 60 * 5
 
 LOG_CONFIG = {
     'name': 'test-name',

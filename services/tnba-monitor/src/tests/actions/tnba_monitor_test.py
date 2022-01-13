@@ -49,7 +49,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._scheduler.add_job.assert_called_once_with(
             tnba_monitor._run_tickets_polling, 'interval',
-            seconds=testconfig.MONITORING_INTERVAL_SECONDS,
+            seconds=testconfig.MONITOR_CONFIG['monitoring_interval_seconds'],
             next_run_time=next_run_time,
             replace_existing=False,
             id='_run_tickets_polling',
@@ -61,7 +61,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._scheduler.add_job.assert_called_once_with(
             tnba_monitor._run_tickets_polling, 'interval',
-            seconds=testconfig.MONITORING_INTERVAL_SECONDS,
+            seconds=testconfig.MONITOR_CONFIG['monitoring_interval_seconds'],
             next_run_time=undefined,
             replace_existing=False,
             id='_run_tickets_polling',
@@ -1370,7 +1370,7 @@ class TestTNBAMonitor:
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
-        with patch.object(testconfig, 'ENVIRONMENT', "dev"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "dev"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
@@ -1426,7 +1426,7 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
@@ -1495,7 +1495,7 @@ class TestTNBAMonitor:
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
@@ -1564,7 +1564,7 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
@@ -1637,7 +1637,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.return_value = built_tnba_note
 
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
@@ -1709,7 +1709,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._bruin_repository.resolve_ticket_detail.return_value = resolve_detail_response
 
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
             autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
                 detail_object=detail_object,
                 best_prediction=confident_request_completed_prediction,
@@ -1908,7 +1908,7 @@ class TestTNBAMonitor:
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
 
-        with patch.object(testconfig, 'ENVIRONMENT', "dev"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "dev"):
             expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
 
             autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
@@ -1961,7 +1961,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._bruin_repository.resolve_ticket_detail.return_value = resolve_detail_response
 
-        with patch.object(testconfig, 'ENVIRONMENT', "production"):
+        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
             expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
 
             autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(

@@ -56,7 +56,7 @@ class TNBAMonitor:
 
         try:
             self._scheduler.add_job(self._run_tickets_polling, 'interval',
-                                    seconds=self._config.MONITORING_INTERVAL_SECONDS,
+                                    seconds=self._config.MONITOR_CONFIG['monitoring_interval_seconds'],
                                     next_run_time=next_run_time, replace_existing=False,
                                     id='_run_tickets_polling')
         except ConflictingIdError as conflict:
@@ -514,7 +514,7 @@ class TNBAMonitor:
             if self._is_new_ticket(ticket_status):
                 self._logger.info(f'Creation date: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
                 if self._is_ticket_old_enough(ticket_creation_date):
-                    if self._config.ENVIRONMENT == 'production':
+                    if self._config.CURRENT_ENVIRONMENT == 'production':
                         msg = (
                             f"Automation Engine appended a TNBA note for serial "
                             f"{serial_number} in ticket {ticket_id}, "
@@ -644,14 +644,14 @@ class TNBAMonitor:
                 self._logger.info(f'No TNBA note will be appended for serial {serial_number} of ticket {ticket_id}.')
                 return
 
-            if self._config.ENVIRONMENT == 'production':
+            if self._config.CURRENT_ENVIRONMENT == 'production':
                 self._tnba_notes_to_append.append({
                     'ticket_id': ticket_id,
                     'text': tnba_note,
                     'detail_id': ticket_detail_id,
                     'service_number': serial_number,
                 })
-            elif self._config.ENVIRONMENT == 'dev':
+            elif self._config.CURRENT_ENVIRONMENT == 'dev':
                 tnba_message = (
                     f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
                     f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
@@ -704,10 +704,10 @@ class TNBAMonitor:
             )
             return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
-        if not self._config.ENVIRONMENT == 'production':
+        if not self._config.CURRENT_ENVIRONMENT == 'production':
             self._logger.info(
                 f'Detail related to serial {serial_number} of ticket {ticket_id} was about to be resolved, but the '
-                f'current environment is {self._config.ENVIRONMENT.upper()}. Skipping autoresolve...'
+                f'current environment is {self._config.CURRENT_ENVIRONMENT.upper()}. Skipping autoresolve...'
             )
             return self.AutoresolveTicketDetailStatus.SKIPPED
 
