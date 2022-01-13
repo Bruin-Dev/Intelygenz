@@ -27,6 +27,9 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
+        self._redis_tnba_client = redis.Redis(host=config.REDIS_TNBA_FEEDBACK["host"], port=6379, decode_responses=True)
+        self._redis_tnba_client.ping()
+
         # SCHEDULER
         self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
@@ -52,7 +55,7 @@ class Container:
         # ACTIONS
         self._tnba_feedback = TNBAFeedback(self._event_bus, self._logger, self._scheduler, config, self._t7_repository,
                                            self._customer_cache, self._bruin_repository, self._notifications_repository,
-                                           self._redis_client)
+                                           self._redis_tnba_client)
 
     async def _start(self):
         await self._event_bus.connect()
