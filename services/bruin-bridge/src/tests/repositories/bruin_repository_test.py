@@ -1999,3 +1999,72 @@ class TestBruinRepository:
             "status": 404,
         }
         assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_ok_test(self):
+        email_id = 12345
+
+        response_body = {"email_id": email_id, "success": True}
+        expected_response = {
+            "body": response_body,
+            "status": 200
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.mark_email_as_done = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.mark_email_as_done(email_id)
+
+        bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_non_2xx_response_test(self):
+        email_id = 12345
+        expected_response = {
+            "body": "Internal Server Error",
+            "status": 500
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.mark_email_as_done = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.mark_email_as_done(email_id)
+
+        bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_response_200_not_success_test(self):
+        email_id = 12345
+        bruin_response = {
+            "body": {"success": False, "email_id": email_id},
+            "status": 200
+        }
+        expected_response = {
+            "status": 400,
+            "body": f"Problem marking email {email_id} as done"
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.mark_email_as_done = CoroutineMock(return_value=bruin_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.mark_email_as_done(email_id)
+
+        bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
+
+        assert result == expected_response

@@ -3760,3 +3760,86 @@ class TestChangeTicketSeverity:
 
             assert ticket_details['body'] == "Got internal error from Bruin"
             assert ticket_details['status'] == 500
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={"success": True, "email_id": email_id})
+        response_mock.status = 200
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        assert response['status'] == 200
+        assert response['body']['success'] is True
+        assert response['body']['email_id'] == email_id
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_400_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock.status = 400
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        assert response['status'] == 400
+        assert response['body'] == "Error 400"
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_401_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock.status = 401
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        logger.error.assert_called_once_with("Got 401 from Bruin. Re-logging in...")
+        assert response['status'] == 401
+        assert response['body'] == "Got 401 from Bruin"
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_5xx_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock.status = 505
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        logger.error.assert_called_once_with("Got HTTP 505 from Bruin")
+        assert response['status'] == 500
+        assert response['body'] == "Got internal error from Bruin"

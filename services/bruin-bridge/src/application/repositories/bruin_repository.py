@@ -316,3 +316,15 @@ class BruinRepository:
 
         response["body"] = documents[0]
         return response
+
+    async def mark_email_as_done(self, email_id: int):
+        response = await self._bruin_client.mark_email_as_done(email_id)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        if not response["body"].get("success"):
+            response['status'] = 400
+            response['body'] = f"Problem marking email {email_id} as done"
+
+        return response
