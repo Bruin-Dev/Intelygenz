@@ -18,28 +18,33 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-MONITORING_INTERVAL_SECONDS = 60 * 60
+CURRENT_ENVIRONMENT = os.environ['CURRENT_ENVIRONMENT']
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+TIMEZONE = os.environ['TIMEZONE']
+
+PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 TNBA_FEEDBACK_CONFIG = {
-    'timezone': 'US/Eastern',
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
+    'monitoring_interval_seconds': int(os.environ['FEEDBACK_JOB_INTERVAL']),
     'semaphore': 1,
-    # 7 days in seconds
-    'redis_ttl': 604800,
-    'velo_filter': {"mettel.velocloud.net": []},
+    'redis_ttl': int(os.environ['GRACE_PERIOD_BEFORE_RESENDING_TICKETS']),
+    'velo_filter': {
+        host: []
+        for host in json.loads(os.environ['MONITORED_VELOCLOUD_HOSTS'])
+    },
 }
+
 LOG_CONFIG = {
     'name': 'tnba-feedback',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-tnba-feedback'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 

@@ -509,7 +509,7 @@ services:
 
   tnba-feedback:
     build:
-      # Context must be the root of the monorepo since we need to copy custompackages
+      # Context must be the root of the monorepo
       context: .
       dockerfile: services/tnba-feedback/Dockerfile
       args:

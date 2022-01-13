@@ -17,13 +17,16 @@ NATS_CONFIG = {
     'reconnects': 0
 }
 
-MONITORING_INTERVAL_SECONDS = 60 * 60
-
+CURRENT_ENVIRONMENT = 'dev'
 ENVIRONMENT_NAME = 'dev'
+
+TIMEZONE = 'US/Eastern'
+
+PRODUCT_CATEGORY = 'SD-WAN2'
 
 TNBA_FEEDBACK_CONFIG = {
     'environment': "dev",
-    'timezone': "US/Eastern",
+    'monitoring_interval_seconds': 60 * 60,
     'semaphore': 1,
     # 7 days in seconds
     'redis_ttl': 604800,

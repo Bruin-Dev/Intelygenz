@@ -43,7 +43,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ['Closed'],
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -88,7 +88,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ['Closed'],
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -129,7 +129,7 @@ class TestBruinRepository:
             'body': {
                 'client_id': bruin_client_id,
                 'ticket_statuses': ['Closed'],
-                'product_category': 'SD-WAN',
+                'product_category': testconfig.PRODUCT_CATEGORY,
                 'ticket_topic': ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")

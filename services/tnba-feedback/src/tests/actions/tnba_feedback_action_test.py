@@ -64,7 +64,7 @@ class TestTNBAMonitor:
 
         scheduler.add_job.assert_called_once_with(
             tnba_feedback._run_tickets_polling, 'interval',
-            seconds=config.MONITORING_INTERVAL_SECONDS,
+            seconds=config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
             next_run_time=next_run_time,
             replace_existing=False,
             id='_run_tickets_polling',
@@ -94,7 +94,7 @@ class TestTNBAMonitor:
 
         scheduler.add_job.assert_called_once_with(
             tnba_feedback._run_tickets_polling, 'interval',
-            seconds=config.MONITORING_INTERVAL_SECONDS,
+            seconds=config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
             next_run_time=next_run_time,
             replace_existing=False,
             id='_run_tickets_polling',
@@ -126,7 +126,7 @@ class TestTNBAMonitor:
         except ConflictingIdError:
             scheduler.add_job.assert_called_once_with(
                 tnba_feedback._run_tickets_polling, 'interval',
-                seconds=config.MONITORING_INTERVAL_SECONDS,
+                seconds=config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
                 next_run_time=undefined,
                 replace_existing=False,
                 id='_run_tickets_polling',

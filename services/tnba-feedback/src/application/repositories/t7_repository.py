@@ -36,7 +36,7 @@ class T7Repository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error when posting metrics for ticket {ticket_id} to T7 in '
-                    f'{self._config.TNBA_FEEDBACK_CONFIG["environment"].upper()} '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment. Error: Error {response_status} - {response_body}'
                 )
 

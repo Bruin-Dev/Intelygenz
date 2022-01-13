@@ -21,14 +21,14 @@ class Container:
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'TNBA feedback starting in {config.TNBA_FEEDBACK_CONFIG["environment"]}...')
+        self._logger.info(f'TNBA feedback starting in {config.CURRENT_ENVIRONMENT}...')
 
         # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
         # SCHEDULER
-        self._scheduler = AsyncIOScheduler(timezone=config.TNBA_FEEDBACK_CONFIG['timezone'])
+        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
         # HEALTHCHECK ENDPOINT
         self._server = QuartServer(config)

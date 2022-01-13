@@ -26,7 +26,7 @@ class BruinRepository:
         request_msg = {
             "request_id": uuid(),
             "body": {"client_id": client_id,
-                     "product_category": "SD-WAN",
+                     "product_category": self._config.PRODUCT_CATEGORY,
                      "ticket_topic": ticket_topic,
                      "ticket_statuses": ['Closed'],
                      "start_date": start_date,
@@ -53,7 +53,7 @@ class BruinRepository:
                 err_msg = (
                     f'Error while retrieving closed tickets, with ticket topic '
                     f'{ticket_topic} and belonging to client {client_id} in '
-                    f'{self._config.TNBA_FEEDBACK_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -101,7 +101,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving task history of ticket {ticket_id} in '
-                    f'{self._config.TNBA_FEEDBACK_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 

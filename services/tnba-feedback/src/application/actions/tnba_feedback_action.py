@@ -29,13 +29,13 @@ class TNBAFeedback:
         next_run_time = undefined
 
         if exec_on_start:
-            tz = timezone(self._config.TNBA_FEEDBACK_CONFIG["timezone"])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
             self._logger.info('TNBA feedback job is going to be executed immediately')
 
         try:
             self._scheduler.add_job(self._run_tickets_polling, 'interval',
-                                    seconds=self._config.MONITORING_INTERVAL_SECONDS,
+                                    seconds=self._config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
                                     next_run_time=next_run_time, replace_existing=False,
                                     id='_run_tickets_polling')
         except ConflictingIdError as conflict:
