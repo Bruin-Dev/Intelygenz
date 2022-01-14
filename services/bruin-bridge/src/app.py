@@ -27,6 +27,7 @@ from application.actions.unpause_ticket import UnpauseTicket
 from application.actions.post_email_tag import PostEmailTag
 from application.actions.get_site import GetSite
 from application.actions.mark_email_as_done import MarkEmailAsDone
+from application.actions.link_ticket_to_email import LinkTicketToEmail
 from igz.packages.nats.clients import NATSClient
 from application.actions.post_ticket import PostTicket
 from igz.packages.eventbus.eventbus import EventBus
@@ -84,6 +85,7 @@ class Container:
         self._subscriber_change_ticket_severity = NATSClient(config, logger=self._logger)
         self._subscriber_get_site = NATSClient(config, logger=self._logger)
         self._subscriber_mark_email_as_done = NATSClient(config, logger=self._logger)
+        self._subscriber_link_ticket_to_email = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -120,6 +122,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_change_ticket_severity, consumer_name="change_ticket_severity")
         self._event_bus.add_consumer(self._subscriber_get_site, consumer_name="get_site")
         self._event_bus.add_consumer(self._subscriber_mark_email_as_done, consumer_name="mark_email_as_done")
+        self._event_bus.add_consumer(self._subscriber_link_ticket_to_email, consumer_name="link_ticket_to_email")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -150,6 +153,7 @@ class Container:
         self._change_ticket_severity = ChangeTicketSeverity(self._logger, self._event_bus, self._bruin_repository)
         self._get_site = GetSite(self._logger, self._event_bus, self._bruin_repository)
         self._mark_email_as_done = MarkEmailAsDone(self._logger, self._event_bus, self._bruin_repository)
+        self._link_ticket_to_email = LinkTicketToEmail(self._logger, self._event_bus, self._bruin_repository)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -203,6 +207,8 @@ class Container:
         self._action_get_site = ActionWrapper(self._get_site, "get_site", is_async=True, logger=self._logger)
         self._action_mark_email_as_done = ActionWrapper(self._mark_email_as_done,
                                                         "mark_email_as_done", is_async=True, logger=self._logger)
+        self._action_link_ticket_to_email = ActionWrapper(self._link_ticket_to_email,
+                                                          "link_ticket_to_email", is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
@@ -291,6 +297,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="mark_email_as_done",
                                                  topic="bruin.mark.email.done",
                                                  action_wrapper=self._action_mark_email_as_done,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="link_ticket_to_email",
+                                                 topic="bruin.link.ticket.email",
+                                                 action_wrapper=self._action_link_ticket_to_email,
                                                  queue="bruin_bridge")
 
     async def start_server(self):

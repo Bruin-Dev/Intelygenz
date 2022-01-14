@@ -3843,3 +3843,110 @@ class TestChangeTicketSeverity:
         logger.error.assert_called_once_with("Got HTTP 505 from Bruin")
         assert response['status'] == 500
         assert response['body'] == "Got internal error from Bruin"
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_200_test(self):
+        email_id = 1234
+        ticket_id = 5678
+        response_dict = {
+            "Success": True,
+            "EmailId": 1234,
+            "TicketId": 5678,
+            "TotalEmailAffected": 3,
+            "Warnings": []
+        }
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=response_dict)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        assert response['status'] == 200
+        assert response['body']['Success'] is True
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_401_test(self):
+        email_id = 1234
+        ticket_id = 5678
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 401
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        logger.error.assert_called_once_with("Got 401 from Bruin. Re-logging in...")
+        assert response['status'] == 401
+        assert response['body'] == "Got 401 from Bruin"
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_461_test(self):
+        email_id = 1234
+        ticket_id = 5678
+        response_dict = {
+            "Success": True,
+            "EmailId": 1234,
+            "TicketId": 5678,
+            "TotalEmailAffected": 3,
+            "Warnings": [
+                {
+                    "ErrorCode": 461,
+                    "ErrorMessage": "Only 3 of 6 emails in the thread get affected. "
+                                    "Some of these emails might aleady have this ticket attached before."
+                },
+            ]
+        }
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=response_dict)
+        response_mock.status = 461
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        logger.warning.assert_called_once()
+        assert response['status'] == 461
+        assert response['body']['Success'] is True
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_5xx_test(self):
+        email_id = 1234
+        ticket_id = 5678
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 500
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        logger.error.assert_called_once_with("Got HTTP 500 from Bruin")
+        assert response['status'] == 500
+        assert response['body'] == "Got internal error from Bruin"

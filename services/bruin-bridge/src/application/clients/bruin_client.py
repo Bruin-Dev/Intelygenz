@@ -1137,3 +1137,50 @@ class BruinClient:
                 'body': e.args[0],
                 'status': 500
             }
+
+    async def link_ticket_to_email(self, ticket_id: int, email_id: int):
+        try:
+            self._logger.info(f'Linking ticket {ticket_id} with email {email_id}')
+            return_response = dict.fromkeys(["body", "status"])
+
+            try:
+                response = await self._session.post(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Email/{email_id}/link/ticket/{ticket_id}',
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status"] = 500
+                return return_response
+
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 401:
+                self._logger.error("Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = "Got 401 from Bruin"
+                return_response["status"] = response.status
+
+            if response.status in range(461, 474):
+                response_json = await response.json()
+                self._logger.warning(f"Got status code {response.status} from Bruin {response_json}")
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status in range(500, 513):
+                self._logger.error(f"Got HTTP {response.status} from Bruin")
+                return_response["body"] = "Got internal error from Bruin"
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {
+                'body': e.args[0],
+                'status': 500
+            }

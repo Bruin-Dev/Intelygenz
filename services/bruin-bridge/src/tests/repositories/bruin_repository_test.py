@@ -2068,3 +2068,130 @@ class TestBruinRepository:
         bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
 
         assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_ok_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = {
+            "Success": True,
+            "EmailId": email_id,
+            "TicketId": ticket_id,
+            "TotalEmailAffected": 3,
+            "Warnings": []
+        }
+        expected_response = {
+            "body": response_body,
+            "status": 200
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_non_2xx_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = 'Bruin Error'
+        expected_response = {
+            "body": response_body,
+            "status": 500
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_non_461_success_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = {
+            "Success": True,
+            "EmailId": email_id,
+            "TicketId": ticket_id,
+            "TotalEmailAffected": 3,
+            "Warnings": [
+                {
+                    "ErrorCode": 461,
+                    "ErrorMessage": "Only 3 of 6 emails in the thread get affected. "
+                                    "Some of these emails might aleady have this ticket attached before."
+                },
+            ]
+        }
+        expected_response = {
+            "body": response_body,
+            "status": 461
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result['body'] == response_body
+        assert result['status'] == 200
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_non_471_not_success_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = {
+            "Success": False,
+            "EmailId": email_id,
+            "TicketId": ticket_id,
+            "TotalEmailAffected": 3,
+            "Warnings": [
+                {
+                    "ErrorCode": 471,
+                    "ErrorMessage": "Database Exception"
+                },
+            ]
+        }
+        bruin_response = {
+            "body": response_body,
+            "status": 471
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=bruin_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result['body'] == f"Problem linking ticket {ticket_id} and email {email_id}"
+        assert result['status'] == 400
