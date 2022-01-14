@@ -52,6 +52,9 @@ dependencies:
   - name: email-tagger-monitor
     version: '*.*.*'
     condition: email-tagger-monitor.enabled
+  - name: fraud-monitor
+    version: '*.*.*'
+    condition: fraud-monitor.enabled
   - name: hawkeye-affecting-monitor
     version: '*.*.*'
     condition: hawkeye-affecting-monitor.enabled

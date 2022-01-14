@@ -71,6 +71,7 @@
     "./services/digi-reboot-report",
     "./services/email-tagger-kre-bridge",
     "./services/email-tagger-monitor",
+    "./services/fraud-monitor",
     "./services/hawkeye-affecting-monitor",
     "./services/hawkeye-bridge",
     "./services/hawkeye-customer-cache",

@@ -346,6 +346,32 @@ email-tagger-monitor:
       memory: 256Mi
 
 
+# -- fraud-monitor subchart specific configuration
+fraud-monitor:
+  enabled: ${FRAUD_MONITOR_ENABLED}
+  replicaCount: ${FRAUD_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "fraud-monitor-${FRAUD_MONITOR_BUILD_NUMBER}"
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/fraud-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${FRAUD_MONITOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
 # -- hawkeye-affecting-monitor subchart specific configuration
 hawkeye-affecting-monitor:
   enabled: ${HAWKEYE_AFFECTING_MONITOR_ENABLED}

@@ -64,6 +64,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "email-tagger-monitor",
                 },
                 {
+                    "query": f"fraud-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[fraud-monitor] - logs",
+                    "repository": "fraud-monitor",
+                },
+                {
                     "query": f"hawkeye-affecting-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-affecting-monitor] - logs",
                     "repository": "hawkeye-affecting-monitor",

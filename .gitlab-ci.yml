@@ -27,6 +27,7 @@ variables:
   DIGI_REBOOT_REPORT_DESIRED_TASKS: "1"
   EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS: "1"
   EMAIL_TAGGER_MONITOR_DESIRED_TASKS: "1"
+  FRAUD_MONITOR_DESIRED_TASKS: "1"
   HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS: "0"
   HAWKEYE_BRIDGE_DESIRED_TASKS: "1"
   HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS: "1"
@@ -85,6 +86,7 @@ include:
   - local: 'services/digi-reboot-report/.gitlab-ci.yml'
   - local: 'services/email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'services/email-tagger-monitor/.gitlab-ci.yml'
+  - local: 'services/fraud-monitor/.gitlab-ci.yml'
   - local: 'services/hawkeye-affecting-monitor/.gitlab-ci.yml'
   - local: 'services/hawkeye-bridge/.gitlab-ci.yml'
   - local: 'services/hawkeye-customer-cache/.gitlab-ci.yml'
