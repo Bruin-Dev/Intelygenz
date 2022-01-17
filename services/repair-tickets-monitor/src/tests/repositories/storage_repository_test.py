@@ -73,6 +73,16 @@ class TestStorageRepository:
 
         storage_repository._redis.set.assert_called_once_with(fixed_key, json.dumps(payload))
 
+    def increment_test(self, storage_repository):
+        key = "test_123"
+        fixed_key = f"{storage_repository._config.ENVIRONMENT_NAME}-{key}"
+
+        storage_repository._redis.set = Mock()
+
+        storage_repository.increment(key)
+
+        storage_repository._redis.incr.assert_called_once_with(fixed_key, amount=1)
+
     def remove_test(self, storage_repository):
         key_1 = "test_123"
         fixed_key_1 = f"{storage_repository._config.ENVIRONMENT_NAME}-{key_1}"

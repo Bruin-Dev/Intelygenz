@@ -10,7 +10,6 @@ repair-tickets-monitor-linter:
         - services/repair-tickets-monitor/src/application/**/*
         - services/repair-tickets-monitor/src/config/**/*
         - services/repair-tickets-monitor/src/app.py
-        - services/repair-tickets-monitor/src/tests/**/*
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
@@ -19,21 +18,21 @@ repair-tickets-monitor-linter:
 # ================================================
 # Unit tests jobs for repair-tickets-monitor module
 # ================================================
-#repair-tickets-monitor-test:
-#  variables:
-#    MODULE: repair-tickets-monitor
-#  rules:
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
-#      changes:
-#        - services/repair-tickets-monitor/src/application/**/*
-#        - services/repair-tickets-monitor/src/config/**/*
-#        - services/repair-tickets-monitor/src/tests/**/*
-#        - services/repair-tickets-monitor/src/app.py
-#        - services/repair-tickets-monitor/Dockerfile
-#        - services/repair-tickets-monitor/requirements.txt
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-#  extends: .unittest_module_python
-#  needs: ["repair-tickets-monitor-linter"]
+repair-tickets-monitor-test:
+  variables:
+    MODULE: repair-tickets-monitor
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/repair-tickets-monitor/src/application/**/*
+        - services/repair-tickets-monitor/src/config/**/*
+        - services/repair-tickets-monitor/src/tests/**/*
+        - services/repair-tickets-monitor/src/app.py
+        - services/repair-tickets-monitor/Dockerfile
+        - services/repair-tickets-monitor/requirements.txt
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python
+  needs: ["repair-tickets-monitor-linter"]
 
 # ===================================================
 # Images builds jobs for repair-tickets-monitor module

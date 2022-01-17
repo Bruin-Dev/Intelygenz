@@ -1344,12 +1344,12 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_connection_error_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
         connection_error_cause = 'Connection timed out'
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1380,6 +1380,54 @@ class TestPostOutageTicket:
 
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_2XX_response_test(self):
+        client_id = 9994,
+        service_number = ["VC05400002265"]
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': service_number,
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": None,
+            "errorCode": 0,
+        }
+        bruin_response_body = {
+            "assets": [ticket_data]
+        }
+        bruin_response_status = 200
+
+        bruin_response = CoroutineMock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client._session.post.assert_awaited_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                ssl=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def post_outage_ticket_with_string_service_number_test(self):
         client_id = 9994,
         service_number = "VC05400002265"
 
@@ -1429,11 +1477,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_409_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1481,11 +1529,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_471_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1530,11 +1578,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_472_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1579,11 +1627,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_473_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1628,11 +1676,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_400_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1677,11 +1725,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_401_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1718,11 +1766,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_403_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1757,12 +1805,12 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_404_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         url = f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1796,11 +1844,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_5XX_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -3760,3 +3808,158 @@ class TestChangeTicketSeverity:
 
             assert ticket_details['body'] == "Got internal error from Bruin"
             assert ticket_details['status'] == 500
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={"success": True, "email_id": email_id})
+        response_mock.status = 200
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        assert response['status'] == 200
+        assert response['body']['success'] is True
+        assert response['body']['email_id'] == email_id
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_400_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock.status = 400
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        assert response['status'] == 400
+        assert response['body'] == "Error 400"
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_401_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock.status = 401
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        logger.error.assert_called_once_with("Got 401 from Bruin. Re-logging in...")
+        assert response['status'] == 401
+        assert response['body'] == "Got 401 from Bruin"
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_5xx_test(self):
+        email_id = 1234
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock.status = 505
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.mark_email_as_done(email_id)
+
+        logger.error.assert_called_once_with("Got HTTP 505 from Bruin")
+        assert response['status'] == 500
+        assert response['body'] == "Got internal error from Bruin"
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_200_test(self):
+        email_id = 1234
+        ticket_id = 5678
+        response_dict = {
+            "success": True,
+            "emailId": 3842493,
+            "ticketId": 6112476,
+            "totalEmailAffected": 1,
+            "warnings": []
+        }
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=response_dict)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        assert response['status'] == 200
+        assert response['body']['success'] is True
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_401_test(self):
+        email_id = 1234
+        ticket_id = 5678
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 401
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        logger.error.assert_called_once_with("Got 401 from Bruin. Re-logging in...")
+        assert response['status'] == 401
+        assert response['body'] == "Got 401 from Bruin"
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_5xx_test(self):
+        email_id = 1234
+        ticket_id = 5678
+
+        logger = Mock()
+
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value={})
+        response_mock.status = 500
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = CoroutineMock()
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        logger.error.assert_called_once_with("Got HTTP 500 from Bruin")
+        assert response['status'] == 500
+        assert response['body'] == "Got internal error from Bruin"

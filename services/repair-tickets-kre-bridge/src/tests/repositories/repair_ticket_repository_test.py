@@ -89,7 +89,7 @@ class TestRepairTicketRepository:
         assert save_outputs_response == valid_created_ticket_response
 
     @pytest.mark.asyncio
-    async def save_outputs__not_2xx_test(self, valid_created_ticket_request):
+    async def save_created_ticket__not_2xx_test(self, valid_created_ticket_request):
         expected_response = {
             "body": "Error response",
             "status": 500
@@ -103,4 +103,37 @@ class TestRepairTicketRepository:
 
         save_outputs_response = await kre_repository.save_created_ticket_feedback(valid_created_ticket_request)
         kre_repository._kre_client.save_created_ticket_feedback.assert_awaited_once_with(valid_created_ticket_request)
+        assert save_outputs_response == expected_response
+
+    @pytest.mark.asyncio
+    async def save_closed_ticket__ok_test(self, valid_closed_ticket_request__cancelled, valid_closed_ticket_response):
+        logger = Mock()
+        kre_client = Mock()
+        kre_client.save_closed_ticket_feedback = CoroutineMock(return_value=valid_closed_ticket_response)
+
+        kre_repository = RepairTicketRepository(logger, kre_client)
+
+        save_outputs_response = await kre_repository.save_closed_ticket_feedback(valid_closed_ticket_request__cancelled)
+        kre_repository._kre_client.save_closed_ticket_feedback.assert_awaited_once_with(
+            valid_closed_ticket_request__cancelled
+        )
+        assert save_outputs_response == valid_closed_ticket_response
+
+    @pytest.mark.asyncio
+    async def save_closed_ticket__not_2xx_test(self, valid_closed_ticket_request__resolved):
+        expected_response = {
+            "body": "Error response",
+            "status": 500
+        }
+
+        logger = Mock()
+        kre_client = Mock()
+        kre_client.save_closed_ticket_feedback = CoroutineMock(return_value=expected_response)
+
+        kre_repository = RepairTicketRepository(logger, kre_client)
+
+        save_outputs_response = await kre_repository.save_closed_ticket_feedback(valid_closed_ticket_request__resolved)
+        kre_repository._kre_client.save_closed_ticket_feedback.assert_awaited_once_with(
+            valid_closed_ticket_request__resolved
+        )
         assert save_outputs_response == expected_response

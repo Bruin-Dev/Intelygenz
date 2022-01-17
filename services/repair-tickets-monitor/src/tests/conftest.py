@@ -2,6 +2,7 @@ from tests.fixtures.bruin import *
 from tests.fixtures.instances import *
 from tests.fixtures.rta import *
 from tests.fixtures.rpc import *
+from tests.fixtures.email_tagger import *
 
 
 @pytest.fixture(scope='function')

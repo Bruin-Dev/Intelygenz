@@ -316,3 +316,29 @@ class BruinRepository:
 
         response["body"] = documents[0]
         return response
+
+    async def mark_email_as_done(self, email_id: int):
+        response = await self._bruin_client.mark_email_as_done(email_id)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        if not response["body"].get("success"):
+            response['status'] = 400
+            response['body'] = f"Problem marking email {email_id} as done"
+
+        return response
+
+    async def link_ticket_to_email(self, ticket_id: int, email_id: int):
+        response = await self._bruin_client.link_ticket_to_email(ticket_id, email_id)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        if not response["body"].get("success"):
+            response['status'] = 400
+            response['body'] = f"Problem linking ticket {ticket_id} and email {email_id}"
+        else:
+            response['status'] = 200
+
+        return response

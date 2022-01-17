@@ -1,6 +1,7 @@
 import asyncio
 import time
 from datetime import datetime
+from collections import defaultdict
 from typing import Any, Dict, Set, List, Tuple
 
 from apscheduler.jobstores.base import ConflictingIdError
@@ -115,7 +116,7 @@ class RepairTicketsMonitor:
                 "body": email_data['body'],
                 "date": email_data['date'],
                 "from_address": email_data['from_address'],
-                "to": email_data['to_address'][0],
+                "to": email_data['to_address'],
                 "cc": cc_addresses,
             },
             tag_info,
@@ -165,7 +166,6 @@ class RepairTicketsMonitor:
         Process repair emails, verify it's service numbers, created/update tickets,
         and save the result of this operations into KRE.
         """
-        # TODO add update email status
         email_id = email_tag_info['email_id']
         email_data = self._new_tagged_emails_repository.get_email_details(email_id).get('email')
         email_data['tag'] = email_tag_info
@@ -207,19 +207,21 @@ class RepairTicketsMonitor:
                 await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
                 self._new_tagged_emails_repository.mark_complete(email_id)
                 return
-
-            if self._is_inference_actionable(inference_data):
+            is_actionable = self._is_inference_actionable(inference_data)
+            if is_actionable:
                 tickets_created, tickets_updated, tickets_cannot_be_created = await self._create_tickets(
-                    inference_data,
+                    email_data,
                     service_number_site_map,
-                    existing_tickets
                 )
+            elif not is_actionable and inference_data['predicted_class'] != 'Other':
+                if inference_data['predicted_class'] != 'Other':
+                    tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
+                        inference_data,
+                        service_number_site_map,
+                        existing_tickets,
+                    )
             else:
-                tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
-                    inference_data,
-                    service_number_site_map,
-                    existing_tickets,
-                )
+                tickets_cannot_be_created = self._get_class_other_tickets(service_number_site_map)
 
             save_output_response = await self._save_output(
                 email_id,
@@ -286,16 +288,94 @@ class RepairTicketsMonitor:
 
     async def _create_tickets(
             self,
-            inference_data: Dict[str, Any],
+            email_data: Dict[str, Any],
             service_number_site_map: Dict[str, str],
-            existing_tickets: List[Dict[str, Any]],
     ) -> (List[str], List[str], List[str]):
-        # TODO: Add content
-        # Separate VOO/VAS
-        # Update/Reopen/Open logic
-        # Return created ticket_id
-        # here be dragons
-        return [], [], []
+        site_id_sn_buckets = defaultdict(list)
+
+        for service_number, site_id in service_number_site_map.items():
+            site_id_sn_buckets[site_id].append(service_number)
+
+        email_id = email_data['email_id']
+        client_id = email_data['client_id']
+        email_body = email_data['body']
+        email_subject = email_data['subject']
+        email_from_address = email_data['from_address']
+        email_date = email_data['date']
+
+        tickets_created = []
+        tickets_updated = []
+        tickets_cannot_be_created = []
+
+        for site_id, service_numbers in site_id_sn_buckets.items():
+            ticket_creation_response = await self._bruin_repository.create_outage_ticket(client_id, service_numbers)
+            ticket_creation_response_body = ticket_creation_response['body']
+            ticket_creation_response_status = ticket_creation_response['status']
+            self._logger.info(f'Got response {ticket_creation_response_status},'
+                              f' with items: {ticket_creation_response_body}')
+
+            error_response = False
+            ticket_updated_flag = False
+
+            bruin_updated_reasons_dict = {
+                409: "In progress ticket present. Added line to it.",
+                471: "Resolved ticket. Unresolving 'manually'.",
+                472: "Resolved ticket. Unresolved automatically.",
+                473: "Same site ticket. Unresolved and added line."
+            }
+            bruin_custom_status_codes = [409, 471, 472, 473]
+
+            if ticket_creation_response_status in range(200, 300):
+                ticket_id = ticket_creation_response_body
+                self._logger.info(f'Successfully created outage ticket {ticket_id} for email_id {email_id}.')
+                created_ticket = self._create_output_ticket_dict(
+                    ticket_id=str(ticket_id),
+                    site_id=str(site_id),
+                    service_numbers=service_numbers
+                )
+                tickets_created.append(created_ticket)
+                await self._bruin_repository.mark_email_as_done(email_id)
+
+            elif ticket_creation_response_status in bruin_custom_status_codes:
+                ticket_id = ticket_creation_response_body
+                update_reason = bruin_updated_reasons_dict[ticket_creation_response_status]
+                self._logger.info(
+                    f'Ticket already present bruin response {ticket_creation_response_status},'
+                    f'reason: {update_reason}'
+                )
+                updated_ticket = self._create_output_ticket_dict(
+                    ticket_id=str(ticket_id),
+                    site_id=str(site_id),
+                    service_numbers=service_numbers
+                )
+                tickets_updated.append(updated_ticket)
+                ticket_updated_flag = True
+
+            else:
+                self._logger.error(f'Got error {ticket_creation_response_status}, {ticket_creation_response_body}'
+                                   f'while creating ticket for {service_numbers} and client {client_id}')
+                error_response = True
+                ticket_cannot_be_created = self._create_output_ticket_dict(
+                    site_id=str(site_id),
+                    service_numbers=service_numbers,
+                    reason="Error while creating bruin ticket"
+                )
+                tickets_cannot_be_created.append(ticket_cannot_be_created)
+
+            if not error_response:
+                ticket_id = ticket_creation_response_body
+                await self._bruin_repository.append_bec_note_to_ticket(
+                    ticket_id=ticket_id,
+                    service_numbers=service_numbers,
+                    subject=email_subject,
+                    from_address=email_from_address,
+                    body=email_body,
+                    date=email_date,
+                    is_update_note=ticket_updated_flag,
+                )
+                await self._bruin_repository.link_email_to_ticket(ticket_id, email_id)
+
+        return tickets_created, tickets_updated, tickets_cannot_be_created
 
     def _get_potential_tickets(
             self,
@@ -306,6 +386,7 @@ class RepairTicketsMonitor:
         """Get potential updated/created tickets"""
         potential_created_tickets = []
         potential_updated_tickets = []
+
         predicted_class = inference_data['predicted_class']
         site_ids = set(service_number_site_map.values())
 
@@ -336,9 +417,29 @@ class RepairTicketsMonitor:
 
         return potential_created_tickets, potential_updated_tickets
 
-    def _update_email_status(self):
-        # TODO: add content
-        pass
+    def _get_class_other_tickets(
+            self,
+            service_number_site_map: Dict[str, str],
+    ) -> List[Dict[str, Any]]:
+        not_created_tickets = []
+        site_ids = set(service_number_site_map.values())
+
+        for site_id in site_ids:
+            service_numbers_filtered_by_site_id = [
+                service_number
+                for service_number, service_site_id in
+                service_number_site_map.items()
+                if service_site_id == site_id
+            ]
+            not_created_tickets.append(
+                self._create_output_ticket_dict(
+                    site_id=site_id,
+                    service_numbers=service_numbers_filtered_by_site_id,
+                    reason='predicted class is Other'
+                )
+            )
+
+        return not_created_tickets
 
     @staticmethod
     def _create_output_ticket_dict(

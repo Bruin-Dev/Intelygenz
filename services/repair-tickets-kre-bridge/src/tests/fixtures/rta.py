@@ -170,7 +170,9 @@ def make_created_ticket_request_payload():
             client_id: str = "",
             real_service_numbers: List[str] = None,
             real_class: str = "",
+            site_map: Dict[str, Any] = None
     ):
+        site_map = site_map or {}
         real_service_numbers = real_service_numbers or []
         return {
             "ticket_id": ticket_id,
@@ -179,6 +181,26 @@ def make_created_ticket_request_payload():
             "client_id": client_id,
             "real_service_numbers": real_service_numbers,
             "real_class": real_class,
+            "site_map": site_map
+        }
+
+    return _inner
+
+
+@pytest.fixture
+def make_closed_ticket_request_payload():
+    def _inner(
+            ticket_id: str = "",
+            client_id: str = "",
+            ticket_status: str = "",
+            cancellation_reasons: List[str] = None,
+    ):
+        cancellation_reasons = cancellation_reasons or []
+        return {
+            "ticket_id": ticket_id,
+            "client_id": client_id,
+            "ticket_status": ticket_status,
+            "cancellation_reasons": cancellation_reasons,
         }
 
     return _inner

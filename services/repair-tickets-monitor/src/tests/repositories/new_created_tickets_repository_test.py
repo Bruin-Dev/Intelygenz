@@ -36,7 +36,7 @@ class TestNewCreatedTicketsRepository:
         ticket_id = 45345
         error_code = 404
 
-        key = f"archive_error_{error_code}_ticket_{ticket_id}"
+        key = f"archived_error_{error_code}_ticket_{ticket_id}"
 
         new_created_tickets_repository.delete_ticket_error_counter(ticket_id, error_code)
 

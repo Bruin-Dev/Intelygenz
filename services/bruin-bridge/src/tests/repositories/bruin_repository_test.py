@@ -1999,3 +1999,162 @@ class TestBruinRepository:
             "status": 404,
         }
         assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_ok_test(self):
+        email_id = 12345
+
+        response_body = {"email_id": email_id, "success": True}
+        expected_response = {
+            "body": response_body,
+            "status": 200
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.mark_email_as_done = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.mark_email_as_done(email_id)
+
+        bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_non_2xx_response_test(self):
+        email_id = 12345
+        expected_response = {
+            "body": "Internal Server Error",
+            "status": 500
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.mark_email_as_done = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.mark_email_as_done(email_id)
+
+        bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def mark_email_as_done_response_200_not_success_test(self):
+        email_id = 12345
+        bruin_response = {
+            "body": {"success": False, "email_id": email_id},
+            "status": 200
+        }
+        expected_response = {
+            "status": 400,
+            "body": f"Problem marking email {email_id} as done"
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.mark_email_as_done = CoroutineMock(return_value=bruin_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.mark_email_as_done(email_id)
+
+        bruin_client.mark_email_as_done.assert_awaited_once_with(email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_ok_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = {
+            "Success": True,
+            "EmailId": email_id,
+            "TicketId": ticket_id,
+            "TotalEmailAffected": 3,
+            "Warnings": []
+        }
+        expected_response = {
+            "body": response_body,
+            "status": 200
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_non_2xx_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = 'Bruin Error'
+        expected_response = {
+            "body": response_body,
+            "status": 500
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def link_ticket_to_email_not_success_test(self):
+        ticket_id = 5689
+        email_id = 12345
+
+        response_body = {
+            "success": False,
+            "emailId": email_id,
+            "ticketId": ticket_id,
+            "total_email_affected": 3,
+            "warnings": [
+                {
+                    "ErrorCode": 471,
+                    "ErrorMessage": "Database Exception"
+                },
+            ]
+        }
+        bruin_response = {
+            "body": response_body,
+            "status": 200
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.link_ticket_to_email = CoroutineMock(return_value=bruin_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
+
+        bruin_client.link_ticket_to_email.assert_awaited_once_with(ticket_id, email_id)
+
+        assert result['body'] == f"Problem linking ticket {ticket_id} and email {email_id}"
+        assert result['status'] == 400

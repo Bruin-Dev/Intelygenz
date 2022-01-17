@@ -1,7 +1,7 @@
 import asyncio
 import time
-
 from datetime import datetime, timedelta
+from typing import Dict, List
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -67,7 +67,8 @@ class NewCreatedTicketsFeedback:
             self._save_created_ticket_feedback(data['email']['email'], data['ticket'])
             for data in new_tickets
         ]
-        await asyncio.gather(*tasks, return_exceptions=True)
+        output = await asyncio.gather(*tasks, return_exceptions=True)
+        self._logger.info(f'print output {output}')
         self._logger.info("NewCreatedTicketsFeedback process finished! Took {:.3f}s".format(time.time() - start_time))
 
     def _check_error(self, error_code: int, ticket_id: int, email_id: str):
@@ -85,6 +86,7 @@ class NewCreatedTicketsFeedback:
     async def _save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email_id"]
         ticket_id = int(ticket_data["ticket_id"])
+        client_id = email_data["client_id"]
 
         async with self._semaphore:
 
@@ -98,11 +100,30 @@ class NewCreatedTicketsFeedback:
                 return
 
             self._logger.info(f"Got ticket info from Bruin: {ticket_response}")
+            ticket_data = ticket_response['body']
+
+            # Get site map
+            site_map = await self._get_site_map_for_ticket(client_id, ticket_data['service_numbers'])
+            if not site_map:
+                self._logger.error(f"Could not create a site map for ticket {ticket_id}")
+                return
+
             #  Save feedback
-            response = await self._rta_repository.save_created_ticket_feedback(email_data, ticket_response['body'])
+            response = await self._rta_repository.save_created_ticket_feedback(email_data, ticket_data, site_map)
             self._logger.info(f"Got response from kre {response}")
             if response["status"] not in range(200, 300):
                 return
 
             # Remove from DB
             self._new_created_tickets_repository.mark_complete(email_id, ticket_id)
+
+    async def _get_site_map_for_ticket(self, client_id: str, service_numbers: List[str]) -> Dict[str, str]:
+        site_map = {}
+        for service_number in service_numbers:
+            response = await self._bruin_repository.verify_service_number_information(client_id, service_number)
+            if response['status'] not in range(200, 300):
+                continue
+
+            site_map[service_number] = str(response['body'].get('site_id'))
+
+        return site_map

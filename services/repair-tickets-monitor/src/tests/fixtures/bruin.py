@@ -37,8 +37,8 @@ def make_ticket(make_address):
         create_date = create_date or bruinize_date(datetime.now())
 
         return {
-            "clientId": client_id,
-            "ticketId": ticket_id,
+            "clientID": client_id,
+            "ticketID": ticket_id,
             "ticketStatus": ticket_status,
             "address": address,
             "createDate": create_date,
@@ -52,31 +52,32 @@ def make_ticket(make_address):
 
 
 @pytest.fixture(scope='session')
-def make_email():
+def make_ticket_decamelized(make_address):
     def _inner(
             *,
-            email_id: int = 0,
             client_id: int = 0,
-            body: str = '',
-            received_date: str = '',
-            subject: str = '',
-            from_address: str = '',
-            cc: str = '',
-            to: str = '',
+            ticket_id: int = 0,
+            ticket_status: str = '',
+            address: dict = None,
+            create_date: str = '',
+            created_by: str = '',
+            call_type: str = '',
+            category: str = '',
+            severity: int = 0
     ):
-        received_date = received_date or bruinize_date(datetime.now())
+        address = address or make_address()
+        create_date = create_date or bruinize_date(datetime.now())
 
         return {
-            "email": {
-                "email_id": email_id,
-                "client_id": client_id,
-                "body": body,
-                "from": from_address,
-                "to": to,
-                "cc": cc,
-                "date": received_date,
-                "subject": subject,
-            }
+            "client_id": client_id,
+            "ticket_id": ticket_id,
+            "ticket_status": ticket_status,
+            "address": address,
+            "create_date": create_date,
+            "created_by": created_by,
+            "call_type": call_type,
+            "category": category,
+            "severity": severity
         }
 
     return _inner

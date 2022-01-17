@@ -157,7 +157,7 @@ class RepairTicketKreRepository:
                 f"Error trying to get save output from rta KRE [email_id='{email_id}']: {e}"
             )
 
-    async def save_created_ticket_feedback(self, email_data: dict, ticket_data: dict):
+    async def save_created_ticket_feedback(self, email_data: dict, ticket_data: dict, site_map: dict):
         email_id = email_data['email_id']
         ticket_id = ticket_data['ticket_id']
 
@@ -176,6 +176,7 @@ class RepairTicketKreRepository:
                     "client_id": email_data['client_id'],
                     "real_service_numbers": ticket_data['service_numbers'],
                     "real_class": ticket_data['category'],
+                    "site_map": site_map,
                 }
             }
             try:
@@ -213,4 +214,63 @@ class RepairTicketKreRepository:
             self._logger.error(
                 f"Error trying to save_created tickets feedback to KRE "
                 f"[email_id='{email_id}', ticket_id='{ticket_id}']: {e}"
+            )
+
+    async def save_closed_ticket_feedback(
+            self,
+            ticket_id: str,
+            client_id: str,
+            status: str,
+            cancellation_reasons: List[str]
+    ):
+
+        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
+                                     min=self._config.NATS_CONFIG['min']),
+               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        async def save_closed_ticket_feedback():
+            err_msg = None
+            self._logger.info(f"Sending ticket data to save_closed_tickets: {ticket_id}")
+            request_msg = {
+                "request_id": uuid(),
+                "body": {
+                    "ticket_id": str(ticket_id),
+                    "client_id": str(client_id),
+                    "ticket_status": status,
+                    "cancellation_reasons": cancellation_reasons,
+                }
+            }
+            try:
+                response = await self._event_bus.rpc_request("rta.closed_ticket_feedback.request",
+                                                             request_msg,
+                                                             timeout=self._timeout)
+
+            except Exception as e:
+                err_msg = f'An error occurred when sending tickets to RTA for ticket_id "{ticket_id} {e}"'
+                response = nats_error_response
+            else:
+                response_body = response['body']
+                response_status = response['status']
+
+                if response_status not in range(200, 300):
+                    err_msg = (
+                        f'Error while saving closed ticket feedback for with ticket_id "{ticket_id}"'
+                        f'in {self._config.ENVIRONMENT.upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+
+            if err_msg:
+                self._logger.error(err_msg)
+                await self._notifications_repository.send_slack_message(err_msg)
+            else:
+                self._logger.info(
+                    f'Save closed request sent for ticket {ticket_id} to RTA')
+
+            return response
+
+        try:
+            return await save_closed_ticket_feedback()
+        except Exception as e:
+            self._logger.error(
+                f"Error trying to save closed tickets feedback to KRE "
+                f"[ticket_id='{ticket_id}']: {e}"
             )
