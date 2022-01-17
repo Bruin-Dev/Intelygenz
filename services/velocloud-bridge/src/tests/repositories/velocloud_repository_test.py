@@ -22,7 +22,7 @@ class TestVelocloudRepository:
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
         test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
-        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        edge = {"host": vr._config.VELOCLOUD_CONFIG['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
         limit = None
@@ -56,7 +56,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
-        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        edge = {"host": vr._config.VELOCLOUD_CONFIG['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
         limit = None
@@ -81,7 +81,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
-        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        edge = {"host": vr._config.VELOCLOUD_CONFIG['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
         limit = None
@@ -109,7 +109,7 @@ class TestVelocloudRepository:
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
         test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
-        host = vr._config['servers'][0]['url']
+        host = vr._config.VELOCLOUD_CONFIG['servers'][0]['url']
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -145,7 +145,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
-        host = vr._config['servers'][0]['url']
+        host = vr._config.VELOCLOUD_CONFIG['servers'][0]['url']
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -173,7 +173,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
-        host = vr._config['servers'][0]['url']
+        host = vr._config.VELOCLOUD_CONFIG['servers'][0]['url']
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()

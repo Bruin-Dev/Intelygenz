@@ -20,7 +20,7 @@ class TestVelocloudClient:
         logger = Mock()
         scheduler = Mock()
         velocloud_client = VelocloudClient(configs, logger, scheduler)
-        assert velocloud_client._config == configs.VELOCLOUD_CONFIG
+        assert velocloud_client._config == configs
         assert velocloud_client._logger == logger
         assert velocloud_client._scheduler == scheduler
         assert isinstance(velocloud_client._clients, list)

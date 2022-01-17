@@ -8,7 +8,7 @@ class VelocloudRepository:
     _logger = None
 
     def __init__(self, config, logger, velocloud_client):
-        self._config = config.VELOCLOUD_CONFIG
+        self._config = config
         self._logger = logger
         self._velocloud_client = velocloud_client
 

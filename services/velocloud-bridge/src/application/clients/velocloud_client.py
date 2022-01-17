@@ -10,7 +10,7 @@ from pytz import timezone
 class VelocloudClient:
 
     def __init__(self, config, logger, scheduler):
-        self._config = config.VELOCLOUD_CONFIG
+        self._config = config
         self._clients = list()
         self._logger = logger
         self._scheduler = scheduler
@@ -19,12 +19,12 @@ class VelocloudClient:
     async def instantiate_and_connect_clients(self):
         self._clients = [
             await self._create_and_connect_client(cred_block['url'], cred_block['username'], cred_block['password']) for
-            cred_block in self._config['servers']]
+            cred_block in self._config.VELOCLOUD_CONFIG['servers']]
 
     async def _start_relogin_job(self, host):
         self._logger.info(f'Scheduling relogin job for host {host}...')
 
-        tz = timezone(self._config['timezone'])
+        tz = timezone(self._config.TIMEZONE)
         run_date = datetime.now(tz)
 
         try:
@@ -41,7 +41,7 @@ class VelocloudClient:
             self._logger.info(f'Skipping start of relogin job for host {host}. Reason: {conflict}')
 
     def _get_cred_block(self, host):
-        for cred_block in self._config['servers']:
+        for cred_block in self._config.VELOCLOUD_CONFIG['servers']:
             if host == cred_block['url']:
                 return cred_block
 
@@ -81,7 +81,7 @@ class VelocloudClient:
                     "password": password
                 },
                 'allow_redirects': False,
-                'ssl': self._config['verify_ssl']
+                'ssl': self._config.VELOCLOUD_CONFIG['verify_ssl']
             }
             response = await self._session.post(f"https://{host}/portal/rest/login/operatorLogin", **post)
             return_response = dict.fromkeys(["body", "status"])
@@ -134,7 +134,7 @@ class VelocloudClient:
             response = await self._session.post(f"https://{host}/portal/rest/event/getEnterpriseEvents",
                                                 json=body,
                                                 headers=target_host_client['headers'],
-                                                ssl=self._config['verify_ssl'])
+                                                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl'])
 
             if response.status in range(200, 300):
                 response_json = await response.json()
@@ -163,7 +163,7 @@ class VelocloudClient:
             response = await self._session.post(f"https://{client['host']}/portal/rest/monitoring/getAggregates",
                                                 json={},
                                                 headers=client['headers'],
-                                                ssl=self._config['verify_ssl'])
+                                                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl'])
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
@@ -239,7 +239,7 @@ class VelocloudClient:
                 f"https://{velocloud_host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
                 json=request_body,
                 headers=target_host_client['headers'],
-                ssl=self._config['verify_ssl']
+                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl']
             )
         except aiohttp.ClientConnectionError:
             result["body"] = 'Error while connecting to Velocloud API'
@@ -290,7 +290,7 @@ class VelocloudClient:
                 f"https://{velocloud_host}/portal/rest/monitoring/getAggregateEdgeLinkMetrics",
                 json=request_body,
                 headers=target_host_client['headers'],
-                ssl=self._config['verify_ssl']
+                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl']
             )
         except aiohttp.ClientConnectionError:
             result["body"] = 'Error while connecting to Velocloud API'
@@ -336,7 +336,7 @@ class VelocloudClient:
                 f"https://{velocloud_host}/portal/rest/metrics/getEdgeLinkSeries",
                 json=payload,
                 headers=target_host_client['headers'],
-                ssl=self._config['verify_ssl']
+                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl']
             )
         except aiohttp.ClientConnectionError:
             result["body"] = 'Error while connecting to Velocloud API'
@@ -390,7 +390,7 @@ class VelocloudClient:
                 f"https://{velocloud_host}/portal/rest/enterprise/getEnterpriseEdges",
                 json=request_body,
                 headers=target_host_client['headers'],
-                ssl=self._config['verify_ssl']
+                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl']
             )
         except aiohttp.ClientConnectionError:
             result["body"] = 'Error while connecting to Velocloud API'
@@ -446,7 +446,7 @@ class VelocloudClient:
                 f"https://{velocloud_host}/portal/rest/edge/getEdgeConfigurationModules",
                 json=request_body,
                 headers=target_host_client['headers'],
-                ssl=self._config['verify_ssl']
+                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl']
             )
         except aiohttp.ClientConnectionError:
             result["body"] = 'Error while connecting to Velocloud API'
@@ -497,7 +497,7 @@ class VelocloudClient:
                 f'https://{velocloud_host}/portal/rest/network/getNetworkEnterprises',
                 json=request_body,
                 headers=target_host_client['headers'],
-                ssl=self._config['verify_ssl']
+                ssl=self._config.VELOCLOUD_CONFIG['verify_ssl']
             )
         except aiohttp.ClientConnectionError:
             result['body'] = 'Error while connecting to Velocloud API'

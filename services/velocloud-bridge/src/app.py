@@ -31,7 +31,7 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
-        self._scheduler = AsyncIOScheduler(timezone=config.VELOCLOUD_CONFIG['timezone'])
+        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
         self._velocloud_client = VelocloudClient(config, self._logger, self._scheduler)
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)

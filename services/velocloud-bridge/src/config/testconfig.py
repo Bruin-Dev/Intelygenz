@@ -12,8 +12,10 @@ NATS_CONFIG = {
     }
 }
 
+TIMEZONE = 'US/Eastern'
+
 VELOCLOUD_CONFIG = {
-    'verify_ssl': False,
+    'verify_ssl': True,
     'servers': [
         {
             'url': 'someurl',
@@ -22,9 +24,6 @@ VELOCLOUD_CONFIG = {
 
         }
     ],
-    'timezone': 'US/Eastern',
-    'ids_by_serial_cache_ttl': 86400
-
 }
 
 LOG_CONFIG = {
