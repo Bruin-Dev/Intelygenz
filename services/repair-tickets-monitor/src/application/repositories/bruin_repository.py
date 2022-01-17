@@ -1,7 +1,9 @@
+import os
 from shortuuid import uuid
 from datetime import datetime
 
 import humps
+import html2text
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application.repositories import nats_error_response
@@ -216,15 +218,233 @@ class BruinRepository:
         except Exception as e:
             self._logger.error(f"Error getting ticket details for {ticket_id} from Bruin: {e}")
 
-    async def get_site(self, site_id: str):
-        # TODO add for ticket creation
-        pass
+    async def get_site(self, client_id: str, site_id: str):
+        err_msg = None
 
-    async def link_email_to_ticket(self, ticket_id: str, email_id: str):
-        pass
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'site_id': site_id,
+            },
+        }
 
-    async def mark_email_as_done(self):
-        pass
+        try:
+            self._logger.info(f'Getting site for site_id {site_id} of client {client_id}...')
+
+            response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=15)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred while getting site for site_id {site_id} '
+                f'Error: {e} '
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'An error response from bruin while getting site information for site_id {site_id} '
+                    f'{self._config.ENVIRONMENT.upper()} environment.'
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def link_email_to_ticket(self, ticket_id: int, email_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'email_id': email_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Linking email {email_id} with ticket {ticket_id}...')
+
+            response = await self._event_bus.rpc_request("bruin.link.ticket.email", request, timeout=15)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when linking ticket {ticket_id} and email {email_id}. '
+                f'Error: {e} '
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'An error occurred when linking ticket {ticket_id} to email {email_id} '
+                    f'{self._config.ENVIRONMENT.upper()} environment.'
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def mark_email_as_done(self, email_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'email_id': email_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Marking email {email_id} as done...')
+
+            response = await self._event_bus.rpc_request("bruin.mark.email.done", request, timeout=15)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred while marking email {email_id} as done. {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while appending note to ticket {email_id} in '
+                    f'{self._config.ENVIRONMENT.upper()} environment. '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def create_outage_ticket(self, client_id: int, service_numbers: List[str]):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "client_id": client_id,
+                "service_number": service_numbers,
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Creating outage ticket for device {service_numbers} that belongs to client {client_id}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
+            self._logger.info(f'Outage ticket for device {service_numbers} that belongs to client {client_id} created!')
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when creating outage ticket for device {service_numbers} belong to client'
+                f'{client_id} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            is_bruin_custom_status = response_status in (409, 471, 472, 473)
+            if not (response_status in range(200, 300) or is_bruin_custom_status):
+                err_msg = (
+                    f'Error while creating outage ticket for device {service_numbers} that belongs to client '
+                    f'{client_id} in {self._config.ENVIRONMENT.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def append_bec_note_to_ticket(
+            self,
+            ticket_id: int,
+            subject: str,
+            from_address: str,
+            body: str,
+            date: datetime,
+            service_numbers: List[str],
+            is_update_note: bool = False,
+    ):
+        new_ticket_message = "This ticket was opened via MetTel Email Center AI Engine."
+        update_ticket_message = "This note is new commentary from the client and posted via BEC AI engine."
+        operator_message = update_ticket_message if is_update_note else new_ticket_message
+
+        body_cleaned = html2text.html2text(body)
+
+        update_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            "BEC AI RTA",
+            "",
+            operator_message,
+            "Please review the full narrative provided in the email attached: \n"
+            f"From: {from_address}",
+            f"Date Stamp: {date}",
+            f"Subject: {subject}",
+            f"Body: \n {body_cleaned}",
+        ])
+
+        return await self.append_note_to_ticket(ticket_id, update_note, service_numbers=service_numbers)
+
+    async def append_note_to_ticket(self, ticket_id: int, note: str, *, service_numbers: List[str]):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'note': note,
+            },
+        }
+
+        if service_numbers:
+            request['body']['service_numbers'] = service_numbers
+
+        try:
+            if service_numbers:
+                self._logger.info(
+                    f'Appending note for service number(s) {", ".join(service_numbers)} in ticket {ticket_id}...'
+                )
+            else:
+                self._logger.info(f'Appending note for all service number(s) in ticket {ticket_id}...')
+
+            response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=15)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when appending a ticket note to ticket {ticket_id}. '
+                f'Ticket note: {note}. Error: {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while appending note to ticket {ticket_id} in '
+                    f'{self._config.ENVIRONMENT.upper()} environment. Note was {note}. Error: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
 
     async def get_tickets_basic_info(
             self,
