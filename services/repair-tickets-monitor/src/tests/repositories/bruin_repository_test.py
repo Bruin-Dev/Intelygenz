@@ -468,12 +468,12 @@ class TestBruinRepository:
 
         expected_ticket_basic_info_calls = (
             call(
-                ticket_statuses=['Closed', 'Resolved'],
+                ticket_statuses=['Closed'],
                 ticket_topic="VOO",
                 start_date=expected_limit_date_str
             ),
             call(
-                ticket_statuses=['Closed', 'Resolved'],
+                ticket_statuses=['Closed'],
                 ticket_topic="VAS",
                 start_date=expected_limit_date_str
             )

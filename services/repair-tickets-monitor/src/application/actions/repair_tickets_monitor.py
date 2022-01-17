@@ -329,8 +329,8 @@ class RepairTicketsMonitor:
                 ticket_id = ticket_creation_response_body
                 self._logger.info(f'Successfully created outage ticket {ticket_id} for email_id {email_id}.')
                 created_ticket = self._create_output_ticket_dict(
-                    ticket_id=ticket_id,
-                    site_id=site_id,
+                    ticket_id=str(ticket_id),
+                    site_id=str(site_id),
                     service_numbers=service_numbers
                 )
                 tickets_created.append(created_ticket)
@@ -344,8 +344,8 @@ class RepairTicketsMonitor:
                     f'reason: {update_reason}'
                 )
                 updated_ticket = self._create_output_ticket_dict(
-                    ticket_id=ticket_id,
-                    site_id=site_id,
+                    ticket_id=str(ticket_id),
+                    site_id=str(site_id),
                     service_numbers=service_numbers
                 )
                 tickets_updated.append(updated_ticket)
@@ -356,7 +356,7 @@ class RepairTicketsMonitor:
                                    f'while creating ticket for {service_numbers} and client {client_id}')
                 error_response = True
                 ticket_cannot_be_created = self._create_output_ticket_dict(
-                    site_id=site_id,
+                    site_id=str(site_id),
                     service_numbers=service_numbers,
                     reason="Error while creating bruin ticket"
                 )

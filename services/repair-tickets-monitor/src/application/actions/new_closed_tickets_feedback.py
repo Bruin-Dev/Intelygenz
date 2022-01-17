@@ -70,8 +70,8 @@ class NewClosedTicketsFeedback:
         closed_tickets = await self.get_closed_tickets_created_during_last_3_days()
         igz_tickets = self._get_igz_created_tickets(closed_tickets)
         self._logger.info(f'Got igz closed tickets: {len(igz_tickets)}')
-        for ticket in igz_tickets:
-            await self._save_closed_ticket_feedback(ticket)
+        tasks = [self._save_closed_ticket_feedback(ticket) for ticket in igz_tickets]
+        await asyncio.gather(*tasks)
 
     async def _save_closed_ticket_feedback(self, ticket_data: dict):
         ticket_id = ticket_data['ticket_id']

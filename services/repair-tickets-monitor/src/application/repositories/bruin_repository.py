@@ -565,7 +565,7 @@ class BruinRepository:
 
         for topic in ticket_topics:
             ticket_response = await self.get_tickets_basic_info(
-                ticket_statuses=['Closed', 'Resolved'],
+                ticket_statuses=['Closed'],
                 ticket_topic=topic,
                 start_date=start_date,
             )
