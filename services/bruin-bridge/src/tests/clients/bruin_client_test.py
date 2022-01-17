@@ -1427,6 +1427,54 @@ class TestPostOutageTicket:
         assert result == expected
 
     @pytest.mark.asyncio
+    async def post_outage_ticket_with_string_service_number_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": None,
+            "errorCode": 0,
+        }
+        bruin_response_body = {
+            "assets": [ticket_data]
+        }
+        bruin_response_status = 200
+
+        bruin_response = CoroutineMock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=bruin_response)):
+            result = await bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client._session.post.assert_awaited_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                ssl=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
     async def post_outage_ticket_with_http_409_response_test(self):
         client_id = 9994,
         service_number = ["VC05400002265"]
