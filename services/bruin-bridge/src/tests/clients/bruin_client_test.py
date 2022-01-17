@@ -3849,11 +3849,11 @@ class TestChangeTicketSeverity:
         email_id = 1234
         ticket_id = 5678
         response_dict = {
-            "Success": True,
-            "EmailId": 1234,
-            "TicketId": 5678,
-            "TotalEmailAffected": 3,
-            "Warnings": []
+            "success": True,
+            "emailId": 3842493,
+            "ticketId": 6112476,
+            "totalEmailAffected": 1,
+            "warnings": []
         }
 
         logger = Mock()
@@ -3870,7 +3870,7 @@ class TestChangeTicketSeverity:
             response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
 
         assert response['status'] == 200
-        assert response['body']['Success'] is True
+        assert response['body']['success'] is True
 
     @pytest.mark.asyncio
     async def link_ticket_to_email_401_test(self):
@@ -3899,11 +3899,11 @@ class TestChangeTicketSeverity:
         email_id = 1234
         ticket_id = 5678
         response_dict = {
-            "Success": True,
-            "EmailId": 1234,
-            "TicketId": 5678,
-            "TotalEmailAffected": 3,
-            "Warnings": [
+            "success": True,
+            "emailId": 3842493,
+            "ticketId": 6112476,
+            "totalEmailAffected": 1,
+            "warnings": [
                 {
                     "ErrorCode": 461,
                     "ErrorMessage": "Only 3 of 6 emails in the thread get affected. "
@@ -3927,7 +3927,7 @@ class TestChangeTicketSeverity:
 
         logger.warning.assert_called_once()
         assert response['status'] == 461
-        assert response['body']['Success'] is True
+        assert response['body']['success'] is True
 
     @pytest.mark.asyncio
     async def link_ticket_to_email_5xx_test(self):

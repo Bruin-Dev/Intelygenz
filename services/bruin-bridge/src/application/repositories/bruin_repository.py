@@ -332,10 +332,11 @@ class BruinRepository:
     async def link_ticket_to_email(self, ticket_id: int, email_id: int):
         response = await self._bruin_client.link_ticket_to_email(ticket_id, email_id)
 
-        if response["status"] not in range(200, 474) or response["status"] == 401:
+        custom_bruin_status = [461, 462, 471, 472, 473, 474]
+        if response["status"] not in range(200, 300) and response["status"] not in custom_bruin_status:
             return response
 
-        if not response["body"].get("Success"):
+        if not response["body"].get("success"):
             response['status'] = 400
             response['body'] = f"Problem linking ticket {ticket_id} and email {email_id}"
         else:

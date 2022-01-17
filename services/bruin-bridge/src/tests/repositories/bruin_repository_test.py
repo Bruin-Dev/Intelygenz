@@ -2129,11 +2129,11 @@ class TestBruinRepository:
         email_id = 12345
 
         response_body = {
-            "Success": True,
-            "EmailId": email_id,
-            "TicketId": ticket_id,
-            "TotalEmailAffected": 3,
-            "Warnings": [
+            "success": True,
+            "email_Id": email_id,
+            "ticket_Id": ticket_id,
+            "total_email_affected": 3,
+            "warnings": [
                 {
                     "ErrorCode": 461,
                     "ErrorMessage": "Only 3 of 6 emails in the thread get affected. "

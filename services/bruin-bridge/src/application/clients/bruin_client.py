@@ -1098,10 +1098,17 @@ class BruinClient:
         try:
             self._logger.info(f'Marking email as done: {email_id}')
             return_response = dict.fromkeys(["body", "status"])
+            payload = {
+                "emailId": email_id,
+                "status": "Done",
+                "resolution": "Mark as done by Intelygenz Ai",
+                "updatedBy": "Intelygenz Ai",
+            }
 
             try:
                 response = await self._session.post(
-                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Email/Exchange/{email_id}/markDone',
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Email/status',
+                    json=payload,
                     headers=self._get_request_headers(),
                     ssl=False,
                 )
