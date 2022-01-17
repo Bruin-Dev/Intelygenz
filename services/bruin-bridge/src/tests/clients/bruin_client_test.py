@@ -1344,12 +1344,12 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_connection_error_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
         connection_error_cause = 'Connection timed out'
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1381,11 +1381,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_2XX_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1429,11 +1429,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_409_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1481,11 +1481,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_471_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1530,11 +1530,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_472_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1579,11 +1579,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_473_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1628,11 +1628,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_400_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1677,11 +1677,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_401_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1718,11 +1718,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_403_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1757,12 +1757,12 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_404_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         url = f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 
@@ -1796,11 +1796,11 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_http_5XX_response_test(self):
         client_id = 9994,
-        service_number = "VC05400002265"
+        service_number = ["VC05400002265"]
 
         request_params = {
             'ClientID': client_id,
-            'WTNs': [service_number],
+            'WTNs': service_number,
             'RequestDescription': "MetTel's IPA -- Service Outage Trouble"
         }
 

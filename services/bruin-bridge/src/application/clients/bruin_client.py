@@ -508,9 +508,12 @@ class BruinClient:
                 f'Posting outage ticket for client with ID {client_id} and for service number {service_number}'
             )
 
+            if not isinstance(service_number, list):
+                service_number = [service_number]
+
             payload = {
                 "ClientID": client_id,
-                "WTNs": [service_number],
+                "WTNs": service_number,
                 "RequestDescription": "MetTel's IPA -- Service Outage Trouble"
             }
             self._logger.info(f'Posting payload {json.dumps(payload)} to create new outage ticket...')
