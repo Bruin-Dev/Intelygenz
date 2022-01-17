@@ -1176,12 +1176,6 @@ class BruinClient:
                 return_response["body"] = "Got 401 from Bruin"
                 return_response["status"] = response.status
 
-            if response.status in range(461, 474):
-                response_json = await response.json()
-                self._logger.warning(f"Got status code {response.status} from Bruin {response_json}")
-                return_response["body"] = response_json
-                return_response["status"] = response.status
-
             if response.status in range(500, 513):
                 self._logger.error(f"Got HTTP {response.status} from Bruin")
                 return_response["body"] = "Got internal error from Bruin"
