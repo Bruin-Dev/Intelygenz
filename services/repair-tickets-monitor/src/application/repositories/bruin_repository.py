@@ -243,7 +243,9 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
+            if response_status in range(200, 300):
+                self._logger.info(f'Got site details of site {site_id} and client {client_id} successfully!')
+            else:
                 err_msg = (
                     f'An error response from bruin while getting site information for site_id {site_id} '
                     f'{self._config.ENVIRONMENT.upper()} environment.'
@@ -281,7 +283,9 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
+            if response_status in range(200, 300):
+                self._logger.info(f'Linked email {email_id} to ticket {ticket_id} successfully!')
+            else:
                 err_msg = (
                     f'An error occurred when linking ticket {ticket_id} to email {email_id} '
                     f'{self._config.ENVIRONMENT.upper()} environment.'
@@ -317,9 +321,11 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
+            if response_status in range(200, 300):
+                self._logger.info(f'Marked email {email_id} as done successfully!')
+            else:
                 err_msg = (
-                    f'Error while appending note to ticket {email_id} in '
+                    f'An error occurred while marking {email_id} as done in '
                     f'{self._config.ENVIRONMENT.upper()} environment. '
                     f'Error {response_status} - {response_body}'
                 )
@@ -345,7 +351,6 @@ class BruinRepository:
             self._logger.info(
                 f'Creating outage ticket for device {service_numbers} that belongs to client {client_id}...')
             response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
-            self._logger.info(f'Outage ticket for device {service_numbers} that belongs to client {client_id} created!')
         except Exception as e:
             err_msg = (
                 f'An error occurred when creating outage ticket for device {service_numbers} belong to client'
@@ -357,9 +362,13 @@ class BruinRepository:
             response_status = response['status']
 
             is_bruin_custom_status = response_status in (409, 471, 472, 473)
-            if not (response_status in range(200, 300) or is_bruin_custom_status):
+            if response_status in range(200, 300) or is_bruin_custom_status:
+                self._logger.info(
+                    f'Outage ticket for devices {service_numbers} that belongs to client {client_id} created!'
+                )
+            else:
                 err_msg = (
-                    f'Error while creating outage ticket for device {service_numbers} that belongs to client '
+                    f'Error while creating outage ticket for devices {service_numbers} that belongs to client '
                     f'{client_id} in {self._config.ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
@@ -408,20 +417,13 @@ class BruinRepository:
             'body': {
                 'ticket_id': ticket_id,
                 'note': note,
+                'service_numbers': service_numbers
             },
         }
-
-        if service_numbers:
-            request['body']['service_numbers'] = service_numbers
-
         try:
-            if service_numbers:
-                self._logger.info(
-                    f'Appending note for service number(s) {", ".join(service_numbers)} in ticket {ticket_id}...'
-                )
-            else:
-                self._logger.info(f'Appending note for all service number(s) in ticket {ticket_id}...')
-
+            self._logger.info(
+                f'Appending note for service number(s) {", ".join(service_numbers)} in ticket {ticket_id}...'
+            )
             response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=15)
         except Exception as e:
             err_msg = (
@@ -433,7 +435,9 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
+            if response_status in range(200, 300):
+                self._logger.info(f'Note appended to ticket {ticket_id} successfully!')
+            else:
                 err_msg = (
                     f'Error while appending note to ticket {ticket_id} in '
                     f'{self._config.ENVIRONMENT.upper()} environment. Note was {note}. Error: '
