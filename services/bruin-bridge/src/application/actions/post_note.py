@@ -34,15 +34,6 @@ class PostNote:
         ticket_id = msg["body"]["ticket_id"]
         note = msg["body"]["note"]
 
-        if len(note) > 1500:
-            self._logger.info(f'Cannot post a note to ticket {ticket_id}')
-            self._logger.info(f'Message is of length:{len(note)} and exceeds 1500 character limit')
-
-            response["body"] = 'Note exceeds 1500 character limit'
-            response["status"] = 400
-            await self._event_bus.publish_message(msg['response_topic'], response)
-            return
-
         self._logger.info(f'Putting note in: {ticket_id}...')
 
         service_numbers: list = msg['body'].get('service_numbers')
