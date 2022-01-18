@@ -125,7 +125,7 @@ data:
                 <option value="last_month">last month</option>
             </select>
         </div>
-        <h1>Email Tagger Dashboard</h1>
+        <h1>${KRE_RUNTIME_NAME} Dashboard</h1>
       </div>
       <iframe id="mettel_public_dashboard" width="100%" height="100%"
             src="/dashboard?lower=now%28%29%20-%207d"
