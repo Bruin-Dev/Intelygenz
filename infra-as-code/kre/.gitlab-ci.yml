@@ -54,7 +54,8 @@ basic-infra-kre-production:
     MODULE: infra-as-code/kre
     MODULE_EKS: 2-create-eks-cluster
     EKS_CLUSTER_NAME: mettel-automation-kre
-    CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_PRO}
+    # variable dont work
+    # CERT_MANAGER_CHART_V: ${CERT_MANAGER_CHART_V_PRO}
     EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_PRO}
     EFS_FILESYSTEM_CHART_V: ${EFS_FILESYSTEM_CHART_V_PRO}
     HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_PRO}
