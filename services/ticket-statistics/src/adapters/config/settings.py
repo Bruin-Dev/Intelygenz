@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
-    'name': 't7-bridge',
+    'name': 'ticket-statistics',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
         'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
-        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-t7-bridge'),
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-ticket-statistics'),
         'host': os.getenv('PAPERTRAIL_HOST'),
         'port': int(os.getenv('PAPERTRAIL_PORT'))
     },

@@ -3,18 +3,17 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
   name: {{ include "ticket-statistics.fullname" . }}-ingress
 spec:
   rules:
     {{ if eq .Values.global.environment "production" }}
-    - host: master.mettel-automation.net
+    - host: ticket-statistics.mettel-automation.net
     {{ else }}
-    - host: {{ .Values.global.environment }}-dev.mettel-automation.net
+    - host: {{ .Values.global.environment }}-ticket-statistics-dev.mettel-automation.net
     {{ end }}
       http:
         paths:
         - backend:
             serviceName: ticket-statistics
             servicePort: {{ .Values.service.port }}
-          path: /api/statistics(/|$)(.*)
+          path: /
