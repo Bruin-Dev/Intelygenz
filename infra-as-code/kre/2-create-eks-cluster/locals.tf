@@ -3,8 +3,8 @@ locals  {
   cluster_name                = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
   k8s_version                 = "1.18"
   worker_nodes_instance_type  = "m5.large"
-  min_worker_nodes            = var.CURRENT_ENVIRONMENT == "dev" ? 5 : 8
-  max_worker_nodes            = var.CURRENT_ENVIRONMENT == "dev" ? 5 : 8
+  min_worker_nodes            = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 8
+  max_worker_nodes            = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 8
 
   // EKS cluster access key local variables
   ssh_key_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks-key" : "${var.common_info.project}-eks-key"
