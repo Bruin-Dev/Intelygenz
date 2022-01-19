@@ -7,6 +7,27 @@ resource "aws_ecr_repository" "hawkeye-outage-monitor-repository" {
   }
 }
 
+resource "aws_ecr_repository_policy" "hawkeye-outage-monitor-fedramp-pull-policy" {
+  repository = aws_ecr_repository.hawkeye-outage-monitor-repository.name
+
+  policy = <<EOF
+{
+    "Version": "2008-10-17",
+    "Statement": [
+        {
+            "Sid": "new policy",
+            "Effect": "Allow",
+            "Principal": "arn:aws:iam::${var.FEDERAL_ACCOUNT_ID}:root",
+            "Action": [
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_ecr_lifecycle_policy" "hawkeye-outage-monitor-image-lifecycle" {
   repository = aws_ecr_repository.hawkeye-outage-monitor-repository.name
 

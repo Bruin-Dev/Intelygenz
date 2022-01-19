@@ -7,6 +7,27 @@ resource "aws_ecr_repository" "notifier-repository" {
   }
 }
 
+resource "aws_ecr_repository_policy" "notifier-fedramp-pull-policy" {
+  repository = aws_ecr_repository.notifier-repository.name
+
+  policy = <<EOF
+{
+    "Version": "2008-10-17",
+    "Statement": [
+        {
+            "Sid": "new policy",
+            "Effect": "Allow",
+            "Principal": "arn:aws:iam::${var.FEDERAL_ACCOUNT_ID}:root",
+            "Action": [
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_ecr_lifecycle_policy" "notifier-image-lifecycle" {
   repository = aws_ecr_repository.notifier-repository.name
 

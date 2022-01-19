@@ -7,6 +7,27 @@ resource "aws_ecr_repository" "customer-cache-repository" {
   }
 }
 
+resource "aws_ecr_repository_policy" "customer-cache-fedramp-pull-policy" {
+  repository = aws_ecr_repository.customer-cache-repository.name
+
+  policy = <<EOF
+{
+    "Version": "2008-10-17",
+    "Statement": [
+        {
+            "Sid": "new policy",
+            "Effect": "Allow",
+            "Principal": "arn:aws:iam::${var.FEDERAL_ACCOUNT_ID}:root",
+            "Action": [
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+            ]
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_ecr_lifecycle_policy" "customer-cache-image-lifecycle" {
   repository = aws_ecr_repository.customer-cache-repository.name
 
