@@ -17,7 +17,9 @@ resource "aws_ecr_repository_policy" "digi-reboot-report-fedramp-pull-policy" {
         {
             "Sid": "new policy",
             "Effect": "Allow",
-            "Principal": "arn:aws:iam::${var.FEDERAL_ACCOUNT_ID}:root",
+            "Principal": {
+                "AWS": "arn:aws:iam::${var.FEDERAL_ACCOUNT_ID}:root"
+            },
             "Action": [
                 "ecr:BatchGetImage",
                 "ecr:GetDownloadUrlForLayer"
