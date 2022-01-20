@@ -8,7 +8,7 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 
-DID_PATTERN = re.compile(r'\+?\d+').pattern
+DID_PATTERN = re.compile(r'\+?(\w|-)+').pattern
 
 EMAIL_SUBJECT_REGEX = re.compile(rf'Possible Fraud on {DID_PATTERN}')
 EMAIL_BODY_REGEX = re.compile(r'(?P<email_body>Possible Fraud Warning.*)\n\nThanks,\nFraud Detection System', re.DOTALL)
