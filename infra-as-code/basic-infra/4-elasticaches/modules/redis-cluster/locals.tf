@@ -10,8 +10,6 @@ locals {
 
   automation-private-zone-Name = var.CURRENT_ENVIRONMENT == "dev" ? "dev.mettel-automation.net." : "pro.mettel-automation.net."
 
-  redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
-
   common_tags = {
     Environment  = var.ENVIRONMENT
     Project      = var.common_info.project

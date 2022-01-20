@@ -71,6 +71,30 @@
                               terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
                               terraform refresh
                               terraform plan && terraform apply -auto-approve
+                              if [[ ${e} == "0-redis" &&  "$TF_VAR_ENVIRONMENT" == "production" ]]; then
+                                  echo "updating gitlab-ci variables with deployed infra values.."
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_HOSTNAME_PRO" --form "value=$(terraform output REDIS_HOSTNAME)"
+                              elif [[ ${e} == "0-redis" ]]; then
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_HOSTNAME_DEV" --form "value=$(terraform output REDIS_HOSTNAME)"
+                              fi
+                              if [[ ${e} == "1-redis-customer-cache" &&  "$TF_VAR_ENVIRONMENT" == "production" ]]; then
+                                  echo "updating gitlab-ci variables with deployed infra values.."
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_CUSTOMER_CACHE_HOSTNAME_PRO" --form "value=$(terraform output REDIS_CUSTOMER_CACHE_HOSTNAME)"
+                              elif [[ ${e} == "1-redis-customer-cache" ]]; then
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_CUSTOMER_CACHE_HOSTNAME_DEV" --form "value=$(terraform output REDIS_CUSTOMER_CACHE_HOSTNAME)"
+                              fi
+                              if [[ ${e} == "2-redis-tnba-feedback" &&  "$TF_VAR_ENVIRONMENT" == "production" ]]; then
+                                  echo "updating gitlab-ci variables with deployed infra values.."
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_TNBA_FEEDBACK_HOSTNAME_PRO" --form "value=$(terraform output REDIS_TNBA_FEEDBACK_HOSTNAME)"
+                              elif [[ ${e} == "2-redis-tnba-feedback" ]]; then
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_TNBA_FEEDBACK_HOSTNAME_DEV" --form "value=$(terraform output REDIS_TNBA_FEEDBACK_HOSTNAME)"
+                              fi
+                              if [[ ${e} == "3-redis-email-tagger" &&  "$TF_VAR_ENVIRONMENT" == "production" ]]; then
+                                  echo "updating gitlab-ci variables with deployed infra values.."
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_EMAIL_TAGGER_HOSTNAME_PRO" --form "value=$(terraform output REDIS_EMAIL_TAGGER_HOSTNAME)"
+                              elif [[ ${e} == "3-redis-email-tagger" ]]; then
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_EMAIL_TAGGER_HOSTNAME_DEV" --form "value=$(terraform output REDIS_EMAIL_TAGGER_HOSTNAME)"
+                              fi
                           fi
                           cd ..
                       )
