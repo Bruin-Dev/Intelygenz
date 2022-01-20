@@ -499,6 +499,16 @@ fraud-monitor:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: ""
+    # -- Defines how often Fraud e-mails are checked to report them as Service Affecting tickets
+    monitoring_job_interval: 0
+    # -- E-mail account that receives Fraud e-mails for later analysis
+    observed_inbox_email_address: ""
+    # -- Senders addresses whose e-mail messages represent Fraud alerts
+    observed_inbox_senders: []
+    # -- Default contact details used when a Fraud is reported as a Service Affecting ticket
+    default_contact_for_new_tickets: {}
+    # -- Default client info used when the DID device in the Fraud alert does not have an inventory assigned in Bruin
+    default_client_info_for_did_without_inventory: {}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

@@ -150,6 +150,24 @@ function email_tagger_monitor_variables() {
   fi
 }
 
+function fraud_monitor_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # fraud-monitor environment variables for ephemeral environments
+    export FRAUD_MONITOR__MONITORING_JOB_INTERVAL="${DEV__FRAUD_MONITOR__MONITORING_JOB_INTERVAL}"
+    export FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS="${DEV__FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS}"
+    export FRAUD_MONITOR__OBSERVED_INBOX_SENDERS="$(echo "${DEV__FRAUD_MONITOR__OBSERVED_INBOX_SENDERS}" | jq . -c)"
+    export FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS="$(echo "${DEV__FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS}" | jq . -c)"
+    export FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY="$(echo "${DEV__FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY}" | jq . -c)"
+  else
+    # fraud-monitor environment variables for production environment
+    export FRAUD_MONITOR__MONITORING_JOB_INTERVAL="${PRO__FRAUD_MONITOR__MONITORING_JOB_INTERVAL}"
+    export FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS="${PRO__FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS}"
+    export FRAUD_MONITOR__OBSERVED_INBOX_SENDERS="$(echo "${PRO__FRAUD_MONITOR__OBSERVED_INBOX_SENDERS}" | jq . -c)"
+    export FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS="$(echo "${PRO__FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS}" | jq . -c)"
+    export FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY="$(echo "${PRO__FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY}" | jq . -c)"
+  fi
+}
+
 function hawkeye_affecting_monitor_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # hawkeye-affecting-monitor environment variables for ephemeral environments
@@ -572,6 +590,7 @@ function environments_assign() {
   dri_bridge_variables
   email_tagger_kre_bridge_variables
   email_tagger_monitor_variables
+  fraud_monitor_variables
   hawkeye_affecting_monitor_variables
   hawkeye_bridge_variables
   hawkeye_customer_cache_variables

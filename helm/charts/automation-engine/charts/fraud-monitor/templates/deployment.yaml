@@ -47,6 +47,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "fraud-monitor.configmapName" . }}
+            - secretRef:
+                name: {{ include "fraud-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
