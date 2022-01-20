@@ -58,7 +58,6 @@ class BruinRepository:
                 'client_id': client_id,
                 'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
-                'product_category': 'SD-WAN',
             },
         }
 

@@ -162,7 +162,6 @@ def make_get_tickets_request(make_rpc_request):
         payload = {
             'client_id': bruin_client_id,
             'ticket_statuses': ticket_statuses,
-            'product_category': 'SD-WAN',
             'ticket_topic': ticket_topic,
         }
 
