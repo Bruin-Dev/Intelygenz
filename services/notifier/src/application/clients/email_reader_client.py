@@ -115,7 +115,10 @@ class EmailReaderClient:
                         break
             else:
                 charset = msg.get_content_charset()
-                body = msg.get_payload(decode=True).decode(encoding=charset, errors="ignore")
+                if charset is not None:
+                    body = msg.get_payload(decode=True).decode(encoding=charset, errors="ignore")
+                else:
+                    body = msg.get_payload()
         except Exception as err:
             self._logger.error(f'Error getting body from message {msg}  due to {err}')
 
