@@ -12,11 +12,12 @@ NATS_CONFIG = {
     }
 }
 
+CURRENT_ENVIRONMENT = "dev"
 ENVIRONMENT_NAME = "dev"
 
+TIMEZONE = 'US/Eastern'
+
 FRAUD_CONFIG = {
-    'environment': ENVIRONMENT_NAME,
-    'timezone': 'US/Eastern',
     'monitoring_interval': 5,
     'inbox_email': 'mettel.automation@intelygenz.com',
     'sender_emails_list': ['amate@mettel.net'],

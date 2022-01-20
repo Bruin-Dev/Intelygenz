@@ -31,7 +31,7 @@ class FraudMonitor:
         next_run_time = undefined
 
         if exec_on_start:
-            tz = timezone(self._config.FRAUD_CONFIG['timezone'])
+            tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
             self._logger.info('Fraud Monitor job is going to be executed immediately')
 
@@ -74,7 +74,7 @@ class FraudMonitor:
             self._logger.info(f'Processing email with msg_uid {msg_uid}')
             processed = await self._process_fraud(body, msg_uid)
 
-            if processed and self._config.FRAUD_CONFIG['environment'] == 'production':
+            if processed and self._config.CURRENT_ENVIRONMENT == 'production':
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response['status']
 
@@ -194,7 +194,7 @@ class FraudMonitor:
             )
             return True
 
-        if self._config.FRAUD_CONFIG['environment'] != 'production':
+        if self._config.CURRENT_ENVIRONMENT != 'production':
             self._logger.info(
                 f'No Fraud note will be appended to ticket {ticket_id} since the current environment is not production'
             )
@@ -216,7 +216,7 @@ class FraudMonitor:
         task_id = ticket_info['ticket_task']['detailID']
         self._logger.info(f'Unresolving task related to {service_number} of Fraud ticket {ticket_id}...')
 
-        if self._config.FRAUD_CONFIG['environment'] != 'production':
+        if self._config.CURRENT_ENVIRONMENT != 'production':
             self._logger.info(
                 f'Task related to {service_number} of Fraud ticket {ticket_id} will not be unresolved '
                 f'since the current environment is not production'
@@ -247,7 +247,7 @@ class FraudMonitor:
         if not contacts:
             return False
 
-        if self._config.FRAUD_CONFIG['environment'] != 'production':
+        if self._config.CURRENT_ENVIRONMENT != 'production':
             self._logger.info(f'No Fraud ticket will be created since the current environment is not production')
             return True
 

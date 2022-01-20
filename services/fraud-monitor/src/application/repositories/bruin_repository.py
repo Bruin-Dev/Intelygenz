@@ -38,9 +38,8 @@ class BruinRepository:
                 self._logger.info(f'Got client info by DID {did}!')
             else:
                 err_msg = (
-                    f'Error while getting client info by DID {did} in '
-                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
-                    f'Error {response_status} - {response_body}'
+                    f'Error while getting client info by DID {did} in {self._config.ENVIRONMENT_NAME.upper()} '
+                    f'environment: Error {response_status} - {response_body}'
                 )
 
         if err_msg:
@@ -104,14 +103,14 @@ class BruinRepository:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic} and belonging to client {client_id} in '
-                        f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
                 else:
                     err_msg = (
                         f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
                         f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
-                        f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                        f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
@@ -156,7 +155,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
             else:
@@ -195,7 +194,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while claiming client info for service number {service_number} in '
-                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -232,7 +231,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while getting site details of site {site_id} and client {client_id} in '
-                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -299,7 +298,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while appending note to ticket {ticket_id} in '
-                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment. Note was {note}. Error: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment. Note was {note}. Error: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -344,7 +343,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while creating fraud ticket for service number {service_number} that belongs to client '
-                    f'{client_id} in {self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                    f'{client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -380,7 +379,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f'Error while opening ticket {ticket_id} in '
-                    f'{self._config.FRAUD_CONFIG["environment"].upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -400,7 +399,7 @@ class BruinRepository:
             email_body,
             '',
             f'Email UID: {msg_uid}',
-            f'TimeStamp: {datetime.now(timezone(self._config.FRAUD_CONFIG["timezone"]))}'
+            f'TimeStamp: {datetime.now(timezone(self._config.TIMEZONE))}'
         ]
 
         return os.linesep.join(note_lines)

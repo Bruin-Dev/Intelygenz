@@ -14,9 +14,7 @@ from config import testconfig
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
 
-custom_fraud_config = testconfig.FRAUD_CONFIG.copy()
-custom_fraud_config['environment'] = 'production'
-config_mock = patch.object(testconfig, 'FRAUD_CONFIG', custom_fraud_config)
+config_mock = patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production')
 
 
 class TestFraudMonitor:
@@ -136,10 +134,7 @@ class TestFraudMonitor:
         fraud_monitor._notifications_repository.mark_email_as_read.return_value = mark_email_as_read_response
         fraud_monitor._process_fraud.return_value = True
 
-        custom_fraud_config = fraud_monitor._config.FRAUD_CONFIG.copy()
-        custom_fraud_config['environment'] = 'production'
-
-        with patch.dict(fraud_monitor._config.FRAUD_CONFIG, custom_fraud_config):
+        with config_mock:
             await fraud_monitor._fraud_monitoring_process()
 
         fraud_monitor._process_fraud.assert_called_once_with(body, msg_uid)
