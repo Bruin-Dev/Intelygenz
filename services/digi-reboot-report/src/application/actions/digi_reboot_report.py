@@ -187,8 +187,7 @@ class DiGiRebootReport:
                         ticket_map[ticket_id]['autoresolved'] = True
                     autoresolve_diff = (autoresolve_time - etc_converted_end_time).total_seconds() / 60
                     ticket_map[ticket_id]['autoresolve_diff'] = autoresolve_diff
-                    ticket_map[ticket_id][
-                        'autoresolve_correlation'] = True if autoresolve_diff > -10 and autoresolve_diff < 30 else False
+                    ticket_map[ticket_id]['autoresolve_correlation'] = -10 < autoresolve_diff < 30
             ticket_map[ticket_id]['reboot_method'] = process['Method']
 
     def _track_process_length(self, day, process_length, process_length_by_day):

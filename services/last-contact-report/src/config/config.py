@@ -32,7 +32,7 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.environ['PAPERTRAIL_ACTIVE'] == "true" else False,
+        'active': os.environ['PAPERTRAIL_ACTIVE'] == "true",
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-last-contact-report'),
         'host': os.environ['PAPERTRAIL_HOST'],
         'port': int(os.environ['PAPERTRAIL_PORT'])
