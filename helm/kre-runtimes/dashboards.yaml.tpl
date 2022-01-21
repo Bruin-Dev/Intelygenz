@@ -101,7 +101,7 @@ data:
             height: 24px;
         }
       </style>
-      <title>${KRE_RUNTIME_NAME} Dashboard</title>
+      <title>Dashboard</title>
     </head>
     <body>
       <div class="filters_wrapper">
