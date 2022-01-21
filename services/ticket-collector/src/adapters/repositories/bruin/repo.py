@@ -46,7 +46,6 @@ class BruinRepository:
         """
         endpoint = 'https://api.bruin.com/api/Ticket/basic'
 
-        self._logger.info(f'{start} - {end}')
         headers = {
             'Authorization': 'Bearer %s' % self._token
         }
@@ -57,11 +56,12 @@ class BruinRepository:
             'TicketTopic': 'VOO'
         }
 
-        self._logger.info(f'Requesting to bruin tickets in date range between {start} - {end} with params {params}')
+        self._logger.info(f'Requesting bruin tickets between {start} and {end}')
 
         tickets_response = requests.get(endpoint, params=params, headers=headers, verify=False)
 
-        # self._logger.info(tickets_response.json())
+        self._logger.info(f'Got bruin tickets response with status {tickets_response.status_code}')
+
         if tickets_response.status_code != 200:
             self._logger.info(tickets_response.json())
 
