@@ -19,6 +19,6 @@ class IDB(metaclass=abc.ABCMeta):
 
 class MongoDB(IDB):
     def initialize(self):
-        self.logger.info("Connected to Mongo DB")
         self.client = MongoClient(self.config['mongo']['url'])
+        self.logger.info("Connected to Mongo DB")
         self.logger.info(f'Mongo server info: {self.client.server_info()}')

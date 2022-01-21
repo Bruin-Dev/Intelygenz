@@ -3,7 +3,7 @@ import sys
 import logging
 from dotenv import load_dotenv
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
 
 LOG_CONFIG = {
     'name': 'ticket-collector',
@@ -11,10 +11,10 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
-        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
-        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-t7-bridge'),
-        'host': os.getenv('PAPERTRAIL_HOST'),
-        'port': int(os.getenv('PAPERTRAIL_PORT'))
+        'active': os.environ['PAPERTRAIL_ACTIVE'] == 'true',
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-ticket-collector'),
+        'host': os.environ['PAPERTRAIL_HOST'],
+        'port': int(os.environ['PAPERTRAIL_PORT'])
     },
 }
 
@@ -29,10 +29,12 @@ def get_config():
     dotenv_path = os.path.join(APP_ROOT, 'config/.env')
     load_dotenv(dotenv_path)
 
-    mongo_url = f'mongodb://{os.getenv("MONGODB_USERNAME")}:{os.getenv("MONGODB_PASSWORD")}@' \
-                f'{os.getenv("MONGODB_HOST")}/{os.getenv("MONGODB_DATABASE")}' \
-                f'?ssl=true&ssl_ca_certs=/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0' \
-                f'&readPreference=secondaryPreferred&retryWrites=false'
+    mongo_user = os.environ["MONGODB_USERNAME"]
+    mongo_password = os.environ["MONGODB_PASSWORD"]
+    mongo_host = os.environ["MONGODB_HOST"]
+    mongo_db = os.environ["MONGODB_DATABASE"]
+    mongo_params = get_mongo_params()
+    mongo_url = f'mongodb://{mongo_user}:{mongo_password}@{mongo_host}/{mongo_db}?{mongo_params}'
 
     return {
         'sentry': {
@@ -45,8 +47,16 @@ def get_config():
             'url': mongo_url
         },
         'bruin': {
-            'id': os.getenv('BRUIN_CLIENT_ID'),
-            'secret': os.getenv('BRUIN_CLIENT_SECRET')
+            'id': os.environ['BRUIN_CLIENT_ID'],
+            'secret': os.environ['BRUIN_CLIENT_SECRET']
         },
-        'interval_tasks_server': int(os.getenv('INTERVAL_TASKS_RUN')),
+        'interval_tasks_server': int(os.environ['INTERVAL_TASKS_RUN']),
     }
+
+
+def get_mongo_params():
+    if ENVIRONMENT_NAME.endswith('local'):
+        return 'authSource=admin'
+    else:
+        return 'ssl=true&ssl_ca_certs=/service/app/rds-combined-ca-bundle.pem' \
+               '&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false'

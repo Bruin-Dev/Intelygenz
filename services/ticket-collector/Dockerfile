@@ -12,8 +12,6 @@ RUN apt-get install -y wget
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
-
 ENV PYTHONUNBUFFERED 1
 
 CMD ["python3", "-u", "src/app.py"]
