@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from collections import defaultdict
 from typing import Callable
+from tenacity import wait_exponential, retry, stop_after_attempt
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -13,16 +14,19 @@ from pytz import utc
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
+EVENT_TIME_REGEX = re.compile(r'(?P<time>^.*): Message from InterMapper')
 
 
 class InterMapperMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, notifications_repository, bruin_repository):
+    def __init__(self, event_bus, logger, scheduler, config, notifications_repository, bruin_repository,
+                 dri_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
+        self._dri_repository = dri_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.INTERMAPPER_CONFIG['concurrent_email_batches'])
 
     async def start_intermapper_outage_monitoring(self, exec_on_start=False):
@@ -124,11 +128,11 @@ class InterMapperMonitor:
         if parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_up_events']:
             self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]} there is no need to create'
                               f' a new ticket. Checking for autoresolve ...')
-            event_processed_successfully = await self._autoresolve_ticket(circuit_id, client_id, body)
+            event_processed_successfully = await self._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
         elif parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_down_events']:
             self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
                               f'checking for ticket creation ...')
-            event_processed_successfully = await self._create_outage_ticket(circuit_id, client_id, body)
+            event_processed_successfully = await self._create_outage_ticket(circuit_id, client_id, parsed_email_dict)
         else:
             self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
                               f'so no further action is needs to be taken')
@@ -143,17 +147,18 @@ class InterMapperMonitor:
 
     def _parse_email_body(self, body):
         parsed_email_dict = {}
+        parsed_email_dict['time'] = EVENT_TIME_REGEX.match(body).group('time')
         parsed_email_dict['event'] = self._find_field_in_body(body, 'Event')
         parsed_email_dict['name'] = self._find_field_in_body(body, 'Name')
         parsed_email_dict['document'] = self._find_field_in_body(body, 'Document')
         parsed_email_dict['address'] = self._find_field_in_body(body, 'Address')
         parsed_email_dict['probe_type'] = self._find_field_in_body(body, 'Probe Type')
-        parsed_email_dict['condition'] = self._find_field_in_body(body, 'Condition')
+        parsed_email_dict['condition'] = self._find_field_in_body(body, 'Condition', parsed_email_dict['event'])
         parsed_email_dict['last_reported_down'] = self._find_field_in_body(body, 'Time since last reported down')
         parsed_email_dict['up_time'] = self._find_field_in_body(body, "Device's up time")
         return parsed_email_dict
 
-    def _find_field_in_body(self, email_body, field_name):
+    def _find_field_in_body(self, email_body, field_name, default_value=''):
         email_body_lines = email_body.splitlines()
         field = None
         for line in email_body_lines:
@@ -162,7 +167,8 @@ class InterMapperMonitor:
                 break
         if field is None or field.strip() == '':
             return None
-        return field.strip().replace(f'{field_name}: ', '')
+        field_value = field.replace(f'{field_name}:', '').strip()
+        return field_value or default_value
 
     def _extract_value_from_field(self, starting_char, ending_char, field):
         extracted_value = None
@@ -173,7 +179,7 @@ class InterMapperMonitor:
                 extracted_value = field.split(starting_char)[1].split(ending_char)[0]
         return extracted_value
 
-    async def _autoresolve_ticket(self, circuit_id, client_id, intermapper_body):
+    async def _autoresolve_ticket(self, circuit_id, client_id, parsed_email_dict):
         self._logger.info('Starting the autoresolve process')
         tickets_response = await self._bruin_repository.get_ticket_basic_info(client_id, circuit_id)
         tickets_body = tickets_response['body']
@@ -190,7 +196,7 @@ class InterMapperMonitor:
             self._logger.info(f'Posting InterMapper UP note to task of ticket id {ticket_id} '
                               f'related to circuit ID {circuit_id}...')
             up_note_response = await self._bruin_repository.append_intermapper_up_note(ticket_id, circuit_id,
-                                                                                       intermapper_body)
+                                                                                       parsed_email_dict)
             if up_note_response['status'] not in range(200, 300):
                 return False
 
@@ -274,7 +280,7 @@ class InterMapperMonitor:
             )
         return True
 
-    async def _create_outage_ticket(self, circuit_id, client_id, intermapper_body):
+    async def _create_outage_ticket(self, circuit_id, client_id, parsed_email_dict):
         self._logger.info(f'Attempting outage ticket creation for client_id {client_id}, '
                           f'and circuit_id {circuit_id}')
         outage_ticket_response = await self._bruin_repository.create_outage_ticket(client_id, circuit_id)
@@ -305,8 +311,44 @@ class InterMapperMonitor:
             return False
 
         self._logger.info(f'Appending InterMapper note to ticket id {outage_ticket_body}')
-        await self._bruin_repository.append_intermapper_note(outage_ticket_body, intermapper_body)
+        if self._is_piab_device(parsed_email_dict):
+            attributes_serial_response = await self._bruin_repository.get_attributes_serial(circuit_id, client_id)
+            if attributes_serial_response["status"] not in range(200, 300):
+                return False
+            event_processed_successfully = await self._process_dri_email(outage_ticket_body,
+                                                                         parsed_email_dict,
+                                                                         attributes_serial_response['body'])
+            return event_processed_successfully
+        await self._bruin_repository.append_intermapper_note(outage_ticket_body, parsed_email_dict)
         return True
+
+    async def _process_dri_email(self, ticket_id, parsed_email_dict, attributes_serial):
+        @retry(wait=wait_exponential(multiplier=self._config.INTERMAPPER_CONFIG['wait_multiplier'],
+                                     min=self._config.INTERMAPPER_CONFIG['wait_min'],
+                                     max=self._config.INTERMAPPER_CONFIG['wait_max']),
+               stop=stop_after_attempt(self._config.INTERMAPPER_CONFIG['stop_after_attempt']),
+               reraise=True)
+        async def _process_dri_email():
+            dri_parameters_response = await self._dri_repository.get_dri_parameters(attributes_serial)
+            if dri_parameters_response["status"] not in range(200, 300):
+                return False
+            if dri_parameters_response["status"] == 204:
+                self._logger.info(dri_parameters_response['body'])
+                raise Exception(f"Error: {dri_parameters_response['body']}")
+            post_dri_note_response = await self._bruin_repository.append_dri_note(ticket_id,
+                                                                                  dri_parameters_response['body'],
+                                                                                  parsed_email_dict)
+            if post_dri_note_response["status"] not in range(200, 300):
+                return False
+            return True
+        try:
+            return await _process_dri_email()
+        except Exception as e:
+            msg = f"Max retries reached processing dri emails in the intermapper process. - exception: {e}"
+            self._logger.error(msg)
+            await self._notifications_repository.send_slack_message(msg)
+            await self._bruin_repository.append_intermapper_note(ticket_id, parsed_email_dict)
+            return True
 
     def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
         current_datetime = datetime.now(utc)
@@ -376,3 +418,7 @@ class InterMapperMonitor:
             if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve_product_category_list']:
                 return False
         return True
+
+    @staticmethod
+    def _is_piab_device(email_data: dict) -> bool:
+        return 'Data Remote Probe' in email_data['probe_type']
