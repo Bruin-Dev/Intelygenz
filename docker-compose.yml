@@ -524,7 +524,7 @@ services:
     depends_on:
       - mongo
     volumes:
-    - ./ticket-collector:/service/app
+    - ./services/ticket-collector:/service/app
     ports:
       - 5617:5000
 
@@ -543,7 +543,7 @@ services:
       - ticket-collector
       - mongo
     volumes:
-    - ./ticket-statistics:/service/app
+    - ./services/ticket-statistics:/service/app
     ports:
       - 3000:3000
 
@@ -709,7 +709,7 @@ services:
       MONGO_INITDB_DATABASE: bruin
     volumes:
       - ${HOME}/databases/mettel/mongodb:/data/db
-      - ./ticket-collector/scripts:/docker-entrypoint-initdb.d/:ro
+      - ./services/ticket-collector/scripts:/docker-entrypoint-initdb.d/:ro
 
   mongo-links-metrics:
     image: mongo:latest
