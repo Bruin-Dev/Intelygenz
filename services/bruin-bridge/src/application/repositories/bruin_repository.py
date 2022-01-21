@@ -147,29 +147,23 @@ class BruinRepository:
             filters['DetailId'] = detail_id
         return await self._bruin_client.unpause_ticket(ticket_id, filters)
 
-    async def _get_attribute_from_inventory(self, filters, attr_key):
-        response = await self._bruin_client.get_inventory_attributes(filters)
+    async def get_management_status(self, filters):
+        response = await self._bruin_client.get_management_status(filters)
 
         if response["status"] not in range(200, 300):
             return response
 
         if "attributes" in response["body"].keys():
-            attribute = [attribute["value"] for attribute in response["body"]["attributes"] if
-                         attribute["key"] == attr_key]
-            if len(attribute) > 0:
-                attribute = attribute[0]
+            management_status = [attribute["value"] for attribute in response["body"]["attributes"] if
+                                 attribute["key"] == "Management Status"]
+            if len(management_status) > 0:
+                management_status = management_status[0]
             else:
-                attribute = None
+                management_status = None
 
-            response["body"] = attribute
+            response["body"] = management_status
 
         return response
-
-    async def get_attributes_serial(self, filters):
-        return await self._get_attribute_from_inventory(filters, attr_key="Serial Number")
-
-    async def get_management_status(self, filters):
-        return await self._get_attribute_from_inventory(filters, attr_key="Management Status")
 
     async def post_outage_ticket(self, client_id, service_number):
         response = await self._bruin_client.post_outage_ticket(client_id, service_number)

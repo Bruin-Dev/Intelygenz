@@ -130,76 +130,21 @@ class BruinRepository:
 
         return response
 
-    async def get_attributes_serial(self, service_number, client_id):
-        err_msg = None
-
-        request = {
-            'request_id': uuid(),
-            'body': {
-                "client_id": client_id,
-                "status": "A",
-                "service_number": service_number,
-            },
-        }
-
-        try:
-            self._logger.info(f"Getting the attribute's serial number of serial number {service_number}")
-            response = await self._event_bus.rpc_request("bruin.inventory.attributes.serial", request, timeout=60)
-        except Exception as e:
-            err_msg = (
-                f"Getting the attribute's serial number of serial number {service_number} Error: {e}"
-            )
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status in range(200, 300):
-                self._logger.info(f"Got the attribute's serial number of serial number {service_number}!")
-            else:
-                err_msg = (
-                    f"'Getting the attribute's serial number of serial number {service_number}'"
-                    f'{self._config.INTERMAPPER_CONFIG["environment"].upper()} environment. Error: '
-                    f'Error {response_status} - {response_body}'
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
-        return response
-
-    async def append_intermapper_note(self, ticket_id, parsed_email_dict):
+    async def append_intermapper_note(self, ticket_id, intermapper_body):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'InterMapper Triage',
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
+            f'{intermapper_body}',
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
         return await self.append_note_to_ticket(ticket_id, intermapper_note)
 
-    async def append_intermapper_up_note(self, ticket_id, wtn, parsed_email_dict):
+    async def append_intermapper_up_note(self, ticket_id, wtn, intermapper_body):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
+            f'{intermapper_body}',
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
         return await self.append_note_to_ticket(ticket_id, intermapper_note, wtns=[wtn])
@@ -212,37 +157,6 @@ class BruinRepository:
             f'TimeStamp: {current_datetime_tz_aware}'
         ])
         return await self.append_note_to_ticket(ticket_id, intermapper_note, wtns=[wtn])
-
-    async def append_dri_note(self, ticket_id, dri_body, parsed_email_dict):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
-        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(' ')
-        sim_note = f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}\n"
-        if 'SIM1' in sim_insert:
-            sim_note = f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}\n" + sim_note
-        if 'SIM2' in sim_insert:
-            sim_note = sim_note + f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n"
-
-        dri_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"InterMapper Triage",
-            f"Message from InterMapper 6.1.5\n",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"{sim_note}",
-            f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
-            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f"Timestamp: {current_datetime_tz_aware}"])
-
-        return await self.append_note_to_ticket(ticket_id, dri_note)
 
     async def resolve_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None

@@ -62,10 +62,7 @@
     * [Description](#description-15)
     * [Request message](#request-message-14)
     * [Response message](#response-message-14)
-  * [Get Attributes Serial](#get-attributes-serial)
-    * [Description](#description-16)
-    * [Request message](#request-message-15)
-    * [Response message](#response-message-15)   
+
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -659,33 +656,6 @@ and then a response message is published to the response topic that was built by
   ],
   "status": 200
 }
-```
-
-# Get Attributes Serial 
-### Description
-When the bruin bridge receives a request with a request message from topic `bruin.inventory.attributes.serial` it will make
-a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query params the filters passed in the message.
-**NOTE: the filters are passed in snake_case and will be converted to PascalCase before being sent to Bruin's API. client_id filter is MANDATORY**
-
-### Request message
-```
-{
-    'request_id': 123,
-    'body': {"client_id": 89267 # MANDATORY parameter,
-                "status": "A" # MANDATORY Can be A(Active), D(Decomissined), S(Suspended),
-                "service_number": "5006950173" # MANDATORY Is the serial number or something similar (i.e circuit id)
-    }
-
-}
-```
-### Response message
-```
-{
-    'request_id': 123,
-    'body': "705286",
-    'status': 200
-}
-
 ```
 
 # Running in docker-compose 

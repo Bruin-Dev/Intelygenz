@@ -503,121 +503,17 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_attributes_serial_test(self):
-        circuit_id = '123'
-        client_id = 83959
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                "client_id": client_id,
-                "status": "A",
-                "service_number": circuit_id,
-            },
-        }
-        response = {
-            'request_id': uuid_,
-            "body": "705286",
-            'status': 200,
-        }
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        with uuid_mock:
-            result = await bruin_repository.get_attributes_serial(circuit_id, client_id)
-
-        event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.attributes.serial", request, timeout=60)
-        assert result == response
-
-    @pytest.mark.asyncio
-    async def get_attributes_serial_rpc_request_test(self):
-        circuit_id = '123'
-        client_id = 83959
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                "client_id": client_id,
-                "status": "A",
-                "service_number": circuit_id,
-            },
-        }
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-
-        logger = Mock()
-        logger.error = Mock()
-
-        config = testconfig
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        with uuid_mock:
-            result = await bruin_repository.get_attributes_serial(circuit_id, client_id)
-
-        event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.attributes.serial", request, timeout=60)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
-        assert result == nats_error_response
-
-    @pytest.mark.asyncio
-    async def get_circuit_id_non_2xx_response_test(self):
-        circuit_id = '123'
-        client_id = 83959
-
-        request = {
-            'request_id': uuid_,
-            'body': {
-                "client_id": client_id,
-                "status": "A",
-                "service_number": circuit_id,
-            },
-        }
-        response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
-        }
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        logger = Mock()
-        logger.error = Mock()
-
-        config = testconfig
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        with uuid_mock:
-            result = await bruin_repository.get_attributes_serial(circuit_id, client_id)
-
-        event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.attributes.serial", request, timeout=60)
-        assert result == response
-
-    @pytest.mark.asyncio
     async def append_intermapper_note_test(self):
         ticket_id = 11111
-        parsed_email_dict = {
-            "time": "01/10 15:35:40",
-            "event": "Alarm",
-            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
-            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
-            "address": "1.3.4",
-            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
-        }
+        intermapper_body = os.linesep.join([
+            "event: Alarm",
+            "name: OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document: O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address: 1.3.4",
+            "probe_type: SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "last_reported_down: 7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
         event_bus = Mock()
         logger = Mock()
@@ -631,21 +527,13 @@ class TestBruinRepository:
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'InterMapper Triage',
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
+            f'{intermapper_body}',
             f'TimeStamp: {current_datetime}'
         ])
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
-            await bruin_repository.append_intermapper_note(ticket_id, parsed_email_dict)
+            await bruin_repository.append_intermapper_note(ticket_id, intermapper_body)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
 
@@ -653,17 +541,15 @@ class TestBruinRepository:
     async def append_intermapper_up_note_test(self):
         ticket_id = 11111
         circuit_id = 1345
-        parsed_email_dict = {
-            "time": "01/10 15:35:40",
-            "event": "Alarm",
-            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
-            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
-            "address": "1.3.4",
-            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
-        }
+        intermapper_body = os.linesep.join([
+            "event: Alarm",
+            f"name: OReilly-HotSpringsAR{circuit_id}-Site803",
+            "document: O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address: 1.3.4",
+            "probe_type: SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "last_reported_down: 7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
         event_bus = Mock()
         logger = Mock()
@@ -676,21 +562,13 @@ class TestBruinRepository:
         current_datetime = datetime.now()
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
+            f'{intermapper_body}',
             f'TimeStamp: {current_datetime}'
         ])
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
-            await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, parsed_email_dict)
+            await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, intermapper_body)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
 
@@ -719,138 +597,6 @@ class TestBruinRepository:
             await bruin_repository.append_autoresolve_note(ticket_id, circuit_id)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
-
-    @pytest.mark.asyncio
-    async def append_dri_note_test(self):
-        ticket_id = 11111
-        parsed_email_dict = {
-            "time": "01/10 15:35:40",
-            "event": "Alarm",
-            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
-            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
-            "address": "1.3.4",
-            "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
-        }
-
-        dri_body = {
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active and SIM2 Ready",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69"
-        }
-
-        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(' ')
-
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        bruin_repository.append_note_to_ticket = CoroutineMock()
-
-        sim_note = os.linesep.join([
-            f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}",
-            f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}",
-            f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n"
-        ])
-
-        current_datetime = datetime.now()
-        dri_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"InterMapper Triage",
-            f"Message from InterMapper 6.1.5\n",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"{sim_note}",
-            f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
-            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f"Timestamp: {current_datetime}"])
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
-            await bruin_repository.append_dri_note(ticket_id, dri_body, parsed_email_dict)
-
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, dri_note)
-
-    @pytest.mark.asyncio
-    async def append_dri_note_no_sims_test(self):
-        ticket_id = 11111
-        parsed_email_dict = {
-            "time": "01/10 15:35:40",
-            "event": "Alarm",
-            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
-            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
-            "address": "1.3.4",
-            "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
-        }
-
-        dri_body = {
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69"
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        bruin_repository.append_note_to_ticket = CoroutineMock()
-
-        sim_note = os.linesep.join([
-            f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}\n",
-        ])
-
-        current_datetime = datetime.now()
-        dri_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"InterMapper Triage",
-            f"Message from InterMapper 6.1.5\n",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"{sim_note}",
-            f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
-            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f"Timestamp: {current_datetime}"])
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
-            await bruin_repository.append_dri_note(ticket_id, dri_body, parsed_email_dict)
-
-        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, dri_note)
 
     @pytest.mark.asyncio
     async def get_ticket_basic_info_with_service_number_specified_test(self):

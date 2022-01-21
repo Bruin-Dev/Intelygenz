@@ -31,19 +31,7 @@ INTERMAPPER_CONFIG = {
     'intermapper_up_events': ['Up', 'OK'],
     'autoresolve_last_outage_seconds': 60 * 75,
     'autoresolve_product_category_list': ['Cloud Connect', 'Cloud Firewall', 'POTS in a Box', 'Premise Firewall',
-                                          'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi', 'SD-WAN'],
-    'dri_parameters': [
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum",
-        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei",
-        "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress"
-    ],
-    'stop_after_attempt': 5,
-    'wait_multiplier': 1,
-    'wait_min': 4,
-    'wait_max': 10
+                                          'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi', 'SD-WAN']
 
 }
 LOG_CONFIG = {

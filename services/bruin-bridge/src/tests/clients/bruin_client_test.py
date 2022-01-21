@@ -770,7 +770,7 @@ class TestBruinClient:
             assert update_ticket_status["status"] == 500
 
     @pytest.mark.asyncio
-    async def get_inventory_attributes_pascalize_with_ok_test(self):
+    async def get_management_status_pascalize_with_ok_test(self):
         logger = Mock()
 
         filters = {
@@ -784,7 +784,7 @@ class TestBruinClient:
             "ServiceNumber": "VC05400009999"
         }
 
-        valid_inventory_attributes_status = {
+        valid_management_status = {
             "inventoryId": "12796795",
             "serviceNumber": "VC05400002265",
             "attributes": [
@@ -796,7 +796,7 @@ class TestBruinClient:
         }
 
         response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=valid_inventory_attributes_status)
+        response_mock.json = CoroutineMock(return_value=valid_management_status)
         response_mock.status = 200
 
         bruin_client = BruinClient(logger, config)
@@ -804,7 +804,7 @@ class TestBruinClient:
         bruin_client.login = CoroutineMock()
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
-            await bruin_client.get_inventory_attributes(filters)
+            await bruin_client.get_management_status(filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                 headers=bruin_client._get_request_headers(),
@@ -814,7 +814,7 @@ class TestBruinClient:
             response_mock.json.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def get_inventory_attributes_with_ko_401_test(self):
+    async def get_management_status_with_ko_401_test(self):
         logger = Mock()
 
         filters = {
@@ -840,18 +840,18 @@ class TestBruinClient:
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
             with raises(Exception):
-                await bruin_client.get_inventory_attributes(filters)
+                await bruin_client.get_management_status(filters)
                 bruin_client._session.get.assert_awaited_once_with(
                     f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                     headers=bruin_client._get_request_headers(),
                     params=pascalized_filter,
                     ssl=False
                 )
-                self.assertRaises(Exception, await bruin_client.get_inventory_attributes)
+                self.assertRaises(Exception, await bruin_client.get_management_status)
                 bruin_client.login.assert_awaited()
 
     @pytest.mark.asyncio
-    async def get_inventory_attributes_with_ko_400_test(self):
+    async def get_management_status_with_ko_400_test(self):
         logger = Mock()
 
         filters = {
@@ -880,7 +880,7 @@ class TestBruinClient:
         bruin_client.login = CoroutineMock()
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
-            await bruin_client.get_inventory_attributes(filters)
+            await bruin_client.get_management_status(filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                 headers=bruin_client._get_request_headers(),
@@ -889,7 +889,7 @@ class TestBruinClient:
             )
 
     @pytest.mark.asyncio
-    async def get_inventory_attributes_with_ko_403_test(self):
+    async def get_management_status_with_ko_403_test(self):
         logger = Mock()
 
         filters = {
@@ -918,7 +918,7 @@ class TestBruinClient:
         bruin_client.login = CoroutineMock()
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
-            await bruin_client.get_inventory_attributes(filters)
+            await bruin_client.get_management_status(filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                 headers=bruin_client._get_request_headers(),
@@ -927,7 +927,7 @@ class TestBruinClient:
             )
 
     @pytest.mark.asyncio
-    async def get_inventory_attributes_with_ko_500_test(self):
+    async def get_management_status_with_ko_500_test(self):
         logger = Mock()
 
         filters = {
@@ -952,7 +952,7 @@ class TestBruinClient:
         bruin_client.login = CoroutineMock()
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
-            await bruin_client.get_inventory_attributes(filters)
+            await bruin_client.get_management_status(filters)
             bruin_client._session.get.assert_called_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                 headers=bruin_client._get_request_headers(),
@@ -961,7 +961,7 @@ class TestBruinClient:
             )
 
     @pytest.mark.asyncio
-    async def get_inventory_attributes_with_connection_error_test(self):
+    async def get_management_status_with_connection_error_test(self):
         logger = Mock()
 
         filters = {
@@ -983,7 +983,7 @@ class TestBruinClient:
         bruin_client.login = CoroutineMock()
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(side_effect=ClientConnectionError(cause))):
-            result = await bruin_client.get_inventory_attributes(filters)
+            result = await bruin_client.get_management_status(filters)
             bruin_client._session.get.assert_awaited_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                 headers=bruin_client._get_request_headers(),
