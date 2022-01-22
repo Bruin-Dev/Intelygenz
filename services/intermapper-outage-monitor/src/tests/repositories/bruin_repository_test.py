@@ -615,6 +615,7 @@ class TestBruinRepository:
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
             "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
         }
@@ -631,10 +632,60 @@ class TestBruinRepository:
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'InterMapper Triage',
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"Message from InterMapper 6.1.5\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
             f"Event:               {parsed_email_dict['event']}",
             f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
+            f"IP Address: {parsed_email_dict['address']}\n",
+            f"IM Device Label:     {parsed_email_dict['name']}\n",
+            f"IM Map Name: 	       {parsed_email_dict['document']}",
+            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+            f"Device's up time: {parsed_email_dict['up_time']}",
+            f'TimeStamp: {current_datetime}'
+        ])
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            await bruin_repository.append_intermapper_note(ticket_id, parsed_email_dict)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
+
+    @pytest.mark.asyncio
+    async def append_intermapper_note_no_previous_condition_test(self):
+        ticket_id = 11111
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": '',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        current_datetime = datetime.now()
+        intermapper_note = os.linesep.join([
+            f"#*MetTel's IPA*#",
+            f'InterMapper Triage',
+            f"Message from InterMapper 6.1.5\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            "",
+            f"Event:               {parsed_email_dict['event']}",
+            f"Time of Event:       {parsed_email_dict['time']}\n",
+            f"IP Address: {parsed_email_dict['address']}\n",
             f"IM Device Label:     {parsed_email_dict['name']}\n",
             f"IM Map Name: 	       {parsed_email_dict['document']}",
             f"Probe Type:          {parsed_email_dict['probe_type']}\n",
@@ -661,6 +712,7 @@ class TestBruinRepository:
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
             "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
         }
@@ -676,10 +728,60 @@ class TestBruinRepository:
         current_datetime = datetime.now()
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"Message from InterMapper 6.1.5\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
             f"Event:               {parsed_email_dict['event']}",
             f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
+            f"IP Address: {parsed_email_dict['address']}\n",
+            f"IM Device Label:     {parsed_email_dict['name']}\n",
+            f"IM Map Name: 	       {parsed_email_dict['document']}",
+            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+            f"Device's up time: {parsed_email_dict['up_time']}",
+            f'TimeStamp: {current_datetime}'
+        ])
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, parsed_email_dict)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
+
+    @pytest.mark.asyncio
+    async def append_intermapper_up_note_no_previous_condition_test(self):
+        ticket_id = 11111
+        circuit_id = 1345
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": '',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        current_datetime = datetime.now()
+        intermapper_note = os.linesep.join([
+            f"#*MetTel's IPA*#",
+            f"Message from InterMapper 6.1.5\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            "",
+            f"Event:               {parsed_email_dict['event']}",
+            f"Time of Event:       {parsed_email_dict['time']}\n",
+            f"IP Address: {parsed_email_dict['address']}\n",
             f"IM Device Label:     {parsed_email_dict['name']}\n",
             f"IM Map Name: 	       {parsed_email_dict['document']}",
             f"Probe Type:          {parsed_email_dict['probe_type']}\n",
@@ -731,6 +833,7 @@ class TestBruinRepository:
             "address": "1.3.4",
             "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
             "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
         }
@@ -765,7 +868,78 @@ class TestBruinRepository:
             f"#*MetTel's IPA*#",
             f"InterMapper Triage",
             f"Message from InterMapper 6.1.5\n",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+            f"Event:               {parsed_email_dict['event']}",
+            f"Time of Event:       {parsed_email_dict['time']}\n",
+            f"Wireless IP Address: {parsed_email_dict['address']}\n",
+            f"IM Device Label:     {parsed_email_dict['name']}\n",
+            f"IM Map Name: 	       {parsed_email_dict['document']}",
+            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+            f"{sim_note}",
+            f"WAN Mac Address:     "
+            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
+            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
+            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
+            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+            f"Device's up time: {parsed_email_dict['up_time']}",
+            f"Timestamp: {current_datetime}"])
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+            await bruin_repository.append_dri_note(ticket_id, dri_body, parsed_email_dict)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, dri_note)
+
+    @pytest.mark.asyncio
+    async def append_dri_note_no_previous_condition_test(self):
+        ticket_id = 11111
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
+            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": "",
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+        }
+
+        dri_body = {
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active and SIM2 Ready",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69"
+        }
+
+        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(' ')
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        sim_note = os.linesep.join([
+            f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}",
+            f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}",
+            f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n"
+        ])
+
+        current_datetime = datetime.now()
+        dri_note = os.linesep.join([
+            f"#*MetTel's IPA*#",
+            f"InterMapper Triage",
+            f"Message from InterMapper 6.1.5\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            "",
             f"Event:               {parsed_email_dict['event']}",
             f"Time of Event:       {parsed_email_dict['time']}\n",
             f"Wireless IP Address: {parsed_email_dict['address']}\n",
@@ -799,6 +973,7 @@ class TestBruinRepository:
             "address": "1.3.4",
             "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
             "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
         }
@@ -829,7 +1004,8 @@ class TestBruinRepository:
             f"#*MetTel's IPA*#",
             f"InterMapper Triage",
             f"Message from InterMapper 6.1.5\n",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
             f"Event:               {parsed_email_dict['event']}",
             f"Time of Event:       {parsed_email_dict['time']}\n",
             f"Wireless IP Address: {parsed_email_dict['address']}\n",

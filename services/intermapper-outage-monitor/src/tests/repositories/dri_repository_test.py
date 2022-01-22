@@ -164,3 +164,51 @@ class TestDRIRepository:
 
         event_bus.rpc_request.assert_awaited_once_with("dri.parameters.request", request, timeout=120)
         assert result == response
+
+    @pytest.mark.asyncio
+    async def get_dri_parameters_204_test(self):
+        serial = '70059'
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'serial_number': serial,
+                'parameter_set': {
+                    "ParameterNames": [
+                        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert",
+                        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers",
+                        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid",
+                        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum",
+                        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei",
+                        "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress"
+                    ],
+                    "Source": 0
+                }
+            }
+        }
+
+        msg = f"Data is still being fetched from DRI for serial {serial}"
+        err_msg = f"Max retries reached when getting dri parameters - exception: Error: {msg}"
+
+        response = {
+            'request_id': uuid_,
+            'body': msg,
+            'status': 204,
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        dri_repository = DRIRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await dri_repository.get_dri_parameters(serial)
+
+        event_bus.rpc_request.assert_awaited_once_with("dri.parameters.request", request, timeout=120)
+        notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        assert result == {"body": err_msg, "status": 400}

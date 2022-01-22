@@ -171,16 +171,25 @@ class BruinRepository:
 
     async def append_intermapper_note(self, ticket_id, parsed_email_dict):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
+            'previous_condition'] else ''
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'InterMapper Triage',
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"Message from InterMapper 6.1.5",
+            "",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"{previous_condition}",
             f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
+            f"Time of Event:       {parsed_email_dict['time']}",
+            "",
+            f"IP Address: {parsed_email_dict['address']}",
+            "",
+            f"IM Device Label:     {parsed_email_dict['name']}",
+            "",
             f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+            f"Probe Type:          {parsed_email_dict['probe_type']}",
+            "",
             f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
             f"Device's up time: {parsed_email_dict['up_time']}",
             f'TimeStamp: {current_datetime_tz_aware}'
@@ -189,15 +198,24 @@ class BruinRepository:
 
     async def append_intermapper_up_note(self, ticket_id, wtn, parsed_email_dict):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
+        previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
+            'previous_condition'] else ''
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"Message from InterMapper 6.1.5",
+            "",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"{previous_condition}",
             f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
+            f"Time of Event:       {parsed_email_dict['time']}",
+            "",
+            f"IP Address: {parsed_email_dict['address']}",
+            "",
+            f"IM Device Label:     {parsed_email_dict['name']}",
+            "",
             f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+            f"Probe Type:          {parsed_email_dict['probe_type']}",
+            "",
             f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
             f"Device's up time: {parsed_email_dict['up_time']}",
             f'TimeStamp: {current_datetime_tz_aware}'
@@ -221,23 +239,32 @@ class BruinRepository:
             sim_note = f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}\n" + sim_note
         if 'SIM2' in sim_insert:
             sim_note = sim_note + f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n"
-
+        previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
+            'previous_condition'] else ''
         dri_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f"InterMapper Triage",
-            f"Message from InterMapper 6.1.5\n",
-            f"CONDITION: {parsed_email_dict['condition']}\n",
+            f"Message from InterMapper 6.1.5",
+            "",
+            f"CONDITION: {parsed_email_dict['condition']}",
+            f"{previous_condition}",
             f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
+            f"Time of Event:       {parsed_email_dict['time']}",
+            "",
+            f"Wireless IP Address: {parsed_email_dict['address']}",
+            "",
+            f"IM Device Label:     {parsed_email_dict['name']}",
+            "",
             f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+            f"Probe Type:          {parsed_email_dict['probe_type']}",
+            "",
             f"{sim_note}",
             f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
+            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}",
+            "",
             f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
+            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}",
+            "",
             f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
             f"Device's up time: {parsed_email_dict['up_time']}",
             f"Timestamp: {current_datetime_tz_aware}"])

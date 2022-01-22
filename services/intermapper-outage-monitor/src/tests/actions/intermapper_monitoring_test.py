@@ -378,15 +378,18 @@ class TestInterMapperMonitor:
         notifications_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_email_down_event_test(self):
+    async def process_email_down_event_non_PIAB_device_test(self):
         circuit_id = 3214
         client_id = 83959
+
+        dri_parameters = None
 
         email = {
             'msg_uid': 123,
             'message': '',
             'subject': '',
-            'body': '01/19 19:35:31: Message from InterMapper 6.1.5\nEvent: Down',
+            'body': "01/19 19:35:31: Message from InterMapper 6.1.5\nEvent: Down\nProbe Type: "
+                    "SNMP - Adtran TA900 ( SNMPv2c)",
         }
 
         response = {
@@ -408,12 +411,67 @@ class TestInterMapperMonitor:
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository, dri_repository)
         intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
+        intermapper_monitor._get_dri_parameters = CoroutineMock(return_value=dri_parameters)
 
         parsed_email_dict = intermapper_monitor._parse_email_body(email['body'])
 
         await intermapper_monitor._process_email(email, circuit_id, client_id)
 
-        intermapper_monitor._create_outage_ticket.assert_awaited_once_with(circuit_id, client_id, parsed_email_dict)
+        intermapper_monitor._get_dri_parameters.assert_not_awaited()
+        intermapper_monitor._create_outage_ticket.assert_awaited_once_with(circuit_id, client_id, parsed_email_dict,
+                                                                           dri_parameters)
+        notifications_repository.mark_email_as_read.assert_awaited_once_with(email['msg_uid'])
+
+    @pytest.mark.asyncio
+    async def process_email_down_event_PIAB_device_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        dri_parameters = {
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:30:69"
+              }
+
+        email = {
+            'msg_uid': 123,
+            'message': '',
+            'subject': '',
+            'body': "01/19 19:35:31: Message from InterMapper 6.1.5\nEvent: Down\nProbe Type: "
+                    "Data Remote Probe ( SNMPv2c)",
+        }
+
+        response = {
+            'body': None,
+            'status': 204
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        notifications_repository = Mock()
+        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+
+        dri_repository = Mock()
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository, dri_repository)
+        intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
+        intermapper_monitor._get_dri_parameters = CoroutineMock(return_value=dri_parameters)
+
+        parsed_email_dict = intermapper_monitor._parse_email_body(email['body'])
+
+        await intermapper_monitor._process_email(email, circuit_id, client_id)
+
+        intermapper_monitor._get_dri_parameters.assert_awaited_once_with(circuit_id, client_id)
+        intermapper_monitor._create_outage_ticket.assert_awaited_once_with(circuit_id, client_id, parsed_email_dict,
+                                                                           dri_parameters)
         notifications_repository.mark_email_as_read.assert_awaited_once_with(email['msg_uid'])
 
     @pytest.mark.asyncio
@@ -541,6 +599,7 @@ class TestInterMapperMonitor:
             "Address: 1.3.4",
             "Probe Type: SNMP - Adtran TA900 ( SNMPv2c)",
             "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "Previous Condition: OK",
             "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
             "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
@@ -552,6 +611,7 @@ class TestInterMapperMonitor:
                             'address': '1.3.4',
                             'probe_type': 'SNMP - Adtran TA900 ( SNMPv2c)',
                             'condition': 'defined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)',
+                            'previous_condition': 'OK',
                             'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
                             'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
 
@@ -580,6 +640,7 @@ class TestInterMapperMonitor:
             "Address: 1.3.4",
             "Probe Type: SNMP - Adtran TA900 ( SNMPv2c)",
             "Condition:",
+            "Previous Condition: OK",
             "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
             "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
@@ -591,6 +652,7 @@ class TestInterMapperMonitor:
                             'address': '1.3.4',
                             'probe_type': 'SNMP - Adtran TA900 ( SNMPv2c)',
                             'condition': 'Alarm',
+                            'previous_condition': 'OK',
                             'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
                             'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
 
@@ -618,6 +680,7 @@ class TestInterMapperMonitor:
             "Document: O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "Address: 1.3.4",
             "Condition: \t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "Previous Condition: OK",
             "Time since last reported down: 7 days, 23 hours, 54 minutes, 10 seconds",
             "Device's up time: 209 days, 10 hours, 44 minutes, 16 seconds"])
 
@@ -629,6 +692,7 @@ class TestInterMapperMonitor:
                             'address': '1.3.4',
                             'probe_type': None,
                             'condition': 'defined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)',
+                            'previous_condition': 'OK',
                             'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
                             'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
 
@@ -693,6 +757,7 @@ class TestInterMapperMonitor:
     @pytest.mark.asyncio
     async def create_outage_ticket_test(self):
         client_id = 83959
+        dri_parameter = None
         parsed_email_dict = {
             "time": "01/10 15:35:40",
             "event": "Alarm",
@@ -716,6 +781,11 @@ class TestInterMapperMonitor:
             f'details at https://app.bruin.com/t/{ticket_id}.'
         )
 
+        post_ticket_response = {
+            'body': 'success',
+            'status': 200
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -726,26 +796,33 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.get_attributes_serial = CoroutineMock()
+        bruin_repository.append_intermapper_note = CoroutineMock(return_value=post_ticket_response)
+        bruin_repository.append_dri_note = CoroutineMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository, dri_repository)
-        intermapper_monitor._process_dri_email = CoroutineMock()
 
-        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict)
+        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
+                                                                   dri_parameter)
 
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.get_attributes_serial.assert_not_awaited()
-        intermapper_monitor._process_dri_email.assert_not_awaited()
+        bruin_repository.append_dri_note.assert_not_awaited()
         bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict)
         assert response is True
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_data_remote_probe_test(self):
+    async def create_outage_ticket_dri_parameters_given_test(self):
+        dri_parameter = {
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:30:69"
+              }
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -770,9 +847,9 @@ class TestInterMapperMonitor:
             f'details at https://app.bruin.com/t/{ticket_id}.'
         )
 
-        attribute_serial_response = {
-            "body": "705286",
-            "status": 200
+        post_ticket_response = {
+            'body': 'success',
+            'status': 200
         }
 
         event_bus = Mock()
@@ -786,7 +863,7 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.append_dri_note = CoroutineMock(return_value=post_ticket_response)
 
         dri_repository = Mock()
 
@@ -794,77 +871,18 @@ class TestInterMapperMonitor:
                                                  bruin_repository, dri_repository)
         intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
 
-        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict)
+        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
+                                                                   dri_parameter)
 
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
-        intermapper_monitor._process_dri_email.assert_awaited_once_with(ticket_id, parsed_email_dict,
-                                                                        attribute_serial_response["body"])
+        bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameter, parsed_email_dict)
         bruin_repository.append_intermapper_note.assert_not_awaited()
         assert response is True
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_data_remote_probe_failed_attributes_serial_rpc_request_test(self):
-        client_id = 83959
-        parsed_email_dict = {
-            "time": "01/10 15:35:40",
-            "event": "Alarm",
-            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
-            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
-            "address": "1.3.4",
-            "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
-        }
-        circuit_id = 3214
-        ticket_id = 321
-        outage_ticket_response = {
-            'body': ticket_id,
-            'status': 200
-        }
-
-        slack_message = (
-            f'Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket '
-            f'details at https://app.bruin.com/t/{ticket_id}.'
-        )
-
-        attribute_serial_response = {
-            "body": "Failed",
-            "status": 400
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
-                                                 bruin_repository, dri_repository)
-        intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
-
-        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict)
-
-        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
-        intermapper_monitor._process_dri_email.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_not_awaited()
-        assert response is False
-
-    @pytest.mark.asyncio
-    async def create_outage_ticket_failed_rpc_test(self):
+    async def create_outage_ticket_failed_ticket_creation_rpc_test(self):
+        dri_parameter = None
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -895,246 +913,147 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.get_attributes_serial = CoroutineMock()
+        bruin_repository.append_dri_note = CoroutineMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository, dri_repository)
-        intermapper_monitor._process_dri_email = CoroutineMock()
 
-        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict)
+        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
+                                                                   dri_parameter)
 
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         notifications_repository.send_slack_message.assert_not_awaited()
         bruin_repository.append_intermapper_note.assert_not_awaited()
-        bruin_repository.get_attributes_serial.assert_not_awaited()
-        intermapper_monitor._process_dri_email.assert_not_awaited()
+        bruin_repository.append_dri_note.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
-    async def process_dri_email_ok_test(self):
-        attribute_serial = "705286"
-        ticket_id = 52150
+    async def create_outage_ticket_failed_post_intermapper_note_rpc_test(self):
+        client_id = 83959
+        dri_parameter = None
         parsed_email_dict = {
-                            'time': '01/10 15:35:40',
-                            'event': 'Alarm',
-                            'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
-                            'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
-                            'address': '1.3.4',
-                            'probe_type': "Data Remote Probe (port 161 SNMPv2c)",
-                            'condition': '\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)',
-                            'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
-                            'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
+            "time": "01/10 15:35:40",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+        }
+        circuit_id = 3214
+        ticket_id = 321
+        outage_ticket_response = {
+            'body': ticket_id,
+            'status': 200
+        }
 
+        slack_message = (
+            f'Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket '
+            f'details at https://app.bruin.com/t/{ticket_id}.'
+        )
+
+        post_ticket_response = {
+            'body': 'failed',
+            'status': 400
         }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        append_dri_note_response = {
-            "body": 'success',
-            "status": 200
-        }
         bruin_repository = Mock()
-        bruin_repository.append_dri_note = CoroutineMock(return_value=append_dri_note_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-        dri_parameters = {
-                'body': {
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                    "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:3:30:69"
-                },
-                'status': 200
-         }
-        dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters)
-
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
-                                                 bruin_repository, dri_repository)
-
-        dri_email_process_response = await intermapper_monitor._process_dri_email(ticket_id, parsed_email_dict,
-                                                                                  attribute_serial)
-        bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameters["body"], parsed_email_dict)
-        notifications_repository.send_slack_message.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_not_awaited()
-        assert dri_email_process_response is True
-
-    @pytest.mark.asyncio
-    async def process_dri_email_ko_failed_rpc_get_dri_parameters_request_test(self):
-        attribute_serial = "705286"
-        ticket_id = 52150
-        parsed_email_dict = {
-                            'time': '01/10 15:35:40',
-                            'event': 'Alarm',
-                            'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
-                            'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
-                            'address': '1.3.4',
-                            'probe_type': "Data Remote Probe (port 161 SNMPv2c)",
-                            'condition': '\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)',
-                            'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
-                            'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
-
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        attribute_serial_response = {
-            "body": "705286",
-            "status": 200
-        }
-
-        bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.append_intermapper_note = CoroutineMock(return_value=post_ticket_response)
         bruin_repository.append_dri_note = CoroutineMock()
-        bruin_repository.append_intermapper_note = CoroutineMock()
 
-        dri_parameters = {
-                'body': 'Rejected',
-                'status': 409
-         }
         dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters)
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository, dri_repository)
-        dri_email_process_response = await intermapper_monitor._process_dri_email(ticket_id, parsed_email_dict,
-                                                                                  attribute_serial)
-        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial_response["body"])
+
+        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
+                                                                   dri_parameter)
+
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         bruin_repository.append_dri_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_not_awaited()
-        assert dri_email_process_response is False
-
-    @pytest.mark.asyncio
-    async def process_dri_email_204_and_retry_failed_test(self):
-        attribute_serial = "705286"
-        ticket_id = 52150
-        parsed_email_dict = {
-                            'time': '01/10 15:35:40',
-                            'event': 'Alarm',
-                            'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
-                            'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
-                            'address': '1.3.4',
-                            'probe_type': "Data Remote Probe (port 161 SNMPv2c)",
-                            'condition': '\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)',
-                            'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
-                            'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
-
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        attribute_serial_response = {
-            "body": "705286",
-            "status": 200
-        }
-        append_dri_note_response = {
-            "body": 'success',
-            "status": 200
-        }
-        bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
-        bruin_repository.append_dri_note = CoroutineMock(return_value=append_dri_note_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-
-        dri_parameters = {
-                'body': "Pending",
-                'status': 204
-         }
-        dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters)
-
-        exception_response = f"Error: {dri_parameters['body']}"
-        msg = f"Max retries reached processing dri emails in the intermapper process. - exception: {exception_response}"
-
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
-                                                 bruin_repository, dri_repository)
-        dri_email_process_response = await intermapper_monitor._process_dri_email(ticket_id, parsed_email_dict,
-                                                                                  attribute_serial)
-        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial_response["body"])
-        bruin_repository.append_dri_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_awaited_once_with(msg)
         bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict)
-        assert dri_email_process_response is True
+        assert response is False
 
     @pytest.mark.asyncio
-    async def process_dri_email_ko_failed_rpc_post_note_request_test(self):
-        attribute_serial = "705286"
-        ticket_id = 52150
+    async def create_outage_ticket_dri_parameters_given_failed_post_dri_note_rpc_test(self):
+        dri_parameter = {
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+            "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:30:69"
+        }
+        client_id = 83959
         parsed_email_dict = {
-                            'time': '01/10 15:35:40',
-                            'event': 'Alarm',
-                            'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
-                            'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
-                            'address': '1.3.4',
-                            'probe_type': "Data Remote Probe (port 161 SNMPv2c)",
-                            'condition': '\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)',
-                            'last_reported_down': '7 days, 23 hours, 54 minutes, 10 seconds',
-                            'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
+            "time": "01/10 15:35:40",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
+            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+        }
+        circuit_id = 3214
+        ticket_id = 321
+        outage_ticket_response = {
+            'body': ticket_id,
+            'status': 200
+        }
 
+        slack_message = (
+            f'Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket '
+            f'details at https://app.bruin.com/t/{ticket_id}.'
+        )
+
+        post_ticket_response = {
+            'body': 'failed',
+            'status': 400
         }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        attribute_serial_response = {
-            "body": "705286",
-            "status": 200
-        }
-        append_dri_note_response = {
-            "body": 'failed',
-            "status": 400
-        }
         bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
-        bruin_repository.append_dri_note = CoroutineMock(return_value=append_dri_note_response)
+        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.append_intermapper_note = CoroutineMock()
+        bruin_repository.append_dri_note = CoroutineMock(return_value=post_ticket_response)
 
-        dri_parameters = {
-                'body': {
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
-                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                    "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:3:30:69"
-                },
-                'status': 200
-         }
         dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters)
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository, dri_repository)
-        dri_email_process_response = await intermapper_monitor._process_dri_email(ticket_id, parsed_email_dict,
-                                                                                  attribute_serial)
-        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial_response["body"])
-        bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameters["body"], parsed_email_dict)
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
+
+        response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
+                                                                   dri_parameter)
+
+        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+        bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameter, parsed_email_dict)
         bruin_repository.append_intermapper_note.assert_not_awaited()
-        assert dri_email_process_response is False
+        assert response is False
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_test(self):
@@ -2266,6 +2185,115 @@ class TestInterMapperMonitor:
         bruin_repository.append_autoresolve_note.assert_not_awaited()
         notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
+
+    @pytest.mark.asyncio
+    async def get_dri_parameters_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        dri_parameters_response_body = {
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+                    "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:3:30:69"
+                }
+        dri_parameters_response = {
+                'body': dri_parameters_response_body,
+                'status': 200
+         }
+
+        attribute_serial = "705286"
+        attribute_serial_response = {
+            "body": attribute_serial,
+            "status": 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+
+        dri_repository = Mock()
+        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository, dri_repository)
+        dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
+        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
+        assert dri_parameters == dri_parameters_response_body
+
+    @pytest.mark.asyncio
+    async def get_dri_parameters_failed_attributes_serial_rpc_request_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        attribute_serial = "Failed"
+        attribute_serial_response = {
+            "body": attribute_serial,
+            "status": 400
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+
+        dri_repository = Mock()
+        dri_repository.get_dri_parameters = CoroutineMock()
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository, dri_repository)
+        dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
+        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        dri_repository.get_dri_parameters.assert_not_awaited()
+        assert dri_parameters is None
+
+    @pytest.mark.asyncio
+    async def get_dri_parameters_failed_dri_parameters_rpc_request_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        attribute_serial = "705286"
+        attribute_serial_response = {
+            "body": attribute_serial,
+            "status": 200
+        }
+
+        dri_parameters_response_body = f"DRI task was rejected for serial {attribute_serial}"
+        dri_parameters_response = {
+            'body': dri_parameters_response_body,
+            'status': 403
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+
+        dri_repository = Mock()
+        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository, dri_repository)
+        dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
+        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
+        assert dri_parameters is None
 
     def last_outage_detected_recently_with_no_reopen_note_or_no_triage_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
