@@ -309,12 +309,14 @@ dri-bridge:
   config:
     # -- Papertrail prefix for create logs definition
     papertrail_prefix: "dri-bridge-${DRI_BRIDGE_BUILD_NUMBER}"
-    # -- Username to log into Dri API
-    dri_acc_email: "${DRI_ACC_EMAIL}"
-    # -- Password to log into Dri API
-    dri_acc_password: "${DRI_ACC_PASSWORD}"
-    # -- Base URL for Dri API
-    dri_base_url: "${DRI_BASE_URL}"
+    # -- Username to log into DRI API
+    username: ${DRI_BRIDGE__USERNAME}
+    # -- Password to log into DRI API
+    password: ${DRI_BRIDGE__PASSWORD}
+    # -- Base URL for DRI API
+    base_url: ${DRI_BRIDGE__BASE_URL}
+    # -- Defines how much time the data retrieved from DRI for a specific device can be stored and served from Redis
+    dri_data_redis_ttl: ${DRI_BRIDGE__DRI_DATA_REDIS_TTL}
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/dri-bridge
     pullPolicy: Always

@@ -34,12 +34,14 @@ global:
 
 config:
   papertrail_prefix: ""
-  # -- Username to log into Dri API
-  dri_acc_email: ""
-  # -- Password to log into Dri API
-  dri_acc_password: ""
-  # -- Base URL for Dri API
-  dri_base_url: ""
+  # -- Username to log into DRI API
+  username: ""
+  # -- Password to log into DRI API
+  password: ""
+  # -- Base URL for DRI API
+  base_url: ""
+  # -- Defines how much time the data retrieved from DRI for a specific device can be stored and served from Redis
+  dri_data_redis_ttl: 0
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true

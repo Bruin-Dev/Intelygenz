@@ -55,7 +55,7 @@ Configmap name of dri-bridge
 {{- end }}
 
 {{/*
-Secret name of bruin-bridge
+Secret name of dri-bridge
 */}}
 {{- define "dri-bridge.secretName" -}}
 {{ include "dri-bridge.fullname" . }}-secret

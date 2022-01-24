@@ -107,14 +107,16 @@ function digi_reboot_report_variables() {
 function dri_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # dri-bridge environment variables for ephemeral environments
-    export DRI_ACC_EMAIL="${DRI_ACC_EMAIL_DEV}"
-    export DRI_ACC_PASSWORD="${DRI_ACC_PASSWORD_DEV}"
-    export DRI_BASE_URL="${DRI_BASE_URL_DEV}"
+    export DRI_BRIDGE__BASE_URL="${DEV__DRI_BRIDGE__BASE_URL}"
+    export DRI_BRIDGE__USERNAME="${DEV__DRI_BRIDGE__USERNAME}"
+    export DRI_BRIDGE__PASSWORD="${DEV__DRI_BRIDGE__PASSWORD}"
+    export DRI_BRIDGE__DRI_DATA_REDIS_TTL="${DEV__DRI_BRIDGE__DRI_DATA_REDIS_TTL}"
   else
     # dri-bridge environment variables for production environment
-    export DRI_ACC_EMAIL="${DRI_ACC_EMAIL_PRO}"
-    export DRI_ACC_PASSWORD="${DRI_ACC_PASSWORD_PRO}"
-    export DRI_BASE_URL="${DRI_BASE_URL_PRO}"
+    export DRI_BRIDGE__BASE_URL="${PRO__DRI_BRIDGE__BASE_URL}"
+    export DRI_BRIDGE__USERNAME="${PRO__DRI_BRIDGE__USERNAME}"
+    export DRI_BRIDGE__PASSWORD="${PRO__DRI_BRIDGE__PASSWORD}"
+    export DRI_BRIDGE__DRI_DATA_REDIS_TTL="${PRO__DRI_BRIDGE__DRI_DATA_REDIS_TTL}"
   fi
 }
 
