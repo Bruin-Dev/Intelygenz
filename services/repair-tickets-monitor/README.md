@@ -98,5 +98,66 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 
 ## Interpreter 
 
-If you can use the interpreter from inside the docker-compose (may require a Pro version of your IDE), do so. If not, create a virtual environment with pyenv -- more details to follow.
+If you can use the interpreter from inside the docker-compose (may require a Pro version of your IDE), do so. If not, create a virtual environment with pyenv -- more details to follow. (If you do not have pyenv in terminal, install it and add to path.) The Automation Engine uses Python 3.6. 
 
+```
+# To install Python 3.6:
+pyenv install 3.6.13
+
+## Add the new interpreter to IDE project settings
+## Open new console with the venv activated
+
+# Install libraries
+pip install -r requirements
+```
+
+
+
+## Build docker compose
+
+***Warning:** This creates a running environment of RTA Monitor, sending requests to Bruin and attempting to pass them to a KRE.*
+
+```
+# Make sure you are logged in to AWS ECR: 
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 374050862540.dkr.ecr.us-east-1.amazonaws.com
+
+# Docker compose:
+docker-compose up --build repair-tickets-monitor
+```
+
+To avoid attempting to send closed ticket feedback to KRE, comment the following line in `app.py`:
+
+```python
+# app.py, class Container 
+    
+    async def _start(self):
+        await self._event_bus.connect()
+        await self._new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
+        # await self._new_closed_tickets_feedback.start_closed_ticket_feedback(exec_on_start=True)
+        await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)
+        self._scheduler.start()
+
+```
+
+
+
+## Installing KRE locally
+
+Clone the KRE repo:
+
+```
+git clone git@github.com:konstellation-io/kre.git  
+```
+
+see official Konstellation README for instructions: https://www.konstellation.io/docs/kre/installation/local/
+
+
+
+
+
+**TODO:**
+
+- [ ] Documentation for installing a KRE instance of RTA locally (in progress)
+- [ ] Doc for creating a Redis for testing purposes
+- [ ] (In main RTA repo README) Doc for deploying a new version of KRT
+- [ ] ...
