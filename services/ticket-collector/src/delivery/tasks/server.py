@@ -38,6 +38,7 @@ class TasksServer(ITasksServer):
                                max_instances=1,
                                minutes=1,
                                id=self.JOB_ID)
+        get_data_tasks.get_data()
 
     async def start(self):
         self.logger.info("Starting server")
