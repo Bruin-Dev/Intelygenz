@@ -76,12 +76,15 @@ class TicketUseCase:
             for ticket in tickets:
                 ticket_id = ticket['ticketID']
                 ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
+                events_on_mongo = ticket_on_mongo.get('events') if ticket_on_mongo else None
 
                 if update:
                     self.tickets_repository.delete_ticket(ticket_id=ticket_id)
 
                 if update or not ticket_on_mongo:
                     self.tickets_repository.save_ticket(ticket=ticket)
+
+                if update or not events_on_mongo:
                     self.save_ticket_events(ticket_id)
         except Exception as e:
             self.logger.error(e)
