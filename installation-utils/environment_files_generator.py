@@ -501,6 +501,7 @@ env_dict = {
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('services', 'ticket-collector', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'MONGODB_HOST={MONGODB_HOST}\n'
         f'MONGODB_USERNAME={MONGODB_USERNAME}\n'
@@ -514,6 +515,7 @@ env_dict = {
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('services', 'ticket-statistics', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'MONGODB_HOST={MONGODB_HOST}\n'
         f'MONGODB_USERNAME={MONGODB_USERNAME}\n'
         f'MONGODB_PASSWORD={MONGODB_PASSWORD}\n'

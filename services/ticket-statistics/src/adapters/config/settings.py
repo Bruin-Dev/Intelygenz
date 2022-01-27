@@ -3,7 +3,8 @@ import sys
 import logging
 from dotenv import load_dotenv
 
-ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']
+CURRENT_ENVIRONMENT = os.environ['CURRENT_ENVIRONMENT']
 
 LOG_CONFIG = {
     'name': 'ticket-statistics',
@@ -32,6 +33,8 @@ def get_config():
     mongo_url = f'mongodb://{mongo_user}:{mongo_password}@{mongo_host}/{mongo_db}?{mongo_params}'
 
     return {
+        'environment_name': ENVIRONMENT_NAME,
+        'current_environment': CURRENT_ENVIRONMENT,
         'mongo': {
             'url': mongo_url,
         },
