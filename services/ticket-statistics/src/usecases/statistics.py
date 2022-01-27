@@ -115,7 +115,10 @@ class StatisticsUseCase:
 
     @staticmethod
     def calculate_hnoc_work_queue(no_touch_resolution, ai_forwarded_tasks, all_tasks) -> int:
-        return ((no_touch_resolution + ai_forwarded_tasks) / all_tasks) * 100
+        try:
+            return ((no_touch_resolution + ai_forwarded_tasks) / all_tasks) * 100
+        except ZeroDivisionError:
+            return 0
 
     @staticmethod
     def calculate_average_time_list(times):

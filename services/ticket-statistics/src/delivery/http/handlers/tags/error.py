@@ -7,8 +7,12 @@ ERRORS = {
         'code': 404,
         'message': 'Not found',
     },
-    'DATES_FORMAT': {
-        'code': 404,
-        'message': 'Wrong dates format, the date format must be Y-m-d',
+    'MISSING_DATES': {
+        'code': 400,
+        'message': "Missing 'start' or 'end' parameters",
+    },
+    'INVALID_DATES': {
+        'code': 400,
+        'message': 'Invalid date format, please specify dates in YYYY-MM-DD format',
     },
 }

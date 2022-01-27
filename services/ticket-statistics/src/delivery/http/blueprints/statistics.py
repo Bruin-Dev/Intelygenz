@@ -20,22 +20,25 @@ def get_blueprint(statistics_use_case: StatisticsUseCase = Provide[UseCases.stat
     blueprint = Blueprint(name, __name__, template_folder='blueprints')
 
     @blueprint.route(endpoint, methods=['GET'], strict_slashes=False)
-    def get_statistics(**kwargs) -> Response:
+    def get_statistics() -> Response:
         """Get statistics data between dates"""
+        start = request.args.get('start')
+        end = request.args.get('end')
+
+        if not start or not end:
+            raise ProjectException('MISSING_DATES')
+
         try:
-            start = to_date(request.args.get('start'))
-            end = to_date(request.args.get('end'))
+            start_date = to_date(start)
+            end_date = to_date(end)
+        except ValueError:
+            raise ProjectException('INVALID_DATES')
 
-            statistics = statistics_use_case.calculate_statistics(start=start, end=end)
+        statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
 
-            return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics)
-        except Exception:
-            raise ProjectException('DATES_FORMAT')
+        return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics)
 
     def to_date(date_string):
-        try:
-            return datetime.datetime.strptime(date_string, "%Y-%m-%d")
-        except ValueError:
-            raise ValueError('{} is not valid date in the format YYYY-MM-DD'.format(date_string))
+        return datetime.datetime.strptime(date_string, "%Y-%m-%d")
 
     return blueprint
