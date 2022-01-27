@@ -7,7 +7,7 @@ variable "eks_developer_users" {
     "joseluis.vega",
     "marc.vivancos",
     "juancarlos.gomez",
-    "ricardo.hortelano"
+    "daniel.montilla",
   ]
 }
 
@@ -30,4 +30,3 @@ data "aws_iam_user" "igz_devops_users" {
   count = length(var.eks_devops_users)
   user_name = var.eks_devops_users[count.index]
 }
-
