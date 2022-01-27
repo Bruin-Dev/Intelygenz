@@ -1,7 +1,6 @@
 import base64
 import datetime
 import requests
-from typing import Dict
 
 
 class BruinRepository:
@@ -34,15 +33,15 @@ class BruinRepository:
             self._logger.info('Logged into Bruin!')
 
             return bearer_token
-        except Exception as err:
-            self._logger.info('An error occurred while trying to login to Bruin.')
+        except Exception as e:
+            self._logger.info('An error occurred while trying to login to Bruin')
 
-    def request_tickets_by_date_range(self, start: datetime, end: datetime) -> Dict:
+    def request_tickets_by_date_range(self, start: datetime, end: datetime) -> list:
         """
         Request tickets by date range.
         :param start:
         :param end:
-        :return Dict:
+        :return list:
         """
         endpoint = 'https://api.bruin.com/api/Ticket/basic'
 
@@ -60,16 +59,17 @@ class BruinRepository:
         tickets_response = requests.get(endpoint, params=params, headers=headers, verify=False)
         self._logger.info(f'Got bruin tickets response with status {tickets_response.status_code}')
 
-        if tickets_response.status_code != 200:
-            self._logger.info(tickets_response.json())
+        if tickets_response.status_code in range(200, 300):
+            return tickets_response.json()['responses']
+        else:
+            self._logger.error(tickets_response.text)
+            return []
 
-        return tickets_response.json()['responses']
-
-    def request_ticket_events(self, ticket_id: str) -> Dict:
+    def request_ticket_events(self, ticket_id: str) -> list:
         """
         Request ticket events
         :param ticket_id:
-        :return Dict:
+        :return list:
         """
         endpoint = 'https://api.bruin.com/api/Ticket/AITicketData'
 
@@ -85,4 +85,8 @@ class BruinRepository:
         tickets_detail_response = requests.get(endpoint, params=params, headers=headers, verify=False)
         self._logger.info(f'Got bruin ticket events response with status {tickets_detail_response.status_code}')
 
-        return tickets_detail_response.json()['result']
+        if tickets_detail_response.status_code in range(200, 300):
+            return tickets_detail_response.json()['result']
+        else:
+            self._logger.error(tickets_detail_response.text)
+            return []

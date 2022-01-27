@@ -67,21 +67,24 @@ class TicketUseCase:
         :param query_date:
         :param update:
         """
-        query_start = query_date.strftime('%Y-%m-%dT00:00:00Z')
-        query_end = query_date.strftime('%Y-%m-%dT23:59:59Z')
+        try:
+            query_start = query_date.strftime('%Y-%m-%dT00:00:00Z')
+            query_end = query_date.strftime('%Y-%m-%dT23:59:59Z')
 
-        tickets = self.bruin_repository.request_tickets_by_date_range(start=query_start, end=query_end)
+            tickets = self.bruin_repository.request_tickets_by_date_range(start=query_start, end=query_end)
 
-        for ticket in tickets:
-            ticket_id = ticket['ticketID']
-            ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
+            for ticket in tickets:
+                ticket_id = ticket['ticketID']
+                ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
 
-            if update:
-                self.tickets_repository.delete_ticket(ticket_id=ticket_id)
+                if update:
+                    self.tickets_repository.delete_ticket(ticket_id=ticket_id)
 
-            if update or not ticket_on_mongo:
-                self.tickets_repository.save_ticket(ticket=ticket)
-                self.save_ticket_events(ticket_id)
+                if update or not ticket_on_mongo:
+                    self.tickets_repository.save_ticket(ticket=ticket)
+                    self.save_ticket_events(ticket_id)
+        except Exception as e:
+            self.logger.error(e)
 
     def save_ticket_events(self, ticket_id: int) -> None:
         try:
@@ -93,4 +96,4 @@ class TicketUseCase:
                 self.logger.info(f"We don't have access to ticket {ticket_id}")
                 self.tickets_repository.mark_not_accessible(ticket_id=ticket_id)
         except Exception as e:
-            self.logger.info(f'Error: {e}')
+            self.logger.error(e)
