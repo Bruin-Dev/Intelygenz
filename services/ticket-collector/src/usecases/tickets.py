@@ -31,7 +31,6 @@ class TicketUseCase:
         """
         Main function to get data from bruin or database
         """
-        self.logger.info('Start getting data')
         days_to_retrieve = 14
         days_to_update = 3
 
@@ -44,6 +43,8 @@ class TicketUseCase:
         for _date in self.date_range(start_date=retrieve_start_date, end_date=today):
             update = self.check_if_it_must_be_updated(start=update_start_date, end=today, requested_date=_date)
             self.get_data_from_bruin(query_date=_date, update=update)
+
+        self.logger.info(f'Finished getting tickets between {retrieve_start_date} and {today}')
 
     def check_if_it_must_be_updated(self, start: date, end: date, requested_date: date) -> bool:
         """
@@ -73,23 +74,25 @@ class TicketUseCase:
 
         tickets = self.bruin_repository.request_tickets_by_date_range(start=query_start, end=query_end)
 
-        for key, ticket in enumerate(tickets):
-            ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket["ticketID"])
+        for ticket in tickets:
+            ticket_id = ticket['ticketID']
+            ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
 
-            if ticket_on_mongo is None or update is True:
-                if update is True:
-                    self.logger.info(f"Ticket {ticket['ticketID']} in range to be updated (Deleting it first)")
-                    self.tickets_repository.delete_ticket(ticket_id=ticket['ticketID'])
+            if update:
+                self.tickets_repository.delete_ticket(ticket_id=ticket_id)
+
+            if update or not ticket_on_mongo:
                 self.tickets_repository.save_ticket(ticket=ticket)
+                self.save_ticket_events(ticket_id)
 
-        for key, ticket in enumerate(tickets):
-            try:
-                events = self.bruin_repository.request_ticket_events(ticket_id=ticket['ticketID'])
+    def save_ticket_events(self, ticket_id: int) -> None:
+        try:
+            events = self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
 
-                if events:
-                    self.tickets_repository.save_events(ticket_id=ticket['ticketID'], events=events)
-                else:
-                    self.logger.info(f"We don't have access to {ticket['ticketID']}")
-                    self.tickets_repository.mark_not_accessible(ticket_id=ticket['ticketID'])
-            except Exception as e:
-                self.logger.info(f'Error: {e}')
+            if events:
+                self.tickets_repository.save_events(ticket_id=ticket_id, events=events)
+            else:
+                self.logger.info(f"We don't have access to ticket {ticket_id}")
+                self.tickets_repository.mark_not_accessible(ticket_id=ticket_id)
+        except Exception as e:
+            self.logger.info(f'Error: {e}')

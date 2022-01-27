@@ -57,9 +57,7 @@ class BruinRepository:
         }
 
         self._logger.info(f'Requesting bruin tickets between {start} and {end}')
-
         tickets_response = requests.get(endpoint, params=params, headers=headers, verify=False)
-
         self._logger.info(f'Got bruin tickets response with status {tickets_response.status_code}')
 
         if tickets_response.status_code != 200:
@@ -83,6 +81,8 @@ class BruinRepository:
             'ticketId': ticket_id
         }
 
+        self._logger.info(f'Requesting bruin ticket events for ticket {ticket_id}')
         tickets_detail_response = requests.get(endpoint, params=params, headers=headers, verify=False)
-        # self._logger.info(tickets_detail_response)
+        self._logger.info(f'Got bruin ticket events response with status {tickets_detail_response.status_code}')
+
         return tickets_detail_response.json()['result']

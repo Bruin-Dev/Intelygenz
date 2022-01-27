@@ -29,12 +29,10 @@ class TicketsRepository(object):
         default_database = self.database.client.get_default_database()
         list_collections = default_database.collection_names()
 
-        self.logger.info(list_collections)
-
         if self.COLLECTION_NAME in list_collections:
-            self.logger.info(f'The collection tickets on database {default_database} exists on mongodb.')
+            self.logger.info('The tickets collection exists on the DB')
         else:
-            self.logger.info(f'The collection tickets on database {default_database} does not exists on mongodb.')
+            self.logger.info('The tickets collection does not exist on the DB')
             default_database.create_collection(self.COLLECTION_NAME)
 
         return default_database[self.COLLECTION_NAME]
@@ -65,7 +63,7 @@ class TicketsRepository(object):
         :param ticket_id:
         :return:
         """
-        self.logger.info(f'Deleting ticket {ticket_id} from mongodb')
+        self.logger.info(f'Deleting ticket {ticket_id} from the DB')
         self.collection.delete_one({"ticket_id": ticket_id})
 
     def mark_not_accessible(self, ticket_id: int) -> None:
@@ -75,7 +73,7 @@ class TicketsRepository(object):
         :param events:
         :return None:
         """
-        self.logger.info(f'Mark ticket {ticket_id} as not accessible for us')
+        self.logger.info(f'Marking ticket {ticket_id} as not accessible for us')
         self.collection.update_one({"ticket_id": ticket_id}, {"$set": {'access': False}})
 
     def get_ticket_by_date(self, start: datetime, end: datetime, status: bool) -> Dict:
@@ -88,12 +86,11 @@ class TicketsRepository(object):
         """
 
         tickets = self.collection.find({"date": {'$lt': end, '$gte': start}, 'status': status})
-        self.logger.info(f'Number of tickets found: {tickets.count()}')
 
         if tickets.count() == 0:
-            self.logger.info(f'No tickets found between {end} and {start} on mongodb')
+            self.logger.info(f'No tickets found between {end} and {start} on the DB')
         else:
-            self.logger.info(f'Found tickets  between {end} and {start}  the number of them is {tickets.count()}')
+            self.logger.info(f'Found {tickets.count()} tickets between {end} and {start} on the DB')
 
         return tickets
 
@@ -105,10 +102,10 @@ class TicketsRepository(object):
         """
         ticket = self.collection.find_one({'ticket_id': ticket_id})
 
-        if ticket is None:
-            self.logger.info(f'Not ticket found ticket {ticket_id} mongodb')
+        if ticket:
+            self.logger.info(f'Ticket {ticket_id} found on the DB')
         else:
-            self.logger.info(f'Found ticket {ticket_id}')
+            self.logger.info(f'Ticket {ticket_id} not found on the DB')
 
         return ticket
 
