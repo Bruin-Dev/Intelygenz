@@ -7,9 +7,10 @@ class BruinRepository:
     def __init__(self, logger, config):
         self._logger = logger
         self._config = config
-        self._token = self.login()
+        self._token = None
+        self.login()
 
-    def login(self) -> str:
+    def login(self):
         login_credentials = ('%s:%s' % (self._config['bruin']['id'], self._config['bruin']['secret']))
         login_credentials = login_credentials.encode()
         login_credentials_b64 = base64.b64encode(login_credentials).decode()
@@ -32,7 +33,7 @@ class BruinRepository:
             bearer_token = response.json()['access_token']
             self._logger.info('Logged into Bruin!')
 
-            return bearer_token
+            self._token = bearer_token
         except Exception as e:
             self._logger.info('An error occurred while trying to login to Bruin')
 
@@ -57,12 +58,17 @@ class BruinRepository:
 
         self._logger.info(f'Requesting bruin tickets between {start} and {end}')
         tickets_response = requests.get(endpoint, params=params, headers=headers, verify=False)
-        self._logger.info(f'Got bruin tickets response with status {tickets_response.status_code}')
 
         if tickets_response.status_code in range(200, 300):
+            self._logger.info(f'Got bruin tickets between {start} and {end}')
             return tickets_response.json()['responses']
+        elif tickets_response.status_code == 401:
+            self._logger.warning('Bruin token expired, re-logging in...')
+            self.login()
+            return self.request_tickets_by_date_range(start, end)
         else:
-            self._logger.error(tickets_response.text)
+            self._logger.error(f'Failed to get bruin tickets between {start} and {end}. '
+                               f'Status code: {tickets_response.status_code}')
             return []
 
     def request_ticket_events(self, ticket_id: str) -> list:
@@ -83,10 +89,15 @@ class BruinRepository:
 
         self._logger.info(f'Requesting bruin ticket events for ticket {ticket_id}')
         tickets_detail_response = requests.get(endpoint, params=params, headers=headers, verify=False)
-        self._logger.info(f'Got bruin ticket events response with status {tickets_detail_response.status_code}')
 
         if tickets_detail_response.status_code in range(200, 300):
+            self._logger.info(f'Got bruin ticket events for ticket {ticket_id}')
             return tickets_detail_response.json()['result']
+        elif tickets_detail_response.status_code == 401:
+            self._logger.warning('Bruin token expired, re-logging in...')
+            self.login()
+            return self.request_ticket_events(ticket_id)
         else:
-            self._logger.error(tickets_detail_response.text)
+            self._logger.error(f'Failed to get bruin ticket events for ticket {ticket_id}. '
+                               f'Status code: {tickets_detail_response.status_code}')
             return []
