@@ -50,7 +50,9 @@ def get_config():
             'id': os.environ['BRUIN_CLIENT_ID'],
             'secret': os.environ['BRUIN_CLIENT_SECRET']
         },
-        'interval_tasks_server': int(os.environ['INTERVAL_TASKS_RUN']),
+        'job_interval_hours': 1,
+        'days_to_retrieve': 14,
+        'days_to_update': 3,
     }
 
 

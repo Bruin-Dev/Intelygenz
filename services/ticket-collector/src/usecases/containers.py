@@ -15,5 +15,6 @@ class UseCases(containers.DeclarativeContainer):
         TicketUseCase,
         bruin_repository=bruin_repository,
         tickets_repository=tickets_repository,
+        config=config,
         logger=logger
     )

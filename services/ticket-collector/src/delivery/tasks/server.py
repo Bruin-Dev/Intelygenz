@@ -29,7 +29,7 @@ class TasksServer(ITasksServer):
     def initialize(self):
         self.logger.info('Adding job to scheduler')
         self.scheduler.add_job(get_data_tasks.get_data, 'interval',
-                               hours=1,
+                               hours=self.config['job_interval_hours'],
                                next_run_time=datetime.now(),
                                replace_existing=False,
                                id='_ticket_collector_job')

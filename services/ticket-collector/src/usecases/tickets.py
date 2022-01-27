@@ -5,7 +5,7 @@ from adapters.repositories.tickets.repo import TicketsRepository
 
 
 class TicketUseCase:
-    def __init__(self, logger, bruin_repository: BruinRepository, tickets_repository: TicketsRepository):
+    def __init__(self, config, logger, bruin_repository: BruinRepository, tickets_repository: TicketsRepository):
         """
         Creation of ticket use case object
         :param logger:
@@ -14,6 +14,7 @@ class TicketUseCase:
         """
         self.bruin_repository = bruin_repository
         self.tickets_repository = tickets_repository
+        self.config = config
         self.logger = logger
 
     @staticmethod
@@ -31,12 +32,9 @@ class TicketUseCase:
         """
         Main function to get data from bruin or database
         """
-        days_to_retrieve = 14
-        days_to_update = 3
-
         today = date.today()
-        update_start_date = today - timedelta(days=days_to_update)
-        retrieve_start_date = today - timedelta(days=days_to_retrieve)
+        retrieve_start_date = today - timedelta(days=self.config['days_to_retrieve'])
+        update_start_date = today - timedelta(days=self.config['days_to_update'])
 
         self.logger.info(f'Getting tickets data between {retrieve_start_date} and {today}')
 
