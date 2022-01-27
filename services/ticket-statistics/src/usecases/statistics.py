@@ -1,5 +1,5 @@
 import pytz
-import re
+import time
 from datetime import datetime
 
 from adapters.repositories.tickets.repo import TicketsRepository
@@ -156,6 +156,9 @@ class StatisticsUseCase:
         return (no_touch_resolution / days_time_frame) / 20
 
     def calculate_statistics(self, start: datetime, end: datetime):
+        self.logger.info(f'Calculating statistics between {start} and {end}')
+        start_time = time.perf_counter()
+
         all_tasks = 0
         tasks_created = 0
         tasks_reopened = 0
@@ -203,6 +206,10 @@ class StatisticsUseCase:
         hnoc_work_queue_reduced = self.calculate_hnoc_work_queue(no_touch_resolution=no_touch_resolution,
                                                                  ai_forwarded_tasks=ai_forwarded_tasks,
                                                                  all_tasks=tasks_created + tasks_reopened)
+
+        end_time = time.perf_counter()
+        elapsed_time = round(end_time - start_time, 2)
+        self.logger.info(f'Finished calculating statistics between {start} and {end} in {elapsed_time}s')
 
         return self.create_statistics_object(tasks_created=tasks_created, tasks_reopened=tasks_reopened,
                                              no_touch_resolution=no_touch_resolution,
