@@ -76,7 +76,7 @@ class TicketUseCase:
             for ticket in tickets:
                 ticket_id = ticket['ticketID']
                 ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
-                events_on_mongo = ticket_on_mongo.get('events') if ticket_on_mongo else None
+                events_on_mongo = self.tickets_repository.get_ticket_events(ticket_id=ticket_id, ticket=ticket_on_mongo)
 
                 if update:
                     self.tickets_repository.delete_ticket(ticket_id=ticket_id)
