@@ -57,11 +57,12 @@ class FlaskServer(IHTTPServer):
             self.client.url_map.strict_slashes = False
 
     def start(self):
+        is_dev = self.config['current_environment'] == 'dev'
         self.client.run(host='0.0.0.0',
-                        threaded=True,
-                        use_reloader=False,
                         port=self.config["server"]["port"],
-                        debug=True)
+                        threaded=True,
+                        use_reloader=is_dev,
+                        debug=is_dev)
 
     def status(self):
         self.logger.info("Flask HTTP Server Running")
