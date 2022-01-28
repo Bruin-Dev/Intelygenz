@@ -502,7 +502,7 @@ class BruinClient:
                 'status': 500
             }
 
-    async def post_outage_ticket(self, client_id, service_number):
+    async def post_outage_ticket(self, client_id, service_number, ticket_contact):
         try:
             self._logger.info(
                 f'Posting outage ticket for client with ID {client_id} and for service number {service_number}'
@@ -516,6 +516,9 @@ class BruinClient:
                 "WTNs": service_number,
                 "RequestDescription": "MetTel's IPA -- Service Outage Trouble"
             }
+            if ticket_contact:
+                payload['ticketContact'] = ticket_contact
+
             self._logger.info(f'Posting payload {json.dumps(payload)} to create new outage ticket...')
 
             return_response = dict.fromkeys(["body", "status"])

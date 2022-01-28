@@ -199,7 +199,53 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number)
+        bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact=None)
+        event_bus.publish_message.assert_awaited_once_with(
+            "some.topic",
+            {
+                "request_id": 123,
+                **repository_response,
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def post_outage_ticket_successful_with_contact_info_test(self):
+        client_id = 9994
+        ticket_contact = {
+            "email": "test@test.com"
+        }
+        service_number = "VC05400002265"
+
+        outage_ticket_id = 123456
+        response_status_code = 200
+
+        repository_response = {
+            'body': outage_ticket_id,
+            'status': response_status_code,
+        }
+
+        logger = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.post_outage_ticket = CoroutineMock(return_value=repository_response)
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        parameters = {
+            "client_id": client_id,
+            "service_number": service_number,
+            "ticket_contact": ticket_contact
+        }
+        response_topic = "some.topic"
+        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+
+        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+
+        await post_outage_ticket.post_outage_ticket(event_bus_request)
+
+        bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number,
+                                                                     ticket_contact=ticket_contact)
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {
