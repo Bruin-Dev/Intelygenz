@@ -308,7 +308,11 @@ class RepairTicketsMonitor:
         tickets_cannot_be_created = []
 
         for site_id, service_numbers in site_id_sn_buckets.items():
-            ticket_creation_response = await self._bruin_repository.create_outage_ticket(client_id, service_numbers)
+            ticket_creation_response = await self._bruin_repository.create_outage_ticket(
+                client_id,
+                service_numbers,
+                email_from_address
+            )
             ticket_creation_response_body = ticket_creation_response['body']
             ticket_creation_response_status = ticket_creation_response['status']
             self._logger.info(f'Got response {ticket_creation_response_status},'
