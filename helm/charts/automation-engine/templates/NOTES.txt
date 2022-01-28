@@ -1,1 +1,69 @@
 Automation-Engine deployed version: {{ .Chart.AppVersion }}
+
+  Not deployed compoenents:
+    *
+{{- if not (index .Values "bruin-bridge" "enabled") }} bruin-bridge{{- end }}
+{{- if not (index .Values "customer-cache" "enabled") }} customer-cache{{- end }}
+{{- if not (index .Values "digi-bridge" "enabled") }} digi-bridge{{- end }}
+{{- if not (index .Values "digi-reboot-report" "enabled") }} digi-reboot-report{{- end }}
+{{- if not (index .Values "dri-bridge" "enabled") }} dri-bridge{{- end }}
+{{- if not (index .Values "email-tagger-kre-bridge" "enabled") }} email-tagger-kre-bridge{{- end }}
+{{- if not (index .Values "email-tagger-monitor" "enabled") }} email-tagger-monitor{{- end }}
+{{- if not (index .Values "fraud-monitor" "enabled") }} fraud-monitor{{- end }}
+{{- if not (index .Values "hawkeye-affecting-monitor" "enabled") }} hawkeye-affecting-monitor{{- end }}
+{{- if not (index .Values "hawkeye-bridge" "enabled") }} hawkeye-bridge{{- end }}
+{{- if not (index .Values "hawkeye-customer-cache" "enabled") }} hawkeye-customer-cache{{- end }}
+{{- if not (index .Values "hawkeye-outage-monitor" "enabled") }} hawkeye-outage-monitor{{- end }}
+{{- if not (index .Values "intermapper-outage-monitor" "enabled") }} intermapper-outage-monitor{{- end }}
+{{- if not (index .Values "last-contact-report" "enabled") }} last-contact-report{{- end }}
+{{- if not (index .Values "links-metrics-api" "enabled") }} links-metrics-api{{- end }}
+{{- if not (index .Values "links-metrics-collector" "enabled") }} links-metrics-collector{{- end }}
+{{- if not (index .Values "lumin-billing-report" "enabled") }} lumin-billing-report{{- end }}
+{{- if not (index .Values "notifier" "enabled") }} notifier{{- end }}
+{{- if not (index .Values "repair-tickets-kre-bridge" "enabled") }} repair-tickets-kre-bridge{{- end }}
+{{- if not (index .Values "repair-tickets-monitor" "enabled") }} repair-tickets-monitor{{- end }}
+{{- if not (index .Values "service-affecting-monitor" "enabled") }} service-affecting-monitor{{- end }}
+{{- if not (index .Values "service-outage-monitor" "enabled") }} service-outage-monitor{{- end }}
+{{- if not (index .Values "service-outage-monitor-triage" "enabled") }} service-outage-monitor-triage{{- end }}
+{{- if not (index .Values "sites-monitor" "enabled") }} sites-monitor{{- end }}
+{{- if not (index .Values "t7-bridge" "enabled") }} t7-bridge{{- end }}
+{{- if not (index .Values "ticket-collector" "enabled") }} ticket-collector{{- end }}
+{{- if not (index .Values "ticket-statistics" "enabled") }} ticket-statistics{{- end }}
+{{- if not (index .Values "tnba-feedback" "enabled") }} tnba-feedback{{- end }}
+{{- if not (index .Values "tnba-monitor" "enabled") }} tnba-monitor{{- end }}
+{{- if not (index .Values "velocloud-bridge" "enabled") }} velocloud-bridge{{- end }}
+  
+  Released components:
+{{ if (index .Values "bruin-bridge" "enabled") }}    - bruin-bridge: {{ (index .Values "bruin-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "customer-cache" "enabled") }}    - customer-cache: {{ (index .Values "customer-cache" "image" "tag") }}{{- end }}
+{{ if (index .Values "digi-bridge" "enabled") }}    - digi-bridge: {{ (index .Values "digi-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "digi-reboot-report" "enabled") }}    - digi-reboot-report: {{ (index .Values "digi-reboot-report" "image" "tag") }}{{- end }}
+{{ if (index .Values "dri-bridge" "enabled") }}    - dri-bridge: {{ (index .Values "dri-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "email-tagger-kre-bridge" "enabled") }}    - email-tagger-kre-bridge: {{ (index .Values "email-tagger-kre-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "email-tagger-monitor" "enabled") }}    - email-tagger-monitor: {{ (index .Values "email-tagger-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "fraud-monitor" "enabled") }}    - fraud-monitor: {{ (index .Values "fraud-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "hawkeye-affecting-monitor" "enabled") }}    - hawkeye-affecting-monitor: {{ (index .Values "hawkeye-affecting-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "hawkeye-bridge" "enabled") }}    - hawkeye-bridge: {{ (index .Values "hawkeye-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "hawkeye-customer-cache" "enabled") }}    - hawkeye-customer-cache: {{ (index .Values "hawkeye-customer-cache" "image" "tag") }}{{- end }}
+{{ if (index .Values "hawkeye-outage-monitor" "enabled") }}    - hawkeye-outage-monitor: {{ (index .Values "hawkeye-outage-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "intermapper-outage-monitor" "enabled") }}    - intermapper-outage-monitor: {{ (index .Values "intermapper-outage-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "last-contact-report" "enabled") }}    - last-contact-report: {{ (index .Values "last-contact-report" "image" "tag") }}{{- end }}
+{{ if (index .Values "links-metrics-api" "enabled") }}    - links-metrics-api: {{ (index .Values "links-metrics-api" "image" "tag") }}{{- end }}
+{{ if (index .Values "links-metrics-collector" "enabled") }}    - links-metrics-collector: {{ (index .Values "links-metrics-collector" "image" "tag") }}{{- end }}
+{{ if (index .Values "lumin-billing-report" "enabled") }}    - lumin-billing-report: {{ (index .Values "lumin-billing-report" "image" "tag") }}{{- end }}
+{{ if (index .Values "notifier" "enabled") }}    - notifier: {{ (index .Values "notifier" "image" "tag") }}{{- end }}
+{{ if (index .Values "repair-tickets-kre-bridge" "enabled") }}    - repair-tickets-kre-bridge: {{ (index .Values "repair-tickets-kre-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "repair-tickets-monitor" "enabled") }}    - repair-tickets-monitor: {{ (index .Values "repair-tickets-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "service-affecting-monitor" "enabled") }}    - service-affecting-monitor: {{ (index .Values "service-affecting-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "service-outage-monitor" "enabled") }}    - service-outage-monitor: {{ (index .Values "service-outage-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "service-outage-monitor-triage" "enabled") }}    - service-outage-monitor-triage: {{ (index .Values "service-outage-monitor-triage" "image" "tag") }}{{- end }}
+{{ if (index .Values "sites-monitor" "enabled") }}    - sites-monitor: {{ (index .Values "sites-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "t7-bridge" "enabled") }}    - t7-bridge: {{ (index .Values "t7-bridge" "image" "tag") }}{{- end }}
+{{ if (index .Values "ticket-collector" "enabled") }}    - ticket-collector: {{ (index .Values "ticket-collector" "image" "tag") }}{{- end }}
+{{ if (index .Values "ticket-statistics" "enabled") }}    - ticket-statistics: {{ (index .Values "ticket-statistics" "image" "tag") }}{{- end }}
+{{ if (index .Values "tnba-feedback" "enabled") }}    - tnba-feedback: {{ (index .Values "tnba-feedback" "image" "tag") }}{{- end }}
+{{ if (index .Values "tnba-monitor" "enabled") }}    - tnba-monitor: {{ (index .Values "tnba-monitor" "image" "tag") }}{{- end }}
+{{ if (index .Values "velocloud-bridge" "enabled") }}    - velocloud-bridge: {{ (index .Values "velocloud-bridge" "image" "tag") }}{{- end }}
+  
+Mettel Automation-Engine develop by Intelygenz.
+Deploy Complete.`
