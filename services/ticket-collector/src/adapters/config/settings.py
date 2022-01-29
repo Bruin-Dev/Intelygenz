@@ -54,7 +54,7 @@ def get_config():
             'secret': os.environ['BRUIN_CLIENT_SECRET']
         },
         'job_interval_hours': 4,
-        'days_to_retrieve': 50,
+        'days_to_retrieve': 14,
         'days_to_update': 3,
     }
 
