@@ -1,3 +1,4 @@
+import time
 from datetime import date, timedelta
 
 from adapters.repositories.bruin.repo import BruinRepository
@@ -36,12 +37,15 @@ class TicketUseCase:
         start_date = today - timedelta(days=self.config['days_to_retrieve'])
 
         self.logger.info(f'Getting tickets data between {start_date} and {today}')
+        start_time = time.perf_counter()
 
         for _date in self.date_range(start_date=start_date, end_date=today):
             update = self.should_update(_date=_date)
             self.get_data_from_bruin(query_date=_date, update=update)
 
-        self.logger.info(f'Finished getting tickets between {start_date} and {today}')
+        end_time = time.perf_counter()
+        elapsed_time = round((end_time - start_time) / 60, 2)
+        self.logger.info(f'Finished getting tickets between {start_date} and {today} in {elapsed_time}m')
 
     def should_update(self, _date: date) -> bool:
         """
