@@ -33,33 +33,31 @@ class TicketUseCase:
         Main function to get data from bruin or database
         """
         today = date.today()
-        retrieve_start_date = today - timedelta(days=self.config['days_to_retrieve'])
-        update_start_date = today - timedelta(days=self.config['days_to_update'])
+        start_date = today - timedelta(days=self.config['days_to_retrieve'])
 
-        self.logger.info(f'Getting tickets data between {retrieve_start_date} and {today}')
+        self.logger.info(f'Getting tickets data between {start_date} and {today}')
 
-        for _date in self.date_range(start_date=retrieve_start_date, end_date=today):
-            update = self.check_if_it_must_be_updated(start=update_start_date, end=today, requested_date=_date)
+        for _date in self.date_range(start_date=start_date, end_date=today):
+            update = self.should_update(_date=_date)
             self.get_data_from_bruin(query_date=_date, update=update)
 
-        self.logger.info(f'Finished getting tickets between {retrieve_start_date} and {today}')
+        self.logger.info(f'Finished getting tickets between {start_date} and {today}')
 
-    def check_if_it_must_be_updated(self, start: date, end: date, requested_date: date) -> bool:
+    def should_update(self, _date: date) -> bool:
         """
-        Check on database if we have tickets there
-        :param start:
-        :param end:
-        :param requested_date:
+        Check if tickets from the given date should be updated
+        :param _date:
         :return:
         """
-        must_be_updated = start <= requested_date <= end
+        days = (date.today() - _date).days
+        update = days <= self.config['days_to_update']
 
-        if must_be_updated:
-            self.logger.info(f'Date {requested_date} is between {start} and {end}')
+        if update:
+            self.logger.info(f'Date {_date} should be updated')
         else:
-            self.logger.info(f'Date {requested_date} is not between {start} and {end}')
+            self.logger.info(f'Date {_date} should not be updated')
 
-        return must_be_updated
+        return update
 
     def get_data_from_bruin(self, query_date: date, update: bool) -> None:
         """
