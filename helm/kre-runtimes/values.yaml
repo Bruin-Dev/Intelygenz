@@ -28,6 +28,23 @@ influxdb:
       max-series-per-database: 0
   persistence:
     storageClass: "hostpath"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - influxdb
+            - key: app
+              operator: In
+              values:
+              - mongo
+          topologyKey: kubernetes.io/hostname
+          namespaces: ["kre-tnba", "kre-email-tagger", "kre-rta"]
 
 config:
   auth:
@@ -54,3 +71,12 @@ certManager:
 
 entrypoint:
   tls: true
+
+kapacitor:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClass: "hostpath"
+  rbac:
+    create: true
+    namespaced: true

@@ -82,6 +82,7 @@
       --set config.admin.apiHost="api.${BASE_DOMAIN_NAME}"
       --set config.admin.frontendBaseURL="https://admin.${BASE_DOMAIN_NAME}"
       --set config.auth.cookieDomain="${BASE_DOMAIN_NAME}"
+      --set kapacitor.influxURL="http://${KRE_RUNTIME_NAME}-influxdb:8086"
       --set adminApi.host="api.${BASE_DOMAIN_NAME}"
       --set adminUI.host="admin.${BASE_DOMAIN_NAME}"
       --set entrypoint.host="${BASE_DOMAIN_NAME}"
