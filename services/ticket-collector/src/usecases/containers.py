@@ -9,7 +9,7 @@ class UseCases(containers.DeclarativeContainer):
     config = providers.Singleton(get_config)
     bruin_repository = adapters.bruin_repository
     tickets_repository = adapters.tickets_repository
-    logger = providers.Callable(get_logger)
+    logger = providers.Singleton(get_logger)
 
     tickets_use_case: TicketUseCase = providers.Singleton(
         TicketUseCase,

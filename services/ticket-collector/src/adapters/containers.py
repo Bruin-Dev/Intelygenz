@@ -10,7 +10,7 @@ from .logger.logger import get_logger
 
 class Adapters(containers.DeclarativeContainer):
     config = providers.Singleton(get_config)
-    logger = providers.Callable(get_logger)
+    logger = providers.Singleton(get_logger)
     database: IDB = providers.Singleton(MongoDB, config=config, logger=logger)
 
     # Repositories
