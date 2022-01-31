@@ -194,6 +194,7 @@ class RepairTicketsMonitor:
                     potential_service_numbers
                 )
                 existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
+                cancelled_tickets = await self._get_cancelled_tickets(client_id, service_number_site_map)
             except ResponseException as e:
                 self._logger.error(f'Error in bruin {e} could not process email: {email_id}')
                 tickets_cannot_be_created.append(
@@ -203,10 +204,10 @@ class RepairTicketsMonitor:
                         reason=e
                     )
                 )
-
                 await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
                 self._new_tagged_emails_repository.mark_complete(email_id)
                 return
+
             is_actionable = self._is_inference_actionable(inference_data)
             if is_actionable:
                 tickets_created, tickets_updated, tickets_cannot_be_created = await self._create_tickets(
@@ -285,6 +286,19 @@ class RepairTicketsMonitor:
                     break
 
         return existing_tickets
+
+    async def _get_cancelled_tickets(
+            self,
+            client_id: str,
+            service_number_site_map: Dict[str, str]
+    ) -> List[Dict[str, Any]]:
+        """Return a list of cancelled tickets for given site ids"""
+        site_ids = list(set(service_number_site_map.values()))
+        response = await self._bruin_repository.get_cancelled_tickets_by_site_ids(client_id, site_ids)
+        if response['status'] not in range(200, 300):
+            raise ResponseException('Exception while getting bruin response for cancelled tickets')
+
+        return response['body']
 
     async def _create_tickets(
             self,

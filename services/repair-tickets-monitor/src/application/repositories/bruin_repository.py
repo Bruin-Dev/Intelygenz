@@ -521,14 +521,21 @@ class BruinRepository:
 
     async def get_open_tickets_with_service_numbers(self, client_id: str, site_ids: List[str]) -> Dict[str, Any]:
         ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_topics = ['VOO', 'VAS']
 
         open_tickets = []
         self._logger.info(f'Getting open tickets for site_ids: {site_ids}')
-        for site_id in site_ids:
-            tickets = await self.get_tickets_basic_info(ticket_statuses, client_id=client_id, site_id=site_id)
-            if tickets['status'] not in range(200, 300):
-                return {'status': tickets['status'], 'body': 'Error while retrieving open tickets'}
-            open_tickets.extend(tickets['body'])
+        for topic in ticket_topics:
+            for site_id in site_ids:
+                tickets = await self.get_tickets_basic_info(
+                    ticket_statuses,
+                    client_id=client_id,
+                    site_id=site_id,
+                    ticket_topic=topic
+                )
+                if tickets['status'] not in range(200, 300):
+                    return {'status': tickets['status'], 'body': 'Error while retrieving open tickets'}
+                open_tickets.extend(tickets['body'])
 
         self._logger.info(f'Open tickets {open_tickets}')
         if not open_tickets:
@@ -549,6 +556,40 @@ class BruinRepository:
             processed_tickets.append(processed_ticket)
 
         return {'status': 200, 'body': processed_tickets}
+
+    async def get_cancelled_tickets_by_site_ids(
+            self,
+            client_id: str,
+            site_ids: List[str]
+    ):
+        ticket_statuses = ['Resolved']
+        ticket_topics = ['VOO', 'VAS']
+
+        resolved_tickets = []
+        for topic in ticket_topics:
+            for site_id in site_ids:
+                ticket_response = await self.get_tickets_basic_info(
+                    ticket_statuses=ticket_statuses,
+                    client_id=client_id,
+                    site_id=site_id,
+                    ticket_topic=topic,
+                )
+                if ticket_response['status'] in range(200, 300):
+                    decamelized_tickets = [self._decamelize_ticket(ticket) for ticket in ticket_response['body']]
+                    resolved_tickets.extend(decamelized_tickets)
+                else:
+                    return {'status': ticket_response['status'], 'body': 'Error while getting cancelled tickets'}
+
+        cancelled_tickets = []
+        for ticket in resolved_tickets:
+            response = await self.get_status_and_cancellation_reasons(ticket_id=ticket['ticket_id'])
+            if response['status'] in range(200, 300):
+                if response['body']['ticket_status'] == 'cancelled':
+                    cancelled_tickets.append(ticket)
+            else:
+                return {"status": response['status'], "body": "Error while getting ticket cancellation reasons"}
+
+        return {"body": cancelled_tickets, "status": 200}
 
     def _decamelize_ticket(self, ticket: Dict[str, Any]) -> Dict[str, Any]:
         decamelized_ticket = humps.decamelize(ticket)
@@ -572,7 +613,7 @@ class BruinRepository:
 
         for topic in ticket_topics:
             ticket_response = await self.get_tickets_basic_info(
-                ticket_statuses=['Closed'],
+                ticket_statuses=['Closed', 'Resolved'],
                 ticket_topic=topic,
                 start_date=start_date,
             )
