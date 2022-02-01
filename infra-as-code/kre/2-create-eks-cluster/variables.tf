@@ -30,6 +30,11 @@ variable "HOSTPATH_HELM_CHART_VERSION" {
   description = "Helm chart version used for hostpath"
 }
 
+variable "LOCAL_PATH_PROVISIONER_HELM_CHART_VERSION" {
+  default     = "0.0.21"
+  description = "Helm chart version used for local-path-provisioner"
+}
+
 variable "INGRESS_NGINX_HELM_CHART_VERSION" {
   default     = "3.21.0"
   description = "Helm chart version used for ingress-nginx"

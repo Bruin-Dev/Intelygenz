@@ -85,7 +85,7 @@ resource "helm_release" "ingress-nginx" {
    ]
 }
 
-resource "helm_release" "hostpah-provisioner" {
+resource "helm_release" "hostpath-provisioner" {
   name          = "hostpath-provisioner"
 
   repository    = "https://charts.rimusz.net"
@@ -97,14 +97,41 @@ resource "helm_release" "hostpah-provisioner" {
   recreate_pods = false
   wait          = true
 
+  values = [
+    file("helm/external-charts/hostpath-provisioner.yaml")
+  ]
+
+  depends_on = [
+      module.mettel-automation-eks-cluster,
+      null_resource.associate-iam-oidc-provider,
+      data.aws_eks_cluster_auth.cluster,
+   ]
+}
+
+resource "helm_release" "local-path-provisioner" {
+  name          = "local-path-provisioner"
+
+  repository    = "https://ebrianne.github.io/helm-charts"
+  chart         = "local-path-provisioner"
+
+  version       = var.LOCAL_PATH_PROVISIONER_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  recreate_pods = false
+  wait          = true
+
+  values = [
+    file("helm/external-charts/local-path-provisioner.yaml")
+  ]
+
   set {
-    name  = "NodeHostPath"
-    value = "/mnt/efs/${local.cluster_name}"
+    name = "nodePathMap[0].paths"
+    value = "{/mnt/efs/${local.cluster_name}}"
+    type  = "string"
   }
 
   depends_on = [
       module.mettel-automation-eks-cluster,
-      aws_iam_role.external-dns-role-eks,
       null_resource.associate-iam-oidc-provider,
       data.aws_eks_cluster_auth.cluster,
    ]

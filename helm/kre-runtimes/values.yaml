@@ -1,33 +1,8 @@
 mongodb:
   storage:
-    className: hostpath
+    className: local-path
   persistentVolume:
-    storageClass: hostpath
-
-prometheus-operator:
-  enabled: false
-
-adminApi:
-  storage:
-    class: hostpath
-  tls:
-    enabled: true
-
-nats_streaming:
-  storage:
-    className: hostpath
-
-chronograf:
-  persistence:
-    storageClass: "hostpath"
-
-influxdb:
-  config:
-    data: 
-      max-values-per-tag: 0
-      max-series-per-database: 0
-  persistence:
-    storageClass: "hostpath"
+    storageClass: local-path
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -45,6 +20,48 @@ influxdb:
               - mongo
           topologyKey: kubernetes.io/hostname
           namespaces: ["kre-tnba", "kre-email-tagger", "kre-rta"]
+
+influxdb:
+  config:
+    data: 
+      max-values-per-tag: 0
+      max-series-per-database: 0
+  persistence:
+    storageClass: "local-path"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - influxdb
+            - key: app
+              operator: In
+              values:
+              - mongo
+          topologyKey: kubernetes.io/hostname
+          namespaces: ["kre-tnba", "kre-email-tagger", "kre-rta"]
+
+prometheus-operator:
+  enabled: false
+
+adminApi:
+  storage:
+    class: local-path
+  tls:
+    enabled: true
+
+nats_streaming:
+  storage:
+    className: local-path
+
+chronograf:
+  persistence:
+    storageClass: "local-path"
 
 config:
   auth:
@@ -76,7 +93,7 @@ kapacitor:
   enabled: true
   persistence:
     enabled: true
-    storageClass: "hostpath"
+    storageClass: "local-path"
   rbac:
     create: true
     namespaced: true
