@@ -13,7 +13,7 @@ from pytz import utc
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
-EVENT_TIME_REGEX = re.compile(r'(?P<time>^.*): Message from InterMapper')
+EVENT_TIME_REGEX = re.compile(r'(?P<time>^.*): Message from InterMapper (?P<version>.*)')
 
 
 class InterMapperMonitor:
@@ -153,6 +153,7 @@ class InterMapperMonitor:
     def _parse_email_body(self, body):
         parsed_email_dict = {}
         parsed_email_dict['time'] = EVENT_TIME_REGEX.match(body).group('time')
+        parsed_email_dict['version'] = EVENT_TIME_REGEX.match(body).group('version')
         parsed_email_dict['event'] = self._find_field_in_body(body, 'Event')
         parsed_email_dict['name'] = self._find_field_in_body(body, 'Name')
         parsed_email_dict['document'] = self._find_field_in_body(body, 'Document')
@@ -202,7 +203,9 @@ class InterMapperMonitor:
             self._logger.info(f'Posting InterMapper UP note to task of ticket id {ticket_id} '
                               f'related to circuit ID {circuit_id}...')
             up_note_response = await self._bruin_repository.append_intermapper_up_note(ticket_id, circuit_id,
-                                                                                       parsed_email_dict)
+                                                                                       parsed_email_dict,
+                                                                                       self._is_piab_device(
+                                                                                           parsed_email_dict))
             if up_note_response['status'] not in range(200, 300):
                 return False
 
@@ -325,7 +328,9 @@ class InterMapperMonitor:
             return True
         self._logger.info(f'Appending InterMapper note to ticket id {outage_ticket_body}')
         append_intermapper_note_response = await self._bruin_repository.append_intermapper_note(outage_ticket_body,
-                                                                                                parsed_email_dict)
+                                                                                                parsed_email_dict,
+                                                                                                self._is_piab_device(
+                                                                                                    parsed_email_dict))
         if append_intermapper_note_response["status"] not in range(200, 300):
             return False
         return True
@@ -335,6 +340,8 @@ class InterMapperMonitor:
         if attributes_serial_response["status"] not in range(200, 300):
             return None
         attributes_serial = attributes_serial_response["body"]
+        if attributes_serial is None:
+            return None
         dri_parameters_response = await self._dri_repository.get_dri_parameters(attributes_serial)
         if dri_parameters_response["status"] not in range(200, 300):
             return None

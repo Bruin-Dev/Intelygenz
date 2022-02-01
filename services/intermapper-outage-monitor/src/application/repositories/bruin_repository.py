@@ -169,21 +169,24 @@ class BruinRepository:
 
         return response
 
-    async def append_intermapper_note(self, ticket_id, parsed_email_dict):
+    async def append_intermapper_note(self, ticket_id, parsed_email_dict, is_piab_device):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
         previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
             'previous_condition'] else ''
+        ip_address = f"Wireless IP Address: {parsed_email_dict['address']}" if is_piab_device else \
+            f"IP Address: {parsed_email_dict['address']}"
+
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f'InterMapper Triage',
-            f"Message from InterMapper 6.1.5",
+            f"Message from InterMapper {parsed_email_dict['version']}",
             "",
             f"CONDITION: {parsed_email_dict['condition']}",
             f"{previous_condition}",
             f"Event:               {parsed_email_dict['event']}",
             f"Time of Event:       {parsed_email_dict['time']}",
             "",
-            f"IP Address: {parsed_email_dict['address']}",
+            f"{ip_address}",
             "",
             f"IM Device Label:     {parsed_email_dict['name']}",
             "",
@@ -196,20 +199,23 @@ class BruinRepository:
         ])
         return await self.append_note_to_ticket(ticket_id, intermapper_note)
 
-    async def append_intermapper_up_note(self, ticket_id, wtn, parsed_email_dict):
+    async def append_intermapper_up_note(self, ticket_id, wtn, parsed_email_dict, is_piab_device):
         current_datetime_tz_aware = datetime.now(timezone(self._config.INTERMAPPER_CONFIG['timezone']))
         previous_condition = f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n" if parsed_email_dict[
             'previous_condition'] else ''
+        ip_address = f"Wireless IP Address: {parsed_email_dict['address']}" if is_piab_device else \
+            f"IP Address: {parsed_email_dict['address']}"
+
         intermapper_note = os.linesep.join([
             f"#*MetTel's IPA*#",
-            f"Message from InterMapper 6.1.5",
+            f"Message from InterMapper {parsed_email_dict['version']}",
             "",
             f"CONDITION: {parsed_email_dict['condition']}",
             f"{previous_condition}",
             f"Event:               {parsed_email_dict['event']}",
             f"Time of Event:       {parsed_email_dict['time']}",
             "",
-            f"IP Address: {parsed_email_dict['address']}",
+            f"{ip_address}",
             "",
             f"IM Device Label:     {parsed_email_dict['name']}",
             "",
@@ -244,7 +250,7 @@ class BruinRepository:
         dri_note = os.linesep.join([
             f"#*MetTel's IPA*#",
             f"InterMapper Triage",
-            f"Message from InterMapper 6.1.5",
+            f"Message from InterMapper {parsed_email_dict['version']}",
             "",
             f"CONDITION: {parsed_email_dict['condition']}",
             f"{previous_condition}",

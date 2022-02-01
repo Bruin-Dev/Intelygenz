@@ -592,7 +592,7 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_body = os.linesep.join([
-            "01/10 15:35:40: Message from InterMapper6.1.5\n",
+            "01/10 15:35:40: Message from InterMapper 6.1.5\n",
             "Event: Alarm",
             "Name: OReilly-HotSpringsAR(SD-WAN)-Site803",
             "Document: O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -605,6 +605,7 @@ class TestInterMapperMonitor:
 
         expected_dict = {
                             'time': '01/10 15:35:40',
+                            'version': '6.1.5',
                             'event': 'Alarm',
                             'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
                             'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
@@ -633,7 +634,7 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_body = os.linesep.join([
-            "01/10 15:35:40: Message from InterMapper6.1.5\n",
+            "01/10 15:35:40: Message from InterMapper 6.1.5\n",
             "Event: Alarm",
             "Name: OReilly-HotSpringsAR(SD-WAN)-Site803",
             "Document: O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -646,6 +647,7 @@ class TestInterMapperMonitor:
 
         expected_dict = {
                             'time': '01/10 15:35:40',
+                            'version': '6.1.5',
                             'event': 'Alarm',
                             'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
                             'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
@@ -674,7 +676,7 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_body = os.linesep.join([
-            "01/10 15:35:40: Message from InterMapper6.1.5\n",
+            "01/10 15:35:40: Message from InterMapper 6.1.5\n",
             "Event: Alarm",
             "Name: OReilly-HotSpringsAR(SD-WAN)-Site803",
             "Document: O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -686,6 +688,7 @@ class TestInterMapperMonitor:
 
         expected_dict = {
                             'time': '01/10 15:35:40',
+                            'version': '6.1.5',
                             'event': 'Alarm',
                             'name': 'OReilly-HotSpringsAR(SD-WAN)-Site803',
                             'document': 'O Reilly Auto Parts - South East |83959| Platinum Monitoring',
@@ -760,6 +763,7 @@ class TestInterMapperMonitor:
         dri_parameter = None
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -810,7 +814,7 @@ class TestInterMapperMonitor:
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         bruin_repository.append_dri_note.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict)
+        bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict, False)
         assert response is True
 
     @pytest.mark.asyncio
@@ -826,6 +830,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -886,6 +891,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -935,6 +941,7 @@ class TestInterMapperMonitor:
         dri_parameter = None
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -985,7 +992,7 @@ class TestInterMapperMonitor:
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         bruin_repository.append_dri_note.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict)
+        bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict, False)
         assert response is False
 
     @pytest.mark.asyncio
@@ -1001,6 +1008,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1060,6 +1068,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1195,7 +1204,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -1217,6 +1226,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1275,6 +1285,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1332,6 +1343,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1394,7 +1406,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
@@ -1411,6 +1423,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1478,7 +1491,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
@@ -1496,6 +1509,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1563,7 +1577,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
@@ -1581,6 +1595,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1643,7 +1658,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
@@ -1661,6 +1676,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1728,7 +1744,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
@@ -1746,6 +1762,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -1874,7 +1891,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -1893,6 +1910,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -2021,7 +2039,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
@@ -2043,6 +2061,7 @@ class TestInterMapperMonitor:
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
+            'version': '6.1.5',
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
@@ -2171,7 +2190,7 @@ class TestInterMapperMonitor:
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
         bruin_repository.append_intermapper_up_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id,
-                                                                             parsed_email_dict)
+                                                                             parsed_email_dict, False)
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -2251,6 +2270,49 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock()
+
+        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
+                                                 bruin_repository, dri_repository)
+        dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
+        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        dri_repository.get_dri_parameters.assert_not_awaited()
+        assert dri_parameters is None
+
+    @pytest.mark.asyncio
+    async def get_dri_parameters_none_attribute_test(self):
+        circuit_id = 3214
+        client_id = 83959
+
+        dri_parameters_response_body = {
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
+                    "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+                    "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:3:30:69"
+                }
+        dri_parameters_response = {
+                'body': dri_parameters_response_body,
+                'status': 200
+         }
+
+        attribute_serial = None
+        attribute_serial_response = {
+            "body": attribute_serial,
+            "status": 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+
+        dri_repository = Mock()
+        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, notifications_repository,
                                                  bruin_repository, dri_repository)
