@@ -1,4 +1,5 @@
 import abc
+from prometheus_client import start_http_server
 
 from delivery.http.blueprints import health
 from delivery.http.blueprints import statistics
@@ -58,11 +59,20 @@ class FlaskServer(IHTTPServer):
 
     def start(self):
         is_dev = self.config['current_environment'] == 'dev'
+        self.start_prometheus_metrics_server()
         self.client.run(host='0.0.0.0',
                         port=self.config["server"]["port"],
                         threaded=True,
                         use_reloader=is_dev,
                         debug=is_dev)
+
+    def start_prometheus_metrics_server(self):
+        self.logger.info('Starting metrics server')
+
+        try:
+            start_http_server(self.config['metrics_server']['port'])
+        except OSError:
+            pass
 
     def status(self):
         self.logger.info("Flask HTTP Server Running")

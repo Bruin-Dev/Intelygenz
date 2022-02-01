@@ -3,18 +3,20 @@ import time
 from datetime import datetime
 
 from adapters.repositories.tickets.repo import TicketsRepository
+from adapters.repositories.metrics.repo import MetricsRepository
 
 utc = pytz.UTC
 
 
 class StatisticsUseCase:
-    def __init__(self, logger, tickets_repository: TicketsRepository):
+    def __init__(self, logger, tickets_repository: TicketsRepository, metrics_repository: MetricsRepository):
         """
         Creation of ticket use case object
         :param logger:
         :param tickets_repository:
         """
         self.tickets_repository = tickets_repository
+        self.metrics_repository = metrics_repository
         self.logger = logger
 
     @staticmethod
@@ -211,43 +213,22 @@ class StatisticsUseCase:
         elapsed_time = round(end_time - start_time, 2)
         self.logger.info(f'Finished calculating statistics between {start} and {end} in {elapsed_time}s')
 
-        return self.create_statistics_object(tasks_created=tasks_created, tasks_reopened=tasks_reopened,
-                                             no_touch_resolution=no_touch_resolution,
-                                             ai_resolved_tasks=ai_resolved_tasks,
-                                             auto_resolved_tasks=auto_resolved_tasks,
-                                             devices_monitoring=devices_monitoring,
-                                             devices_rebooted=devices_rebooted,
-                                             hnoc_work_queue_reduced=hnoc_work_queue_reduced,
-                                             ai_forwarded_tasks=ai_forwarded_tasks,
-                                             dispatch_monitored=dispatch_monitored,
-                                             dispatch_reminders=dispatch_reminders,
-                                             average_time_to_resolve=average_time_to_resolve,
-                                             average_time_to_acknowledge=average_time_to_acknowledge_calculated,
-                                             average_time_to_document=0,
-                                             ipa_headcount_equivalent=ipa_headcount_equivalent)
+        statistics = self.metrics_repository.create_statistics_object(
+            tasks_created=tasks_created,
+            tasks_reopened=tasks_reopened,
+            no_touch_resolution=no_touch_resolution,
+            ai_resolved_tasks=ai_resolved_tasks,
+            auto_resolved_tasks=auto_resolved_tasks,
+            devices_monitoring=devices_monitoring,
+            devices_rebooted=devices_rebooted,
+            hnoc_work_queue_reduced=hnoc_work_queue_reduced,
+            ai_forwarded_tasks=ai_forwarded_tasks,
+            dispatch_monitored=dispatch_monitored,
+            dispatch_reminders=dispatch_reminders,
+            average_time_to_resolve=average_time_to_resolve,
+            average_time_to_acknowledge=average_time_to_acknowledge_calculated,
+            ipa_headcount_equivalent=ipa_headcount_equivalent,
+        )
 
-    @staticmethod
-    def create_statistics_object(tasks_created, tasks_reopened, no_touch_resolution, ai_resolved_tasks,
-                                 auto_resolved_tasks,
-                                 devices_rebooted, devices_monitoring, hnoc_work_queue_reduced, ai_forwarded_tasks,
-                                 dispatch_reminders, dispatch_monitored, average_time_to_resolve,
-                                 average_time_to_document,
-                                 average_time_to_acknowledge, ipa_headcount_equivalent):
-        return {
-            'ai_forwarded_tasks': ai_forwarded_tasks,
-            'tasks_created_AI': tasks_created,
-            'tasks_reopend_AI': tasks_reopened,
-            'no_touch_resolution': no_touch_resolution,
-            'ai_resolved_tasks': ai_resolved_tasks,
-            'auto_resolved_tasks': auto_resolved_tasks,
-            'devices_rebooted': devices_rebooted,
-            'devices_monitoring': devices_monitoring,
-            'hnoc_work_queue_reduced': hnoc_work_queue_reduced,
-            'dispatch_reminders': dispatch_reminders,
-            'dispatch_monitored': dispatch_monitored,
-            'average_time_to_resolve': average_time_to_resolve,
-            'average_time_to_document': average_time_to_document,
-            'average_time_to_acknowledge': average_time_to_acknowledge,
-            'ipa_headcount_equivalent': ipa_headcount_equivalent,
-            'quarantine_time': 3,
-        }
+        self.metrics_repository.set_statistics(statistics)
+        return statistics
