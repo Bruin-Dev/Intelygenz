@@ -8,7 +8,7 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 
-DID_PATTERN = re.compile(r'\+?\d+').pattern
+DID_PATTERN = re.compile(r'.+').pattern
 
 EMAIL_SUBJECT_REGEX = re.compile(rf'Possible Fraud on {DID_PATTERN}')
 EMAIL_BODY_REGEX = re.compile(r'(?P<email_body>Possible Fraud Warning.*)\n\nThanks,\nFraud Detection System', re.DOTALL)
@@ -95,11 +95,14 @@ class FraudMonitor:
         email_body = EMAIL_BODY_REGEX.search(email_body).group('email_body')
 
         client_info_by_did_response = await self._bruin_repository.get_client_info_by_did(did)
-        if client_info_by_did_response['status'] not in range(200, 300):
-            return False
-
-        client_id = client_info_by_did_response['body']['clientId']
-        service_number = client_info_by_did_response['body']['btn']
+        if client_info_by_did_response['status'] in range(200, 300):
+            client_id = client_info_by_did_response['body']['clientId']
+            service_number = client_info_by_did_response['body']['btn']
+        else:
+            self._logger.warning(f'Failed to get client info by DID {did}, using default client info')
+            default_client_info = self._config.FRAUD_CONFIG['default_client_info']
+            client_id = default_client_info['client_id']
+            service_number = default_client_info['service_number']
 
         open_fraud_tickets_response = await self._bruin_repository.get_open_fraud_tickets(client_id, service_number)
         if open_fraud_tickets_response['status'] not in range(200, 300):
@@ -268,18 +271,23 @@ class FraudMonitor:
         return True
 
     async def _get_contacts(self, client_id: int, service_number: str):
+        default_contacts = self._bruin_repository.get_contacts(self._config.FRAUD_CONFIG['default_contact'])
+
         client_info_response = await self._bruin_repository.get_client_info(service_number)
         if client_info_response['status'] not in range(200, 300) or not client_info_response['body']:
-            return
+            self._logger.warning(f'Failed to get client info for service number {service_number}, '
+                                 f'using default contacts')
+            return default_contacts
 
-        client_info = client_info_response['body'][0]
-        site_details_response = await self._bruin_repository.get_site_details(client_id, client_info['site_id'])
+        site_id = client_info_response['body'][0]['site_id']
+        site_details_response = await self._bruin_repository.get_site_details(client_id, site_id)
         if site_details_response['status'] not in range(200, 300):
-            return
+            self._logger.warning(f'Failed to get site details for client {client_id} and site {site_id}, '
+                                 f'using default contacts')
+            return default_contacts
 
         site_details = site_details_response['body']
         contact_info = self._bruin_repository.get_contact_info(site_details)
         contacts = self._bruin_repository.get_contacts(contact_info)
-        default_contacts = self._bruin_repository.get_contacts(self._config.FRAUD_CONFIG['default_contact'])
 
         return contacts or default_contacts

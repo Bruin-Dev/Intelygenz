@@ -24,6 +24,10 @@ FRAUD_CONFIG = {
     'monitoring_interval': 5,
     'inbox_email': 'mettel.automation@intelygenz.com',
     'sender_emails_list': ['amate@mettel.net'],
+    'default_client_info': {
+        'client_id': 9994,
+        'service_number': '2126070002',
+    },
     'default_contact': {
         'name': 'Holmdel NOC',
         'email': 'holmdelnoc@mettel.net',
