@@ -70,37 +70,31 @@ class TicketUseCase:
         :param _date:
         :param today:
         """
-        try:
-            start = _date.strftime('%Y-%m-%dT00:00:00Z')
-            end = _date.strftime('%Y-%m-%dT23:59:59Z')
+        start = _date.strftime('%Y-%m-%dT00:00:00Z')
+        end = _date.strftime('%Y-%m-%dT23:59:59Z')
 
-            tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
-            update = self.should_update(_date=_date, today=today)
+        tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
+        update = self.should_update(_date=_date, today=today)
 
-            for ticket in tickets:
-                ticket_id = ticket['ticketID']
-                ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
-                events_on_mongo = self.tickets_repository.get_ticket_events(ticket_id=ticket_id, ticket=ticket_on_mongo)
+        for ticket in tickets:
+            ticket_id = ticket['ticketID']
+            ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
+            events_on_mongo = self.tickets_repository.get_ticket_events(ticket_id=ticket_id, ticket=ticket_on_mongo)
 
-                if update:
-                    self.tickets_repository.delete_ticket(ticket_id=ticket_id)
+            if update:
+                self.tickets_repository.delete_ticket(ticket_id=ticket_id)
 
-                if update or not ticket_on_mongo:
-                    self.tickets_repository.save_ticket(ticket=ticket)
+            if update or not ticket_on_mongo:
+                self.tickets_repository.save_ticket(ticket=ticket)
 
-                if update or not events_on_mongo:
-                    await self.save_ticket_events(ticket_id)
-        except Exception as e:
-            self.logger.error(e)
+            if update or not events_on_mongo:
+                await self.save_ticket_events(ticket_id)
 
     async def save_ticket_events(self, ticket_id: int) -> None:
-        try:
-            events = await self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
+        events = await self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
 
-            if events:
-                self.tickets_repository.save_events(ticket_id=ticket_id, events=events)
-            else:
-                self.logger.info(f"We don't have access to ticket {ticket_id}")
-                self.tickets_repository.mark_not_accessible(ticket_id=ticket_id)
-        except Exception as e:
-            self.logger.error(e)
+        if events:
+            self.tickets_repository.save_events(ticket_id=ticket_id, events=events)
+        else:
+            self.logger.info(f"We don't have access to ticket {ticket_id}")
+            self.tickets_repository.mark_not_accessible(ticket_id=ticket_id)
