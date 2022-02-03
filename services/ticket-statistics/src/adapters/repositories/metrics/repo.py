@@ -33,6 +33,6 @@ class MetricsRepository:
             'quarantine_time': quarantine_time,
         }
 
-    def set_statistics(self, statistics):
+    def save_statistics(self, statistics):
         for key, value in statistics.items():
             self.metrics[key].set(value)

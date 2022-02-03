@@ -157,7 +157,7 @@ class StatisticsUseCase:
     def calculate_ipa_headcount_equivalent(no_touch_resolution, days_time_frame):
         return (no_touch_resolution / days_time_frame) / 34
 
-    def calculate_statistics(self, start: datetime, end: datetime):
+    def calculate_statistics(self, start: datetime, end: datetime, save: bool):
         self.logger.info(f'Calculating statistics between {start} and {end}')
         start_time = time.perf_counter()
 
@@ -230,5 +230,8 @@ class StatisticsUseCase:
             ipa_headcount_equivalent=ipa_headcount_equivalent,
         )
 
-        self.metrics_repository.set_statistics(statistics)
+        if save:
+            self.metrics_repository.save_statistics(statistics)
+            self.logger.info(f'Saved statistics between {start} and {end} in the metrics server')
+
         return statistics
