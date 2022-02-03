@@ -155,7 +155,7 @@ class StatisticsUseCase:
 
     @staticmethod
     def calculate_ipa_headcount_equivalent(no_touch_resolution, days_time_frame):
-        return (no_touch_resolution / days_time_frame) / 20
+        return (no_touch_resolution / days_time_frame) / 34
 
     def calculate_statistics(self, start: datetime, end: datetime):
         self.logger.info(f'Calculating statistics between {start} and {end}')
