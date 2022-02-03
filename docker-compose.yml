@@ -523,6 +523,7 @@ services:
       - services/ticket-collector/src/config/env
     depends_on:
       - mongo
+      - ticket-statistics
     volumes:
     - ./services/ticket-collector:/service/app
     ports:
