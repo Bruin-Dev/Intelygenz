@@ -1013,6 +1013,8 @@ ticket-collector:
     bruin_client_id: ${BRUIN_CLIENT_ID}
     # -- Client Secret credentials for Bruin API
     bruin_client_secret: ${BRUIN_CLIENT_SECRET}
+    # -- Host for the ticket-statistics service
+    ticket_statistics_host: ${TICKET_STATISTICS_HOST}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:

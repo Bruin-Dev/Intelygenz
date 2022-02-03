@@ -40,6 +40,7 @@ def get_config():
     return {
         'environment_name': ENVIRONMENT_NAME,
         'current_environment': CURRENT_ENVIRONMENT,
+        'ticket_statistics_host': os.environ['TICKET_STATISTICS_HOST'],
         'sentry': {
             'config': {
                 'release': os.getenv('VERSION')
