@@ -1,5 +1,6 @@
 import time
 from datetime import date, timedelta
+from typing import List
 
 from adapters.repositories.bruin.repo import BruinRepository
 from adapters.repositories.tickets.repo import TicketsRepository
@@ -19,7 +20,7 @@ class TicketUseCase:
         self.logger = logger
 
     @staticmethod
-    def date_range(start_date: date, end_date: date):
+    def date_range(start_date: date, end_date: date) -> List[date]:
         """
         Get date range
         :param start_date:
@@ -40,18 +41,17 @@ class TicketUseCase:
         start_time = time.perf_counter()
 
         for _date in self.date_range(start_date=start_date, end_date=today):
-            update = self.should_update(today=today, _date=_date)
-            await self.get_data_from_bruin(query_date=_date, update=update)
+            await self.get_data_from_bruin(_date=_date, today=today)
 
         end_time = time.perf_counter()
         elapsed_time = round((end_time - start_time) / 60, 2)
         self.logger.info(f'Finished getting tickets between {start_date} and {today} in {elapsed_time}m')
 
-    def should_update(self, today: date, _date: date) -> bool:
+    def should_update(self, _date: date, today: date) -> bool:
         """
         Check if tickets from the given date should be updated
-        :param today:
         :param _date:
+        :param today:
         :return:
         """
         days = (today - _date).days
@@ -64,17 +64,18 @@ class TicketUseCase:
 
         return update
 
-    async def get_data_from_bruin(self, query_date: date, update: bool) -> None:
+    async def get_data_from_bruin(self, _date: date, today: date) -> None:
         """
         Get data from bruin
-        :param query_date:
-        :param update:
+        :param _date:
+        :param today:
         """
         try:
-            query_start = query_date.strftime('%Y-%m-%dT00:00:00Z')
-            query_end = query_date.strftime('%Y-%m-%dT23:59:59Z')
+            start = _date.strftime('%Y-%m-%dT00:00:00Z')
+            end = _date.strftime('%Y-%m-%dT23:59:59Z')
 
-            tickets = await self.bruin_repository.request_tickets_by_date_range(start=query_start, end=query_end)
+            tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
+            update = self.should_update(_date=_date, today=today)
 
             for ticket in tickets:
                 ticket_id = ticket['ticketID']
