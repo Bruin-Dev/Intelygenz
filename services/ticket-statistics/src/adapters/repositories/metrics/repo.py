@@ -1,14 +1,12 @@
-from prometheus_client import Counter, Gauge
+from prometheus_client import Gauge
 
 
 class MetricsRepository:
-    counters = {}
-    gauges = {}
+    metrics = {}
 
     def __init__(self):
         for key in self.create_statistics_object():
-            self.counters[key] = Counter(key, f'{key}_counter')
-            self.gauges[key] = Gauge(key, f'{key}_gauge')
+            self.metrics[key] = Gauge(f'stat_{key}', '')
 
     @staticmethod
     def create_statistics_object(
@@ -37,5 +35,4 @@ class MetricsRepository:
 
     def set_statistics(self, statistics):
         for key, value in statistics.items():
-            self.counters[key].inc(value)
-            self.gauges[key].set(value)
+            self.metrics[key].set(value)
