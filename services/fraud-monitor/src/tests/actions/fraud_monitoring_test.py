@@ -304,6 +304,36 @@ class TestFraudMonitor:
         fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, body, msg_uid)
 
     @pytest.mark.asyncio
+    async def process_fraud__create_ticket__default_client_info_test(
+            self, fraud_monitor, make_get_tickets_response, bruin_500_response):
+        default_client_info = testconfig.FRAUD_CONFIG['default_client_info']
+        client_id = default_client_info['client_id']
+        service_number = default_client_info['service_number']
+        msg_uid = '123456'
+
+        body = (
+            'Possible Fraud Warning with the following information:\n'
+            'DID: 12345678\n'
+        )
+
+        full_body = (
+            'Network,\n'
+            '\n'
+            f'{body}\n'
+            '\n'
+            'Thanks,\n'
+            'Fraud Detection System'
+        )
+
+        fraud_monitor._bruin_repository.get_client_info_by_did.return_value = bruin_500_response
+        fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
+        fraud_monitor._bruin_repository.get_resolved_fraud_tickets.return_value = make_get_tickets_response()
+
+        await fraud_monitor._process_fraud(full_body, msg_uid)
+
+        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, body, msg_uid)
+
+    @pytest.mark.asyncio
     async def get_oldest_fraud_ticket__found_test(
             self, fraud_monitor, make_ticket, make_detail_item, make_ticket_note, make_ticket_details,
             make_detail_item_with_notes_and_ticket_info, make_rpc_response):
@@ -642,9 +672,11 @@ class TestFraudMonitor:
         assert result is True
 
     @pytest.mark.asyncio
-    async def get_contacts__client_info_rpc_request__has_not_2xx_status_test(self, fraud_monitor, bruin_500_response):
+    async def get_contacts__client_info_rpc_request__has_not_2xx_status_test(
+            self, fraud_monitor, make_contact_info, bruin_500_response):
         client_id = 12345
         service_number = 'VC1234567'
+        contacts = make_contact_info()
 
         fraud_monitor._bruin_repository.get_client_info.return_value = bruin_500_response
 
@@ -653,15 +685,16 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.get_client_info.assert_awaited_once_with(service_number)
         fraud_monitor._bruin_repository.get_site_details.assert_not_awaited()
         fraud_monitor._bruin_repository.get_contact_info.assert_not_called()
-        fraud_monitor._bruin_repository.get_contacts.assert_not_called()
-        assert result is None
+        assert fraud_monitor._bruin_repository.get_contacts.call_count == 1
+        assert result == contacts
 
     @pytest.mark.asyncio
     async def get_contacts__client_info_rpc_request_success__site_details_rpc_request_has_not_2xx_status_test(
-            self, fraud_monitor, make_get_client_info_200_response, bruin_500_response):
+            self, fraud_monitor, make_contact_info, make_get_client_info_200_response, bruin_500_response):
         site_id = 11111
         client_id = 12345
         service_number = 'VC1234567'
+        contacts = make_contact_info()
 
         fraud_monitor._bruin_repository.get_client_info.return_value = make_get_client_info_200_response(
             site_id=site_id)
@@ -672,8 +705,8 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.get_client_info.assert_awaited_once_with(service_number)
         fraud_monitor._bruin_repository.get_site_details.assert_awaited_once_with(client_id, site_id)
         fraud_monitor._bruin_repository.get_contact_info.assert_not_called()
-        fraud_monitor._bruin_repository.get_contacts.assert_not_called()
-        assert result is None
+        assert fraud_monitor._bruin_repository.get_contacts.call_count == 1
+        assert result == contacts
 
     @pytest.mark.asyncio
     async def get_contacts__client_info_rpc_request_success__site_details_rpc_request_success_test(
