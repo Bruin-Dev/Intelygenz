@@ -1,5 +1,6 @@
 import abc
 from datetime import datetime
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from delivery.tasks import get_data_tasks
 from igz.packages.server.api import QuartServer
@@ -8,14 +9,11 @@ from adapters.config import settings
 
 
 class ITasksServer(metaclass=abc.ABCMeta):
-
     def __init__(self, config, logger, use_cases) -> None:
-        from apscheduler.schedulers.background import BackgroundScheduler
-
         self.config = config
         self.logger = logger
         self.use_cases = use_cases
-        self.scheduler = BackgroundScheduler()
+        self.scheduler = AsyncIOScheduler()
         self.use_cases.wire(modules=[get_data_tasks])
         self._server = QuartServer(settings)
         self.initialize()

@@ -4,5 +4,5 @@ from usecases.containers import UseCases
 
 
 @inject
-def get_data(tickets_use_cases: TicketUseCase = Provide[UseCases.tickets_use_case]) -> None:
-    tickets_use_cases.get_data()
+async def get_data(tickets_use_cases: TicketUseCase = Provide[UseCases.tickets_use_case]) -> None:
+    await tickets_use_cases.get_data()

@@ -29,7 +29,7 @@ class TicketUseCase:
         days = (end_date - start_date).days
         return [start_date + timedelta(day) for day in range(days)]
 
-    def get_data(self) -> None:
+    async def get_data(self) -> None:
         """
         Main function to get data from bruin or database
         """
@@ -41,7 +41,7 @@ class TicketUseCase:
 
         for _date in self.date_range(start_date=start_date, end_date=today):
             update = self.should_update(today=today, _date=_date)
-            self.get_data_from_bruin(query_date=_date, update=update)
+            await self.get_data_from_bruin(query_date=_date, update=update)
 
         end_time = time.perf_counter()
         elapsed_time = round((end_time - start_time) / 60, 2)
@@ -64,7 +64,7 @@ class TicketUseCase:
 
         return update
 
-    def get_data_from_bruin(self, query_date: date, update: bool) -> None:
+    async def get_data_from_bruin(self, query_date: date, update: bool) -> None:
         """
         Get data from bruin
         :param query_date:
@@ -74,7 +74,7 @@ class TicketUseCase:
             query_start = query_date.strftime('%Y-%m-%dT00:00:00Z')
             query_end = query_date.strftime('%Y-%m-%dT23:59:59Z')
 
-            tickets = self.bruin_repository.request_tickets_by_date_range(start=query_start, end=query_end)
+            tickets = await self.bruin_repository.request_tickets_by_date_range(start=query_start, end=query_end)
 
             for ticket in tickets:
                 ticket_id = ticket['ticketID']
@@ -88,13 +88,13 @@ class TicketUseCase:
                     self.tickets_repository.save_ticket(ticket=ticket)
 
                 if update or not events_on_mongo:
-                    self.save_ticket_events(ticket_id)
+                    await self.save_ticket_events(ticket_id)
         except Exception as e:
             self.logger.error(e)
 
-    def save_ticket_events(self, ticket_id: int) -> None:
+    async def save_ticket_events(self, ticket_id: int) -> None:
         try:
-            events = self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
+            events = await self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
 
             if events:
                 self.tickets_repository.save_events(ticket_id=ticket_id, events=events)

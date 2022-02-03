@@ -1,10 +1,7 @@
 import sys
+import asyncio
 from dependency_injector.wiring import inject, Provide
 from containers import Application
-import urllib3
-import asyncio
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 @inject
