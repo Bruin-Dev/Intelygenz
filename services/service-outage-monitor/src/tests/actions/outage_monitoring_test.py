@@ -3018,7 +3018,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number)
         bruin_repository.get_ticket_details.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -3102,7 +3103,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number)
         bruin_repository.get_ticket_details.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -3200,7 +3202,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_not_awaited()
 
@@ -3308,7 +3311,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_not_called()
@@ -3486,7 +3490,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number_1)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -3664,7 +3669,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number_1)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -3839,7 +3845,8 @@ class TestServiceOutageMonitor:
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number_1)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -4025,7 +4032,8 @@ class TestServiceOutageMonitor:
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'dev'):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number_1)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -4220,7 +4228,8 @@ class TestServiceOutageMonitor:
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number_1)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
@@ -4418,7 +4427,8 @@ class TestServiceOutageMonitor:
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number_1)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(

@@ -23,33 +23,24 @@ class BruinRepository:
         request = {
             'request_id': uuid(),
             'body': {
-                'client_id': client_id,
                 'ticket_statuses': ticket_statuses,
                 'ticket_topic': ticket_topic,
                 'product_category': self._config.PRODUCT_CATEGORY,
             },
         }
 
+        if client_id:
+            request['body']['client_id'] = client_id
         if service_number:
             request['body']['service_number'] = service_number
 
         try:
-            if not service_number:
-                self._logger.info(
-                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'{ticket_topic} and belonging to client {client_id} from Bruin...'
-                )
-            else:
-                self._logger.info(
-                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin...'
-                )
+            self._logger.info(f'Getting all tickets with parameters of {request["body"]} from Bruin...')
 
             response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
         except Exception as e:
             err_msg = (
-                f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
-                f'with ticket topic {ticket_topic} and belonging to client {client_id} -> {e}'
+                f'An error occurred when requesting tickets from Bruin API with parameters of {request["body"]} -> {e}'
             )
             response = nats_error_response
         else:
@@ -57,32 +48,15 @@ class BruinRepository:
             response_status = response['status']
 
             if response_status in range(200, 300):
-                if not service_number:
-                    self._logger.info(
-                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
-                        f'{ticket_topic} and belonging to client {client_id} from Bruin!'
-                    )
-                else:
-                    self._logger.info(
-                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
-                        f'{ticket_topic}, service number {service_number} and belonging to client '
-                        f'{client_id} from Bruin!'
-                    )
+                self._logger.info(
+                    f'Got all tickets with parameters of {request["body"]} from Bruin!'
+                )
             else:
-                if not service_number:
-                    err_msg = (
-                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                        f'{ticket_topic} and belonging to client {client_id} in '
-                        f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
-                        f'Error {response_status} - {response_body}'
-                    )
-                else:
-                    err_msg = (
-                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                        f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
-                        f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
-                        f'Error {response_status} - {response_body}'
-                    )
+                err_msg = (
+                    f'Error while retrieving tickets with parameters of {request["body"]} in '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
 
         if err_msg:
             self._logger.error(err_msg)
@@ -586,7 +560,7 @@ class BruinRepository:
 
         return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
 
-    async def get_open_outage_tickets(self, client_id: int, *, service_number: str = None):
+    async def get_open_outage_tickets(self, *, client_id: int = None, service_number: str = None):
         ticket_statuses = ['New', 'InProgress', 'Draft']
 
         return await self.get_outage_tickets(client_id, ticket_statuses, service_number=service_number)

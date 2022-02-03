@@ -1866,7 +1866,7 @@ class TestBruinRepository:
         bruin_repository.get_outage_tickets = CoroutineMock()
 
         with uuid_mock:
-            await bruin_repository.get_open_outage_tickets(bruin_client_id)
+            await bruin_repository.get_open_outage_tickets(client_id=bruin_client_id)
 
         bruin_repository.get_outage_tickets.assert_awaited_once_with(
             bruin_client_id, ticket_statuses, service_number=None
@@ -1887,7 +1887,7 @@ class TestBruinRepository:
         bruin_repository.get_outage_tickets = CoroutineMock()
 
         with uuid_mock:
-            await bruin_repository.get_open_outage_tickets(bruin_client_id, service_number=service_number)
+            await bruin_repository.get_open_outage_tickets(client_id=bruin_client_id, service_number=service_number)
 
         bruin_repository.get_outage_tickets.assert_awaited_once_with(
             bruin_client_id, ticket_statuses, service_number=service_number

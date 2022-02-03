@@ -327,7 +327,7 @@ class OutageMonitor:
 
             client_id = edge['cached_info']['bruin_client_info']['client_id']
             outage_ticket_response = await self._bruin_repository.get_open_outage_tickets(
-                client_id, service_number=serial_number
+                client_id=client_id, service_number=serial_number
             )
             outage_ticket_response_body = outage_ticket_response['body']
             outage_ticket_response_status = outage_ticket_response['status']

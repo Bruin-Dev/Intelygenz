@@ -110,66 +110,64 @@ class Triage:
                 continue
 
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
-        open_tickets = []
+        open_tickets_details = []
 
         bruin_clients_ids: Set[int] = set(elem['bruin_client_info']['client_id'] for elem in self._customer_cache)
-        tasks = [
-            self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
-            for client_id in bruin_clients_ids
-        ]
-        await asyncio.gather(*tasks, return_exceptions=True)
-        return open_tickets
 
-    async def _get_open_tickets_with_details_by_client_id(self, client_id, open_tickets):
+        open_tickets_response = await self._bruin_repository.get_open_outage_tickets()
+        open_tickets_response_body = open_tickets_response['body']
+        open_tickets_response_status = open_tickets_response['status']
+
+        if open_tickets_response_status not in range(200, 300):
+            self._metrics_repository.increment_open_tickets_errors()
+            return []
+
+        filtered_ticket_list = [ticket for ticket in open_tickets_response_body
+                                if ticket["clientID"] in bruin_clients_ids]
+        self._logger.info("Getting all opened tickets details for each open ticket ...")
+        open_tickets_ids = (ticket['ticketID'] for ticket in filtered_ticket_list)
+
+        tasks = [
+            self._get_open_tickets_with_details_by_ticket_id(ticket_id, open_tickets_details)
+            for ticket_id in open_tickets_ids
+        ]
+
+        await asyncio.gather(*tasks, return_exceptions=True)
+        self._logger.info('Finished getting all opened ticket details!')
+
+        return open_tickets_details
+
+    async def _get_open_tickets_with_details_by_ticket_id(self, ticket_id, open_tickets_details):
         @retry(wait=wait_exponential(multiplier=self._config.TRIAGE_CONFIG['multiplier'],
                                      min=self._config.TRIAGE_CONFIG['min']),
                stop=stop_after_delay(self._config.TRIAGE_CONFIG['stop_delay']))
-        async def get_open_tickets_with_details_by_client_id():
+        async def get_open_tickets_with_details_by_ticket_id():
             async with self._semaphore:
-                result = []
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+                ticket_details_response_body = ticket_details_response['body']
+                ticket_details_response_status = ticket_details_response['status']
 
-                open_tickets_response = await self._bruin_repository.get_open_outage_tickets(client_id)
-                open_tickets_response_body = open_tickets_response['body']
-                open_tickets_response_status = open_tickets_response['status']
+                if ticket_details_response_status not in range(200, 300):
+                    return
 
-                if open_tickets_response_status not in range(200, 300):
-                    self._metrics_repository.increment_open_tickets_errors()
-                    raise Exception
+                ticket_details_list = ticket_details_response_body['ticketDetails']
+                if not ticket_details_list:
+                    self._logger.info(f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. "
+                                      f"Skipping...")
+                    return
 
-                open_tickets_ids = (ticket['ticketID'] for ticket in open_tickets_response_body)
+                self._logger.info(f'Got details for ticket {ticket_id}!')
 
-                self._logger.info(f'Getting all opened tickets for Bruin customer {client_id}...')
-                for ticket_id in open_tickets_ids:
-                    ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
-                    ticket_details_response_body = ticket_details_response['body']
-                    ticket_details_response_status = ticket_details_response['status']
-
-                    if ticket_details_response_status not in range(200, 300):
-                        continue
-
-                    ticket_details_list = ticket_details_response_body['ticketDetails']
-                    if not ticket_details_list:
-                        self._logger.info(f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. "
-                                          f"Skipping...")
-                        continue
-
-                    self._logger.info(f'Got details for ticket {ticket_id} of Bruin customer {client_id}!')
-
-                    result.append({
-                        'ticket_id': ticket_id,
-                        'ticket_details': ticket_details_list,
-                        'ticket_notes': ticket_details_response_body['ticketNotes'],
-                    })
-
-                self._logger.info(f'Finished getting all opened tickets for Bruin customer {client_id}!')
-                for ticket_item in result:
-                    open_tickets.append(ticket_item)
-
+                open_tickets_details.append({
+                    'ticket_id': ticket_id,
+                    'ticket_details': ticket_details_list,
+                    'ticket_notes': ticket_details_response_body['ticketNotes'],
+                })
         try:
-            await get_open_tickets_with_details_by_client_id()
+            await get_open_tickets_with_details_by_ticket_id()
         except Exception as e:
             self._logger.error(
-                f"An error occurred while trying to get open tickets with details for Bruin client {client_id} -> {e}"
+                f"An error occurred while trying to get tickets details for ticket_id {ticket_id} -> {e}"
             )
 
     def _filter_tickets_and_details_related_to_edges_under_monitoring(self, tickets):

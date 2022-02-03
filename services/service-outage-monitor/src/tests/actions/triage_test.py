@@ -580,9 +580,11 @@ class TestTriage:
 
     @pytest.mark.asyncio
     async def get_all_open_tickets_with_details_for_monitored_companies_test(self):
-        tickets_with_details_for_bruin_client_1 = [
-            {
-                'ticket_id': 12345,
+        ticket_1_id = 11111
+        ticket_2_id = 22222
+
+        tickets_with_details_for_bruin_client_1 = {
+                'ticket_id': ticket_1_id,
                 'ticket_details': [
                     {
                         "detailID": 2746937,
@@ -597,10 +599,9 @@ class TestTriage:
                     }
                 ],
             }
-        ]
-        tickets_with_details_for_bruin_client_2 = [
-            {
-                'ticket_id': 67890,
+
+        tickets_with_details_for_bruin_client_2 = {
+                'ticket_id': ticket_2_id,
                 'ticket_details': [
                     {
                         "detailID": 2746937,
@@ -615,8 +616,10 @@ class TestTriage:
                     }
                 ],
             }
-        ]
 
+        open_tickets_detail_return = [
+            tickets_with_details_for_bruin_client_1, tickets_with_details_for_bruin_client_2
+        ]
         bruin_client_1_id = 12345
         bruin_client_2_id = 67890
 
@@ -661,12 +664,25 @@ class TestTriage:
             },
         ]
 
+        ticket_ids = [{'ticketID': ticket_1_id, "clientID": bruin_client_1_id},
+                      {'ticketID': ticket_2_id, "clientID": 123},
+                      {'ticketID': ticket_2_id, "clientID": bruin_client_2_id}]
+
+        uuid_1 = uuid()
+        get_open_tickets_response = {
+            'request_id': uuid_1,
+            'body': ticket_ids,
+            'status': 200,
+        }
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
-        bruin_repository = Mock()
         velocloud_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
@@ -678,58 +694,62 @@ class TestTriage:
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository, ha_repository)
         triage._customer_cache = customer_cache
-        triage._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
-            tickets_with_details_for_bruin_client_1, tickets_with_details_for_bruin_client_2
-        ])
+        triage._get_open_tickets_with_details_by_ticket_id = CoroutineMock(side_effect=open_tickets_detail_return)
 
         await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
-        triage._get_open_tickets_with_details_by_client_id.assert_has_awaits([
-            call(bruin_client_1_id, []), call(bruin_client_2_id, [])
-        ], any_order=True)
+        bruin_repository.get_open_outage_tickets.assert_awaited_once()
+        triage._get_open_tickets_with_details_by_ticket_id.assert_has_awaits([
+            call(ticket_1_id, []),
+            call(ticket_2_id, [])
+            ], any_order=True)
 
     @pytest.mark.asyncio
     async def get_all_open_tickets_with_details_for_monitored_companies_with_some_requests_failing_test(self):
-        tickets_with_details_for_bruin_client_1 = [
-            {
-                'ticket_id': 12345,
-                'ticket_details': [
-                    {
-                        "detailID": 2746937,
-                        "detailValue": 'VC1234567890',
-                    },
-                ],
-                'ticket_notes': [
-                    {
-                        "noteId": 41894041,
-                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
-                        "createdDate": "2020-02-24T10:07:13.503-05:00",
-                    }
-                ],
-            }
-        ]
-        tickets_with_details_for_bruin_client_3 = [
-            {
-                'ticket_id': 67890,
-                'ticket_details': [
-                    {
-                        "detailID": 2746937,
-                        "detailValue": 'VC0987654321',
-                    },
-                ],
-                'ticket_notes': [
-                    {
-                        "noteId": 41894042,
-                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
-                        "createdDate": "2020-02-24T10:07:13.503-05:00",
-                    }
-                ],
-            }
-        ]
+        ticket_1_id = 11111
+        ticket_2_id = 22222
+        ticket_3_id = 33333
 
+        tickets_with_details_for_bruin_client_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": 2746937,
+                    "detailValue": 'VC1234567890',
+                },
+            ],
+            'ticket_notes': [
+                {
+                    "noteId": 41894041,
+                    "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                }
+            ],
+        }
+
+        tickets_with_details_for_bruin_client_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": 2746937,
+                    "detailValue": 'VC0987654321',
+                },
+            ],
+            'ticket_notes': [
+                {
+                    "noteId": 41894042,
+                    "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                }
+            ],
+        }
+
+        open_tickets_detail_return = [
+            tickets_with_details_for_bruin_client_1, Exception, tickets_with_details_for_bruin_client_2
+        ]
         bruin_client_1_id = 12345
         bruin_client_2_id = 67890
-        bruin_client_3_id = 11223
+        bruin_client_3_id = 99999
 
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC7654321'
@@ -772,12 +792,25 @@ class TestTriage:
             },
         ]
 
+        ticket_ids = [{'ticketID': ticket_1_id, "clientID": bruin_client_1_id},
+                      {'ticketID': ticket_3_id, "clientID": bruin_client_3_id},
+                      {'ticketID': ticket_2_id, "clientID": bruin_client_2_id}]
+
+        uuid_1 = uuid()
+        get_open_tickets_response = {
+            'request_id': uuid_1,
+            'body': ticket_ids,
+            'status': 200,
+        }
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
-        bruin_repository = Mock()
         velocloud_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
@@ -789,25 +822,142 @@ class TestTriage:
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository, ha_repository)
         triage._customer_cache = customer_cache
-        triage._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
-            tickets_with_details_for_bruin_client_1,
-            Exception,
-            tickets_with_details_for_bruin_client_3,
-        ])
+        triage._get_open_tickets_with_details_by_ticket_id = CoroutineMock(side_effect=open_tickets_detail_return)
 
         await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
-        triage._get_open_tickets_with_details_by_client_id.assert_has_awaits([
-            call(bruin_client_1_id, []), call(bruin_client_2_id, []), call(bruin_client_3_id, [])
+        bruin_repository.get_open_outage_tickets.assert_awaited_once()
+        triage._get_open_tickets_with_details_by_ticket_id.assert_has_awaits([
+            call(ticket_1_id, []),
+            call(ticket_3_id, []),
+            call(ticket_2_id, [])
         ], any_order=True)
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_test(self):
-        bruin_client_id = 12345
-
+    async def get_all_open_tickets_with_details_for_monitored_companies_failed_rpc_test(self):
         ticket_1_id = 11111
         ticket_2_id = 22222
-        ticket_ids = [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}]
+
+        tickets_with_details_for_bruin_client_1 = [
+            {
+                'ticket_id': ticket_1_id,
+                'ticket_details': [
+                    {
+                        "detailID": 2746937,
+                        "detailValue": 'VC1234567890',
+                    },
+                ],
+                'ticket_notes': [
+                    {
+                        "noteId": 41894041,
+                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
+                        "createdDate": "2020-02-24T10:07:13.503-05:00",
+                    }
+                ],
+            }
+        ]
+        tickets_with_details_for_bruin_client_2 = [
+            {
+                'ticket_id': ticket_2_id,
+                'ticket_details': [
+                    {
+                        "detailID": 2746937,
+                        "detailValue": 'VC0987654321',
+                    },
+                ],
+                'ticket_notes': [
+                    {
+                        "noteId": 41894042,
+                        "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
+                        "createdDate": "2020-02-24T10:07:13.503-05:00",
+                    }
+                ],
+            }
+        ]
+
+        open_tickets_detail_return = [
+            tickets_with_details_for_bruin_client_1, tickets_with_details_for_bruin_client_2
+        ]
+        bruin_client_1_id = 12345
+        bruin_client_2_id = 67890
+
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC7654321'
+        edge_3_serial = 'VC1111111'
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+
+        customer_cache = [
+            {
+                'edge': edge_1_full_id,
+                'last_contact': '2020-09-17T02:23:59',
+                'serial_number': edge_1_serial,
+                'ha_serial_number': None,
+                'bruin_client_info': {
+                    'client_id': bruin_client_1_id,
+                    'client_name': 'EVIL-CORP'
+                },
+            },
+            {
+                'edge': edge_2_full_id,
+                'last_contact': '2020-09-17T02:23:59',
+                'serial_number': edge_2_serial,
+                'ha_serial_number': None,
+                'bruin_client_info': {
+                    'client_id': bruin_client_2_id,
+                    'client_name': 'EVIL-CORP'
+                },
+            },
+            {
+                'edge': edge_3_full_id,
+                'last_contact': '2020-09-17T02:23:59',
+                'serial_number': edge_3_serial,
+                'ha_serial_number': None,
+                'bruin_client_info': {
+                    'client_id': bruin_client_2_id,
+                    'client_name': 'EVIL-CORP'
+                },
+            },
+        ]
+
+        uuid_1 = uuid()
+        get_open_tickets_response = {
+            'request_id': uuid_1,
+            'body': 'Failed',
+            'status': 400,
+        }
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        outage_repository = Mock()
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        ha_repository = Mock()
+
+        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
+                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
+                        triage_repository, metrics_repository, ha_repository)
+        triage._customer_cache = customer_cache
+        triage._get_open_tickets_with_details_by_ticket_id = CoroutineMock(return_value=open_tickets_detail_return)
+
+        await triage._get_all_open_tickets_with_details_for_monitored_companies()
+
+        bruin_repository.get_open_outage_tickets.assert_awaited_once()
+        triage._get_open_tickets_with_details_by_ticket_id.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def get_open_tickets_with_details_by_ticket_id_test(self):
+        ticket_1_id = 11111
 
         ticket_1_details_item_1 = {
             "detailID": 2746937,
@@ -831,46 +981,10 @@ class TestTriage:
             'ticketNotes': ticket_1_notes,
         }
 
-        ticket_2_details_item_1 = {
-            "detailID": 2746938,
-            "detailValue": 'VC1234567890',
-        }
-        ticket_2_details_items = [ticket_2_details_item_1]
-        ticket_2_notes = [
-            {
-                "noteId": 41894043,
-                "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894044,
-                "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        ticket_2_details = {
-            'ticketDetails': ticket_2_details_items,
-            'ticketNotes': ticket_2_notes,
-        }
-
-        uuid_1 = uuid()
-        get_open_tickets_response = {
-            'request_id': uuid_1,
-            'body': ticket_ids,
-            'status': 200,
-        }
-
         uuid_2 = uuid()
         get_ticket_1_details_response = {
             'request_id': uuid_2,
             'body': ticket_1_details,
-            'status': 200,
-        }
-
-        uuid_3 = uuid()
-        get_ticket_2_details_response = {
-            'request_id': uuid_3,
-            'body': ticket_2_details,
             'status': 200,
         }
 
@@ -887,44 +1001,33 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
-        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
-            get_ticket_1_details_response, get_ticket_2_details_response
-        ])
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository, ha_repository)
 
         result = []
-        await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
+        await triage._get_open_tickets_with_details_by_ticket_id(ticket_1_id, result)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id)
-        ])
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_1_id)
 
         expected = [
             {
                 'ticket_id': ticket_1_id,
                 'ticket_details': ticket_1_details_items,
                 'ticket_notes': ticket_1_notes,
-            },
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_details': ticket_2_details_items,
-                'ticket_notes': ticket_2_notes,
             }
         ]
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_with_open_tickets_request_not_having_2XX_status_test(self):
-        bruin_client_id = 12345
+    async def get_open_tickets_with_details_by_ticket_id_with_ticket_details_request_not_having_2XX_status_test(self):
+        ticket_1_id = 11111
 
-        uuid_ = uuid()
-        get_open_tickets_response = {
-            'request_id': uuid_,
+        uuid_2 = uuid()
+        get_ticket_1_details_response = {
+            'request_id': uuid_2,
             'body': 'Got internal error from Bruin',
             'status': 500,
         }
@@ -942,68 +1045,34 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository, ha_repository)
 
         result = []
-        await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
+        await triage._get_open_tickets_with_details_by_ticket_id(ticket_1_id, result)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_1_id)
+
         assert result == []
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_with_ticket_details_request_not_having_2XX_status_test(self):
-        bruin_client_id = 12345
+    async def get_open_tickets_with_details_by_ticket_id_with_ticket_details_not_having_details_actually_test(self):
+        ticket_1_id = 22222
 
-        ticket_1_id = 11111
-        ticket_2_id = 22222
-        ticket_ids = [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}]
-
-        ticket_2_details_item_1 = {
-            "detailID": 2746938,
-            "detailValue": 'VC1234567890',
-        }
-        ticket_2_details_items = [ticket_2_details_item_1]
-        ticket_2_notes = [
-            {
-                "noteId": 41894043,
-                "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            },
-            {
-                "noteId": 41894044,
-                "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
-                "createdDate": "2020-02-24T10:07:13.503-05:00",
-            }
-        ]
-        ticket_2_details = {
-            'ticketDetails': ticket_2_details_items,
-            'ticketNotes': ticket_2_notes,
-        }
-
-        uuid_1 = uuid()
-        get_open_tickets_response = {
-            'request_id': uuid_1,
-            'body': ticket_ids,
-            'status': 200,
-        }
-
-        uuid_2 = uuid()
-        get_ticket_1_details_response = {
-            'request_id': uuid_2,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+        ticket_1_details_items = []
+        ticket_1_notes = []
+        ticket_1_details = {
+            'ticketDetails': ticket_1_details_items,
+            'ticketNotes': ticket_1_notes,
         }
 
         uuid_3 = uuid()
-        get_ticket_2_details_response = {
+        get_ticket_1_details_response = {
             'request_id': uuid_3,
-            'body': ticket_2_details,
+            'body': ticket_1_details,
             'status': 200,
         }
 
@@ -1020,39 +1089,22 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
-        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
-            get_ticket_1_details_response, get_ticket_2_details_response
-        ])
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository, ha_repository)
 
         result = []
-        await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
+        await triage._get_open_tickets_with_details_by_ticket_id(ticket_1_id, result)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id)
-        ])
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_1_id)
 
-        expected = [
-            {
-                'ticket_id': ticket_2_id,
-                'ticket_details': ticket_2_details_items,
-                'ticket_notes': ticket_2_notes,
-            }
-        ]
-        assert result == expected
+        assert result == []
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_with_ticket_details_not_having_details_actually_test(self):
-        bruin_client_id = 12345
-
+    async def get_open_tickets_with_details_by_ticket_id_test(self):
         ticket_1_id = 11111
-        ticket_2_id = 22222
-        ticket_ids = [{'ticketID': ticket_1_id}, {'ticketID': ticket_2_id}]
 
         ticket_1_details_item_1 = {
             "detailID": 2746937,
@@ -1076,31 +1128,10 @@ class TestTriage:
             'ticketNotes': ticket_1_notes,
         }
 
-        ticket_2_details_items = []
-        ticket_2_notes = []
-        ticket_2_details = {
-            'ticketDetails': ticket_2_details_items,
-            'ticketNotes': ticket_2_notes,
-        }
-
-        uuid_1 = uuid()
-        get_open_tickets_response = {
-            'request_id': uuid_1,
-            'body': ticket_ids,
-            'status': 200,
-        }
-
         uuid_2 = uuid()
         get_ticket_1_details_response = {
             'request_id': uuid_2,
             'body': ticket_1_details,
-            'status': 200,
-        }
-
-        uuid_3 = uuid()
-        get_ticket_2_details_response = {
-            'request_id': uuid_3,
-            'body': ticket_2_details,
             'status': 200,
         }
 
@@ -1117,22 +1148,16 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
-        bruin_repository.get_ticket_details = CoroutineMock(side_effect=[
-            get_ticket_1_details_response, get_ticket_2_details_response
-        ])
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(event_bus, logger, scheduler, config, outage_repository,
                         customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                         triage_repository, metrics_repository, ha_repository)
 
         result = []
-        await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
+        await triage._get_open_tickets_with_details_by_ticket_id(ticket_1_id, result)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_1_id), call(ticket_2_id)
-        ])
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_1_id)
 
         expected = [
             {
@@ -1142,6 +1167,35 @@ class TestTriage:
             }
         ]
         assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_open_tickets_with_details_by_ticket_id_general_exception_test(self):
+        ticket_1_id = 11111
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        outage_repository = Mock()
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        ha_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(side_effect=Exception)
+
+        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
+                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
+                        triage_repository, metrics_repository, ha_repository)
+
+        result = []
+        await triage._get_open_tickets_with_details_by_ticket_id(ticket_1_id, result)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_1_id)
+        assert result == []
 
     def filter_tickets_and_details_related_to_edges_under_monitoring_test(self):
         edge_1_serial = 'VC1234567'
