@@ -1,3 +1,4 @@
+import asyncio
 import time
 from datetime import date, timedelta
 from typing import List
@@ -36,12 +37,13 @@ class TicketUseCase:
         """
         today = date.today()
         start_date = today - timedelta(days=self.config['days_to_retrieve'])
+        date_range = self.date_range(start_date=start_date, end_date=today)
 
         self.logger.info(f'Getting tickets data between {start_date} and {today}')
         start_time = time.perf_counter()
 
-        for _date in self.date_range(start_date=start_date, end_date=today):
-            await self.get_data_from_bruin(_date=_date, today=today)
+        tasks = [self.get_data_from_bruin(_date=_date, today=today) for _date in date_range]
+        await asyncio.gather(*tasks)
 
         end_time = time.perf_counter()
         elapsed_time = round((end_time - start_time) / 60, 2)
