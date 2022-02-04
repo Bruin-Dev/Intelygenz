@@ -49,7 +49,7 @@ MONITOR_CONFIG = {
     'autoresolve': {
         'semaphore': 3,
         'metrics_lookup_interval_minutes': 30,
-        'last_affecting_trouble_seconds': 75 * 60,
+        'last_affecting_trouble_seconds': 90 * 60,
         'max_autoresolves': 3,
         'thresholds': {
             AffectingTroubles.BOUNCING: 4,

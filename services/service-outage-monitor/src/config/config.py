@@ -69,7 +69,7 @@ MONITOR_CONFIG = {
     ],
     'forward_link_outage_seconds': 60 * 60,
     'autoresolve_ticket_creation_seconds': 75 * 60,
-    'autoresolve_last_outage_seconds': 75 * 60,
+    'autoresolve_last_outage_seconds': 90 * 60,
     'last_digi_reboot_seconds': 30 * 60,
     'semaphore': 5,
     'severity_by_outage_type': {
