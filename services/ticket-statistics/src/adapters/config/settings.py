@@ -19,10 +19,6 @@ LOG_CONFIG = {
     },
 }
 
-METRICS_SERVER_CONFIG = {
-    'port': 9090
-}
-
 
 def get_config():
     APP_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')  # refers to application_top
@@ -48,7 +44,6 @@ def get_config():
             'version': os.getenv('SERVER_VERSION', '1.0.0'),
             'name': os.getenv('SERVER_NAME', 'ticket-statistics')
         },
-        'metrics_server': METRICS_SERVER_CONFIG
     }
 
 

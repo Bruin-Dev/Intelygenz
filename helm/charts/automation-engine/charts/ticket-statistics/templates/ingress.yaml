@@ -6,7 +6,11 @@ metadata:
   name: {{ include "ticket-statistics.fullname" . }}-ingress
 spec:
   rules:
-    - host: {{ .Values.ticket-collector.config.ticket_statistics_host }}
+    {{ if eq .Values.global.environment "production" }}
+    - host: ticket-statistics.mettel-automation.net
+    {{ else }}
+    - host: {{ .Values.global.environment }}-ticket-statistics.mettel-automation.net
+    {{ end }}
       http:
         paths:
         - backend:

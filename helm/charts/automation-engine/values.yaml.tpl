@@ -1013,8 +1013,6 @@ ticket-collector:
     bruin_client_id: ${BRUIN_CLIENT_ID}
     # -- Client Secret credentials for Bruin API
     bruin_client_secret: ${BRUIN_CLIENT_SECRET}
-    # -- Host for the ticket-statistics service
-    ticket_statistics_host: ${TICKET_STATISTICS_HOST}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1059,17 +1057,6 @@ ticket-statistics:
     server_name: ticket-statistics
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-statistics
     pullPolicy: Always

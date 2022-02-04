@@ -523,7 +523,6 @@ services:
       - services/ticket-collector/src/config/env
     depends_on:
       - mongo
-      - ticket-statistics
     volumes:
     - ./services/ticket-collector:/service/app
     ports:
@@ -546,7 +545,6 @@ services:
     - ./services/ticket-statistics:/service/app
     ports:
       - 3000:3000
-      - 9120:9090
 
   tnba-feedback:
     build:

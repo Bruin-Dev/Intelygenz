@@ -57,9 +57,3 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['service-outage-monitor-triage:9090']
-
- -  job_name: 'ticket-statistics'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['ticket-statistics:9090']

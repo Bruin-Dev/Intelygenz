@@ -1,5 +1,4 @@
 import asyncio
-import httpx
 import time
 from datetime import date, timedelta
 from typing import List
@@ -37,7 +36,6 @@ class TicketUseCase:
         Main function to get data from bruin or database
         """
         today = date.today()
-        yesterday = today - timedelta(days=1)
         start_date = today - timedelta(days=self.config['days_to_retrieve'])
         date_range = self.date_range(start_date=start_date, end_date=today)
 
@@ -50,9 +48,6 @@ class TicketUseCase:
         end_time = time.perf_counter()
         elapsed_time = round((end_time - start_time) / 60, 2)
         self.logger.info(f'Finished getting tickets between {start_date} and {today} in {elapsed_time}m')
-
-        params = {'start': yesterday, 'end': today, 'save': 1}
-        httpx.get(f'http://{self.config["ticket_statistics_host"]}/api/statistics', params=params)
 
     def should_update(self, _date: date, today: date) -> bool:
         """

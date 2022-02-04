@@ -24,7 +24,6 @@ def get_blueprint(statistics_use_case: StatisticsUseCase = Provide[UseCases.stat
         """Get statistics data between dates"""
         start = request.args.get('start')
         end = request.args.get('end')
-        save = bool(int(request.args.get('save', False)))
 
         if not start or not end:
             raise ProjectException('MISSING_DATES')
@@ -35,7 +34,7 @@ def get_blueprint(statistics_use_case: StatisticsUseCase = Provide[UseCases.stat
         except ValueError:
             raise ProjectException('INVALID_DATES')
 
-        statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date, save=save)
+        statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
 
         return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics)
 

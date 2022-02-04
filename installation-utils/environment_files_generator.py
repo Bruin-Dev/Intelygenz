@@ -512,8 +512,7 @@ env_dict = {
         f'INTERVAL_TASKS_RUN={INTERVAL_TASKS_RUN}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}'
-        f'TICKET_STATISTICS_HOST={TICKET_STATS_SERVER_NAME}:{TICKET_STATS_SERVER_PORT}',
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     os.path.join('services', 'ticket-statistics', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'

@@ -3,20 +3,18 @@ import time
 from datetime import datetime
 
 from adapters.repositories.tickets.repo import TicketsRepository
-from adapters.repositories.metrics.repo import MetricsRepository
 
 utc = pytz.UTC
 
 
 class StatisticsUseCase:
-    def __init__(self, logger, tickets_repository: TicketsRepository, metrics_repository: MetricsRepository):
+    def __init__(self, logger, tickets_repository: TicketsRepository):
         """
         Creation of ticket use case object
         :param logger:
         :param tickets_repository:
         """
         self.tickets_repository = tickets_repository
-        self.metrics_repository = metrics_repository
         self.logger = logger
 
     @staticmethod
@@ -157,7 +155,7 @@ class StatisticsUseCase:
     def calculate_ipa_headcount_equivalent(no_touch_resolution, days_time_frame):
         return (no_touch_resolution / days_time_frame) / 34
 
-    def calculate_statistics(self, start: datetime, end: datetime, save: bool):
+    def calculate_statistics(self, start: datetime, end: datetime):
         self.logger.info(f'Calculating statistics between {start} and {end}')
         start_time = time.perf_counter()
 
@@ -213,7 +211,7 @@ class StatisticsUseCase:
         elapsed_time = round(end_time - start_time, 2)
         self.logger.info(f'Finished calculating statistics between {start} and {end} in {elapsed_time}s')
 
-        statistics = self.metrics_repository.create_statistics_object(
+        return self.create_statistics_object(
             tasks_created=tasks_created,
             tasks_reopened=tasks_reopened,
             no_touch_resolution=no_touch_resolution,
@@ -230,8 +228,27 @@ class StatisticsUseCase:
             ipa_headcount_equivalent=ipa_headcount_equivalent,
         )
 
-        if save:
-            self.metrics_repository.save_statistics(statistics)
-            self.logger.info(f'Saved statistics between {start} and {end} in the metrics server')
-
-        return statistics
+    @staticmethod
+    def create_statistics_object(
+            tasks_created=0, tasks_reopened=0, no_touch_resolution=0, ai_resolved_tasks=0, auto_resolved_tasks=0,
+            devices_rebooted=0, devices_monitoring=0, hnoc_work_queue_reduced=0, ai_forwarded_tasks=0,
+            dispatch_reminders=0, dispatch_monitored=0, average_time_to_resolve=0, average_time_to_document=0,
+            average_time_to_acknowledge=0, ipa_headcount_equivalent=0, quarantine_time=3):
+        return {
+            'ai_forwarded_tasks': ai_forwarded_tasks,
+            'tasks_created': tasks_created,
+            'tasks_reopened': tasks_reopened,
+            'no_touch_resolution': no_touch_resolution,
+            'ai_resolved_tasks': ai_resolved_tasks,
+            'auto_resolved_tasks': auto_resolved_tasks,
+            'devices_rebooted': devices_rebooted,
+            'devices_monitoring': devices_monitoring,
+            'hnoc_work_queue_reduced': hnoc_work_queue_reduced,
+            'dispatch_reminders': dispatch_reminders,
+            'dispatch_monitored': dispatch_monitored,
+            'average_time_to_resolve': average_time_to_resolve,
+            'average_time_to_document': average_time_to_document,
+            'average_time_to_acknowledge': average_time_to_acknowledge,
+            'ipa_headcount_equivalent': ipa_headcount_equivalent,
+            'quarantine_time': quarantine_time,
+        }
