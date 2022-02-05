@@ -153,6 +153,7 @@ kubeprometheusstack:
     plugins:
       - grafana-piechart-panel
       - grafana-polystat-panel
+      - marcusolsson-json-datasource
 
     sidecar:
       dashboards:
