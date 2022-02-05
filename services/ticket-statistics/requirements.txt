@@ -7,7 +7,5 @@ python-dotenv==0.17.1
 requests==2.25.1
 Flask==1.1.2
 Flask-Log-Request-ID==0.10.1
-simplejson==3.17.2
 flask-smorest==0.25.0
-simplejson==3.17.2
 Flask-Cors==3.0.8
