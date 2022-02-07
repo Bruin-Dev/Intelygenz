@@ -109,22 +109,6 @@ class TicketsRepository(object):
 
         return ticket
 
-    def get_ticket_events(self, ticket_id: int, ticket: Optional[Dict]) -> Optional[List]:
-        """
-        Get ticket events.
-        :param ticket_id:
-        :param ticket:
-        :return Optional[Dict]:
-        """
-        events = ticket.get('events') if ticket else None
-
-        if events:
-            self.logger.info(f'Events for ticket {ticket_id} found on the DB')
-        else:
-            self.logger.info(f'Events for ticket {ticket_id} not found on the DB')
-
-        return events
-
     def create_ticket_object(self, ticket) -> Dict:
         """
         Return an standard ticket object to save it on mongodb

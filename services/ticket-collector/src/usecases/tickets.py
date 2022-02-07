@@ -81,7 +81,6 @@ class TicketUseCase:
         for ticket in tickets:
             ticket_id = ticket['ticketID']
             ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
-            events_on_mongo = self.tickets_repository.get_ticket_events(ticket_id=ticket_id, ticket=ticket_on_mongo)
 
             if update:
                 self.tickets_repository.delete_ticket(ticket_id=ticket_id)
@@ -89,8 +88,7 @@ class TicketUseCase:
             if update or not ticket_on_mongo:
                 self.tickets_repository.save_ticket(ticket=ticket)
 
-            if update or not events_on_mongo:
-                await self.save_ticket_events(ticket_id)
+            await self.save_ticket_events(ticket_id)
 
             self.logger.info(f'Finished getting tickets from {_date}')
 
