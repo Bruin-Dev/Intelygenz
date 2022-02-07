@@ -129,6 +129,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "repair-tickets-kre-bridge",
                 },
                 {
+                    "query": f"repair-tickets-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[repair-tickets-monitor] - logs",
+                    "repository": "repair-tickets-monitor",
+                },
+                {
                     "query": f"NGINX AND <BUILD_NUMBER> AND {ENVIRONMENT_NAME}",
                     "search_name": f"[nginx] - logs",
                     "repository": "dispatch-portal-frontend/nginx",
