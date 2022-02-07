@@ -39,7 +39,7 @@ class TicketUseCase:
         start_date = today - timedelta(days=self.config['days_to_retrieve'])
         date_range = self.date_range(start_date=start_date, end_date=today)
 
-        self.logger.info(f'Getting tickets data between {start_date} and {today}')
+        self.logger.info(f'Getting tickets between {start_date} and {today}')
         start_time = time.perf_counter()
 
         tasks = [self.get_data_from_bruin(_date=_date, today=today) for _date in date_range]
@@ -91,6 +91,8 @@ class TicketUseCase:
 
             if update or not events_on_mongo:
                 await self.save_ticket_events(ticket_id)
+
+            self.logger.info(f'Finished getting tickets from {_date}')
 
     async def save_ticket_events(self, ticket_id: int) -> None:
         events = await self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
