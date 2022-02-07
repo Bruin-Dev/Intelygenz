@@ -14,6 +14,7 @@ class IHTTPServer(metaclass=abc.ABCMeta):
         self.use_cases = use_cases
         self.use_cases.wire(modules=[statistics, health])
         self.client = Flask(self.config['server']['name'])
+        self.client.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
         self.initialize()
 
     @abc.abstractmethod
