@@ -46,6 +46,7 @@ def get_config():
         },
         'redis': {
             'host': os.environ['REDIS_HOSTNAME'],
+            'ttl': 1 * 60 * 60,
         }
     }
 

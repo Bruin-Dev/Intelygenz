@@ -541,6 +541,7 @@ services:
       - services/ticket-statistics/src/config/env
     depends_on:
       - mongo
+      - redis
     volumes:
     - ./services/ticket-statistics:/service/app
     ports:

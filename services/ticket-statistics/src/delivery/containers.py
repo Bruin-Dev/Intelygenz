@@ -11,5 +11,6 @@ class Delivery(containers.DeclarativeContainer):
         FlaskServer,
         config=adapters.config,
         logger=adapters.logger,
+        adapters=adapters,
         use_cases=use_cases
     )

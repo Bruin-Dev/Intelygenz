@@ -1,4 +1,5 @@
 import abc
+from flask import Flask
 
 from delivery.http.blueprints import health
 from delivery.http.blueprints import statistics
@@ -6,15 +7,18 @@ from delivery.http.blueprints import statistics
 
 class IHTTPServer(metaclass=abc.ABCMeta):
 
-    def __init__(self, config, logger, use_cases) -> None:
-        from flask import Flask
-
+    def __init__(self, config, logger, adapters, use_cases) -> None:
         self.config = config
         self.logger = logger
+        self.adapters = adapters
         self.use_cases = use_cases
-        self.use_cases.wire(modules=[statistics, health])
+
+        self.adapters.wire(modules=[statistics])
+        self.use_cases.wire(modules=[statistics])
+
         self.client = Flask(self.config['server']['name'])
         self.client.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
         self.initialize()
 
     @abc.abstractmethod
