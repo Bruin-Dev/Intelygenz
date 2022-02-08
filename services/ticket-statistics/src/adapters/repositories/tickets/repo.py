@@ -29,11 +29,11 @@ class TicketsRepository(object):
         :return Dict:
         """
 
-        tickets = self.collection.find({"date": {'$lt': end, '$gte': start}, 'status': status})
+        tickets = self.collection.find({'date': {'$gte': start, '$lte': end}, 'status': status})
 
         if tickets.count() == 0:
-            self.logger.info(f'No tickets found between {end} and {start} on the DB')
+            self.logger.info(f'No tickets found between {start} and {end} on the DB')
         else:
-            self.logger.info(f'Found {tickets.count()} tickets between {end} and {start} on the DB')
+            self.logger.info(f'Found {tickets.count()} tickets between {start} and {end} on the DB')
 
         return tickets
