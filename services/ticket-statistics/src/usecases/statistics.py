@@ -49,22 +49,6 @@ class StatisticsUseCase:
         return 0
 
     @staticmethod
-    def check_dispatch_reminders(event) -> int:
-        if event['Notes'] is not None and \
-                '#*MetTel\'s IPA*#' in event['Notes'] and \
-                'prior reminder sent to' in event['Notes']:
-            return 1
-        return 0
-
-    @staticmethod
-    def check_dispatch_monitored(event) -> int:
-        if event['Notes'] is not None and \
-                '#*MetTel\'s IPA*#' in event['Notes'] and \
-                'Dispatch Management - Dispatch Requested' in event['Notes']:
-            return 1
-        return 0
-
-    @staticmethod
     def check_auto_resolved_task(event) -> bool:
         if event['Notes'] is not None and '#*MetTel\'s IPA*#\nAuto-resolving detail for serial' in event['Notes']:
             return True
@@ -167,8 +151,6 @@ class StatisticsUseCase:
         devices_rebooted = 0
         devices_monitoring = 0
         ai_forwarded_tasks = 0
-        dispatch_reminders = 0
-        dispatch_monitored = 0
         tasks_resolved_times = []
         tasks_average_times_to_acknowledge = []
 
@@ -189,8 +171,6 @@ class StatisticsUseCase:
                 auto_resolved_tasks += self.check_auto_resolved_task(event=event)
                 ai_resolved_tasks += self.check_ai_resolved_task(event=event)
                 ai_forwarded_tasks += self.check_ai_forwarded(event=event)
-                dispatch_reminders += self.check_dispatch_reminders(event=event)
-                dispatch_monitored += self.check_dispatch_monitored(event=event)
 
                 if average_time_to_acknowledge is False:
                     tasks_average_times_to_acknowledge.append(
@@ -221,8 +201,6 @@ class StatisticsUseCase:
             devices_rebooted=devices_rebooted,
             hnoc_work_queue_reduced=hnoc_work_queue_reduced,
             ai_forwarded_tasks=ai_forwarded_tasks,
-            dispatch_monitored=dispatch_monitored,
-            dispatch_reminders=dispatch_reminders,
             average_time_to_resolve=average_time_to_resolve,
             average_time_to_acknowledge=average_time_to_acknowledge_calculated,
             ipa_headcount_equivalent=ipa_headcount_equivalent,
@@ -232,8 +210,8 @@ class StatisticsUseCase:
     def create_statistics_object(
             tasks_created=0, tasks_reopened=0, no_touch_resolution=0, ai_resolved_tasks=0, auto_resolved_tasks=0,
             devices_rebooted=0, devices_monitoring=0, hnoc_work_queue_reduced=0, ai_forwarded_tasks=0,
-            dispatch_reminders=0, dispatch_monitored=0, average_time_to_resolve=0, average_time_to_document=0,
-            average_time_to_acknowledge=0, ipa_headcount_equivalent=0, quarantine_time=3):
+            average_time_to_resolve=0, average_time_to_document=0, average_time_to_acknowledge=0,
+            ipa_headcount_equivalent=0, quarantine_time=3):
         return {
             'ai_forwarded_tasks': ai_forwarded_tasks,
             'tasks_created': tasks_created,
@@ -244,8 +222,6 @@ class StatisticsUseCase:
             'devices_rebooted': devices_rebooted,
             'devices_monitoring': devices_monitoring,
             'hnoc_work_queue_reduced': hnoc_work_queue_reduced,
-            'dispatch_reminders': dispatch_reminders,
-            'dispatch_monitored': dispatch_monitored,
             'average_time_to_resolve': average_time_to_resolve,
             'average_time_to_document': average_time_to_document,
             'average_time_to_acknowledge': average_time_to_acknowledge,
