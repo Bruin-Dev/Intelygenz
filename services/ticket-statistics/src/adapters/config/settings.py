@@ -42,8 +42,11 @@ def get_config():
             'port': os.getenv('SERVER_PORT', 8000),
             'root_path': os.getenv('SERVER_ROOT_PATH', '/api'),
             'version': os.getenv('SERVER_VERSION', '1.0.0'),
-            'name': os.getenv('SERVER_NAME', 'ticket-statistics')
+            'name': os.getenv('SERVER_NAME', 'ticket-statistics'),
         },
+        'redis': {
+            'host': os.environ['REDIS_HOSTNAME'],
+        }
     }
 
 

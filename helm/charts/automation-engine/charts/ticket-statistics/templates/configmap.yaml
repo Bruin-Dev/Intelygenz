@@ -17,3 +17,4 @@ data:
   SERVER_ROOT_PATH: {{ .Values.config.server_root_path | quote }}
   SERVER_VERSION: {{ .Values.config.server_version | quote }}
   SERVER_NAME: {{ .Values.config.server_name | quote }}
+  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}

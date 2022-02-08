@@ -526,7 +526,8 @@ env_dict = {
         f'SERVER_VERSION={TICKET_STATS_SERVER_VERSION}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
-        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('services', 'links-metrics-collector', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
