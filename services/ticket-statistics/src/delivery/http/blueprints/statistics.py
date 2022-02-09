@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 from dependency_injector.wiring import inject, Provide
 
@@ -24,6 +25,7 @@ def get_blueprint(
     name = 'statistics'
 
     blueprint = Blueprint(name, __name__, template_folder='blueprints')
+    lock = threading.Lock()
 
     @blueprint.route(endpoint, methods=['GET'], strict_slashes=False)
     def get_statistics() -> Response:
@@ -40,14 +42,15 @@ def get_blueprint(
         except ValueError:
             raise ProjectException('INVALID_DATES')
 
-        statistics = redis.get(start, end)
-        from_cache = bool(statistics)
+        with lock:
+            statistics = redis.get(start, end)
+            from_cache = bool(statistics)
 
-        if statistics:
-            logger.info(f'Found statistics between {start} and {end} on Redis, skipping calculation')
-        else:
-            statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
-            redis.set(statistics, start, end)
+            if statistics:
+                logger.info(f'Found statistics between {start} and {end} on Redis, skipping calculation')
+            else:
+                statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
+                redis.set(statistics, start, end)
 
         metadata = {'from_cache': from_cache}
         return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics, metadata=metadata)
