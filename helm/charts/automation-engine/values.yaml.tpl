@@ -157,9 +157,9 @@ bruin-bridge:
     # -- Base URL for Bruin API
     bruin_base_url: ${BRUIN_BRIDGE__BRUIN_BASE_URL}
     # -- IP of Bruin DEV Login URL
-    bruin_login_url_ip: ${BRUIN_BRIDGE__BRUIN_LOGIN_URL_IP}
+    bruin_login_url_ip: "${BRUIN_BRIDGE__BRUIN_LOGIN_URL_IP}"
     # -- IP of Bruin DEV Base URL
-    bruin_base_url_ip: ${BRUIN_BRIDGE__BRUIN_BASE_URL_IP}
+    bruin_base_url_ip: "${BRUIN_BRIDGE__BRUIN_BASE_URL_IP}"
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -242,9 +242,9 @@ digi-bridge:
     # -- Record name for Digi Production Environment
     digi_api_dns_record_name: ${DIGI_BRIDGE__DIGI_REBOOT_API_DNS_RECORD_NAME}
     # -- IP for Digi Test Environment
-    digi_api_test_ip: ${DIGI_BRIDGE__DIGI_REBOOT_API_TEST_IP}
+    digi_api_test_ip: "${DIGI_BRIDGE__DIGI_REBOOT_API_TEST_IP}"
     # -- Record name for Digi Test Environment
-    digi_api_test_dns_record_name: ${DIGI_BRIDGE__DIGI_REBOOT_API_TEST_DNS_RECORD_NAME}
+    digi_api_test_dns_record_name: "${DIGI_BRIDGE__DIGI_REBOOT_API_TEST_DNS_RECORD_NAME}"
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
     pullPolicy: Always

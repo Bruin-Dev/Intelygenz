@@ -65,10 +65,10 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- if eq .Values.global.current_environment "dev" }}
       hostAliases:
-        - ip: {{ .Values.config.bruin_login_url_ip }}
+        - ip: {{ .Values.config.bruin_login_url_ip | quote }}
           hostnames:
             - {{ .Values.config.bruin_login_url | replace "https://" "" }}
-        - ip: {{ .Values.config.bruin_base_url_ip }}
+        - ip: {{ .Values.config.bruin_base_url_ip | quote }}
           hostnames:
             - {{ .Values.config.bruin_base_url | replace "https://" "" }}
       {{- end }}
