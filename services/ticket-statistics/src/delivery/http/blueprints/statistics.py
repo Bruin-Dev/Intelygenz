@@ -1,12 +1,18 @@
+from datetime import datetime
 from dependency_injector.wiring import inject, Provide
-from usecases.statistics import StatisticsUseCase
 
 from usecases.containers import UseCases
-from datetime import datetime
+from usecases.statistics import StatisticsUseCase
+from adapters.containers import Adapters
+from adapters.db.redis import Redis
 
 
 @inject
-def get_blueprint(statistics_use_case: StatisticsUseCase = Provide[UseCases.statistics_use_case]):
+def get_blueprint(
+        logger=Provide[Adapters.logger],
+        redis: Redis = Provide[Adapters.redis],
+        statistics_use_case: StatisticsUseCase = Provide[UseCases.statistics_use_case],
+):
     from flask import Response
     from flask_smorest import Blueprint
     from delivery.http.handlers import response_handler
@@ -34,9 +40,17 @@ def get_blueprint(statistics_use_case: StatisticsUseCase = Provide[UseCases.stat
         except ValueError:
             raise ProjectException('INVALID_DATES')
 
-        statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
+        statistics = redis.get(start, end)
+        from_cache = bool(statistics)
 
-        return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics)
+        if statistics:
+            logger.info(f'Found statistics between {start} and {end} on Redis, skipping calculation')
+        else:
+            statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
+            redis.set(statistics, start, end)
+
+        metadata = {'from_cache': from_cache}
+        return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics, metadata=metadata)
 
     def to_date(date_string):
         return datetime.strptime(date_string, '%Y-%m-%d')
