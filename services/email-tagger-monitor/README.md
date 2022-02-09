@@ -1,16 +1,43 @@
 # Email Tagger Monitor
-  * [Description](#description)
-  * [Work Flow](#work-flow)
-  * [Behaviour in dev and in pro](#behaviour-in-development-and-in-production)
+  * [Architecture](#architecture)
+  * [Service general description](#service-general-description)
+  * [Monitoring emails](#monitoring-emails)
+  * [Sending feedback to KRE](#sending-feedback-to-kre)
   * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
 
-# Description
-# Work Flow
-# Behaviour in dev and in pro
+# Architecture
+![RTA diagram](../../docs/img/RTA.jpg)
+
+# Service general description
+The goals of this services are:
+1. Receive webhooks about new emails from Bruin
+2. Receive webhooks about new tickets from Bruin
+3. Enrich tickets with KRE pridictions for new emails
+4. Report metrics to KRE
+
+## Process: Quart API
+ This process expose these POST endpoints to receive webhook from Bruin
+
+### `/email`
+Listen Bruin webhooks about new emails and save the email in Redis with the pattern `email_{email_id}`
+
+### `/ticket`
+Listen Bruin webhooks about new tickets and save the ticket in Redis with the pattern `ticket_{email_id}_{ticket_id}`
+
+## Process: New email monitor
+Span Redis for new emails looking for the keys that `email_*` that were saved by the `/email` API endpoint. If there emails to process, ask for prediction to [email-tagger-kre-bridge](../email-tagger-kre-bridge/README.md).
+
+Then the process rename the tag `email_{email_id}` to `archived_email_*`. 
+Finally the process save a new tag with the patern `tag_email_{email_id}`. This tags will be listen by [repait-tickets-monitor -> repair-tickets-monitor](../repair_tickets_monitor/src/application/actions/repair_tickets_monitor.py) that will try to create or update bruin tickets based on this information.
+
+## Process: New ticket monitor
+Span Redis for new tickets lokking for the keys that match `ticket_*.`. Then check if the ticket is valid and send the valid tickets to [email-tagger-kre-bridge](../email-tagger-kre-bridge/README.md).
+
+
 # Capabilities used
 - [Bruin bridge](../bruin-bridge/README.md)
-- [T7 bridge](../email-tagger-kre-bridge/README.md)
+- [email-tagger-kre-bridge](../email-tagger-kre-bridge/README.md)
 - [Notifier](../notifier/README.md)
 
 # Running in docker-compose
@@ -18,63 +45,8 @@
 `docker-compose up --build bruin-bridge email-tagger-kre-bridge notifier`
 `docker-compose up --build email-tagger-monitor`
 
-# Running with Bruin mock and Konstellation local 
+## Bruin-mock in local
+TODO: Complete in the another MR
 
-You need a `bruin-mock-local` module and a file `docker-compose.local.yml` like this:
-
-```
-version: '3.6'
-services:
-
-  bruin-mock-local:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: bruin-mock-local/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-    env_file:
-      - bruin-mock-local/src/config/env
-    ports:
-      - 8066:8066
-```
-
-And you should edit `BRUIN_BASE_URL=http://bruin-mock-local:8066/` on `bruin-bridge/src/config/env` 
-
-Find your local ip and edit and uncomment this code `docker-compose.yml`:
-```json
-  email-tagger-kre-bridge:
-    ....
-    ....
-    # NOTE: Extra hosts is needed only for local development with a KRE local
-    #       Change to your host IP
-    extra_hosts:
-      - "host.docker.internal:192.168.1.134"
-```
-
-you should edit `grpc_secure_mode` to `False` on `email-tagger-kre-bridge/src/config/config.py`
-```json
-KRE_CONFIG = {
-    'base_url': os.environ['KRE_BASE_URL'],
-    # NOTE: Set to False for local development or manual tests
-    'grpc_secure_mode': True
-}
-```
-
-edit `KRE_BASE_URL=host.docker.internal:9000` en `email-tagger-kre-bridge/src/config/env`
-
-the `REQUEST_SIGNATURE_SECRET_KEY=secret` should match with `email-tagger-monitor/scripts/local_notify_ticket.sh` secret field.
-
-
-open a portforward on KST entrypoint pod to port 9000 and address 0.0.0.0 
-
-```
-docker-compose -f docker-compose.yml -f docker-compose.local.yml up --build bruin-bridge email-tagger-kre-bridge bruin-mock-local
-```
-```
-docker-compose up --build nats-server redis redis-email-tagger
-```
-```
-docker-compose up --build email-tagger-monitor
-```
+## KRE in local
+TODO: Complete in the another MR
