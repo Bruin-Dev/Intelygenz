@@ -13,6 +13,9 @@ helm-branches:
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
     HELM_CHART_RELEASE_NAME: "automation-engine"
     HELM_CHART_DIR: "helm/charts/automation-engine"
+    PRO__BRUIN_BRIDGE__CLIENT_ID: $PRO__BRUIN_BRIDGE__CLIENT_ID
+    PRO__BRUIN_BRIDGE__CLIENT_ID : $PRO__BRUIN_BRIDGE__CLIENT_SECRET
+
   before_script:  
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -42,6 +45,9 @@ helm-master:
     HELM_CHART_REPOSITORIES: "stable https://charts.helm.sh/stable, nats https://nats-io.github.io/k8s/helm/charts/"
     HELM_CHART_RELEASE_NAME: "automation-engine"
     HELM_CHART_DIR: "helm/charts/automation-engine"
+    DEV__BRUIN_BRIDGE__CLIENT_ID: $DEV__BRUIN_BRIDGE__CLIENT_ID
+    DEV__BRUIN_BRIDGE__CLIENT_ID : $DEV__BRUIN_BRIDGE__CLIENT_SECRET
+
   before_script:   
     # DECLARE NECESSARY ENVIRONMENT VARIABLES
     - export ENVIRONMENT_SLUG=production
