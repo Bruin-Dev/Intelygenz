@@ -1188,9 +1188,9 @@ ticket-collector:
     # -- Indicate mongo database to use
     mongodb_database: ${TICKET_COLLECTOR_MONGO_DB_NAME}
     # -- Client ID credentials for Bruin API
-    bruin_client_id: ${BRUIN_CLIENT_ID}
+    bruin_client_id: ${BRUIN_BRIDGE__BRUIN_CLIENT_ID}
     # -- Client Secret credentials for Bruin API
-    bruin_client_secret: ${BRUIN_CLIENT_SECRET}
+    bruin_client_secret: ${BRUIN_BRIDGE__BRUIN_CLIENT_SECRET}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
