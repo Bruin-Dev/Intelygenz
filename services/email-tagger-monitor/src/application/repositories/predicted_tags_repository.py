@@ -2,6 +2,7 @@ from typing import List
 
 
 class PredictedTagsRepository:
+    # TODO: notification repository is unsed. Maybe we can delete it.
     def __init__(self, logger, config, notifications_repository, storage_repository):
         self._logger = logger
         self._config = config

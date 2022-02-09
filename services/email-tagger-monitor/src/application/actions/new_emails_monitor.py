@@ -68,14 +68,16 @@ class NewEmailsMonitor:
         email_id = email_data["email"]["email_id"]
         parent_id = email_data["email"].get("parent_id", None)
 
+        # TODO: Add comment to know why we are using semaphors
         async with self._semaphore:
             # Get tag from KRE
             response = await self._email_tagger_repository.get_prediction(email_data)
-            prediction = response.get('body')
             if response["status"] not in range(200, 300):
+                self._logger.error(f"NewEmailMonitor got an unespected response for {email_id} from prediction service: {response}")
                 return
-
-            if prediction is not None and len(prediction) > 0:
+            
+            prediction = response.get('body')
+            if prediction and len(prediction) > 0:
                 self._logger.info(
                     f"Got prediction with {len(prediction)} tags from KRE [email_id='{email_id}', "
                     f"parent_id='{parent_id}'] {prediction}"

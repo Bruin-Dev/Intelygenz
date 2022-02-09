@@ -88,6 +88,7 @@ class NewCreatedTicketsFeedback:
         ticket_id = int(ticket_data["ticket_id"])
         client_id = email_data["client_id"]
 
+        # TODO: Add comments to know why we are using semaphore
         async with self._semaphore:
 
             # Get more info from Bruin

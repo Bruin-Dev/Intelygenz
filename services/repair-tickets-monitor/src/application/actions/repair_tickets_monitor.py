@@ -189,10 +189,12 @@ class RepairTicketsMonitor:
 
             potential_service_numbers = inference_data['potential_service_numbers']
             try:
+                # Ask bruin API for site and service information
                 service_number_site_map = await self._get_valid_service_numbers_site_map(
                     client_id,
                     potential_service_numbers
                 )
+                # Ask bruin for open ticket for this service number and site
                 existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
             except ResponseException as e:
                 self._logger.error(f'Error in bruin {e} could not process email: {email_id}')
@@ -223,6 +225,7 @@ class RepairTicketsMonitor:
             else:
                 tickets_cannot_be_created = self._get_class_other_tickets(service_number_site_map)
 
+            # Send information to kre bridge
             save_output_response = await self._save_output(
                 email_id,
                 service_number_site_map,
@@ -290,7 +293,7 @@ class RepairTicketsMonitor:
             self,
             email_data: Dict[str, Any],
             service_number_site_map: Dict[str, str],
-    ) -> (List[str], List[str], List[str]):
+    ) -> Tuple[List[str], List[str], List[str]]:
         site_id_sn_buckets = defaultdict(list)
 
         for service_number, site_id in service_number_site_map.items():
@@ -386,7 +389,7 @@ class RepairTicketsMonitor:
             inference_data: Dict[str, Any],
             service_number_site_map: Dict[str, str],
             existing_tickets: List[Dict[str, Any]],
-    ) -> (List[Dict[str, Any]], List[Dict[str, Any]]):
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """Get potential updated/created tickets"""
         potential_created_tickets = []
         potential_updated_tickets = []

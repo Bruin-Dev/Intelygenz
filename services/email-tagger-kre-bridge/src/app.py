@@ -57,6 +57,7 @@ class Container:
         self._action_save_metrics = ActionWrapper(self._save_metrics, "save_metrics",
                                                   is_async=True, logger=self._logger)
 
+        # TODO: This Quart server has not endpoint
         self._server = QuartServer(config)
         self._logger.info("KRE Email Tagger bridge started!")
 
