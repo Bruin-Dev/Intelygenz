@@ -1203,11 +1203,11 @@ ticket-collector:
     port: 5000
   resources:
     limits:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 300m
+      memory: 512Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 150m
+      memory: 1024Mi
 
 
 # -- ticket-statistics subchart specific configuration
@@ -1245,7 +1245,7 @@ ticket-statistics:
     port: 5000
   resources:
     limits:
-      cpu: 200m
+      cpu: 300m
       memory: 256Mi
     requests:
       cpu: 100m
