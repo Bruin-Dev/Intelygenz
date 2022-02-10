@@ -122,17 +122,21 @@ class TicketUseCase:
                     self.tickets_repository.save_ticket(ticket=ticket)
                     self._stop_perf_counter('save_ticket_on_mongodb')
 
-                self._start_perf_counter('get_ticket_events_from_bruin')
                 await self.save_ticket_events(ticket_id)
-                self._stop_perf_counter('get_ticket_events_from_bruin')
 
             self.logger.info(f'Finished getting tickets from {_date}')
 
     async def save_ticket_events(self, ticket_id: int) -> None:
+        self._start_perf_counter('get_ticket_events_from_bruin')
         events = await self.bruin_repository.request_ticket_events(ticket_id=ticket_id)
+        self._stop_perf_counter('get_ticket_events_from_bruin')
 
         if events:
+            self._start_perf_counter('save_ticket_events_on_mongodb')
             self.tickets_repository.save_events(ticket_id=ticket_id, events=events)
+            self._stop_perf_counter('save_ticket_events_on_mongodb')
         else:
             self.logger.info(f"We don't have access to ticket {ticket_id}")
+            self._start_perf_counter('mark_ticket_not_accessible_on_mongodb')
             self.tickets_repository.mark_not_accessible(ticket_id=ticket_id)
+            self._stop_perf_counter('mark_ticket_not_accessible_on_mongodb')
