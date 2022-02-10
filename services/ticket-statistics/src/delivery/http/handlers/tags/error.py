@@ -15,4 +15,8 @@ ERRORS = {
         'code': 400,
         'message': 'Invalid date format, please specify dates in YYYY-MM-DD format',
     },
+    'INVALID_DATE_RANGE': {
+        'code': 400,
+        'message': "Invalid date range, 'start' cannot be after 'end'",
+    },
 }

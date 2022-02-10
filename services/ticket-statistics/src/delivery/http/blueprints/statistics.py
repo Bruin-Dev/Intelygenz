@@ -42,6 +42,9 @@ def get_blueprint(
         except ValueError:
             raise ProjectException('INVALID_DATES')
 
+        if start_date > end_date:
+            raise ProjectException('INVALID_DATE_RANGE')
+
         with lock:
             statistics = redis.get(start, end)
             cache_hit = bool(statistics)
