@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 31,
-  "iteration": 1639996565640,
+  "id": 47,
+  "iteration": 1644460518306,
   "links": [],
   "panels": [
     {
@@ -25,24 +25,22 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 17,
-        "w": 24,
+        "h": 8,
+        "w": 18,
         "x": 0,
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 20,
+      "id": 23,
       "legend": {
         "avg": false,
         "current": false,
@@ -54,8 +52,8 @@
       },
       "lines": true,
       "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
+      "maxDataPoints": 250,
+      "nullPointMode": "null as zero",
       "options": {
         "alertThreshold": true
       },
@@ -64,136 +62,32 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
-      "repeatDirection": "h",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/identity/connect/token\", namespace=~\"$namespace\"})",
-          "hide": false,
+          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (method)",
+          "format": "time_series",
           "interval": "",
-          "legendFormat": "POST /identity/connect/token",
+          "legendFormat": "{{method}}",
           "refId": "A"
         },
         {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory\", namespace=~\"$namespace\"})",
+          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
+          "format": "heatmap",
           "hide": false,
           "interval": "",
-          "legendFormat": "GET /api/Inventory",
+          "legendFormat": "total",
           "refId": "B"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/Attribute\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Inventory/Attribute",
-          "refId": "C"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/circuit\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Inventory/circuit",
-          "refId": "D"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Site\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Site",
-          "refId": "E"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Ticket",
-          "refId": "F"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "POST /api/Ticket",
-          "refId": "G"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/detail/unpause\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "POST /api/Ticket/<id>/detail/unpause",
-          "refId": "H"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/details\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Ticket/<id>/details",
-          "refId": "I"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/[0-9]+/status\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "PUT /api/Ticket/<id>/details/<id>/status",
-          "refId": "J"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/work\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "PUT /api/Ticket/<id>/details/work",
-          "refId": "K"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/nextresult\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Ticket/<id>/nextresult",
-          "refId": "L"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "POST /api/Ticket/<id>/notes",
-          "refId": "M"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes/advanced\", namespace=~\"$namespace\"})",
-          "interval": "",
-          "legendFormat": "POST /api/Ticket/<id>/notes/advanced",
-          "refId": "N"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/severity\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "PUT /api/Ticket/<id>/severity",
-          "refId": "O"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket/basic\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "GET /api/Ticket/basic",
-          "refId": "P"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket/repair\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "POST /api/Ticket/repair",
-          "refId": "Q"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Overview",
+      "title": "Histogram of Calls by Method",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -209,7 +103,6 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -232,29 +125,101 @@
       }
     },
     {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {},
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 2500000
+              },
+              {
+                "color": "red",
+                "value": 4000000
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 24,
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "text": {}
+      },
+      "pluginVersion": "7.4.1",
+      "targets": [
+        {
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[1d]))",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "total",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[1d])) by (method)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{method}}",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "API Calls per Day",
+      "type": "bargauge"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 7,
-        "w": 12,
+        "h": 8,
+        "w": 18,
         "x": 0,
-        "y": 17
+        "y": 8
       },
       "hiddenSeries": false,
-      "id": 3,
+      "id": 25,
       "legend": {
         "avg": false,
         "current": false,
@@ -266,7 +231,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "maxPerRow": 2,
+      "maxDataPoints": 250,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -276,23 +241,24 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
-      "repeatDirection": "h",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "bruin_api_usage_total{method=\"POST\", endpoint_=\"/identity/connect/token\", namespace=~\"$namespace\"}",
+          "expr": "sum(label_replace(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]),\"endpoint_group\",\"$1$2$3$4$5\", \"endpoint_\",\"(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*\\\\?*.*\")) by (method, endpoint_group)",
+          "format": "time_series",
           "interval": "",
-          "legendFormat": "Pod: {{pod}}",
+          "legendFormat": "{{method}} {{endpoint_group}}",
           "refId": "A"
         },
         {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/identity/connect/token\", namespace=~\"$namespace\"})",
+          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
+          "format": "heatmap",
           "hide": false,
           "interval": "",
-          "legendFormat": "Total",
+          "legendFormat": "total",
           "refId": "B"
         }
       ],
@@ -300,7 +266,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "POST /identity/connect/token",
+      "title": "Histogram of Calls by Endpoint",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -316,7 +282,6 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -344,131 +309,22 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 17
-      },
-      "hiddenSeries": false,
-      "id": 4,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Inventory",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
+        "h": 8,
+        "w": 18,
         "x": 0,
-        "y": 24
+        "y": 16
       },
       "hiddenSeries": false,
-      "id": 2,
+      "id": 26,
       "legend": {
         "avg": false,
         "current": false,
@@ -480,8 +336,8 @@
       },
       "lines": true,
       "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
+      "maxDataPoints": 250,
+      "nullPointMode": "null as zero",
       "options": {
         "alertThreshold": true
       },
@@ -490,24 +346,24 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
-      "repeat": "endpoint",
-      "repeatDirection": "h",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/Attribute\", namespace=~\"$namespace\"}",
+          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (response_status)",
+          "format": "time_series",
           "interval": "",
-          "legendFormat": "Pod: {{pod}}",
+          "legendFormat": "{{response_status}}",
           "refId": "A"
         },
         {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/Attribute\", namespace=~\"$namespace\"})",
+          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
+          "format": "heatmap",
           "hide": false,
           "interval": "",
-          "legendFormat": "Total",
+          "legendFormat": "total",
           "refId": "B"
         }
       ],
@@ -515,7 +371,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "GET /api/Inventory/Attribute",
+      "title": "Histogram of Calls by Status Code",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -531,1504 +387,6 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 5,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/circuit\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Inventory/circuit\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Inventory/circuit",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 31
-      },
-      "hiddenSeries": false,
-      "id": 6,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Site\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Site\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Site",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 31
-      },
-      "hiddenSeries": false,
-      "id": 7,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Ticket",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 38
-      },
-      "hiddenSeries": false,
-      "id": 8,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "POST /api/Ticket",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 38
-      },
-      "hiddenSeries": false,
-      "id": 9,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/detail/unpause\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/detail/unpause\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "POST /api/Ticket/<ticket_id>/detail/unpause",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 45
-      },
-      "hiddenSeries": false,
-      "id": 10,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/details\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/details\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Ticket/<ticket_id>/details",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 45
-      },
-      "hiddenSeries": false,
-      "id": 11,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/[0-9]+/status\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/[0-9]+/status\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "PUT /api/Ticket/<ticket_id>/details/<detail_id>/status",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 52
-      },
-      "hiddenSeries": false,
-      "id": 12,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/work\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/details/work\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "PUT /api/Ticket/<ticket_id>/details/work",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 52
-      },
-      "hiddenSeries": false,
-      "id": 13,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/nextresult\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=~\"/api/Ticket/[0-9]+/nextresult\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Ticket/<ticket_id>/nextresult",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 59
-      },
-      "hiddenSeries": false,
-      "id": 14,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "POST /api/Ticket/<ticket_id>/notes",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 59
-      },
-      "hiddenSeries": false,
-      "id": 15,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes/advanced\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=~\"/api/Ticket/[0-9]+/notes/advanced\", namespace=~\"$namespace\"})",
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "POST /api/Ticket/<ticket_id>/notes/advanced",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 66
-      },
-      "hiddenSeries": false,
-      "id": 18,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/severity\", namespace=~\"$namespace\"}) by (pod)",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"PUT\", endpoint_=~\"/api/Ticket/[0-9]+/severity\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "PUT /api/Ticket/<ticket_id>/severity",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 66
-      },
-      "hiddenSeries": false,
-      "id": 17,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket/basic\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"GET\", endpoint_=\"/api/Ticket/basic\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET /api/Ticket/basic",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 73
-      },
-      "hiddenSeries": false,
-      "id": 19,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "maxPerRow": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "h",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket/repair\", namespace=~\"$namespace\"}",
-          "interval": "",
-          "legendFormat": "Pod: {{pod}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(bruin_api_usage_total{method=\"POST\", endpoint_=\"/api/Ticket/repair\", namespace=~\"$namespace\"})",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Total",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "POST /api/Ticket/repair",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -2051,7 +409,7 @@
       }
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
@@ -2060,10 +418,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": [],
-          "value": []
+          "selected": false,
+          "text": "automation-engine",
+          "value": "automation-engine"
         },
         "datasource": null,
         "definition": "kube_namespace_created",
@@ -2112,5 +469,5 @@
   "timezone": "",
   "title": "Bruin API usage",
   "uid": "bpYpZmonk",
-  "version": 2
+  "version": 38
 }

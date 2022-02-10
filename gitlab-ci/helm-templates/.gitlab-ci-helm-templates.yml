@@ -104,6 +104,6 @@
     # CREATE GRAFANA DASHBOARDS DYNAMICALLY
     - kubectl -n prometheus port-forward service/prometheus-kubeprometheuss-prometheus 9090:9090 &
     - sleep 5
-    - python3 ci-utils/grafana/generate_dashboard.py
+    # - python3 ci-utils/grafana/generate_dashboard.py
     - envsubst < ci-utils/grafana/importer.yml.tpl > ci-utils/grafana/importer.yml
     - cd ci-utils/grafana && gdg dash export 
