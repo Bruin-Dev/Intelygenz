@@ -44,7 +44,7 @@ def get_blueprint(
 
         with lock:
             statistics = redis.get(start, end)
-            from_cache = bool(statistics)
+            cache_hit = bool(statistics)
 
             if statistics:
                 logger.info(f'Found statistics between {start} and {end} on Redis, skipping calculation')
@@ -52,7 +52,7 @@ def get_blueprint(
                 statistics = statistics_use_case.calculate_statistics(start=start_date, end=end_date)
                 redis.set(statistics, start, end)
 
-        metadata = {'from_cache': from_cache}
+        metadata = {'cache_hit': cache_hit}
         return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics, metadata=metadata)
 
     def to_date(date_string):
