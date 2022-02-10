@@ -6,7 +6,10 @@ from delivery.http.handlers.exceptions.project_exception import ProjectException
 
 
 def get_error_with_exception(exception):
-    return exception.serialize
+    if hasattr(exception, 'serialize'):
+        return exception.serialize
+    else:
+        return exception
 
 
 def constructor_error_handler(logger):
