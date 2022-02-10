@@ -497,7 +497,7 @@ function t7_bridge_variables() {
     export T7_BRIDGE__KRE_BASE_URL="${DEV__T7_BRIDGE__KRE_BASE_URL}"
   else
     # t7-bridge environment variables for production environment
-    export T7_BRIDGE__KRE_BASE_URL="${DEV__T7_BRIDGE__KRE_BASE_URL}"
+    export T7_BRIDGE__KRE_BASE_URL="${PRO__T7_BRIDGE__KRE_BASE_URL}"
   fi
 }
 
