@@ -13,5 +13,6 @@ class UseCases(containers.DeclarativeContainer):
     statistics_use_case: StatisticsUseCase = providers.Singleton(
         StatisticsUseCase,
         tickets_repository=tickets_repository,
+        config=config,
         logger=logger
     )
