@@ -1204,10 +1204,10 @@ ticket-collector:
   resources:
     limits:
       cpu: 300m
-      memory: 512Mi
+      memory: 1024Mi
     requests:
       cpu: 150m
-      memory: 1024Mi
+      memory: 512Mi
 
 
 # -- ticket-statistics subchart specific configuration
