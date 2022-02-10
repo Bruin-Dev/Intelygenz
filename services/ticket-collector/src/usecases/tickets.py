@@ -20,6 +20,30 @@ class TicketUseCase:
         self.config = config
         self.logger = logger
         self.semaphore = asyncio.BoundedSemaphore(self.config['concurrent_days'])
+        self.perf_counters = {}
+
+    def _start_perf_counter(self, counter):
+        self.perf_counters[counter] = time.perf_counter()
+
+    def _stop_perf_counter(self, counter):
+        elapsed_time = time.perf_counter() - self.perf_counters[counter]
+        self.perf_counters.pop(counter)
+        self.logger.debug(f'{counter} took {self._humanize_time(elapsed_time)}')
+
+    @staticmethod
+    def _humanize_time(t):
+        if t < 1:
+            unit = 'ms'
+            t = t * 1000
+        elif t < 60:
+            unit = 's'
+        elif t < 3600:
+            unit = 'm'
+            t = t / 60
+        else:
+            unit = 'h'
+            t = t / 3600
+        return f'{round(t, 2)}{unit}'
 
     @staticmethod
     def date_range(start_date: date, end_date: date) -> List[date]:
@@ -77,20 +101,30 @@ class TicketUseCase:
             start = _date.strftime('%Y-%m-%dT00:00:00Z')
             end = _date.strftime('%Y-%m-%dT23:59:59Z')
 
+            self._start_perf_counter('get_tickets_from_bruin')
             tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
+            self._stop_perf_counter('get_tickets_from_bruin')
             update = self.should_update(_date=_date, today=today)
 
             for ticket in tickets:
                 ticket_id = ticket['ticketID']
+                self._start_perf_counter('get_ticket_from_mongodb')
                 ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
+                self._stop_perf_counter('get_ticket_from_mongodb')
 
                 if update:
+                    self._start_perf_counter('delete_ticket_from_mongodb')
                     self.tickets_repository.delete_ticket(ticket_id=ticket_id)
+                    self._stop_perf_counter('delete_ticket_from_mongodb')
 
                 if update or not ticket_on_mongo:
+                    self._start_perf_counter('save_ticket_on_mongodb')
                     self.tickets_repository.save_ticket(ticket=ticket)
+                    self._stop_perf_counter('save_ticket_on_mongodb')
 
+                self._start_perf_counter('get_ticket_events_from_bruin')
                 await self.save_ticket_events(ticket_id)
+                self._stop_perf_counter('get_ticket_events_from_bruin')
 
             self.logger.info(f'Finished getting tickets from {_date}')
 
