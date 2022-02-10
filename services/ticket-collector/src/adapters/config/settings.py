@@ -56,6 +56,7 @@ def get_config():
         'job_interval_hours': 4,
         'days_to_retrieve': 3,
         'days_to_update': 3,
+        'concurrent_days': 1,
     }
 
 

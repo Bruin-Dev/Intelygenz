@@ -19,6 +19,7 @@ class TicketUseCase:
         self.tickets_repository = tickets_repository
         self.config = config
         self.logger = logger
+        self.semaphore = asyncio.BoundedSemaphore(self.config['concurrent_days'])
 
     @staticmethod
     def date_range(start_date: date, end_date: date) -> List[date]:
@@ -72,23 +73,24 @@ class TicketUseCase:
         :param _date:
         :param today:
         """
-        start = _date.strftime('%Y-%m-%dT00:00:00Z')
-        end = _date.strftime('%Y-%m-%dT23:59:59Z')
+        async with self.semaphore:
+            start = _date.strftime('%Y-%m-%dT00:00:00Z')
+            end = _date.strftime('%Y-%m-%dT23:59:59Z')
 
-        tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
-        update = self.should_update(_date=_date, today=today)
+            tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
+            update = self.should_update(_date=_date, today=today)
 
-        for ticket in tickets:
-            ticket_id = ticket['ticketID']
-            ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
+            for ticket in tickets:
+                ticket_id = ticket['ticketID']
+                ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
 
-            if update:
-                self.tickets_repository.delete_ticket(ticket_id=ticket_id)
+                if update:
+                    self.tickets_repository.delete_ticket(ticket_id=ticket_id)
 
-            if update or not ticket_on_mongo:
-                self.tickets_repository.save_ticket(ticket=ticket)
+                if update or not ticket_on_mongo:
+                    self.tickets_repository.save_ticket(ticket=ticket)
 
-            await self.save_ticket_events(ticket_id)
+                await self.save_ticket_events(ticket_id)
 
             self.logger.info(f'Finished getting tickets from {_date}')
 
