@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 56,
-  "iteration": 1644539666732,
+  "iteration": 1644601533833,
   "links": [],
   "panels": [
     {
@@ -364,7 +364,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Histogram of Calls per Day",
+      "title": "24h calls per datapoint",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -547,7 +547,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -565,7 +565,7 @@
     ]
   },
   "timezone": "",
-  "title": "New Bruin API usage",
-  "uid": "bruin_usage_keko",
+  "title": "Bruin API usage",
+  "uid": "bruin_api_usage_v2",
   "version": 4
 }
