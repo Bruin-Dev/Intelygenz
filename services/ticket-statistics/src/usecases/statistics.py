@@ -145,6 +145,7 @@ class StatisticsUseCase:
         return ((no_touch_resolution + ai_forwarded_tasks) / tasks) * 100
 
     def calculate_ipa_headcount_equivalent(self, no_touch_resolution, start, end) -> float:
-        days = (end - start).days + 1
+        seconds_in_a_day = 60 * 60 * 24
+        days = (end - start).total_seconds() / seconds_in_a_day
         ipa_average_daily_tasks = no_touch_resolution / days
         return ipa_average_daily_tasks / self.config['human_average_daily_tasks']
