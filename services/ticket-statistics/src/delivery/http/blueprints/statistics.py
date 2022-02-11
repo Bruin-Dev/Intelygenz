@@ -1,5 +1,5 @@
 import threading
-from datetime import datetime
+from dateutil.parser import isoparse
 from dependency_injector.wiring import inject, Provide
 
 from usecases.containers import UseCases
@@ -37,8 +37,8 @@ def get_blueprint(
             raise ProjectException('MISSING_DATES')
 
         try:
-            start_date = to_date(start).replace(hour=0, minute=0, second=0)
-            end_date = to_date(end).replace(hour=23, minute=59, second=59)
+            start_date = isoparse(start)
+            end_date = isoparse(end)
         except ValueError:
             raise ProjectException('INVALID_DATES')
 
@@ -57,8 +57,5 @@ def get_blueprint(
 
         metadata = {'cache_hit': cache_hit}
         return response_handler.response(tag=RESPONSES['RESOURCE_FOUND'], data=statistics, metadata=metadata)
-
-    def to_date(date_string):
-        return datetime.strptime(date_string, '%Y-%m-%d')
 
     return blueprint

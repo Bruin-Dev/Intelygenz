@@ -13,7 +13,7 @@ ERRORS = {
     },
     'INVALID_DATES': {
         'code': 400,
-        'message': 'Invalid date format, please specify dates in YYYY-MM-DD format',
+        'message': 'Invalid dates, please specify a valid format',
     },
     'INVALID_DATE_RANGE': {
         'code': 400,
