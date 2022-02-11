@@ -83,40 +83,6 @@ helm-master-logs:
       when: never
 
 # ============================================
-# Grafana Dashboards jobs
-# ============================================
-
-grafana-dashboards-dev:
-  stage: helm
-  extends: .helm_template_update_dashboards
-  environment:
-    name: development
-    url: http://grafana-dev.mettel-automation.net/
-  variables:
-    EKS_CLUSTER_NAME: "mettel-automation-dev"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-      when: never
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
-      when: manual
-      allow_failure: true
-    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"'
-      when: manual
-      allow_failure: true
-
-grafana-dashboards-pro:
-  stage: helm
-  extends: .helm_template_update_dashboards
-  environment:
-    name: production
-    url: https://grafana.mettel-automation.net/
-  variables:
-    EKS_CLUSTER_NAME: "mettel-automation"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|destroy)\(.*\): .*$/'
-    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
-
-# ============================================
 # Destroy Helm jobs
 # ============================================
 destroy-helm-branches:
