@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict
 
 from pymongo.collection import Collection
 
@@ -76,24 +76,6 @@ class TicketsRepository(object):
         self.logger.info(f'Marking ticket {ticket_id} as not accessible for us')
         self.collection.update_one({"ticket_id": ticket_id}, {"$set": {'access': False}})
 
-    def get_ticket_by_date(self, start: datetime, end: datetime, status: bool) -> Dict:
-        """
-        Get tickets by date.
-        :param start:
-        :param end:
-        :param status:
-        :return Dict:
-        """
-
-        tickets = self.collection.find({"date": {'$lt': end, '$gte': start}, 'status': status})
-
-        if tickets.count() == 0:
-            self.logger.info(f'No tickets found between {end} and {start} on the DB')
-        else:
-            self.logger.info(f'Found {tickets.count()} tickets between {end} and {start} on the DB')
-
-        return tickets
-
     def get_ticket_by_id(self, ticket_id: int) -> Dict:
         """
         Get tickets by date.
@@ -120,7 +102,8 @@ class TicketsRepository(object):
             'details': ticket,
             'date': self.get_creation_date_from_ticket(ticket=ticket),
             'status': False,
-            'access': True
+            'access': True,
+            'events': []
         }
 
     @staticmethod
