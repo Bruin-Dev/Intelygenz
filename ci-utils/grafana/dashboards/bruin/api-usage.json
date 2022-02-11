@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 56,
-  "iteration": 1644537362879,
+  "iteration": 1644539666732,
   "links": [],
   "panels": [
     {
@@ -68,14 +68,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (method)",
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (method)",
           "format": "time_series",
           "interval": "",
           "legendFormat": "{{method}}",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
           "format": "heatmap",
           "hide": false,
           "interval": "",
@@ -247,14 +247,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(label_replace(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]),\"endpoint_group\",\"$1$2$3$4$5\", \"endpoint_\",\"(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*\\\\?*.*\")) by (method, endpoint_group)",
+          "expr": "sum(label_replace(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]),\"endpoint_group\",\"$1$2$3$4$5\", \"endpoint_\",\"(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*\\\\?*.*\")) by (method, endpoint_group)",
           "format": "time_series",
           "interval": "",
           "legendFormat": "{{method}} {{endpoint_group}}",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
           "format": "heatmap",
           "hide": false,
           "interval": "",
@@ -450,14 +450,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (response_status)",
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (response_status)",
           "format": "time_series",
           "interval": "",
           "legendFormat": "{{response_status}}",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
+          "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]))",
           "format": "heatmap",
           "hide": false,
           "interval": "",
@@ -547,7 +547,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -565,7 +565,7 @@
     ]
   },
   "timezone": "",
-  "title": "Bruin API usage (Keko)",
+  "title": "New Bruin API usage",
   "uid": "bruin_usage_keko",
-  "version": 2
+  "version": 4
 }
