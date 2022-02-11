@@ -46,7 +46,7 @@ def get_config():
         },
         'redis': {
             'host': os.environ['REDIS_HOSTNAME'],
-            'ttl': 1 * 60 * 60,
+            'ttl': 1 * 60,
         },
         'human_average_daily_tasks': 34,
     }
