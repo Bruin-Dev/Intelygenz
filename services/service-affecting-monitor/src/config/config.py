@@ -23,7 +23,7 @@ NATS_CONFIG = {
 # JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
 default_contact_info_raw = json.loads(os.environ['MONITORING__DEFAULT_CONTACT_INFO_PER_CUSTOMER'])
 default_contact_info = defaultdict(dict)
-for host in default_contact_info.keys():
+for host in default_contact_info_raw.keys():
     default_contact_info.setdefault(host, {})
     for client_id in default_contact_info_raw[host]:
         if client_id.isnumeric():
