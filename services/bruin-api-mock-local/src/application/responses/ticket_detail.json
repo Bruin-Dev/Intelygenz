@@ -1,0 +1,49 @@
+{
+    "ticketDetails": [
+        {
+            "detailID": 2746937,
+            "detailType": "BillGrpID",
+            "detailStatus": "O",
+            "assignedToName": "0",
+            "currentTaskID": null,
+            "currentTaskName": null,
+            "SkillName": null,
+            "SubcategoryName": null,
+            "lastUpdatedBy": 166019,
+            "lastUpdatedAt": "2017-06-29T16:12:29.08+02:00"
+        },
+        {
+            "detailID": 2746938,
+            "detailType": "Repair_WTN",
+            "detailStatus": "O",
+            "assignedToName": "0",
+            "currentTaskID": 7526950,
+            "currentTaskName": "COM",
+            "lastUpdatedBy": 166019,
+            "lastUpdatedAt": "2017-06-29T16:12:29.237+02:00"
+        }
+    ],
+    "ticketNotes": [
+        {
+            "noteId": 41894040,
+            "noteValue": "test",
+            "serviceNumber": [
+                "397_7af21b17-13b7-45c6-ad88-96a2cbaeb6de",
+                "397_936c8578-d993-4987-b8aa-9279edfa50b7",
+                "397_947f553f-0fac-4d3d-bacb-da0676659e53"
+            ],
+            "createdDate": "2016-03-30T17:59:31.237-04:00",
+            "creator": "xwan@mettel.net"
+        },
+        {
+            "noteId": 41894041,
+            "noteValue": "test",
+            "serviceNumber": [
+                "397_fd1fdbe5-9ec0-420a-994b-f35e42855459",
+                "397_feaef3d8-ef0e-4a5b-9ff6-989cee41b986"
+            ],
+            "createdDate": "2016-03-30T17:59:31.243-04:00",
+            "creator": "xwan@mettel.net"
+        }
+    ]
+}
