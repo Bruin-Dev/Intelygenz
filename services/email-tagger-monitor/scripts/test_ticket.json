@@ -1,23 +1,29 @@
 {
-  "Id": "3b6a6b4b-9fa7-4013-a4c8-3f0a1ab9be96",
+  "Id": "0e78f066-f375-4ce3-af8a-5691bcaebc8a",
   "Attempt": 1,
   "Notification": {
-    "Id": "ce432c87-0ed3-41ce-bf41-0d083b5548df",
-    "ClientId": 0,
-    "EntityId": "73110",
-    "ApplicationName": "NotificationAPI",
+    "Id": "4c152f92-9c70-4c35-a6e6-db38b8476593",
+    "ClientId": 86937,
+    "EntityId": "3930270",
+    "ApplicationName": "EmailCenter",
     "Action": "EmailTicketLinked",
-    "Body":  {
-      "EmailId": "70340",
-      "ClientId": "777",
-      "Subject": "Test 15:41\"5@6t<>=se",
-      "Date": "2020-06-26T15:42:42",
-      "Body": "the issue here <strong>\"test\"</strong>",
-      "ParentID": "70213",
-      "PreviousEmailID": "70213",
-      "TagID": [],
+    "Body": {
+      "EmailId": 3930270,
+      "ClientId": 86937,
+      "Subject": "PP02561",
+      "Date": "2022-02-12T14:04:17",
+      "Body": "n<style>p.MsoNormal,li.MsoNormal,div.MsoNormal { margin: 0in; margin-bottom: .0001pt; font-size: 11.0pt; font-family: Calibri, sans-serif }na:link,span.MsoHyperlink { color: #0563C1; text-decoration: underline }na:visited,span.MsoHyperlinkFollowed { color: #954F72; text-decoration: underline }nspan.EmailStyle17 { font-family: Calibri, sans-serif; color: windowtext }n.MsoChpDefault { font-family: Calibri, sans-serif }ndiv.WordSection1 { }</style><br><br><div class=WordSection1><p class=MsoNormal>Hi,</p><p class=MsoNormal></p><p class=MsoNormal>Can we open a ticket for Store, When down, we power Cycle Cradle, and Velo store came back for a minute now is down again. Velo light is been just Amber and sometimes coming on green.</p><p class=MsoNormal></p><p class=MsoNormal>Thank you.</p><p class=MsoNormal></p><p class=MsoNormal style=margin-left: .25in><b><span style=font-family: &quot;Arial&quot;, sans-serif; color: #0B5394><img width=110 height=44 style=width: 1.1458in; height: .4583in src=/export/DownloadEmailAttachedFile/?emailId=3930270&attachmentId=2921580></span></b><span style=font-size: 10.0pt; color: #1F497D></span></p><p class=MsoNormal style=margin-left: .25in><span style=font-size: 14.0pt; font-family: &quot;Candara&quot;, sans-serif; color: #0B5394>Irma Guillen</span></p><p class=MsoNormal style=margin-left: .25in><span style=font-family: &quot;Candara&quot;, sans-serif; color: #0B5394>Analyst IT I</span></p><p class=MsoNormal style=margin-left: .25in><span style=font-family: &quot;Candara&quot;, sans-serif; color: #0B5394>Network/Telecom Services</span></p><p class=MsoNormal style=margin-left: .25in><span style=font-size: 10.0pt; font-family: &quot;Candara&quot;, sans-serif; color: #0B5394><a href=mailto:Irma.Guillen@signetjewelers.com>Irma.Guillen@signetjewelers.com</a>&nbsp; </span></p><p class=MsoNormal style=margin-left: .25in><span style=font-size: 10.0pt; font-family: &quot;Candara&quot;, sans-serif; color: #0B5394>p&nbsp;330.668.5977&nbsp; |&nbsp;375 Ghent Road<br>Akron, OH 44333</span><span style=font-family: &quot;Arial&quot;, sans-serif; color: #0B5394></span></p><p class=MsoNormal></p></div><br><br>The information contained in this e-mail message is privileged and/or confidential and is intended only for the use of the individual or entity named above. If the reader of this message is not the intended recipient, or the employee or agent responsible to deliver it to the intended recipient, you are hereby notified that any dissemination, distribution or copying of this communication is strictly prohibited. If you have received this communications in error, please immediately notify us by telephone (330-668-5000), and destroy the original message. Thank you." ,
+      "ParentID": 3930270,
+      "TagID": [
+        1
+      ],
+      "FromAddress": "irma.guillen@signetjewelers.com",
+      "ToAddress": [
+        "signet@mettel.net"
+      ],
+      "SendCC": [],
       "Ticket": {
-        "TicketID": "3499114"
+        "TicketID": 6184804
       }
     }
   }
