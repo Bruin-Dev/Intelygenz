@@ -61,6 +61,8 @@ class NewEmailsMonitor:
             self._process_new_email(email_data)
             for email_data in new_emails
         ]
+        # TODO: We have no visibility over this taks results. Errors happend and we will not receive anything
+        # TODO: when some errors occur we are breaking the task loop and it no running anymore until restarting the service
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info("NewEmailsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
 
