@@ -192,31 +192,31 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
-        Match               kube.var.log.containers.service-outage-monitor-1*
+        Match               kube.var.log.containers.som1-*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     service-outage-monitor-1
+        log_stream_name     som1-mettel-velocloud-net
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
-        Match               kube.var.log.containers.service-outage-monitor-2*
+        Match               kube.var.log.containers.som2-*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     service-outage-monitor-2
+        log_stream_name     som2-metvco02-mettel-net
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
-        Match               kube.var.log.containers.service-outage-monitor-3*
+        Match               kube.var.log.containers.som3-*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     service-outage-monitor-3
+        log_stream_name     som3-metvco03-mettel-net
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
-        Match               kube.var.log.containers.service-outage-monitor-4*
+        Match               kube.var.log.containers.som4-*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     service-outage-monitor-4
+        log_stream_name     som4-metvco04-mettel-net
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
