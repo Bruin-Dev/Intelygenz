@@ -7,7 +7,7 @@ ENV IGZ_PACKAGES_VERSION=${IGZ_PACKAGES_VERSION}
 USER root
 
 ENV GF_SECURITY_ADMIN_PASSWORD=password
-ENV GF_INSTALL_PLUGINS=grafana-piechart-panel
+ENV GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-polystat-panel,marcusolsson-json-datasource
 
 COPY ./metrics-dashboard /metrics-dashboard
 
