@@ -1,4 +1,4 @@
-FROM grafana/grafana:6.5.2
+FROM grafana/grafana:7.4.1
 
 ARG IGZ_PACKAGES_REPOSITORY_URL
 ARG IGZ_PACKAGES_VERSION
