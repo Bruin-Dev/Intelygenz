@@ -606,7 +606,7 @@ services:
     volumes:
       - ./metrics-dashboard/grafana/datasources:/etc/grafana/provisioning/datasources
       - ./metrics-dashboard/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./metrics-dashboard/grafana/dashboards-definitions:/var/lib/grafana/dashboards
+      - ./metrics-dashboard/grafana/dashboards-definitions:/var/lib/grafana/dashboards-definitions
 
   prometheus:
     image: prom/prometheus:v2.7.2

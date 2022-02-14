@@ -3,12 +3,6 @@ providers:
 - folder: main
   name: default
   options:
-    path: /var/lib/grafana/dashboards/main
-  org_id: 1
-  type: file
-- folder: titan-america
-  name: titan-america-dashboard
-  options:
-    path: /var/lib/grafana/dashboards/titan-america
+    path: /var/lib/grafana/dashboards-definitions/main
   org_id: 1
   type: file
