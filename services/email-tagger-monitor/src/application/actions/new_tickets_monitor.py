@@ -59,6 +59,8 @@ class NewTicketsMonitor:
             for data in new_tickets
             if self._new_tickets_repository.validate_ticket(data)
         ]
+        # TODO: We have no visibility over this taks results. Errors happend and we will not receive anything
+        # TODO: when some errors occur we are breaking the task loop and it no running anymore until restarting the service
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info("NewTicketsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
 
@@ -74,8 +76,10 @@ class NewTicketsMonitor:
     async def _save_metrics(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
         ticket_id = int(ticket_data["ticket_id"])
+        self._logger.info(f"2 - Running save metric: {email_id} - {ticket_id}")
 
         async with self._semaphore:
+            self._logger.info("Go in to sem")
             # Get more info from Bruin
             ticket_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             self._logger.info(f"Ticket response: {ticket_response}")
