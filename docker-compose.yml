@@ -594,8 +594,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: metrics-dashboard/grafana/Dockerfile
-      args:
-        GRAFANA_ADMIN_PASSWORD: password
     env_file:
       - metrics-dashboard/grafana/config/env
     depends_on:
