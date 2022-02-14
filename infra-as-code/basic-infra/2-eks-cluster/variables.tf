@@ -27,7 +27,7 @@ variable "worker_node_instance_type" {
 # helm charts variables
 
 variable "CLUSTER_AUTOSCALER_HELM_CHART_VERSION" {
-  default     = "9.9.2"
+  default     = "9.4.0"
   description = "Helm chart version used for cluster-autoscaler"
 }
 
