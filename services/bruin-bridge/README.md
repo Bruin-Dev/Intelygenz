@@ -802,3 +802,12 @@ it will make a call to the endpoint `/api/Ticket/topics` in bruin, using as quer
 
 # Running in docker-compose 
 `docker-compose up --build redis nats-server bruin-bridge`
+
+# Aim bruin-bridge to bruin-api-mock-local
+Check the [full documentation](../bruin-api-mock-local/README.md)
+
+Modify env file on this way
+```
+BRUIN_LOGIN_URL=http://bruin-api-mock-local:15001/login
+BRUIN_BASE_URL=http://bruin-api-mock-local:15001/api
+```
