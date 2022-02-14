@@ -22,7 +22,7 @@ SLACK_CONFIG = {
 }
 
 EMAIL_DELIVERY_CONFIG = {
-    'sender_email': os.environ['EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME'],
+    'email': os.environ['EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME'],
     'password': os.environ["EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD"],
 }
 
