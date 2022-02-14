@@ -79,7 +79,7 @@ MONITOR_CONFIG = {
 # JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
 recipients_by_customer_raw = json.loads(os.environ['REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_CUSTOMER'])
 recipients_by_customer = defaultdict(dict)
-for client_id in recipients_by_customer.keys():
+for client_id in recipients_by_customer_raw.keys():
     if client_id.isnumeric():
         recipients_by_customer[int(client_id)] = recipients_by_customer_raw[client_id]
     else:
