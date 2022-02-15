@@ -1,13 +1,16 @@
 # -- nats helm chart configuration
 nats:
+  enabled: ${NATS_SERVER_ENABLED}
   cluster:
     enabled: true
+    replicas: ${NATS_SERVER_DESIRED_TASKS}
   natsbox:
     enabled: false
   # -- override name to use nats as name for svc, deployment and all created by nats helm chart
   nameOverride: "nats"
 
 
+# -- prometheus-nats-exporter helm chart configuration to get Nats metrics in prometheus
 prometheus-nats-exporter:
   # enable or disable prometheus-nats-exporter
   enabled: ${PROMETHEUS_NATS_EXPORTER_ENABLED}
