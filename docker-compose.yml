@@ -356,6 +356,11 @@ services:
       - redis-email-tagger
     ports:
       - 5057:5000
+    volumes:
+      - ./services/repair-tickets-monitor:/service/app:z
+    stdin_open: true # for debug
+    tty: true # for debug
+
 
   repair-tickets-kre-bridge:
     build:
