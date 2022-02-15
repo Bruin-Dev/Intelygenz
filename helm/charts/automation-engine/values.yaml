@@ -949,6 +949,8 @@ repair-tickets-monitor:
     rta_monitor_job_interval: 0
     # -- Defines how often new created tickets fetched from Bruin are sent to the KRE to train the AI model
     new_created_tickets_feedback_job_interval: 0
+    # -- Defines how often new closed tickets fetched from Bruin are sent to the KRE to train the AI model
+    new_closed_tickets_feedback_job_interval: 0
     # -- Defines how many simultaneous tagged emails are processed
     max_concurrent_emails_for_monitoring: 0
     # -- Defines how many simultaneous new created tickets are sent to the KRE to train the AI model
