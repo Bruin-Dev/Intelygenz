@@ -28,6 +28,7 @@ basic-infra-dev:
     IAM_TO_EKS_ROLES: developer, devops
     HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
     HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
+    CLUSTER_AUTOSCALER_CHART_V: ${CLUSTER_AUTOSCALER_CHART_V_DEV}
     KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
     EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
     INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
@@ -62,6 +63,7 @@ basic-infra-pro:
     IAM_TO_EKS_ROLES: developer, devops
     HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
     HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
+    CLUSTER_AUTOSCALER_CHART_V: ${CLUSTER_AUTOSCALER_CHART_V_PRO}
     KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PRO}
     EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_PRO}
     INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_PRO}
