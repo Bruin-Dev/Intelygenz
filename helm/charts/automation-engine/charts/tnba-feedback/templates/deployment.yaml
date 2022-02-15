@@ -44,12 +44,6 @@ spec:
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://customer-cache:5000/_health; do echo waiting for customer-cache; sleep 2; done']
         {{- end }}
-        - name: wait-redis-tnba-feedback
-          image: busybox:1.28
-          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_TNBA_FEEDBACK_HOSTNAME} 6379; do echo waiting for tnba-feedback redis; sleep 2; done']
-          envFrom:
-            - configMapRef:
-                name: {{ include "tnba-feedback.configmapName" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"

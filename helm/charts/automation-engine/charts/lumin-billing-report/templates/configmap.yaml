@@ -9,7 +9,10 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "lumin-billing-report.fullname" . }}-{{ .Values.image.tag }}"
+  NATS_SERVER1: {{ .Values.config.nats_server | quote }}
+  REDIS_HOSTNAME: {{ .Values.config.redis_hostname | quote }}
+  PAPERTRAIL_ACTIVE: {{ .Values.config.papertrail_active | quote }}
+  PAPERTRAIL_HOST: {{ .Values.config.papertrail_host | quote }}
+  PAPERTRAIL_PORT: {{ .Values.config.papertrail_port | quote }}
+  TIMEZONE: {{ .Values.config.timezone | quote }}

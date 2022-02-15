@@ -1,13 +1,16 @@
 # -- nats helm chart configuration
 nats:
+  enabled: true
   cluster:
     enabled: true
+    replicas: 3
   natsbox:
     enabled: false
   # -- override name to use nats as name for svc, deployment and all created by nats helm chart
   nameOverride: "nats"
 
 
+# -- prometheus-nats-exporter helm chart configuration to get Nats metrics in prometheus
 prometheus-nats-exporter:
   # enable or disable prometheus-nats-exporter
   enabled: true
@@ -95,11 +98,8 @@ prometheus-nats-exporter:
 global:
   # -- Name of environment for EKS cluster and network resources
   current_environment: "dev"
-  # -- Name of environment for helm charts and
-  # redis elasticaches used
+  # -- Name of environment for helm charts
   environment: "automation-test"
-  # -- NATS cluster endpoint used by bruin-bridge
-  nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
   # -- Redis Hostname used to store information used by customer-cache
@@ -108,18 +108,19 @@ global:
   redis_tnba_feedback_hostname: "redis"
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "redis"
-  # -- Indicates if the logs will be sent to papertrail or not.
-  papertrail_active: "False"
-  # -- Papertrail host to which the logs will be sent
-  papertrail_host: "logs.papertrailapp.com"
-  # -- Papertrail port to which the logs will be sent
-  papertrail_port: "0"
-  # -- Timezone used for periodic jobs, timestamps...
-  timezone: ""
-  # -- Contact email address
-  last_contact_recipient: ""
-  # -- Email account password
-  email_acc_pwd: ""
+  # -- external-secrets feature to sync parameters from AWS
+  externalSecrets:
+    # -- Enable/disable external-secrets
+    enabled: true
+    # -- Environment path to reference parameter store secrets
+    envPath: "/automation-engine/test"
+    # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
+    secretStorage:
+      # -- Custom serviceAccount to assign AWS permissions
+      serviceAccount:
+        # -- AWS IAM role that have access to get parameters from AWS 
+        # (needs secret-manager and ssm IAM permission, if use encryption also kms permissions)
+        roleARN: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -147,12 +148,6 @@ bruin-bridge:
     port: 5000
   # -- bruin-bridge specific configuration variables
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Client ID credentials for Bruin API
-    bruin_client_id: ""
-    # -- Client Secret credentials for Bruin API
-    bruin_client_secret: ""
     # -- Login URL for Bruin API
     bruin_login_url: ""
     # -- Base URL for Bruin API
@@ -189,22 +184,6 @@ customer-cache:
   # -- Number of replicas of customer-cache module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- VeloCloud hosts whose edges will be stored to the cache
-    velocloud_hosts: []
-    # -- E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories
-    duplicate_inventories_recipient: ""
-    # -- Defines how often the cache is refreshed
-    refresh_job_interval: 0
-    # -- Defines how often the next refresh flag is checked to decide if it's time to refresh the cache or not
-    refresh_check_interval: 0
-    # -- VeloCloud edges that should be ignored in the caching process
-    blacklisted_edges: []
-    # -- Client IDs whose edges have Pending management status that should be ignored in the caching process
-    blacklisted_clients_with_pending_status: []
-    # -- Management statuses that should be considered in the caching process
-    whitelisted_management_statuses: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -230,18 +209,7 @@ digi-bridge:
   enabled: true
   # -- Number of replicas of digi-bridge module
   replicaCount: 1
-  # -- digi-bridge specific configuration variables
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Client ID credentials for Digi API
-    digi_client_id: ""
-    # -- Client Secret credentials for Digi API
-    digi_client_secret: ""
-    # -- Base URL for Digi API
-    digi_base_url: ""
-    # -- Auth tokens TTL
-    digi_token_ttl: 0
     # -- IP for Digi Environment
     digi_api_ip: ""
     # -- Record name for Digi Production Environment
@@ -250,7 +218,6 @@ digi-bridge:
     digi_api_test_ip: ""
     # -- Record name for Digi Test Environment
     digi_api_test_dns_record_name: ""
-  # -- digi-bridge image details
   image:
     # -- digi-bridge image image
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
@@ -285,14 +252,6 @@ digi-reboot-report:
   # -- Number of replicas of digi-reboot-report module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often the report is built and sent
-    job_interval: 0
-    # -- Defines how much time back to look for DiGi Reboot logs
-    logs_lookup_interval: 0
-    # -- Email address to send the report
-    recipient: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -320,16 +279,6 @@ dri-bridge:
   replicaCount: 1
   # -- dri-bridge specific configuration variables
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Username to log into DRI API
-    username: ""
-    # -- Password to log into DRI API
-    password: ""
-    # -- Base URL for DRI API
-    base_url: ""
-    # -- Defines how much time the data retrieved from DRI for a specific device can be stored and served from Redis
-    dri_data_redis_ttl: 0
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
@@ -421,11 +370,6 @@ email-tagger-kre-bridge:
   enabled: true
   # -- Number of replicas of email-tagger-kre-bridge module
   replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Base URL for E-mail Tagger's KRE
-    kre_base_url: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-kre-bridge
     pullPolicy: Always
@@ -457,22 +401,6 @@ email-tagger-monitor:
   # -- Number of replicas of email-tagger-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often new emails received from Bruin are processed
-    new_emails_job_interval: 0
-    # -- Defines how often new tickets received from Bruin are sent to the KRE to train the AI model
-    new_tickets_job_interval: 0
-    # -- Defines how many simultaneous emails are processed
-    max_concurrent_emails: 0
-    # -- Defines how many simultaneous tickets are sent to the KRE to train the AI model
-    max_concurrent_tickets: 0
-    # -- API request key for incoming requests
-    api_request_key: ""
-    # -- API signature secret key for incoming requests
-    api_request_signature_secret_key: ""
-    # -- API server endpoint prefix for incoming requests
-    api_endpoint_prefix: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -499,18 +427,6 @@ fraud-monitor:
   # -- Number of replicas of fraud-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often Fraud e-mails are checked to report them as Service Affecting tickets
-    monitoring_job_interval: 0
-    # -- E-mail account that receives Fraud e-mails for later analysis
-    observed_inbox_email_address: ""
-    # -- Senders addresses whose e-mail messages represent Fraud alerts
-    observed_inbox_senders: []
-    # -- Default contact details used when a Fraud is reported as a Service Affecting ticket
-    default_contact_for_new_tickets: {}
-    # -- Default client info used when the DID device in the Fraud alert does not have an inventory assigned in Bruin
-    default_client_info_for_did_without_inventory: {}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -537,14 +453,6 @@ hawkeye-affecting-monitor:
   # -- Number of replicas of hawkeye-affecting-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often devices are checked to find and report issues
-    monitoring_job_interval: 0
-    # -- Defines how much time back to look for probes' tests results
-    probes_tests_results_lookup_interval: 0
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -570,15 +478,6 @@ hawkeye-bridge:
   enabled: true
   # -- Number of replicas of hawkeye-bridge module
   replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Client username to log into Hawkeye API
-    client_username: ""
-    # -- Client password to log into Hawkeye API
-    client_password: ""
-    # -- Base URL to access Hawkeye API
-    base_url: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-bridge
     pullPolicy: Always
@@ -610,14 +509,6 @@ hawkeye-customer-cache:
   # -- Number of replicas of hawkeye-customer-cache module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories
-    duplicate_inventories_recipient: ""
-    # -- Defines how often the cache is refreshed
-    refresh_job_interval: 0
-    # -- Management statuses that should be considered in the caching process
-    whitelisted_management_statuses: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -644,16 +535,6 @@ hawkeye-outage-monitor:
   # -- Number of replicas of hawkeye-outage-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often devices are checked to find and report issues
-    monitoring_job_interval: 0
-    # -- Defines how much time to wait before checking if a particular device is still in outage state
-    quarantine_for_devices_in_outage: 0
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
-    # -- Defines for how long a ticket can be auto-resolved after the last documented outage
-    grace_period_to_autoresolve_after_last_documented_outage: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -680,26 +561,6 @@ intermapper-outage-monitor:
   # -- Number of replicas of intermapper-outage-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often InterMapper events are checked to find and report issues
-    monitoring_job_interval: 0
-    # -- E-mail account that receives InterMapper events for later analysis
-    observed_inbox_email_address: ""
-    # -- Senders addresses whose e-mail messages represent InterMapper events
-    observed_inbox_senders: []
-    # -- InterMapper events considered as DOWN
-    monitored_down_events: []
-    # -- InterMapper events considered as UP
-    monitored_up_events: []
-    # -- Defines how many simultaneous email batches related to the same InterMapper asset are processed
-    max_concurrent_email_batches: 0
-    # -- Defines which Bruin product categories are taken into account when auto-resolving tickets
-    whitelisted_product_categories_for_autoresolve: []
-    # -- Defines for how long a ticket can be auto-resolved after the last documented outage
-    grace_period_to_autoresolve_after_last_documented_outage: 0
-    # -- Parameters to fetch from DRI to include them in InterMapper notes for PIAB devices
-    dri_parameters_for_piab_notes: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -726,12 +587,6 @@ last-contact-report:
   # -- Number of replicas of last-contact-report module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- VeloCloud hosts whose edges will be used to build the report
-    monitored_velocloud_hosts: []
-    # -- Email address to send the report
-    recipient: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -757,7 +612,18 @@ links-metrics-api:
   # -- Number of links-metrics-api pods
   replicaCount: 1
   config:
-    papertrail_prefix: ""
+    # -- NATS cluster endpoint
+    nats_server: ""
+    # -- Redis Hostname used to store heavy NATS messages (>1MB)
+    redis_hostname: ""
+    # -- Indicates if the logs will be sent to papertrail or not.
+    papertrail_active: ""
+    # -- Papertrail host to which the logs will be sent
+    papertrail_host: ""
+    # -- Papertrail port to which the logs will be sent
+    papertrail_port: ""
+    # -- Timezone used for periodic jobs, timestamps...
+    timezone: ""
     # -- Indicate mongo username
     mongodb_username: ""
     # -- Indicate mongo password
@@ -792,7 +658,18 @@ links-metrics-collector:
   # -- Number of links-metrics-collector pods
   replicaCount: 1
   config:
-    papertrail_prefix: ""
+    # -- NATS cluster endpoint
+    nats_server: ""
+    # -- Redis Hostname used to store heavy NATS messages (>1MB)
+    redis_hostname: ""
+    # -- Indicates if the logs will be sent to papertrail or not.
+    papertrail_active: ""
+    # -- Papertrail host to which the logs will be sent
+    papertrail_host: ""
+    # -- Papertrail port to which the logs will be sent
+    papertrail_port: ""
+    # -- Timezone used for periodic jobs, timestamps...
+    timezone: ""
     # -- Indicate mongo username
     mongodb_username: ""
     # -- Indicate mongo password
@@ -827,8 +704,18 @@ lumin-billing-report:
   # -- Number of replicas of lumin-billing-report module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
+    # -- NATS cluster endpoint
+    nats_server: ""
+    # -- Redis Hostname used to store heavy NATS messages (>1MB)
+    redis_hostname: ""
+    # -- Indicates if the logs will be sent to papertrail or not.
+    papertrail_active: ""
+    # -- Papertrail host to which the logs will be sent
+    papertrail_host: ""
+    # -- Papertrail port to which the logs will be sent
+    papertrail_port: ""
+    # -- Timezone used for periodic jobs, timestamps...
+    timezone: ""
     # -- URI of Lumin API
     lumin_uri: ""
     # -- Token credentials for Lumin API
@@ -837,6 +724,8 @@ lumin-billing-report:
     customer_name: ""
     # -- Email address to send lumin-billing-report
     billing_recipient: ""
+    # -- Email account password
+    email_acc_pwd: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lumin-billing-report
     pullPolicy: Always
@@ -871,23 +760,7 @@ notifier:
   service:
     type: ClusterIP
     port: 5000
-  # -- notifier specific configuration variables
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Slack webhook to send messages
-    slack_webhook: ""
-    # -- Email account used to send messages to other accounts (username)
-    email_account_for_message_delivery_username: ""
-    # -- Email account used to send messages to other accounts (password)
-    email_account_for_message_delivery_password: ""
-    # -- Mapping of e-mail addresses and passwords whose inboxes can be read for later analysis
-    monitorable_email_accounts: {}
   resources:
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
     limits:
       cpu: 200m
       memory: 256Mi
@@ -908,11 +781,6 @@ repair-tickets-kre-bridge:
   enabled: true
   # -- Number of replicas of repair-tickets-kre-bridge module
   replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Base URL for RTA's KRE
-    kre_base_url: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
     pullPolicy: Always
@@ -943,22 +811,6 @@ repair-tickets-monitor:
   # -- Number of replicas of repair-tickets-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often new emails tagged by the E-mail Tagger are processed
-    rta_monitor_job_interval: 0
-    # -- Defines how often new created tickets fetched from Bruin are sent to the KRE to train the AI model
-    new_created_tickets_feedback_job_interval: 0
-    # -- Defines how often new closed tickets fetched from Bruin are sent to the KRE to train the AI model
-    new_closed_tickets_feedback_job_interval: 0
-    # -- Defines how many simultaneous tagged emails are processed
-    max_concurrent_emails_for_monitoring: 0
-    # -- Defines how many simultaneous new created tickets are sent to the KRE to train the AI model
-    max_concurrent_created_tickets_for_feedback: 0
-    # -- Defines how many simultaneous new closed tickets are sent to the KRE to train the AI model
-    max_concurrent_closed_tickets_for_feedback: 0
-    # -- Mapping of tag names and their corresponding numeric ID, as defined in the AI model
-    tag_ids_mapping: {}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -996,72 +848,10 @@ service-affecting-monitor:
   # -- Number of replicas of service-affecting-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
     # -- Indicates if the monitor reports process will be executed on start or not
     exec_monitor_reports_on_start: "False"
     # -- Indicates if the bandwidth reports process will be executed on start or not
     exec_bandwidth_reports_on_start: "False"
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
-    # -- [Monitoring] Defines how often devices are checked to find and report issues
-    monitoring__monitoring_job_interval: 0
-    # -- [Monitoring] VeloCloud hosts whose edges will be monitored
-    monitoring__monitored_velocloud_hosts: []
-    # -- [Monitoring] Mapping of VeloCloud hosts, Bruin customers and default contact info
-    monitoring__default_contact_info_per_customer: {}
-    # -- [Monitoring] List Bruin customers that should always use the default contact info
-    monitoring__customers_to_always_use_default_contact_info: []
-    # -- [Monitoring] Threshold for Latency troubles
-    monitoring__latency_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Packet Loss troubles
-    monitoring__packet_loss_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Jitter troubles
-    monitoring__jitter_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
-    monitoring__bandwidth_over_utilization_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Circuit Instability troubles
-    monitoring__circuit_instability_monitoring_threshold: 0
-    # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
-    monitoring__circuit_instability_autoresolve_threshold: 0
-    # -- [Monitoring] Defines how much time back to look for Latency metrics in Latency checks
-    monitoring__latency_monitoring_lookup_interval: 0
-    # -- [Monitoring] Defines how much time back to look for Packet Loss metrics in Packet Loss checks
-    monitoring__packet_loss_monitoring_lookup_interval: 0
-    # -- [Monitoring] Defines how much time back to look for Jitter metrics in Jitter checks
-    monitoring__jitter_monitoring_lookup_interval: 0
-    # -- [Monitoring] Defines how much time back to look for Bandwidth metrics in Bandwidth Over Utilization checks
-    monitoring__bandwidth_over_utilization_monitoring_lookup_interval: 0
-    # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
-    monitoring__circuit_instability_monitoring_lookup_interval: 0
-    # -- [Monitoring] Defines how much time back to look for all kinds of metrics while running auto-resolves
-    monitoring__autoresolve_lookup_interval: 0
-    # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented trouble
-    monitoring__grace_period_to_autoresolve_after_last_documented_trouble: 0
-    # -- [Monitoring] Defines how many times a ticket can be auto-resolved
-    monitoring__max_autoresolves_per_ticket: 0
-    # -- [Monitoring] List of client IDs for which Bandwidth Over Utilization checks are enabled
-    monitoring__customers_with_bandwidth_over_utilization_monitoring: []
-    # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
-    monitoring__link_labels_blacklisted_in_asr_forwards: []
-    # -- [Reoccurring Trouble Report] Cron expression that determines when to build and deliver this report
-    reoccurring_trouble_report__execution_cron_expression: ""
-    # -- [Reoccurring Trouble Report] Troubles that will be reported
-    reoccurring_trouble_report__reported_troubles: []
-    # -- [Reoccurring Trouble Report] Defines how much time back to look for Bruin tickets
-    reoccurring_trouble_report__tickets_lookup_interval: 0
-    # -- [Reoccurring Trouble Report] Number of different tickets a trouble must appear in for a particular edge and interface to include it in the report
-    reoccurring_trouble_report__reoccurring_trouble_tickets_threshold: 0
-    # -- [Reoccurring Trouble Report] Mapping of Bruin customer IDs and recipients of these reports
-    reoccurring_trouble_report__recipients_per_customer: {}
-    # -- [Daily Bandwidth Report] Cron expression that determines when to build and deliver this report
-    daily_bandwidth_report__execution_cron_expression: ""
-    # -- [Daily Bandwidth Report] Defines how much time back to look for bandwidth metrics and Bruin tickets
-    daily_bandwidth_report__lookup_interval: 0
-    # -- [Daily Bandwidth Report] Customers for whom this report will be built
-    daily_bandwidth_report__enabled_customers: []
-    # -- [Daily Bandwidth Report] List of recipients that will get these reports
-    daily_bandwidth_report__recipients: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1099,38 +889,8 @@ service-outage-monitor:
   # -- Number of replicas of service-outage-monitor module
   replicaCount: 1
   config:
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
-    # -- [Monitoring] Defines how often devices are checked to find and report issues
-    monitoring__monitoring_job_interval: 0
     # -- [Monitoring] VeloCloud hosts whose edges will be monitored
     monitoring__monitored_velocloud_hosts: []
-    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Link Down state
-    monitoring__quarantine_for_edges_in_link_down_outage: 0
-    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Hard Down state
-    monitoring__quarantine_for_edges_in_hard_down_outage: 0
-    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Link Down (HA) state
-    monitoring__quarantine_for_edges_in_ha_link_down_outage: 0
-    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Soft Down (HA) state
-    monitoring__quarantine_for_edges_in_ha_soft_down_outage: 0
-    # -- [Monitoring] Defines how much time to wait before re-checking an edge currently in Hard Down (HA) state
-    monitoring__quarantine_for_edges_in_ha_hard_down_outage: 0
-    # -- [Monitoring] E-mail address that will receive a tiny report showing which edges from VeloCloud responses are not in the cache of customers
-    monitoring__missing_edges_from_cache_report_recipient: ""
-    # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
-    monitoring__link_labels_blacklisted_in_asr_forwards: []
-    # -- [Monitoring] List of edges that are excluded from Service Outage monitoring
-    monitoring__blacklisted_edges: []
-    # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented outage
-    monitoring__grace_period_to_autoresolve_after_last_documented_outage: 0
-    # -- [Monitoring] Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge
-    monitoring__grace_period_before_attempting_new_digi_reboots: 0
-    # -- [Monitoring] Severity level for Edge Down outages
-    monitoring__severity_level_for_edge_down_outages: 0
-    # -- [Monitoring] Severity level for Link Down outages
-    monitoring__severity_level_for_link_down_outages: 0
-    # -- [Monitoring] Defines how many times a ticket can be auto-resolved
-    monitoring__max_autoresolves_per_ticket: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1168,16 +928,6 @@ service-outage-monitor-triage:
   # -- Number of replicas of service-outage-monitor-triage module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
-    # -- [Triage] Defines how often tickets are checked to see if it needs an initial triage or events note
-    triage__monitoring_job_interval: 0
-    # -- [Triage] VeloCloud hosts whose edges will be monitored
-    triage__monitored_velocloud_hosts: []
-    # -- [Triage] Defines how many events will be included in events notes
-    triage__max_events_per_event_note: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1215,12 +965,6 @@ sites-monitor:
   # -- Number of replicas of sites-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Defines how often to look for links and edges, and write their data to the metrics server
-    monitoring_job_interval: 0
-    # -- VeloCloud hosts whose edges will be monitored
-    monitored_velocloud_hosts: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
@@ -1252,11 +996,6 @@ t7-bridge:
   enabled: true
   # -- Number of replicas of t7-bridge module
   replicaCount: 1
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Base URL for TNBA's KRE
-    kre_base_url: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/t7-bridge
     pullPolicy: Always
@@ -1291,8 +1030,12 @@ ticket-collector:
   # -- Number of replicas of ticket-collector module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
+    # -- Indicates if the logs will be sent to papertrail or not.
+    papertrail_active: ""
+    # -- Papertrail host to which the logs will be sent
+    papertrail_host: ""
+    # -- Papertrail port to which the logs will be sent
+    papertrail_port: ""
     # -- Indicate the interval task that must run in parallel
     interval_tasks_run: ""
     # -- Indicate mongo username
@@ -1333,8 +1076,14 @@ ticket-statistics:
   # -- Number of replicas of ticket-statistics module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
+    # -- Redis Hostname used to store heavy NATS messages (>1MB)
+    redis_hostname: ""
+    # -- Indicates if the logs will be sent to papertrail or not.
+    papertrail_active: ""
+    # -- Papertrail host to which the logs will be sent
+    papertrail_host: ""
+    # -- Papertrail port to which the logs will be sent
+    papertrail_port: ""
     # -- Indicate mongo username
     mongodb_username: ""
     # -- Indicate mongo password
@@ -1377,16 +1126,6 @@ tnba-feedback:
   # -- Number of replicas of tnba-feedback module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
-    # -- Defines how often tickets are pulled from Bruin and sent to the KRE to train the predictive model
-    feedback_job_interval: 0
-    # -- VeloCloud hosts whose edges will be monitored
-    monitored_velocloud_hosts: []
-    # -- Defines for how long a ticket needs to wait before being re-sent to the KRE
-    grace_period_before_resending_tickets: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1413,34 +1152,6 @@ tnba-monitor:
   # -- Number of replicas of tnba-monitor module
   replicaCount: 1
   config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Bruin's product category under monitoring
-    monitored_product_category: ""
-    # -- Defines how often tickets are checked to see if they need a new TNBA note
-    monitoring_job_interval: 0
-    # -- VeloCloud hosts whose edges will be monitored
-    monitored_velocloud_hosts: []
-    # -- List of edges that are excluded from TNBA monitoring
-    blacklisted_edges: []
-    # -- Defines for how long a ticket needs to wait since it was opened before appending a new TNBA note
-    grace_period_before_appending_new_tnba_notes: 0
-    # -- Defines for how long a Service Outage ticket needs to wait after the last documented outage to get a new TNBA note appended
-    grace_period_before_monitoring_tickets_based_on_last_documented_outage: 0
-    # -- Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves
-    min_required_confidence_for_request_and_repair_completed_predictions: 0
-    # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
-    monitoring__circuit_instability_monitoring_lookup_interval: 0
-    # -- [Monitoring] Threshold for Latency troubles
-    monitoring__latency_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Packet Loss troubles
-    monitoring__packet_loss_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Jitter troubles
-    monitoring__jitter_monitoring_threshold: 0
-    # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
-    monitoring__bandwidth_over_utilization_monitoring_threshold: 0
-    # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
-    monitoring__circuit_instability_autoresolve_threshold: 0
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
@@ -1466,11 +1177,6 @@ velocloud-bridge:
   enabled: true
   # -- Number of replicas of velocloud-bridge module
   replicaCount: 2
-  config:
-    # -- Papertrail prefix for create logs definition
-    papertrail_prefix: ""
-    # -- Velocloud credentials
-    velocloud_credentials: ""
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-bridge
     pullPolicy: Always

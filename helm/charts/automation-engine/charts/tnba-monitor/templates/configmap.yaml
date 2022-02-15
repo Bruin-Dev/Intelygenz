@@ -9,20 +9,4 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
-  MONITORING_JOB_INTERVAL: {{ (int64 .Values.config.monitoring_job_interval) | quote }}
-  GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES: {{ (int64 .Values.config.grace_period_before_appending_new_tnba_notes) | quote }}
-  GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE: {{ (int64 .Values.config.grace_period_before_monitoring_tickets_based_on_last_documented_outage) | quote }}
-  MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS: {{ (int64 .Values.config.min_required_confidence_for_request_and_repair_completed_predictions) | quote }}
-  MONITORING__AUTORESOLVE_LOOKUP_INTERVAL: {{ (int64 .Values.config.monitoring__circuit_instability_monitoring_lookup_interval) | quote }}
-  MONITORING__LATENCY_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__latency_monitoring_threshold) | quote }}
-  MONITORING__PACKET_LOSS_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__packet_loss_monitoring_threshold) | quote }}
-  MONITORING__JITTER_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__jitter_monitoring_threshold) | quote }}
-  MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD: {{ (int64 .Values.config.monitoring__bandwidth_over_utilization_monitoring_threshold) | quote }}
-  MONITORING__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD: {{ (int64 .Values.config.monitoring__circuit_instability_autoresolve_threshold) | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "tnba-monitor.fullname" . }}-{{ .Values.image.tag }}"

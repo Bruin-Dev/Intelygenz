@@ -18,6 +18,7 @@
     - export TF_VAR_CLUSTER_AUTOSCALER_HELM_CHART_VERSION=${CLUSTER_AUTOSCALER_CHART_V}
     - export TF_VAR_CHARTMUSEUM_HELM_CHART_VERSION=${CHARTMUSEUM_CHART_V}
     - export TF_VAR_EXTERNAL_DNS_HELM_CHART_VERSION=${EXTERNAL_DNS_CHART_V}
+    - export TF_VAR_EXTERNAL_SECRETS_HELM_CHART_VERSION=${EXTERNAL_SECRETS_CHART_V}
     - export TF_VAR_INGRESS_NGINX_HELM_CHART_VERSION=${INGRESS_NGINX_CHART_V}
     - export TF_VAR_METRICS_SERVER_VERSION=${KUBERNETES_METRICS_SERVER_V}
     - export TF_VAR_RELOADER_CHART_VERSION=${RELOADER_CHART_V}
@@ -49,9 +50,9 @@
                   fi
                   if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_PRO" --form "value=$(terraform output oreilly-security-group-id)"
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_LOG_GROUP_NAME" --form "value=$(terraform output fluent-bit-log-group-name)"
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_IAM_ROLE_ARN" --form "value=$(terraform output fluent-bit-role-arn)"
-                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_PRO" --form "value=$(terraform output oreilly-security-group-id)"
                   fi
                   if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."

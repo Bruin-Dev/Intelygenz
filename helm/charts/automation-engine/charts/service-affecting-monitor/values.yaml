@@ -7,15 +7,12 @@ replicaCount: 1
 
 enabled: true
 
-# -- Global configuration
+# -- Global configuration for all subcharts
 global:
   # -- Name of environment for EKS cluster and network resources
   current_environment: "dev"
-  # -- Name of environment for helm charts and
-  # redis elasticaches used
+  # -- Name of environment for helm charts
   environment: "automation-test"
-  # -- NATS cluster endpoint used by bruin-bridge
-  nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
   # -- Redis Hostname used to store information used by customer-cache
@@ -24,14 +21,19 @@ global:
   redis_tnba_feedback_hostname: "redis"
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "redis"
-  # -- Indicates if the logs will be sent to papertrail or not.
-  papertrail_active: "False"
-  # -- Papertrail host to which the logs will be sent
-  papertrail_host: "logs.papertrailapp.com"
-  # -- Papertrail port to which the logs will be sent
-  papertrail_port: "0"
-  # -- Timezone used for periodic jobs, timestamps...
-  timezone: ""
+  # -- external-secrets feature to sync parameters from AWS
+  externalSecrets:
+    # -- Enable/disable external-secrets
+    enabled: true
+    # -- Environment path to reference parameter store secrets
+    envPath: "/automation-engine/test"
+    # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
+    secretStorage:
+      # -- Custom serviceAccount to assign AWS permissions
+      serviceAccount:
+        # -- AWS IAM role that have access to get parameter's from AWS
+        # (needs secret-manager and ssm IAM permission, if use encryption also kms permissions)
+        roleARN: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -40,71 +42,10 @@ global:
     name: "ecr-registry"
 
 config:
-  papertrail_prefix: ""
   # -- Indicates if the monitor reports process will be executed on start or not
   exec_monitor_reports_on_start: "False"
   # -- Indicates if the bandwidth reports process will be executed on start or not
   exec_bandwidth_reports_on_start: "False"
-  # -- Bruin's product category under monitoring
-  monitored_product_category: ""
-  # -- [Monitoring] Defines how often devices are checked to find and report issues
-  monitoring__monitoring_job_interval: 0
-  # -- [Monitoring] VeloCloud hosts whose edges will be monitored
-  monitoring__monitored_velocloud_hosts: []
-  # -- [Monitoring] Mapping of VeloCloud hosts, Bruin customers and default contact info
-  monitoring__default_contact_info_per_customer: {}
-  # -- [Monitoring] List Bruin customers that should always use the default contact info
-  monitoring__customers_to_always_use_default_contact_info: []
-  # -- [Monitoring] Threshold for Latency troubles
-  monitoring__latency_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Packet Loss troubles
-  monitoring__packet_loss_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Jitter troubles
-  monitoring__jitter_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
-  monitoring__bandwidth_over_utilization_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Circuit Instability troubles
-  monitoring__circuit_instability_monitoring_threshold: 0
-  # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
-  monitoring__circuit_instability_autoresolve_threshold: 0
-  # -- [Monitoring] Defines how much time back to look for Latency metrics in Latency checks
-  monitoring__latency_monitoring_lookup_interval: 0
-  # -- [Monitoring] Defines how much time back to look for Packet Loss metrics in Packet Loss checks
-  monitoring__packet_loss_monitoring_lookup_interval: 0
-  # -- [Monitoring] Defines how much time back to look for Jitter metrics in Jitter checks
-  monitoring__jitter_monitoring_lookup_interval: 0
-  # -- [Monitoring] Defines how much time back to look for Bandwidth metrics in Bandwidth Over Utilization checks
-  monitoring__bandwidth_over_utilization_monitoring_lookup_interval: 0
-  # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
-  monitoring__circuit_instability_monitoring_lookup_interval: 0
-  # -- [Monitoring] Defines how much time back to look for all kinds of metrics while running auto-resolves
-  monitoring__autoresolve_lookup_interval: 0
-  # -- [Monitoring] Defines for how long a ticket can be auto-resolved after the last documented trouble
-  monitoring__grace_period_to_autoresolve_after_last_documented_trouble: 0
-  # -- [Monitoring] Defines how many times a ticket can be auto-resolved
-  monitoring__max_autoresolves_per_ticket: 0
-  # -- [Monitoring] List of client IDs for which Bandwidth Over Utilization checks are enabled
-  monitoring__customers_with_bandwidth_over_utilization_monitoring: []
-  # -- [Monitoring] List of link labels that are excluded from forwards to the ASR queue
-  monitoring__link_labels_blacklisted_in_asr_forwards: []
-  # -- [Reoccurring Trouble Report] Cron expression that determines when to build and deliver this report
-  reoccurring_trouble_report__execution_cron_expression: ""
-  # -- [Reoccurring Trouble Report] Troubles that will be reported
-  reoccurring_trouble_report__reported_troubles: []
-  # -- [Reoccurring Trouble Report] Defines how much time back to look for Bruin tickets
-  reoccurring_trouble_report__tickets_lookup_interval: 0
-  # -- [Reoccurring Trouble Report] Number of different tickets a trouble must appear in for a particular edge and interface to include it in the report
-  reoccurring_trouble_report__reoccurring_trouble_tickets_threshold: 0
-  # -- [Reoccurring Trouble Report] Mapping of Bruin customer IDs and recipients of these reports
-  reoccurring_trouble_report__recipients_per_customer: {}
-  # -- [Daily Bandwidth Report] Cron expression that determines when to build and deliver this report
-  daily_bandwidth_report__execution_cron_expression: ""
-  # -- [Daily Bandwidth Report] Defines how much time back to look for bandwidth metrics and Bruin tickets
-  daily_bandwidth_report__lookup_interval: 0
-  # -- [Daily Bandwidth Report] Customers for whom this report will be built
-  daily_bandwidth_report__enabled_customers: []
-  # -- [Daily Bandwidth Report] List of recipients that will get these reports
-  daily_bandwidth_report__recipients: []
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true

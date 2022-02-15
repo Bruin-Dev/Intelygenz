@@ -9,17 +9,4 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
-  REDIS_EMAIL_TAGGER_HOSTNAME: {{ .Values.global.redis_email_tagger_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
-  RTA_MONITOR_JOB_INTERVAL: {{ (int64 .Values.config.rta_monitor_job_interval) | quote }}
-  NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL: {{ (int64 .Values.config.new_created_tickets_feedback_job_interval) | quote }}
-  NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL: {{ (int64 .Values.config.new_closed_tickets_feedback_job_interval) | quote }}
-  MAX_CONCURRENT_EMAILS_FOR_MONITORING: {{ (int64 .Values.config.max_concurrent_emails_for_monitoring) | quote }}
-  MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK: {{ (int64 .Values.config.max_concurrent_created_tickets_for_feedback) | quote }}
-  MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK: {{ (int64 .Values.config.max_concurrent_closed_tickets_for_feedback) | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "repair-tickets-monitor.fullname" . }}-{{ .Values.image.tag }}"

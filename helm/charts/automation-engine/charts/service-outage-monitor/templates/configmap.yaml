@@ -12,23 +12,6 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ $.Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ $.Values.global.environment | quote }}
-  NATS_SERVER1: {{ $.Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ $.Values.global.redis_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ $.Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ $.Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ $.Values.global.papertrail_port | quote }}
   PAPERTRAIL_PREFIX: "{{ include "service-outage-monitor.fullname" $ }}-{{ . | replace "." "-" }}-{{ $.Values.image.tag }}"
-  TIMEZONE: {{ $.Values.global.timezone | quote }}
   ENABLE_TRIAGE_MONITORING: {{ 0 | quote }}  # Always disabled
-  MONITORING__MONITORING_JOB_INTERVAL: {{ (int64 $.Values.config.monitoring__monitoring_job_interval) | quote }}
-  MONITORING__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE: {{ (int64 $.Values.config.monitoring__quarantine_for_edges_in_link_down_outage) | quote }}
-  MONITORING__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE: {{ (int64 $.Values.config.monitoring__quarantine_for_edges_in_hard_down_outage) | quote }}
-  MONITORING__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE: {{ (int64 $.Values.config.monitoring__quarantine_for_edges_in_ha_link_down_outage) | quote }}
-  MONITORING__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE: {{ (int64 $.Values.config.monitoring__quarantine_for_edges_in_ha_soft_down_outage) | quote }}
-  MONITORING__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE: {{ (int64 $.Values.config.monitoring__quarantine_for_edges_in_ha_hard_down_outage) | quote }}
-  MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE: {{ (int64 $.Values.config.monitoring__grace_period_to_autoresolve_after_last_documented_outage) | quote }}
-  MONITORING__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS: {{ (int64 $.Values.config.monitoring__grace_period_before_attempting_new_digi_reboots) | quote }}
-  MONITORING__SEVERITY_FOR_EDGE_DOWN_OUTAGES: {{ (int64 $.Values.config.monitoring__severity_level_for_edge_down_outages) | quote }}
-  MONITORING__SEVERITY_FOR_LINK_DOWN_OUTAGES: {{ (int64 $.Values.config.monitoring__severity_level_for_link_down_outages) | quote }}
-  MONITORING__MAX_AUTORESOLVES_PER_TICKET: {{ (int64 $.Values.config.monitoring__max_autoresolves_per_ticket) | quote }}
 {{- end }}

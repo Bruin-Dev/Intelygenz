@@ -41,6 +41,11 @@ variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
   description = "Helm chart version used for external-dns"
 }
 
+variable "EXTERNAL_SECRETS_HELM_CHART_VERSION" {
+  default     = "0.4.1"
+  description = "Helm chart version used for external-secrets"
+}
+
 variable "INGRESS_NGINX_HELM_CHART_VERSION" {
   default     = "3.21.0"
   description = "Helm chart version used for ingress-nginx"

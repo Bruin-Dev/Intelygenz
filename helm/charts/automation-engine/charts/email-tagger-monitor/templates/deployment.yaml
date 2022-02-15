@@ -41,7 +41,7 @@ spec:
         {{- end }}
         - name: wait-redis-email-tagger
           image: busybox:1.28
-          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_EMAIL_TAGGER_HOSTNAME} 6379; do echo waiting for email-tagger redis; sleep 2; done']
+          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_EMAIL_TAGGER_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
           envFrom:
             - configMapRef:
                 name: {{ include "email-tagger-monitor.configmapName" . }}

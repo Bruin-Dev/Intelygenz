@@ -9,13 +9,5 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "service-outage-monitor-triage.fullname" . }}-{{ .Values.image.tag }}"
   ENABLE_TRIAGE_MONITORING: {{ 1 | quote }}  # Always enabled
-  TRIAGE__MONITORING_JOB_INTERVAL: {{ (int64 .Values.config.triage__monitoring_job_interval) | quote }}
-  TRIAGE__MAX_EVENTS_PER_EVENT_NOTE: {{ (int64 .Values.config.triage__max_events_per_event_note) | quote }}

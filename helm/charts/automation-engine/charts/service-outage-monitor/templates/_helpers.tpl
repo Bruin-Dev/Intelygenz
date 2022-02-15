@@ -44,3 +44,4 @@ Selector labels
 app.kubernetes.io/name: {{ include "service-outage-monitor.name" $ }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+

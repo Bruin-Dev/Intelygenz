@@ -6,15 +6,12 @@ replicaCount: 1
 
 enabled: true
 
-# -- Global configuration
+# -- Global configuration for all subcharts
 global:
   # -- Name of environment for EKS cluster and network resources
   current_environment: "dev"
-  # -- Name of environment for helm charts and
-  # redis elasticaches used
+  # -- Name of environment for helm charts
   environment: "automation-test"
-  # -- NATS cluster endpoint used by bruin-bridge
-  nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
   # -- Redis Hostname used to store information used by customer-cache
@@ -23,14 +20,19 @@ global:
   redis_tnba_feedback_hostname: "redis"
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "redis"
-  # -- Indicates if the logs will be sent to papertrail or not.
-  papertrail_active: "False"
-  # -- Papertrail host to which the logs will be sent
-  papertrail_host: "logs.papertrailapp.com"
-  # -- Papertrail port to which the logs will be sent
-  papertrail_port: "0"
-  # -- Timezone used for periodic jobs, timestamps...
-  timezone: ""
+  # -- external-secrets feature to sync parameters from AWS
+  externalSecrets:
+    # -- Enable/disable external-secrets
+    enabled: true
+    # -- Environment path to reference parameter store secrets
+    envPath: "/automation-engine/test"
+    # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
+    secretStorage:
+      # -- Custom serviceAccount to assign AWS permissions
+      serviceAccount:
+        # -- AWS IAM role that have access to get parameter's from AWS
+        # (needs secret-manager and ssm IAM permission, if use encryption also kms permissions)
+        roleARN: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -39,33 +41,6 @@ global:
     name: "ecr-registry"
 
 config:
-  papertrail_prefix: ""
-  # -- Bruin's product category under monitoring
-  monitored_product_category: ""
-  # -- Defines how often tickets are checked to see if they need a new TNBA note
-  monitoring_job_interval: 0
-  # -- VeloCloud hosts whose edges will be monitored
-  monitored_velocloud_hosts: []
-  # -- List of edges that are excluded from TNBA monitoring
-  blacklisted_edges: []
-  # -- Defines for how long a ticket needs to wait since it was opened before appending a new TNBA note
-  grace_period_before_appending_new_tnba_notes: 0
-  # -- Defines for how long a Service Outage ticket needs to wait after the last documented outage to get a new TNBA note appended
-  grace_period_before_monitoring_tickets_based_on_last_documented_outage: 0
-  # -- Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves
-  min_required_confidence_for_request_and_repair_completed_predictions: 0
-  # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
-  monitoring__circuit_instability_monitoring_lookup_interval: 0
-  # -- [Monitoring] Threshold for Latency troubles
-  monitoring__latency_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Packet Loss troubles
-  monitoring__packet_loss_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Jitter troubles
-  monitoring__jitter_monitoring_threshold: 0
-  # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
-  monitoring__bandwidth_over_utilization_monitoring_threshold: 0
-  # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
-  monitoring__circuit_instability_autoresolve_threshold: 0
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

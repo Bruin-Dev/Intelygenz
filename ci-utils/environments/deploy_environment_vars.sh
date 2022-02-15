@@ -13,6 +13,7 @@ function common_variables_by_environment() {
     export PAPERTRAIL_HOST=${PAPERTRAIL_HOST_DEV}
     export PAPERTRAIL_PORT=${PAPERTRAIL_PORT_DEV}
     export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_DEV}
+    export EXTERNAL_SECRETS_IAM_ROLE_ARN=${EXTERNAL_SECRETS_IAM_ROLE_ARN_DEV}
     export PAPERTRAIL_ACTIVE="false"
   else
     # common environment variables for production environment
@@ -24,6 +25,7 @@ function common_variables_by_environment() {
     export PAPERTRAIL_HOST=${PAPERTRAIL_HOST_PRO}
     export PAPERTRAIL_PORT=${PAPERTRAIL_PORT_PRO}
     export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_PRO}
+    export EXTERNAL_SECRETS_IAM_ROLE_ARN=${EXTERNAL_SECRETS_IAM_ROLE_ARN_PRO}
     export PAPERTRAIL_ACTIVE="true"
   fi
 }

@@ -7,15 +7,12 @@ replicaCount: 1
 
 enabled: true
 
-# -- Global configuration
+# -- Global configuration for all subcharts
 global:
   # -- Name of environment for EKS cluster and network resources
   current_environment: "dev"
-  # -- Name of environment for helm charts and
-  # redis elasticaches used
+  # -- Name of environment for helm charts
   environment: "automation-test"
-  # -- NATS cluster endpoint used by bruin-bridge
-  nats_server: "nats://nats:4222"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
   # -- Redis Hostname used to store information used by customer-cache
@@ -24,12 +21,19 @@ global:
   redis_tnba_feedback_hostname: "redis"
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "redis"
-  # -- Indicates if the logs will be sent to papertrail or not.
-  papertrail_active: "False"
-  # -- Papertrail host to which the logs will be sent
-  papertrail_host: "logs.papertrailapp.com"
-  # -- Papertrail port to which the logs will be sent
-  papertrail_port: "0"
+  # -- external-secrets feature to sync parameters from AWS
+  externalSecrets:
+    # -- Enable/disable external-secrets
+    enabled: true
+    # -- Environment path to reference parameter store secrets
+    envPath: "/automation-engine/test"
+    # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
+    secretStorage:
+      # -- Custom serviceAccount to assign AWS permissions
+      serviceAccount:
+        # -- AWS IAM role that have access to get parameter's from AWS 
+        # (needs secret-manager and ssm IAM permission, if use encryption also kms permissions)
+        roleARN: ""
   # -- Indicates if the helm chart will be displayed in an aws or local environment,
   # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
   mode: "aws"
@@ -38,13 +42,6 @@ global:
     name: "ecr-registry"
 
 config:
-  papertrail_prefix: ""
-  # -- E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories
-  duplicate_inventories_recipient: ""
-  # -- Defines how often the cache is refreshed
-  refresh_job_interval: 0
-  # -- Management statuses that should be considered in the caching process
-  whitelisted_management_statuses: []
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

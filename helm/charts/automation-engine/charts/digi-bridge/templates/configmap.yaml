@@ -9,11 +9,5 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
   REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
-  DIGI_TOKEN_TTL: {{ (int64 .Values.config.digi_token_ttl) | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "digi-bridge.fullname" . }}-{{ .Values.image.tag }}"

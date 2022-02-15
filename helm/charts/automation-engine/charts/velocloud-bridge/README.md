@@ -37,4 +37,3 @@ A Helm chart for Kubernetes to deploy microservice t7-bridge
 | service.port | int | `5000` |  |
 | service.type | string | `"ClusterIP"` |  |
 | tolerations | list | `[]` |  |
-

@@ -9,13 +9,4 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
-  MONITORING_JOB_INTERVAL: {{ (int64 .Values.config.monitoring_job_interval) | quote }}
-  QUARANTINE_FOR_DEVICES_IN_OUTAGE: {{ (int64 .Values.config.quarantine_for_devices_in_outage) | quote }}
-  GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE: {{ (int64 .Values.config.grace_period_to_autoresolve_after_last_documented_outage) | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "hawkeye-outage-monitor.fullname" . }}-{{ .Values.image.tag }}"

@@ -22,6 +22,7 @@
     - source ci-utils/environments/build_number_assign.sh
     # GET HELM CHART SET ATTRIBUTES
     - source ci-utils/environments/deploy_environment_vars.sh
+    - export CURRENT_ENVIRONMENT_SHORT=${CURRENT_ENVIRONMENT:0:3}
     - >
       if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
         export TICKET_COLLECTOR_ENABLED=false
@@ -32,6 +33,7 @@
     # PRINT PIPELINE ENVIRONMENT VARIABLES (FOR DEBUG)
     - echo "the ENVIRONMENT_SLUG is $ENVIRONMENT_SLUG"
     - echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
+    - echo "the CURRENT_ENVIRONMENT_SHORT is $CURRENT_ENVIRONMENT_SHORT"
     - echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
     - echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
     - echo "SOM hosts are $SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS"
@@ -44,11 +46,13 @@
         helm repo add mettel https://chartmuseum.mettel-automation.net --username="${CHARTMUSEUM_USER}" --password="${CHARTMUSEUM_PASSWORD}"
         export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
         helm cm-push ${HELM_CHART_DIR}/ --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" mettel
-        envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+        envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
+        cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm repo update
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}
       else
-        envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml
+        envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
+        cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${NAMESPACE}
       fi
 

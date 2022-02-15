@@ -9,6 +9,8 @@ locals {
   chartmuseum-policy-name = "${local.cluster_name}-chartmuseum-oidc-policy"
   fluent-bit-role-name =  "${local.cluster_name}-fluent-bit-oidc"
   fluent-bit-policy-name = "${local.cluster_name}-fluent-bit-oidc-policy"
+  external-secrets-role-name =  "${local.cluster_name}-external-secrets-oidc"
+  external-secrets-policy-name = "${local.cluster_name}-external-secrets-oidc-policy"
 }
 
 ######################
@@ -44,6 +46,56 @@ resource "aws_iam_role_policy_attachment" "cluster-autoscaler-eks-attachment" {
   role       = aws_iam_role.cluster-autoscaler-role-eks.name
   policy_arn = aws_iam_policy.cluster-autoscaler-eks.arn
 }
+
+####################
+# EXTERNAL SECRETS #
+####################
+data "template_file" "external-secrets-eks-role" {
+  template = file("${path.module}/roles/external-secrets-role.json")
+
+  vars = {
+    eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
+    account_id = data.aws_caller_identity.current.account_id
+  }
+}
+
+resource "aws_iam_role" "external-secrets-role-eks" {
+  name                  = local.external-secrets-role-name
+  assume_role_policy    = data.template_file.external-secrets-eks-role.rendered
+  force_detach_policies = true
+
+  tags                  = local.common_tags
+}
+
+data "template_file" "external-secrets-eks-policy" {
+  template = file("${path.module}/policies/external-secrets-policy.json")
+
+  vars = {
+    account_id = data.aws_caller_identity.current.account_id
+  }
+}
+
+resource "aws_iam_policy" "external-secrets-eks" {
+  name   = local.external-secrets-policy-name
+  policy = data.template_file.external-secrets-eks-policy.rendered
+}
+
+resource "aws_iam_role_policy_attachment" "external-secrets-eks-attachment" {
+  role       = aws_iam_role.external-secrets-role-eks.name
+  policy_arn = aws_iam_policy.external-secrets-eks.arn
+}
+
+resource "aws_ssm_parameter" "external-secrets-eks-parameter" {
+  name        = "/automation-engine/${substr(var.CURRENT_ENVIRONMENT, 0, 3)}/external-secrets/iam-role-arn"
+  description = "The ARN of the AWS IAM role necesary to manage parameter store and secret manager"
+  type        = "SecureString"
+  value       = aws_iam_role.external-secrets-role-eks.arn
+
+  tags = merge(local.common_tags, {
+    name = "external-secrets-iam-role-arn"
+  })
+}
+
 
 ######################
 #    CHARTMUSEUM     #

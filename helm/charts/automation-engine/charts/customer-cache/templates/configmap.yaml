@@ -9,13 +9,5 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
   REDIS_CUSTOMER_CACHE_HOSTNAME: {{ .Values.global.redis_customer_cache_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
-  REFRESH_JOB_INTERVAL: {{ (int64 .Values.config.refresh_job_interval) | quote }}
-  REFRESH_CHECK_INTERVAL: {{ (int64 .Values.config.refresh_check_interval) | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "customer-cache.fullname" . }}-{{ .Values.image.tag }}"

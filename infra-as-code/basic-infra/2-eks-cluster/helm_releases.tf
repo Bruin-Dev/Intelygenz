@@ -35,6 +35,31 @@ resource "helm_release" "cluster-autoscaler" {
    ]
 }
 
+resource "helm_release" "external-secrets" {
+  name          = "external-secrets"
+
+  repository    = "https://charts.external-secrets.io"
+  chart         = "external-secrets"
+
+  version       = var.EXTERNAL_SECRETS_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  wait          = true
+  recreate_pods = false
+
+  values = [
+    file("helm/external-charts/external-secrets-values.yaml")
+  ]
+
+  depends_on = [
+      aws_iam_role.external-secrets-role-eks,
+      null_resource.associate-iam-oidc-provider,
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
+   ]
+}
+
 resource "helm_release" "chartmuseum" {
   count         = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   name          = "chartmuseum"

@@ -9,15 +9,5 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  NATS_SERVER1: {{ .Values.global.nats_server | quote }}
-  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
   REDIS_EMAIL_TAGGER_HOSTNAME: {{ .Values.global.redis_email_tagger_hostname | quote }}
-  PAPERTRAIL_ACTIVE: {{ .Values.global.papertrail_active | quote }}
-  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host | quote }}
-  PAPERTRAIL_PORT: {{ .Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: {{ .Values.config.papertrail_prefix | quote }}
-  TIMEZONE: {{ .Values.global.timezone | quote }}
-  NEW_EMAILS_JOB_INTERVAL: {{ (int64 .Values.config.new_emails_job_interval) | quote }}
-  NEW_TICKETS_JOB_INTERVAL: {{ (int64 .Values.config.new_tickets_job_interval) | quote }}
-  MAX_CONCURRENT_EMAILS: {{ (int64 .Values.config.max_concurrent_emails) | quote }}
-  MAX_CONCURRENT_TICKETS: {{ (int64 .Values.config.max_concurrent_tickets) | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "email-tagger-monitor.fullname" . }}-{{ .Values.image.tag }}"
