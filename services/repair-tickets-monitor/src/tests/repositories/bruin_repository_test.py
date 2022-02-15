@@ -335,7 +335,7 @@ class TestBruinRepository:
         assert response == expected_response
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_service_numbers__ok_test(
+    async def get_existing_tickets_with_service_number__ok_test(
             self,
             bruin_repository,
             make_rpc_response,
@@ -347,22 +347,22 @@ class TestBruinRepository:
         site_ids = ["1234"]
         tickets_input = [make_ticket(ticket_id=ticket_id)]
         expected_service_numbers = ['VC05200085666', 'VC05200085762']
-        tickets_response = make_rpc_response(request_id=uuid_, status=200, body=tickets_input)
+        basic_info_response = make_rpc_response(request_id=uuid_, status=200, body=tickets_input)
         details_response = make_rpc_response(request_id=uuid_, status=200, body=ticket_details_1)
 
-        bruin_repository.get_tickets_basic_info = CoroutineMock(return_value=tickets_response)
+        bruin_repository.get_tickets_basic_info = CoroutineMock(return_value=basic_info_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=details_response)
         bruin_repository._get_details_service_numbers = Mock(return_value=expected_service_numbers)
 
-        open_tickets = await bruin_repository.get_open_tickets_with_service_numbers(client_id, site_ids)
+        existing_tickets = await bruin_repository.get_existing_tickets_with_service_numbers(client_id, site_ids)
 
-        assert open_tickets['status'] == 200
-        assert open_tickets['body'][0]['ticket_id'] == ticket_id
-        assert len(open_tickets['body']) == 1
-        assert open_tickets['body'][0]['service_numbers'] == expected_service_numbers
+        assert existing_tickets['status'] == 200
+        assert existing_tickets['body'][0]['ticket_id'] == ticket_id
+        assert len(existing_tickets['body']) == 2
+        assert existing_tickets['body'][0]['service_numbers'] == expected_service_numbers
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_service_numbers__error_tickets_test(
+    async def get_existing_tikets__error_tickets_test(
             self,
             bruin_repository,
             make_rpc_response,
@@ -373,13 +373,13 @@ class TestBruinRepository:
         tickets_response = make_rpc_response(request_id=uuid_, status=400, body=error_message)
         bruin_repository.get_tickets_basic_info = CoroutineMock(return_value=tickets_response)
 
-        tickets = await bruin_repository.get_open_tickets_with_service_numbers(client_id, site_ids)
+        existing_tickets = await bruin_repository.get_existing_tickets_with_service_numbers(client_id, site_ids)
 
-        assert tickets['status'] == 400
-        assert tickets['body'] == 'Error while retrieving open tickets'
+        assert existing_tickets['status'] == 400
+        assert existing_tickets['body'] == 'Error while retrieving tickets'
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_service_numbers__empty_tickets_test(
+    async def get_existing_tickets_with_service_numbers__empty_tickets_test(
             self,
             bruin_repository,
             make_rpc_response,
@@ -390,13 +390,13 @@ class TestBruinRepository:
         tickets_response = make_rpc_response(request_id=uuid_, status=200, body=error_message)
         bruin_repository.get_tickets_basic_info = CoroutineMock(return_value=tickets_response)
 
-        tickets = await bruin_repository.get_open_tickets_with_service_numbers(client_id, site_ids)
+        tickets = await bruin_repository.get_existing_tickets_with_service_numbers(client_id, site_ids)
 
         assert tickets['status'] == 404
-        assert tickets['body'] == 'No open tickets found'
+        assert tickets['body'] == 'No tickets found'
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_service_numbers__details_error_test(
+    async def get_existing_tickets_with_service_numbers__details_error_test(
             self,
             bruin_repository,
             make_ticket,
@@ -413,10 +413,10 @@ class TestBruinRepository:
         bruin_repository.get_tickets_basic_info = CoroutineMock(return_value=tickets_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=details_response)
 
-        open_tickets = await bruin_repository.get_open_tickets_with_service_numbers(client_id, site_ids)
+        existing_tickets = await bruin_repository.get_existing_tickets_with_service_numbers(client_id, site_ids)
 
-        assert open_tickets['status'] == 200
-        assert open_tickets['body'] == []
+        assert existing_tickets['status'] == 200
+        assert existing_tickets['body'] == []
 
     def _decamelize_ticket_test(self, bruin_repository, make_ticket):
         input_ticket = make_ticket(
