@@ -567,6 +567,7 @@ class TestFraudMonitor:
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
+        fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         assert result is False
 
     @pytest.mark.asyncio
@@ -582,6 +583,7 @@ class TestFraudMonitor:
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
+        fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         assert result is True
 
     @pytest.mark.asyncio
@@ -605,6 +607,7 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
                                                                                      contacts)
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
+        fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         assert result is False
 
     @pytest.mark.asyncio
@@ -634,6 +637,7 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, service_number,
                                                                                        email_body, msg_uid)
         fraud_monitor._notifications_repository.notify_successful_note_append.assert_not_awaited()
+        fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         assert result is False
 
     @pytest.mark.asyncio
@@ -664,6 +668,8 @@ class TestFraudMonitor:
                                                                                        email_body, msg_uid)
         fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(ticket_id,
                                                                                                        service_number)
+        fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
+            ticket_id=ticket_id, service_number=service_number)
         assert result is True
 
     @pytest.mark.asyncio

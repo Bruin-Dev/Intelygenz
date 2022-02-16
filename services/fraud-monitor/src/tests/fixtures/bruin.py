@@ -298,6 +298,24 @@ def make_open_or_resolve_ticket_request(make_rpc_request):
     return _inner
 
 
+@pytest.fixture(scope='session')
+def make_change_detail_work_queue_request(make_rpc_request):
+    def _inner(*, request_id: str = '', ticket_id: int = 0, service_number: str = '',
+               target_queue: str = ''):
+        payload = {
+            'ticket_id': ticket_id,
+            'service_number': service_number,
+            'queue_name': target_queue,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
 # RPC responses
 @pytest.fixture(scope='session')
 def make_get_client_info_by_did_response(make_rpc_response):

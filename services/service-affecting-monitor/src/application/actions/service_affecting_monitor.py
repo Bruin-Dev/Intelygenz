@@ -878,18 +878,17 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        self._logger.info(
-            f'Task related to serial {serial_number} of ticket {ticket_id} will be forwarded to the '
-            f'HNOC queue shortly'
-        )
-        self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        if trouble is not AffectingTroubles.BOUNCING:
+            self._schedule_forward_to_hnoc_queue(ticket_id, serial_number)
 
         return ticket_id
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
+        self._logger.info(f'Scheduling forward to HNOC task job for ticket_id {ticket_id} and '
+                          f'serial {serial_number}...')
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
-        forward_task_run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['forward_to_hnoc'])
+        forward_task_run_date = current_datetime + timedelta(minutes=self._config.MONITOR_CONFIG['forward_to_hnoc'])
 
         self._scheduler.add_job(
             self._forward_ticket_to_hnoc_queue, 'date',
@@ -900,6 +899,20 @@ class ServiceAffectingMonitor:
         )
 
     async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
+        self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved')
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+
+        if ticket_details_response['status'] not in range(200, 300):
+            return
+
+        ticket_tasks = ticket_details_response['body']['ticketDetails']
+        relevant_task = self._ticket_repository.find_task_by_serial_number(ticket_tasks, serial_number)
+        if self._ticket_repository.is_task_resolved(relevant_task):
+            self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. "
+                              f"Skipping forward to HNOC...")
+            return
+        self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
+                          f"Forwarding to HNOC...")
         change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
             ticket_id=ticket_id, service_number=serial_number
         )
@@ -928,7 +941,9 @@ class ServiceAffectingMonitor:
                 link_interface_type = link_configuration['type']
 
         if link_interface_type != 'WIRED':
-            self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED')
+            self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward'
+                              f'to HNOC...')
+            await self._forward_ticket_to_hnoc_queue(ticket_id, serial_number)
             return
 
         self._logger.info(f'Filtering out any of the wired links of serial {serial_number} that contains any of the '

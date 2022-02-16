@@ -847,16 +847,14 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def change_detail_work_queue_to_hnoc_test(self, bruin_repository):
         ticket_id = 12345
-        detail_id = 67890
         task_result = "HNOC Investigate"
         service_number = 'VC1234567'
 
         await bruin_repository.change_detail_work_queue_to_hnoc(ticket_id=ticket_id,
-                                                                service_number=service_number,
-                                                                detail_id=detail_id)
+                                                                service_number=service_number)
 
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            ticket_id=ticket_id, task_result=task_result, service_number=service_number, detail_id=detail_id
+            ticket_id=ticket_id, task_result=task_result, service_number=service_number
         )
 
     @pytest.mark.asyncio

@@ -673,3 +673,100 @@ class TestBruinRepository:
 
             result = bruin_repository._build_fraud_note(email_body, msg_uid, reopening=True)
             assert result == re_open_note
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue__work_queue_changed_test(
+            self, bruin_repository, make_change_detail_work_queue_request, bruin_generic_200_response):
+        ticket_id = 12345
+        target_queue = "Wireless Repair Intervention Needed"
+        service_number = 'VC1234567'
+
+        request = make_change_detail_work_queue_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+            target_queue=target_queue,
+        )
+
+        bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(service_number=service_number,
+                                                                     ticket_id=ticket_id,
+                                                                     task_result=target_queue)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.change.work", request, timeout=90
+        )
+        assert result == bruin_generic_200_response
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue__rpc_request_failing_test(
+            self, bruin_repository, make_change_detail_work_queue_request):
+        ticket_id = 12345
+        target_queue = "Wireless Repair Intervention Needed"
+        service_number = 'VC1234567'
+
+        request = make_change_detail_work_queue_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+            target_queue=target_queue,
+        )
+
+        bruin_repository._event_bus.rpc_request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(service_number=service_number,
+                                                                     ticket_id=ticket_id,
+                                                                     task_result=target_queue)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.change.work", request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        bruin_repository._logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue__rpc_request_has_not_2xx_status_test(
+            self, bruin_repository, make_change_detail_work_queue_request, bruin_500_response):
+        ticket_id = 12345
+        target_queue = "Wireless Repair Intervention Needed"
+        service_number = 'VC1234567'
+
+        request = make_change_detail_work_queue_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+            target_queue=target_queue,
+        )
+
+        bruin_repository._event_bus.rpc_request.return_value = bruin_500_response
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(service_number=service_number,
+                                                                     ticket_id=ticket_id,
+                                                                     task_result=target_queue)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.change.work", request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        bruin_repository._logger.error.assert_called_once()
+        assert result == bruin_500_response
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue_to_hnoc_test(self, bruin_repository):
+        ticket_id = 12345
+        task_result = "HNOC Investigate"
+        service_number = 'VC1234567'
+
+        await bruin_repository.change_detail_work_queue_to_hnoc(ticket_id=ticket_id,
+                                                                service_number=service_number)
+
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            ticket_id=ticket_id, task_result=task_result, service_number=service_number
+        )

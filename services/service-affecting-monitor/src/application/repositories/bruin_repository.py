@@ -427,12 +427,11 @@ class BruinRepository:
 
         return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
 
-    async def change_detail_work_queue_to_hnoc(self, ticket_id: int, *, service_number: str = None,
-                                               detail_id: int = None):
+    async def change_detail_work_queue_to_hnoc(self, ticket_id: int, *, service_number: str = None):
         task_result = 'HNOC Investigate'
 
         return await self.change_detail_work_queue(
-            ticket_id=ticket_id, task_result=task_result, service_number=service_number, detail_id=detail_id
+            ticket_id=ticket_id, task_result=task_result, service_number=service_number
         )
 
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):

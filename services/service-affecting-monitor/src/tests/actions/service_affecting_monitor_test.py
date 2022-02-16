@@ -1836,6 +1836,25 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
+    async def create_affecting_ticket__ticket_created_bouncing_trouble_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_with_events_and_contact_info,
+            bruin_generic_200_response, make_create_ticket_200_response):
+        trouble = AffectingTroubles.BOUNCING
+        link_info = make_structured_metrics_object_with_cache_with_events_and_contact_info()
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+            make_create_ticket_200_response()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
     async def create_affecting_ticket__ticket_created_test(
             self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
             bruin_generic_200_response, make_create_ticket_200_response):
@@ -1860,7 +1879,7 @@ class TestServiceAffectingMonitor:
 
         current_datetime = frozen_datetime.now()
         wait_seconds_until_forward = service_affecting_monitor._config.MONITOR_CONFIG['forward_to_hnoc']
-        forward_task_run_date = current_datetime + timedelta(seconds=wait_seconds_until_forward)
+        forward_task_run_date = current_datetime + timedelta(minutes=wait_seconds_until_forward)
 
         with patch.multiple(service_affecting_monitor_module, datetime=frozen_datetime, timezone=Mock()):
             service_affecting_monitor._schedule_forward_to_hnoc_queue(
@@ -1876,16 +1895,61 @@ class TestServiceAffectingMonitor:
         )
 
     @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__change_work_queue_request_has_not_2xx_status_test(
+    async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
             self, service_affecting_monitor, bruin_500_response):
         ticket_id = 12345
         serial_number = 'VC1234567'
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
+
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue__resolved_ticket_test(
+            self, service_affecting_monitor, make_detail_item, make_ticket_details,
+            make_rpc_response):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        detail_item = make_detail_item(value=serial_number, status='R')
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue__change_work_queue_request_has_not_2xx_status_test(
+            self, service_affecting_monitor, bruin_500_response, make_detail_item, make_ticket_details,
+            make_rpc_response):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        detail_item = make_detail_item(value=serial_number)
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
 
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_500_response
 
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id, service_number=serial_number,
         )
@@ -1893,15 +1957,25 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_test(
-            self, service_affecting_monitor, bruin_generic_200_response):
+            self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
+            make_rpc_response):
         ticket_id = 12345
         serial_number = 'VC1234567'
+
+        detail_item = make_detail_item(value=serial_number, status='O')
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
 
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_generic_200_response
 
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id, service_number=serial_number,
         )
@@ -2721,8 +2795,11 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository = Mock()
         service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
         await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
 
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
             ticket_id, task_result, service_number=serial, detail_id=detail_item['detailID']
@@ -2731,6 +2808,302 @@ class TestServiceAffectingMonitor:
             ticket_id, link_data['link_status'], serial
         )
         service_affecting_monitor._notifications_repository.send_slack_message.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_no_link_interface_found_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE2')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial)
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_not_wired_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1')
+        link_configuration = make_links_configuration(type_='WIRELESS', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial)
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_should_not_be_forwarded_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1', display_name='BYOB')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_non_2xx_ticket_details_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_rpc_response, bruin_500_response):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_other_troubles_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response, make_ticket_note):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        note = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Latency", service_numbers=[serial])
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item], notes=[note])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_already_forwarded_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response, make_ticket_note):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        note = make_ticket_note(text=f"#*MetTel's IPA*#\nMoving task to: ASR Investigate", service_numbers=[serial])
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item], notes=[note])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = make_rpc_response(
+            body=None,
+            status=200,
+        )
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def attempt_forward_to_asr_non_2xx__change_work_queue_test(
+            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
+            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
+            make_detail_item, make_ticket_details, make_rpc_response, bruin_500_response):
+        ticket_id = 12345
+        serial = 'VC1234567'
+        task_result = 'No Trouble Found - Carrier Issue'
+
+        link = make_link(interface='GE1')
+        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+
+        cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
+        structured_metrics_object = make_structured_metrics_object(link_info=link)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
+                                                                               metrics_object=structured_metrics_object)
+
+        detail_item = make_detail_item(value=serial)
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = bruin_500_response
+
+        service_affecting_monitor._notifications_repository = Mock()
+        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
+
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            ticket_id, task_result, service_number=serial, detail_id=detail_item['detailID']
+        )
+        service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
     def should_be_forwarded_to_asr_test(self, service_affecting_monitor, make_link, make_structured_metrics_object):
         link = make_link(display_name='Test link')

@@ -542,9 +542,6 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
-                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                            serial_number=serial_number,
-                                                            edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 409:
@@ -575,8 +572,6 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                            serial_number=serial_number, edge_status=edge_status)
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 472:
@@ -585,8 +580,7 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
-                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                            serial_number=serial_number, edge_status=edge_status)
+
                         await self._append_triage_note(
                             ticket_creation_response_body, cached_edge, edge_status, outage_type, is_reopen_note=True,
                         )
@@ -602,8 +596,7 @@ class OutageMonitor:
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
-                        self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
-                                                            serial_number=serial_number, edge_status=edge_status)
+
                         await self._append_triage_note(
                             ticket_creation_response_body, cached_edge, edge_status, outage_type
                         )
@@ -637,48 +630,40 @@ class OutageMonitor:
 
         self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
-    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
+    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, forward_time=1):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
-        forward_task_run_date = current_datetime + timedelta(
-            seconds=self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc'])
+        forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'edge_status': edge_status},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=False,
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
-    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, edge_status):
-        if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
-            self._logger.info(
-                f'Edge with serial {serial_number} was detected to be DOWN. Ticket {ticket_id} will '
-                'be forwarded to the HNOC Investigate queue.'
-            )
+    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
+        self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before attempting'
+                          f'to forward to HNOC...')
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
-            await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
-        elif self._outage_repository.is_any_link_disconnected(edge_status['links']):
-            self._logger.info(f'At least one link of the edge with serial {serial_number} was DISCONNECTED.')
+        if ticket_details_response['status'] not in range(200, 300):
+            return
 
-            ticket_data_response = await self._bruin_repository.get_ticket_overview(ticket_id=ticket_id)
-            if ticket_data_response['status'] not in range(200, 300):
-                return
+        ticket_details = ticket_details_response['body']['ticketDetails']
+        most_recent_detail = self._get_first_element_matching(
+            ticket_details,
+            lambda detail: detail['detailValue'] == serial_number,
+        )
+        if self._is_detail_resolved(most_recent_detail):
+            self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. "
+                              f"Skipping forward to HNOC...")
+            return
+        self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
+                          f"Forwarding to HNOC...")
 
-            ticket_creation_date = ticket_data_response['body']['createDate']
-            if not self._is_ticket_old_enough(ticket_creation_date):
-                self._logger.info(
-                    f'Ticket {ticket_id} is too recent, so detail related to serial {serial_number} will not be '
-                    'forwarded to the HNOC Investigate queue'
-                )
-                return
-
-            self._logger.info(
-                f'Ticket {ticket_id} is old enough, so detail related to serial {serial_number} will be forwarded '
-                'to the HNOC Investigate queue'
-            )
-            await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
 
     async def change_detail_work_queue(self, ticket_id, serial_number):
         task_result = 'HNOC Investigate'
@@ -1018,7 +1003,12 @@ class OutageMonitor:
             )
             change_severity_task = self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
             target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+            self.schedule_forward_to_hnoc_queue(
+                ticket_id, serial_number, self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
+
         else:
+            self.schedule_forward_to_hnoc_queue(
+                ticket_id, serial_number, self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 if ticket_details_response['status'] not in range(200, 300):

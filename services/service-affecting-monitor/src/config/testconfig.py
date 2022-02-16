@@ -55,7 +55,7 @@ MONITOR_CONFIG = {
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
         AffectingTroubles.BOUNCING: 60,
     },
-    'forward_to_hnoc': 60,
+    'forward_to_hnoc': 90,
     'autoresolve': {
         'semaphore': 3,
         'metrics_lookup_interval_minutes': 30,

@@ -9485,37 +9485,7 @@ class TestServiceOutageMonitor:
         edge_serial = 'VC5678901'
         edge_enterprise_id = 3
         edge_id = 1
-        edge_status = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_id,
-            'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
-        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -9536,19 +9506,17 @@ class TestServiceOutageMonitor:
                                        digi_repository, ha_repository)
 
         current_datetime = datetime.now()
-        forward_task_run_date = current_datetime + timedelta(
-            seconds=outage_monitor._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc'])
+        forward_task_run_date = current_datetime + timedelta(minutes=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
                 outage_monitor.schedule_forward_to_hnoc_queue(ticket_id=ticket_id,
-                                                              serial_number=serial_number,
-                                                              edge_status=edge_status)
+                                                              serial_number=serial_number)
 
         scheduler.add_job.assert_called_once_with(
             outage_monitor.forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'edge_status': edge_status},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=False,
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
@@ -9645,162 +9613,47 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue_with_faulty_edge_test(self):
+    async def forward_ticket_to_hnoc_queue_test(self):
         serial_number = 'VC1234567'
         ticket_id = 12345  # Ticket ID
-        velocloud_host = 'mettel.velocloud.net'
-        edge_serial = 'VC5678901'
-        edge_enterprise_id = 3
-        edge_id = 1
-        edge_status = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'OFFLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_id,
-            'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "O",
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        ha_repository = Mock()
-        velocloud_repository = Mock()
-        bruin_repository = Mock()
-
-        outage_repository = Mock()
-        config = testconfig
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-        outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=True)
-        outage_monitor.change_detail_work_queue = CoroutineMock()
-        next_run_time = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, edge_status)
-
-        outage_monitor.change_detail_work_queue.assert_called_once_with(
-            serial_number=serial_number,
-            ticket_id=ticket_id)
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue_with_faulty_link_test(self):
-        serial_number = 'VC1234567'
-        ticket_id = 12345  # Ticket ID
-        velocloud_host = 'mettel.velocloud.net'
-        edge_serial = 'VC5678901'
-        edge_enterprise_id = 3
-        edge_id = 1
-        ticket = {
-            'ticketID': 123,
-            "clientName": "Sam &amp; Su's Retail Shop 5",
-            "category": "",
-            "topic": "Add Cloud PBX User License",
-            "referenceTicketNumber": 0,
-            "ticketStatus": "Resolved",
-            "address": {
-                "address": "69 Blanchard St",
-                "city": "Newark",
-                "state": "NJ",
-                "zip": "07105-4701",
-                "country": "USA"
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
             },
-            "createDate": "4/23/2019 7:59:50 PM",
-            "createdBy": "Amulya Bidar Nataraj 113",
-            "creationNote": 'null',
-            "resolveDate": "4/23/2019 8:00:35 PM",
-            "resolvedby": 'null',
-            "closeDate": 'null',
-            "closedBy": 'null',
-            "lastUpdate": 'null',
-            "updatedBy": 'null',
-            "mostRecentNote": " ",
-            "nextScheduledDate": "4/23/2019 4:00:00 AM",
-            "flags": "",
-            "severity": "100"
-        }
-        response_overview = {
             'status': 200,
-            'body': ticket
         }
-        edge_status = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'ONLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_id,
-            'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+
+        change_detail_work_queue_response = {
+            'body': 'Success',
+            'status': 200
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
+
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
         velocloud_repository = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
 
         outage_repository = Mock()
         config = testconfig
@@ -9809,89 +9662,54 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_monitor._outage_repository.is_any_link_disconnected = Mock(return_value=True)
-        outage_monitor.change_detail_work_queue = CoroutineMock()
-        outage_monitor._bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
-        outage_monitor._is_ticket_old_enough = CoroutineMock(return_value=True)
-        next_run_time = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, edge_status)
 
-        outage_monitor.change_detail_work_queue.assert_called_once_with(
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
             serial_number=serial_number,
-            ticket_id=ticket_id)
+            ticket_id=ticket_id,
+            task_result='HNOC Investigate')
+        notifications_repository.send_slack_message.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue_with_faulty_link_and_ticket_overview_rpc_returning_4xx_test(self):
+    async def forward_ticket_to_hnoc_queue_non_2xx_ticket_detail_return_test(self):
         serial_number = 'VC1234567'
         ticket_id = 12345  # Ticket ID
-        velocloud_host = 'mettel.velocloud.net'
-        edge_serial = 'VC5678901'
-        edge_enterprise_id = 3
-        edge_id = 1
-        response_overview = {
-            'status': 400,
-            'body': []
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "R",
         }
-        edge_status = {
-            'host': velocloud_host,
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': edge_enterprise_id,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'ONLINE',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': edge_id,
-            'edgeSerialNumber': edge_serial,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'links': [
-                {
-                    'displayName': 'Test Name',
-                    'isp': None,
-                    'interface': 'GE1',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-                {
-                    'displayName': '70.59.5.185',
-                    'isp': None,
-                    'interface': 'Augmented',
-                    'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                    'linkState': 'DISCONNECTED',
-                    'linkLastActive': '2020-09-29T04:45:15.000Z',
-                    'linkVpnState': 'DISCONNECTED',
-                    'linkId': 5293,
-                    'linkIpAddress': '70.59.5.185',
-                },
-            ],
+
+        ticket_details_response = {
+            'body': 'Failed',
+            'status': 400,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Failed',
+            'status': 400
         }
 
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
+
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
         velocloud_repository = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
 
         outage_repository = Mock()
         config = testconfig
@@ -9900,17 +9718,130 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
-        outage_monitor.change_detail_work_queue = CoroutineMock()
-        outage_monitor._bruin_repository.get_ticket_overview = CoroutineMock(return_value=response_overview)
-        next_run_time = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, edge_status)
 
-        outage_monitor.change_detail_work_queue.assert_not_called()
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_resolved_ticket_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "R",
+        }
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Failed',
+            'status': 400
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_non_2xx_change_work_queue_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "O",
+        }
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Failed',
+            'status': 400
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result='HNOC Investigate'
+        )
+        notifications_repository.send_slack_message.assert_not_awaited()
 
     def is_ticket_old_enough_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
@@ -10908,10 +10839,11 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def change_ticket_severity_with_edge_down_test(self):
         ticket_id = 12345
+        serial = 'VC1234567'
         edge_status = {
             # Some fields omitted for simplicity
             'edgeState': 'DISCONNECTED',
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial,
             'links': [
                 # No links specified for simplicity
             ],
@@ -10953,12 +10885,15 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
 
         bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
         bruin_repository.change_ticket_severity_for_offline_edge.assert_awaited_once_with(ticket_id)
 
     @pytest.mark.asyncio
@@ -10968,6 +10903,8 @@ class TestServiceOutageMonitor:
         link_1_interface = 'REX'
         link_2_interface = 'RAY'
         link_3_interface = 'Mk. II'
+
+        serial = 'VC1234567'
 
         link_1 = {
             # Some fields omitted for simplicity
@@ -10987,7 +10924,7 @@ class TestServiceOutageMonitor:
         edge_status = {
             # Some fields omitted for simplicity
             'edgeState': 'ONLINE',
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial,
             'links': [
                 link_1,
                 link_2,
@@ -11041,11 +10978,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
 
         bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
             ticket_id, disconnected_interfaces
         )
@@ -11149,6 +11089,7 @@ class TestServiceOutageMonitor:
                                        digi_repository, ha_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=False)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
 
@@ -11156,6 +11097,8 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
         bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial_number, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
             ticket_id, disconnected_interfaces
         )
@@ -11249,11 +11192,14 @@ class TestServiceOutageMonitor:
                                        digi_repository, ha_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial_number, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
         bruin_repository.get_ticket.assert_not_awaited()
         outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
         bruin_repository.change_ticket_severity_for_disconnected_links.assert_not_awaited()
@@ -11331,9 +11277,12 @@ class TestServiceOutageMonitor:
                                        digi_repository, ha_repository)
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=True)
 
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial_number, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_not_called()
         bruin_repository.get_ticket.assert_not_awaited()
@@ -11343,10 +11292,11 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def change_ticket_severity_with_retrieval_of_ticket_info_returning_non_2xx_status_test(self):
         ticket_id = 12345
+        serial = 'VC1234567'
         edge_status = {
             # Some fields omitted for simplicity
             'edgeState': 'DISCONNECTED',
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial,
             'links': [
                 # No links specified for simplicity
             ],
@@ -11381,9 +11331,12 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
 
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
         bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
         bruin_repository.change_ticket_severity_for_offline_edge.assert_not_awaited()
@@ -11391,10 +11344,12 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def change_ticket_severity_with_ticket_already_in_target_severity_level_test(self):
         ticket_id = 12345
+        serial = 'VC1234567'
+
         edge_status = {
             # Some fields omitted for simplicity
             'edgeState': 'DISCONNECTED',
-            'edgeSerialNumber': 'VC1234567',
+            'edgeSerialNumber': serial,
             'links': [
                 # No links specified for simplicity
             ],
@@ -11436,9 +11391,12 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=True)
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         await outage_monitor._change_ticket_severity(ticket_id, edge_status, check_ticket_tasks=False)
 
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+            ticket_id, serial, config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
         bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity_level)
         bruin_repository.change_ticket_severity_for_offline_edge.assert_not_awaited()
