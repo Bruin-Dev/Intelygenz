@@ -100,6 +100,12 @@ data:
         .predefined select{
             height: 24px;
         }
+        .hidden{
+            display: none;
+        }
+        .show{
+            display: inline;
+        }
       </style>
       <title>Dashboard</title>
     </head>
@@ -118,12 +124,17 @@ data:
                 <option value="now%28%29%20-%207d">past 7d</option>
                 <option value="now%28%29%20-%2030d">past 30d</option>
                 <!-- Custom predefined values -->
-                this_week, last_week, current_month, last_month
+                this_week, last_week, current_month, last_month, custom
                 <option value="this_week">current week</option>
                 <option value="last_week">last week</option>
                 <option value="current_month">current month</option>
                 <option value="last_month">last month</option>
+                <option value="custom">custom date</option>
             </select>
+            <div class="hidden" id="date_picker">
+                <input type="date" id="date_picker_start" name="date_picker_update">
+                <input type="date" id="date_picker_end" name="date_picker_update">
+            </div>
         </div>
         <h1>Dashboard</h1>
       </div>
@@ -187,10 +198,17 @@ data:
 
          document.addEventListener('DOMContentLoaded', function() {
              var predefinedValues = document.getElementById('predefined_dates_filter');
+             var customDate = document.getElementById('date_picker');
              predefinedValues.onchange = (event) => {
+                 // Hid custom dates boxes by default
                  const inputText = event.target.value;
 
                  let monitor_url_with_filters = "";
+
+                 if (inputText != "custom"){
+                     customDate.className = "hidden";
+                 }
+
                  switch (inputText) {
                     case "this_week":
                         const dates = getCurrentWeek()
@@ -211,6 +229,38 @@ data:
                         const datesLastMonth = getPreviousMonth()
                         monitor_url_with_filters = MONITOR_BASE_URL +
                             "?lower=" + datesLastMonth.firstday + "&upper=" + datesLastMonth.lastday;
+                            console.log(monitor_url_with_filters)
+                        break;
+                    case "custom":
+                        // We use custom to show the date picker
+                        customDate.className = "show";
+
+                        var dateUpdate = document.getElementsByName('date_picker_update');
+
+                        customDate.onchange = (event) => {
+                            var startDate = document.getElementById('date_picker_start');
+                            var endDate = document.getElementById('date_picker_end');
+                            if ((startDate.value == "") || (endDate.value == "")){
+                                console.log("Error: start date empty!");
+                                monitor_url_with_filters = ""
+
+                            }
+                            else if ((startDate.value > endDate.value) && (endDate.value != "")) {
+                                window.alert("Error: start date is greater than end date!");
+                                monitor_url_with_filters = ""
+                            }
+                            else{
+                                console.log("All good");
+                                monitor_url_with_filters = MONITOR_BASE_URL +
+                                    "?lower=" + startDate.value + "&upper=" + endDate.value;
+                            }
+                            if (monitor_url_with_filters != "") {
+                                document.getElementById('mettel_public_dashboard').src = monitor_url_with_filters;
+                            }
+                            else{
+                                console.log("Error: filters empty!")
+                            }
+                        };
                         break;
                     default:
                         monitor_url_with_filters = MONITOR_BASE_URL + "?lower=" + inputText;
