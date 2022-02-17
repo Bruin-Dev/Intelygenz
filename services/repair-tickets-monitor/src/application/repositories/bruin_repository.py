@@ -273,7 +273,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f"An error response from bruin while getting site information for site_id {site_id} "
-                    f"{self._config.ENVIRONMENT.upper()} environment."
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment."
                     f"Error {response_status} - {response_body}"
                 )
 
@@ -317,7 +317,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f"An error occurred when linking ticket {ticket_id} to email {email_id} "
-                    f"{self._config.ENVIRONMENT.upper()} environment."
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment."
                     f"Error {response_status} - {response_body}"
                 )
 
@@ -355,7 +355,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f"An error occurred while marking {email_id} as done in "
-                    f"{self._config.ENVIRONMENT.upper()} environment. "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment. "
                     f"Error {response_status} - {response_body}"
                 )
 
@@ -404,7 +404,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f"Error while creating outage ticket for devices {service_numbers} that belongs to client "
-                    f"{client_id} in {self._config.ENVIRONMENT.upper()} environment: "
+                    f"{client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: "
                     f"Error {response_status} - {response_body}"
                 )
 
@@ -487,7 +487,7 @@ class BruinRepository:
             else:
                 err_msg = (
                     f"Error while appending note to ticket {ticket_id} in "
-                    f"{self._config.ENVIRONMENT.upper()} environment. Note was {note}. Error: "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment. Note was {note}. Error: "
                     f"Error {response_status} - {response_body}"
                 )
 

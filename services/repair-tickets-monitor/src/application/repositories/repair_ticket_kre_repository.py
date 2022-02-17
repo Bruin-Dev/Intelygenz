@@ -254,7 +254,7 @@ class RepairTicketKreRepository:
                 if response_status not in range(200, 300):
                     err_msg = (
                         f'Error while saving closed ticket feedback for with ticket_id "{ticket_id}"'
-                        f'in {self._config.ENVIRONMENT.upper()} environment: '
+                        f'in {self._config.ENVIRONMENT_NAME.upper()} environment: '
                         f'Error {response_status} - {response_body}'
                     )
 
