@@ -527,7 +527,6 @@ class RepairTicketsMonitor:
         validation_set = inference_data["filter_flags"]["in_validation_set"]
         tagger_below_threshold = inference_data["filter_flags"]["tagger_is_below_threshold"]
         rta_model1_is_below_threshold = inference_data["filter_flags"]["rta_model1_is_below_threshold"]
-        rta_model2_is_below_threshold = inference_data["filter_flags"]["rta_model2_is_below_threshold"]
 
         return not any(
             [
@@ -536,6 +535,5 @@ class RepairTicketsMonitor:
                 tagger_below_threshold,
                 is_other,
                 rta_model1_is_below_threshold,
-                rta_model2_is_below_threshold,
             ]
         )

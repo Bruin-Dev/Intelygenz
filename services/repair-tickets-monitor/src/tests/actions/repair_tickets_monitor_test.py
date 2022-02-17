@@ -860,6 +860,7 @@ class TestRepairTicketsMonitor:
                 },
                 False,
             ),
+            # Model 2 is not checked now
             (
                 "VOO",
                 {
@@ -869,7 +870,7 @@ class TestRepairTicketsMonitor:
                     "rta_model1_is_below_threshold": False,
                     "rta_model2_is_below_threshold": True,
                 },
-                False,
+                True,
             ),
             (
                 "VAS",
