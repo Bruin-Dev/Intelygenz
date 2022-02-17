@@ -1,0 +1,33 @@
+apiVersion: v1
+data:
+  aivencloud-project-ca-certificate.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIIEQTCCAqmgAwIBAgIUM09rD/YlTGqwxv0MCXBs2nFxOZgwDQYJKoZIhvcNAQEM
+    BQAwOjE4MDYGA1UEAwwvOTRhNjc1NjktYWY5NC00YTkwLWExZmQtYWRhMWQwYjFk
+    ZDExIFByb2plY3QgQ0EwHhcNMjExMjAxMTA1OTI4WhcNMzExMTI5MTA1OTI4WjA6
+    MTgwNgYDVQQDDC85NGE2NzU2OS1hZjk0LTRhOTAtYTFmZC1hZGExZDBiMWRkMTEg
+    UHJvamVjdCBDQTCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoCggGBAK5vCw5S
+    zYtGzz9pygpjpacC8aml5rMf7N5TytwVHgi/uVdH/nO0HDMXOFjnG53JKsxEGnvA
+    4WjfLUnND4WUuoLk3ZK5hN5iYtI/sJSTE++up6dt16gajsNCsglsMSri0tuWM9VO
+    XSgfHltkEyYchCUglg+awEKm8i+tv9fZ3wyW53rZWRopSaINJjB8Sp2ywV+ERjxl
+    lyZhKFyElsydz9HKwXR/LMHBmVIffroDCazibq6MQ611hV3NyRnscZxNhnCz25oV
+    VeSCQYw8kANEoTHL6I67p3ZIK1BMPEBkZcgEzF2ZKTMVrfcKpH4Ez2t2dfCFZz9g
+    VUtz2dUkjcgaVRLt7Q3PramlA0qV5Ngg3UfO907QyLGlaeTdzvRXhRzw9f7l0qbo
+    j4L8F4kSIh8Fxs2wHOETKlUt/1hlz6uxyGfQD0iqCu7ax3JDWqeiC7avoi1HGAnL
+    JUTLUeH6WJMBfsVcZdDG89AO232dr/LljfhCN1Z4i+A43ffh+gIZmU5cUwIDAQAB
+    oz8wPTAdBgNVHQ4EFgQUpQhnqKwIisZkkn/+waggkiw7vF0wDwYDVR0TBAgwBgEB
+    /wIBADALBgNVHQ8EBAMCAQYwDQYJKoZIhvcNAQEMBQADggGBAC6QwID3X3WJlT7g
+    PaY/V2H6ytN8g0y9jOCsbn3ewQj9QP/Ib00FNzUBT7r90QfAZPXH8zBlc7eetDOm
+    9Vv6vQJS+b7KXv1EwgTWjSYlkkhoIH0BqPIcIOQXT3kFgLxffxtzdB+if9O74I89
+    Xnensi2HrZtI9zsW5UMmh7smZ5tfDQ5J6vDdi4KkbybUdxDVv0AM2HcpvhgvleJo
+    jKqITaYjXomUlohYiR68MKTawQzeWJwSOqVn1aYopI2MHnmw6pryxANihqg1wHU3
+    jsaSTDsP6z8ujFsf07JNznGYpmu4IvkASanhokxK+yUhknjaTlAXoNEFFG0bRUNf
+    aMZ6+pcwDnaZ/AGtOrTXl7Uma8cMOvYNJR4i+lmUip6CZ/I7b6p0HBYQgDQLrRLU
+    FrQRaNKqnOFFfPwoo3K8as2vlYAkTui/YkASFep+4P72cYiQL3ZAJ3+VlYPnZfly
+    Gd5Hkvm4MUFVHmfo1U6ub80IaADFYjB0qJyD+6zL0VrCXvKNtA==
+    -----END CERTIFICATE-----
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: ca-pemstore
+  namespace: prometheus

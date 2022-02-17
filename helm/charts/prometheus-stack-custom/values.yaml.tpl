@@ -273,29 +273,38 @@ kubeprometheusstack:
             resources:
               requests:
                 storage: 50Gi
-
+      
+      ## Metrics from data-higway
+      #### ca certificate to scrape kafka metrics
+      configMaps: 
+        - ca-pemstore
+      #### configuration for scrape metrics
       additionalScrapeConfigs:
-          - job_name: 'kafka-data-highway'
-            scrape_interval: 5s
-            scrape_timeout: 5s
-            scheme: https
-            basic_auth:
-              username: ${KAFKA_METRICS_USER}
-              password: ${KAFKA_METRICS_PASSWORD}
-            static_configs:
-              - targets: [ '${KAFKA_METRICS_URL}' ]
-                labels:
-                  project: 'data-highway'
-                  service: 'kafka'
-          - job_name: 'kafka-connect-data-highway'
-            scrape_interval: 5s
-            scrape_timeout: 5s
-            scheme: https
-            basic_auth:
-              username: ${KAFKA_CONNECT_METRICS_USER}
-              password: ${KAFKA_CONNECT_METRICS_PASSWORD}
-            static_configs:
-              - targets: [ '${KAFKA_CONNECT_METRICS_URL}' ]
-                labels:
-                  project: 'data-highway'
-                  service: 'kafka-connect'
+        - job_name: 'kafka-data-highway'
+          scrape_interval: 5s
+          scrape_timeout: 5s
+          scheme: https
+          basic_auth:
+            username: ${KAFKA_METRICS_USER}
+            password: ${KAFKA_METRICS_PASSWORD}
+          static_configs:
+            - targets: [ '${KAFKA_METRICS_URL}' ]
+              labels:
+                project: 'data-highway'
+                service: 'kafka'
+          tls_config:
+            ca_file: /etc/prometheus/configmaps/ca-pemstore/aivencloud-project-ca-certificate.pem
+        - job_name: 'kafka-connect-data-highway'
+          scrape_interval: 5s
+          scrape_timeout: 5s
+          scheme: https
+          basic_auth:
+            username: ${KAFKA_CONNECT_METRICS_USER}
+            password: ${KAFKA_CONNECT_METRICS_PASSWORD}
+          static_configs:
+            - targets: [ '${KAFKA_CONNECT_METRICS_URL}' ]
+              labels:
+                project: 'data-highway'
+                service: 'kafka-connect'
+          tls_config:
+            ca_file: /etc/prometheus/configmaps/ca-pemstore/aivencloud-project-ca-certificate.pem
