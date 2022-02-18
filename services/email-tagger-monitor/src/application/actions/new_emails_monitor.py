@@ -10,15 +10,15 @@ from pytz import timezone
 
 class NewEmailsMonitor:
     def __init__(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            predicted_tag_repository,
-            new_emails_repository,
-            email_tagger_repository,
-            bruin_repository
+        self,
+        event_bus,
+        logger,
+        scheduler,
+        config,
+        predicted_tag_repository,
+        new_emails_repository,
+        email_tagger_repository,
+        bruin_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -28,41 +28,40 @@ class NewEmailsMonitor:
         self._predicted_tag_repository = predicted_tag_repository
         self._email_tagger_repository = email_tagger_repository
         self._bruin_repository = bruin_repository
-        self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphores']['new_emails_concurrent'])
+        self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG["semaphores"]["new_emails_concurrent"])
 
     async def start_email_events_monitor(self, exec_on_start=False):
-        self._logger.info('Scheduling NewEmailsMonitor feedback job...')
+        self._logger.info("Scheduling NewEmailsMonitor feedback job...")
         next_run_time = undefined
 
         if exec_on_start:
             tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
-            self._logger.info('NewEmailsMonitor feedback job is going to be executed immediately')
+            self._logger.info("NewEmailsMonitor feedback job is going to be executed immediately")
 
         try:
-            scheduler_seconds = self._config.MONITOR_CONFIG['scheduler_config']['new_emails_seconds']
-            self._scheduler.add_job(self._run_new_emails_polling, 'interval',
-                                    seconds=scheduler_seconds,
-                                    next_run_time=next_run_time, replace_existing=False,
-                                    id='_run_new_emails_polling')
+            scheduler_seconds = self._config.MONITOR_CONFIG["scheduler_config"]["new_emails_seconds"]
+            self._scheduler.add_job(
+                self._run_new_emails_polling,
+                "interval",
+                seconds=scheduler_seconds,
+                next_run_time=next_run_time,
+                replace_existing=False,
+                id="_run_new_emails_polling",
+            )
         except ConflictingIdError as conflict:
-            self._logger.info(f'Skipping start of NewEmailsMonitor feedback job. Reason: {conflict}')
+            self._logger.info(f"Skipping start of NewEmailsMonitor feedback job. Reason: {conflict}")
 
     async def _run_new_emails_polling(self):
-        self._logger.info('Starting NewEmailsMonitor feedback process...')
+        self._logger.info("Starting NewEmailsMonitor feedback process...")
 
         start_time = time.time()
 
-        self._logger.info('Getting all new emails...')
+        self._logger.info("Getting all new emails...")
         new_emails = self._new_emails_repository.get_pending_emails()
-        self._logger.info(f'Got {len(new_emails)} emails that needs tagging.')
+        self._logger.info(f"Got {len(new_emails)} emails that needs tagging.")
 
-        tasks = [
-            self._process_new_email(email_data)
-            for email_data in new_emails
-        ]
-        # TODO: We have no visibility over this taks results. Errors happend and we will not receive anything
-        # TODO: when some errors occur we are breaking the task loop and it no running anymore until restarting the service
+        tasks = [self._process_new_email(email_data) for email_data in new_emails]
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info("NewEmailsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
 
@@ -99,7 +98,7 @@ class NewEmailsMonitor:
 
     @staticmethod
     def get_most_probable_tag_id(prediction):
-        prediction.sort(key=lambda x: x['probability'], reverse=True)
+        prediction.sort(key=lambda x: x["probability"], reverse=True)
         tags = [{"id": tag["tag_id"], "probability": tag["probability"]} for tag in prediction]
 
         return tags[0]
