@@ -1,0 +1,33 @@
+Resources:
+  GSAServiceAffectingMonitor:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.app.handler
+      Runtime: python3.6
+      Timeout: 600
+      Events:
+        ServiceAffectingMonitorJob:
+          Type: Schedule
+          Properties:
+            Schedule: rate(10 minutes)
+      Environment:
+        Variables:
+          CURRENT_ENVIRONMENT: dev
+          ENVIRONMENT_NAME: local
+          TIMEZONE: US/Eastern
+          LATENCY_MONITORING_THRESHOLD: 140
+          PACKET_LOSS_MONITORING_THRESHOLD: 8
+          JITTER_MONITORING_THRESHOLD: 50
+          BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD: 80
+          CIRCUIT_INSTABILITY_MONITORING_THRESHOLD: 10
+          LATENCY_MONITORING_LOOKUP_INTERVAL: 1800
+          PACKET_LOSS_MONITORING_LOOKUP_INTERVAL: 1800
+          JITTER_MONITORING_LOOKUP_INTERVAL: 1800
+          BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL: 1800
+          CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL: 3600
+          BLACKLISTED_EDGES:
+          MONITORED_VELOCLOUD_HOSTS: metgsavco-ic1.fedmettel.net
+          VELOCLOUD_CREDENTIALS: metgsavco-ic1.fedmettel.net+mettel@intelygenz.com+password
+          EMAIL_ACCOUNT:
+          EMAIL_PASSWORD:
+          EMAIL_RECIPIENT: GSAGICS1@mettel.net
