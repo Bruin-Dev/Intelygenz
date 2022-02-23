@@ -40,8 +40,13 @@
                   if [[ ${i} != "0-ecr-repositories" && ${i} != "3-eks-roles" ]]; then
                       terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
                   fi
-                  terraform refresh
-                  terraform plan && terraform apply -auto-approve
+                  if [[ ${i} == "3-eks-roles" ]]; then
+                      terraform plan -var-file="./eks-access/${TF_VAR_CURRENT_ENVIRONMENT}.tfvars" && terraform apply -var-file="./eks-access/${TF_VAR_CURRENT_ENVIRONMENT}.tfvars" -auto-approve
+                      echo "updating gitlab-ci variables with deployed infra values.."
+                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/AUTOMATION_SSL_CERTIFICATE_ARN" --form "value=$(terraform output ssl-certificate-arn)"
+                  else
+                      terraform plan && terraform apply -auto-approve
+                  fi
                   if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_LOG_GROUP_NAME" --form "value=$(terraform output fluent-bit-log-group-name)"
@@ -51,10 +56,6 @@
                   if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_DEV" --form "value=$(terraform output oreilly-security-group-id)"
-                  fi
-                  if [[ ${i} == "3-eks-roles" ]]; then
-                      echo "updating gitlab-ci variables with deployed infra values.."
-                      curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/AUTOMATION_SSL_CERTIFICATE_ARN" --form "value=$(terraform output ssl-certificate-arn)"
                   fi
                   if [[ ${i} == "5-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
@@ -69,7 +70,6 @@
                               echo "Start to create elasticache ${e}"
                               terraform init
                               terraform workspace new "${TF_VAR_ENVIRONMENT}" || terraform workspace select "${TF_VAR_ENVIRONMENT}"
-                              terraform refresh
                               terraform plan && terraform apply -auto-approve
                               if [[ ${e} == "0-redis" &&  "$TF_VAR_ENVIRONMENT" == "production" ]]; then
                                   echo "updating gitlab-ci variables with deployed infra values.."
@@ -134,5 +134,4 @@
   script:
     - cd "${MODULE}" || exit 1
     - terraform init -backend=true -get=true -input=false
-    - terraform refresh
     - terraform plan && terraform apply -auto-approve

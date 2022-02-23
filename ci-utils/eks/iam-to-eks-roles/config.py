@@ -8,7 +8,7 @@ CLUSTER_ROLES_PERMISSIONS = {
         "rules": [
             {
                 "apiGroups": [""],
-                "resources": ["pods", "pods/log", "pods/exec", "configmaps", "secrets"],
+                "resources": ["pods", "pods/log", "pods/exec", "configmaps", "secrets", "namespaces"],
                 "verbs": ["get", "list", "watch", "create", "patch", "update", "delete"]
             },
             {
@@ -99,7 +99,7 @@ CLUSTER_ROLES_PERMISSIONS = {
         ],
         "apiVersion": "rbac.authorization.k8s.io/v1"
     },
-    "developer-ops-privileged": {
+    "ops": {
         "rules": [
             {
                 "apiGroups": ["", "apps"],
@@ -108,15 +108,20 @@ CLUSTER_ROLES_PERMISSIONS = {
             },
             {
                 "apiGroups": [""],
-                "resources": ["pods", "pods/log", "pods/exec", "configmaps", "secrets"],
-                "verbs": ["get", "list", "watch", "create", "patch", "update", "delete"]
+                "resources": ["pods",
+                              "pods/log",
+                              "pods/exec",
+                              "configmaps",
+                              "secrets",
+                              "namespaces",
+                              "namespaces/finalize",
+                              "namespaces/status",
+                              "serviceaccounts"],
+                "verbs": ["*"]
             },
             {
                 "apiGroups": [""],
-                "resources": ["namespaces",
-                              "namespaces/finalize",
-                              "namespaces/status",
-                              "nodes",
+                "resources": ["nodes",
                               "nodes/proxy",
                               "nodes/status",
                               "persistentvolumeclaims",
@@ -128,26 +133,9 @@ CLUSTER_ROLES_PERMISSIONS = {
                               "pods/eviction",
                               "pods/proxy",
                               "pods/status",
-                              "serviceaccounts",
                               "services",
                               "services/proxy",
                               "services/status"],
-                "verbs": ["get", "list", "watch"]
-            },
-            {
-                "apiGroups": ["apps"],
-                "resources": ["controllerrevisions",
-                              "daemonsets",
-                              "daemonsets/status",
-                              "deployments",
-                              "deployments/scale",
-                              "deployments/status",
-                              "replicasets",
-                              "replicasets/scale",
-                              "replicasets/status",
-                              "statefulsets",
-                              "statefulsets/scale",
-                              "statefulsets/status"],
                 "verbs": ["get", "list", "watch"]
             },
             {

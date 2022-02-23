@@ -25,7 +25,7 @@ basic-infra-dev:
     name: development
   variables:
     MODULE: "infra-as-code/basic-infra"
-    IAM_TO_EKS_ROLES: developer, devops
+    IAM_TO_EKS_ROLES: developer, ops, devops
     HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
     HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
     CLUSTER_AUTOSCALER_CHART_V: ${CLUSTER_AUTOSCALER_CHART_V_DEV}
@@ -60,7 +60,7 @@ basic-infra-pro:
     name: production
   variables:
     MODULE: "infra-as-code/basic-infra"
-    IAM_TO_EKS_ROLES: developer, devops
+    IAM_TO_EKS_ROLES: developer, ops, devops
     HELM_CHART_REPOSITORIES: "prometheus-community https://prometheus-community.github.io/helm-charts"
     HELM_CHART_PROMETHEUS_DIR: "helm/charts/prometheus-stack-custom"
     CLUSTER_AUTOSCALER_CHART_V: ${CLUSTER_AUTOSCALER_CHART_V_PRO}
