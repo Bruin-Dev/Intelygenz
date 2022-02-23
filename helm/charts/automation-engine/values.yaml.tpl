@@ -1309,6 +1309,18 @@ tnba-monitor:
     grace_period_before_monitoring_tickets_based_on_last_documented_outage: ${TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE}
     # -- Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves
     min_required_confidence_for_request_and_repair_completed_predictions: ${TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS}
+    # -- [Monitoring] Defines how much time back to look for DOWN events in Circuit Instability checks
+    monitoring__circuit_instability_monitoring_lookup_interval: ${SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL}
+    # -- [Monitoring] Threshold for Latency troubles
+    monitoring__latency_monitoring_threshold: ${DEV__SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Packet Loss troubles
+    monitoring__packet_loss_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Jitter troubles
+    monitoring__jitter_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_THRESHOLD}
+    # -- [Monitoring] Threshold for Bandwidth Over Utilization troubles
+    monitoring__bandwidth_over_utilization_monitoring_threshold: ${SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD}
+    # -- [Monitoring] Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets
+    monitoring__circuit_instability_autoresolve_threshold: ${DEV__SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD}
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
   image:
