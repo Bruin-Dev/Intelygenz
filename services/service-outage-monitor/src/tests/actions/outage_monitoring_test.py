@@ -5938,9 +5938,9 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=False,
         )
-        # outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
-        #     ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
-        # )
+        outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -6169,9 +6169,9 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
-        # outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
-        #     ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
-        # )
+        outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
         outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
             cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, ticket_id,
         )
@@ -6402,9 +6402,9 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
-        # outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
-        #     ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
-        # )
+        outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
         outage_monitor._reopen_outage_ticket.assert_awaited_once_with(
             ticket_id, links_grouped_by_primary_edge_with_ha_info, cached_edge_primary, outage_type
         )

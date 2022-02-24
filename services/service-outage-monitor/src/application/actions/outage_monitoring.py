@@ -545,8 +545,8 @@ class OutageMonitor:
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number,
                                                             edge_status=edge_status)
-                        # await self._check_for_digi_reboot(ticket_creation_response_body,
-                        #                                   logical_id_list, serial_number, edge_status)
+                        await self._check_for_digi_reboot(ticket_creation_response_body,
+                                                          logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 409:
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} already has an outage ticket in '
@@ -558,8 +558,8 @@ class OutageMonitor:
                             edge_status=edge_status,
                             check_ticket_tasks=True,
                         )
-                        # await self._check_for_failed_digi_reboot(ticket_creation_response_body,
-                        #                                          logical_id_list, serial_number, edge_status)
+                        await self._check_for_failed_digi_reboot(ticket_creation_response_body,
+                                                                 logical_id_list, serial_number, edge_status)
                         await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body)
                     elif ticket_creation_response_status == 471:
                         self._logger.info(
@@ -577,8 +577,8 @@ class OutageMonitor:
 
                         self.schedule_forward_to_hnoc_queue(ticket_id=ticket_creation_response_body,
                                                             serial_number=serial_number, edge_status=edge_status)
-                        # await self._check_for_digi_reboot(ticket_creation_response_body,
-                        #                                   logical_id_list, serial_number, edge_status)
+                        await self._check_for_digi_reboot(ticket_creation_response_body,
+                                                          logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 472:
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
