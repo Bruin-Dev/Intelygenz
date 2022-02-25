@@ -22,6 +22,11 @@ def event_bus():
 
 
 @pytest.fixture(scope='function')
+def event_bus_real():
+    return EventBus(redis)
+
+
+@pytest.fixture(scope='function')
 def logger():
     return Mock()
 
@@ -50,6 +55,11 @@ def bruin_repository(event_bus, logger, notifications_repository):
     wrap_all_methods(instance)
 
     return instance
+
+
+@pytest.fixture(scope='function')
+def bruin_repository_real(event_bus_real, logger, notifications_repository):
+    return BruinRepository(event_bus_real, logger, config, notifications_repository)
 
 
 @pytest.fixture(scope='function')
@@ -108,7 +118,7 @@ def repair_tickets_monitor(
         event_bus,
         logger,
         scheduler,
-        bruin_repository,
+        bruin_repository_real,
         new_tagged_emails_repository,
         repair_ticket_kre_repository
 ):
@@ -117,7 +127,7 @@ def repair_tickets_monitor(
         logger,
         scheduler,
         config,
-        bruin_repository,
+        bruin_repository_real,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
     )

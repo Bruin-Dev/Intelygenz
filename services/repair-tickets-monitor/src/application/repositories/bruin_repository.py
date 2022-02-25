@@ -1,9 +1,7 @@
-import os
 from shortuuid import uuid
 from datetime import datetime
 
 import humps
-import html2text
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application.repositories import nats_error_response
@@ -16,9 +14,7 @@ class BruinRepository:
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
-        self._timeout = self._config.MONITOR_CONFIG["nats_request_timeout"][
-            "bruin_request_seconds"
-        ]
+        self._timeout = self._config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"]
 
     async def get_single_ticket_basic_info(self, ticket_id: str):
         @retry(
@@ -46,8 +42,7 @@ class BruinRepository:
 
             except Exception as err:
                 err_msg = (
-                    f"An error occurred when getting basic info from Bruin, "
-                    f'for ticket_id "{ticket_id}" -> {err}'
+                    f"An error occurred when getting basic info from Bruin, " f'for ticket_id "{ticket_id}" -> {err}'
                 )
                 response = nats_error_response
             else:
@@ -73,9 +68,7 @@ class BruinRepository:
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             else:
-                self._logger.info(
-                    f"Basic info for ticket {ticket_id} retrieved from Bruin"
-                )
+                self._logger.info(f"Basic info for ticket {ticket_id} retrieved from Bruin")
 
             return response
 
@@ -109,9 +102,7 @@ class BruinRepository:
 
         return {"status": 200, "body": ticket}
 
-    async def verify_service_number_information(
-        self, client_id: str, service_number: str
-    ):
+    async def verify_service_number_information(self, client_id: str, service_number: str):
         @retry(
             wait=wait_exponential(
                 multiplier=self._config.NATS_CONFIG["multiplier"],
@@ -121,9 +112,7 @@ class BruinRepository:
         )
         async def verify_service_number_information():
             err_msg = None
-            self._logger.info(
-                f'Getting inventory "{client_id}" and service number {service_number}'
-            )
+            self._logger.info(f'Getting inventory "{client_id}" and service number {service_number}')
             request_msg = {
                 "request_id": uuid(),
                 "body": {
@@ -168,18 +157,14 @@ class BruinRepository:
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             else:
-                self._logger.info(
-                    f"Service number info {service_number} retrieved from Bruin"
-                )
+                self._logger.info(f"Service number info {service_number} retrieved from Bruin")
 
             return response
 
         try:
             return await verify_service_number_information()
         except Exception as e:
-            self._logger.error(
-                f"Error getting service number info {service_number} from Bruin: {e}"
-            )
+            self._logger.error(f"Error getting service number info {service_number} from Bruin: {e}")
 
     async def get_ticket_details(self, ticket_id: int):
         @retry(
@@ -198,9 +183,7 @@ class BruinRepository:
             }
 
             try:
-                self._logger.info(
-                    f"Getting details of ticket {ticket_id} from Bruin..."
-                )
+                self._logger.info(f"Getting details of ticket {ticket_id} from Bruin...")
                 response = await self._event_bus.rpc_request(
                     "bruin.ticket.details.request",
                     request,
@@ -208,8 +191,7 @@ class BruinRepository:
                 )
             except Exception as e:
                 err_msg = (
-                    f"An error occurred when requesting ticket details "
-                    f"from Bruin API for ticket {ticket_id} -> {e}"
+                    f"An error occurred when requesting ticket details " f"from Bruin API for ticket {ticket_id} -> {e}"
                 )
                 response = nats_error_response
             else:
@@ -233,9 +215,7 @@ class BruinRepository:
         try:
             return await get_ticket_details()
         except Exception as e:
-            self._logger.error(
-                f"Error getting ticket details for {ticket_id} from Bruin: {e}"
-            )
+            self._logger.error(f"Error getting ticket details for {ticket_id} from Bruin: {e}")
 
     async def get_site(self, client_id: str, site_id: str):
         err_msg = None
@@ -249,27 +229,18 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(
-                f"Getting site for site_id {site_id} of client {client_id}..."
-            )
+            self._logger.info(f"Getting site for site_id {site_id} of client {client_id}...")
 
-            response = await self._event_bus.rpc_request(
-                "bruin.get.site", request, timeout=15
-            )
+            response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=15)
         except Exception as e:
-            err_msg = (
-                f"An error occurred while getting site for site_id {site_id} "
-                f"Error: {e} "
-            )
+            err_msg = f"An error occurred while getting site for site_id {site_id} " f"Error: {e} "
             response = nats_error_response
         else:
             response_body = response["body"]
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(
-                    f"Got site details of site {site_id} and client {client_id} successfully!"
-                )
+                self._logger.info(f"Got site details of site {site_id} and client {client_id} successfully!")
             else:
                 err_msg = (
                     f"An error response from bruin while getting site information for site_id {site_id} "
@@ -284,8 +255,6 @@ class BruinRepository:
         return response
 
     async def link_email_to_ticket(self, ticket_id: int, email_id: int):
-        err_msg = None
-
         request = {
             "request_id": uuid(),
             "body": {
@@ -293,38 +262,24 @@ class BruinRepository:
                 "email_id": email_id,
             },
         }
-
         try:
-            self._logger.info(f"Linking email {email_id} with ticket {ticket_id}...")
-
-            response = await self._event_bus.rpc_request(
-                "bruin.link.ticket.email", request, timeout=15
-            )
+            response = await self._event_bus.rpc_request("bruin.link.ticket.email", request, timeout=15)
         except Exception as e:
-            err_msg = (
-                f"An error occurred when linking ticket {ticket_id} and email {email_id}. "
-                f"Error: {e} "
+            error_message = (f"email_id={email_id} An error occurred linking ticket {ticket_id}\n Error: {e}",)
+            await self._notifications_repository.send_slack_message(error_message)
+            return nats_error_response
+
+        if response["status"] != 200:
+            error_message = (
+                f"email_id={email_id} Error response from bruin-bridge while linking the {ticket_id}"
+                f"{self._config.ENVIRONMENT_NAME.upper()} environment."
+                f"{response['status']} - {response['body']}"
             )
-            response = nats_error_response
-        else:
-            response_body = response["body"]
-            response_status = response["status"]
+            self._logger.error(error_message)
+            await self._notifications_repository.send_slack_message(error_message)
+            return response
 
-            if response_status in range(200, 300):
-                self._logger.info(
-                    f"Linked email {email_id} to ticket {ticket_id} successfully!"
-                )
-            else:
-                err_msg = (
-                    f"An error occurred when linking ticket {ticket_id} to email {email_id} "
-                    f"{self._config.ENVIRONMENT_NAME.upper()} environment."
-                    f"Error {response_status} - {response_body}"
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
+        self._logger.info("email_id=%s, linked to ticket %s", email_id, ticket_id)
         return response
 
     async def mark_email_as_done(self, email_id: int):
@@ -340,9 +295,7 @@ class BruinRepository:
         try:
             self._logger.info(f"Marking email {email_id} as done...")
 
-            response = await self._event_bus.rpc_request(
-                "bruin.mark.email.done", request, timeout=15
-            )
+            response = await self._event_bus.rpc_request("bruin.mark.email.done", request, timeout=15)
         except Exception as e:
             err_msg = f"An error occurred while marking email {email_id} as done. {e}"
             response = nats_error_response
@@ -365,9 +318,7 @@ class BruinRepository:
 
         return response
 
-    async def create_outage_ticket(
-        self, client_id: int, service_numbers: List[str], contact_address: str
-    ):
+    async def create_outage_ticket(self, client_id: int, service_numbers: List[str], contact_address: str):
         err_msg = None
 
         request = {
@@ -383,9 +334,7 @@ class BruinRepository:
             self._logger.info(
                 f"Creating outage ticket for device {service_numbers} that belongs to client {client_id}..."
             )
-            response = await self._event_bus.rpc_request(
-                "bruin.ticket.creation.outage.request", request, timeout=30
-            )
+            response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
         except Exception as e:
             err_msg = (
                 f"An error occurred when creating outage ticket for device {service_numbers} belong to client"
@@ -414,87 +363,50 @@ class BruinRepository:
 
         return response
 
-    async def append_bec_note_to_ticket(
-        self,
-        ticket_id: int,
-        subject: str,
-        from_address: str,
-        body: str,
-        date: datetime,
-        service_numbers: List[str],
-        is_update_note: bool = False,
-    ):
-        new_ticket_message = "This ticket was opened via MetTel Email Center AI Engine."
-        update_ticket_message = (
-            "This note is new commentary from the client and posted via BEC AI engine."
-        )
-        operator_message = (
-            update_ticket_message if is_update_note else new_ticket_message
-        )
-
-        body_cleaned = html2text.html2text(body)
-
-        update_note = os.linesep.join(
-            [
-                "#*MetTel's IPA*#",
-                "BEC AI RTA",
-                "",
-                operator_message,
-                "Please review the full narrative provided in the email attached: \n"
-                f"From: {from_address}",
-                f"Date Stamp: {date}",
-                f"Subject: {subject}",
-                f"Body: \n {body_cleaned}",
-            ]
-        )
-
-        return await self.append_note_to_ticket(
-            ticket_id, update_note, service_numbers=service_numbers
-        )
-
-    async def append_note_to_ticket(
-        self, ticket_id: int, note: str, *, service_numbers: List[str]
-    ):
-        err_msg = None
-
-        request = {
-            "request_id": uuid(),
-            "body": {
-                "ticket_id": ticket_id,
-                "note": note,
-                "service_numbers": service_numbers,
+    async def append_notes_to_ticket(self, ticket_id: int, notes: List[Dict]) -> Dict[str, int]:
+        # Preparing the request to bruin-bridge
+        rpc_request = {
+            "topic": "bruin.ticket.multiple.notes.append.request",
+            "content": {
+                "request_id": uuid(),
+                "body": {
+                    "ticket_id": ticket_id,
+                    "notes": notes,
+                },
             },
+            "timeout": 15,
         }
         try:
-            self._logger.info(
-                f'Appending note for service number(s) {", ".join(service_numbers)} in ticket {ticket_id}...'
-            )
             response = await self._event_bus.rpc_request(
-                "bruin.ticket.note.append.request", request, timeout=15
+                rpc_request["topic"], rpc_request["content"], timeout=rpc_request["timeout"]
             )
+        # TODO: only capture specific exceptions that requires to be managed
         except Exception as e:
             err_msg = (
-                f"An error occurred when appending a ticket note to ticket {ticket_id}. "
-                f"Ticket note: {note}. Error: {e}"
+                f"ticket_id={ticket_id} An error occurred during RPC comunication\n"
+                f"Request sent: {rpc_request}\n"
+                f"Error: {e}"
             )
-            response = nats_error_response
-        else:
-            response_body = response["body"]
-            response_status = response["status"]
-
-            if response_status in range(200, 300):
-                self._logger.info(f"Note appended to ticket {ticket_id} successfully!")
-            else:
-                err_msg = (
-                    f"Error while appending note to ticket {ticket_id} in "
-                    f"{self._config.ENVIRONMENT_NAME.upper()} environment. Note was {note}. Error: "
-                    f"Error {response_status} - {response_body}"
-                )
-
-        if err_msg:
             self._logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
+            # This response has the same structe that bruin responses
+            return nats_error_response
 
+        # Checking RPC response
+        if response["status"] != 200:
+            err_msg = (
+                f"ticket_id={ticket_id} Bruin returned a not success status\n"
+                f"Request: {rpc_request}\n"
+                f"Response: {response['status']} - {response['body']}"
+            )
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            return response
+
+        # we need this log because we can see private note onces they have been plubished
+        self._logger.info(
+            "ticket_id=%s Note appended to ticket successfully!\n Note published: %s", ticket_id, response["body"]
+        )
         return response
 
     async def get_tickets_basic_info(self, ticket_statuses: List[str], **kwargs):
@@ -514,8 +426,7 @@ class BruinRepository:
 
             try:
                 self._logger.info(
-                    f"Getting all tickets with any status of {ticket_statuses},"
-                    f"with keyword arguments {kwargs}"
+                    f"Getting all tickets with any status of {ticket_statuses}," f"with keyword arguments {kwargs}"
                 )
                 response = await self._event_bus.rpc_request(
                     "bruin.ticket.basic.request", request, timeout=self._timeout
@@ -552,13 +463,9 @@ class BruinRepository:
         try:
             return await get_tickets_basic_info()
         except Exception as e:
-            self._logger.error(
-                f"Error getting tickets with keyword arguments {kwargs} from Bruin: {e}"
-            )
+            self._logger.error(f"Error getting tickets with keyword arguments {kwargs} from Bruin: {e}")
 
-    async def get_existing_tickets_with_service_numbers(
-        self, client_id: str, site_ids: List[str]
-    ) -> Dict[str, Any]:
+    async def get_existing_tickets_with_service_numbers(self, client_id: str, site_ids: List[str]) -> Dict[str, Any]:
         ticket_statuses = ["New", "InProgress", "Draft", "Resolved"]
         ticket_topic = ["VOO", "VAS"]
 
@@ -569,7 +476,7 @@ class BruinRepository:
             client_id,
             ticket_statuses,
             site_ids,
-            ticket_topic
+            ticket_topic,
         )
         for site_id in site_ids:
             for topic in ticket_topic:
@@ -624,9 +531,7 @@ class BruinRepository:
                 unique_service_numbers.update(note_service_numbers)
         return list(unique_service_numbers)
 
-    async def get_closed_tickets_with_creation_date_limit(
-        self, limit: datetime
-    ) -> Dict[str, Any]:
+    async def get_closed_tickets_with_creation_date_limit(self, limit: datetime) -> Dict[str, Any]:
         ticket_topics = ["VOO", "VAS"]
         closed_tickets = []
         start_date = limit.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -638,10 +543,7 @@ class BruinRepository:
                 start_date=start_date,
             )
             if ticket_response["status"] in range(200, 300):
-                decamelized_tickets = [
-                    self._decamelize_ticket(ticket)
-                    for ticket in ticket_response["body"]
-                ]
+                decamelized_tickets = [self._decamelize_ticket(ticket) for ticket in ticket_response["body"]]
                 closed_tickets.extend(decamelized_tickets)
             else:
                 return ticket_response
@@ -650,9 +552,7 @@ class BruinRepository:
 
         return response
 
-    async def get_status_and_cancellation_reasons(
-        self, ticket_id: int
-    ) -> Dict[str, Any]:
+    async def get_status_and_cancellation_reasons(self, ticket_id: int) -> Dict[str, Any]:
         # TODO: Check if we are using this method
         ticket_details = await self.get_ticket_details(ticket_id)
         if ticket_details["status"] not in range(200, 300):
@@ -673,15 +573,9 @@ class BruinRepository:
 
         return response
 
-    def _get_status_and_cancellation_reasons_from_notes(
-        self, notes: List[Dict[str, Any]]
-    ) -> Tuple[str, list]:
-        cancellation_notes = filter(
-            lambda x: x.get("noteType") == "CancellationReason", notes
-        )
-        cancellation_reasons = list(
-            set([detail["noteValue"] for detail in cancellation_notes])
-        )
+    def _get_status_and_cancellation_reasons_from_notes(self, notes: List[Dict[str, Any]]) -> Tuple[str, list]:
+        cancellation_notes = filter(lambda x: x.get("noteType") == "CancellationReason", notes)
+        cancellation_reasons = list(set([detail["noteValue"] for detail in cancellation_notes]))
 
         status = "cancelled" if cancellation_reasons else "resolved"
 

@@ -1,5 +1,6 @@
+import asyncio
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import Mock, patch
 
 import pytest
@@ -558,13 +559,13 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._save_output.assert_awaited_once()
 
         assert repair_tickets_monitor._save_output.await_args[0][-1] == [
-                {
-                    "site_id": "site_name_2",
-                    "service_numbers": ["2345"],
-                    "ticket_id": "",
-                    "not_creation_reason": "A previous ticket on that site was recently cancelled",
-                }
-            ]
+            {
+                "site_id": "site_name_2",
+                "service_numbers": ["2345"],
+                "ticket_id": "",
+                "not_creation_reason": "A previous ticket on that site was recently cancelled",
+            }
+        ]
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
         repair_tickets_monitor._bruin_repository.mark_email_as_done.assert_not_awaited()
 
@@ -899,3 +900,140 @@ class TestRepairTicketsMonitor:
 
         result = repair_tickets_monitor._is_inference_actionable(inference_data)
         assert result == expected
+
+    def _compose_bec_private_note_to_ticket_update_test(self, repair_tickets_monitor):
+        call = {
+            "ticket_id": "1234",
+            "service_numbers": ["VC05200011984"],
+            "subject": "Example subject",
+            "from_address": "from@address.com",
+            "body": "<html><body>algo</body></html>",
+            "date": datetime(2022, 1, 11),
+            "is_update_note": True,
+        }
+        notes = repair_tickets_monitor._compose_bec_private_note_to_ticket(**call)
+
+        assert all(
+            "This note is new commentary from the client and posted via BEC AI engine." in note["text"]
+            for note in notes
+        )
+        assert all(note["is_private"] is True for note in notes)
+        assert all(note["service_number"] == "VC05200011984" for note in notes)
+
+    def _compose_bec_private_note_to_ticket_create_test(self, repair_tickets_monitor):
+        # Given
+        call = {
+            "ticket_id": "1234",
+            "service_numbers": ["VC05200011984"],
+            "subject": "Example subject",
+            "from_address": "from@address.com",
+            "body": "<html><body>algo</body></html>",
+            "date": datetime(2022, 1, 11),
+            "is_update_note": False,
+        }
+
+        notes = repair_tickets_monitor._compose_bec_private_note_to_ticket(**call)
+
+        assert all("This ticket was opened via MetTel Email Center AI Engine." in note["text"] for note in notes)
+        assert all(note["is_private"] is True for note in notes)
+        assert all(note["service_number"] == "VC05200011984" for note in notes)
+
+    @pytest.mark.asyncio
+    async def _create_tickets_create_test(self, repair_tickets_monitor, email_data):
+        # given
+        service_numbers_site_map = {"1": "site_1", "6": "site_1"}
+        rpc_response_200 = {
+            "status": 200,
+            # ticket id
+            "body": "12345",
+        }
+        espected_response = (
+            # tickets created
+            [
+                {
+                    "site_id": "site_1",
+                    "service_numbers": ["1", "6"],
+                    "ticket_id": "12345",
+                    "not_creation_reason": "",
+                },
+            ],
+            # Tickets updated
+            [],
+            # tickets cannot be created
+            [],
+        )
+        with patch.object(
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+        ) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response_200)
+            # when
+            response = await repair_tickets_monitor._create_tickets(email_data, service_numbers_site_map)
+
+        # then
+        assert response == espected_response
+
+    @pytest.mark.asyncio
+    async def _create_tickets_update_test(self, repair_tickets_monitor, email_data):
+        # given
+        service_numbers_site_map = {"1": "site_1", "6": "site_1"}
+        rpc_response_200 = {
+            "status": 409,
+            # ticket id
+            "body": "12345",
+        }
+        espected_response = (
+            # tickets created
+            [],
+            # Tickets updated
+            [
+                {
+                    "site_id": "site_1",
+                    "service_numbers": ["1", "6"],
+                    "ticket_id": "12345",
+                    "not_creation_reason": "",
+                },
+            ],
+            # tickets cannot be created
+            [],
+        )
+        with patch.object(
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+        ) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response_200)
+            # when
+            response = await repair_tickets_monitor._create_tickets(email_data, service_numbers_site_map)
+
+        # then
+        assert response == espected_response
+
+    @pytest.mark.asyncio
+    async def _create_tickets_error_test(self, repair_tickets_monitor, email_data):
+        # given
+        service_numbers_site_map = {"1": "site_1", "6": "site_1"}
+        rpc_response_200 = {
+            "status": 500,
+            # ticket id
+            "body": "An error very ugly",
+        }
+        espected_response = (
+            [],
+            [],
+            [
+                {
+                    "not_creation_reason": "Error while creating bruin ticket",
+                    "service_numbers": ["1", "6"],
+                    "site_id": "site_1",
+                    "ticket_id": "",
+                }
+            ],
+        )
+
+        with patch.object(
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+        ) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response_200)
+            # when
+            response = await repair_tickets_monitor._create_tickets(email_data, service_numbers_site_map)
+
+        # then
+        assert response == espected_response

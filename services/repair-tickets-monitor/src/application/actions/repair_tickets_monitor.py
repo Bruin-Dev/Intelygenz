@@ -3,6 +3,9 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
+import os
+
+import html2text
 
 from application.exceptions import ResponseException
 from apscheduler.jobstores.base import ConflictingIdError
@@ -355,6 +358,41 @@ class RepairTicketsMonitor:
 
         return tickets_with_site_id
 
+    def _compose_bec_private_note_to_ticket(
+        self,
+        ticket_id: int,
+        service_numbers: List[str],
+        subject: str,
+        from_address: str,
+        body: str,
+        date: datetime,
+        is_update_note: bool = False,
+    ) -> List[Dict]:
+        new_ticket_message = "This ticket was opened via MetTel Email Center AI Engine."
+        update_ticket_message = "This note is new commentary from the client and posted via BEC AI engine."
+        operator_message = update_ticket_message if is_update_note else new_ticket_message
+        body_cleaned = html2text.html2text(body)
+
+        note_text = os.linesep.join(
+            [
+                "#*MetTel's IPA*#",
+                "BEC AI RTA",
+                "",
+                operator_message,
+                "Please review the full narrative provided in the email attached:\n" f"From: {from_address}",
+                f"Date Stamp: {date}",
+                f"Subject: {subject}",
+                f"Body: \n {body_cleaned}",
+            ]
+        )
+        notes = [
+            {"text": note_text, "service_number": service_number, "is_private": True}
+            for service_number in service_numbers
+        ]
+        self._logger.info("ticket_id=%s Sending note: %s", ticket_id, notes)
+
+        return notes
+
     async def _create_tickets(
         self,
         email_data: Dict[str, Any],
@@ -363,11 +401,6 @@ class RepairTicketsMonitor:
         """
         Try to create tickets for valid service_number
         """
-        site_id_sn_buckets = defaultdict(list)
-
-        for service_number, site_id in service_number_site_map.items():
-            site_id_sn_buckets[site_id].append(service_number)
-
         email_id = email_data["email_id"]
         client_id = email_data["client_id"]
         email_body = email_data["body"]
@@ -375,9 +408,21 @@ class RepairTicketsMonitor:
         email_from_address = email_data["from_address"]
         email_date = email_data["date"]
 
+        bruin_updated_reasons_dict = {
+            409: "In progress ticket present. Added line to it.",
+            471: "Resolved ticket. Unresolving 'manually'.",
+            472: "Resolved ticket. Unresolved automatically.",
+            473: "Same site ticket. Unresolved and added line.",
+        }
+
+        # Return data
         tickets_created = []
         tickets_updated = []
         tickets_cannot_be_created = []
+
+        site_id_sn_buckets = defaultdict(list)
+        for service_number, site_id in service_number_site_map.items():
+            site_id_sn_buckets[site_id].append(service_number)
 
         for site_id, service_numbers in site_id_sn_buckets.items():
             ticket_creation_response = await self._bruin_repository.create_outage_ticket(
@@ -386,45 +431,44 @@ class RepairTicketsMonitor:
             ticket_creation_response_body = ticket_creation_response["body"]
             ticket_creation_response_status = ticket_creation_response["status"]
             self._logger.info(
-                f"Got response {ticket_creation_response_status}," f" with items: {ticket_creation_response_body}"
+                "email_id=%s Got response %s, with items: %s",
+                email_id,
+                ticket_creation_response_status,
+                ticket_creation_response_body,
             )
 
             error_response = False
             ticket_updated_flag = False
 
-            bruin_updated_reasons_dict = {
-                409: "In progress ticket present. Added line to it.",
-                471: "Resolved ticket. Unresolving 'manually'.",
-                472: "Resolved ticket. Unresolved automatically.",
-                473: "Same site ticket. Unresolved and added line.",
-            }
-            bruin_custom_status_codes = [409, 471, 472, 473]
-
-            if ticket_creation_response_status in range(200, 300):
+            if ticket_creation_response_status == 200:
                 ticket_id = ticket_creation_response_body
-                self._logger.info(f"Successfully created outage ticket {ticket_id} for email_id {email_id}.")
+                self._logger.info("email_id=%s Successfully created outage ticket %s", email_id, ticket_id)
                 created_ticket = self._create_output_ticket_dict(
                     ticket_id=str(ticket_id), site_id=str(site_id), service_numbers=service_numbers
                 )
                 tickets_created.append(created_ticket)
-
-            elif ticket_creation_response_status in bruin_custom_status_codes:
+            elif ticket_creation_response_status in bruin_updated_reasons_dict.keys():
                 ticket_id = ticket_creation_response_body
                 update_reason = bruin_updated_reasons_dict[ticket_creation_response_status]
                 self._logger.info(
-                    f"Ticket already present bruin response {ticket_creation_response_status},"
-                    f"reason: {update_reason}"
+                    "email_id=%s Ticket already present bruin response %s reason: %s",
+                    email_id,
+                    ticket_creation_response_status,
+                    update_reason,
                 )
                 updated_ticket = self._create_output_ticket_dict(
                     ticket_id=str(ticket_id), site_id=str(site_id), service_numbers=service_numbers
                 )
                 tickets_updated.append(updated_ticket)
                 ticket_updated_flag = True
-
             else:
                 self._logger.error(
-                    f"Got error {ticket_creation_response_status}, {ticket_creation_response_body}"
-                    f"while creating ticket for {service_numbers} and client {client_id}"
+                    "email_id=%s Got error %s, %s while creating ticket for %s and client %s",
+                    email_id,
+                    ticket_creation_response_status,
+                    ticket_creation_response_body,
+                    service_number,
+                    client_id,
                 )
                 error_response = True
                 ticket_cannot_be_created = self._create_output_ticket_dict(
@@ -434,7 +478,7 @@ class RepairTicketsMonitor:
 
             if not error_response:
                 ticket_id = ticket_creation_response_body
-                await self._bruin_repository.append_bec_note_to_ticket(
+                notes_to_append = self._compose_bec_private_note_to_ticket(
                     ticket_id=ticket_id,
                     service_numbers=service_numbers,
                     subject=email_subject,
@@ -443,6 +487,8 @@ class RepairTicketsMonitor:
                     date=email_date,
                     is_update_note=ticket_updated_flag,
                 )
+
+                await self._bruin_repository.append_notes_to_ticket(client_id, notes_to_append)
                 await self._bruin_repository.link_email_to_ticket(ticket_id, email_id)
 
         return tickets_created, tickets_updated, tickets_cannot_be_created
