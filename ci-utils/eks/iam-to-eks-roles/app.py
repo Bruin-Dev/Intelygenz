@@ -56,10 +56,11 @@ class IamRolesUtil:
     def _get_necessary_attributes():
         project_tag = parser.parse_args().project_tag
         project_role_tag = parser.parse_args().project_role_tag
-        return project_tag, project_role_tag
+        project_env_tag = parser.parse_args().project_env_tag
+        return project_tag, project_role_tag, project_env_tag
 
     @staticmethod
-    def _create_necessary_tags_map(project_tag, project_role_tag):
+    def _create_necessary_tags_map(project_tag, project_role_tag, project_env_tag):
         if project_tag and project_role_tag:
             necessary_tags = [
                 {
@@ -69,6 +70,10 @@ class IamRolesUtil:
                 {
                     "Key": "Project-Role",
                     "Value": project_role_tag
+                },
+                {
+                    "Key": "Project-Env",
+                    "Value": project_env_tag
                 }
             ]
             return necessary_tags
@@ -76,8 +81,8 @@ class IamRolesUtil:
             print("It's necessary to provide a value for -p/--project-tag and --project-role-tag")
             exit(1)
 
-    def _get_iam_roles_of_eks_with_specific_profile(self, iam_botocore_session, project, project_role):
-        necessary_tags = self._create_necessary_tags_map(project, project_role)
+    def _get_iam_roles_of_eks_with_specific_profile(self, iam_botocore_session, project, project_role, project_env):
+        necessary_tags = self._create_necessary_tags_map(project, project_role, project_env)
         has_more_data = True
         marker = None
         print(f"Obtaining and filtering IAM roles for EKS users with {project_role} role in project {project}")
@@ -285,11 +290,12 @@ class IamRolesUtil:
             )
 
     def do_necessary_actions(self):
-        project, project_role = self._get_necessary_attributes()
+        project, project_role, project_env = self._get_necessary_attributes()
         iam_botocore_session = self._create_botocore_service_session('iam')
         iam_roles_filtered = self._get_iam_roles_of_eks_with_specific_profile(iam_botocore_session,
                                                                               project,
-                                                                              project_role)
+                                                                              project_role,
+                                                                              project_env)
         if iam_roles_filtered:
             self._update_kubernetes_aws_auth_cm(iam_roles_filtered)
             developer_cluster_role_exists = self._check_specific_cluster_role_exists(project_role)
@@ -321,6 +327,10 @@ if __name__ == '__main__':
     parser.add_argument('--project-role-tag',
                         type=str,
                         help='Project-Role tag to get users',
+                        required=True)
+    parser.add_argument('--project-env-tag',
+                        type=str,
+                        help='Project-Env tag to get users',
                         required=True)
     parser.add_argument('-a', '--aws-profile',
                         type=str,

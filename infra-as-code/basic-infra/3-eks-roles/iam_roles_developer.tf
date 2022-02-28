@@ -13,6 +13,7 @@ resource "aws_iam_role" "developer_eks" {
   force_detach_policies = true
   tags = {
     Project-Role  = "developer"
+    Project-Env   = substr(var.CURRENT_ENVIRONMENT, 0, 3)
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
     User          = var.eks_developer_users[count.index]

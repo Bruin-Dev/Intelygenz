@@ -110,7 +110,7 @@
     - >
       for i in $(echo $IAM_TO_EKS_ROLES | tr ", " "\n"); do
         (
-          python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation --project-role-tag ${i}
+          python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation --project-env-tag ${TF_VAR_CURRENT_ENVIRONMENT:0:3} --project-role-tag ${i}
         )
       done
     # INSTALL KUBE CONFIG
