@@ -309,3 +309,12 @@ kubeprometheusstack:
                 service: 'kafka-connect'
           tls_config:
             ca_file: /etc/prometheus/configmaps/ca-pemstore/aivencloud-project-ca-certificate.pem
+        - job_name: 'data-highway-velocloud-fetcher'
+          scrape_interval: 5s
+          scrape_timeout: 5s
+          scheme: http
+          static_configs:
+            - targets: [ '${DATA_HIGHWAY_VELOCLOUD_FETCHER_METRICS_URL}' ]
+              labels:
+                project: 'data-highway'
+                service: 'velocloud-fetcher'
