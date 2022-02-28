@@ -8,7 +8,7 @@ data "template_file" "ops_eks_role" {
 
 resource "aws_iam_role" "ops_eks" {
   count                 = length(var.eks_ops_users)
-  name                  = "eks-ops-${var.common_info.project}-${var.eks_ops_users[count.index]}"
+  name                  = "${var.short_environment}-ops-${var.common_info.project}-${var.eks_ops_users[count.index]}"
   assume_role_policy    = data.template_file.ops_eks_role[count.index].rendered
   force_detach_policies = true
   tags = {
@@ -30,7 +30,7 @@ data "template_file" "assume-ops-role" {
 
 resource "aws_iam_policy" "assume-ops-role" {
   count  = length(var.eks_ops_users)
-  name   = "policy-eks-ops-${var.common_info.project}-${var.eks_ops_users[count.index]}"
+  name   = "policy-${var.short_environment}-ops-${var.common_info.project}-${var.eks_ops_users[count.index]}"
   policy = data.template_file.assume-ops-role[count.index].rendered
 }
 
@@ -41,7 +41,7 @@ data "template_file" "ops-role-policy" {
 
 resource "aws_iam_role_policy" "ops-role-policy-permissions" {
   count = length(var.eks_ops_users)
-  name = "role-policy-eks-ops-${var.common_info.project}-${var.eks_ops_users[count.index]}"
+  name = "role-policy-${var.short_environment}-ops-${var.common_info.project}-${var.eks_ops_users[count.index]}"
   role = aws_iam_role.ops_eks[count.index].id
 
   policy = data.template_file.ops-role-policy[count.index].rendered

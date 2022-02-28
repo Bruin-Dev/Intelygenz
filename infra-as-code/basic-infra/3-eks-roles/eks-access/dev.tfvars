@@ -1,3 +1,5 @@
+short_environment = "dev"
+
 eks_developer_users = [
     "julia.hossu"
 ]

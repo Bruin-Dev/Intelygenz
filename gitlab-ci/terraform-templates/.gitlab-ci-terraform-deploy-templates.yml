@@ -37,7 +37,7 @@
               echo "The current Workdir is $i"
               if [[ ${i} != "4-elasticaches" ]]; then
                   terraform init -backend=true -get=true -input=false
-                  if [[ ${i} != "0-ecr-repositories" && ${i} != "3-eks-roles" ]]; then
+                  if [[ ${i} != "0-ecr-repositories" ]]; then
                       terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
                   fi
                   if [[ ${i} == "3-eks-roles" ]]; then

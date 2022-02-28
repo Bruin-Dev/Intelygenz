@@ -1,3 +1,5 @@
+short_environment = "pro"
+
 eks_developer_users = [
     "brandon.samudio",
     "joseluis.vega",
