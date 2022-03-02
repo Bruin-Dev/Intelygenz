@@ -5,7 +5,7 @@ kind: Service
 metadata:
   name: "{{ include "service-outage-monitor.fullname" $ }}-{{ $host | replace "." "-" }}"
   labels:
-    {{- include "service-outage-monitor.labels" $ | nindent 4 }}-
+    {{- include "service-outage-monitor.labels" $ | nindent 4 }}
     velocloud_host: {{ $host | quote }}
 spec:
   type: {{ $.Values.service.type }}
