@@ -372,6 +372,89 @@ class TestServiceAffectingMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
+    async def map_cached_edges_with_links_metrics_and_contact_info__force_default_contacts_test(
+            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
+            make_structured_metrics_object, make_list_of_structured_metrics_objects,
+            make_structured_metrics_object_with_cache_and_contact_info,
+            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+            make_contact_info, make_site_details, make_bruin_client_info, make_edge_full_id,
+    ):
+        site_detail_email = None
+        site_detail_phone = None
+        site_detail_name = None
+        site_details = make_site_details(
+            contact_name=site_detail_name,
+            contact_phone=site_detail_phone,
+            contact_email=site_detail_email,
+        )
+
+        edge_1_serial_number = 'VCO123'
+        edge_2_serial_number = 'VC4567'
+
+        client_id_1 = 1234
+        client_id_2 = 5678
+        default_contact_info = make_contact_info(
+            email='some-email',
+            phone='some-phone',
+            name='some-name',
+        )
+
+        bruin_client_info_1 = make_bruin_client_info(client_id=client_id_1)
+        bruin_client_info_2 = make_bruin_client_info(client_id=client_id_2)
+        edge_1_cache_info = make_cached_edge(
+            serial_number=edge_1_serial_number,
+            bruin_client_info=bruin_client_info_1,
+            site_details=site_details,
+        )
+        full_id = make_edge_full_id(host='metvco04.mettel.net')
+        edge_2_cache_info = make_cached_edge(
+            full_id=full_id,
+            serial_number=edge_2_serial_number,
+            bruin_client_info=bruin_client_info_2,
+            site_details=site_details,
+        )
+        edge_1 = make_edge(serial_number=edge_1_serial_number)
+        edge_2 = make_edge(serial_number=edge_2_serial_number)
+
+        edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
+        edge_2_structured_metrics = make_structured_metrics_object(edge_info=edge_2)
+        structured_metrics = make_list_of_structured_metrics_objects(
+            edge_1_structured_metrics,
+            edge_2_structured_metrics,
+        )
+
+        customer_cache = make_customer_cache(edge_1_cache_info, edge_2_cache_info)
+        service_affecting_monitor._customer_cache = customer_cache
+
+        contact_info_by_client_id = {
+            client_id_1: default_contact_info,
+            client_id_2: default_contact_info,
+        }
+        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+
+        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+            structured_metrics)
+
+        edge_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=edge_1_structured_metrics,
+            cache_info=edge_1_cache_info,
+            contact_info=default_contact_info,
+        )
+        edge_2_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=edge_2_structured_metrics,
+            cache_info=edge_2_cache_info,
+            contact_info=default_contact_info,
+        )
+
+        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
+            edge_1_complete_info,
+            edge_2_complete_info,
+        )
+        service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_not_called()
+
+        assert result == expected
+
+    @pytest.mark.asyncio
     async def map_cached_edges_with_links_metrics_and_contact_info__no_cached_edge_test(
             self, service_affecting_monitor, make_edge, make_link, make_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,

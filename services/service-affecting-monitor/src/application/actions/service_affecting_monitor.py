@@ -107,6 +107,16 @@ class ServiceAffectingMonitor:
 
         return contact_info_by_client
 
+    def _should_use_default_contact_info(self, client_id: int, edge: dict):
+        if client_id in self._config.MONITOR_CONFIG['customers_to_always_use_default_contact_info']:
+            return True
+
+        if 'ALL_FIS_CLIENTS' in self._config.MONITOR_CONFIG['customers_to_always_use_default_contact_info']:
+            if edge['edge']['host'] == 'metvco04.mettel.net':
+                return True
+
+        return False
+
     def _structure_links_metrics(self, links_metrics: list, events: dict = None) -> list:
         result = []
 
@@ -227,7 +237,10 @@ class ServiceAffectingMonitor:
             site_details = cached_edge['site_details']
 
             default_contacts = self._default_contact_info_by_client.get(client_id)
-            contacts = self._bruin_repository.get_contact_info_for_site(site_details) or default_contacts
+            if self._should_use_default_contact_info(client_id, cached_edge):
+                contacts = default_contacts
+            else:
+                contacts = self._bruin_repository.get_contact_info_for_site(site_details) or default_contacts
 
             result.append({
                 'cached_info': cached_edge,
