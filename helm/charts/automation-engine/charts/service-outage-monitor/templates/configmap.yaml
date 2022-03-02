@@ -3,11 +3,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ include "service-outage-monitor.fullname" $ }}{{ $index | add1 }}-{{ . | replace "." "-" }}-configmap"
+  name: "{{ include "service-outage-monitor.fullname" $ }}-{{ . | replace "." "-" }}-configmap"
   labels:
     {{- include "service-outage-monitor.labels" $ | nindent 4 }}
     velocloud_host: {{ $host | quote }}
-    velocloud_host_id: {{ $index | add1 | quote }}
   annotations:
     reloader.stakater.com/match: "true"
 data:
@@ -18,7 +17,7 @@ data:
   PAPERTRAIL_ACTIVE: {{ $.Values.global.papertrail_active | quote }}
   PAPERTRAIL_HOST: {{ $.Values.global.papertrail_host | quote }}
   PAPERTRAIL_PORT: {{ $.Values.global.papertrail_port | quote }}
-  PAPERTRAIL_PREFIX: "{{ include "service-outage-monitor.fullname" $ }}{{ $index | add1 }}-{{ . | replace "." "-" }}-{{ $.Values.image.tag }}"
+  PAPERTRAIL_PREFIX: "{{ include "service-outage-monitor.fullname" $ }}-{{ . | replace "." "-" }}-{{ $.Values.image.tag }}"
   TIMEZONE: {{ $.Values.global.timezone | quote }}
   ENABLE_TRIAGE_MONITORING: {{ 0 | quote }}  # Always disabled
   MONITORING__MONITORING_JOB_INTERVAL: {{ (int64 $.Values.config.monitoring__monitoring_job_interval) | quote }}

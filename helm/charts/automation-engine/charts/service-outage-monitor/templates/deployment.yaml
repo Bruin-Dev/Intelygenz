@@ -3,11 +3,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ include "service-outage-monitor.fullname" $ }}{{ $index | add1 }}-{{ $host | replace "." "-" }}"
+  name: "{{ include "service-outage-monitor.fullname" $ }}-{{ $host | replace "." "-" }}"
   labels:
     {{- include "service-outage-monitor.labels" $ | nindent 4 }}
     velocloud_host: {{ $host | quote }}
-    velocloud_host_id: {{ $index | add1 | quote }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
@@ -18,7 +17,6 @@ spec:
     matchLabels:
       {{- include "service-outage-monitor.selectorLabels" $ | nindent 6 }}
       velocloud_host: {{ $host | quote }}
-      velocloud_host_id: {{ $index | add1 | quote }}
   strategy:
     type: Recreate
   template:
@@ -26,7 +24,6 @@ spec:
       labels:
         {{- include "service-outage-monitor.labels" $ | nindent 8 }}
         velocloud_host: {{ $host | quote }}
-        velocloud_host_id: {{ $index | add1 | quote }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
@@ -63,9 +60,9 @@ spec:
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: "{{ include "service-outage-monitor.fullname" $ }}{{ $index | add1 }}-{{ $host | replace "." "-" }}-configmap"
+                name: "{{ include "service-outage-monitor.fullname" $ }}-{{ $host | replace "." "-" }}-configmap"
             - secretRef:
-                name: "{{ include "service-outage-monitor.fullname" $ }}{{ $index | add1 }}-{{ $host | replace "." "-" }}-secret"
+                name: "{{ include "service-outage-monitor.fullname" $ }}-{{ $host | replace "." "-" }}-secret"
           ports:
             - name: http
               containerPort: {{ $.Values.service.port }}

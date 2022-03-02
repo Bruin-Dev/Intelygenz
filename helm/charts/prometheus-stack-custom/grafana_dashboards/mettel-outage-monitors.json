@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1626693983714,
+  "id": 18,
+  "iteration": 1646219147629,
   "links": [],
   "panels": [
     {
@@ -69,7 +70,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "cycle_runtime_gauge{job=\"$instance\",namespace=~\"$namespace\"}",
+          "expr": "cycle_runtime_gauge{job=~\".*$instance\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -189,7 +190,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "outage_ticket_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(outage_ticket_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "expr": "outage_ticket_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(outage_ticket_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[1h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -279,7 +280,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "outage_monitoring_edge_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(outage_monitoring_edge_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "expr": "outage_monitoring_edge_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(outage_monitoring_edge_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[1h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -373,7 +374,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "max_retry_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(max_retry_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "expr": "max_retry_error_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(max_retry_error_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[1h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -463,7 +464,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "temp_cache_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(temp_cache_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[8h])",
+          "expr": "temp_cache_error_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(temp_cache_error_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[8h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -553,7 +554,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "first_triage_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(first_triage_error_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[4h])",
+          "expr": "first_triage_error_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(first_triage_error_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[4h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -643,7 +644,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "autoresolve_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(autoresolve_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "expr": "autoresolve_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(autoresolve_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[1h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -733,7 +734,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "reopened_counter_total{job=\"$instance\",namespace=~\"$namespace\"} - min_over_time(reopened_counter_total{job=\"$instance\",namespace=~\"$namespace\"}[1h])",
+          "expr": "reopened_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"} - min_over_time(reopened_counter_total{job=~\".*$instance\",namespace=~\"$namespace\"}[1h])",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -776,52 +777,12 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "service-outage-monitor-1",
-          "value": "service-outage-monitor-1"
-        },
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": false,
-        "label": "Outage Monitor instance(s)",
-        "multi": false,
-        "name": "instance",
-        "options": [
-          {
-            "selected": true,
-            "text": "service-outage-monitor-1",
-            "value": "service-outage-monitor-1"
-          },
-          {
-            "selected": false,
-            "text": "service-outage-monitor-2",
-            "value": "service-outage-monitor-2"
-          },
-          {
-            "selected": false,
-            "text": "service-outage-monitor-3",
-            "value": "service-outage-monitor-3"
-          },
-          {
-            "selected": false,
-            "text": "service-outage-monitor-4",
-            "value": "service-outage-monitor-4"
-          }
-        ],
-        "query": "service-outage-monitor-1,service-outage-monitor-2,service-outage-monitor-3,service-outage-monitor-4",
-        "queryValue": "",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
+          "tags": [],
           "text": [
-            "All"
+            "automation-engine"
           ],
           "value": [
-            "$__all"
+            "automation-engine"
           ]
         },
         "datasource": null,
@@ -833,13 +794,7 @@
         "label": "namespace",
         "multi": true,
         "name": "namespace",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          }
-        ],
+        "options": [],
         "query": {
           "query": "kube_namespace_created",
           "refId": "StandardVariableQuery"
@@ -848,6 +803,58 @@
         "regex": "/.*namespace=\"(?<namespace>automation-.*?)\".*/",
         "skipUrlSync": false,
         "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "mettel.velocloud.net",
+          "value": "mettel.velocloud.net"
+        },
+        "datasource": null,
+        "definition": "kube_pod_labels{namespace=~\"$namespace\", label_app_kubernetes_io_name=\"som\"}",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "VCO",
+        "multi": false,
+        "name": "instance",
+        "options": [
+          {
+            "selected": true,
+            "text": "mettel.velocloud.net",
+            "value": "mettel.velocloud.net"
+          },
+          {
+            "selected": false,
+            "text": "metvco02.mettel.net",
+            "value": "metvco02.mettel.net"
+          },
+          {
+            "selected": false,
+            "text": "metvco03.mettel.net",
+            "value": "metvco03.mettel.net"
+          },
+          {
+            "selected": false,
+            "text": "metvco04.mettel.net",
+            "value": "metvco04.mettel.net"
+          }
+        ],
+        "query": {
+          "query": "kube_pod_labels{namespace=~\"$namespace\", label_app_kubernetes_io_name=\"som\"}",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 0,
+        "regex": "/.*label_velocloud_host=\"(?<host>.*?)\".*/",
+        "skipUrlSync": false,
+        "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -874,7 +881,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "Outage Monitor (all instances)",
   "uid": "u3tpYYmG2",
   "version": 1

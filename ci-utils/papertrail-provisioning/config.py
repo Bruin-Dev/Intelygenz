@@ -144,23 +144,23 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "service-affecting-monitor",
                 },
                 {
-                    "query": f"som1-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som1-mettel-velocloud-net] - logs",
+                    "query": f"som-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[som-mettel-velocloud-net] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
-                    "query": f"som2-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som2-metvco02-mettel-net] - logs",
+                    "query": f"som-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[som-metvco02-mettel-net] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
-                    "query": f"som3-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som3-metvco03-mettel-net] - logs",
+                    "query": f"som-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[som-metvco03-mettel-net] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
-                    "query": f"som4-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som4-metvco04-mettel-net] - logs",
+                    "query": f"som-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[som-metvco04-mettel-net] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
