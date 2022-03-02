@@ -53,6 +53,8 @@ config:
   monitoring__monitored_velocloud_hosts: []
   # -- [Monitoring] Mapping of VeloCloud hosts, Bruin customers and default contact info
   monitoring__default_contact_info_per_customer: {}
+  # -- [Monitoring] List Bruin customers that should always use the default contact info
+  monitoring__customers_to_always_use_default_contact_info: []
   # -- [Monitoring] Threshold for Latency troubles
   monitoring__latency_monitoring_threshold: 0
   # -- [Monitoring] Threshold for Packet Loss troubles

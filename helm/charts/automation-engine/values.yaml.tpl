@@ -904,6 +904,8 @@ service-affecting-monitor:
     monitoring__monitored_velocloud_hosts: ${SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS}
     # -- [Monitoring] Mapping of VeloCloud hosts, Bruin customers and default contact info
     monitoring__default_contact_info_per_customer: ${SERVICE_AFFECTING__MONITOR__DEFAULT_CONTACT_INFO_PER_CUSTOMER}
+    # -- [Monitoring] List Bruin customers that should always use the default contact info
+    monitoring__customers_to_always_use_default_contact_info: ${SERVICE_AFFECTING__MONITOR__CUSTOMERS_TO_ALWAYS_USE_DEFAULT_CONTACT_INFO}
     # -- [Monitoring] Threshold for Latency troubles
     monitoring__latency_monitoring_threshold: ${DEV__SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_THRESHOLD}
     # -- [Monitoring] Threshold for Packet Loss troubles

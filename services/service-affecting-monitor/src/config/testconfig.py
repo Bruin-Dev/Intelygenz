@@ -36,6 +36,7 @@ MONITOR_CONFIG = {
             ],
         },
     },
+    'customers_to_always_use_default_contact_info': [1234, 'ALL_FIS_CLIENTS'],
     'velo_filter': {
         'test-host': [],
     },

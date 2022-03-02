@@ -39,6 +39,9 @@ PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 MONITOR_CONFIG = {
     'contact_by_host_and_client_id': default_contact_info,
+    'customers_to_always_use_default_contact_info': json.loads(
+        os.environ['MONITORING__CUSTOMERS_TO_ALWAYS_USE_DEFAULT_CONTACT_INFO']
+    ),
     'velo_filter': {
         host: []
         for host in json.loads(os.environ['MONITORING__MONITORED_VELOCLOUD_HOSTS'])
