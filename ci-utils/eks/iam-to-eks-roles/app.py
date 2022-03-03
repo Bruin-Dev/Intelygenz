@@ -78,13 +78,14 @@ class IamRolesUtil:
             ]
             return necessary_tags
         else:
-            print("It's necessary to provide a value for -p/--project-tag and --project-role-tag")
+            print("It's necessary to provide a value for -p/--project-tag, --project-env-tag and --project-role-tag")
             exit(1)
 
     def _get_iam_roles_of_eks_with_specific_profile(self, iam_botocore_session, project, project_role, project_env):
         necessary_tags = self._create_necessary_tags_map(project, project_role, project_env)
         has_more_data = True
         marker = None
+        roles_filtered = []
         print(f"Obtaining and filtering IAM roles for EKS users with {project_role} role in project {project}")
         while has_more_data:
             if marker:
@@ -96,7 +97,6 @@ class IamRolesUtil:
             if not resp["Roles"]:
                 break
             roles = resp["Roles"]
-            roles_filtered = []
             for role in roles:
                 rolename = role["RoleName"]
                 role_arn = role["Arn"]
@@ -117,7 +117,7 @@ class IamRolesUtil:
             has_more_data = resp["IsTruncated"]
             if has_more_data:
                 marker = resp["Marker"]
-            return roles_filtered
+        return roles_filtered
 
     @staticmethod
     def _update_map_roles_items_aws_auth_cm(iam_roles_filtered, aws_auth_cm_map_roles):
