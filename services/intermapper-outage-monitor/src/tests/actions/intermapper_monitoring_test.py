@@ -1156,6 +1156,11 @@ class TestInterMapperMonitor:
             'status': 200,
         }
 
+        unpause_ticket_detail_response = {
+            'body': 'ok',
+            'status': '200',
+        }
+
         relevant_notes_for_edge = [
             ticket_note_1,
             ticket_note_2,
@@ -1186,6 +1191,7 @@ class TestInterMapperMonitor:
         bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.unpause_ticket_detail = CoroutineMock(return_value=unpause_ticket_detail_response)
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
         bruin_repository.append_autoresolve_note = CoroutineMock()
@@ -2147,6 +2153,11 @@ class TestInterMapperMonitor:
             'status': 200,
         }
 
+        unpause_ticket_detail_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
         relevant_notes_for_edge = [
             ticket_note_1,
             ticket_note_2,
@@ -2173,6 +2184,7 @@ class TestInterMapperMonitor:
         bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.unpause_ticket_detail = CoroutineMock(return_value=unpause_ticket_detail_response)
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
         bruin_repository.append_autoresolve_note = CoroutineMock()

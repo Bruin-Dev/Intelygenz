@@ -271,6 +271,12 @@ class InterMapperMonitor:
                     'Skipping autoresolve...'
                 )
                 continue
+
+            await self._bruin_repository.unpause_ticket_detail(
+                ticket_id,
+                service_number=circuit_id, detail_id=ticket_detail_id
+            )
+
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(ticket_id, ticket_detail_id)
             if resolve_ticket_response['status'] not in range(200, 300):
                 return False

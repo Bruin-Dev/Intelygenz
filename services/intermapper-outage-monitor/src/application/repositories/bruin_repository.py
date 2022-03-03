@@ -277,6 +277,50 @@ class BruinRepository:
 
         return await self.append_note_to_ticket(ticket_id, dri_note)
 
+    async def unpause_ticket_detail(self, ticket_id: int, *, detail_id: int = None, service_number: str = None):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "ticket_id": ticket_id,
+            },
+        }
+
+        if detail_id:
+            request['body']['detail_id'] = detail_id
+
+        if service_number:
+            request['body']['service_number'] = service_number
+
+        try:
+            self._logger.info(f'Unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}...')
+            response = await self._event_bus.rpc_request("bruin.ticket.unpause", request, timeout=30)
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}. '
+                f'Error: {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Detail {detail_id} (serial {service_number}) of ticket {ticket_id} was unpaused!')
+            else:
+                err_msg = (
+                    f'Error while unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id} in '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment. '
+                    f'Error: Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def resolve_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None
 
