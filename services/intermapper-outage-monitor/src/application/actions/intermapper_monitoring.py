@@ -272,6 +272,13 @@ class InterMapperMonitor:
                 )
                 continue
 
+            if self._is_detail_resolved(detail_for_ticket_resolution):
+                self._logger.info(
+                    f'Detail {ticket_detail_id} (circuit ID {circuit_id}) of ticket {ticket_id} is already '
+                    'resolved. Skipping autoresolve...'
+                )
+                continue
+
             await self._bruin_repository.unpause_ticket_detail(
                 ticket_id,
                 service_number=circuit_id, detail_id=ticket_detail_id
@@ -425,3 +432,7 @@ class InterMapperMonitor:
     @staticmethod
     def _is_piab_device(email_data: dict) -> bool:
         return 'Data Remote Probe' in email_data['probe_type']
+
+    @staticmethod
+    def _is_detail_resolved(ticket_detail: dict):
+        return ticket_detail['detailStatus'] == 'R'
