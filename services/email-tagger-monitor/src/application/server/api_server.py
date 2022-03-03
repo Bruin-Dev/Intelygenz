@@ -146,6 +146,7 @@ class APIServer:
         signature_to_verify = SHA256_PREFIX.sub("", signature_to_verify)
         signature_to_verify = signature_to_verify.upper()
 
+        self._logger.info(f"Key: \n>>>>{secret_key}<<<<<<\n")
         self._logger.info(f"Request RAW body: \n>>>>{content}<<<<<<\n")
         self._logger.info(f"Signature: IGZ  [{calculated_signature}]")
         self._logger.info(f"Signature: BRUIN[{signature_to_verify}]")
