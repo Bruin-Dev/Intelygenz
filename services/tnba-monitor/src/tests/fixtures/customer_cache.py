@@ -1,8 +1,12 @@
 import pytest
+from typing import List
 
 
 # Model-as-dict generators
-def __generate_cached_edge(*, edge_full_id: dict, serial_number: str, **kwargs):
+def __generate_cached_edge(*, edge_full_id: dict, serial_number: str, name: str = '',
+                           site_details: dict = None, links_configuration: List[dict] = None,
+                           **kwargs,
+                           ):
     last_contact = kwargs.get('last_contact', '2020-01-16T14:59:56.245Z')
     logical_ids = kwargs.get(
         'logical_ids',
@@ -18,6 +22,7 @@ def __generate_cached_edge(*, edge_full_id: dict, serial_number: str, **kwargs):
 
     return {
         "edge": edge_full_id,
+        'edge_name': name,
         "last_contact": last_contact,
         "logical_ids": logical_ids,
         "serial_number": serial_number,
@@ -25,6 +30,8 @@ def __generate_cached_edge(*, edge_full_id: dict, serial_number: str, **kwargs):
             "client_id": bruin_client_id,
             "client_name": bruin_client_name,
         },
+        'site_details': site_details,
+        'links_configuration': links_configuration,
     }
 
 
@@ -51,6 +58,32 @@ def edge_cached_info_3(edge_full_id_3, serial_number_3):
         edge_full_id=edge_full_id_3,
         serial_number=serial_number_3,
     )
+
+
+@pytest.fixture(scope='session')
+def make_cached_edge(make_site_details):
+    def _inner(edge_full_id, serial_number: str = '', name: str = '', site_details: dict = None,
+               links_configuration: List[dict] = None):
+
+        site_details = site_details or make_site_details()
+        links_configuration = links_configuration or []
+        return __generate_cached_edge(
+            edge_full_id=edge_full_id,
+            serial_number=serial_number,
+            name=name,
+            site_details=site_details,
+            links_configuration=links_configuration,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_customer_cache():
+    def _inner(*edges: List[dict]):
+        return list(edges)
+
+    return _inner
 
 
 # RPC responses

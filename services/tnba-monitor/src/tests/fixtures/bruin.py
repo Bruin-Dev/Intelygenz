@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import List
+from typing import Optional
 
 import pytest
 
 from tests.fixtures import _constants as constants
+from tests.fixtures._helpers import bruinize_date
 
 
 # Model-as-dict generators
@@ -449,3 +451,45 @@ def bruin_500_response():
         'body': 'Got internal error from Bruin',
         'status': 500,
     }
+
+
+@pytest.fixture(scope='session')
+def make_address():
+    def _inner(*, street: str = '', city: str = '', state: str = '', zip_code: str = '', country: str = ''):
+        return {
+            "address": street,
+            "city": city,
+            "state": state,
+            "zip": zip_code,
+            "country": country,
+        }
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_site_details(make_address):
+    def _inner(*, client_id: int = 0, client_name: str = '', site_id: int = 0, site_label: str = '',
+               site_add_date: str = '', address: dict = None, longitude: float = 0.0, latitude: float = 0.0,
+               business_hours: str = '', timezone: str = None, tz_offset: int = 0, contact_name: Optional[str] = '',
+               contact_phone: Optional[str] = '', contact_email: Optional[str] = ''):
+        address = address or make_address()
+        site_add_date = site_add_date or bruinize_date(datetime.now())
+
+        return {
+            "clientID": client_id,
+            "clientName": client_name,
+            "siteID": site_id,
+            "siteLabel": site_label,
+            "siteAddDate": site_add_date,
+            "address": address,
+            "longitude": longitude,
+            "latitude": latitude,
+            "businessHours": business_hours,
+            "timeZone": timezone,
+            "tzOffset": tz_offset,
+            "primaryContactName": contact_name,
+            "primaryContactPhone": contact_phone,
+            "primaryContactEmail": contact_email,
+        }
+    return _inner

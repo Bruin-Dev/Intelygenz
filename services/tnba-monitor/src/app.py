@@ -16,6 +16,7 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.prediction_repository import PredictionRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.t7_repository import T7Repository
+from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from application.actions.tnba_monitor import TNBAMonitor
@@ -45,9 +46,11 @@ class Container:
         self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                  notifications_repository=self._notifications_repository)
         self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
-                                                         notifications_repository=self._notifications_repository)
+                                                         notifications_repository=self._notifications_repository,
+                                                         utils_repository=self._utils_repository)
         self._t7_repository = T7Repository(event_bus=self._event_bus, logger=self._logger, config=config,
                                            notifications_repository=self._notifications_repository)
+        self._trouble_repository = TroubleRepository(config, self._utils_repository)
         self._customer_cache_repository = CustomerCacheRepository(
             event_bus=self._event_bus, logger=self._logger,
             config=config, notifications_repository=self._notifications_repository,
@@ -56,7 +59,8 @@ class Container:
         self._tnba_monitor = TNBAMonitor(self._event_bus, self._logger, self._scheduler, config, self._t7_repository,
                                          self._ticket_repo, self._customer_cache_repository, self._bruin_repository,
                                          self._velocloud_repository, self._prediction_repo,
-                                         self._notifications_repository, self._utils_repository)
+                                         self._notifications_repository, self._utils_repository,
+                                         self._trouble_repository)
 
     async def _start(self):
         await self._event_bus.connect()

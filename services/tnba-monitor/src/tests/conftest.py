@@ -5,3 +5,4 @@ from tests.fixtures.instances import *
 from tests.fixtures.rpc import *
 from tests.fixtures.t7 import *
 from tests.fixtures.velocloud import *
+from tests.fixtures.misc import *

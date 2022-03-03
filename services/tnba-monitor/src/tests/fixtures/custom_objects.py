@@ -1,4 +1,5 @@
 from typing import List
+from collections import defaultdict
 
 import pytest
 
@@ -132,5 +133,66 @@ def make_predictions_by_ticket_id_object():
         return {
             ticket_id: predictions,
         }
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_list_of_ticket_notes():
+    def _inner(*ticket_notes: List[dict]):
+        return list(ticket_notes)
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_link_metrics_and_events_object(make_metrics):
+    def _inner(*, metrics: dict = None, events: list = None,):
+        metrics = metrics or make_metrics()
+        events = events or []
+        return {
+                'link_events': events,
+                'link_metrics': metrics,
+        }
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_list_link_metrics_and_events_objects():
+    def _inner(*link_metrics_and_events_objects: List[dict]):
+        return list(link_metrics_and_events_objects)
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_serial_to_link_metrics_and_events_interface(make_link_status_and_metrics_object):
+    def _inner(*, serials: list = None, interfaces: list = None, **kwargs):
+        serials = serials or []
+        interfaces = interfaces or []
+        make_link_status_and_metrics = defaultdict(lambda: defaultdict(dict))
+
+        for serial in serials:
+            for interface in interfaces:
+                make_link_status_and_metrics_object[serial].append(make_link_metrics_and_events_object(**kwargs))
+
+        return make_link_status_and_metrics
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def make_events_by_serial_and_interface():
+    def _inner(*, serials: list = None, interfaces: list = None):
+        serials = serials or []
+        interfaces = interfaces or []
+        events = defaultdict(lambda: defaultdict(list))
+
+        for serial in serials:
+            for interface in interfaces:
+                events[serial][interface] = []
+
+        return events
 
     return _inner

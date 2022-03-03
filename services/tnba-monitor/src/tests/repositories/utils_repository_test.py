@@ -69,3 +69,14 @@ class TestUtilsRepository:
         result = UtilsRepository.get_last_element_matching(iterable=payload, condition=cond, fallback=fallback_value)
 
         assert result == fallback_value
+
+    def get_interface_from_event_test(self):
+        event = {'message': 'Link GE1 is now DEAD'}
+        result = UtilsRepository.get_interface_from_event(event)
+        expected = 'GE1'
+        assert result == expected
+
+        event = {'message': 'Interface GE1 is down'}
+        result = UtilsRepository.get_interface_from_event(event)
+        expected = 'GE1'
+        assert result == expected

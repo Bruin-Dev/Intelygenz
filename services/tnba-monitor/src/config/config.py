@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+from application import AffectingTroubles
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -26,6 +27,26 @@ MONITOR_CONFIG = {
     'velo_filter': {
         host: []
         for host in json.loads(os.environ['MONITORED_VELOCLOUD_HOSTS'])
+    },
+    'service_affecting': {
+        'metrics_lookup_interval_minutes': int(os.environ['SERVICE_AFFECTING__AUTORESOLVE_LOOKUP_INTERVAL']) // 60,
+        'thresholds': {
+            # milliseconds
+            AffectingTroubles.LATENCY: int(os.environ['SERVICE_AFFECTING__LATENCY_MONITORING_THRESHOLD']),
+            # packets
+            AffectingTroubles.PACKET_LOSS: int(os.environ['SERVICE_AFFECTING__PACKET_LOSS_MONITORING_THRESHOLD']),
+            # milliseconds
+            AffectingTroubles.JITTER: int(os.environ['SERVICE_AFFECTING__JITTER_MONITORING_THRESHOLD']),
+            # percentage of total bandwidth
+            AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: int(
+                os.environ['SERVICE_AFFECTING__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD']),
+            # number of down / dead events
+            AffectingTroubles.BOUNCING: int(os.environ['SERVICE_AFFECTING__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD']),
+        },
+        'monitoring_minutes_per_trouble': {
+            AffectingTroubles.BOUNCING: int(
+                os.environ['SERVICE_AFFECTING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL']) // 60,
+        }
     },
     'tnba_notes_age_for_new_appends_in_minutes': int(os.environ['GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES']) // 60,
     'last_outage_seconds': int(os.environ['GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE']),

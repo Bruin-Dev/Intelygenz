@@ -23,7 +23,7 @@ REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-ope
 class TNBAMonitor:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                  customer_cache_repository, bruin_repository, velocloud_repository, prediction_repository,
-                 notifications_repository, utils_repository):
+                 notifications_repository, utils_repository, trouble_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -36,6 +36,7 @@ class TNBAMonitor:
         self._prediction_repository = prediction_repository
         self._notifications_repository = notifications_repository
         self._utils_repository = utils_repository
+        self._trouble_repository = trouble_repository
 
         self.__reset_state()
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
@@ -43,6 +44,7 @@ class TNBAMonitor:
     def __reset_state(self):
         self._customer_cache_by_serial = {}
         self._edge_status_by_serial = {}
+        self._link_metrics_and_events_by_serial = {}
         self._tnba_notes_to_append = []
 
     async def start_tnba_automated_process(self, exec_on_start=False):
@@ -86,6 +88,15 @@ class TNBAMonitor:
         customer_cache, edges_statuses = self._filter_edges_in_customer_cache_and_edges_statuses(
             customer_cache, edges_statuses
         )
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_autoresolve()
+        links_metrics: list = links_metrics_response['body']
+        if not links_metrics:
+            self._logger.info("List of links metrics arrived empty. Skipping...")
+            return
+        events = await self._velocloud_repository.get_events_by_serial_and_interface(customer_cache)
+        self._link_metrics_and_events_by_serial = self._velocloud_repository._structure_link_and_event_metrics(
+            links_metrics, events)
 
         self._logger.info('Loading customer cache and edges statuses by serial into the monitor instance...')
         self._customer_cache_by_serial = {
@@ -676,19 +687,28 @@ class TNBAMonitor:
 
         self._logger.info(f'Running autoresolve for serial {serial_number} of ticket {ticket_id}...')
 
-        if not self._ticket_repository.is_detail_in_outage_ticket(detail_object):
-            self._logger.info(
-                f'Ticket {ticket_id}, where serial {serial_number} is, is not an outage ticket. Skipping '
-                'autoresolve...'
-            )
-            return self.AutoresolveTicketDetailStatus.SKIPPED
-
         if not self._ticket_repository.was_ticket_created_by_automation_engine(detail_object):
             self._logger.info(
                 f'Ticket {ticket_id}, where serial {serial_number} is, was not created by Automation Engine. '
                 'Skipping autoresolve...'
             )
             return self.AutoresolveTicketDetailStatus.SKIPPED
+        edge_status = self._edge_status_by_serial[serial_number]
+        if self._ticket_repository.is_detail_in_outage_ticket(detail_object) and self._is_there_an_outage(edge_status):
+            self._logger.info(
+                f'Serial {serial_number} of ticket {ticket_id} is in outage state. Skipping autoresolve...'
+            )
+            return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
+
+        link_metrics_and_events = self._link_metrics_and_events_by_serial[serial_number]
+        if self._ticket_repository.is_detail_in_affecting_ticket(
+                detail_object) and not self._trouble_repository.are_all_metrics_within_thresholds(
+                                        link_metrics_and_events):
+            self._logger.info(
+                f'At least one metric from serial {serial_number} of ticket {ticket_id} is not within the threshold.'
+                f' Skipping autoresolve...'
+            )
+            return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
         if not self._prediction_repository.is_prediction_confident_enough(best_prediction):
             self._logger.info(
@@ -696,13 +716,6 @@ class TNBAMonitor:
                 f'did not exceed the minimum threshold. Skipping autoresolve...'
             )
             return self.AutoresolveTicketDetailStatus.SKIPPED
-
-        edge_status = self._edge_status_by_serial[serial_number]
-        if self._is_there_an_outage(edge_status):
-            self._logger.info(
-                f'Serial {serial_number} of ticket {ticket_id} is in outage state. Skipping autoresolve...'
-            )
-            return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
         if not self._config.CURRENT_ENVIRONMENT == 'production':
             self._logger.info(

@@ -14,6 +14,7 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.prediction_repository import PredictionRepository
 from application.repositories.t7_repository import T7Repository
 from application.repositories.ticket_repository import TicketRepository
+from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from config import testconfig as config
@@ -58,12 +59,13 @@ def bruin_repository(logger, event_bus, notifications_repository):
 
 
 @pytest.fixture(scope='function')
-def velocloud_repository(logger, event_bus, notifications_repository):
+def velocloud_repository(logger, event_bus, notifications_repository, utils_repository):
     instance = VelocloudRepository(
         logger=logger,
         event_bus=event_bus,
         notifications_repository=notifications_repository,
         config=config,
+        utils_repository=utils_repository
     )
     wrap_all_methods(instance)
 
@@ -127,9 +129,20 @@ def utils_repository():
 
 
 @pytest.fixture(scope='function')
+def trouble_repository(utils_repository):
+    instance = TroubleRepository(
+        utils_repository=utils_repository,
+        config=config,
+    )
+    wrap_all_methods(instance)
+
+    return instance
+
+
+@pytest.fixture(scope='function')
 def tnba_monitor(event_bus, logger, scheduler, t7_repository, bruin_repository, velocloud_repository,
                  customer_cache_repository, notifications_repository, prediction_repository, ticket_repository,
-                 utils_repository):
+                 utils_repository, trouble_repository):
     instance = TNBAMonitor(
         event_bus=event_bus,
         logger=logger,
@@ -143,6 +156,7 @@ def tnba_monitor(event_bus, logger, scheduler, t7_repository, bruin_repository, 
         prediction_repository=prediction_repository,
         ticket_repository=ticket_repository,
         utils_repository=utils_repository,
+        trouble_repository=trouble_repository
     )
     wrap_all_methods(instance)
 

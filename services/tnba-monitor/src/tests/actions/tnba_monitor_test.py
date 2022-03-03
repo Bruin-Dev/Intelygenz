@@ -127,7 +127,7 @@ class TestTNBAMonitor:
         assert tnba_monitor._edge_status_by_serial == {}
 
     @pytest.mark.asyncio
-    async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_no_notes_to_append_test(
+    async def run_tickets_polling_no_link_metrics_test(
             self, tnba_monitor, make_edge_with_links_info, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
             edge_1_connected, link_1_stable):
         customer_cache = [
@@ -144,8 +144,72 @@ class TestTNBAMonitor:
             edge_with_links,
         ]
 
+        link_metrics = []
+
+        link_metrics_return = {
+            'body': link_metrics,
+            'status': 200
+        }
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
+        tnba_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = link_metrics_return
+
+        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
+            customer_cache, edges_statuses
+        ))
+        tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
+        tnba_monitor._map_ticket_details_with_predictions.return_value = []
+
+        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
+        tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
+        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
+        tnba_monitor._remove_erroneous_predictions = Mock()
+        tnba_monitor._transform_tickets_into_detail_objects = Mock(return_value=[])
+        tnba_monitor._filter_resolved_ticket_details = Mock()
+        tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
+        tnba_monitor._process_ticket_detail = CoroutineMock()
+        tnba_monitor._append_tnba_notes = CoroutineMock()
+
+        await tnba_monitor._run_tickets_polling()
+
+        tnba_monitor._velocloud_repository.get_events_by_serial_and_interface.assert_not_awaited()
+        tnba_monitor._velocloud_repository._structure_link_and_event_metrics.assert_not_called()
+        assert tnba_monitor._link_metrics_and_events_by_serial == {}
+
+    @pytest.mark.asyncio
+    async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_no_notes_to_append_test(
+            self, tnba_monitor, make_edge_with_links_info, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
+            edge_1_connected, link_1_stable, make_metrics, make_events_by_serial_and_interface):
+        customer_cache = [
+            edge_cached_info_1,
+            edge_cached_info_2,
+        ]
+        get_cache_response = make_rpc_response(
+            body=customer_cache,
+            status=200,
+        )
+
+        edge_with_links = make_edge_with_links_info(edge_info=edge_1_connected, links_info=[link_1_stable])
+        edges_statuses = [
+            edge_with_links,
+        ]
+        link_metrics = make_metrics()
+
+        link_metrics_return = {
+            'body': link_metrics,
+            'status': 200
+        }
+        events_return = make_events_by_serial_and_interface()
+
+        link_and_event_metrics = {
+            'some.serial': [{'link_metrics': link_metrics, 'link_events': []}]
+        }
+
+        tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
+        tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
+        tnba_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = link_metrics_return
+        tnba_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = events_return
+        tnba_monitor._velocloud_repository._structure_link_and_event_metrics.return_value = link_and_event_metrics
         tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
             customer_cache, edges_statuses
         ))
@@ -171,7 +235,7 @@ class TestTNBAMonitor:
     async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_notes_to_append_test(
             self, tnba_monitor, make_edge_with_links_info, make_detail_object_with_predictions,
             make_payload_for_note_append_with_ticket_id, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
-            edge_1_connected, link_1_stable):
+            edge_1_connected, link_1_stable, make_metrics, make_events_by_serial_and_interface):
         customer_cache = [
             edge_cached_info_1,
             edge_cached_info_2,
@@ -186,8 +250,23 @@ class TestTNBAMonitor:
             edge_with_links,
         ]
 
+        link_metrics = make_metrics()
+
+        link_metrics_return = {
+            'body': link_metrics,
+            'status': 200
+        }
+        events_return = make_events_by_serial_and_interface()
+
+        link_and_event_metrics = {
+            'some.serial': [{'link_metrics': link_metrics, 'link_events': []}]
+        }
+
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
+        tnba_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = link_metrics_return
+        tnba_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = events_return
+        tnba_monitor._velocloud_repository._structure_link_and_event_metrics.return_value = link_and_event_metrics
         tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
             customer_cache, edges_statuses
         ))
@@ -1679,7 +1758,8 @@ class TestTNBAMonitor:
     async def autoresolve_ticket_detail_ok_test(self, tnba_monitor, make_in_progress_ticket_detail,
                                                 make_detail_object_with_predictions, make_edge_with_links_info,
                                                 make_rpc_response, edge_1_connected, link_1_stable, link_2_stable,
-                                                serial_number_1, confident_request_completed_prediction):
+                                                serial_number_1, confident_request_completed_prediction,
+                                                make_metrics):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
@@ -1704,6 +1784,11 @@ class TestTNBAMonitor:
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
 
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
         resolve_detail_response = make_rpc_response(body='ok', status=200)
         expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SUCCESS
 
@@ -1716,11 +1801,13 @@ class TestTNBAMonitor:
             )
 
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
         tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
             confident_request_completed_prediction
         )
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_not_called()
         tnba_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
             ticket_id, service_number=serial_number_1, detail_id=ticket_detail_id
         )
@@ -1728,47 +1815,20 @@ class TestTNBAMonitor:
         assert autoresolved_status == expected_autoresolved_status
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_ticket_being_an_affecting_ticket_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
-            confident_request_completed_prediction):
-        ticket_id = 12345
-        ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VAS'
-
-        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
-        detail_object = make_detail_object_with_predictions(
-            ticket_id=ticket_id,
-            ticket_topic=ticket_topic,
-            ticket_creator=ticket_creator,
-            ticket_detail=ticket_detail,
-            ticket_notes=[],
-            ticket_detail_predictions=[confident_request_completed_prediction]
-        )
-
-        expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
-
-        autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
-            detail_object=detail_object,
-            best_prediction=confident_request_completed_prediction,
-        )
-
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
-        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_not_called()
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_not_called()
-        tnba_monitor._is_there_an_outage.assert_not_called()
-        tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
-        assert autoresolved_status == expected_autoresolved_status
-
-    @pytest.mark.asyncio
     async def autoresolve_ticket_detail_with_ticket_not_automatically_created_test(
             self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
-            confident_request_completed_prediction):
+            confident_request_completed_prediction, make_metrics):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Otacon'
         ticket_topic = 'VOO'
 
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
+
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
             ticket_id=ticket_id,
@@ -1786,21 +1846,39 @@ class TestTNBAMonitor:
             best_prediction=confident_request_completed_prediction,
         )
 
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_not_called()
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_not_called()
         tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_not_called()
         tnba_monitor._is_there_an_outage.assert_not_called()
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_not_called()
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         assert autoresolved_status == expected_autoresolved_status
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_detail_with_prediction_having_insufficient_confidence_level_test(
             self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
-            unconfident_request_completed_prediction):
+            unconfident_request_completed_prediction, make_metrics,
+            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'VOO'
+
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
+        edge_status_by_serial = {
+            serial_number_1: edge_status,
+        }
+        tnba_monitor._edge_status_by_serial = edge_status_by_serial
+
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1819,12 +1897,14 @@ class TestTNBAMonitor:
             best_prediction=unconfident_request_completed_prediction,
         )
 
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
         tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
             unconfident_request_completed_prediction
         )
-        tnba_monitor._is_there_an_outage.assert_not_called()
+        tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
+        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_not_called()
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         assert autoresolved_status == expected_autoresolved_status
 
@@ -1835,11 +1915,18 @@ class TestTNBAMonitor:
                                                                        make_edge_with_links_info,
                                                                        edge_1_offline, link_1_disconnected,
                                                                        link_2_disconnected, serial_number_1,
-                                                                       confident_request_completed_prediction):
+                                                                       confident_request_completed_prediction,
+                                                                       make_metrics):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'VOO'
+
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1867,13 +1954,66 @@ class TestTNBAMonitor:
             best_prediction=confident_request_completed_prediction,
         )
 
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
-        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
-            confident_request_completed_prediction
-        )
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_not_called()
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
+        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_not_called()
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_not_called()
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
+        assert autoresolved_status == expected_autoresolved_status
+
+    @pytest.mark.asyncio
+    async def autoresolve_ticket_detail_with_affecting_not_all_metrics_within_threshold_test(
+            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
+            unconfident_request_completed_prediction, make_metrics,
+            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
+        ticket_id = 12345
+        ticket_detail_id = 1
+        ticket_creator = 'Intelygenz Ai'
+        ticket_topic = 'VAS'
+
+        edge_status = make_edge_with_links_info(
+            edge_info=edge_1_connected,
+            links_info=[link_1_stable, link_2_stable],
+        )
+        edge_status_by_serial = {
+            serial_number_1: edge_status,
+        }
+        tnba_monitor._edge_status_by_serial = edge_status_by_serial
+
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
+
+        ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
+        detail_object = make_detail_object_with_predictions(
+            ticket_id=ticket_id,
+            ticket_topic=ticket_topic,
+            ticket_creator=ticket_creator,
+            ticket_detail=ticket_detail,
+            ticket_notes=[],
+            ticket_detail_predictions=[unconfident_request_completed_prediction]
+        )
+
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds = Mock(return_value=False)
+        expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.BAD_PREDICTION
+
+        autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
+            detail_object=detail_object,
+            best_prediction=unconfident_request_completed_prediction,
+        )
+
+        tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
+        tnba_monitor._is_there_an_outage.assert_not_called()
+        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_called_once_with(
+            tnba_monitor._link_metrics_and_events_by_serial[serial_number_1])
+        tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
+        tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_not_called()
         assert autoresolved_status == expected_autoresolved_status
 
     @pytest.mark.asyncio
@@ -1883,11 +2023,18 @@ class TestTNBAMonitor:
                                                                              make_edge_with_links_info,
                                                                              edge_1_connected, link_1_stable,
                                                                              link_2_stable, serial_number_1,
-                                                                             confident_request_completed_prediction):
+                                                                             confident_request_completed_prediction,
+                                                                             make_metrics):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'VOO'
+
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1916,11 +2063,13 @@ class TestTNBAMonitor:
                 best_prediction=confident_request_completed_prediction,
             )
 
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
         tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
             confident_request_completed_prediction
         )
+        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_not_called()
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         assert autoresolved_status == expected_autoresolved_status
@@ -1929,11 +2078,17 @@ class TestTNBAMonitor:
     async def autoresolve_ticket_detail_with_failure_in_autoresolve_request_test(
             self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions,
             make_edge_with_links_info, make_rpc_response, edge_1_connected, link_1_stable, link_2_stable,
-            serial_number_1, confident_request_completed_prediction):
+            serial_number_1, confident_request_completed_prediction, make_metrics):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_creator = 'Intelygenz Ai'
         ticket_topic = 'VOO'
+
+        metrics = make_metrics()
+
+        tnba_monitor._link_metrics_and_events_by_serial = {
+            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+        }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1969,12 +2124,14 @@ class TestTNBAMonitor:
                 best_prediction=confident_request_completed_prediction,
             )
 
-        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.was_ticket_created_by_automation_engine.assert_called_once_with(detail_object)
         tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_called_once_with(
             confident_request_completed_prediction
         )
+        tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
+        tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_called_once_with(detail_object)
         tnba_monitor._is_there_an_outage.assert_called_once_with(edge_status)
+        tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_not_called()
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_awaited_once_with(ticket_id, ticket_detail_id)
         assert autoresolved_status == expected_autoresolved_status
 

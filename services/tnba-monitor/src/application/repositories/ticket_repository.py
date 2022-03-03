@@ -56,6 +56,10 @@ class TicketRepository:
         return ticket_detail['ticket_topic'] == 'VOO'
 
     @staticmethod
+    def is_detail_in_affecting_ticket(ticket_detail: dict) -> bool:
+        return ticket_detail['ticket_topic'] == 'VAS'
+
+    @staticmethod
     def was_ticket_created_by_automation_engine(ticket_detail: dict) -> bool:
         return ticket_detail['ticket_creator'] == 'Intelygenz Ai'
 

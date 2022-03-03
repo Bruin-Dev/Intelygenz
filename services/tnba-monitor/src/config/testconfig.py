@@ -1,6 +1,7 @@
 # You must replicate the structure of config.py, changing os.environ calls for mock values
 import logging
 import sys
+from application import AffectingTroubles
 
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
@@ -30,6 +31,19 @@ MONITOR_CONFIG = {
     'tnba_notes_age_for_new_appends_in_minutes': 30,
     'last_outage_seconds': 60 * 60,
     'request_repair_completed_confidence_threshold': 0.75,
+    'service_affecting': {
+        'metrics_lookup_interval_minutes': 10,
+        'thresholds': {
+            AffectingTroubles.LATENCY: 140,  # milliseconds
+            AffectingTroubles.PACKET_LOSS: 8,  # packets
+            AffectingTroubles.JITTER: 50,  # milliseconds
+            AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,  # percentage of total bandwidth
+            AffectingTroubles.BOUNCING: 4,  # number of down / dead events
+        },
+        'monitoring_minutes_per_trouble': {
+            AffectingTroubles.BOUNCING: 60,
+        },
+    }
 }
 
 CURRENT_ENVIRONMENT = 'dev'
