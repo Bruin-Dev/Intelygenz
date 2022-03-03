@@ -467,7 +467,7 @@ class RepairTicketsMonitor:
                     email_id,
                     ticket_creation_response_status,
                     ticket_creation_response_body,
-                    service_number,
+                    service_numbers,
                     client_id,
                 )
                 error_response = True
@@ -488,7 +488,7 @@ class RepairTicketsMonitor:
                     is_update_note=ticket_updated_flag,
                 )
 
-                await self._bruin_repository.append_notes_to_ticket(client_id, notes_to_append)
+                await self._bruin_repository.append_notes_to_ticket(ticket_id, notes_to_append)
                 await self._bruin_repository.link_email_to_ticket(ticket_id, email_id)
 
         return tickets_created, tickets_updated, tickets_cannot_be_created
