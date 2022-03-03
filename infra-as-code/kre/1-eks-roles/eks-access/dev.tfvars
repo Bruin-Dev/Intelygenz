@@ -6,14 +6,13 @@ eks_devops_users = [
     "alberto.iglesias",
     "angel.luis.piquero",
     "alejandro.aceituna",
-    "daniel.fernandez"
 ]
 
 eks_ops_users = [
-    "brandon.samudio",
-    "joseluis.vega",
+    "david.garciaguerrero",
+    "daniel.fernandez",
     "juancarlos.gomez",
-    "sergio.delpuerto",
+    "brandon.samudio",
     "daniel.montilla",
-    "david.garciaguerrero"
+    "joseluis.vega"
 ]

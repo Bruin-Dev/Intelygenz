@@ -37,7 +37,7 @@ basic-infra-kre-dev:
     INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
     KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
     LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
-    IAM_TO_EKS_ROLES: developer, devops
+    IAM_TO_EKS_ROLES: developer, devops, ops
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
   rules:
@@ -62,7 +62,7 @@ basic-infra-kre-production:
     INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_PRO}
     KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_PRO}
     LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_PRO}
-    IAM_TO_EKS_ROLES: developer, devops
+    IAM_TO_EKS_ROLES: developer, devops, ops
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
   rules:

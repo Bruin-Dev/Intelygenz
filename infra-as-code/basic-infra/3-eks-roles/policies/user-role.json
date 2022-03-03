@@ -3,7 +3,7 @@
   "Statement": [
       {
           "Effect": "Allow",
-          "Principal": { "AWS": "arn:aws:iam::374050862540:user/${user_name}" },
+          "Principal": { "AWS": "arn:aws:iam::${account_id}:user/${user_name}" },
           "Action": "sts:AssumeRole"
       }
   ]
