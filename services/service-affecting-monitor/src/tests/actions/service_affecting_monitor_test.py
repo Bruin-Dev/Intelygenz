@@ -1103,7 +1103,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         edge_serial_number = 'VCO123'
-        client_id = 1234
+        client_id = 12345
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
