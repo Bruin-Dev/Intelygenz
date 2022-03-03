@@ -42,17 +42,6 @@ class PostMultipleNotes:
                 await self._event_bus.publish_message(msg['response_topic'], response)
                 return
 
-            if len(note['text']) > 1500:
-                self._logger.info(
-                    f'At least one of the notes to be posted for {ticket_id} is larger than 1500 chars. '
-                    f'Message has {len(note["text"])} characters.'
-                )
-
-                response["body"] = f'One of the notes for ticket {ticket_id} exceeds 1500 character limit'
-                response["status"] = 400
-                await self._event_bus.publish_message(msg['response_topic'], response)
-                return
-
         self._logger.info(f'Posting multiple notes for ticket {ticket_id}...')
         result = await self._bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
 
