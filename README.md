@@ -481,9 +481,11 @@ In the creation and possible updates in the EKS clusters an association is made 
 
 IAM roles are created for each of the users, although these are distinguished into three categories according to the tag `Project-Role` of them, this tag will also be used to associate them to a `ClusterRole` of the EKS cluster and allow access to certain resources of the same. The mentioned tags are the following:
 
-- **developer**: This tag identify users that will only have access to the [pods](https://kubernetes.io/docs/concepts/workloads/pods/) of any namespace to perform `get`, `list` and `watch` on them.
+- **developer**: This tag identify users that will only have access to the [pods](https://kubernetes.io/docs/concepts/workloads/pods/) of any namespace to perform `get`, `list`, `watch`, and `delete` on them.
 
 - **devops**: This tag identify users that will access to any resource in any namespace.
+
+- **ops**: This tag identify users that will have the same access of the developer, but with additionaly options to manage [configmaps](https://kubernetes.io/docs/concepts/configuration/configmap/), [secrets](https://kubernetes.io/docs/concepts/configuration/secret/) and [deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). This role is util for a developer can manage ephemeral environments.
 
 ### Roles assigned to Users
 
