@@ -613,7 +613,7 @@ The following steps must be followed to set up the configuration to access any o
      output=json
      ```
 
-2. Add the configuration of the IAM role created for the user in the awscli config file. The role IAM arn created for each user uses the following format `arn:aws:iam::374050862540:role/eks-<role_tag>-mettel-automation-kre-<iam_user_name>`, where the `role_tag` value will be one of those explained in the [previous section](#roles).
+2. Add the configuration of the IAM role created for the user in the awscli config file. The role IAM arn created for each user uses the following format `arn:aws:iam::374050862540:role/<env>-<role>-mettel-automation-kre-<iam_user_name>`, where the `role_tag` value will be one of those explained in the [previous section](#roles).
 
    The following is an example of the configuration for a a Ops role in dev, and Developer role in pro through the modification of the `~/.aws/config` file for Automation-Engine cluster:
 
