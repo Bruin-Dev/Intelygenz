@@ -8,8 +8,10 @@
 |       customer-cache       |             [![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
 |        digi-bridge         |                [![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                |
 |     digi-reboot-report     |         [![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)         |
+|        dri-bridge          |                [![dri-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dri-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                  |
 |  email-tagger-kre-bridge   |    [![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)    |
 |    email-tagger-monitor    |       [![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
+|       fraud-monitor        |       [![fraud-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=fraud-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                     |
 | hawkeye-affecting-monitor  |  [![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |       hawkeye-bridge       |             [![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
 |   hawkeye-customer-cache   |     [![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
@@ -18,6 +20,8 @@
 |    last-contact-report     |        [![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
 |    lumin-billing-report    |         [![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)          |
 |          notifier          |                   [![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                   |
+| repair-tickets-kre-bridge  |  [![repair-tickets-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
+|   repair-tickets-monitor   |  [![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
 | service-affecting-monitor  |  [![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |   service-outage-monitor   |     [![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
 |       sites-monitor        |              [![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
@@ -31,14 +35,14 @@
 - [Table of Contents](#table-of-contents)
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
-  - [<a name="commit"></a> Commit Message Format](#-commit-message-format)
-    - [<a name="commit-header"></a>Commit Message Header](#commit-message-header)
+  - [Commit Message Format](#commit-message-format)
+    - [Commit Message Header](#commit-message-header)
       - [Type](#type)
       - [Types that trigger jobs in pipelines](#types-that-trigger-jobs-in-pipelines)
       - [Scope](#scope)
       - [Short summary](#short-summary)
-    - [<a name="commit-body"></a>Commit Message Body](#commit-message-body)
-    - [<a name="commit-footer"></a>Commit Message Footer](#commit-message-footer)
+    - [Commit Message Body](#commit-message-body)
+    - [Commit Message Footer](#commit-message-footer)
     - [Revert commits](#revert-commits)
     - [Example](#example)
   - [Adding new microservices to the system](#adding-new-microservices-to-the-system)
@@ -483,28 +487,14 @@ IAM roles are created for each of the users, although these are distinguished in
 
 ### Roles assigned to Users
 
-Below are the roles created for each of the users actually, as well as the category to which they belong from those explained above:
+Below are the roles created:
 
-| IAM User Name      | Role in Project | IAM role created                                                                                         |
-| ------------------ | --------------- | -------------------------------------------------------------------------------------------------------- |
-| alberto.iglesias   | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alberto.iglesias    |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias    |
-| alejandro.aceituna | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-alejandro.aceituna  |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alejandro.aceituna  |
-| angel.costales     | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.costales      |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.costales      |
-| angel.luis.piquero | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-angel.luis.piquero  |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-angel.luis.piquero  |
-| brandon.samudio    | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation--brandon.samudio |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-brandon.samudio  |
-| daniel.fernandez   | devops          | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-daniel.fernandez    |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-daniel.fernandez |
-| joseluis.vega      | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-joseluis.vega    |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-joseluis.vega    |
-| marc.vivancos      | developer       | `automation-engine:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-marc.vivancos    |
-|                    |                 | `konstellation:` arn:aws:iam::<aws_account_id>:role/eks-developer-mettel-automation-kre-marc.vivancos    |
+| Environments   | Roles in Project       | IAM role per project                                                                                     |
+| -------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| dev, pro       | developer, devops, ops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/<env>-<role>-mettel-automation-<aws-username>    |
+|                |                        | `konstellation:` arn:aws:iam::<aws_account_id>:role/<env>-<role>-mettel-automation-kre-<aws-username>    |
 
-> The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one, contact the *DevOps* of the project to get a new one.
+> The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one value, contact the *DevOps* of the project to get the data.
 
 ## Access Configuration
 
@@ -625,20 +615,47 @@ The following steps must be followed to set up the configuration to access any o
 
 2. Add the configuration of the IAM role created for the user in the awscli config file. The role IAM arn created for each user uses the following format `arn:aws:iam::374050862540:role/eks-<role_tag>-mettel-automation-kre-<iam_user_name>`, where the `role_tag` value will be one of those explained in the [previous section](#roles).
 
-   The following is an example of the configuration of this role through the modification of the `~/.aws/config` file:
+   The following is an example of the configuration for a a Ops role in dev, and Developer role in pro through the modification of the `~/.aws/config` file for Automation-Engine cluster:
 
    ```
-   [profile devops-role-kre]
-   role_arn = arn:aws:iam::<aws_account_id>:role/eks-devops-mettel-automation-kre-alberto.iglesias
+   [profile ops-role-automation-dev]
+   role_arn = arn:aws:iam::<aws_account_id>:role/dev-ops-mettel-automation-your.username
+   source_profile = mettel-automation
+   region=us-east-1
+   output=json
+
+   [profile developer-role-automation-pro]
+   role_arn = arn:aws:iam::<aws_account_id>:role/pro-developer-mettel-automation-your.username
    source_profile = mettel-automation
    region=us-east-1
    output=json
    ```
 
+   The following is an example of the configuration of the Devops role in pro through the modification of the `~/.aws/config` file for konstellation cluster:
+
+   ```
+   [profile devops-role-kre-pro]
+   role_arn = arn:aws:iam::<aws_account_id>:role/pro-devops-mettel-automation-kre-your.username
+   source_profile = mettel-automation
+   region=us-east-1
+   output=json
+   ```
+
+Remember: you have to know the role (developer, devops or ops) assigned per environment (dev or pro), so contact with the project *devops* to get this specific access info for you. If you will have access to both envs, you have to configure two AWS Profiles, one for `dev` and other for `pro`.
+
 3. Add to the Kubernetes kubeconfig file the EKS cluster to which the user wants to connect. This can be done through the following `awscli` command:
 
     ```sh
-    $ aws eks update-kubeconfig --name <kre_eks_cluster_name> --profile devops-role-kre
+    $ aws eks update-kubeconfig --name <eks_cluster_name> --profile <aws_config_file_profile_name>
+
+    # example Automation-Enginer DEV cluster with profile Ops:
+    $ aws eks update-kubeconfig --name mettel-automation-dev --profile ops-role-automation-dev
+
+    # example Automation-Enginer PRO cluster with profile Developer:
+    $ aws eks update-kubeconfig --name mettel-automation --profile ops-role-automation-pro
+
+    # example Konstellation PRO cluster with profile Devops:
+    $ aws eks update-kubeconfig --name mettel-automation-kre --profile devops-role-kre-pro
     ```
 
    > The name of the EKS cluster's are, production automation engine: `mettel-automation`, production konstelation: `mettel-automation-kre`, development automation engine: `mettel-automation-dev` and development konstellation: `mettel-automation-kre-dev`.
