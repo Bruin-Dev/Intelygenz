@@ -491,8 +491,8 @@ Below are the roles created:
 
 | Environments   | Roles in Project       | IAM role per project                                                                                     |
 | -------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| dev, pro       | developer, devops, ops | `automation-engine:` arn:aws:iam::<aws_account_id>:role/<env>-<role>-mettel-automation-<aws-username>    |
-|                |                        | `konstellation:` arn:aws:iam::<aws_account_id>:role/<env>-<role>-mettel-automation-kre-<aws-username>    |
+| dev, pro       | developer, devops, ops | `automation-engine:` arn:aws:iam::[aws_account_id]:role/[env]-[role]-mettel-automation-[aws-username]    |
+|                |                        | `konstellation:` arn:aws:iam::[aws_account_id]:role/[env]-[role]-mettel-automation-kre-[aws-username]    |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one value, contact the *DevOps* of the project to get the data.
 
