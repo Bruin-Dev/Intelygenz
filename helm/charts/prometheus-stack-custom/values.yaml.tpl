@@ -310,8 +310,8 @@ kubeprometheusstack:
           tls_config:
             ca_file: /etc/prometheus/configmaps/ca-pemstore/aivencloud-project-ca-certificate.pem
         - job_name: 'data-highway-velocloud-fetcher'
-          scrape_interval: 5s
-          scrape_timeout: 5s
+          scrape_interval: 30s
+          scrape_timeout: 1m
           scheme: http
           static_configs:
             - targets: [ '${DATA_HIGHWAY_VELOCLOUD_FETCHER_METRICS_URL}' ]
