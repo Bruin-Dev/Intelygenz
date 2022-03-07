@@ -540,6 +540,7 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=False,
+                            is_409_status=False
                         )
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
@@ -554,6 +555,7 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=True,
+                            is_409_status=True
                         )
                         await self._check_for_failed_digi_reboot(ticket_creation_response_body,
                                                                  logical_id_list, serial_number, edge_status)
@@ -570,6 +572,7 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=True,
+                            is_409_status=False
                         )
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
@@ -588,6 +591,7 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=True,
+                            is_409_status=False
                         )
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
@@ -604,6 +608,7 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=False,
+                            is_409_status=False
                         )
             else:
                 self._logger.info(
@@ -630,16 +635,21 @@ class OutageMonitor:
 
         self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
-    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, forward_time=1):
+    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, target_severity=None):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
+        forward_time = 1
+        if target_severity == self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']:
+            forward_time = self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down']
+
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
+        self._logger.info(f"Scheduling HNOC forwarding to happen at timestamp: {forward_task_run_date}")
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue, 'date',
             kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
-            replace_existing=False,
+            replace_existing=True,
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
@@ -988,7 +998,8 @@ class OutageMonitor:
 
         return seconds_elapsed_since_creation >= max_seconds_since_creation
 
-    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, *, check_ticket_tasks: bool):
+    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, *, check_ticket_tasks: bool,
+                                      is_409_status: bool):
         self._logger.info(f'Attempting to change severity level of ticket {ticket_id}...')
 
         serial_number = edge_status['edgeSerialNumber']
@@ -1003,12 +1014,14 @@ class OutageMonitor:
             )
             change_severity_task = self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
             target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
-            self.schedule_forward_to_hnoc_queue(
-                ticket_id, serial_number, self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
+            if not is_409_status:
+                self.schedule_forward_to_hnoc_queue(
+                    ticket_id, serial_number, target_severity_level)
 
         else:
-            self.schedule_forward_to_hnoc_queue(
-                ticket_id, serial_number, self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
+            if not is_409_status:
+                self.schedule_forward_to_hnoc_queue(
+                    ticket_id, serial_number, self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down'])
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 if ticket_details_response['status'] not in range(200, 300):
@@ -1049,6 +1062,9 @@ class OutageMonitor:
             )
             change_severity_task.close()
             return
+        if is_409_status:
+            self.schedule_forward_to_hnoc_queue(
+                ticket_id, serial_number, target_severity_level)
 
         await change_severity_task
         self._logger.info(f'Finished changing severity level of ticket {ticket_id} to {target_severity_level}!')
