@@ -14,4 +14,5 @@ data:
   ENVIRONMENT_NAME: {{ $.Values.global.environment | quote }}
   PAPERTRAIL_PREFIX: "{{ include "service-outage-monitor.fullname" $ }}-{{ . | replace "." "-" }}-{{ $.Values.image.tag }}"
   ENABLE_TRIAGE_MONITORING: {{ 0 | quote }}  # Always disabled
+  MONITORING__VELOCLOUD_HOST: {{ $host }}
 {{- end }}
