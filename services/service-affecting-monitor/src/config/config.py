@@ -68,8 +68,14 @@ MONITOR_CONFIG = {
     'autoresolve': {
         'semaphore': 3,
         'metrics_lookup_interval_minutes': int(os.environ['MONITORING__AUTORESOLVE_LOOKUP_INTERVAL']) // 60,
-        'last_affecting_trouble_seconds': int(
-            os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE']),
+        'day_schedule': {
+            'start_hour': int(os.environ['MONITORING__AUTORESOLVE_DAY_START_HOUR']),
+            'end_hour': int(os.environ['MONITORING__AUTORESOLVE_DAY_END_HOUR'])
+        },
+        'last_affecting_trouble_seconds': {
+            'day': int(os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE_DAY_TIME']),
+            'night': int(os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE_NIGHT_TIME'])
+        },
         'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
         'thresholds': {
             AffectingTroubles.BOUNCING: int(os.environ['MONITORING__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD']),

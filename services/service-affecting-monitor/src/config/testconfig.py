@@ -60,7 +60,14 @@ MONITOR_CONFIG = {
     'autoresolve': {
         'semaphore': 3,
         'metrics_lookup_interval_minutes': 30,
-        'last_affecting_trouble_seconds': 75 * 60,
+        'day_schedule': {
+            'start_hour': 8,
+            'end_hour': 0
+        },
+        'last_affecting_trouble_seconds': {
+            'day': 1.5 * 60 * 60,
+            'night': 3 * 60 * 60
+        },
         'max_autoresolves': 3,
         'thresholds': {
             AffectingTroubles.BOUNCING: 4,
