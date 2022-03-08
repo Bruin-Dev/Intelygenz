@@ -108,7 +108,7 @@ def make_ticket_note():
 def make_site_details(make_address):
     def _inner(*, client_id: int = 0, client_name: str = '', site_id: int = 0, site_label: str = '',
                site_add_date: str = '', address: dict = None, longitude: float = 0.0, latitude: float = 0.0,
-               business_hours: str = '', timezone: str = '0', contact_name: Optional[str] = '',
+               business_hours: str = '', timezone: str = None, tz_offset: int = 0, contact_name: Optional[str] = '',
                contact_phone: Optional[str] = '', contact_email: Optional[str] = ''):
         address = address or make_address()
         site_add_date = site_add_date or bruinize_date(datetime.now())
@@ -124,6 +124,7 @@ def make_site_details(make_address):
             "latitude": latitude,
             "businessHours": business_hours,
             "timeZone": timezone,
+            "tzOffset": tz_offset,
             "primaryContactName": contact_name,
             "primaryContactPhone": contact_phone,
             "primaryContactEmail": contact_email,

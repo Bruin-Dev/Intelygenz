@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -3212,3 +3212,34 @@ class TestServiceAffectingMonitor:
 
         result = service_affecting_monitor._is_link_label_blacklisted('BYOB')
         assert result is True
+
+    def get_max_seconds_since_last_trouble_test(self, service_affecting_monitor, make_links_by_edge_object):
+        edge = make_links_by_edge_object()
+
+        day_schedule = testconfig.MONITOR_CONFIG['autoresolve']['day_schedule']
+        last_affecting_trouble_seconds = testconfig.MONITOR_CONFIG['autoresolve']['last_affecting_trouble_seconds']
+
+        current_datetime = datetime.now().replace(hour=10)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+            with patch.dict(day_schedule, start_hour=6, end_hour=22):
+                result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
+                assert result == last_affecting_trouble_seconds['day']
+
+            with patch.dict(day_schedule, start_hour=8, end_hour=0):
+                result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
+                assert result == last_affecting_trouble_seconds['day']
+
+            with patch.dict(day_schedule, start_hour=10, end_hour=2):
+                result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
+                assert result == last_affecting_trouble_seconds['day']
+
+            with patch.dict(day_schedule, start_hour=12, end_hour=4):
+                result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
+                assert result == last_affecting_trouble_seconds['night']
+
+            with patch.dict(day_schedule, start_hour=2, end_hour=8):
+                result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
+                assert result == last_affecting_trouble_seconds['night']

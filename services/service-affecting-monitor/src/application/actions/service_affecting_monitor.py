@@ -336,8 +336,7 @@ class ServiceAffectingMonitor:
                     if note['noteValue'] is not None
                 ]
 
-                max_seconds_since_last_trouble = self._config.MONITOR_CONFIG['autoresolve'][
-                    'last_affecting_trouble_seconds']
+                max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
                 last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
                     relevant_notes,
                     affecting_ticket_creation_date,
@@ -1036,3 +1035,23 @@ class ServiceAffectingMonitor:
     def _is_link_label_blacklisted(self, link_label: str) -> bool:
         blacklisted_link_labels = self._config.ASR_CONFIG['link_labels_blacklist']
         return any(label for label in blacklisted_link_labels if label in link_label)
+
+    def _get_max_seconds_since_last_trouble(self, edge: dict) -> int:
+        from datetime import timezone
+
+        tz_offset = edge['cached_info']['site_details']['tzOffset']
+        tz = timezone(timedelta(hours=tz_offset))
+        now = datetime.now(tz=tz)
+
+        last_affecting_trouble_seconds = self._config.MONITOR_CONFIG['autoresolve']['last_affecting_trouble_seconds']
+        day_schedule = self._config.MONITOR_CONFIG['autoresolve']['day_schedule']
+        day_start_hour = day_schedule['start_hour']
+        day_end_hour = day_schedule['end_hour']
+
+        if day_start_hour >= day_end_hour:
+            day_end_hour += 24
+
+        if day_start_hour <= now.hour < day_end_hour:
+            return last_affecting_trouble_seconds['day']
+        else:
+            return last_affecting_trouble_seconds['night']
