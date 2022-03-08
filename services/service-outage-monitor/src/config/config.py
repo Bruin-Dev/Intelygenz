@@ -47,6 +47,7 @@ else:
         'recipient': os.environ["MONITORING__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT"],
         'jobs_intervals': {
             'outage_monitor': int(os.environ['MONITORING__MONITORING_JOB_INTERVAL']),
+            'forward_to_hnoc_edge_down': 1,
             'forward_to_hnoc_link_down': 90,
         },
         'quarantine': {

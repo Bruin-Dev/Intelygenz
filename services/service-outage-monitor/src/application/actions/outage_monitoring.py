@@ -18,7 +18,7 @@ from pytz import timezone
 from pytz import utc
 from shortuuid import uuid
 
-from application import Outages
+from application import Outages, ChangeTicketSeverityStatus
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
@@ -540,8 +540,11 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=False,
-                            is_409_status=False
                         )
+
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                            forward_time=forward_time)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -551,12 +554,17 @@ class OutageMonitor:
                             f'progress (ID = {ticket_creation_response_body}). Skipping outage ticket creation for '
                             'this edge...'
                         )
-                        await self._change_ticket_severity(
+                        change_severity_result = await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=True,
-                            is_409_status=True
                         )
+
+                        if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
+                            forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                                forward_time=forward_time)
+
                         await self._check_for_failed_digi_reboot(ticket_creation_response_body,
                                                                  logical_id_list, serial_number, edge_status)
                         await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body)
@@ -572,8 +580,11 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=True,
-                            is_409_status=False
                         )
+
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                            serial_number, forward_time=forward_time)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -591,8 +602,12 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=True,
-                            is_409_status=False
                         )
+
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                            serial_number, forward_time=forward_time)
+
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
                             f'[{outage_type.value}] There is a resolve outage ticket for the same location of faulty '
@@ -608,8 +623,12 @@ class OutageMonitor:
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
                             check_ticket_tasks=False,
-                            is_409_status=False
                         )
+
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                            serial_number, forward_time=forward_time)
+
             else:
                 self._logger.info(
                     f'[{outage_type.value}] Not starting outage ticket creation for {len(edges_still_down)} faulty '
@@ -635,13 +654,15 @@ class OutageMonitor:
 
         self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
-    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, target_severity=None):
+    def _get_hnoc_forward_time_by_outage_type(self, outage_type: Outages) -> int:
+        if outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN:
+            return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down']
+        else:
+            return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
+
+    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, *, forward_time):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
-        forward_time = 1
-        if target_severity == self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']:
-            forward_time = self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down']
-
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
         self._logger.info(f"Scheduling HNOC forwarding to happen at timestamp: {forward_task_run_date}")
@@ -650,6 +671,8 @@ class OutageMonitor:
             kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=True,
+            misfire_grace_time=9999,
+            coalesce=True,
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
@@ -998,14 +1021,15 @@ class OutageMonitor:
 
         return seconds_elapsed_since_creation >= max_seconds_since_creation
 
-    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, *, check_ticket_tasks: bool,
-                                      is_409_status: bool):
+    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, *,
+                                      check_ticket_tasks: bool) -> ChangeTicketSeverityStatus:
         self._logger.info(f'Attempting to change severity level of ticket {ticket_id}...')
 
         serial_number = edge_status['edgeSerialNumber']
 
         change_severity_task: Coroutine = None
         target_severity_level = None
+        change_severity_status: ChangeTicketSeverityStatus = None
 
         if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
             self._logger.info(
@@ -1014,18 +1038,11 @@ class OutageMonitor:
             )
             change_severity_task = self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
             target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
-            if not is_409_status:
-                self.schedule_forward_to_hnoc_queue(
-                    ticket_id, serial_number, target_severity_level)
-
         else:
-            if not is_409_status:
-                self.schedule_forward_to_hnoc_queue(
-                    ticket_id, serial_number, self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down'])
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 if ticket_details_response['status'] not in range(200, 300):
-                    return
+                    return ChangeTicketSeverityStatus.NOT_CHANGED
 
                 ticket_tasks = ticket_details_response['body']['ticketDetails']
                 if self._has_ticket_multiple_unresolved_tasks(ticket_tasks):
@@ -1034,7 +1051,7 @@ class OutageMonitor:
                         f'issue is that at least one link of edge {serial_number} is disconnected, and this ticket '
                         f'has multiple unresolved tasks.'
                     )
-                    return
+                    return ChangeTicketSeverityStatus.NOT_CHANGED
 
             self._logger.info(
                 f'Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue '
@@ -1052,7 +1069,7 @@ class OutageMonitor:
         get_ticket_response = await self._bruin_repository.get_ticket(ticket_id)
         if not get_ticket_response['status'] in range(200, 300):
             change_severity_task.close()
-            return
+            return ChangeTicketSeverityStatus.NOT_CHANGED
 
         ticket_info = get_ticket_response['body']
         if self._is_ticket_already_in_severity_level(ticket_info, target_severity_level):
@@ -1061,13 +1078,19 @@ class OutageMonitor:
                 'to change it.'
             )
             change_severity_task.close()
-            return
-        if is_409_status:
-            self.schedule_forward_to_hnoc_queue(
-                ticket_id, serial_number, target_severity_level)
+            return ChangeTicketSeverityStatus.NOT_CHANGED
 
-        await change_severity_task
+        result = await change_severity_task
+        if result['status'] not in range(200, 300):
+            return ChangeTicketSeverityStatus.NOT_CHANGED
+
+        if target_severity_level == self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']:
+            change_severity_status = ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
+        else:
+            change_severity_status = ChangeTicketSeverityStatus.CHANGED_TO_EDGE_DOWN_SEVERITY
+
         self._logger.info(f'Finished changing severity level of ticket {ticket_id} to {target_severity_level}!')
+        return change_severity_status
 
     def _has_ticket_multiple_unresolved_tasks(self, ticket_tasks: list) -> bool:
         unresolved_tasks = [task for task in ticket_tasks if not self._is_detail_resolved(task)]

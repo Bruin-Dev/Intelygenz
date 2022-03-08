@@ -908,6 +908,8 @@ class ServiceAffectingMonitor:
             kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=False,
+            misfire_grace_time=9999,
+            coalesce=True,
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 

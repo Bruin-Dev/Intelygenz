@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class Outages(Enum):
@@ -8,3 +8,9 @@ class Outages(Enum):
     HA_LINK_DOWN = 'Link Down Outage (HA)'
     HA_SOFT_DOWN = 'Soft Down Outage (HA)'
     HA_HARD_DOWN = 'Hard Down Outage (HA)'
+
+
+class ChangeTicketSeverityStatus(Enum):
+    CHANGED_TO_LINK_DOWN_SEVERITY = auto()
+    CHANGED_TO_EDGE_DOWN_SEVERITY = auto()
+    NOT_CHANGED = auto()
