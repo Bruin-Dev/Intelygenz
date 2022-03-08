@@ -8,6 +8,7 @@ from typing import NoReturn
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
+from pyzipcode import ZipCodeDatabase
 from pytz import timezone
 from shortuuid import uuid
 from tenacity import retry
@@ -31,7 +32,7 @@ class RefreshCache:
         self._velocloud_repository = velocloud_repository
         self._notifications_repository = notifications_repository
         self._serials_with_multiple_inventories = {}
-
+        self._zip_db = ZipCodeDatabase()
         self._semaphore = asyncio.BoundedSemaphore(self._config.REFRESH_CONFIG['semaphore'])
 
         self.__reset_state()
@@ -251,7 +252,8 @@ class RefreshCache:
                 if site_details_response['status'] not in range(200, 300):
                     return
 
-                side_details: dict = site_details_response['body']
+                site_details: dict = site_details_response['body']
+                site_details['tzOffset'] = self._get_tz_offset(site_details)
 
                 return {
                     'edge': edge_with_serial['edge'],
@@ -261,7 +263,7 @@ class RefreshCache:
                     'serial_number': serial_number,
                     'ha_serial_number': edge_with_serial['ha_serial_number'],
                     'bruin_client_info': bruin_client_info,
-                    'site_details': side_details,
+                    'site_details': site_details,
                     'links_configuration': edge_with_serial['links_configuration']
                 }
 
@@ -365,3 +367,23 @@ class RefreshCache:
 
         self._logger.info(f"Is time to refresh cache? {is_time}")
         return is_time
+
+    def _get_tz_offset(self, site_details):
+        try:
+            tz_name = site_details['timeZone']
+
+            if tz_name:
+                tz_offset = self._get_offset_from_tz_name(f'US/{tz_name}')
+            else:
+                zip_code = site_details['address']['zip'].split('-')[0]
+                tz_offset = self._zip_db.get(zip_code).timezone
+        except Exception:
+            tz_offset = self._get_offset_from_tz_name(self._config.TIMEZONE)
+
+        return tz_offset
+
+    @staticmethod
+    def _get_offset_from_tz_name(tz_name):
+        tz = timezone(tz_name)
+        tz_offset = datetime.now(tz).strftime('%z')
+        return int(tz_offset[0:3])

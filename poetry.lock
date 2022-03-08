@@ -581,6 +581,14 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 tzdata = {version = "*", markers = "python_version >= \"3.6\""}
 
 [[package]]
+name = "pyzipcode"
+version = "3.0.1"
+description = "query zip codes and location data"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "quart"
 version = "0.6.15"
 description = "A Python ASGI web microframework with the same API as Flask"
@@ -740,7 +748,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "3.6.15"
-content-hash = "69e48387922901706a29c209200fd90661bb802e9cc8f709b156844ef5e3380f"
+content-hash = "7ee8df2794fdcc1522a0989f86803206eb0f01235af3b944bc9f405b833d2636"
 
 [metadata.files]
 aiofiles = [
@@ -1037,6 +1045,9 @@ pytz = [
 pytz-deprecation-shim = [
     {file = "pytz_deprecation_shim-0.1.0.post0-py2.py3-none-any.whl", hash = "sha256:8314c9692a636c8eb3bda879b9f119e350e93223ae83e70e80c31675a0fdc1a6"},
     {file = "pytz_deprecation_shim-0.1.0.post0.tar.gz", hash = "sha256:af097bae1b616dde5c5744441e2ddc69e74dfdcb0c263129610d85b87445a59d"},
+]
+pyzipcode = [
+    {file = "pyzipcode-3.0.1.tar.gz", hash = "sha256:4146386c3f45dc9b5c30e537da60c7d58fac54d6312f24a718340f3c235cff1b"},
 ]
 quart = [
     {file = "Quart-0.6.15-py3-none-any.whl", hash = "sha256:27ff38116e0df6c4af0b52f3f772ed876dd2cd26238a7841aac4a66fb620a496"},

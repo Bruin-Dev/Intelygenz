@@ -859,6 +859,7 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]['ha_serial_number'] = 'VC011'
         instance_cache_edges[0]['edge']['host'] = 'metvco02.mettel.net'
         instance_cache_edges[0]['last_contact'] = last_contact
+        instance_cache_edges[0]['site_details'] = site_details
         instance_edges_refresh_cache[0]['bruin_client_info'] = [client_info]
         instance_edges_refresh_cache[0]['edge_name'] = "Big Boss"
         links_configuration = [
@@ -882,6 +883,7 @@ class TestRefreshCache:
             return_value={'body': site_details, 'status': 200})
 
         instance_refresh_cache._storage_repository.set_cache = Mock()
+        instance_refresh_cache._get_tz_offset = Mock(return_value=0)
 
         cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
 
@@ -889,6 +891,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
         instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
+        instance_refresh_cache._get_tz_offset.assert_called_with(site_details)
 
         assert cache_return == instance_cache_edges[0]
         assert instance_refresh_cache._invalid_edges == {}
@@ -1176,3 +1179,26 @@ class TestRefreshCache:
             ha_device_1,
         ]
         assert cache == new_cache
+
+    def get_tz_offset_test(self, instance_refresh_cache):
+        site_details = {}
+        tz_offset = instance_refresh_cache._get_tz_offset(site_details)
+        assert tz_offset == -5
+
+        site_details = {'timeZone': None, 'address': {'zip': '94568-1840'}}
+        tz_offset = instance_refresh_cache._get_tz_offset(site_details)
+        assert tz_offset == -8
+
+        site_details = {'timeZone': 'Hawaii'}
+        tz_offset = instance_refresh_cache._get_tz_offset(site_details)
+        assert tz_offset == -10
+
+    def get_offset_from_tz_name_test(self, instance_refresh_cache):
+        tz_offset = instance_refresh_cache._get_offset_from_tz_name('US/Hawaii')
+        assert tz_offset == -10
+
+        tz_offset = instance_refresh_cache._get_offset_from_tz_name('Australia/Sydney')
+        assert tz_offset == 11
+
+        tz_offset = instance_refresh_cache._get_offset_from_tz_name('UTC')
+        assert tz_offset == 0
