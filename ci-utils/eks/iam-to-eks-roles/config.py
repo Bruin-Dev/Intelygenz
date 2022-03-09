@@ -107,6 +107,11 @@ CLUSTER_ROLES_PERMISSIONS = {
                 "verbs": ["*"]
             },
             {
+                "apiGroups": ["externalsecrets"],
+                "resources": ["*"],
+                "verbs": ["*"]
+            },
+            {
                 "apiGroups": [""],
                 "resources": ["pods",
                               "pods/log",
@@ -204,3 +209,4 @@ CLUSTER_ROLE_BINDING_CONFIG = {
         "kind": "ClusterRole"
     }
 }
+
