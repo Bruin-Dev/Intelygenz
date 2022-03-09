@@ -55,12 +55,13 @@
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${NAMESPACE}
-        echo "Setting to \"None\" externalsecrets creationPolicy in dev environment"
+        echo "Setting to \"None\" externalsecrets creationPolicy"
         for i in $(kubectl get externalsecret -n ${NAMESPACE} -o json | jq '.items[] | .metadata.name' | tr -d '\"'); do
           (
-          kubectl patch externalsecret ${i} -n ${NAMESPACE} --type='json' -p='[{"op": "replace", "path": "/spec/target/creationPolicy", "value":"None"}]'
+          kubectl patch externalsecret ${i} -n ${NAMESPACE} --type='json' -p='[{"op": "replace", "path": "/spec/target/creationPolicy", "value":"None"}]' &> /dev/null
           )
         done
+        echo "Done." 
       fi
 
 .helm_template_destroy_chart: &helm_template_destroy_chart
@@ -98,4 +99,3 @@
     # UPDATE FLUENT-BIT HELM CHART
     - envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
     - helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
-
