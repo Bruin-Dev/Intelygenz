@@ -42,6 +42,7 @@
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
         envsubst "$(env | awk -F= '{print "$"$1" "}' | grep -i BUILD_NUMBER | tr -d '\n')" < ${HELM_CHART_DIR}/values.yaml.tpl > ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \$\{.*\}/ ""/g' ${HELM_CHART_DIR}/values.yaml
+        sed -i -E 's/ \"\$\{.*\}/ "/g' ${HELM_CHART_DIR}/values.yaml
         helm plugin install https://github.com/chartmuseum/helm-push.git
         helm repo add mettel https://chartmuseum.mettel-automation.net --username="${CHARTMUSEUM_USER}" --password="${CHARTMUSEUM_PASSWORD}"
         export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
@@ -54,6 +55,12 @@
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${NAMESPACE}
+        echo "Setting to \"None\" externalsecrets creationPolicy in dev environment"
+        for i in $(kubectl get externalsecret -n ${NAMESPACE} -o json | jq '.items[] | .metadata.name' | tr -d '\"'); do
+          (
+          kubectl patch externalsecret ${i} -n ${NAMESPACE} --type='json' -p='[{"op": "replace", "path": "/spec/target/creationPolicy", "value":"None"}]'
+          )
+        done
       fi
 
 .helm_template_destroy_chart: &helm_template_destroy_chart
@@ -91,3 +98,4 @@
     # UPDATE FLUENT-BIT HELM CHART
     - envsubst < ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml.tpl > ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
     - helm -n kube-system upgrade --wait --install fluent-bit-custom ${HELM_CHART_FLUENT_BIT_DIR} -f ${HELM_CHART_FLUENT_BIT_DIR}/values.yaml
+
