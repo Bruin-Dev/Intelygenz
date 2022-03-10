@@ -280,7 +280,7 @@ resource "aws_security_group" "automation-default" {
 #######################
 # DATA HIGHWAY ROUTES #
 #######################
-data "aws_vpc_peering_connection" "pc" {
+data "aws_vpc_peering_connection" "data-highway-peering-connection" {
   id              = var.DATA_HIGHWAY_PEERING_CONNECTION_ID
   peer_cidr_block = "10.0.1.0/22"
 }
@@ -288,23 +288,23 @@ data "aws_vpc_peering_connection" "pc" {
 resource "aws_route" "data-highway-private-1a-to-automation-private-1a" {
   route_table_id = aws_route_table.automation-private-1a.id
   destination_cidr_block = var.AUTOMATION_CIDR_PRIVATE_1A[var.CURRENT_ENVIRONMENT]
-  vpc_peering_connection_id = aws_vpc_peering_connection.data_highway_automation.id
+  vpc_peering_connection_id = data.aws_vpc_peering_connection.data-highway-peering-connection.id
 }
 
 resource "aws_route" "data-highway-private-1a-to-automation-private-1b" {
   route_table_id = aws_route_table.automation-private-1a.id
   destination_cidr_block = var.AUTOMATION_CIDR_PRIVATE_1B[var.CURRENT_ENVIRONMENT]
-  vpc_peering_connection_id = aws_vpc_peering_connection.data_highway_automation.id
+  vpc_peering_connection_id = data.aws_vpc_peering_connection.data-highway-peering-connection.id
 }
 
 resource "aws_route" "data-highway-private-1b-to-automation-private-1a" {
   route_table_id = aws_route_table.automation-private-1b.id
   destination_cidr_block = var.AUTOMATION_CIDR_PRIVATE_1A[var.CURRENT_ENVIRONMENT]
-  vpc_peering_connection_id = aws_vpc_peering_connection.data_highway_automation.id
+  vpc_peering_connection_id = data.aws_vpc_peering_connection.data-highway-peering-connection.id
 }
 
 resource "aws_route" "data-highway-private-1b-to-automation-private-1b" {
   route_table_id = aws_route_table.automation-private-1b.id
   destination_cidr_block = var.AUTOMATION_CIDR_PRIVATE_1B[var.CURRENT_ENVIRONMENT]
-  vpc_peering_connection_id = aws_vpc_peering_connection.data_highway_automation.id
+  vpc_peering_connection_id = data.aws_vpc_peering_connection.data-highway-peering-connection.id
 }
