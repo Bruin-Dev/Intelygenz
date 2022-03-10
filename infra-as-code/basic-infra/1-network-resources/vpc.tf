@@ -282,7 +282,6 @@ resource "aws_security_group" "automation-default" {
 #######################
 data "aws_vpc_peering_connection" "data-highway-peering-connection" {
   id              = var.DATA_HIGHWAY_PEERING_CONNECTION_ID
-  peer_cidr_block = "10.0.1.0/22"
 }
 
 resource "aws_route" "data-highway-private-1a-to-automation-private-1a" {
