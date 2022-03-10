@@ -69,3 +69,30 @@ variable "EKS_PROJECT_BASE_NAME" {
   default = "mettel-automation"
   description = "Base name used for EKS cluster used to deploy project components"
 }
+
+##########################
+# DATA HIGHWAY VARIABLES #
+##########################
+
+variable "DATA_HIGHWAY_PEERING_CONNECTION_ID" {
+  type = string
+  description = "VPC PEERING connection ID between data highway and automation nets"
+}
+
+variable "AUTOMATION_CIDR_PRIVATE_1A" {
+  description = "Private subnet A CIDR of data highway project"
+  type        = map(string)
+  default     = {
+    "master"  = "172.31.74.0/24"
+    "develop" = "172.31.78.0/24"
+  }
+}
+
+variable "AUTOMATION_CIDR_PRIVATE_1B" {
+  description = "Private subnet B CIDR of data highway project"
+  type        = map(string)
+  default     = {
+    "master"  = "172.31.75.0/24"
+    "develop" = "172.31.79.0/24"
+  }
+}
