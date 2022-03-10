@@ -281,7 +281,7 @@ resource "aws_security_group" "automation-default" {
 # DATA HIGHWAY ROUTES #
 #######################
 data "aws_vpc_peering_connection" "data-highway-peering-connection" {
-  peer_vpc_id = var.DATA_HIGHWAY_PEERING_CONNECTION_ID
+  id              = var.DATA_HIGHWAY_PEERING_CONNECTION_ID
 }
 
 resource "aws_route" "data-highway-private-1a-to-automation-private-1a" {

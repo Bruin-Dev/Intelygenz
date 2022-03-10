@@ -83,8 +83,8 @@ variable "AUTOMATION_CIDR_PRIVATE_1A" {
   description = "Private subnet A CIDR of data highway project"
   type        = map(string)
   default     = {
-    "master"  = "172.31.74.0/24"
-    "develop" = "172.31.78.0/24"
+    "production"  = "172.31.74.0/24"
+    "dev" = "172.31.78.0/24"
   }
 }
 
@@ -92,7 +92,7 @@ variable "AUTOMATION_CIDR_PRIVATE_1B" {
   description = "Private subnet B CIDR of data highway project"
   type        = map(string)
   default     = {
-    "master"  = "172.31.75.0/24"
-    "develop" = "172.31.79.0/24"
+    "production"  = "172.31.75.0/24"
+    "dev" = "172.31.79.0/24"
   }
 }
