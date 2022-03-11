@@ -1,15 +1,20 @@
 {{- if and .Values.config.metrics.enabled -}}
+{{- range $index, $host := .Values.config.monitoring__monitored_velocloud_hosts }}
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "service-affecting-monitor.fullname" . }}
+  name: "{{ include "service-affecting-monitor.fullname" $ }}-{{ $host | replace "." "-" }}"
   labels:
-    {{- include "service-affecting-monitor.labels" . | nindent 4 }}
-{{ with .Values.config.metrics.labels }}{{ toYaml . | indent 4 }}{{ end }}
+    {{- include "service-affecting-monitor.labels" $ | nindent 4 }}
+    velocloud_host: {{ $host | quote }}
+{{ with $.Values.config.metrics.labels }}{{ toYaml $ | indent 4 }}{{ end }}
 spec:
   endpoints:
-  - port: {{ .Values.config.metrics.svc.name }}
+  - port: {{ $.Values.config.metrics.svc.name }}
   selector:
     matchLabels:
-      {{- include "service-affecting-monitor.selectorLabels" . | nindent 6 }}
+      {{- include "service-affecting-monitor.selectorLabels" $ | nindent 6 }}
+      velocloud_host: {{ $host | quote }}
+{{- end }}
 {{- end }}

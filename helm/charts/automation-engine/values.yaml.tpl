@@ -747,6 +747,8 @@ service-affecting-monitor:
   enabled: ${SERVICE_AFFECTING_MONITOR_ENABLED}
   replicaCount: ${SERVICE_AFFECTING_MONITOR_DESIRED_TASKS}
   config:
+    # -- [Monitoring] VeloCloud hosts whose edges will be monitored
+    monitoring__monitored_velocloud_hosts: ref+awsssm://automation-engine/${CURRENT_ENVIRONMENT_SHORT}/service-affecting/monitor/monitored-velocloud-hosts
     # -- Indicates if the monitor reports process will be executed on start or not
     exec_monitor_reports_on_start: ${EXEC_MONITOR_REPORTS_ON_START}
     # -- Indicates if the bandwidth reports process will be executed on start or not

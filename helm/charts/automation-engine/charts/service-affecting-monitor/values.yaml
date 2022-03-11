@@ -42,6 +42,8 @@ global:
     name: "ecr-registry"
 
 config:
+  # -- [Monitoring] VeloCloud hosts whose edges will be monitored
+  monitoring__monitored_velocloud_hosts: []
   # -- Indicates if the monitor reports process will be executed on start or not
   exec_monitor_reports_on_start: "False"
   # -- Indicates if the bandwidth reports process will be executed on start or not

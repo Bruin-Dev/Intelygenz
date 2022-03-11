@@ -1,17 +1,22 @@
+{{- range $index, $host := .Values.config.monitoring__monitored_velocloud_hosts }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "service-affecting-monitor.fullname" . }}
+  name: "{{ include "service-affecting-monitor.fullname" $ }}-{{ $host | replace "." "-" }}"
   labels:
-    {{- include "service-affecting-monitor.labels" . | nindent 4 }}
+    {{- include "service-affecting-monitor.labels" $ | nindent 4 }}
+    velocloud_host: {{ $host | quote }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $.Values.service.type }}
   ports:
     - name: http
-      port: {{ .Values.service.port }}
-    {{- if .Values.config.metrics.enabled }}
-    - name: {{ .Values.config.metrics.svc.name }}
-      port: {{ .Values.config.metrics.svc.port }}
+      port: {{ $.Values.service.port }}
+    {{- if $.Values.config.metrics.enabled }}
+    - name: {{ $.Values.config.metrics.svc.name }}
+      port: {{ $.Values.config.metrics.svc.port }}
     {{- end }}
   selector:
-    {{- include "service-affecting-monitor.selectorLabels" . | nindent 4 }}
+    {{- include "service-affecting-monitor.selectorLabels" $ | nindent 4 }}
+    velocloud_host: {{ $host | quote }}
+{{- end }}

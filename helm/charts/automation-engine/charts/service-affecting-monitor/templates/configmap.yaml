@@ -1,14 +1,19 @@
+{{- range $index, $host := .Values.config.monitoring__monitored_velocloud_hosts }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "service-affecting-monitor.configmapName" . }}
+  name: "{{ include "service-affecting-monitor.fullname" $ }}-{{ . | replace "." "-" }}-configmap"
   labels:
-    {{- include "service-affecting-monitor.labels" . | nindent 4 }}
+    {{- include "service-affecting-monitor.labels" $ | nindent 4 }}
+    velocloud_host: {{ $host | quote }}
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
-  ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  PAPERTRAIL_PREFIX: "{{ include "service-affecting-monitor.fullname" . }}-{{ .Values.image.tag }}"
-  EXEC_MONITOR_REPORTS_ON_START: {{ .Values.config.exec_monitor_reports_on_start | default "False" | quote }}
-  EXEC_BANDWIDTH_REPORTS_ON_START: {{ .Values.config.exec_bandwidth_reports_on_start | default "False" | quote }}
+  CURRENT_ENVIRONMENT: {{ $.Values.global.current_environment | quote }}
+  ENVIRONMENT_NAME: {{ $.Values.global.environment | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "service-affecting-monitor.fullname" $ }}-{{ . | replace "." "-" }}-{{ $.Values.image.tag }}"
+  EXEC_MONITOR_REPORTS_ON_START: {{ $.Values.config.exec_monitor_reports_on_start | default "False" | quote }}
+  EXEC_BANDWIDTH_REPORTS_ON_START: {{ $.Values.config.exec_bandwidth_reports_on_start | default "False" | quote }}
+  MONITORED_VELOCLOUD_HOST: {{ $host }}
+{{- end }}
