@@ -84,8 +84,11 @@ class TemplateRepository:
             now = datetime.now(timezone(self._config.TIMEZONE))
             date = now.strftime(DATE_FORMAT)
             subject = f'{client_name} - Reoccurring Service Affecting Trouble - {date}'
-            recipients_by_client = self._config.MONITOR_REPORT_CONFIG['recipients']
-            recipients = recipients_by_client['default']
+
+            velocloud_host = self._config.VELOCLOUD_HOST
+            recipients_by_host_and_client = self._config.MONITOR_REPORT_CONFIG['recipients_by_host_and_client_id']
+            recipients_by_client = recipients_by_host_and_client[velocloud_host]
+            recipients = self._config.MONITOR_REPORT_CONFIG['default_contacts']
 
             if client_id in recipients_by_client:
                 recipients = recipients + recipients_by_client[client_id]
