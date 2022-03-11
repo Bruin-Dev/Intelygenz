@@ -31,7 +31,9 @@ class Container:
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'Service Affecting Monitor starting in {config.CURRENT_ENVIRONMENT}...')
+        self._logger.info(
+            f'Service Affecting Monitor starting for host {config.VELOCLOUD_HOST} in {config.CURRENT_ENVIRONMENT}...'
+        )
 
         # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
@@ -101,12 +103,26 @@ class Container:
         await self._event_bus.connect()
 
         await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
-        await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
-            exec_on_start=config.MONITOR_REPORT_CONFIG['exec_on_start']
-        )
-        await self._bandwidth_reports.start_bandwidth_reports_job(
-            exec_on_start=config.BANDWIDTH_REPORT_CONFIG['exec_on_start']
-        )
+
+        if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG['recipients_by_host_and_client_id']:
+            await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
+                exec_on_start=config.MONITOR_REPORT_CONFIG['exec_on_start']
+            )
+        else:
+            self._logger.warning(
+                f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
+                "as these reports are disabled for this host"
+            )
+
+        if config.VELOCLOUD_HOST in config.BANDWIDTH_REPORT_CONFIG['client_ids_by_host']:
+            await self._bandwidth_reports.start_bandwidth_reports_job(
+                exec_on_start=config.BANDWIDTH_REPORT_CONFIG['exec_on_start']
+            )
+        else:
+            self._logger.warning(
+                f"Job for Daily Bandwidth Reports will not be scheduled for {config.VELOCLOUD_HOST} "
+                "as these reports are disabled for this host"
+            )
 
         self._scheduler.start()
 
