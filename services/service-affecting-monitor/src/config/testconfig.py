@@ -18,6 +18,8 @@ TIMEZONE = 'US/Eastern'
 
 PRODUCT_CATEGORY = 'SD-WAN'
 
+VELOCLOUD_HOST = 'test-host'
+
 MONITOR_CONFIG = {
     'recipient': 'some.recipient@email.com',
     'contact_by_host_and_client_id': {
@@ -86,9 +88,11 @@ MONITOR_REPORT_CONFIG = {
     'threshold': 3,
     'active_reports': ['Jitter', 'Latency', 'Packet Loss', 'Bandwidth Over Utilization'],
     'trailing_days': 14,
-    'recipients': {
-        'default': ['mettel.automation@intelygenz.com'],
-        9994: ['HNOCleaderteam@mettel.net'],
+    'default_contacts': ['mettel.automation@intelygenz.com'],
+    'recipients_by_host_and_client_id': {
+        'test-host': {
+            9994: ['HNOCleaderteam@mettel.net'],
+        },
     }
 }
 
@@ -98,7 +102,9 @@ BANDWIDTH_REPORT_CONFIG = {
     'timezone': 'US/Eastern',
     'crontab': '0 8 * * *',
     'lookup_interval_hours': 24,
-    'clients': [9994],
+    'client_ids_by_host': {
+        'test-host': [9994],
+    },
     'recipients': ['mettel.automation@intelygenz.com']
 }
 
