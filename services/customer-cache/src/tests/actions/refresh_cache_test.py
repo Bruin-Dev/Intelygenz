@@ -1181,24 +1181,37 @@ class TestRefreshCache:
         assert cache == new_cache
 
     def get_tz_offset_test(self, instance_refresh_cache):
+        instance_refresh_cache._zip_db = Mock()
+        instance_refresh_cache._get_offset_from_tz_name = Mock()
+
         site_details = {}
-        tz_offset = instance_refresh_cache._get_tz_offset(site_details)
-        assert tz_offset == -5
+        instance_refresh_cache._get_tz_offset(site_details)
+        instance_refresh_cache._get_offset_from_tz_name.assert_called_with(testconfig.TIMEZONE)
 
         site_details = {'timeZone': None, 'address': {'zip': '94568-1840'}}
-        tz_offset = instance_refresh_cache._get_tz_offset(site_details)
-        assert tz_offset == -8
+        instance_refresh_cache._get_tz_offset(site_details)
+        instance_refresh_cache._zip_db.get.assert_called_with('94568')
 
-        site_details = {'timeZone': 'Hawaii'}
-        tz_offset = instance_refresh_cache._get_tz_offset(site_details)
-        assert tz_offset == -10
+        site_details = {'timeZone': 'Pacific'}
+        instance_refresh_cache._get_tz_offset(site_details)
+        instance_refresh_cache._get_offset_from_tz_name.assert_called_with('US/Pacific')
 
     def get_offset_from_tz_name_test(self, instance_refresh_cache):
-        tz_offset = instance_refresh_cache._get_offset_from_tz_name('US/Hawaii')
-        assert tz_offset == -10
+        datetime_mock = Mock()
+        datetime_mock.now.side_effect = lambda tz: tz.localize(datetime.now().replace(month=1))
 
-        tz_offset = instance_refresh_cache._get_offset_from_tz_name('Australia/Sydney')
-        assert tz_offset == 11
+        with patch.object(refresh_cache_module, 'datetime', new=datetime_mock):
+            tz_offset = instance_refresh_cache._get_offset_from_tz_name('US/Pacific')
+            assert tz_offset == -8
 
-        tz_offset = instance_refresh_cache._get_offset_from_tz_name('UTC')
-        assert tz_offset == 0
+            tz_offset = instance_refresh_cache._get_offset_from_tz_name('US/Hawaii')
+            assert tz_offset == -10
+
+            tz_offset = instance_refresh_cache._get_offset_from_tz_name('Australia/Sydney')
+            assert tz_offset == 11
+
+            tz_offset = instance_refresh_cache._get_offset_from_tz_name('Europe/Madrid')
+            assert tz_offset == 1
+
+            tz_offset = instance_refresh_cache._get_offset_from_tz_name('UTC')
+            assert tz_offset == 0
