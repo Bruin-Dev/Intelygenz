@@ -139,8 +139,23 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "dispatch-portal-frontend/nginx",
                 },
                 {
-                    "query": f"service-affecting-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[service-affecting-monitor] - logs",
+                    "query": f"sam-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[sam-mettel-velocloud-net] - logs",
+                    "repository": "service-affecting-monitor",
+                },
+                {
+                    "query": f"sam-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[sam-metvco02-mettel-net] - logs",
+                    "repository": "service-affecting-monitor",
+                },
+                {
+                    "query": f"sam-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[sam-metvco03-mettel-net] - logs",
+                    "repository": "service-affecting-monitor",
+                },
+                {
+                    "query": f"sam-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[sam-metvco04-mettel-net] - logs",
                     "repository": "service-affecting-monitor",
                 },
                 {
