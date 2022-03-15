@@ -16,10 +16,10 @@ The Python [script](./environment_files_generator.py) is used to generate all en
 
 ### Usage <a name="env_generation_usage"></a>
 
-In order to use this [script](./environment_files_generator.py) it is necessary to ask for a private token. Once this is done, run:
-
 ```
 $ cd installation-utils
 $ python3 -m pip install -r requirements.txt
-$ python3 environment_files_generator.py <private_token>
+$ python3 environment_files_generator.py --aws-profile=<profile>
 ```
+
+The `aws-profile` argument is optional, `ops-mettel` is used by default.

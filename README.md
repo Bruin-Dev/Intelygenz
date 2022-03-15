@@ -450,15 +450,15 @@ These variables are indicated in different ways, depending on whether you want t
 
 ## Env files
 
-Ask a maintainer for a temp private token. Clone the mettel repo and run:
+Clone the mettel repo and run:
 
 ```bash
 $ cd installation-utils
 $ python3 -m pip install -r requirements.txt
-$ python3 environment_files_generator.py <private_token>
+$ python3 environment_files_generator.py --aws-profile=<profile>
 ```
 
-That'll generate all env files needed.
+The `aws-profile` argument is optional, `ops-mettel` is used by default.
 
 ## Finish up
 
