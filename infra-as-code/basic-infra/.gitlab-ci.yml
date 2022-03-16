@@ -45,6 +45,7 @@ basic-infra-dev:
     - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
     - export TF_VAR_DATA_HIGHWAY_PEERING_CONNECTION_ID=${DATA_HIGHWAY_PEERING_CONNECTION_ID_DEV}
+    - export TF_VAR_DATA_HIGHWAY_AIVEN_PEERING_CONNECTION_ID=${DATA_HIGHWAY_AIVEN_PEERING_CONNECTION_ID_DEV}
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
@@ -82,6 +83,7 @@ basic-infra-pro:
     - export EKS_CLUSTER_NAME="mettel-automation"
     - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
     - export TF_VAR_DATA_HIGHWAY_PEERING_CONNECTION_ID=${DATA_HIGHWAY_PEERING_CONNECTION_ID_PRO}
+    - export TF_VAR_DATA_HIGHWAY_AIVEN_PEERING_CONNECTION_ID=${DATA_HIGHWAY_AIVEN_PEERING_CONNECTION_ID_PRO}
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
       when: manual
