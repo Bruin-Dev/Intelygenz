@@ -1,6 +1,6 @@
 .terraform_template_validate_one_folder: &terraform_template_validate_one_folder
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -13,7 +13,7 @@
 
 .terraform_template_dirs_validate: &terraform_template_dirs_validate
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -25,7 +25,7 @@
               cd "${i}" || exit
               echo "The current Workdir is $i"
               if [[ ${i} != "4-elasticaches" ]]; then
-                  terraform init -backend=true -get=true -input=false
+                  terraform init -upgrade -backend=true -get=true -input=false
                   terraform validate
                   cd ..
               else
@@ -33,7 +33,7 @@
                       (
                           cd "${e}" || exit
                           if [[ ${e} != "modules" ]]; then
-                            terraform init -backend=true -get=true -input=false
+                            terraform init -upgrade -backend=true -get=true -input=false
                             terraform validate
                           fi
                           cd ..

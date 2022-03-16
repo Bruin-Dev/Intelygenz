@@ -2,13 +2,12 @@ locals {
   // EKS cluster local variables
   cluster_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
   logs_name = var.CURRENT_ENVIRONMENT == "dev" ? "DEV-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-logs" : "PRO-${var.common_info.project}-logs"
-  k8s_version = "1.18"
-  worker_nodes_instance_type = "t3.large"
-  min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 4
-  max_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 10 : 10
+  k8s_version = "1.19"
+  min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 3 : 4
+  max_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 6 : 10
   eks_worker_ami_name_filter = "amazon-eks-node-${local.k8s_version}-*"
   eks_worker_ami_owner_id = "amazon"
-  eks_worker_root_volume_type = "gp2"
+  eks_worker_root_volume_type = "gp3"
   eks_cluster_tag_key = "tag:kubernetes.io/cluster/${data.aws_eks_cluster.cluster.name}"
   eks_cluster_tag_value = "owned"
   eks_nodes_security_tag_name_value = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks_worker_sg" : "${var.common_info.project}-eks_worker_sg"

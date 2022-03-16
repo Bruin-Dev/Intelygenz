@@ -1,6 +1,6 @@
 .kre_template_destroy_basic_infra: &kre_template_destroy_basic_infra
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -26,7 +26,7 @@
 
 .kre_template_destroy_runtime: &kre_template_destroy_runtime
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.0_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_1.1_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

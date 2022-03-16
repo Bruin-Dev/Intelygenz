@@ -164,12 +164,10 @@ resource "helm_release" "ingress-nginx" {
     file("helm/external-charts/ingress-nginx-values.yaml")
   ]
 
-  dynamic "set" {
-    for_each = var.WHITELISTED_IPS
-    content {
-      name = join("", ["controller.service.loadBalancerSourceRanges[", set.key, "]"])
-      value = set.value
-    }
+  set {
+    name  = "controller.service.loadBalancerSourceRanges"
+    value = "{${join(",", var.WHITELISTED_IPS)}}"
+    type  = "string"
   }
 
   set {
