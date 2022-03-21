@@ -37,9 +37,18 @@ INTERMAPPER_CONFIG = {
     'concurrent_email_batches': 10,
     'intermapper_down_events': ['Down', 'Critical', 'Alarm', 'Warning', 'Link Warning'],
     'intermapper_up_events': ['Up', 'OK'],
-    'autoresolve_last_outage_seconds': 60 * 60,
-    'autoresolve_product_category_list': ['Cloud Connect', 'Cloud Firewall', 'POTS in a Box', 'Premise Firewall',
-                                          'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi'],
+    'autoresolve': {
+        'day_schedule': {
+            'start_hour': 8,
+            'end_hour': 0
+        },
+        'last_outage_seconds': {
+            'day': 1.5 * 60 * 60,
+            'night': 3 * 60 * 60
+        },
+        'product_category_list': ['Cloud Connect', 'Cloud Firewall', 'POTS in a Box', 'Premise Firewall',
+                                  'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi'],
+    },
     'dri_parameters': [
         "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert",
         "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers",

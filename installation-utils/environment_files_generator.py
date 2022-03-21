@@ -109,7 +109,8 @@ INTERMAPPER_OUTAGE_MONITOR__MONITORED_DOWN_EVENTS = json.dumps(json.loads(parame
 INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS = json.dumps(json.loads(parameters['dev']['intermapper-outage-monitor']['monitored-up-events']))
 INTERMAPPER_OUTAGE_MONITOR__MAX_CONCURRENT_EMAIL_BATCHES = parameters['dev']['intermapper-outage-monitor']['max-concurrent-email-batches']
 INTERMAPPER_OUTAGE_MONITOR__WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE = json.dumps(json.loads(parameters['dev']['intermapper-outage-monitor']['whitelisted-product-categories-for-autoresolve']))
-INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE = parameters['dev']['intermapper-outage-monitor']['grace-period-to-autoresolve-after-last-documented-outage']
+INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME = parameters['dev']['intermapper-outage-monitor']['grace-period-to-autoresolve-after-last-documented-outage-day-time']
+INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters['dev']['intermapper-outage-monitor']['grace-period-to-autoresolve-after-last-documented-outage-night-time']
 INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES = json.dumps(json.loads(parameters['dev']['intermapper-outage-monitor']['dri-parameters-for-piab-notes']))
 
 # Last Contact Report variables
@@ -481,7 +482,10 @@ env_dict = {
         f'MONITORED_UP_EVENTS={INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS}',
         f'MAX_CONCURRENT_EMAIL_BATCHES={INTERMAPPER_OUTAGE_MONITOR__MAX_CONCURRENT_EMAIL_BATCHES}',
         f'WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE={INTERMAPPER_OUTAGE_MONITOR__WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE}',
-        f'GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE={INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE}',
+        f'AUTORESOLVE_DAY_START_HOUR={AUTORESOLVE_DAY_START_HOUR}',
+        f'AUTORESOLVE_DAY_END_HOUR={AUTORESOLVE_DAY_END_HOUR}',
+        f'GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME={INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME}',
+        f'GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME={INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME}',
         f'DRI_PARAMETERS_FOR_PIAB_NOTES={INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES}',
     ],
     os.path.join('services', 'last-contact-report', 'src', 'config', 'env'): [

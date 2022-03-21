@@ -30,8 +30,17 @@ INTERMAPPER_CONFIG = {
     'concurrent_email_batches': int(os.environ['MAX_CONCURRENT_EMAIL_BATCHES']),
     'intermapper_down_events': json.loads(os.environ['MONITORED_DOWN_EVENTS']),
     'intermapper_up_events': json.loads(os.environ['MONITORED_UP_EVENTS']),
-    'autoresolve_last_outage_seconds': int(os.environ['GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE']),
-    'autoresolve_product_category_list': json.loads(os.environ['WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE']),
+    'autoresolve': {
+        'day_schedule': {
+            'start_hour': int(os.environ['AUTORESOLVE_DAY_START_HOUR']),
+            'end_hour': int(os.environ['AUTORESOLVE_DAY_END_HOUR'])
+        },
+        'last_outage_seconds': {
+            'day': int(os.environ['GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME']),
+            'night': int(os.environ['GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME'])
+        },
+        'product_category_list': json.loads(os.environ['WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE']),
+    },
     'dri_parameters': json.loads(os.environ['DRI_PARAMETERS_FOR_PIAB_NOTES']),
     'stop_after_attempt': 5,
     'wait_multiplier': 1,

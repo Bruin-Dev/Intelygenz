@@ -440,7 +440,7 @@ class InterMapperMonitor:
     def _are_all_product_categories_whitelisted(self, bruin_product_category: str) -> bool:
         all_product_categories = bruin_product_category.split(",")
         for product_category in all_product_categories:
-            if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve_product_category_list']:
+            if product_category not in self._config.INTERMAPPER_CONFIG['autoresolve']['product_category_list']:
                 return False
         return True
 
