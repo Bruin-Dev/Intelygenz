@@ -1,8 +1,11 @@
 locals  {
   // EKS cluster local variables
   cluster_name                = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
-  k8s_version                 = "1.18"
+  k8s_version                 = "1.19"
   worker_nodes_instance_type  = "m6a.large"
+  eks_worker_root_volume_type = "gp3"
+  eks_worker_ami_name_filter  = "amazon-eks-node-${local.k8s_version}-*"
+  eks_worker_ami_owner_id     = "amazon"
   min_worker_nodes            = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 8
   max_worker_nodes            = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 8
 

@@ -22,7 +22,7 @@
         (
           echo "The current Workdir is $i"
           cd "${i}" || exit
-          terraform init -backend=true -get=true -input=false
+          terraform init -upgrade -backend=true -get=true -input=false
           if [[ "$i" != "3-smtp/" ]]; then
             terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
           fi
@@ -60,7 +60,7 @@
     # assign terraform variables
     - export TF_VAR_CURRENT_ENVIRONMENT=${CURRENT_ENVIRONMENT}
     - export TF_VAR_RUNTIME_NAME=${KRE_RUNTIME_NAME}
-    - terraform init -backend=true -get=true -input=false
+    - terraform init -upgrade -backend=true -get=true -input=false
     - terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
     - terraform plan && terraform apply -auto-approve
     - KRE_HOSTED_ZONE_ID=$(terraform output kre_runtime_hosted_zone_id | tr -d '"')
