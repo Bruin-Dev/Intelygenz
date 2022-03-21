@@ -369,7 +369,7 @@ class OutageMonitor:
                 if serial_number in note['serviceNumber']
                 if note['noteValue'] is not None
             ]
-            if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
+            if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date, edge):
                 self._logger.info(
                     f'Edge {serial_number} has been in outage state for a long time, so detail {ticket_detail_id} '
                     f'(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping '
@@ -784,9 +784,9 @@ class OutageMonitor:
         else:
             self._logger.error(f'Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.')
 
-    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
+    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str, edge: dict) -> bool:
         current_datetime = datetime.now(utc)
-        max_seconds_since_last_outage = self._config.MONITOR_CONFIG['autoresolve_last_outage_seconds']
+        max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
 
         notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
 
@@ -1099,3 +1099,23 @@ class OutageMonitor:
     @staticmethod
     def _is_ticket_already_in_severity_level(ticket_info: dict, severity_level: int) -> bool:
         return ticket_info['severity'] == severity_level
+
+    def _get_max_seconds_since_last_outage(self, edge: dict) -> int:
+        from datetime import timezone
+
+        tz_offset = edge['cached_info']['site_details']['tzOffset']
+        tz = timezone(timedelta(hours=tz_offset))
+        now = datetime.now(tz=tz)
+
+        last_outage_seconds = self._config.MONITOR_CONFIG['autoresolve']['last_outage_seconds']
+        day_schedule = self._config.MONITOR_CONFIG['autoresolve']['day_schedule']
+        day_start_hour = day_schedule['start_hour']
+        day_end_hour = day_schedule['end_hour']
+
+        if day_start_hour >= day_end_hour:
+            day_end_hour += 24
+
+        if day_start_hour <= now.hour < day_end_hour:
+            return last_outage_seconds['day']
+        else:
+            return last_outage_seconds['night']

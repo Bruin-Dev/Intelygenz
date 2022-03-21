@@ -3495,7 +3495,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
-            relevant_notes_for_edge, outage_ticket_1_creation_date
+            relevant_notes_for_edge, outage_ticket_1_creation_date, edge
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
 
@@ -3674,7 +3674,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
-            relevant_notes_for_edge, outage_ticket_1_creation_date
+            relevant_notes_for_edge, outage_ticket_1_creation_date, edge
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, serial_number_1,
@@ -3851,7 +3851,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
-            relevant_notes_for_edge, outage_ticket_1_creation_date
+            relevant_notes_for_edge, outage_ticket_1_creation_date, edge
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, serial_number_1,
@@ -4039,7 +4039,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
-            relevant_notes_for_edge, outage_ticket_1_creation_date
+            relevant_notes_for_edge, outage_ticket_1_creation_date, edge
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, serial_number_1,
@@ -4236,7 +4236,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
-            relevant_notes_for_edge, outage_ticket_1_creation_date
+            relevant_notes_for_edge, outage_ticket_1_creation_date, edge
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, serial_number_1,
@@ -4436,7 +4436,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         outage_monitor._was_last_outage_detected_recently.assert_called_once_with(
-            relevant_notes_for_edge, outage_ticket_1_creation_date
+            relevant_notes_for_edge, outage_ticket_1_creation_date, edge
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, serial_number_1,
@@ -4480,6 +4480,7 @@ class TestServiceOutageMonitor:
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self):
         ticket_creation_date = '9/25/2020 6:31:54 AM'
         ticket_notes = []
+        edge = {}
 
         event_bus = Mock()
         logger = Mock()
@@ -4499,26 +4500,27 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_found_test(self):
@@ -4548,6 +4550,8 @@ class TestServiceOutageMonitor:
             ticket_note_2,
         ]
 
+        edge = {}
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -4565,24 +4569,25 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_having_old_watermark_found_test(self):
@@ -4612,6 +4617,8 @@ class TestServiceOutageMonitor:
             ticket_note_2,
         ]
 
+        edge = {}
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -4629,24 +4636,25 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self):
@@ -4666,6 +4674,8 @@ class TestServiceOutageMonitor:
             ticket_note_1,
         ]
 
+        edge = {}
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -4683,25 +4693,25 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_having_old_watermark_found_test(
@@ -4722,6 +4732,8 @@ class TestServiceOutageMonitor:
             ticket_note_1,
         ]
 
+        edge = {}
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -4739,25 +4751,25 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date, edge)
             assert result is False
 
     @pytest.mark.asyncio
@@ -11833,3 +11845,53 @@ class TestServiceOutageMonitor:
         severity_level = 2
         result = OutageMonitor._is_ticket_already_in_severity_level(ticket_info, severity_level)
         assert result is False
+
+    def get_max_seconds_since_last_outage_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        outage_repository = Mock()
+        bruin_repository = Mock()
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        edge = {'cached_info': {'site_details': {'tzOffset': 0}}}
+
+        day_schedule = testconfig.MONITOR_CONFIG['autoresolve']['day_schedule']
+        last_outage_seconds = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']
+
+        current_datetime = datetime.now().replace(hour=10)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(day_schedule, start_hour=6, end_hour=22):
+                result = outage_monitor._get_max_seconds_since_last_outage(edge)
+                assert result == last_outage_seconds['day']
+
+            with patch.dict(day_schedule, start_hour=8, end_hour=0):
+                result = outage_monitor._get_max_seconds_since_last_outage(edge)
+                assert result == last_outage_seconds['day']
+
+            with patch.dict(day_schedule, start_hour=10, end_hour=2):
+                result = outage_monitor._get_max_seconds_since_last_outage(edge)
+                assert result == last_outage_seconds['day']
+
+            with patch.dict(day_schedule, start_hour=12, end_hour=4):
+                result = outage_monitor._get_max_seconds_since_last_outage(edge)
+                assert result == last_outage_seconds['night']
+
+            with patch.dict(day_schedule, start_hour=2, end_hour=8):
+                result = outage_monitor._get_max_seconds_since_last_outage(edge)
+                assert result == last_outage_seconds['night']
