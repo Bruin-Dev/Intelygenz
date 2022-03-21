@@ -52,14 +52,23 @@ MONITOR_CONFIG = {
     'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned', 'PIAB'],
     'blacklisted_edges': [],
     'forward_link_outage_seconds': 60 * 60,
-    'autoresolve_last_outage_seconds': 60 * 60,
     'last_digi_reboot_seconds': 30 * 60,
     'semaphore': 1,
     'severity_by_outage_type': {
         'edge_down': SEVERITY_LEVELS['medium_high'],
         'link_down': SEVERITY_LEVELS['medium_low'],
     },
-    'max_autoresolves': 3,
+    'autoresolve': {
+        'day_schedule': {
+            'start_hour': 8,
+            'end_hour': 0
+        },
+        'last_outage_seconds': {
+            'day': 1.5 * 60 * 60,
+            'night': 3 * 60 * 60
+        },
+        'max_autoresolves': 3,
+    },
 }
 
 LOG_CONFIG = {

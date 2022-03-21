@@ -379,7 +379,7 @@ class OutageMonitor:
 
             can_detail_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_detail_auto_resolvable(
                 notes_from_outage_ticket, serial_number,
-                max_autoresolves=self._config.MONITOR_CONFIG['max_autoresolves'],
+                max_autoresolves=self._config.MONITOR_CONFIG['autoresolve']['max_autoresolves'],
             )
             if not can_detail_be_autoresolved_one_more_time:
                 self._logger.info(

@@ -3677,7 +3677,8 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
+            outage_ticket_notes, serial_number_1,
+            max_autoresolves=config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_not_called()
 
@@ -3853,7 +3854,8 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
+            outage_ticket_notes, serial_number_1,
+            max_autoresolves=config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -4040,7 +4042,8 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
+            outage_ticket_notes, serial_number_1,
+            max_autoresolves=config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_not_awaited()
@@ -4236,7 +4239,8 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
+            outage_ticket_notes, serial_number_1,
+            max_autoresolves=config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
@@ -4435,7 +4439,8 @@ class TestServiceOutageMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date
         )
         outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            outage_ticket_notes, serial_number_1, max_autoresolves=config.MONITOR_CONFIG['max_autoresolves']
+            outage_ticket_notes, serial_number_1,
+            max_autoresolves=config.MONITOR_CONFIG['autoresolve']['max_autoresolves']
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         bruin_repository.unpause_ticket_detail.assert_awaited_once_with(

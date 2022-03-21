@@ -64,15 +64,24 @@ else:
             os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS']),
         'blacklisted_edges': json.loads(os.environ['MONITORING__BLACKLISTED_EDGES']),
         'forward_link_outage_seconds': 60 * 60,
-        'autoresolve_last_outage_seconds': int(
-            os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE']),
         'last_digi_reboot_seconds': int(os.environ['MONITORING__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS']),
         'semaphore': 5,
         'severity_by_outage_type': {
             'edge_down': int(os.environ['MONITORING__SEVERITY_FOR_EDGE_DOWN_OUTAGES']),
             'link_down': int(os.environ['MONITORING__SEVERITY_FOR_LINK_DOWN_OUTAGES']),
         },
-        'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
+        'autoresolve': {
+            'day_schedule': {
+                'start_hour': int(os.environ['MONITORING__AUTORESOLVE_DAY_START_HOUR']),
+                'end_hour': int(os.environ['MONITORING__AUTORESOLVE_DAY_END_HOUR'])
+            },
+            'last_outage_seconds': {
+                'day': int(os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME']),
+                'night': int(
+                    os.environ['MONITORING__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME'])
+            },
+            'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
+        },
     }
 
 LOG_CONFIG = {
