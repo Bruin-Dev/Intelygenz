@@ -80,7 +80,8 @@ class InterMapperMonitor:
 
             if not asset_id or asset_id == 'SD-WAN':
                 for email in emails:
-                    await self._mark_email_as_read(email['msg_uid'])
+                    if self._config.CURRENT_ENVIRONMENT == 'production':
+                        await self._mark_email_as_read(email['msg_uid'])
 
                 self._logger.info(f'Invalid asset_id. Skipping emails with asset_id {asset_id}...')
                 return
@@ -98,7 +99,8 @@ class InterMapperMonitor:
                                    f'Marking all emails with this asset_id as read')
 
                 for email in emails:
-                    await self._mark_email_as_read(email['msg_uid'])
+                    if self._config.CURRENT_ENVIRONMENT == 'production':
+                        await self._mark_email_as_read(email['msg_uid'])
 
                 return
 
@@ -143,8 +145,10 @@ class InterMapperMonitor:
                               f'so no further action is needs to be taken')
             event_processed_successfully = True
 
-        if event_processed_successfully:
+        if event_processed_successfully and self._config.CURRENT_ENVIRONMENT == 'production':
             await self._mark_email_as_read(msg_uid)
+
+        if event_processed_successfully:
             self._logger.info(f'Processed email: {msg_uid}')
         else:
             self._logger.error(f'Email with msg_uid: {msg_uid} and subject: {subject} '
@@ -279,6 +283,11 @@ class InterMapperMonitor:
                 )
                 continue
 
+            if self._config.CURRENT_ENVIRONMENT != 'production':
+                self._logger.info(f'Skipping autoresolve for circuit ID {circuit_id} '
+                                  f'since the current environment is not production')
+                return True
+
             await self._bruin_repository.unpause_ticket_detail(
                 ticket_id,
                 service_number=circuit_id, detail_id=ticket_detail_id
@@ -305,6 +314,12 @@ class InterMapperMonitor:
     async def _create_outage_ticket(self, circuit_id, client_id, parsed_email_dict, dri_parameters):
         self._logger.info(f'Attempting outage ticket creation for client_id {client_id}, '
                           f'and circuit_id {circuit_id}')
+
+        if self._config.CURRENT_ENVIRONMENT != 'production':
+            self._logger.info(f'No outage ticket will be created for client_id {client_id} and circuit_id {circuit_id} '
+                              f'since the current environment is not production')
+            return True
+
         outage_ticket_response = await self._bruin_repository.create_outage_ticket(client_id, circuit_id)
         outage_ticket_status = outage_ticket_response['status']
         outage_ticket_body = outage_ticket_response['body']
