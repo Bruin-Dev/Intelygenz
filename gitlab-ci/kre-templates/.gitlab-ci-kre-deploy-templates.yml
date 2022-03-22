@@ -8,15 +8,10 @@
     - cd ${MODULE} || exit 1
     # assign terraform variables
     - export TF_VAR_RUNTIME_NAME=${KRE_RUNTIME_NAME}
-    - export TF_VAR_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    # - export TF_VAR_CERT_MANAGER_HELM_CHART_VERSION=${CERT_MANAGER_CHART_V}
-    - export TF_VAR_EXTERNAL_DNS_HELM_CHART_VERSION=${EXTERNAL_DNS_CHART_V}
-    - export TF_VAR_HOSTPATH_HELM_CHART_VERSION=${HOSTPATH_CHART_V}
-    - export TF_VAR_INGRESS_NGINX_HELM_CHART_VERSION=${INGRESS_NGINX_CHART_V}
-    - export TF_VAR_METRICS_SERVER_VERSION=${KUBERNETES_METRICS_SERVER_V}
+    # - export TF_VAR_EXTERNAL_DNS_HELM_CHART_VERSION=${EXTERNAL_DNS_CHART_V}
+    # - export TF_VAR_INGRESS_NGINX_HELM_CHART_VERSION=${INGRESS_NGINX_CHART_V}
+    # - export TF_VAR_METRICS_SERVER_VERSION=${KUBERNETES_METRICS_SERVER_V}
     - export TF_VAR_WHITELISTED_IPS="[${LOAD_BALANCER_WHITELIST}]"
-    # - echo "CERT_MANAGER_CHART_V value is ${CERT_MANAGER_CHART_V}"
-    # - echo "TF_VAR_CERT_MANAGER_HELM_CHART_VERSION value is ${TF_VAR_CERT_MANAGER_HELM_CHART_VERSION}"
     - >
       for i in $(ls -d */ | cut -d " " -f10); do
         (
@@ -86,13 +81,9 @@
       --set config.admin.apiHost="api.${BASE_DOMAIN_NAME}"
       --set config.admin.frontendBaseURL="https://admin.${BASE_DOMAIN_NAME}"
       --set config.auth.cookieDomain="${BASE_DOMAIN_NAME}"
-      --set kapacitor.influxURL="http://${KRE_RUNTIME_NAME}-influxdb:8086"
       --set adminApi.host="api.${BASE_DOMAIN_NAME}"
       --set adminUI.host="admin.${BASE_DOMAIN_NAME}"
       --set entrypoint.host="${BASE_DOMAIN_NAME}"
-      --set certManager.dns01.route53.accessKeyID=${AWS_ACCESS_KEY_ID}
-      --set certManager.dns01.route53.secretAccessKey=${AWS_SECRET_ACCESS_KEY}
-      --set certManager.dns01.route53.hostedZoneID=${KRE_HOSTED_ZONE_ID}
       --set kapacitor.influxURL="http://${KRE_RUNTIME_NAME}-influxdb:8086"
       konstellation-io/kre
     # CREATE / UPDATE PUBLIC DASHBOARDS

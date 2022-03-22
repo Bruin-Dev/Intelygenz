@@ -125,6 +125,13 @@
     # DEPLOY PROMETHEUS HELM CHART
     - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
+    - >
+      if [[ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
+          cat "$GRAFANA_USERS_DEV" > "./users.sh" && chmod +x ./users.sh &> /dev/null
+      elif [[ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+          cat "$GRAFANA_USERS_PRO" > "./users.sh" && chmod +x ./users.sh &> /dev/null
+      fi
+    - ./users.sh
 
 .terraform_template_deploy_one_folder: &terraform_template_deploy_one_folder
   image:

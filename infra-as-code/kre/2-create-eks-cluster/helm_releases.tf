@@ -1,3 +1,50 @@
+####################################################
+### EBS CSI (Container Storage Interface)
+### to support gp3 ebs persistent volumens lifecycle
+####################################################
+
+resource "helm_release" "aws-ebs-csi-driver" {
+  name          = "aws-ebs-csi-driver"
+
+  repository    = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+  chart         = "aws-ebs-csi-driver"
+
+  version       = var.EBS_CSI_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  wait          = true
+  recreate_pods = false
+
+  set {
+    name  = "node.tolerateAllTaints"
+    value = "true"
+  }
+
+  set {
+    name  = "controller.serviceAccount.create"
+    value = "true"
+    type  = "string"
+  }
+
+  set {
+    name = "controller.serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.aws-ebs-csi-driver-role-eks.arn
+    type  = "string"
+  }
+
+  depends_on = [
+      kubectl_manifest.aws_auth,
+      aws_eks_addon.vpc_cni,
+      aws_eks_addon.kube_proxy,
+      aws_eks_addon.coredns,
+      aws_iam_role.external-dns-role-eks,
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
+   ]
+}
+
+
 resource "helm_release" "external-dns" {
   name          = "external-dns"
 
@@ -21,35 +68,15 @@ resource "helm_release" "external-dns" {
   }
 
   depends_on = [
+      kubectl_manifest.aws_auth,
+      aws_eks_addon.vpc_cni,
+      helm_release.aws-ebs-csi-driver,
+      aws_eks_addon.kube_proxy,
+      aws_eks_addon.coredns,
       aws_iam_role.external-dns-role-eks,
-      null_resource.associate-iam-oidc-provider,
       module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
-   ]
-}
-
-resource "helm_release" "cert-manager" {
-  name              = "cert-manager"
-
-  repository        = "https://charts.jetstack.io"
-  chart             = "cert-manager"
-
-  version           = var.CERT_MANAGER_HELM_CHART_VERSION
-  namespace         = "cert-manager"
-  force_update      = true
-  wait              = true
-  create_namespace  = true
-
-
-  set {
-    name = "installCRDs"
-    value = true
-  }
-
-  depends_on = [
-      module.mettel-automation-eks-cluster,
-      data.aws_eks_cluster_auth.cluster,
    ]
 }
 
@@ -78,61 +105,64 @@ resource "helm_release" "ingress-nginx" {
   }
 
   depends_on = [
+      kubectl_manifest.aws_auth,
+      aws_eks_addon.vpc_cni,
+      helm_release.aws-ebs-csi-driver,
+      aws_eks_addon.kube_proxy,
+      aws_eks_addon.coredns,
       module.mettel-automation-eks-cluster,
       aws_iam_role.external-dns-role-eks,
-      null_resource.associate-iam-oidc-provider,
       data.aws_eks_cluster_auth.cluster,
    ]
 }
 
-resource "helm_release" "hostpath-provisioner" {
-  name          = "hostpath-provisioner"
+resource "helm_release" "metrics-server" {
+  name          = "metrics-server"
 
-  repository    = "https://charts.rimusz.net"
-  chart         = "hostpath-provisioner"
+  repository    = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart         = "metrics-server"
 
-  version       = var.HOSTPATH_HELM_CHART_VERSION
+  version       = var.METRICS_SERVER_HELM_CHART_VERSION
   namespace     = "kube-system"
   force_update  = false
   recreate_pods = false
   wait          = true
 
-  values = [
-    file("helm/external-charts/hostpath-provisioner.yaml")
-  ]
-
   depends_on = [
+      kubectl_manifest.aws_auth,
+      aws_eks_addon.vpc_cni,
+      helm_release.aws-ebs-csi-driver,
+      aws_eks_addon.kube_proxy,
+      aws_eks_addon.coredns,
       module.mettel-automation-eks-cluster,
-      null_resource.associate-iam-oidc-provider,
       data.aws_eks_cluster_auth.cluster,
    ]
 }
 
-resource "helm_release" "local-path-provisioner" {
-  name          = "local-path-provisioner"
 
-  repository    = "https://ebrianne.github.io/helm-charts"
-  chart         = "local-path-provisioner"
+resource "helm_release" "descheduler" {
+  name          = "descheduler"
 
-  version       = var.LOCAL_PATH_PROVISIONER_HELM_CHART_VERSION
+  repository    = "https://kubernetes-sigs.github.io/descheduler/"
+  chart         = "descheduler"
+
+  version       = var.DESCHEDULER_HELM_CHART_VERSION
   namespace     = "kube-system"
   force_update  = false
-  recreate_pods = false
   wait          = true
+  recreate_pods = false
 
   values = [
-    file("helm/external-charts/local-path-provisioner.yaml")
+    file("helm/external-charts/descheduler-values.yaml")
   ]
 
-  set {
-    name = "nodePathMap[0].paths"
-    value = "{/mnt/efs/${local.cluster_name}}"
-    type  = "string"
-  }
-
   depends_on = [
+      kubectl_manifest.aws_auth,
+      aws_eks_addon.vpc_cni,
+      helm_release.aws-ebs-csi-driver,
+      aws_eks_addon.kube_proxy,
+      aws_eks_addon.coredns,
       module.mettel-automation-eks-cluster,
-      null_resource.associate-iam-oidc-provider,
       data.aws_eks_cluster_auth.cluster,
    ]
 }

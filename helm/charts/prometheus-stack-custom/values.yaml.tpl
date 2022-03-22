@@ -179,6 +179,7 @@ kubeprometheusstack:
     ## name of dashboard without extension
     grafanaDashboards:
       - bruin-api-usage
+      - business-metrics
       - datahighway-kafka
       - mettel-affecting-monitor
       - mettel-current-sdwan-status

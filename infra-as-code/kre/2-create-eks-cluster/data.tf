@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 # Data from other tfstate
 # AWS Network Resources tfstate
 data "terraform_remote_state" "tfstate-network-resources" {
@@ -16,6 +18,16 @@ data "terraform_remote_state" "tfstate-s3-bucket-eks" {
     bucket = "automation-infrastructure"
     region = "us-east-1"
     key = "env:/${terraform.workspace}/mettel-automation-eks-kre-bucket.tfstate"
+  }
+}
+
+data "aws_ami" "eks_worker_ami_name_filter" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-${local.k8s_version}-*"]
   }
 }
 

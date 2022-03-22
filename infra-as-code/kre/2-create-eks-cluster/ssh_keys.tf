@@ -14,7 +14,7 @@ resource "aws_key_pair" "aws_key_pair" {
   }
 }
 
-resource "aws_s3_bucket_object" "pem_file" {
+resource "aws_s3_object" "pem_file" {
   bucket  = local.bucket_name
   key     = "${local.ssh_key_name}.pem"
   content = tls_private_key.tls_private_key_eks.private_key_pem

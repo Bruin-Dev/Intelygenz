@@ -1,73 +1,8 @@
-mongodb:
-  storage:
-    className: local-path
-  persistentVolume:
-    storageClass: local-path
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: app.kubernetes.io/name
-              operator: In
-              values:
-              - influxdb
-            - key: app
-              operator: In
-              values:
-              - mongo
-          topologyKey: kubernetes.io/hostname
-          namespaces: ["kre-tnba", "kre-email-tagger", "kre-rta"]
-
-influxdb:
-  config:
-    data: 
-      max-values-per-tag: 0
-      max-series-per-database: 0
-  persistence:
-    storageClass: "local-path"
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: app.kubernetes.io/name
-              operator: In
-              values:
-              - influxdb
-            - key: app
-              operator: In
-              values:
-              - mongo
-          topologyKey: kubernetes.io/hostname
-          namespaces: ["kre-tnba", "kre-email-tagger", "kre-rta"]
-
-prometheus-operator:
-  enabled: false
-
-adminApi:
-  storage:
-    class: local-path
-  tls:
-    enabled: true
-
-nats_streaming:
-  storage:
-    className: local-path
-
-chronograf:
-  persistence:
-    storageClass: "local-path"
-
-kapacitor:
-  enabled: true
-  rbac:
-    create: true
-    namespaced: true
+# YAML anchor to define annotations
+.ingressAnnotations: &ingressAnnotations
+  cert-manager.io/cluster-issuer: cert-manager-kre
+  cert-manager.io/acme-challenge-type: "dns01"
+  kubernetes.io/tls-acme: "true"
 
 config:
   auth:
@@ -79,27 +14,83 @@ config:
     # Use this for first login and create new users.
     userEmail: "mettel@intelygenz.com"
 
+mongodb:
+  persistentVolume:
+    storageClass: gp3
+    size: 80G
+  tolerations:
+  - key: dedicated
+    operator: "Equal"
+    value: mongo
+    effect: NoSchedule
+  nodeSelector:
+    dedicated: mongo
+
+influxdb:
+  config:
+    data: 
+      max-values-per-tag: 0
+      max-series-per-database: 0
+  persistence:
+    storageClass: gp3
+    size: 80G
+  tolerations:
+  - key: dedicated
+    operator: "Equal"
+    value: influx
+    effect: NoSchedule
+  nodeSelector:
+    dedicated: influx
+
+adminApi:
+  storage:
+    class: gp3
+    size: 30G
+  tls:
+    enabled: true
+  ingress:
+    annotations:
+      <<: *ingressAnnotations
+
 adminUI:
   tls:
     enabled: true
-
-certManager:
-  enabled: true
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: mettel@intelygenz.com
-  dns01:
-    route53:
-      region: "us-east-1"
+  ingress:
+    annotations:
+      <<: *ingressAnnotations
 
 entrypoint:
   tls: true
+  ingress:
+    annotations:
+      <<: *ingressAnnotations
+  grpc:
+    ingress:
+      annotations:
+        <<: *ingressAnnotations
+
+nats_streaming:
+  storage:
+    className: gp3
+    size: 30G
+
+chronograf:
+  persistence:
+    storageClass: gp3
+    size: 10G
 
 kapacitor:
   enabled: true
   persistence:
     enabled: true
-    storageClass: "local-path"
+    storageClass: gp3
+    size: 10G
   rbac:
     create: true
     namespaced: true
+
+certManager:
+  enabled: false
+
+prometheus-operator:
+  enabled: false

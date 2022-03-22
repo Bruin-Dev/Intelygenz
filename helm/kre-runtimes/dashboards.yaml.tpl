@@ -300,11 +300,11 @@ spec:
   type: ClusterIP
 status:
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: ${KRE_RUNTIME_NAME}-clusterissuer-runtimes-entrypoints
+    cert-manager.io/cluster-issuer: cert-manager-kre
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/default-backend: chronograf-proxy
@@ -318,8 +318,10 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: chronograf-proxy
-          servicePort: web
+          service:
+            name: chronograf-proxy
+            port: 
+              name: web
         path: /
         pathType: ImplementationSpecific
   tls:

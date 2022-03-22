@@ -4,6 +4,5 @@ terraform {
     bucket          = "automation-infrastructure"
     region          = "us-east-1"
     key             = "mettel-automation-kre-smtp.tfstate"
-    dynamodb_table  = "automation-engine-kre-smtp-terraform-state-lock"
   }
 }

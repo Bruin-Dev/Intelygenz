@@ -1,49 +1,57 @@
-variable "map_users" {
-  description = "Additional IAM users to add to the aws-auth configmap."
-  type = list(object({
-    userarn  = string
-    username = string
-    groups   = list(string)
-  }))
-
-  default = [
-    {
-      userarn  = "arn:aws:iam::374050862540:user/angel.costales"
-      username = "angel.costales"
-      groups   = ["system:masters"]
-    }
-  ]
-}
-
-variable "CERT_MANAGER_HELM_CHART_VERSION" {
-  default     = "1.2.0"
-  description = "Helm chart version used for cert-manager"
+variable "METRICS_SERVER_HELM_CHART_VERSION" {
+  default     = "3.8.2"
+  description = "Helm chart version used for metrics-server"
 }
 
 variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
-  default     = "4.8.6"
+  default     = "6.2.1"
   description = "Helm chart version used for external-dns"
 }
 
-variable "HOSTPATH_HELM_CHART_VERSION" {
-  default     = "0.2.9"
-  description = "Helm chart version used for hostpath"
-}
-
-variable "LOCAL_PATH_PROVISIONER_HELM_CHART_VERSION" {
-  default     = "0.0.21"
-  description = "Helm chart version used for local-path-provisioner"
-}
-
 variable "INGRESS_NGINX_HELM_CHART_VERSION" {
-  default     = "3.21.0"
+  default     = "4.0.13"
   description = "Helm chart version used for ingress-nginx"
 }
 
-variable "METRICS_SERVER_VERSION" {
-  default     = "0.4.2"
-  description = "Version of metrics server release to install in the EKS cluster"
+variable "DESCHEDULER_HELM_CHART_VERSION" {
+  default     = "0.23.2"
+  description = "Helm chart version used for descheduler"
 }
+
+variable "EBS_CSI_HELM_CHART_VERSION" {
+  default     = "2.6.4"
+  description = "Helm chart version used for aws-ebs-csi-driver"
+}
+
+
+### EKS ADMIN
+variable "EKS_CLUSTER_ADMIN_IAM_USER_NAME" {
+  default     = "angel.costales"
+  description = "IAM user name to admin cluster"
+}
+
+
+### EKS ADDONS
+variable "EKS_ADDON_VPC_CNI_VERSION" {
+  default     = "v1.10.2-eksbuild.1"
+  description = "EKS addon version used for VPC CNI"
+}
+
+variable "EKS_ADDON_EBS_CSI_VERSION" {
+  default     = "v1.4.0-eksbuild.preview"
+  description = "EKS addon version used for EBS CSI"
+}
+
+variable "EKS_ADDON_KUBE_PROXY_VERSION" {
+  default     = "v1.21.2-eksbuild.2"
+  description = "EKS addon version used for KUBE-PROXY"
+}
+
+variable "EKS_ADDON_COREDNS_VERSION" {
+  default     = "v1.8.4-eksbuild.1"
+  description = "EKS addon version used for COREDNS"
+}
+
 
 variable "WHITELISTED_IPS" {
   type        = list(string)
