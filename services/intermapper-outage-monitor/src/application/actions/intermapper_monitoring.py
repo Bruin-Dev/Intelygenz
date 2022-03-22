@@ -1,7 +1,7 @@
 import asyncio
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import Callable
 
@@ -10,6 +10,10 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
+from pyzipcode import ZipCodeDatabase
+
+US_STATES_PATTERN = re.compile(r'(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)').pattern  # noqa
+ZIP_CODE_REGEX = re.compile(rf'{US_STATES_PATTERN},? (?P<zip_code>\d{{5}})')
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
@@ -26,6 +30,7 @@ class InterMapperMonitor:
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
         self._dri_repository = dri_repository
+        self._zip_db = ZipCodeDatabase()
         self._semaphore = asyncio.BoundedSemaphore(self._config.INTERMAPPER_CONFIG['concurrent_email_batches'])
 
     async def start_intermapper_outage_monitoring(self, exec_on_start=False):
@@ -257,7 +262,8 @@ class InterMapperMonitor:
                 if note['noteValue'] is not None
             ]
 
-            if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
+            if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date,
+                                                           parsed_email_dict):
                 self._logger.info(
                     f'Edge has been in outage state for a long time, so detail {ticket_detail_id} '
                     f'(circuit ID {circuit_id}) of ticket {ticket_id} will not be autoresolved. Skipping '
@@ -375,10 +381,12 @@ class InterMapperMonitor:
             return None
         return dri_parameters_response["body"]
 
-    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
-        current_datetime = datetime.now(utc)
-        max_seconds_since_last_outage = self._config.INTERMAPPER_CONFIG['autoresolve_last_outage_seconds']
+    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str,
+                                           parsed_email_dict: dict) -> bool:
+        tz_offset = self._get_tz_offset(parsed_email_dict['name'])
+        max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(tz_offset)
 
+        current_datetime = datetime.now(utc)
         notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
 
         last_reopen_note = self._get_last_element_matching(
@@ -451,3 +459,37 @@ class InterMapperMonitor:
     @staticmethod
     def _is_detail_resolved(ticket_detail: dict):
         return ticket_detail['detailStatus'] == 'R'
+
+    def _get_tz_offset(self, name):
+        try:
+            zip_code = ZIP_CODE_REGEX.search(name).group('zip_code')
+            tz_offset = self._zip_db.get(zip_code).timezone
+        except Exception:
+            tz_offset = self._get_offset_from_tz_name(self._config.TIMEZONE)
+
+        return tz_offset
+
+    @staticmethod
+    def _get_offset_from_tz_name(tz_name):
+        tz = timezone(tz_name)
+        tz_offset = datetime.now(tz).strftime('%z')
+        return int(tz_offset[0:3])
+
+    def _get_max_seconds_since_last_outage(self, tz_offset: int) -> int:
+        from datetime import timezone
+
+        tz = timezone(timedelta(hours=tz_offset))
+        now = datetime.now(tz=tz)
+
+        last_outage_seconds = self._config.INTERMAPPER_CONFIG['autoresolve']['last_outage_seconds']
+        day_schedule = self._config.INTERMAPPER_CONFIG['autoresolve']['day_schedule']
+        day_start_hour = day_schedule['start_hour']
+        day_end_hour = day_schedule['end_hour']
+
+        if day_start_hour >= day_end_hour:
+            day_end_hour += 24
+
+        if day_start_hour <= now.hour < day_end_hour:
+            return last_outage_seconds['day']
+        else:
+            return last_outage_seconds['night']
