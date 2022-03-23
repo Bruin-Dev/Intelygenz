@@ -15,19 +15,27 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 34,
-  "iteration": 1645476503644,
+  "id": 28,
+  "iteration": 1648056981809,
   "links": [],
   "panels": [
     {
       "aliasColors": {},
       "bars": false,
+      "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "color": {},
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -38,6 +46,119 @@
         "w": 24,
         "x": 0,
         "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(increase(velocloud_api_usage_total{}[$__interval])) by (endpoint_)",
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{endpoint_}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(velocloud_api_usage_total{}[$__interval]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "TOTAL",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Velocloud API calls",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {},
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 11
       },
       "hiddenSeries": false,
       "id": 14,
@@ -177,7 +298,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 11
+        "y": 22
       },
       "id": 2,
       "options": {
@@ -252,7 +373,7 @@
         "h": 5,
         "w": 5,
         "x": 5,
-        "y": 11
+        "y": 22
       },
       "id": 4,
       "options": {
@@ -322,7 +443,7 @@
         "h": 5,
         "w": 5,
         "x": 10,
-        "y": 11
+        "y": 22
       },
       "id": 6,
       "options": {
@@ -392,7 +513,7 @@
         "h": 5,
         "w": 5,
         "x": 15,
-        "y": 11
+        "y": 22
       },
       "id": 8,
       "options": {
@@ -461,7 +582,7 @@
         "h": 5,
         "w": 4,
         "x": 20,
-        "y": 11
+        "y": 22
       },
       "id": 10,
       "options": {
@@ -489,7 +610,7 @@
       "type": "gauge"
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
@@ -499,8 +620,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "master",
-          "value": "master"
+          "text": "develop",
+          "value": "develop"
         },
         "description": null,
         "error": null,
@@ -511,12 +632,12 @@
         "name": "Environment",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "master",
             "value": "master"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "develop",
             "value": "develop"
           }
@@ -529,12 +650,12 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Kafka",
   "uid": "RleS-If7k",
-  "version": 20
+  "version": 1
 }
