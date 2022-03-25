@@ -4,9 +4,11 @@ from unittest.mock import patch
 
 import pytest
 
+from asynctest import CoroutineMock
+
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories.bruin_repository import BruinRepository
-from asynctest import CoroutineMock
+from config import testconfig as config
 
 
 class TestBruinRepository:
@@ -15,10 +17,11 @@ class TestBruinRepository:
         logger = Mock()
         bruin_client = Mock()
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         assert bruin_repository._logger is logger
         assert bruin_repository._bruin_client is bruin_client
+        assert bruin_repository._config is config
 
     @pytest.mark.asyncio
     async def get_all_filtered_tickets_test(self):
@@ -39,7 +42,7 @@ class TestBruinRepository:
         full_params_2 = params.copy()
         full_params_2["TicketStatus"] = ticket_status_2
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         filtered_tickets = await bruin_repository.get_all_filtered_tickets(
             params=params,
             ticket_status=[ticket_status_1, ticket_status_2],
@@ -91,7 +94,7 @@ class TestBruinRepository:
         full_params_3 = params.copy()
         full_params_3["TicketStatus"] = ticket_status_3
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         response = dict.fromkeys(["body", "status"])
         response['body'] = []
@@ -145,7 +148,7 @@ class TestBruinRepository:
         full_params_2 = params.copy()
         full_params_2["TicketStatus"] = ticket_status_2
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         filtered_tickets = await bruin_repository.get_all_filtered_tickets(
             params=params,
             ticket_status=[ticket_status_1, ticket_status_2],
@@ -156,7 +159,7 @@ class TestBruinRepository:
         assert filtered_tickets['status'] == 200
 
     @pytest.mark.asyncio
-    async def get_tickets_basic_info_ok_test(self):
+    async def get_tickets_basic_info__single_page_ok_test(self):
         initial_payload = {
             'service_number': 'VC1234567',
             'product_category': 'SD-WAN',
@@ -172,6 +175,8 @@ class TestBruinRepository:
         payload = {
             **initial_payload,
             'ticket_status': ticket_statuses,
+            'page_size': 100,
+            'page_number': 1,
         }
 
         ticket_1 = {
@@ -207,10 +212,10 @@ class TestBruinRepository:
 
         ticket_response = {
             'body': {
-                'responses': [
-                    ticket_1,
-                    ticket_2,
-                ],
+                'total': 2,
+                'start': 0,
+                'currentPageSize': 100,
+                'responses': tickets,
             },
             'status': 200,
         }
@@ -219,8 +224,9 @@ class TestBruinRepository:
 
         bruin_client = Mock()
         bruin_client.get_tickets_basic_info = CoroutineMock(return_value=ticket_response)
+        bruin_client.get_tickets_basic_info.__name__ = 'get_tickets_basic_info'
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_tickets_basic_info(
             params=initial_payload, ticket_statuses=ticket_statuses
@@ -233,7 +239,220 @@ class TestBruinRepository:
         }
 
     @pytest.mark.asyncio
-    async def get_tickets_basic_info_returning_bad_status_code_test(self):
+    async def get_tickets_basic_info__multiple_pages_ok_test(self):
+        initial_payload = {
+            'service_number': 'VC1234567',
+            'product_category': 'SD-WAN',
+        }
+
+        ticket_status_1 = 'New'
+        ticket_status_2 = 'In-Progress'
+        ticket_statuses = [
+            ticket_status_1,
+            ticket_status_2,
+        ]
+
+        payload_page1 = {
+            **initial_payload,
+            'ticket_status': ticket_statuses,
+            'page_size': 100,
+            'page_number': 1,
+        }
+        payload_page2 = {
+            **initial_payload,
+            'ticket_status': ticket_statuses,
+            'page_size': 100,
+            'page_number': 2,
+        }
+
+        ticket_1 = {
+            "clientID": 30000,
+            "ticketID": 5262293,
+            "ticketStatus": "New",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+        ticket_2 = {
+            "clientID": 40000,
+            "ticketID": 5262999,
+            "ticketStatus": "In-Progress",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+
+        # Let's make this have enough tickets to force multiple calls to the endpoint (i.e. multiple pages)
+        tickets = [ticket_1] * 100
+        tickets += [ticket_2]
+
+        ticket_response_page1 = {
+            'body': {
+                'total': 101,
+                'start': 0,
+                'currentPageSize': 100,
+                'responses': [ticket_1] * 100,
+            },
+            'status': 200,
+        }
+        ticket_response_page2 = {
+            'body': {
+                'total': 101,
+                'start': 100,
+                'currentPageSize': 100,
+                'responses': [ticket_2],
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(side_effect=[
+            ticket_response_page1,
+            ticket_response_page2,
+        ])
+        bruin_client.get_tickets_basic_info.__name__ = 'get_tickets_basic_info'
+
+        bruin_repository = BruinRepository(logger, config, bruin_client)
+
+        result = await bruin_repository.get_tickets_basic_info(
+            params=initial_payload, ticket_statuses=ticket_statuses
+        )
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call(payload_page1),
+            call(payload_page2),
+        ])
+        assert result == {
+            'body': tickets,
+            'status': 200,
+        }
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info__few_retries_exhausted_test(self):
+        initial_payload = {
+            'service_number': 'VC1234567',
+            'product_category': 'SD-WAN',
+        }
+
+        ticket_status_1 = 'New'
+        ticket_status_2 = 'In-Progress'
+        ticket_statuses = [
+            ticket_status_1,
+            ticket_status_2,
+        ]
+
+        payload_page1 = {
+            **initial_payload,
+            'ticket_status': ticket_statuses,
+            'page_size': 100,
+            'page_number': 1,
+        }
+        payload_page2 = {
+            **initial_payload,
+            'ticket_status': ticket_statuses,
+            'page_size': 100,
+            'page_number': 2,
+        }
+
+        ticket_1 = {
+            "clientID": 30000,
+            "ticketID": 5262293,
+            "ticketStatus": "New",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+        ticket_2 = {
+            "clientID": 40000,
+            "ticketID": 5262999,
+            "ticketStatus": "In-Progress",
+            "address": {
+                "address": "1090 Vermont Ave NW",
+                "city": "Washington",
+                "state": "DC",
+                "zip": "20005-4905",
+                "country": "USA"
+            },
+            "createDate": "3/13/2021 12:59:36 PM",
+        }
+
+        # Let's make this have enough tickets to force multiple calls to the endpoint (i.e. multiple pages)
+        tickets = [ticket_1] * 100
+        tickets += [ticket_2]
+
+        ticket_response_page1 = {
+            'body': {
+                'total': 101,
+                'start': 0,
+                'currentPageSize': 100,
+                'responses': [ticket_1] * 100,
+            },
+            'status': 200,
+        }
+        ticket_response_page2 = {
+            'body': {
+                'total': 101,
+                'start': 100,
+                'currentPageSize': 100,
+                'responses': [ticket_2],
+            },
+            'status': 200,
+        }
+
+        bruin_500_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_tickets_basic_info = CoroutineMock(side_effect=[
+            bruin_500_response,
+            ticket_response_page1,
+            bruin_500_response,
+            bruin_500_response,
+            ticket_response_page2,
+        ])
+        bruin_client.get_tickets_basic_info.__name__ = 'get_tickets_basic_info'
+
+        bruin_repository = BruinRepository(logger, config, bruin_client)
+
+        result = await bruin_repository.get_tickets_basic_info(
+            params=initial_payload, ticket_statuses=ticket_statuses
+        )
+
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call(payload_page1),
+            call(payload_page1),
+            call(payload_page2),
+            call(payload_page2),
+            call(payload_page2),
+        ])
+        assert result == {
+            'body': tickets,
+            'status': 200,
+        }
+
+    @pytest.mark.asyncio
+    async def get_tickets_basic_info__max_retries_reached_test(self):
         initial_payload = {
             'service_number': 'VC1234567',
             'product_category': 'SD-WAN',
@@ -249,9 +468,11 @@ class TestBruinRepository:
         payload = {
             **initial_payload,
             'ticket_status': ticket_statuses,
+            'page_size': 100,
+            'page_number': 1,
         }
 
-        ticket_response = {
+        bruin_500_response = {
             'body': 'Got internal error from Bruin',
             'status': 500,
         }
@@ -259,16 +480,21 @@ class TestBruinRepository:
         logger = Mock()
 
         bruin_client = Mock()
-        bruin_client.get_tickets_basic_info = CoroutineMock(return_value=ticket_response)
+        bruin_client.get_tickets_basic_info = CoroutineMock(return_value=bruin_500_response)
+        bruin_client.get_tickets_basic_info.__name__ = 'get_tickets_basic_info'
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_tickets_basic_info(
             params=initial_payload, ticket_statuses=ticket_statuses
         )
 
-        bruin_client.get_tickets_basic_info.assert_awaited_once_with(payload)
-        assert result is ticket_response
+        bruin_client.get_tickets_basic_info.assert_has_awaits([
+            call(payload),
+            call(payload),
+            call(payload),
+        ])
+        assert result is bruin_500_response
 
     @pytest.mark.asyncio
     async def get_single_ticket_basic_info_ok_test(self):
@@ -306,7 +532,7 @@ class TestBruinRepository:
             ticket_status_1_response,
         ])
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_single_ticket_basic_info(shared_payload['ticket_id'])
 
@@ -340,7 +566,7 @@ class TestBruinRepository:
             ticket_status_1_response,
         ])
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_single_ticket_basic_info(
             shared_payload['ticket_id']
@@ -363,7 +589,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_ticket_details = CoroutineMock(return_value=expected_ticket_details)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         ticket_details = await bruin_repository.get_ticket_details(ticket_id)
 
         bruin_repository._bruin_client.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -380,7 +606,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_ticket_note = CoroutineMock(return_value=expected_post_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         post_response = await bruin_repository.post_ticket_note(ticket_id, note_contents)
 
         bruin_client.post_ticket_note.assert_awaited_once_with(ticket_id, payload)
@@ -404,7 +630,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_ticket_note = CoroutineMock(return_value=expected_post_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         post_response = await bruin_repository.post_ticket_note(
             ticket_id, note_contents, service_numbers=service_numbers
@@ -423,7 +649,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_ticket = CoroutineMock(return_value=expected_post_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         create_ticket = await bruin_repository.post_ticket(payload)
         bruin_client.post_ticket.assert_awaited_once_with(payload)
         assert create_ticket == expected_post_response
@@ -440,7 +666,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.update_ticket_status = CoroutineMock(return_value=successful_status_change)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         change_status = await bruin_repository.open_ticket(ticket_id, detail_id)
         bruin_client.update_ticket_status.assert_awaited_once_with(ticket_id, detail_id, payload)
         assert change_status == successful_status_change
@@ -457,7 +683,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.update_ticket_status = CoroutineMock(return_value=successful_status_change)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         change_status = await bruin_repository.resolve_ticket(ticket_id, detail_id)
         bruin_client.update_ticket_status.assert_awaited_once_with(ticket_id, detail_id, payload)
         assert change_status == successful_status_change
@@ -474,7 +700,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.unpause_ticket = CoroutineMock(return_value=successful_status_change)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         change_status = await bruin_repository.unpause_ticket(ticket_id, serial_number, detail_id)
         bruin_client.unpause_ticket.assert_awaited_once_with(ticket_id,
                                                              {'serviceNumber': serial_number, 'DetailId': detail_id})
@@ -504,7 +730,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         response = await bruin_repository.get_attributes_serial(filters)
         get_attributes_serial = response["body"]
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
@@ -528,7 +754,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         response_attributes = await bruin_repository.get_attributes_serial(filters)
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert response_attributes == response
@@ -557,7 +783,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         response = await bruin_repository.get_attributes_serial(filters)
         get_attributes_serial = response["body"]
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
@@ -576,7 +802,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         get_attributes_serial = await bruin_repository.get_attributes_serial(filters)
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert get_attributes_serial == response
@@ -595,7 +821,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         get_attributes_serial = await bruin_repository.get_attributes_serial(filters)
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert get_attributes_serial == response
@@ -624,7 +850,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         response = await bruin_repository.get_management_status(filters)
         management_status = response["body"]
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
@@ -648,7 +874,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         response_management = await bruin_repository.get_management_status(filters)
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert response_management == response
@@ -677,7 +903,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         response = await bruin_repository.get_management_status(filters)
         management_status = response["body"]
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
@@ -696,7 +922,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         management_status = await bruin_repository.get_management_status(filters)
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert management_status == response
@@ -715,7 +941,7 @@ class TestBruinRepository:
         }
         bruin_client = Mock()
         bruin_client.get_inventory_attributes = CoroutineMock(return_value=response)
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         management_status = await bruin_repository.get_management_status(filters)
         bruin_client.get_inventory_attributes.assert_awaited_once_with(filters)
         assert management_status == response
@@ -744,7 +970,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -775,7 +1001,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -806,7 +1032,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -837,7 +1063,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -868,7 +1094,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -892,7 +1118,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -929,7 +1155,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_client_info = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_client_info(filters)
 
@@ -1004,7 +1230,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_client_info = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_client_info(filters)
 
@@ -1036,7 +1262,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_client_info = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_client_info(filters)
 
@@ -1109,7 +1335,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_client_info = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_client_info(filters)
 
@@ -1184,7 +1410,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_client_info = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_client_info(filters)
 
@@ -1209,7 +1435,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_client_info_by_did = CoroutineMock(return_value=mock_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         response = await bruin_repository.get_client_info_by_did(did)
 
@@ -1251,7 +1477,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_possible_detail_next_result = CoroutineMock(return_value=next_results_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, service_number)
 
@@ -1287,7 +1513,7 @@ class TestBruinRepository:
         bruin_client.get_possible_detail_next_result = CoroutineMock(return_value=possible_work_queues_response)
         bruin_client.change_detail_work_queue = CoroutineMock()
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.change_detail_work_queue(ticket_id, filters)
 
@@ -1333,7 +1559,7 @@ class TestBruinRepository:
         bruin_client.get_possible_detail_next_result = CoroutineMock(return_value=possible_work_queues_response)
         bruin_client.change_detail_work_queue = CoroutineMock()
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.change_detail_work_queue(ticket_id, filters)
 
@@ -1398,7 +1624,7 @@ class TestBruinRepository:
         bruin_client.get_possible_detail_next_result = CoroutineMock(return_value=possible_work_queues_response)
         bruin_client.change_detail_work_queue = CoroutineMock()
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.change_detail_work_queue(ticket_id, filters)
 
@@ -1480,7 +1706,7 @@ class TestBruinRepository:
         bruin_client.get_possible_detail_next_result = CoroutineMock(return_value=possible_work_queues_response)
         bruin_client.change_detail_work_queue = CoroutineMock(return_value=change_work_queue_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.change_detail_work_queue(ticket_id, filters)
 
@@ -1550,7 +1776,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_multiple_ticket_notes = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
 
@@ -1707,7 +1933,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_multiple_ticket_notes = CoroutineMock(return_value=client_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
 
@@ -1733,7 +1959,7 @@ class TestBruinRepository:
         bruin_client.get_ticket_task_history = CoroutineMock(return_value=client_response)
 
         filter = {'ticket_id': ticket_id}
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_ticket_task_history(filter)
 
@@ -1758,7 +1984,7 @@ class TestBruinRepository:
         bruin_client.get_ticket_task_history = CoroutineMock(return_value=client_response)
 
         filter = {'ticket_id': ticket_id}
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_ticket_task_history(filter)
 
@@ -1806,7 +2032,7 @@ class TestBruinRepository:
             {'body': [ticket_123, ticket_123], 'status': 200},
             {'body': [ticket_321], 'status': 200}
         ])
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_ticket_overview(ticket_id)
 
@@ -1819,7 +2045,7 @@ class TestBruinRepository:
         logger = Mock()
 
         bruin_client = Mock()
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_ticket_overview(ticket_id)
 
@@ -1836,7 +2062,7 @@ class TestBruinRepository:
         bruin_client.get_all_tickets = CoroutineMock(side_effect=[
             {'body': [], 'status': 200},
         ])
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_ticket_overview(ticket_id)
 
@@ -1883,7 +2109,7 @@ class TestBruinRepository:
             {'body': [ticket_123, ticket_123], 'status': 400},
             {'body': [ticket_321], 'status': 400}
         ])
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_ticket_overview(ticket_id)
 
@@ -1900,7 +2126,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_circuit_id = CoroutineMock(return_value=circuit_id_return)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         circuit_id = await bruin_repository.get_circuit_id(params)
 
@@ -1917,7 +2143,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.post_email_tag = CoroutineMock(return_value=expected_post_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
         post_response = await bruin_repository.post_email_tag(email_id, tag_id)
 
         bruin_client.post_email_tag.assert_awaited_once_with(email_id, tag_id)
@@ -1948,7 +2174,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.change_ticket_severity = CoroutineMock(return_value=change_ticket_severity_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.change_ticket_severity(ticket_id, original_payload)
 
@@ -2000,7 +2226,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_site = CoroutineMock(return_value=get_site_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_site(params=shared_payload)
 
@@ -2033,7 +2259,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.get_site = CoroutineMock(return_value=get_site_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.get_site(params=shared_payload)
 
@@ -2060,7 +2286,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.mark_email_as_done = CoroutineMock(return_value=expected_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.mark_email_as_done(email_id)
 
@@ -2081,7 +2307,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.mark_email_as_done = CoroutineMock(return_value=expected_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.mark_email_as_done(email_id)
 
@@ -2106,7 +2332,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.mark_email_as_done = CoroutineMock(return_value=bruin_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.mark_email_as_done(email_id)
 
@@ -2136,7 +2362,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
 
@@ -2160,7 +2386,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.link_ticket_to_email = CoroutineMock(return_value=expected_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
 
@@ -2195,7 +2421,7 @@ class TestBruinRepository:
         bruin_client = Mock()
         bruin_client.link_ticket_to_email = CoroutineMock(return_value=bruin_response)
 
-        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository = BruinRepository(logger, config, bruin_client)
 
         result = await bruin_repository.link_ticket_to_email(ticket_id, email_id)
 

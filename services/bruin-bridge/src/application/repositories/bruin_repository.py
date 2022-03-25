@@ -1,12 +1,14 @@
 import asyncio
 
+from typing import Callable
 from typing import List
 
 
 class BruinRepository:
 
-    def __init__(self, logger, bruin_client):
+    def __init__(self, logger, config, bruin_client):
         self._logger = logger
+        self._config = config
         self._bruin_client = bruin_client
 
     async def get_all_filtered_tickets(self, params, ticket_status):
@@ -43,16 +45,48 @@ class BruinRepository:
             'ticket_status': ticket_statuses,
         }
 
-        response = await self._bruin_client.get_tickets_basic_info(payload)
+        return await self.__make_paginated_request(self._bruin_client.get_tickets_basic_info, **payload)
 
-        if response['status'] not in range(200, 300):
-            return response
-
-        tickets = response['body']['responses']
-        return {
-            'body': tickets,
-            'status': response['status'],
+    async def __make_paginated_request(self, fn: Callable, *, page_size: int = 100, **params):
+        result = {
+            'body': [],
+            'status': 200,
         }
+
+        retries = 0
+        max_retries = self._config.BRUIN_CONFIG['pagination']['max_retries_per_page_request']
+
+        remaining_items = None
+        current_page = 1
+        params['page_size'] = page_size
+
+        self._logger.info(f'Fetching all pages using {fn.__name__}...')
+        while remaining_items is None or remaining_items > 0:
+            params_cp = params.copy()
+            params_cp['page_number'] = current_page
+            response = await fn(params_cp)
+
+            if response['status'] not in range(200, 300):
+                if retries < max_retries:
+                    retries += 1
+                    continue
+                else:
+                    self._logger.error(f'There have been {max_retries} or more errors when calling {fn.__name__}.')
+                    return response
+
+            retries = 0
+            result['body'] += response['body']['responses']
+
+            if remaining_items is None:
+                remaining_items = int(response['body']['total'])
+
+            remaining_items -= len(response['body']['responses'])
+            if remaining_items <= 0:
+                break
+
+            current_page += 1
+
+        return result
 
     async def get_single_ticket_basic_info(self, ticket_id: int) -> dict:
         payload = {

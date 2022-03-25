@@ -22,6 +22,9 @@ BRUIN_CONFIG = {
     'client_id': "client_id",
     'client_secret': "client_secret",
     'login_url': "some.login.url",
+    'pagination': {
+        'max_retries_per_page_request': 2,
+    }
 }
 
 AIOHTTP_CONFIG = {

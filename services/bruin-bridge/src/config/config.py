@@ -38,6 +38,9 @@ BRUIN_CONFIG = {
     'client_id': os.environ["BRUIN_CLIENT_ID"],
     'client_secret': os.environ["BRUIN_CLIENT_SECRET"],
     'login_url': os.environ["BRUIN_LOGIN_URL"],
+    'pagination': {
+        'max_retries_per_page_request': 2,
+    }
 }
 
 ENVIRONMENT_NAME = os.environ['ENVIRONMENT_NAME']

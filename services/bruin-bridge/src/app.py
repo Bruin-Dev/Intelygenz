@@ -57,7 +57,7 @@ class Container:
         )
 
         self._bruin_client = BruinClient(self._logger, config)
-        self._bruin_repository = BruinRepository(self._logger, self._bruin_client)
+        self._bruin_repository = BruinRepository(self._logger, config, self._bruin_client)
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
