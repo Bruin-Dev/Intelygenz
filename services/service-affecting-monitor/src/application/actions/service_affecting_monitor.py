@@ -847,7 +847,7 @@ class ServiceAffectingMonitor:
         self._logger.info(
             f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
         )
-        self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number, edge=link_data)
 
     async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
         serial_number = link_data['cached_info']['serial_number']
@@ -892,17 +892,18 @@ class ServiceAffectingMonitor:
         )
 
         if trouble is not AffectingTroubles.BOUNCING:
-            self._schedule_forward_to_hnoc_queue(ticket_id, serial_number)
+            self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data)
 
         return ticket_id
 
-    def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
+    def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, edge):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
-        forward_task_run_date = current_datetime + timedelta(minutes=self._config.MONITOR_CONFIG['forward_to_hnoc'])
+        max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
+        forward_task_run_date = current_datetime + timedelta(seconds=max_seconds_since_last_trouble)
 
-        self._logger.info(f"Scheduling HNOC forwarding for ticket_id {ticket_id} and serial {serial_number}"
-                          f" to happen at timestamp: {forward_task_run_date}")
+        self._logger.info(f'Scheduling HNOC forwarding for ticket_id {ticket_id} and serial {serial_number} '
+                          f'to happen at timestamp: {forward_task_run_date}')
 
         self._scheduler.add_job(
             self._forward_ticket_to_hnoc_queue, 'date',

@@ -1959,14 +1959,18 @@ class TestServiceAffectingMonitor:
     def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime):
         ticket_id = 12345
         serial_number = 'VC1234567'
+        edge = {}
 
         current_datetime = frozen_datetime.now()
-        wait_seconds_until_forward = service_affecting_monitor._config.MONITOR_CONFIG['forward_to_hnoc']
-        forward_task_run_date = current_datetime + timedelta(minutes=wait_seconds_until_forward)
+        autoresolve_config = service_affecting_monitor._config.MONITOR_CONFIG['autoresolve']
+        wait_seconds_until_forward = autoresolve_config['last_affecting_trouble_seconds']['day']
+        forward_task_run_date = current_datetime + timedelta(seconds=wait_seconds_until_forward)
+
+        service_affecting_monitor._get_max_seconds_since_last_trouble.return_value = wait_seconds_until_forward
 
         with patch.multiple(service_affecting_monitor_module, datetime=frozen_datetime, timezone=Mock()):
             service_affecting_monitor._schedule_forward_to_hnoc_queue(
-                ticket_id=ticket_id, serial_number=serial_number
+                ticket_id=ticket_id, serial_number=serial_number, edge=edge
             )
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
