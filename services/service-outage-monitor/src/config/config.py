@@ -48,7 +48,6 @@ else:
         'jobs_intervals': {
             'outage_monitor': int(os.environ['MONITORING__MONITORING_JOB_INTERVAL']),
             'forward_to_hnoc_edge_down': 1,
-            'forward_to_hnoc_link_down': 90,
         },
         'quarantine': {
             Outages.LINK_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE']),

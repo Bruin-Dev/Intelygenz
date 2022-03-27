@@ -6140,6 +6140,8 @@ class TestServiceOutageMonitor:
             'status': 409,
         }
 
+        wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -6174,6 +6176,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=wait_seconds_until_forward)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
@@ -6193,8 +6196,8 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
+            ticket_id, edge_primary_serial, forward_time=wait_seconds_until_forward / 60,
+        )
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
         )
@@ -6852,6 +6855,8 @@ class TestServiceOutageMonitor:
             'status': 472,
         }
 
+        wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -6886,6 +6891,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=wait_seconds_until_forward)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
@@ -6903,8 +6909,8 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down'])
+            ticket_id, edge_primary_serial, forward_time=wait_seconds_until_forward / 60,
+        )
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
             is_reopen_note=True,

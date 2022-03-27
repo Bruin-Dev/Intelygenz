@@ -460,7 +460,8 @@ class OutageMonitor:
         self._logger.info(f"[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}")
 
         # This method is never called with an empty outage_edges, so no IndexError should be raised
-        host = outage_edges[0]['status']['host']
+        first_outage_edge = outage_edges[0]
+        host = first_outage_edge['status']['host']
 
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response['status'] not in range(200, 300):
@@ -543,7 +544,7 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
-                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
                                                             forward_time=forward_time)
 
@@ -562,7 +563,7 @@ class OutageMonitor:
                         )
 
                         if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
-                            forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                            forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
                                                                 forward_time=forward_time)
 
@@ -583,7 +584,7 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                             serial_number, forward_time=forward_time)
 
@@ -605,7 +606,7 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                             serial_number, forward_time=forward_time)
 
@@ -626,7 +627,7 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
-                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type)
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                             serial_number, forward_time=forward_time)
 
@@ -655,9 +656,10 @@ class OutageMonitor:
 
         self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
-    def _get_hnoc_forward_time_by_outage_type(self, outage_type: Outages) -> int:
+    def _get_hnoc_forward_time_by_outage_type(self, outage_type: Outages, edge: dict) -> float:
         if outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN:
-            return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_link_down']
+            max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
+            return max_seconds_since_last_outage / 60
         else:
             return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
 
