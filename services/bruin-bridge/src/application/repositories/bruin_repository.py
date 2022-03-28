@@ -206,7 +206,14 @@ class BruinRepository:
         if not (status_code in range(200, 300) or is_bruin_custom_status):
             return response
 
-        response['body'] = response['body']['ticketId']
+        ticket_id = response['body'].get('ticketId')
+        if not ticket_id:
+            error_msg = (f'Bruin reported a ticket ID = 0 after SO ticket creation for device {service_number}.'
+                        f' This functionality might be temporarily unavailable.')
+            response['body'] = error_msg
+            response['status'] = 503
+        else:
+            response['body'] = ticket_id
         return response
 
     async def get_client_info(self, filters):

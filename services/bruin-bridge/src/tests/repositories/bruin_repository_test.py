@@ -978,6 +978,40 @@ class TestBruinRepository:
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
+    async def post_outage_ticket_with_2xx_status_code_and_ticket_id_value_zero_test(self):
+        client_id = 9994
+        ticket_contact = None
+        service_number = "VC05400002265"
+        ticket_id = 0
+        response_status = 200
+        error_msg = 'An error occurred while executing the command definition. See the inner exception for details.'
+        client_response = {
+            'body': {
+                'ticketId': ticket_id,
+                'inventoryId': 12796795,
+                'wtn': service_number,
+                'errorMessage': error_msg,
+                'errorCode': None,
+            },
+            "status": response_status,
+        }
+        error_response_status = 503
+        error_msg = (f'Bruin reported a ticket ID = 0 after SO ticket creation for device {service_number}.'
+                     f' This functionality might be temporarily unavailable.')
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = CoroutineMock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, config, bruin_client)
+
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        assert result == {"body": error_msg, "status": error_response_status}
+
+    @pytest.mark.asyncio
     async def post_outage_ticket_with_409_status_code_test(self):
         client_id = 9994
         ticket_contact = None
