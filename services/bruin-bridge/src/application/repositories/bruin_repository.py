@@ -207,13 +207,14 @@ class BruinRepository:
             return response
 
         ticket_id = response['body'].get('ticketId')
-        if not ticket_id:
+        if ticket_id == 0:
             error_msg = (f'Bruin reported a ticket ID = 0 after SO ticket creation for device {service_number}.'
-                        f' This functionality might be temporarily unavailable.')
+                         f' This functionality might be temporarily unavailable.')
             response['body'] = error_msg
             response['status'] = 503
-        else:
-            response['body'] = ticket_id
+            return response
+
+        response['body'] = ticket_id
         return response
 
     async def get_client_info(self, filters):
