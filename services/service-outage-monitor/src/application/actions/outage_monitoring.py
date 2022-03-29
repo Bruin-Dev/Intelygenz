@@ -17,6 +17,7 @@ from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
 from shortuuid import uuid
+from tenacity import retry, wait_exponential, stop_after_delay
 
 from application import Outages, ChangeTicketSeverityStatus
 
@@ -677,26 +678,38 @@ class OutageMonitor:
         )
 
     async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
-        self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before attempting'
-                          f'to forward to HNOC...')
-        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
+                                     min=self._config.NATS_CONFIG['min']),
+               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        async def forward_ticket_to_hnoc_queue():
+            self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
+                              f'attempting to forward to HNOC...')
+            ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
-        if ticket_details_response['status'] not in range(200, 300):
-            return
+            if ticket_details_response['status'] not in range(200, 300):
+                raise Exception
 
-        ticket_details = ticket_details_response['body']['ticketDetails']
-        most_recent_detail = self._get_first_element_matching(
-            ticket_details,
-            lambda detail: detail['detailValue'] == serial_number,
-        )
-        if self._is_detail_resolved(most_recent_detail):
-            self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. "
-                              f"Skipping forward to HNOC...")
-            return
-        self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
-                          f"Forwarding to HNOC...")
+            ticket_details = ticket_details_response['body']['ticketDetails']
+            most_recent_detail = self._get_first_element_matching(
+                ticket_details,
+                lambda detail: detail['detailValue'] == serial_number,
+            )
+            if self._is_detail_resolved(most_recent_detail):
+                self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. "
+                                  f"Skipping forward to HNOC...")
+                return
+            self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
+                              f"Forwarding to HNOC...")
 
-        await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
+            await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
+
+        try:
+            await forward_ticket_to_hnoc_queue()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to HNOC"
+                f" -> {e}"
+            )
 
     async def change_detail_work_queue(self, ticket_id, serial_number):
         task_result = 'HNOC Investigate'
