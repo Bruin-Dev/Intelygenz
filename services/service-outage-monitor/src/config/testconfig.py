@@ -12,7 +12,10 @@ NATS_CONFIG = {
     },
     'publisher': {
         'max_pub_acks_inflight': 6000
-    }
+    },
+    'multiplier': 1,
+    'min': 1,
+    'stop_delay': 0,
 }
 
 SEVERITY_LEVELS = {

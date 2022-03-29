@@ -666,7 +666,8 @@ class OutageMonitor:
         current_datetime = datetime.now(tz)
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
-        self._logger.info(f"Scheduling HNOC forwarding to happen at timestamp: {forward_task_run_date}")
+        self._logger.info(f"Scheduling HNOC forwarding for ticket_id {ticket_id} and serial {serial_number}"
+                          f" to happen at timestamp: {forward_task_run_date}")
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue, 'date',
             kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
@@ -687,6 +688,9 @@ class OutageMonitor:
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response['status'] not in range(200, 300):
+                self._logger.error(f'Getting ticket details of ticket_id {ticket_id} and serial {serial_number}'
+                                   f'from Bruin failed: {ticket_details_response}. '
+                                   f'Retrying forward to HNOC...')
                 raise Exception
 
             ticket_details = ticket_details_response['body']['ticketDetails']
@@ -724,6 +728,12 @@ class OutageMonitor:
                 f'to {task_result} queue!'
             )
             await self._notifications_repository.send_slack_message(slack_message)
+            self._logger.info(f'Successfully forwarded ticket_id {ticket_id} and '
+                              f'serial {serial_number} to {task_result}.')
+        else:
+            self._logger.error(f'Failed to forward ticket_id {ticket_id} and '
+                               f'serial {serial_number} to {task_result} due to bruin '
+                               f'returning {change_detail_work_queue_response} when attempting to forward to HNOC.')
 
     async def _append_triage_note(self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages, *,
                                   is_reopen_note=False):

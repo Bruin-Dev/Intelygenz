@@ -10,6 +10,7 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
+from tenacity import retry, wait_exponential, stop_after_delay
 
 from application import AffectingTroubles
 
@@ -896,11 +897,12 @@ class ServiceAffectingMonitor:
         return ticket_id
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number):
-        self._logger.info(f'Scheduling forward to HNOC task job for ticket_id {ticket_id} and '
-                          f'serial {serial_number}...')
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         forward_task_run_date = current_datetime + timedelta(minutes=self._config.MONITOR_CONFIG['forward_to_hnoc'])
+
+        self._logger.info(f"Scheduling HNOC forwarding for ticket_id {ticket_id} and serial {serial_number}"
+                          f" to happen at timestamp: {forward_task_run_date}")
 
         self._scheduler.add_job(
             self._forward_ticket_to_hnoc_queue, 'date',
@@ -913,29 +915,47 @@ class ServiceAffectingMonitor:
         )
 
     async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
-        self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved')
-        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
+                                     min=self._config.NATS_CONFIG['min']),
+               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        async def forward_ticket_to_hnoc_queue():
+            self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
+                              f'attempting to forward to HNOC...')
+            ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
-        if ticket_details_response['status'] not in range(200, 300):
-            return
+            if ticket_details_response['status'] not in range(200, 300):
+                self._logger.error(f'Getting ticket details of ticket_id {ticket_id} and serial {serial_number}'
+                                   f'from Bruin failed: {ticket_details_response}. '
+                                   f'Retrying forward to HNOC...')
+                raise Exception
 
-        ticket_tasks = ticket_details_response['body']['ticketDetails']
-        relevant_task = self._ticket_repository.find_task_by_serial_number(ticket_tasks, serial_number)
-        if self._ticket_repository.is_task_resolved(relevant_task):
-            self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. "
-                              f"Skipping forward to HNOC...")
-            return
-        self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
-                          f"Forwarding to HNOC...")
-        change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
-            ticket_id=ticket_id, service_number=serial_number
-        )
-        if change_work_queue_response['status'] not in range(200, 300):
-            return
+            ticket_tasks = ticket_details_response['body']['ticketDetails']
+            relevant_task = self._ticket_repository.find_task_by_serial_number(ticket_tasks, serial_number)
+            if self._ticket_repository.is_task_resolved(relevant_task):
+                self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. "
+                                  f"Skipping forward to HNOC...")
+                return
+            self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
+                              f"Forwarding to HNOC...")
+            change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
+                ticket_id=ticket_id, service_number=serial_number
+            )
+            if change_work_queue_response['status'] not in range(200, 300):
+                self._logger.error(f'Failed to forward ticket_id {ticket_id} and '
+                                   f'serial {serial_number} to HNOC Investigate due to bruin '
+                                   f'returning {change_work_queue_response} when attempting to forward to HNOC.')
+                return
 
-        await self._notifications_repository.notify_successful_ticket_forward(
-            ticket_id=ticket_id, serial_number=serial_number
-        )
+            await self._notifications_repository.notify_successful_ticket_forward(
+                ticket_id=ticket_id, serial_number=serial_number
+            )
+        try:
+            await forward_ticket_to_hnoc_queue()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to HNOC"
+                f" -> {e}"
+            )
 
     async def _attempt_forward_to_asr(self, link_data: dict, ticket_id: Optional[int]):
         if not ticket_id:
