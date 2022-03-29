@@ -358,7 +358,7 @@ class RepairTicketsMonitor:
 
         return tickets_with_site_id
 
-    def _compose_bec_private_note_to_ticket(
+    def _compose_bec_note_to_ticket(
         self,
         ticket_id: int,
         service_numbers: List[str],
@@ -386,7 +386,7 @@ class RepairTicketsMonitor:
             ]
         )
         notes = [
-            {"text": note_text, "service_number": service_number, "is_private": True}
+            {"text": note_text, "service_number": service_number}
             for service_number in service_numbers
         ]
         self._logger.info("ticket_id=%s Sending note: %s", ticket_id, notes)
@@ -478,7 +478,7 @@ class RepairTicketsMonitor:
 
             if not error_response:
                 ticket_id = ticket_creation_response_body
-                notes_to_append = self._compose_bec_private_note_to_ticket(
+                notes_to_append = self._compose_bec_note_to_ticket(
                     ticket_id=ticket_id,
                     service_numbers=service_numbers,
                     subject=email_subject,

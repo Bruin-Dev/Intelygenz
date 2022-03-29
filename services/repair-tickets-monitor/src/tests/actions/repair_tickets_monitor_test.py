@@ -901,7 +901,7 @@ class TestRepairTicketsMonitor:
         result = repair_tickets_monitor._is_inference_actionable(inference_data)
         assert result == expected
 
-    def _compose_bec_private_note_to_ticket_update_test(self, repair_tickets_monitor):
+    def _compose_bec_note_to_ticket_update_test(self, repair_tickets_monitor):
         call = {
             "ticket_id": "1234",
             "service_numbers": ["VC05200011984"],
@@ -911,13 +911,12 @@ class TestRepairTicketsMonitor:
             "date": datetime(2022, 1, 11),
             "is_update_note": True,
         }
-        notes = repair_tickets_monitor._compose_bec_private_note_to_ticket(**call)
+        notes = repair_tickets_monitor._compose_bec_note_to_ticket(**call)
 
         assert all(
             "This note is new commentary from the client and posted via BEC AI engine." in note["text"]
             for note in notes
         )
-        assert all(note["is_private"] is True for note in notes)
         assert all(note["service_number"] == "VC05200011984" for note in notes)
 
     def _compose_bec_private_note_to_ticket_create_test(self, repair_tickets_monitor):
@@ -932,10 +931,9 @@ class TestRepairTicketsMonitor:
             "is_update_note": False,
         }
 
-        notes = repair_tickets_monitor._compose_bec_private_note_to_ticket(**call)
+        notes = repair_tickets_monitor._compose_bec_note_to_ticket(**call)
 
         assert all("This ticket was opened via MetTel Email Center AI Engine." in note["text"] for note in notes)
-        assert all(note["is_private"] is True for note in notes)
         assert all(note["service_number"] == "VC05200011984" for note in notes)
 
     @pytest.mark.asyncio
