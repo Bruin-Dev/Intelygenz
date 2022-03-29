@@ -1054,10 +1054,10 @@ tnba-monitor:
   resources:
     limits:
       cpu: 200m
-      memory: 256Mi
+      memory: 512Mi
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 192Mi
 
 
 # -- velocloud-bridge subchart specific configuration
