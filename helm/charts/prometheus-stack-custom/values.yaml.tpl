@@ -181,7 +181,7 @@ kubeprometheusstack:
       url: http://prometheus-kubeprometheuss-prometheus:9090/
       access: proxy
       isDefault: true
-      editable: false
+      editable: true
       jsonData:
         timeInterval: 30s
         timeout: '120s'
