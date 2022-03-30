@@ -172,21 +172,34 @@ kubeprometheusstack:
 
       datasources:
         enabled: true
-        jsonData:
-          timeout: '120s'
-          tlsSkipVerify: false
-        defaultDatasourceEnabled: true
+        defaultDatasourceEnabled: false
         label: grafana_datasource
 
     additionalDataSources:
-    - name: ticket-statistics-api
-      basicAuth: false
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-kubeprometheuss-prometheus:9090/
+      access: proxy
+      isDefault: true
       editable: false
+      jsonData:
+        timeInterval: 30s
+        timeout: '120s'
+        tlsSkipVerify: false
+      orgId: 1
+      version: 1
+      customQueryParameters: "max_source_resolution=5m&timeout=10"
+
+    - name: ticket-statistics-api
+      type: marcusolsson-json-datasource
+      url: http://ticket-statistics.automation-engine:5000/api/statistics
+      access: proxy
+      isDefault: false
+      editable: false
+      basicAuth: false
       jsonData:
           tlsSkipVerify: true
       orgId: 1
-      type: marcusolsson-json-datasource
-      url: http://ticket-statistics.automation-engine:5000/api/statistics
       version: 1
 
     ## (custom) Grafana Dashboards
