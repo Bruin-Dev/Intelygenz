@@ -99,3 +99,4 @@ variable "ENABLE_FLUENT_BIT" {
   default     = "false"
   description = "If set to true, enable fluent-bit required components"
 }
+

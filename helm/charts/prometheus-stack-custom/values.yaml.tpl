@@ -261,7 +261,7 @@ kubeprometheusstack:
     ## Configuration for Prometheus service
     prometheusSpec:
       scrapeInterval: 30s
-      scrapeTimeout: 10s
+      scrapeTimeout: 25s
       enableAdminAPI: true
 
       externalUrl: "${PROMETHEUS_INGRESS_EXTERNAL_URL}"
