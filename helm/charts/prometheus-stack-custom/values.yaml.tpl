@@ -172,6 +172,9 @@ kubeprometheusstack:
 
       datasources:
         enabled: true
+        jsonData:
+          timeout: '120s'
+          tlsSkipVerify: false
         defaultDatasourceEnabled: true
         label: grafana_datasource
 
