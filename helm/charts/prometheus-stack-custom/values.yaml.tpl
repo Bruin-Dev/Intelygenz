@@ -175,6 +175,17 @@ kubeprometheusstack:
         defaultDatasourceEnabled: true
         label: grafana_datasource
 
+    additionalDataSources:
+    - name: ticket-statistics-api
+      basicAuth: false
+      editable: false
+      jsonData:
+          tlsSkipVerify: true
+      orgId: 1
+      type: marcusolsson-json-datasource
+      url: https://ticket-statistics.automation-engine:5000/api/statistics
+      version: 1
+
     ## (custom) Grafana Dashboards
     ## name of dashboard without extension
     grafanaDashboards:

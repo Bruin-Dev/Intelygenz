@@ -1,7 +1,7 @@
 {
     "__inputs": [
       {
-        "name": "DS_TICKET_STATISTICS API",
+        "name": "ticket-statistics-api",
         "label": "Ticket Statistics API",
         "description": "",
         "type": "datasource",
@@ -55,7 +55,7 @@
     "links": [],
     "panels": [
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -126,7 +126,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -195,7 +195,7 @@
         "type": "gauge"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "description": "",
         "fieldConfig": {
           "defaults": {
@@ -268,7 +268,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "description": "",
         "fieldConfig": {
           "defaults": {
@@ -346,7 +346,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "description": "",
         "fieldConfig": {
           "defaults": {
@@ -418,7 +418,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "description": "",
         "fieldConfig": {
           "defaults": {
@@ -490,7 +490,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "description": "",
         "fieldConfig": {
           "defaults": {
@@ -562,7 +562,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -635,7 +635,7 @@
         "type": "stat"
       },
       {
-        "datasource": "${DS_TICKET_STATISTICS API}",
+        "datasource": "ticket-statistics-api",
         "description": "",
         "fieldConfig": {
           "defaults": {
