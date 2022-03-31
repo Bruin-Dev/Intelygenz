@@ -7,9 +7,12 @@ ticket-collector-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
-        - services/ticket-collector/src/application/**/*
+        - services/ticket-collector/src/adapters/**/*
         - services/ticket-collector/src/config/**/*
+        - services/ticket-collector/src/delivery/**/*
+        - services/ticket-collector/src/usecases/**/*
         - services/ticket-collector/src/app.py
+        - services/ticket-collector/src/containers.py
         - services/ticket-collector/Dockerfile
         - services/ticket-collector/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
@@ -27,9 +30,12 @@ ticket-collector-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - services/ticket-collector/src/application/**/*
+        - services/ticket-collector/src/adapters/**/*
         - services/ticket-collector/src/config/**/*
+        - services/ticket-collector/src/delivery/**/*
+        - services/ticket-collector/src/usecases/**/*
         - services/ticket-collector/src/app.py
+        - services/ticket-collector/src/containers.py
         - services/ticket-collector/Dockerfile
         - services/ticket-collector/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
