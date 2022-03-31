@@ -103,7 +103,7 @@ class RepairTicketsMonitor:
     async def _get_inference(self, email_data, tag_info):
         """Get the models inference for given email data"""
         cc_addresses = ", ".join(email_data.get("send_cc")) if email_data.get("send_cc") else ""
-
+        email_id = email_data["email_id"]
         prediction_response = await self._repair_tickets_kre_repository.get_email_inference(
             {
                 "email_id": email_data["email_id"],
@@ -117,8 +117,13 @@ class RepairTicketsMonitor:
             },
             tag_info,
         )
-        if prediction_response["status"] not in range(200, 300):
-            self._logger.info(f"Error prediction response status code {prediction_response['status']}")
+        if prediction_response["status"] != 200:
+            self._logger.info(
+                "email_id=%s Error prediction response status code %s %s",
+                email_id,
+                prediction_response["status"],
+                prediction_response["body"],
+            )
             return
         return prediction_response.get("body")
 
@@ -131,6 +136,7 @@ class RepairTicketsMonitor:
         tickets_could_be_created: List[Dict[str, Any]] = None,
         tickets_could_be_updated: List[Dict[str, Any]] = None,
         tickets_cannot_be_created: List[Dict[str, Any]] = None,
+        validated_tickets: List[Dict[str, Any]] = None,
     ):
         """Save the output from the ticket creation / inference verification"""
         service_number_sites_map = service_number_sites_map or {}
@@ -147,11 +153,12 @@ class RepairTicketsMonitor:
             tickets_could_be_created,
             tickets_could_be_updated,
             tickets_cannot_be_created,
+            validated_tickets,
         )
-        if output_response["status"] not in range(200, 300):
-            self._logger.info(f"Error while saving output response status code {output_response['status']}")
+        if output_response["status"] != 200:
+            self._logger.error("email_id=%s Error while saving output %s", email_id, output_response)
             return
-        return output_response.get("body")
+        return output_response["body"]
 
     def get_site_ids_with_previous_cancellations(self, tickets: List[Dict[str, Any]]) -> List[str]:
         site_ids = set()
@@ -194,6 +201,23 @@ class RepairTicketsMonitor:
             feedback_not_created_due_cancellations.append(site_id_feedback)
         return feedback_not_created_due_cancellations
 
+    async def get_validated_tickets(self, tickets_id: List[int]) -> List[int]:
+        """
+        Return the tickets that already exist in Bruin
+        """
+        validated_tickets = []
+        for ticket_id in tickets_id:
+            bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
+            if bruin_bridge_response["status"] == 200:
+                validated_ticket = {
+                    "ticket_id": bruin_bridge_response["body"]["ticket_id"],
+                    "ticket_status": bruin_bridge_response["body"]["ticket_status"],
+                    "call_type": bruin_bridge_response["body"]["call_type"],
+                    "category": bruin_bridge_response["body"]["category"],
+                }
+                validated_tickets.append(validated_ticket)
+        return validated_tickets
+
     async def _process_repair_email(self, email_tag_info: Dict[str, Any]):
         """
         Process repair emails, verify it's service numbers, created/update tickets,
@@ -215,11 +239,22 @@ class RepairTicketsMonitor:
             # Ask for potential services numbers to KRE
             inference_data = await self._get_inference(email_data, email_tag_info)
             if not inference_data:
-                self._logger.error(f"Could not process email {email_id}, marking it as complete")
+                self._logger.error("email_id=%s No inference data. Marking email as complete in Redis", email_id)
                 self._new_tagged_emails_repository.mark_complete(email_id)
+                tickets_cannot_be_created.append(
+                    self._create_output_ticket_dict(service_numbers=[], site_id="", reason="No inference data")
+                )
+                await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
                 return
-            potential_service_numbers = inference_data["potential_service_numbers"]
-            self._logger.info("email_id=%s potential services numbers=%s", email_id, potential_service_numbers)
+
+            potential_service_numbers = inference_data.get("potential_service_numbers")
+            potential_ticket_numbers = inference_data.get("potential_ticket_numbers")
+            self._logger.info(
+                "email_id=%s inference: potential services numbers=%s potential_tickets_numbers=%s",
+                email_id,
+                potential_service_numbers,
+                potential_ticket_numbers,
+            )
 
             try:
                 # Check if the service number is valid against Bruin API
@@ -228,8 +263,9 @@ class RepairTicketsMonitor:
                 )
                 self._logger.info("email_id=%s service_numbers_site_map=%s", email_id, service_number_site_map)
                 existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
+                self._logger.info("email_id=%s existing_tickets=%s", email_id, existing_tickets)
             except ResponseException as e:
-                self._logger.error(f"Error in bruin {e} could not process email: {email_id}")
+                self._logger.error("email_id=%s Error in bruin %s, could not process email", email_id, e)
                 tickets_cannot_be_created.append(
                     self._create_output_ticket_dict(service_numbers=[], site_id="", reason=e)
                 )
@@ -271,12 +307,11 @@ class RepairTicketsMonitor:
                     map_without_cancellations,
                 )
             elif not is_actionable and inference_data["predicted_class"] != "Other":
-                if inference_data["predicted_class"] != "Other":
-                    tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
-                        inference_data,
-                        service_number_site_map,
-                        existing_tickets,
-                    )
+                tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
+                    inference_data,
+                    service_number_site_map,
+                    existing_tickets,
+                )
             else:
                 tickets_cannot_be_created = self._get_class_other_tickets(service_number_site_map)
 
@@ -286,19 +321,24 @@ class RepairTicketsMonitor:
 
             tickets_cannot_be_created += feedback_not_created_due_cancellations
 
-            output_send_to_save = [
-                email_id,
-                service_number_site_map,
-                tickets_created,
-                tickets_updated,
-                tickets_could_be_created,
-                tickets_could_be_updated,
-                tickets_cannot_be_created,
-            ]
+            validated_tickets = (
+                await self.get_validated_tickets(potential_ticket_numbers) if potential_ticket_numbers else []
+            )
+
+            output_send_to_save = {
+                "service_number_site_map": service_number_site_map,
+                "tickets_created": tickets_created,
+                "tickets_updated": tickets_updated,
+                "tickets_could_be_created": tickets_could_be_created,
+                "tickets_could_be_updated": tickets_could_be_updated,
+                "tickets_cannot_be_created": tickets_cannot_be_created,
+                "validated_tickets": validated_tickets,
+            }
             self._logger.info("email_id=%s output_send_to_save=%s", email_id, output_send_to_save)
-            save_output_response = await self._save_output(*output_send_to_save)
+            save_output_response = await self._save_output(email_id, **output_send_to_save)
+
             if not save_output_response:
-                self._logger.error(f"Error while saving output for email: {email_id}")
+                self._logger.error("email_id=%s Error while saving output for email in RTA-KRE", email_id)
                 return
 
             # we only mark the email as done in bruin when at least one ticket has been created or updated,
@@ -318,7 +358,7 @@ class RepairTicketsMonitor:
         service_number_site_map = {}
         for potential_service_number in potential_service_numbers:
             result = await self._bruin_repository.verify_service_number_information(client_id, potential_service_number)
-            if result["status"] in range(200, 300):
+            if result["status"] == 200:
                 service_number_site_map[potential_service_number] = str(result["body"]["site_id"])
             elif result["status"] == 404:
                 continue
@@ -385,10 +425,7 @@ class RepairTicketsMonitor:
                 f"Body: \n {body_cleaned}",
             ]
         )
-        notes = [
-            {"text": note_text, "service_number": service_number}
-            for service_number in service_numbers
-        ]
+        notes = [{"text": note_text, "service_number": service_number} for service_number in service_numbers]
         self._logger.info("ticket_id=%s Sending note: %s", ticket_id, notes)
 
         return notes

@@ -9,7 +9,7 @@
     - cd services/${MODULE}
     - pip install -r requirements.txt
   script:
-    - pytest --cov
+    - python -m pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   tags:
     - kubernetes

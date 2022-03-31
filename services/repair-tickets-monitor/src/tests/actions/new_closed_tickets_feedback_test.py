@@ -147,7 +147,7 @@ class TestNewClosedTicketsFeedback:
 
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback__ok_test(self, new_closed_tickets_feedback, ticket_created_ai):
-        bruin_response_body = {"ticket_status": "resolved", "cancellation_reasons": []}
+        bruin_response_body = {"ticket_status": "resolved", "cancelled_reasons": []}
         bruin_response = {"status": 200, "body": bruin_response_body}
 
         kre_response = {"status": 200, "body": {"success": True}}
@@ -167,7 +167,7 @@ class TestNewClosedTicketsFeedback:
             ticket_created_ai['ticket_id'],
             ticket_created_ai['client_id'],
             bruin_response_body['ticket_status'],
-            bruin_response_body['cancellation_reasons']
+            bruin_response_body['cancelled_reasons']
         )
 
     @pytest.mark.asyncio
@@ -197,7 +197,7 @@ class TestNewClosedTicketsFeedback:
 
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback__rta_saving_error_test(self, new_closed_tickets_feedback, ticket_created_ai):
-        bruin_response_body = {"ticket_status": "resolved", "cancellation_reasons": []}
+        bruin_response_body = {"ticket_status": "resolved", "cancelled_reasons": []}
         bruin_response = {"status": 200, "body": bruin_response_body}
 
         kre_response = {"status": 500, "body": "Error"}
@@ -220,6 +220,6 @@ class TestNewClosedTicketsFeedback:
             ticket_created_ai['ticket_id'],
             ticket_created_ai['client_id'],
             bruin_response_body['ticket_status'],
-            bruin_response_body['cancellation_reasons']
+            bruin_response_body['cancelled_reasons']
         )
         logger.error.assert_called_once()
