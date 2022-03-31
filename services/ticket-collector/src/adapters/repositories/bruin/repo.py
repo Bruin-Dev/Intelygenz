@@ -51,32 +51,48 @@ class BruinRepository:
         async with httpx.AsyncClient() as client:
             try:
                 self._logger.info(f'Requesting bruin tickets between {start} and {end}')
+                tickets = []
 
                 params = {
                     'StartDate': start,
                     'EndDate': end,
                     'TicketTopic': 'VOO',
+                    'PageSize': 100,
+                    'PageNumber': 1,
                 }
 
-                tickets_response = await client.get(
-                    'https://api.bruin.com/api/Ticket/basic',
-                    params=params,
-                    headers=self.get_headers(),
-                    timeout=90,
-                )
+                remaining_items = None
+                while remaining_items is None or remaining_items > 0:
+                    tickets_response = await client.get(
+                        'https://api.bruin.com/api/Ticket/basic',
+                        params=params,
+                        headers=self.get_headers(),
+                        timeout=90,
+                    )
 
-                if tickets_response.status_code in range(200, 300):
-                    tickets = tickets_response.json()['responses']
-                    self._logger.info(f'Got {len(tickets)} bruin tickets between {start} and {end}')
-                    return tickets
-                elif tickets_response.status_code == 401:
-                    self._logger.warning('Bruin token expired, re-logging in...')
-                    self.login()
-                    return await self.request_tickets_by_date_range(start, end)
-                else:
-                    self._logger.error(f'Failed to get bruin tickets between {start} and {end}. '
-                                       f'Status code: {tickets_response.status_code}')
-                    return []
+                    if tickets_response.status_code in range(200, 300):
+                        response_json = tickets_response.json()
+                        tickets += response_json['responses']
+
+                        if remaining_items is None:
+                            remaining_items = int(response_json['total'])
+
+                        remaining_items -= len(response_json['responses'])
+                        if remaining_items <= 0:
+                            break
+
+                        params['PageNumber'] += 1
+                    elif tickets_response.status_code == 401:
+                        self._logger.warning('Bruin token expired, re-logging in...')
+                        self.login()
+                        continue
+                    else:
+                        self._logger.error(f'Failed to get bruin tickets between {start} and {end}. '
+                                           f'Status code: {tickets_response.status_code}')
+                        return []
+
+                self._logger.info(f'Got {len(tickets)} bruin tickets between {start} and {end}')
+                return tickets
             except Exception as e:
                 self._logger.error(f'Failed to get bruin tickets between {start} and {end}. Error: {e}')
                 return []
