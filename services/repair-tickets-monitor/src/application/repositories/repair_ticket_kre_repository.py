@@ -84,7 +84,7 @@ class RepairTicketKreRepository:
         tickets_could_be_created: List[Dict[str, Any]],
         tickets_could_be_updated: List[Dict[str, Any]],
         tickets_cannot_be_created: List[Dict[str, Any]],
-        validated_ticket_numbers: List[Dict[str, Any]],
+        validated_tickets: List[Dict[str, Any]],
     ):
         validated_service_numbers = list(service_numbers_sites_map.keys())
 
@@ -108,7 +108,7 @@ class RepairTicketKreRepository:
                     "tickets_could_be_created": tickets_could_be_created,
                     "tickets_could_be_updated": tickets_could_be_updated,
                     "tickets_cannot_be_created": tickets_cannot_be_created,
-                    "validated_ticket_numbers": validated_ticket_numbers,
+                    "validated_tickets": validated_tickets,
                 },
             }
             self._logger.info(

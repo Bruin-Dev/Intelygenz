@@ -136,7 +136,7 @@ class RepairTicketsMonitor:
         tickets_could_be_created: List[Dict[str, Any]] = None,
         tickets_could_be_updated: List[Dict[str, Any]] = None,
         tickets_cannot_be_created: List[Dict[str, Any]] = None,
-        validated_ticket_numbers: List[Dict[str, Any]] = None,
+        validated_tickets: List[Dict[str, Any]] = None,
     ):
         """Save the output from the ticket creation / inference verification"""
         service_number_sites_map = service_number_sites_map or {}
@@ -153,7 +153,7 @@ class RepairTicketsMonitor:
             tickets_could_be_created,
             tickets_could_be_updated,
             tickets_cannot_be_created,
-            validated_ticket_numbers,
+            validated_tickets,
         )
         if output_response["status"] != 200:
             self._logger.error("email_id=%s Error while saving output %s", email_id, output_response)
@@ -201,11 +201,11 @@ class RepairTicketsMonitor:
             feedback_not_created_due_cancellations.append(site_id_feedback)
         return feedback_not_created_due_cancellations
 
-    async def get_validated_ticket_numbers(self, tickets_id: List[int]) -> List[int]:
+    async def get_validated_tickets(self, tickets_id: List[int]) -> List[int]:
         """
         Return the tickets that already exist in Bruin
         """
-        validated_ticket_numbers = []
+        validated_tickets = []
         for ticket_id in tickets_id:
             bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             if bruin_bridge_response["status"] == 200:
@@ -215,8 +215,8 @@ class RepairTicketsMonitor:
                     "call_type": bruin_bridge_response["body"]["call_type"],
                     "category": bruin_bridge_response["body"]["category"],
                 }
-                validated_ticket_numbers.append(validated_ticket)
-        return validated_ticket_numbers
+                validated_tickets.append(validated_ticket)
+        return validated_tickets
 
     async def _process_repair_email(self, email_tag_info: Dict[str, Any]):
         """
@@ -321,8 +321,8 @@ class RepairTicketsMonitor:
 
             tickets_cannot_be_created += feedback_not_created_due_cancellations
 
-            validated_ticket_numbers = (
-                await self.get_validated_ticket_numbers(potential_ticket_numbers) if potential_ticket_numbers else []
+            validated_tickets = (
+                await self.get_validated_tickets(potential_ticket_numbers) if potential_ticket_numbers else []
             )
 
             output_send_to_save = {
@@ -332,7 +332,7 @@ class RepairTicketsMonitor:
                 "tickets_could_be_created": tickets_could_be_created,
                 "tickets_could_be_updated": tickets_could_be_updated,
                 "tickets_cannot_be_created": tickets_cannot_be_created,
-                "validated_ticket_numbers": validated_ticket_numbers,
+                "validated_tickets": validated_tickets,
             }
             self._logger.info("email_id=%s output_send_to_save=%s", email_id, output_send_to_save)
             save_output_response = await self._save_output(email_id, **output_send_to_save)
