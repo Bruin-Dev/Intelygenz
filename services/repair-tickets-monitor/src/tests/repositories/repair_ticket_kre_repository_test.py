@@ -162,7 +162,7 @@ class TestRepairTicketRepository:
                 tickets_could_be_created=[],
                 tickets_could_be_updated=[],
                 tickets_cannot_be_created=[],
-                validated_tickets=[],
+                validated_ticket_numbers=[],
             )
 
         assert save_output_response["status"] == 200
@@ -191,7 +191,7 @@ class TestRepairTicketRepository:
                 tickets_could_be_created=[],
                 tickets_could_be_updated=[],
                 tickets_cannot_be_created=[],
-                validated_tickets=[],
+                validated_ticket_numbers=[],
             )
 
         assert save_output_response["status"] == 400
