@@ -2,8 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-# application.clients.generated_grpc MUST to added after copyng this generated
-# file from AI repository
 import application.clients.generated_grpc.public_input_pb2 as public__input__pb2
 
 

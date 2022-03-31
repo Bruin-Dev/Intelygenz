@@ -67,14 +67,12 @@ def make_inference_data(make_filter_flags):
     def _inner(
             *,
             potential_service_numbers: List[str] = None,
-            potential_ticket_numbers: List[str] = None,
             filter_flags: Dict[str, Any] = None,
             predicted_class: str = "",
     ):
         filter_flags = filter_flags or make_filter_flags()
         return {
-            "potential_service_numbers": potential_service_numbers or [],
-            "potential_ticket_numbers": potential_ticket_numbers or [],
+            "potential_service_numbers": potential_service_numbers,
             "predicted_class": predicted_class,
             "filter_flags": filter_flags
         }
@@ -134,7 +132,6 @@ def make_save_outputs_request_payload(make_rta_ticket_payload):
             *,
             email_id: str = "",
             service_numbers: List[str] = None,
-            ticket_numbers: List[str] = None,
             service_numbers_sites_map: Dict[str, str] = None,
             tickets_created: List[Dict[str, Any]] = None,
             tickets_updated: List[Dict[str, Any]] = None,
@@ -143,7 +140,6 @@ def make_save_outputs_request_payload(make_rta_ticket_payload):
             tickets_cannot_be_created: List[Dict[str, Any]] = None,
     ):
         service_numbers = service_numbers or []
-        ticket_numbers = ticket_numbers or []
         service_numbers_sites_map = service_numbers_sites_map or {}
         tickets_created = tickets_created or []
         tickets_updated = tickets_updated or []
@@ -154,7 +150,6 @@ def make_save_outputs_request_payload(make_rta_ticket_payload):
         return {
             'email_id': email_id,
             'validated_service_numbers': service_numbers,
-            'validated_ticket_numbers': service_numbers,
             'service_numbers_sites_map': service_numbers_sites_map,
             'tickets_created': tickets_created,
             'tickets_updated': tickets_updated,
@@ -198,14 +193,14 @@ def make_closed_ticket_request_payload():
             ticket_id: str = "",
             client_id: str = "",
             ticket_status: str = "",
-            cancelled_reasons: List[str] = None,
+            cancellation_reasons: List[str] = None,
     ):
-        cancelled_reasons = cancelled_reasons or []
+        cancellation_reasons = cancellation_reasons or []
         return {
             "ticket_id": ticket_id,
             "client_id": client_id,
             "ticket_status": ticket_status,
-            "cancelled_reasons": cancelled_reasons,
+            "cancellation_reasons": cancellation_reasons,
         }
 
     return _inner

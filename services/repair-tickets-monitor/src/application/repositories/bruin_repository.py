@@ -25,10 +25,10 @@ class BruinRepository:
             stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
         )
         async def get_single_ticket_basic_info():
-            request_id = uuid()
-            self._logger.info('request_id=%s ticket_id=%s Getting ticket basic info', request_id, ticket_id)
+            err_msg = None
+            self._logger.info(f'Getting ticket "{ticket_id}" basic info')
             request_msg = {
-                "request_id": request_id,
+                "request_id": uuid(),
                 "body": {
                     "ticket_id": ticket_id,
                 },
@@ -39,46 +39,43 @@ class BruinRepository:
                     request_msg,
                     timeout=self._timeout,
                 )
-            except Exception as exception:
-                err_msg = "request_id=%s ticket_id=%s Exception occurred when getting basic info from Bruin: %s" % (
-                    request_id,
-                    ticket_id,
-                    exception
+
+            except Exception as err:
+                err_msg = (
+                    f"An error occurred when getting basic info from Bruin, " f'for ticket_id "{ticket_id}" -> {err}'
                 )
                 response = nats_error_response
+            else:
+                response_body = response["body"]
+                response_status = response["status"]
+
+                if response_status not in range(200, 300):
+                    err_msg = (
+                        f"Error getting basic info for ticket {ticket_id} in "
+                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
+                        f"Error {response_status} - {response_body}"
+                    )
+                else:
+                    response["body"] = {
+                        "ticket_id": ticket_id,
+                        "ticket_status": response["body"]["ticketStatus"],
+                        "call_type": response["body"]["callType"],
+                        "category": response["body"]["category"],
+                        "creation_date": response["body"]["createDate"],
+                    }
+
+            if err_msg:
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
-                return response
-
-            response_body = response["body"]
-            response_status = response["status"]
-
-            if response_status != 200:
-                err_msg = "request_id=%s ticket_id=%s Bad response code received from Bruin bridge: %s - %s" % (
-                    request_id,
-                    ticket_id,
-                    response_status,
-                    response_body,
-                )
-                self._logger.error(err_msg)
-                await self._notifications_repository.send_slack_message(err_msg)
-                return response
-
-            response["body"] = {
-                "ticket_id": ticket_id,
-                "ticket_status": response_body["ticketStatus"],
-                "call_type": response_body["callType"],
-                "category": response_body["category"],
-                "creation_date": response_body["createDate"],
-            }
-            self._logger.info(
-                "request_id=%s ticket_id=%s Basic info for ticket retrieved from Bruin",
-                request_id,
-                ticket_id)
+            else:
+                self._logger.info(f"Basic info for ticket {ticket_id} retrieved from Bruin")
 
             return response
 
-        return await get_single_ticket_basic_info()
+        try:
+            return await get_single_ticket_basic_info()
+        except Exception as e:
+            self._logger.error(f"Error getting ticket {ticket_id} from Bruin: {e}")
 
     async def get_single_ticket_info_with_service_numbers(self, ticket_id: str):
         basic_info_response = await self.get_single_ticket_basic_info(ticket_id)

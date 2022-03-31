@@ -79,7 +79,7 @@ def valid_closed_ticket_request__cancelled(make_closed_ticket_request_payload):
         ticket_id="1234",
         client_id="5678",
         ticket_status="cancelled",
-        cancelled_reasons=["cancelled cause ai", "duplicated ticket"]
+        cancellation_reasons=["cancelled cause ai", "duplicated ticket"]
     )
 
 

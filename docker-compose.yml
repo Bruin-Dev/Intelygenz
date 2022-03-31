@@ -305,7 +305,6 @@ services:
       - 4222:4222
       - 8222:8222
     hostname: nats-server
-
   nats-server-1:
     restart: on-failure
     build:
@@ -314,7 +313,6 @@ services:
     env_file:
       - nats-server/nats-server-1-env
     hostname: nats-server-1
-
   nats-server-2:
     restart: on-failure
     build:
@@ -381,10 +379,6 @@ services:
       - 9010:9000
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - ./services/repair-tickets-kre-bridge:/service/app:z
-    stdin_open: true # for debug
-    tty: true # for debug
 
 # service-affecting-monitor instances vary depending on the environment you want to test, so their configuration
 # can't be hardcoded in this docker-compose file

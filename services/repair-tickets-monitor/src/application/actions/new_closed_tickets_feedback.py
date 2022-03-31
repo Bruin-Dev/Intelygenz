@@ -87,7 +87,7 @@ class NewClosedTicketsFeedback:
                 ticket_id,
                 client_id,
                 status_response['body']['ticket_status'],
-                status_response['body']['cancelled_reasons']
+                status_response['body']['cancellation_reasons']
             )
             if save_closed_ticket_response['status'] not in range(200, 300):
                 self._logger.error(f"Error while saving closed ticket feedback for {ticket_id}")
