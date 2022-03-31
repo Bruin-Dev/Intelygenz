@@ -18,4 +18,5 @@ spec:
               name: ticket-statistics
               port: 
                 number: {{ .Values.service.port }}
+          pathType: Prefix
           path: /

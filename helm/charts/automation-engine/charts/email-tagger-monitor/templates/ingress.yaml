@@ -19,5 +19,6 @@ spec:
               name: email-tagger-monitor
               port: 
                 number: {{ .Values.service.port }}
+          pathType: Prefix
           path: /
 
