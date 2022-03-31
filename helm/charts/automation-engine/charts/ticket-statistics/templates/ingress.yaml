@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -14,6 +14,8 @@ spec:
       http:
         paths:
         - backend:
-            serviceName: ticket-statistics
-            servicePort: {{ .Values.service.port }}
+            service:
+              name: ticket-statistics
+              port: 
+                number: {{ .Values.service.port }}
           path: /
