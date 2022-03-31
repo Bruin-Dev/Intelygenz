@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 56,
-  "iteration": 1644601533833,
+  "iteration": 1648758220505,
   "links": [],
   "panels": [
     {
@@ -71,6 +70,7 @@
           "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (method)",
           "format": "time_series",
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "{{method}}",
           "refId": "A"
         },
@@ -79,6 +79,7 @@
           "format": "heatmap",
           "hide": false,
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "total",
           "refId": "B"
         }
@@ -103,6 +104,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:169",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -111,6 +113,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:170",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -181,6 +184,7 @@
           "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[1d]))",
           "format": "time_series",
           "hide": false,
+          "instant": true,
           "interval": "",
           "legendFormat": "total",
           "refId": "A"
@@ -188,6 +192,7 @@
         {
           "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[1d])) by (method)",
           "hide": false,
+          "instant": true,
           "interval": "",
           "legendFormat": "{{method}}",
           "refId": "B"
@@ -250,6 +255,7 @@
           "expr": "sum(label_replace(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval]),\"endpoint_group\",\"$1$2$3$4$5\", \"endpoint_\",\"(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*(\\\\D*)\\\\d*\\\\?*.*\")) by (method, endpoint_group)",
           "format": "time_series",
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "{{method}} {{endpoint_group}}",
           "refId": "A"
         },
@@ -258,6 +264,7 @@
           "format": "heatmap",
           "hide": false,
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "total",
           "refId": "B"
         }
@@ -282,6 +289,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:279",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -290,6 +298,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:280",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -355,7 +364,7 @@
           "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[24h]))",
           "format": "heatmap",
           "hide": false,
-          "interval": "",
+          "interval": "8h",
           "legendFormat": "total",
           "refId": "B"
         }
@@ -380,6 +389,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:57",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -388,6 +398,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:58",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -453,6 +464,7 @@
           "expr": "sum(increase(bruin_api_usage_total{namespace=~\"$namespace\"}[$__rate_interval])) by (response_status)",
           "format": "time_series",
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "{{response_status}}",
           "refId": "A"
         },
@@ -461,6 +473,7 @@
           "format": "heatmap",
           "hide": false,
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "total",
           "refId": "B"
         }
@@ -485,6 +498,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:335",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -493,6 +507,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:336",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -567,5 +582,5 @@
   "timezone": "",
   "title": "Bruin API usage",
   "uid": "bruin_api_usage_v2",
-  "version": 4
+  "version": 1
 }
