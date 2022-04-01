@@ -76,7 +76,6 @@ class NewTicketsMonitor:
         ticket_id = int(ticket_data["ticket_id"])
 
         async with self._semaphore:
-            self._logger.info("Go in to sem")
             # Get more info from Bruin
             ticket_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             self._logger.info(f"Ticket response: {ticket_response}")
