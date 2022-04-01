@@ -202,7 +202,7 @@ class TestTicketRepository:
             links_configuration=links_configurations,
         )
 
-        link = make_link(interface='REX', display_name='Metal Gear REX')
+        link = make_link(interface='REX', display_name='Metal Gear REX', ip_address='34.56.3.1')
         link_metrics = make_metrics(best_latency_ms_tx=101010, best_latency_ms_rx=202020)
 
         structured_metrics = make_structured_metrics_object(edge_info=edge, link_info=link, metrics=link_metrics)
@@ -221,6 +221,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -246,6 +247,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -279,7 +281,7 @@ class TestTicketRepository:
             links_configuration=links_configurations,
         )
 
-        link = make_link(interface='REX', display_name='Metal Gear REX')
+        link = make_link(interface='REX', display_name='Metal Gear REX', ip_address='34.56.3.1')
         link_metrics = make_metrics(best_packet_loss_tx=101010, best_packet_loss_rx=202020)
 
         structured_metrics = make_structured_metrics_object(edge_info=edge, link_info=link, metrics=link_metrics)
@@ -298,6 +300,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -323,6 +326,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -356,7 +360,7 @@ class TestTicketRepository:
             links_configuration=links_configurations,
         )
 
-        link = make_link(interface='REX', display_name='Metal Gear REX')
+        link = make_link(interface='REX', display_name='Metal Gear REX', ip_address='34.56.3.1')
         link_metrics = make_metrics(best_jitter_ms_tx=101010, best_jitter_ms_rx=202020)
 
         structured_metrics = make_structured_metrics_object(edge_info=edge, link_info=link, metrics=link_metrics)
@@ -375,6 +379,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -400,6 +405,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -433,7 +439,7 @@ class TestTicketRepository:
             links_configuration=links_configurations,
         )
 
-        link = make_link(interface='REX', display_name='Metal Gear REX')
+        link = make_link(interface='REX', display_name='Metal Gear REX', ip_address='34.56.3.1')
         link_metrics = make_metrics(
             bytes_tx=101010, bytes_rx=202020,
             bps_of_best_path_tx=1, bps_of_best_path_rx=1,
@@ -455,6 +461,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -483,6 +490,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 30 minutes",
@@ -519,7 +527,7 @@ class TestTicketRepository:
             links_configuration=links_configurations,
         )
 
-        link = make_link(interface='REX', display_name='Metal Gear REX')
+        link = make_link(interface='REX', display_name='Metal Gear REX', ip_address='34.56.3.1')
         link_metrics = make_metrics(best_latency_ms_tx=101010, best_latency_ms_rx=202020)
         event = make_event()
         events = [event] * 12
@@ -541,6 +549,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 60 minutes",
@@ -564,6 +573,7 @@ class TestTicketRepository:
                 "Edge Name: Travis Touchdown",
                 "Name: Metal Gear REX",
                 "Interface: REX",
+                "IP Address: 34.56.3.1",
                 "Link Type: Public Wireless",
                 "",
                 "Interval for Scan: 60 minutes",
