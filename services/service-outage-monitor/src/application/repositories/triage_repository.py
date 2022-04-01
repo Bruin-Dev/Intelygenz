@@ -151,6 +151,7 @@ class TriageRepository:
             interface_name = link['interface']
             link_state = link['linkState']
             link_label = link['displayName']
+            link_ip = link['linkIpAddress']
             link_interface_type = "Unknown"
             for link_configuration in links_configuration:
                 if interface_name in link_configuration['interfaces']:
@@ -161,6 +162,7 @@ class TriageRepository:
 
             ticket_note_lines.append(f'Interface {interface_name}')
             ticket_note_lines.append(f'Interface {interface_name} Label: {link_label}')
+            ticket_note_lines.append(f'Interface {interface_name} IP Address: {link_ip}')
             ticket_note_lines.append(f'Interface {interface_name} Type: {link_interface_type}')
             ticket_note_lines.append(f'Interface {interface_name} Status: {link_state}')
 

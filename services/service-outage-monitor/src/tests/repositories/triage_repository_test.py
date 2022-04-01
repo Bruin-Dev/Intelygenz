@@ -70,7 +70,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -78,6 +78,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -85,6 +86,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': None,
@@ -195,6 +197,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -202,6 +205,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: STABLE',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -209,6 +213,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: STABLE',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
@@ -273,7 +278,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -281,6 +286,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -288,6 +294,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': None,
@@ -398,6 +405,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -405,6 +413,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: DISCONNECTED',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -412,6 +421,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: DISCONNECTED',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
@@ -476,7 +486,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -484,6 +494,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -491,6 +502,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': 'CONNECTED',
@@ -610,6 +622,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -617,6 +630,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: STABLE',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -624,6 +638,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: STABLE',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
@@ -688,7 +703,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -696,6 +711,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -703,6 +719,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': 'OFFLINE',
@@ -825,6 +842,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: STABLE',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -832,6 +850,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: STABLE',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -839,6 +858,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: STABLE',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
@@ -903,7 +923,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -911,6 +931,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -918,6 +939,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': 'OFFLINE',
@@ -1042,6 +1064,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -1049,6 +1072,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: DISCONNECTED',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -1056,6 +1080,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: DISCONNECTED',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
@@ -1120,7 +1145,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -1128,6 +1153,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -1135,6 +1161,7 @@ class TestTriageRepository:
                     'linkState': 'STABLE',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': None,
@@ -1247,6 +1274,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -1254,6 +1282,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: STABLE',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -1261,6 +1290,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: STABLE',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
@@ -1325,7 +1355,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE1',
                     'displayName': 'Solid Snake',
-
+                    'linkIpAddress': '86.16.6.1',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -1333,6 +1363,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'GE7',
                     'displayName': 'Big Boss',
+                    'linkIpAddress': '86.16.6.2',
                 },
                 {
                     # Some fields omitted for simplicity
@@ -1340,6 +1371,7 @@ class TestTriageRepository:
                     'linkState': 'DISCONNECTED',
                     'interface': 'INTERNET3',
                     'displayName': 'Otacon',
+                    'linkIpAddress': '86.16.6.3',
                 }
             ],
             'edgeHAState': 'CONNECTED',
@@ -1459,6 +1491,7 @@ class TestTriageRepository:
             '',
             'Interface GE1',
             'Interface GE1 Label: Solid Snake',
+            'Interface GE1 IP Address: 86.16.6.1',
             'Interface GE1 Type: Public Wired',
             'Interface GE1 Status: DISCONNECTED',
             'Last GE1 Interface Online: 2019-07-30 02:40:00+00:00',
@@ -1466,6 +1499,7 @@ class TestTriageRepository:
             '',
             'Interface GE7',
             'Interface GE7 Label: Big Boss',
+            'Interface GE7 IP Address: 86.16.6.2',
             'Interface GE7 Type: Public Wired',
             'Interface GE7 Status: DISCONNECTED',
             'Last GE7 Interface Online: 2019-07-01 07:40:00+00:00',
@@ -1473,6 +1507,7 @@ class TestTriageRepository:
             '',
             'Interface INTERNET3',
             'Interface INTERNET3 Label: Otacon',
+            'Interface INTERNET3 IP Address: 86.16.6.3',
             'Interface INTERNET3 Type: Private Wired',
             'Interface INTERNET3 Status: DISCONNECTED',
             'Last INTERNET3 Interface Online: 2019-08-01 09:40:00+00:00',
