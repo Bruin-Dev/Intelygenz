@@ -61,6 +61,7 @@ MONITOR_CONFIG = {
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
         AffectingTroubles.BOUNCING: 60,
     },
+    'link_labels__hnoc_blacklist': ['BYOB'],
     'autoresolve': {
         'semaphore': 3,
         'metrics_lookup_interval_minutes': 30,

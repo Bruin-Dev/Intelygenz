@@ -3,15 +3,15 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
+from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from shortuuid import uuid
+from tests.fixtures._constants import CURRENT_DATETIME
 
 from application import AffectingTroubles
-from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from config import testconfig
-from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()
 uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_)
@@ -1956,10 +1956,11 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
-    def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime):
+    def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime,
+                                            make_structured_metrics_object):
         ticket_id = 12345
         serial_number = 'VC1234567'
-        edge = {}
+        link_info = make_structured_metrics_object()
 
         current_datetime = frozen_datetime.now()
         autoresolve_config = service_affecting_monitor._config.MONITOR_CONFIG['autoresolve']
@@ -1970,12 +1971,12 @@ class TestServiceAffectingMonitor:
 
         with patch.multiple(service_affecting_monitor_module, datetime=frozen_datetime, timezone=Mock()):
             service_affecting_monitor._schedule_forward_to_hnoc_queue(
-                ticket_id=ticket_id, serial_number=serial_number, edge=edge
+                ticket_id=ticket_id, serial_number=serial_number, link_data=link_info
             )
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
             service_affecting_monitor._forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_info},
             run_date=forward_task_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
@@ -1984,14 +1985,51 @@ class TestServiceAffectingMonitor:
         )
 
     @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
-            self, service_affecting_monitor, bruin_500_response):
+    async def forward_ticket_to_hnoc_queue__BYOB_link_test(
+            self, service_affecting_monitor,
+            make_structured_metrics_object, make_link):
         ticket_id = 12345
         serial_number = 'VC1234567'
 
+        link_data = make_link(display_name='BYOB test')
+        link_info = make_structured_metrics_object(link_info=link_data)
+
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue__IP_link_test(
+            self, service_affecting_monitor,
+            make_structured_metrics_object, make_link):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        link_data = make_link(display_name='192.158.1.38')
+        link_info = make_structured_metrics_object(link_info=link_data)
+
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info)
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
+            self, service_affecting_monitor, bruin_500_response,
+            make_structured_metrics_object):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+        link_info = make_structured_metrics_object()
+
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info)
 
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
@@ -2000,9 +2038,10 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__resolved_ticket_test(
             self, service_affecting_monitor, make_detail_item, make_ticket_details,
-            make_rpc_response):
+            make_rpc_response, make_structured_metrics_object):
         ticket_id = 12345
         serial_number = 'VC1234567'
+        link_info = make_structured_metrics_object()
 
         detail_item = make_detail_item(value=serial_number, status='R')
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -2012,7 +2051,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info)
 
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
@@ -2021,9 +2061,10 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__change_work_queue_request_has_not_2xx_status_test(
             self, service_affecting_monitor, bruin_500_response, make_detail_item, make_ticket_details,
-            make_rpc_response):
+            make_rpc_response, make_structured_metrics_object):
         ticket_id = 12345
         serial_number = 'VC1234567'
+        link_info = make_structured_metrics_object()
 
         detail_item = make_detail_item(value=serial_number)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -2036,7 +2077,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info)
 
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
@@ -2047,9 +2089,10 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_test(
             self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
-            make_rpc_response):
+            make_rpc_response, make_structured_metrics_object):
         ticket_id = 12345
         serial_number = 'VC1234567'
+        link_info = make_structured_metrics_object()
 
         detail_item = make_detail_item(value=serial_number, status='O')
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -2062,7 +2105,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_generic_200_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info)
 
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
@@ -2071,6 +2115,72 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_awaited_once_with(
             ticket_id=ticket_id, serial_number=serial_number,
         )
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_with_BYOB_link_in_vco4_test(
+            self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
+            make_rpc_response, make_link, make_structured_metrics_object):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+        link_data = make_link(display_name='BYOB test')
+        link_info = make_structured_metrics_object(link_info=link_data)
+
+        detail_item = make_detail_item(value=serial_number, status='O')
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
+            bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+            await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id,
+                                                                          serial_number=serial_number,
+                                                                          link_data=link_info)
+            service_affecting_monitor._should_be_forwarded_to_HNOC.assert_not_called()
+            service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+            service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
+                ticket_id=ticket_id, service_number=serial_number,
+            )
+            service_affecting_monitor._notifications_repository.\
+                notify_successful_ticket_forward.assert_awaited_once_with(ticket_id=ticket_id,
+                                                                          serial_number=serial_number)
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_with_IP_link_in_vco4_test(
+            self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
+            make_rpc_response, make_link, make_structured_metrics_object):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+        link_data = make_link(display_name='192.158.1.38')
+        link_info = make_structured_metrics_object(link_info=link_data)
+
+        detail_item = make_detail_item(value=serial_number, status='O')
+        ticket_details = make_ticket_details(detail_items=[detail_item])
+
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
+            bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+            await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id,
+                                                                          serial_number=serial_number,
+                                                                          link_data=link_info)
+            service_affecting_monitor._should_be_forwarded_to_HNOC.assert_not_called()
+            service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+            service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
+                ticket_id=ticket_id, service_number=serial_number,
+            )
+            service_affecting_monitor._notifications_repository. \
+                notify_successful_ticket_forward.assert_awaited_once_with(ticket_id=ticket_id,
+                                                                          serial_number=serial_number)
 
     @pytest.mark.asyncio
     async def run_autoresolve_process__no_metrics_found_test(

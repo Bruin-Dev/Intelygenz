@@ -65,6 +65,7 @@ MONITOR_CONFIG = {
             os.environ['MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL']) // 60,
         AffectingTroubles.BOUNCING: int(os.environ['MONITORING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL']) // 60,
     },
+    'link_labels__hnoc_blacklist': json.loads(os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS']),
     'autoresolve': {
         'semaphore': 3,
         'metrics_lookup_interval_minutes': int(os.environ['MONITORING__AUTORESOLVE_LOOKUP_INTERVAL']) // 60,
