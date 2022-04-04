@@ -35,6 +35,31 @@ resource "helm_release" "cluster-autoscaler" {
    ]
 }
 
+
+resource "helm_release" "descheduler" {
+  name          = "descheduler"
+
+  repository    = "https://kubernetes-sigs.github.io/descheduler/"
+  chart         = "descheduler"
+
+  version       = var.DESCHEDULER_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  wait          = true
+  recreate_pods = false
+
+  values = [
+    file("helm/external-charts/descheduler-values.yaml")
+  ]
+
+  depends_on = [
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
+   ]
+}
+
+
 resource "helm_release" "external-secrets" {
   name          = "external-secrets"
 
@@ -59,6 +84,7 @@ resource "helm_release" "external-secrets" {
       data.aws_eks_cluster.cluster
    ]
 }
+
 
 resource "helm_release" "chartmuseum" {
   count         = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
@@ -148,6 +174,7 @@ resource "helm_release" "external-dns" {
    ]
 }
 
+
 resource "helm_release" "ingress-nginx" {
   name          = "ingress-nginx"
 
@@ -183,14 +210,15 @@ resource "helm_release" "ingress-nginx" {
    ]
 }
 
-resource "helm_release" "reloader" {
-  name          = "reloader"
 
-  repository    = "https://stakater.github.io/stakater-charts"
-  chart         = "reloader"
+resource "helm_release" "metrics-server" {
+  name          = "metrics-server"
 
-  version       = var.RELOADER_CHART_VERSION
-  namespace     = "default"
+  repository    = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart         = "metrics-server"
+
+  version       = var.METRICS_SERVER_HELM_CHART_VERSION
+  namespace     = "kube-system"
   force_update  = false
   recreate_pods = false
   wait          = true
@@ -198,5 +226,26 @@ resource "helm_release" "reloader" {
   depends_on = [
       module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
+   ]
+}
+
+
+resource "helm_release" "reloader" {
+  name          = "reloader"
+
+  repository    = "https://stakater.github.io/stakater-charts"
+  chart         = "reloader"
+
+  version       = var.RELOADER_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  recreate_pods = false
+  wait          = true
+
+  depends_on = [
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+      data.aws_eks_cluster.cluster
    ]
 }

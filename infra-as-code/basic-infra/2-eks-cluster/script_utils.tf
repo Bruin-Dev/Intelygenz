@@ -27,19 +27,3 @@ resource "null_resource" "update_kube_config" {
       module.mettel-automation-eks-cluster,
    ]
 }
-
-resource "null_resource" "install-metrics-server" {
-
-  provisioner "local-exec" {
-    command = "kubectl --namespace=kube-system apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v${var.METRICS_SERVER_VERSION}/components.yaml"
-  }
-
-  triggers = {
-    always_run = timestamp()
-  }
-
-  depends_on = [
-    module.mettel-automation-eks-cluster,
-    null_resource.update_kube_config
-  ]
-}

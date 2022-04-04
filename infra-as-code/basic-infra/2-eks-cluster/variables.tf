@@ -27,7 +27,7 @@ variable "worker_node_instance_type" {
 # helm charts variables
 
 variable "CLUSTER_AUTOSCALER_HELM_CHART_VERSION" {
-  default     = "9.4.0"
+  default     = "9.13.1"
   description = "Helm chart version used for cluster-autoscaler"
 }
 
@@ -37,28 +37,33 @@ variable "CHARTMUSEUM_HELM_CHART_VERSION" {
 }
 
 variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
-  default     = "4.8.6"
+  default     = "6.0.2"
   description = "Helm chart version used for external-dns"
 }
 
 variable "EXTERNAL_SECRETS_HELM_CHART_VERSION" {
-  default     = "0.4.1"
+  default     = "0.4.4"
   description = "Helm chart version used for external-secrets"
 }
 
 variable "INGRESS_NGINX_HELM_CHART_VERSION" {
-  default     = "3.21.0"
+  default     = "4.0.13"
   description = "Helm chart version used for ingress-nginx"
 }
 
-variable "METRICS_SERVER_VERSION" {
-  default     = "0.4.2"
-  description = "Version of metrics server release to install in the EKS cluster"
+variable "METRICS_SERVER_HELM_CHART_VERSION" {
+  default     = "3.8.2"
+  description = "Helm chart version used for  metrics-server"
 }
 
-variable "RELOADER_CHART_VERSION" {
-  default     = "0.0.81"
+variable "RELOADER_HELM_CHART_VERSION" {
+  default     = "0.0.103"
   description = "Helm chart version used for reloader"
+}
+
+variable "DESCHEDULER_HELM_CHART_VERSION" {
+  default     = "0.22.1"
+  description = "Helm chart version used for descheduler"
 }
 
 variable "WHITELISTED_IPS" {
