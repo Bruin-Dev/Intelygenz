@@ -8,7 +8,7 @@
             "subAccountNumber": "string",
             "inventoryID": "string",
             "serviceNumber": "string",
-            "siteId": 0,
+            "siteId": 10,
             "siteLabel": "string",
             "address": {
                 "address": "string",

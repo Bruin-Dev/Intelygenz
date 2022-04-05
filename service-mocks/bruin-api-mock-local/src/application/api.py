@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify
 
 api_blueprint = Blueprint("api", __name__)
 
+
 # Email
 @api_blueprint.route("/api/Email/<email_id>/tag/<tag_id>", methods=["POST"])
 def post_tag(email_id, tag_id):

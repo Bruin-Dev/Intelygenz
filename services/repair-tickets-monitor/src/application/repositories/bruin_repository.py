@@ -113,61 +113,73 @@ class BruinRepository:
             ),
             stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
         )
-        async def verify_service_number_information():
-            err_msg = None
-            self._logger.info(f'Getting inventory "{client_id}" and service number {service_number}')
+        async def verify_service_number_information(request_id: str):
+            request_id = uuid()
             request_msg = {
-                "request_id": uuid(),
+                "request_id": request_id,
                 "body": {
                     "client_id": client_id,
                     "service_number": service_number,
                     "status": "A",
                 },
             }
+            self._logger.info(
+                "request_id=%s service_number=%s Verifiying active service number",
+                request_id,
+                service_number)
             try:
                 response = await self._event_bus.rpc_request(
                     "bruin.customer.get.info", request_msg, timeout=self._timeout
                 )
             except Exception as err:
                 err_msg = (
-                    f"An error occurred when getting service number info from Bruin, "
-                    f'for ticket_id "{client_id}" -> {err}'
-                )
-                response = nats_error_response
-            else:
-                response_body = response["body"]
-                response_status = response["status"]
-
-                if response_status not in range(200, 300):
-                    err_msg = (
-                        f"Error getting service number info for {service_number} in "
-                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
-                        f"Error {response_status} - {response_body}"
+                    "request_id=%s An error occurred when getting service number info from Bruin bridge: %s" % (
+                        request_id,
+                        err
                     )
-                elif not response_body:
-                    self._logger.info(f"Service number not validated {service_number}")
-                    response["status"] = 404
-                    response["body"] = "Service number not validated"
-                else:
-                    response["status"] = response_status
-                    response["body"] = {
-                        "client_id": client_id,
-                        "site_id": response_body[0].get("site_id"),
-                        "service_number": service_number,
-                    }
-
-            if err_msg:
-                self._logger.error(err_msg)
+                )
                 await self._notifications_repository.send_slack_message(err_msg)
-            else:
-                self._logger.info(f"Service number info {service_number} retrieved from Bruin")
+                return nats_error_response
 
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status != 200:
+                self._logger.error(
+                    "request_id=%s service_number=%s Status %s received: %s. environment: %s",
+                    request_id,
+                    service_number,
+                    response_status,
+                    response_body,
+                    self._config.ENVIRONMENT_NAME.upper(),
+                )
+                return response
+
+            if not response_body:
+                self._logger.info(
+                    "request_id=%s service_number=%s Service number not validated",
+                    request_id,
+                    service_number
+                )
+                response["status"] = 404
+                response["body"] = "Service number not validated"
+                return response
+
+            response["status"] = response_status
+            response["body"] = {
+                "client_id": client_id,
+                "site_id": response_body[0].get("site_id"),
+                "service_number": service_number,
+            }
+
+            self._logger.info(
+                "request_id=%s service_number=%s Info retrieved from bruin-bridge",
+                request_id,
+                service_number
+            )
             return response
 
-        try:
-            return await verify_service_number_information()
-        except Exception as e:
-            self._logger.error(f"Error getting service number info {service_number} from Bruin: {e}")
+        return await verify_service_number_information()
 
     async def get_ticket_details(self, ticket_id: int):
         @retry(
