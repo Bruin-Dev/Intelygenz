@@ -335,11 +335,7 @@ class RepairTicketsMonitor:
                 "validated_ticket_numbers": validated_ticket_numbers,
             }
             self._logger.info("email_id=%s output_send_to_save=%s", email_id, output_send_to_save)
-            save_output_response = await self._save_output(email_id, **output_send_to_save)
-
-            if not save_output_response:
-                self._logger.error("email_id=%s Error while saving output for email in RTA-KRE", email_id)
-                return
+            await self._save_output(email_id, **output_send_to_save)
 
             # we only mark the email as done in bruin when at least one ticket has been created or updated,
             # and there is no cancellations in any site
