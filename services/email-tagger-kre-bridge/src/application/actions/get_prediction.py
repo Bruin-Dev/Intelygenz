@@ -56,4 +56,9 @@ class GetPrediction:
         }
 
         await self._event_bus.publish_message(msg['response_topic'], response)
-        self._logger.info(f'Prediction for email {email_id} published in event bus!')
+        self._logger.info(
+            'request_id=%s, enail_id=%s Prediction %s published in event bus!',
+            request_id,
+            email_id,
+            response
+        )

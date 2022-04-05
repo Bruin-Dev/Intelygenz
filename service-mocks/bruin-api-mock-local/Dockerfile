@@ -4,7 +4,7 @@ ARG REPOSITORY_URL
 ARG DOCKER_BASE_IMAGE_VERSION
 FROM ${REPOSITORY_URL}/python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
 
-COPY service-mock/bruin-api-mock-local/ /service/app
+COPY service-mocks/bruin-api-mock-local/ /service/app
 
 WORKDIR /service/app
 

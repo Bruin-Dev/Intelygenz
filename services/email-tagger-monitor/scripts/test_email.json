@@ -1,19 +1,24 @@
 {
-  "Id": "fcc35638-27f8-4dc4-a428-d17a6ee07b0c",
+  "Id": "d2a2afe6-225e-474a-9d66-3a27c81e83de",
   "Attempt": 1,
   "Notification": {
-    "Id": "ce432c87-0ed3-41ce-bf41-0d083b5548df",
-    "ClientId": 30000,
-    "EntityId": "73111",
-    "ApplicationName": "NotificationAPI",
-    "Action": "EmailSent",
+    "Id": "72906608-c374-4bd4-a886-2e5ddba5cd34",
+    "ClientId": 84975,
+    "EntityId": "4104172",
+    "ApplicationName": "EmailCenter",
+    "Action": "EmailReceived",
     "Body": {
-      "EmailId": 73111,
-      "ClientId": "30000",
-      "Subject": "Fw: [EXTERNAL EMAIL] Repair Acknowledgement- Ticket#6209191]' VC05200011984",
-      "Date": "2021-03-28T10:43:55.493",
-      "body": "Please repair this VC05200011984",
-      "TagID": []
+      "EmailId": 4104172,
+      "ClientId": 84975,
+      "Subject": "Fwd: ##1887152## - CENTER 1085 Multiple Computers - Internet Outage - Network / Internet",
+      "Date": "2022-04-04T08:16:15-04:00",
+      "Body": "<style>p { margin-top: 0px; margin-bottom: 0px; font-family: Arial, Helvetica, sans-serif; font-size: 13px }</style><p></p><div style='font-family: Roboto, Verdana; font-size: 10pt><div>Hello MetTel,<br></div><div><br></div><div>Please open up a carrier ticket for the following issue:<br></div><div><br></div><ul><li>Center Number: 1085<br></li><li>Center Name: Santa Monica Pico BLVD<br></li><ul><li><span style='color: rgb(34,34,34); font-family: Inter, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, sans-serif; font-size: 13px; font-style: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; background-color: rgb(255,255,255); display: inline !important; float: none>2728 Pico Blvd Santa Monica, CA 90405</span><br></li></ul><li>Explain trouble in detail: ISP Modem is down<br></li><li>List local contact information:<br></li><ul><li>Oganes Safaryan<br></li><li>310-266-0134<br></li></ul><li>Store Hours of Operation:<br></li><ul><li>Monday to Friday 8am to 5pm</li></ul></ul><div><br></div></div><p></p>",
+      "TagID": [],
+      "FromAddress": "help1@calibercollision.com",
+      "ToAddress": [
+        "caliber@mettel.net"
+      ],
+      "SendCC": []
     }
   }
 }
