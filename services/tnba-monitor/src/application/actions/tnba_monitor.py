@@ -121,13 +121,6 @@ class TNBAMonitor:
             f'Cleaning them up to exclude all invalid notes...'
         )
         relevant_open_tickets = self._filter_irrelevant_notes_in_tickets(relevant_open_tickets)
-        ticket_details_to_forward = self._transform_tickets_into_detail_objects(relevant_open_tickets)
-
-        forward_tasks = [
-           self._forward_detail_object(detail_object)
-           for detail_object in ticket_details_to_forward
-        ]
-        await asyncio.gather(*forward_tasks)
 
         self._logger.info('Getting T7 predictions for all relevant open tickets...')
         predictions_by_ticket_id = await self._get_predictions_by_ticket_id(relevant_open_tickets)
@@ -510,37 +503,6 @@ class TNBAMonitor:
 
         return result
 
-    async def _forward_detail_object(self, detail_object: dict):
-        async with self._semaphore:
-            ticket_creation_date = detail_object['ticket_creation_date']
-            ticket_status = detail_object['ticket_status']
-            ticket_id = detail_object['ticket_id']
-            ticket_detail_id = detail_object['ticket_detail']['detailID']
-            serial_number = detail_object['ticket_detail']['detailValue']
-
-            self._logger.info(
-                f'Trying to forward {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id} to HNOC queue...'
-            )
-            self._logger.info(f'Ticket status: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
-            if self._is_new_ticket(ticket_status):
-                self._logger.info(f'Creation date: {ticket_status} (serial: {serial_number} ticket: {ticket_id})')
-                if self._is_ticket_old_enough(ticket_creation_date):
-                    if self._config.CURRENT_ENVIRONMENT == 'production':
-                        msg = (
-                            f"Automation Engine appended a TNBA note for serial "
-                            f"{serial_number} in ticket {ticket_id}, "
-                            "which has been in the IPA Investigate work queue for a while. "
-                            "The ticket is going to be forwarded "
-                            "to the HNOC Investigate queue."
-                        )
-                        self._logger.info(msg)
-                        await self._bruin_repository.change_detail_work_queue(
-                            ticket_id,
-                            task_result='HNOC Investigate',
-                            serial_number=serial_number,
-                            detail_id=ticket_detail_id
-                        )
-
     async def _process_ticket_detail(self, detail_object: dict):
         async with self._semaphore:
             ticket_id = detail_object['ticket_id']
@@ -779,16 +741,3 @@ class TNBAMonitor:
     @staticmethod
     def _is_faulty_link(link_state: str) -> bool:
         return link_state == 'DISCONNECTED'
-
-    @staticmethod
-    def _is_new_ticket(ticket_status: str) -> bool:
-        return ticket_status == "New"
-
-    def _is_ticket_old_enough(self, ticket_creation_date: str) -> bool:
-        current_datetime = datetime.now().astimezone(utc)
-        max_seconds_since_creation = self._config.MONITOR_CONFIG['last_outage_seconds']
-
-        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
-        seconds_elapsed_since_creation = (current_datetime - ticket_creation_datetime).total_seconds()
-
-        return seconds_elapsed_since_creation >= max_seconds_since_creation
