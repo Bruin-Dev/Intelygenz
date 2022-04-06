@@ -9,7 +9,7 @@ eks_devops_users = [
 ]
 
 eks_ops_users = [
-    "david.garciaguerrero",
+    "gabriel.palacios",
     "daniel.fernandez",
     "juancarlos.gomez",
     "brandon.samudio",

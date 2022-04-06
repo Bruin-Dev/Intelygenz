@@ -2,7 +2,8 @@ eks_developer_users = [
     "julia.hossu",
     "brandon.samudio",
     "daniel.montilla",
-    "joseluis.vega"
+    "joseluis.vega",
+    "gabriel.palacios"
 ]
 
 eks_devops_users = [
@@ -12,7 +13,6 @@ eks_devops_users = [
 ]
 
 eks_ops_users = [
-    "david.garciaguerrero",
     "daniel.fernandez",
     "juancarlos.gomez"
 ]

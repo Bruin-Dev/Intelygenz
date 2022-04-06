@@ -4,7 +4,6 @@ eks_developer_users = [
     "juancarlos.gomez",
     "sergio.delpuerto",
     "daniel.montilla",
-    "david.garciaguerrero",
     "javier.aguilera",
     "gabriel.palacios"
 ]
