@@ -326,7 +326,7 @@ class RepairTicketsMonitor:
             )
 
             output_send_to_save = {
-                "service_number_site_map": service_number_site_map,
+                "service_number_sites_map": service_number_site_map,
                 "tickets_created": tickets_created,
                 "tickets_updated": tickets_updated,
                 "tickets_could_be_created": tickets_could_be_created,
