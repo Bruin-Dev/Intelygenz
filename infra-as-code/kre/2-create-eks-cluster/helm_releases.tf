@@ -37,7 +37,7 @@ resource "helm_release" "aws-ebs-csi-driver" {
       aws_eks_addon.vpc_cni,
       aws_eks_addon.kube_proxy,
       aws_eks_addon.coredns,
-      aws_iam_role.external-dns-role-eks,
+      aws_iam_role.aws-ebs-csi-driver-role-eks,
       module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
