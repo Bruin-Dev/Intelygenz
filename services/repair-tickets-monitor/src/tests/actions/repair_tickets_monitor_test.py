@@ -284,9 +284,12 @@ class TestRepairTicketsMonitor:
                 tickets_could_be_updated=[],
                 tickets_cannot_be_created=[],
                 validated_ticket_numbers=[],
+                bruin_ticket_status_map=[],
+                bruin_ticket_call_type_map=[],
+                bruin_ticket_category_map=[],
             )
 
-        assert save_outputs_response == {'success': True}
+        assert save_outputs_response == {"success": True}
 
     @pytest.mark.asyncio
     async def _save_outputs__not_200_test(self, repair_tickets_monitor, make_rpc_response):
@@ -307,6 +310,9 @@ class TestRepairTicketsMonitor:
                 tickets_could_be_updated=[],
                 tickets_cannot_be_created=[],
                 validated_ticket_numbers=[],
+                bruin_ticket_status_map=[],
+                bruin_ticket_call_type_map=[],
+                bruin_ticket_category_map=[],
             )
 
         assert result is None
@@ -480,6 +486,12 @@ class TestRepairTicketsMonitor:
         tickets_created = [{"site_id": "site_1", "service_numbers": ["1234"], "ticket_id": "5678"}]
         tickets_updated = [{"site_id": "site_2", "service_numbers": ["2345"], "ticket_id": "1234"}]
         tickets_not_created = []
+        validated_tickets = {
+            "validated_ticket_numbers": [],
+            "bruin_ticket_status_map": [],
+            "bruin_ticket_call_type_map": [],
+            "bruin_ticket_category_map": [],
+        }
 
         create_ticket_response = (tickets_created, tickets_updated, tickets_not_created)
         existing_tickets_response = [make_ticket_decamelized()]
@@ -488,9 +500,9 @@ class TestRepairTicketsMonitor:
         new_tagged_emails_repository = Mock()
         repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
         repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
-
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(return_value=service_number_site_map)
+        repair_tickets_monitor._get_validated_ticket_numbers = CoroutineMock(return_value=validated_tickets)
         repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
         repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
@@ -507,15 +519,21 @@ class TestRepairTicketsMonitor:
         email_id = "1234"
         tagged_email = {"email_id": email_id, "tag_id": 1}
         email = make_email(email_id=email_id)
+        validated_tickes = {
+            "validated_ticket_numbers": ["1234"],
+            "bruin_ticket_status_map": [{"1234": "site_1"}],
+            "bruin_ticket_call_type_map": [],
+            "bruin_ticket_category_map": [],
+        }
 
         new_tagged_emails_repository = Mock()
         repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
         repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+        repair_tickets_monitor._get_validated_ticket_numbers = CoroutineMock(return_value=validated_tickes)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=None)
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=None)
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
-
         repair_tickets_monitor._save_output.assert_awaited_once_with(
             "1234",
             tickets_cannot_be_created=[
@@ -552,8 +570,12 @@ class TestRepairTicketsMonitor:
         tickets_created = [{"site_id": "site_name_1", "service_numbers": ["1234"], "ticket_id": "5678"}]
         tickets_updated = [{"site_id": "site_name_2", "service_numbers": ["2345"], "ticket_id": "1234"}]
         tickets_not_created = []
-        validated_ticket_numbers = [{"ticket_id": "1234", "ticket_status": "InProgress"}]
-
+        validated_tickets = {
+            "validated_ticket_numbers": ["1234"],
+            "bruin_ticket_status_map": [{"1234": "site_1"}],
+            "bruin_ticket_call_type_map": [],
+            "bruin_ticket_category_map": [],
+        }
         create_ticket_response = (tickets_created, tickets_updated, tickets_not_created)
         existing_tickets_response = [
             resolved_ticket_data_with_cancellation,
@@ -567,11 +589,11 @@ class TestRepairTicketsMonitor:
 
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(return_value=service_number_site_map)
+        repair_tickets_monitor._get_validated_ticket_numbers = CoroutineMock(return_value=validated_tickets)
         repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
         repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
         repair_tickets_monitor._bruin_repository.mark_email_as_done = CoroutineMock()
-        repair_tickets_monitor.get_validated_ticket_numbers = CoroutineMock(return_value=validated_ticket_numbers)
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
 
@@ -585,7 +607,10 @@ class TestRepairTicketsMonitor:
                 "not_creation_reason": "A previous ticket on that site was recently cancelled",
             }
         ]
-        assert repair_tickets_monitor._save_output.await_args[1]["validated_ticket_numbers"] == validated_ticket_numbers
+        assert (
+            repair_tickets_monitor._save_output.await_args[1]["validated_ticket_numbers"]
+            == validated_tickets["validated_ticket_numbers"]
+        )
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
         repair_tickets_monitor._bruin_repository.mark_email_as_done.assert_not_awaited()
 
@@ -1167,8 +1192,11 @@ class TestRepairTicketsMonitor:
             repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
-            validated_ticket_numbers = await repair_tickets_monitor.get_validated_ticket_numbers(tickets_id)
+            validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
 
-        assert validated_ticket_numbers == [
-            {"call_type": "repair", "category": "VOO", "ticket_id": "12345", "ticket_status": "inProgress"}
-        ]
+        assert validated_ticket_numbers == {
+            "validated_ticket_numbers": ["12345"],
+            "bruin_ticket_status_map": [{"12345": "inProgress"}],
+            "bruin_ticket_call_type_map": [{"12345": "repair"}],
+            "bruin_ticket_category_map": [{"12345": "VOO"}],
+        }

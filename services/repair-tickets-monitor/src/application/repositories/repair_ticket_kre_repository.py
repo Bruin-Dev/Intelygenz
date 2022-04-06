@@ -85,6 +85,9 @@ class RepairTicketKreRepository:
         tickets_could_be_updated: List[Dict[str, Any]],
         tickets_cannot_be_created: List[Dict[str, Any]],
         validated_ticket_numbers: List[Dict[str, Any]],
+        bruin_ticket_status_map: List[Dict[str, Any]],
+        bruin_ticket_call_type_map: List[Dict[str, Any]],
+        bruin_ticket_category_map: List[Dict[str, Any]]
     ):
         validated_service_numbers = list(service_numbers_sites_map.keys())
 
@@ -109,6 +112,9 @@ class RepairTicketKreRepository:
                     "tickets_could_be_updated": tickets_could_be_updated,
                     "tickets_cannot_be_created": tickets_cannot_be_created,
                     "validated_ticket_numbers": validated_ticket_numbers,
+                    "bruin_ticket_status_map": bruin_ticket_status_map,
+                    "bruin_ticket_call_type_map": bruin_ticket_call_type_map,
+                    "bruin_ticket_category_map": bruin_ticket_category_map
                 },
             }
             self._logger.info(

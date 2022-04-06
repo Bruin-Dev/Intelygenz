@@ -163,6 +163,9 @@ class TestRepairTicketRepository:
                 tickets_could_be_updated=[],
                 tickets_cannot_be_created=[],
                 validated_ticket_numbers=[],
+                bruin_ticket_status_map=[],
+                bruin_ticket_call_type_map=[],
+                bruin_ticket_category_map=[],
             )
 
         assert save_output_response["status"] == 200
@@ -192,6 +195,9 @@ class TestRepairTicketRepository:
                 tickets_could_be_updated=[],
                 tickets_cannot_be_created=[],
                 validated_ticket_numbers=[],
+                bruin_ticket_status_map=[],
+                bruin_ticket_call_type_map=[],
+                bruin_ticket_category_map=[],
             )
 
         assert save_output_response["status"] == 400
