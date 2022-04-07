@@ -5958,6 +5958,8 @@ class TestServiceOutageMonitor:
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id, edge_primary_serial,
+            edge_with_links_primary['links'],
+            outage_type,
             forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6196,7 +6198,8 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, forward_time=wait_seconds_until_forward / 60,
+            ticket_id, edge_primary_serial, edge_with_links_primary['links'], outage_type,
+            forward_time=wait_seconds_until_forward / 60
         )
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6671,7 +6674,9 @@ class TestServiceOutageMonitor:
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id, edge_primary_serial,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
+            edge_with_links_primary['links'], outage_type,
+            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+            )
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
         )
@@ -6909,7 +6914,8 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, forward_time=wait_seconds_until_forward / 60,
+            ticket_id, edge_primary_serial, edge_with_links_primary['links'], outage_type,
+            forward_time=wait_seconds_until_forward / 60,
         )
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
@@ -7145,7 +7151,9 @@ class TestServiceOutageMonitor:
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id, edge_primary_serial,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
+            edge_with_links_primary['links'], outage_type,
+            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+            )
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
         )
@@ -9763,6 +9771,16 @@ class TestServiceOutageMonitor:
         serial_number = 'VC1234567'
         ticket_id = 12345  # Ticket ID
 
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        }]
+
+        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -9791,11 +9809,14 @@ class TestServiceOutageMonitor:
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
                 outage_monitor.schedule_forward_to_hnoc_queue(
                     ticket_id=ticket_id, serial_number=serial_number,
-                    forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'])
+                    link_data=link_data, outage_type=outage_type,
+                    forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+                    )
 
         scheduler.add_job.assert_called_once_with(
             outage_monitor.forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_data,
+                    'outage_type': outage_type},
             run_date=forward_task_run_date,
             replace_existing=True,
             misfire_grace_time=9999,
@@ -9897,6 +9918,7 @@ class TestServiceOutageMonitor:
     async def forward_ticket_to_hnoc_queue_test(self):
         serial_number = 'VC1234567'
         ticket_id = 12345  # Ticket ID
+        outage_type = Outages.HA_LINK_DOWN
 
         outage_ticket_detail_1 = {
             "detailID": 2746937,
@@ -9917,6 +9939,14 @@ class TestServiceOutageMonitor:
             'body': 'Success',
             'status': 200
         }
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        }]
 
         event_bus = Mock()
         scheduler = Mock()
@@ -9944,7 +9974,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
@@ -9952,6 +9982,393 @@ class TestServiceOutageMonitor:
             ticket_id=ticket_id,
             task_result='HNOC Investigate')
         notifications_repository.send_slack_message.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_vco4_byob_link_label_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "O",
+        }
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Success',
+            'status': 200
+        }
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'BYOB Jeff'
+        }]
+
+        outage_type = Outages.HA_LINK_DOWN
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+            await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result='HNOC Investigate')
+        notifications_repository.send_slack_message.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_vco4_ip_link_label_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "O",
+        }
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Success',
+            'status': 200
+        }
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': '192.158.1.38'
+        }]
+        outage_type = Outages.HA_LINK_DOWN
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+            await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result='HNOC Investigate')
+        notifications_repository.send_slack_message.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_edge_down_byob_link_label_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "O",
+        }
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Success',
+            'status': 200
+        }
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'BYOB Jeff'
+        }]
+        outage_type = Outages.HARD_DOWN
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result='HNOC Investigate')
+        notifications_repository.send_slack_message.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_edge_down_ip_link_label_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        outage_ticket_detail_1 = {
+            "detailID": 2746937,
+            "detailValue": serial_number,
+            "detailStatus": "O",
+        }
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+            },
+            'status': 200,
+        }
+
+        change_detail_work_queue_response = {
+            'body': 'Success',
+            'status': 200
+        }
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': '192.158.1.38'
+        }]
+        outage_type = Outages.HARD_DOWN
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
+
+        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result='HNOC Investigate')
+        notifications_repository.send_slack_message.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_byob_link_label_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        },
+            {
+                # Some fields omitted for simplicity
+                'interface': 'REX',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+                'displayName': 'BYOB Jeff'
+            }
+        ]
+        outage_type = Outages.LINK_DOWN
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock()
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_hnoc_queue_ip_link_label_test(self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345  # Ticket ID
+
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        },
+            {
+                # Some fields omitted for simplicity
+                'interface': 'REX',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+                'displayName': '192.158.1.38'
+            }
+        ]
+        outage_type = Outages.HA_LINK_DOWN
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        velocloud_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_ticket_details = CoroutineMock()
+        bruin_repository.change_detail_work_queue = CoroutineMock()
+
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
+
+        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.change_detail_work_queue.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue_non_2xx_ticket_detail_return_test(self):
@@ -9974,6 +10391,15 @@ class TestServiceOutageMonitor:
             'status': 400
         }
 
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        }]
+        outage_type = Outages.HA_LINK_DOWN
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -10000,7 +10426,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_not_awaited()
@@ -10031,6 +10457,15 @@ class TestServiceOutageMonitor:
             'status': 400
         }
 
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        }]
+        outage_type = Outages.HA_LINK_DOWN
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -10057,7 +10492,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_not_awaited()
@@ -10088,6 +10523,15 @@ class TestServiceOutageMonitor:
             'status': 400
         }
 
+        link_data = [{
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+            'displayName': 'Jeff'
+        }]
+        outage_type = Outages.HA_LINK_DOWN
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -10114,7 +10558,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(

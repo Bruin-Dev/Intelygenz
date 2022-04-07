@@ -40,6 +40,7 @@ if ENABLE_TRIAGE_MONITORING:
         'semaphore': 1,
     }
 else:
+    VELOCLOUD_HOST = os.environ['MONITORING__VELOCLOUD_HOST']
     MONITOR_CONFIG = {
         'multiplier': 5,
         'min': 5,
@@ -57,8 +58,10 @@ else:
             Outages.HA_HARD_DOWN: int(os.environ['MONITORING__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE']),
         },
         'velocloud_instances_filter': {
-            os.environ['MONITORING__VELOCLOUD_HOST']: [],
+            VELOCLOUD_HOST: [],
         },
+        'blacklisted_link_labels_for_hnoc_forwards': json.loads(
+            os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS']),
         'blacklisted_link_labels_for_asr_forwards': json.loads(
             os.environ['MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS']),
         'blacklisted_edges': json.loads(os.environ['MONITORING__BLACKLISTED_EDGES']),
