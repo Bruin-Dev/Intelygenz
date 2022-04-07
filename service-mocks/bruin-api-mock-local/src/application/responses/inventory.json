@@ -1,7 +1,7 @@
 {
     "documents": [
         {
-            "clientID": 0,
+            "clientID": 10,
             "clientName": "client",
             "vendor": "a vendor",
             "accountNumber": "accountnumber",
@@ -37,8 +37,8 @@
             "rateCardIdentifier": "string",
             "lastInvoiceUsageDate": "2022-02-11T17:11:21.347Z",
             "lastUsageDate": "2022-02-11T17:11:21.347Z",
-            "longitude": 0,
-            "latitude": 0
+            "longitude": 10,
+            "latitude": 10
         }
     ]
 }

@@ -113,7 +113,7 @@ class BruinRepository:
             ),
             stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
         )
-        async def verify_service_number_information(request_id: str):
+        async def verify_service_number_information():
             request_id = uuid()
             request_msg = {
                 "request_id": request_id,
