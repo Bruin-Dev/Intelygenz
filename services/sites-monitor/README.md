@@ -1,8 +1,17 @@
 # Table of contents
-- [Velocloud integration](#velocloud-integration)
+* [Description](#description)
+* [Work Flow](#work-flow)
+* [Velocloud integration](#velocloud-integration)
   * [Connecting to several clusters](#connecting-to-several-clusters)
-  * [Service logic](#service-logic) 
-  * [How to run it](#how-to-run-it) 
+  * [Service logic](#service-logic)
+* [Capabilities used](#capabilities-used)
+* [Running in docker-compose](#running-in-docker-compose)
+ 
+# Description
+
+This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.
+
+# Work flow
 
 # Velocloud integration
 
@@ -46,15 +55,14 @@ environment configuration), in a snippet like this:
 ````
 MONITORING_SECONDS=120
 ````
-## How to run it
 
-If you want to launch this si
-````
-docker-compose up --build velocloud-bridge grafana prometheus thanos-querier thanos-sidecar
-````   
-Wait until everything is up and running, and then run:
-````
-docker-compose up --build sites-monitor
-````
+# Capabilities used
 
-You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../metrics-dashboard/grafana/Dockerfile)
+![IMAGE: sites-monitor_microservice_relationships](/docs/img/system_overview/use_cases/sites-monitor_microservice_relationships.png)
+
+# Running in docker-compose
+
+First run: `docker-compose up --build velocloud-bridge grafana prometheus thanos-querier thanos-sidecar`
+Wait until everything is up and running, and then run: `docker-compose up --build sites-monitor`
+
+You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../../metrics-dashboard/grafana/Dockerfile)

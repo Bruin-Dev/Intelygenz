@@ -4,6 +4,9 @@
       * [Description](#description)
       * [Request message](#request-message)
       * [Response message](#response-message)
+  
+![IMAGE: customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/customer-cache_microservice_relationships.png)
+
 # Service logic
 This service will ask velocloud-bridge for all the edges across all the velocloud instances.
 

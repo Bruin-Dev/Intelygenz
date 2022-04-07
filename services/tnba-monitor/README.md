@@ -1,7 +1,6 @@
 # Table of contents
   * [Description](#description)
   * [Work Flow](#work-flow)
-  * [Behaviour in dev and in pro](#behaviour-in-development-and-in-production)
   * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
 
@@ -66,6 +65,8 @@ as a Slack notification.
 - [Notifier](../notifier/README.md)
 - [T7 bridge](../t7-bridge/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
+
+![IMAGE: tnba-monitor_microservice_relationships](/docs/img/system_overview/use_cases/tnba-monitor_microservice_relationships.png)
 
 # Running in docker-compose
 `docker-compose up --build redis nats-server bruin-bridge velocloud-bridge t7-bridge notifier tnba-monitor`

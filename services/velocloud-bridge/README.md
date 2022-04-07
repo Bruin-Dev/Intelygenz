@@ -1,11 +1,21 @@
-# Table of contents
-- [Velocloud integration](#velocloud-integration)
-  * [Connecting to several clusters](#connecting-to-several-clusters)
-  * [Service logic](#service-logic)
+# Velocloud bridge
+* [Description](#description)
+* [Connecting to several clusters](#connecting-to-several-clusters)
+* [Requests](#requests)
+  * [Alert request event edge](#alert-request-event-edge)
+  * [Alert request event enterprise](#alert-request-event-enterprise)
+  * [Get links with edge info](#get-links-with-edge-info)
+  * [Get links metric info](#get-links-metric-info)
+  * [Request enterprises names](#request-enterprises-names)
 
-# Velocloud integration
+# Description
+This microservice is in charge of making requests to the velocloud API, taking the role of replier in the context of NATS.
 
-## Connecting to several clusters
+When another microservice requests velocloud data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
+
+![IMAGE: velocloud-bridge_microservice_relationships](/docs/img/system_overview/capabilities/velocloud-bridge_microservice_relationships.png)
+
+# Connecting to several clusters
 Velocloud provided us with endpoints to make request calls to. The client that makes the request calls is located 
 in the `client` folder of the `velocloud-bridge`.
 
@@ -15,55 +25,54 @@ Credentials are put inside an environment variable with the next schema:
 `some.host.name+hostusername+hostpassword;other.host.name+otherusername+otherpassword`
 
 In the `config.py`script, there's a way to split this into an array of dictionaries like this one:
-
-````
+```
         {'url': "some.host.name",
          'username': "hostusername",
          'password': "hostpassword"
          }
-````
+```
 
-## Service logic
-The bridge will subscribe to 'get.links.with.edge.info`, `get.links.metric.info`, `alert.request.event.edge`,
-and `alert.request.event.edge`. 
-
-When a message is received by `alert.request.event.edge`, the bridge will get the 
+# Requests
+## Alert request event edge
+When a message is received by `alert.request.event.edge`, the bridge will get the
 specific edge event and send to a response topic that was built by NATS under the hood:
 
-__alert.request.event.edge schema__
-```
-{
-    'request_id': 123,
-    'body':{
-        'edge': {"host": "some.host", "enterprise_id":19, "edge_id":99},
-        'start_date': '2019-07-19 14:19:45',  # Seven days before end_date
-        'end_date': '2019-07-26 14:19:45',
-        'filter': ['EDGE_UP']
-        'limit':  200
-    }
-}
-```
 The `filter` field is used to request from the bridge only events that have event names in the list. If no filter is provided
 all events are returned.
 
-The `limit` field is used to limit how many events do we actually want to be returned. If no limit is provided then 
+The `limit` field is used to limit how many events do we actually want to be returned. If no limit is provided then
 all events are returned.
 
-__alert.response.event.edge.{some service id} schema__
-```
-{
-    'request_id': 123, 
-    'body': {...}, 
+```python
+request_message = {
+    'request_id': 123,
+    'body': {
+        'edge': {
+            "host": "some.host", 
+            "enterprise_id": 19, 
+            "edge_id": 99,
+        },
+        'start_date': '2019-07-19 14:19:45',  # Seven days before end_date
+        'end_date': '2019-07-26 14:19:45',
+        'filter': ['EDGE_UP'],
+        'limit':  200,
+    },
+}
+
+# __alert.response.event.edge.{some service id}__
+response_message = {
+    'request_id': request_message['request_id'], 
+    'body': {}, # body content
     'status': 200
 }
 ```
 
+## Alert request event enterprise
 When a message is received by `alert.request.event.enterprise`, the bridge will get the 
 specific enterprise events and send to a response topic that was built by NATS under the hood:
 
-__alert.request.event.enterprise schema__
 ```
-{
+request_message = {
     'request_id': 123,
     'body':{
         'host': "some.host", 
@@ -81,6 +90,7 @@ all events are returned.
 The `limit` field is used to limit how many events do we actually want to be returned. If no limit is provided then 
 all events are returned.
 
+### Response message
 __alert.response.event.enterprise.{some service id} schema__
 ```
 {
@@ -90,16 +100,18 @@ __alert.response.event.enterprise.{some service id} schema__
 }
 ```
 
+## Get links with edge info
 When `get.links.with.edge.info` receives the `host` parameter it will return all the links corresponding to the host 
 
-__get.links.with.edge.info schema__
+### Request message
 ```
 {
     "request_id": 123, 
     "body": {"host": "some.host"}
 }
 ```
-__get.links.with.edge.info response schema__
+
+### Response message
 ```
 {
     "request_id": 123, 
@@ -131,10 +143,11 @@ __get.links.with.edge.info response schema__
 }
 ```
 
+## Get links metric info
 When get.links.metric.info receives the host and interval parameter it will return the information of all links in this 
 interval for this host
 
-__get.links.metric.info schema__
+### Request message
 ```
 {
     "request_id": 123, 
@@ -147,7 +160,8 @@ __get.links.metric.info schema__
             }
 }
 ```
-__get.links.metric.info response schema__
+
+### Response message
 ```
 {
     "request_id": 123, 
@@ -221,10 +235,11 @@ __get.links.metric.info response schema__
 }
 ```
 
+## Request enterprises names
 When request.enterprises.names receives the filter is empty list returns all enterprise names. If you send some value in 
 this list return the name of enterprises that have the same name.
 
-__request.enterprises.names schema__
+### Request message
 ```
 {
     "request_id": 123, 
@@ -233,7 +248,8 @@ __request.enterprises.names schema__
             }
 }
 ```
-__request.enterprises.names response schema__
+
+### Response message
 ```
 {
     "request_id": 123, 

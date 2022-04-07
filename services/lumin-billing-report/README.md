@@ -16,6 +16,8 @@ generating a summary HTML email and attaching a csv with all data for the curren
 This service is self-contained, i.e., it does not require access to NATS or Redis, or any other
 microservice within the Automation Engine.
 
+![IMAGE: lumin-billing-report_microservice_relationships](/docs/img/system_overview/isolated_services/lumin-billing-report_microservice_relationships.png)
+
 ## Components
 
 - ***clients/EmailClient***

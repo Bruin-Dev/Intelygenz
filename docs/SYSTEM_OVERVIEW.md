@@ -93,16 +93,6 @@ The following [diagram](https://app.diagrams.net/#G1g8vBpgNG_UFBwsUnNi5_z5nN5aoX
 
 ![IMAGE: bruin-bridge_microservice_relationships](img/system_overview/capabilities/bruin-bridge_microservice_relationships.png)
 
-#### Cts-bridge microservice
-
-This microservice is in charge of making requests to the CTS API, taking the role of replier in the context of NATS.
-
-When another microservice requests CTS data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
-
-The following [diagram](https://app.diagrams.net/#G1UrbamtWY7hB7Xy9p0gnRgah9eWvoEYKK) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
-
-![IMAGE: cts-bridge_microservice_relationships](img/system_overview/capabilities/cts-bridge_microservice_relationships.png)
-
 #### Digi-bridge microservice
 
 This microservice is in charge of making requests to the Digi Reboot API, taking the role of replier in the context of NATS.
@@ -113,6 +103,21 @@ The following [diagram](https://app.diagrams.net/#G184B7YUYaKKWe5MsRKKY1rVVVQd_a
 
 ![IMAGE: digi-bridge_microservice_relationships](img/system_overview/capabilities/digi-bridge_microservice_relationships.png)
 
+#### Dri-bridge microservice
+
+This microservice is in charge of replying to PIAB device data requests produced to NATS by integrating with the DRI API.
+
+The following [diagram](https://app.diagrams.net/#G1j7g-Pze0MjRzuoUzDXpJhdi2yQXTZopM) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+
+![IMAGE: dri-bridge_microservice_relationships](img/system_overview/capabilities/dri-bridge_microservice_relationships.png)
+
+#### Email-tagger-kre-bridge microservice
+
+This microservice is in charge of replying to email tag prediction requests produced to NATS by integrating with the Email Tagger's KRE.
+
+The following [diagram](https://app.diagrams.net/#G1PLAtl9wesAhr9tEkukcZm-efcqbIv-bq) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+
+![IMAGE: email-tagger-kre-bridge_microservice_relationships](img/system_overview/capabilities/email-tagger-kre-bridge_microservice_relationships.png)
 
 #### Hawkeye-bridge microservice
 
@@ -124,16 +129,6 @@ The following [diagram](https://app.diagrams.net/#G1ki13-NoKadfUai12FWQCFebwkNGo
 
 ![IMAGE: hawkeye-bridge_microservice_relationships](img/system_overview/capabilities/hawkeye-bridge_microservice_relationships.png)
 
-#### Lit-bridge microservice
-
-This microservice is in charge of making requests to the LIT API, taking the role of replier in the context of NATS.
-
-When another microservice requests LIT data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
-
-The following [diagram](https://app.diagrams.net/#G1UztleVULGVS86wYXTEh7efsb2zdBWNJy) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
-
-![IMAGE: lit-bridge_microservice_relationships](img/system_overview/capabilities/lit-bridge_microservice_relationships.png)
-
 #### Notifier microservice
 
 This microservice is in charge of sending emails, Slack notifications and SMS.
@@ -143,6 +138,14 @@ It is important to point out that it is not in charge of the composition of the 
 The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: notifier_microservice_relationships](img/system_overview/capabilities/notifier_microservice_relationships.png)
+
+#### Repair-tickets-kre-bridge microservice
+
+This microservice is in charge of replying to email tag prediction requests produced to NATS by integrating with the Email Tagger's KRE.
+
+The following [diagram](https://app.diagrams.net/#G1Dx4LVqTeTPapfr_4_D_WAqqE4aGhM6Y3) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+
+![IMAGE: repair-tickets-kre-bridge_microservice_relationships](img/system_overview/capabilities/repair-tickets-kre-bridge_microservice_relationships.png)
 
 #### T7-bridge microservice
 
@@ -164,20 +167,29 @@ The following [diagram](https://app.diagrams.net/#G1bn-S0EvBXgnLW22Zwvdx4MJVx0ha
 
 ### Use cases microservices
 
-#### Dispatch-portal-backend microservice
+#### Digi-reboot-report microservice
 
-In conjunction with `dispatch-portal-frontend`, this service provides MetTel the ability to track the status of dispatch requests,
-as well as create and update them, so their technicians can assist customers when they report any issue related to a device.
+This microservice creates a report of the last 24 hours DiGi reboots by crossing DiGi recovery logs and Bruin ticket data and then emails it out.
 
-It also updates Bruin tickets to keep support people posted about the changes in the dispatch requests.
+The following [diagram](https://app.diagrams.net/#G1sAQA8REYxkX8Nfp_6Ol_0HqGIKiilGxA) shows the dependencies or interactions of this microservice with the others.
 
-It acts as an intermediary between `dispatch-portal-frontend` and CTS & LIT APIs by providing a REST API with multiple endpoints
-that, once they receive a payload from the frontent side, it modifies its fields with the help of some mappers to match the formats expected
-by CTS and LIT and then forward those customized payloads to their APIs. 
+![IMAGE: digi-reboot-report_microservice_relationships](img/system_overview/use_cases/digi-reboot-report_microservice_relationships.png)
 
-The following [diagram](https://app.diagrams.net/#G16slq1OcvjBmFVygq6jhC9DlpAMvcZS2W) shows the dependencies or interactions of this microservice with the others.
+#### Email-tagger-monitor microservice
 
-![IMAGE: grafana_microservice_relationships](img/system_overview/use_cases/grafana_microservice_relationships.png)
+This microservice tags polled Bruin emails based on Email Tagger's KRE prediction.
+
+The following [diagram](https://app.diagrams.net/#G16FwibBWRYseVvjMnbwxJHqingjM7QX_K) shows the dependencies or interactions of this microservice with the others.
+
+![IMAGE: email-tagger-monitor_microservice_relationships](img/system_overview/use_cases/email-tagger-monitor_microservice_relationships.png)
+
+#### Fraud-monitor microservice
+
+This microservice creates Bruin tickets based on unread fraud warning emails.
+
+The following [diagram](https://app.diagrams.net/#G1S9vPf9bG1GJFu921goXiH93mOfn5Y6Ol) shows the dependencies or interactions of this microservice with the others.
+
+![IMAGE: fraud-monitor_microservice_relationships](img/system_overview/use_cases/fraud-monitor_microservice_relationships.png)
 
 #### Grafana microservice
 
@@ -186,7 +198,15 @@ Titan America.
 
 The following [diagram](https://app.diagrams.net/#G1Q4GtTXtbDXUyJibl4bXF8ZKAaQMQlVrf) shows the dependencies or interactions of this microservice with the others.
 
-![IMAGE: dispatch-portal-backend_microservice_relationships](img/system_overview/use_cases/dispatch-portal-backend_microservice_relationships.png)
+![IMAGE: grafana_microservice_relationships](img/system_overview/use_cases/grafana_microservice_relationships.png)
+
+#### Hawkeye-affecting-monitor microservice
+
+This service is responsible for creating, updating or resolving affecting tickets depending on Ixia devices test results.
+
+In the following [diagram](https://app.diagrams.net/#G1uy-l4Y8amjx3PX9DikFjJiuNxwJSewoh) it's possible see the relationship of this microservice with the others.
+
+![IMAGE: hawkeye-affecting-monitor_microservice_relationships](img/system_overview/use_cases/hawkeye-affecting-monitor_microservice_relationships.png)
 
 #### Hawkeye-outage-monitor microservice
 
@@ -199,7 +219,17 @@ will be taken.
 In case the device was detected to be healthy, the system looks for an open outage ticket for this device and resolves it in case it exists.
 
 In the following [diagram](https://app.diagrams.net/#G1ZAQSFthTrg4w2RGuzINR03LNlT54aOpZ) it's possible see the relationship of this microservice with the others.
+
 ![IMAGE: hawkeye-outage-monitor_microservice_relationships](img/system_overview/use_cases/hawkeye-outage-monitor_microservice_relationships.png)
+
+#### Intermapper-outage-monitor microservice
+
+This service is responsible for creating and Service Outage tickets depending on the state of InterMapper devices. 
+These are determined by parsing e-mails sent by MetTel's InterMapper instance to IPA's mailbox.
+
+In the following [diagram](https://app.diagrams.net/#G1M055Rh3ErgeVtrTfjdK40ijF7ibyexbo) it's possible see the relationship of this microservice with the others.
+
+![IMAGE: intermapper-outage-monitor_microservice_relationships](img/system_overview/use_cases/intermapper-outage-monitor_microservice_relationships.png)
 
 #### Last-contact-report microservice
 
@@ -212,7 +242,24 @@ The following flow is used to make this report:
 2. Once the events are obtained from an edge, it communicates with the *notifier* microservice to send an email with this information.
 
 It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://app.diagrams.net/#G13QWoYPfjPgxZ0Mp1Nl7SDZVonzUj2tIS).
+
 ![IMAGE: last-contact-report_microservice_relationships](img/system_overview/use_cases/last-contact-report_microservice_relationships.png)
+
+#### Links-metrics-collector microservice
+
+This service is responsible for collecting metrics time series for VeloCloud edges and storing them to a MongoDB instance.
+
+The following [diagram](https://app.diagrams.net/#G1YeRvdfGBfRCJzlvVt_ts6qJ1s0MSgTlr) shows the dependencies or interactions of this microservice with the others.
+
+![IMAGE: links-metrics-collector_microservice_relationships](img/system_overview/use_cases/links-metrics-collector_microservice_relationships.png)
+
+#### Repair-tickets-monitor microservice
+
+This service is responsible for post processing e-mails tagged by the E-mail Tagger Monitor to create Service Outage tickets in Bruin, as long as the AI model living in the KRE instance dictates so through predictions.
+
+The following [diagram](https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ1s2W87e) shows the dependencies or interactions of this microservice with the others.
+
+![IMAGE: repair-tickets-monitor_microservice_relationships](img/system_overview/use_cases/repair-tickets-monitor_microservice_relationships.png)
 
 #### Service-affecting-monitor microservice
 
@@ -225,47 +272,6 @@ This microservice also communicates with the bruin-bridge microservice to create
 In the following [diagram](https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ1s2W87e) it's possible see the relationships between this microservice and the others.
 
 ![IMAGE: service-affecting-monitor_microservice_relationships](img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png)
-
-#### Service-dispatch-monitor microservice
-
-This microservice monitor dispatches statuses for different vendors, at the time of writting this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.
-
-A dispatch is general terms can have the following statuses:
-
-- Requested
-- Confirmed
-- Tech on site
-- Canceled
-- Completed
-
-The main use is to monitor:
-
-- Dispatch status changed
-- Updates in the dispatch like the technician
-- Send sms prior 2 and 12 hours before
-- Send sms tech on site
-- Cancel dispatch
-
-The basic algorithm behaves like this:
-
-- Get all dispatches for a vendor
-- Filter dispatches that are created through the `dispatch-portal`
-- Discard invalid ticket ids or dispatches with not proper fields
-- Split the dispatches by status and then send them to the function to proccess them, there are 3 general functions
-    * Confirmed dispatch:
-        - Send sms and append note to bruin when a dispatch is confirmed
-        - Send sms and append note to bruin 12 or 2 hours prior the dispatch
-        - Send sms and append note to bruin when a tech has changed
-    * Tech on site dispatch:
-        - Send sms and append note to bruin when tech on site
-    * Canceled dispatch:
-        - Append note to bruin when a dispatch is canceled
-
-Each vendor has it's own details like how to retrieve some fields or how we identify the tickets with the dispatches, all explained in the `service-dispatch-monitor`.
-
-In the following [diagram](https://app.diagrams.net/#G1cy-zEqGpzKDxFTlCYuVNrrq8VqcVO7l0) it's possible see the relationships between this microservice and the others.
-
-![IMAGE: service-dispatch-monitor_microservice_relationships](img/system_overview/use_cases/service-dispatch-monitor_microservice_relationships.png)
 
 #### Service-outage-monitor microservice
 
@@ -293,6 +299,7 @@ will be taken.
     that is the reason why several triage notes are appended to the ticket (instead of just appending one).
 
 In the following [diagram](https://app.diagrams.net/#G1-ESnlWgdP7-SbwhP3NAuRWv6ZMuSOUu0) it's possible see the relationship of this microservice with the others.
+
 ![IMAGE: service-outage-monitor_microservice_relationships](img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png)
 
 #### Sites-monitor microservice
@@ -308,7 +315,7 @@ The following [diagram](https://app.diagrams.net/#G1XwwdfpZZ5Wxn-0L-gt-fmlsysUqI
 This microservice is in charge of collecting closed tickets that had a TNBA note appended by `tnba-monitor` at some point. After collecting them, they are sent to `t7-bridge` to retrain predictive models and hence improve
 the accuracy of predictions claimed by `tnba-monitor`.
 
-The following [diagram](https://www.draw.io/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq) shows the relationship between this microservice and the others.
+The following [diagram](https://app.diagrams.net/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq) shows the relationship between this microservice and the others.
 
 ![IMAGE: tnba-feedback_microservice_relationships](img/system_overview/use_cases/tnba-feedback_microservice_relationships.png)
 
@@ -319,7 +326,7 @@ Bruin can take to move forward on the resolution of the ticket.
 
 It mostly communicates with `bruin-bridge` and `t7-bridge` to embed predictions into tickets, but it also communicates with other capabilities as shown in the following [diagram](https://www.draw.io/#G1uD7Otczhg_kZrgtBztJ5GvLkud0uaTNv).
 
-The following [diagram](https://app.diagrams.net/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq) shows the relationship between this microservice and the others.
+The following [diagram](https://app.diagrams.net/#G1sNibE62BOYWLQr0asl7YC4-15lBxrAA0) shows the relationship between this microservice and the others.
 
 ![IMAGE: tnba-monitor_microservice_relationships](img/system_overview/use_cases/tnba-monitor_microservice_relationships.png)
 
@@ -332,7 +339,7 @@ On the other hand, it also serves this information to the rest of services.
 
 This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).
 
-The following [diagram](https://www.draw.io/#G1y-I8UCvNxvZo538T9BEY0mfteGi52Pzk) shows the dependencies or interactions of this microservice with the rest.
+The following [diagram](https://app.diagrams.net/#G1y-I8UCvNxvZo538T9BEY0mfteGi52Pzk) shows the dependencies or interactions of this microservice with the rest.
 
 ![IMAGE: customer-cache_microservice_relationships](img/system_overview/mixed_services/customer-cache_microservice_relationships.png)
 
@@ -347,7 +354,7 @@ On the other hand, it also serves this information to the rest of services.
 
 This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).
 
-The following [diagram](https://www.draw.io/#G1QLpox45cZE4PV3dxlZsnK5Gv1N6hQNvM) shows the dependencies or interactions of this microservice with the rest.
+The following [diagram](https://app.diagrams.net/#G1QLpox45cZE4PV3dxlZsnK5Gv1N6hQNvM) shows the dependencies or interactions of this microservice with the rest.
 
 ![IMAGE: hawkeye-customer-cache_microservice_relationships](img/system_overview/mixed_services/hawkeye-customer-cache_microservice_relationships.png)
 
@@ -357,17 +364,15 @@ From the point of view of services to the right of `hawkeye-customer-cache`, it 
 
 ### Microservices that don't communicate with NATS
 
-#### dispatch-portal-frontend
+#### Links-metrics-api
 
-In conjunction with `dispatch-portal-backend`, this service provides MetTel the ability to track the status of dispatch requests,
-as well as create and update them, so their technicians can assist customers when they report any issue related to a device.
+This service is responsible for exposing a REST API to query the time series that are stored in the MongoDB instance.
 
-It exposes a UI that communicates directly with a REST API in `dispatch-portal-backend` to handle the visualization, creation and
-update of dispatch requests.
+This service is self-contained, i.e. it does not require access to NATS or Redis or any other microservice within the Automation Engine.
 
-The following [diagram](https://app.diagrams.net/#G15bx0C_yx4lsMM9h9a16Ew4YmHu62U5uD) shows the relationship between this microservice and `dispatch-portal-backend`.
+The following [diagram](https://app.diagrams.net/#G1yIeNn6kGMEyX24rHgWsJDV9-I4n86nxl) shows the dependencies or interactions of this microservice with the rest.
 
-![IMAGE: dispatch-portal-frontend_microservice_relationships](img/system_overview/isolated_services/dispatch-portal-frontend_microservice_relationships.png)
+![IMAGE: links-metrics-api_microservice_relationships](img/system_overview/isolated_services/links-metrics-api_microservice_relationships.png)
 
 #### lumin-billing-report
 
@@ -391,6 +396,27 @@ Metrics are usually displayed in a Grafana instance with a few custom dashboards
 The following [diagram](https://app.diagrams.net/#G15dB_8RisA3p0HWtdsFr-5--iUAj1_Y34) shows the relationship between Prometheus, the metrics servers it scrapes metrics, and Grafana.
 
 ![IMAGE: prometheus_microservice_relationships](img/system_overview/isolated_services/prometheus_microservice_relationships.png)
+
+#### Ticket-collector
+
+This service is responsible for collecting and storing information of Bruin tickets to a MongoDB instance.
+
+Although the service clearly uses Bruin to fetch data, this service is self-contained, i.e., it does not require access to NATS or Redis, or any other microservice within the Automation Engine, which essentially means it does not use bruin-bridge. For that reason, it is not a REQuester or a REPlier.
+
+The following [diagram](https://app.diagrams.net/#G1HqP3HfIBZ-iJkmKV8dRoXilgmEhHtDwb) shows the dependencies or interactions of this microservice with the rest.
+
+![IMAGE: ticket-collector_microservice_relationships](img/system_overview/isolated_services/ticket-collector_microservice_relationships.png)
+
+#### Ticket-statistics
+
+This service is responsible for calculating ticket statistics, store them, and expose them through an API.
+These statistics are used to build some custom Grafana dashboards.
+
+Although the service clearly uses Bruin to fetch data, this service is self-contained, i.e., it does not require access to NATS or Redis, or any other microservice within the Automation Engine, which essentially means it does not use bruin-bridge. For that reason, it is not a REQuester or a REPlier.
+
+The following [diagram](https://app.diagrams.net/#G1wMDs-vmY_avG6rj9VBsJGA_BkWvsi1Nm) shows the dependencies or interactions of this microservice with the rest.
+
+![IMAGE: ticket-statistics_microservice_relationships](img/system_overview/isolated_services/ticket-statistics_microservice_relationships.png)
 
 #### Redis
 

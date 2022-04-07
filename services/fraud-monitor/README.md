@@ -23,5 +23,7 @@ otherwise we need to keep it unread in order to reattempt processing it next tim
 - [Bruin Bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
 
+![IMAGE: fraud-monitor_microservice_relationships](/docs/img/system_overview/use_cases/fraud-monitor_microservice_relationships.png)
+
 # Running in docker-compose
 `docker-compose up --build nats-server notifier bruin-bridge fraud-monitor`

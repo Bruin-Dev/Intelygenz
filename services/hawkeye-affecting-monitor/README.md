@@ -1,6 +1,6 @@
 # Table of contents
   * [Description](#description)
-  * [Affecting monitoring](#affecting-monitoring)
+  * [Workflow](#work-flow)
   * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
 
@@ -68,6 +68,8 @@ they were built throughout the process.
 - [Hawkeye customer cache](../hawkeye-customer-cache/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+
+![IMAGE: hawkeye-affecting-monitor_microservice_relationships](/docs/img/system_overview/use_cases/hawkeye-affecting-monitor_microservice_relationships.png)
 
 # Running in docker-compose
 `docker-compose up --build redis hawkeye-bridge bruin-bridge notifier nats-server hawkeye-customer-cache hawkeye-affecting-monitor`

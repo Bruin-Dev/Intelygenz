@@ -28,5 +28,7 @@ Which is then followed up by appending the full `body` of the InterMapper email 
 - [Bruin Bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
 
+![IMAGE: intermapper-outage-monitor_microservice_relationships](/docs/img/system_overview/use_cases/intermapper-outage-monitor_microservice_relationships.png)
+
 # Running in docker-compose
 `docker-compose up --build nats-server notifier bruin_bridge dri-bridge intermapper-outage-monitor`

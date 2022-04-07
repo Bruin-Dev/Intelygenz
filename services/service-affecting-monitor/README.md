@@ -111,5 +111,7 @@ exceeded, the process will report this issue.
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
 
+![IMAGE: service-affecting-monitor_microservice_relationships](/docs/img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png)
+
 # Running in docker-compose
 `docker-compose up --build redis nats-server velocloud-bridge notifier customer-cache service-affecting-monitor`

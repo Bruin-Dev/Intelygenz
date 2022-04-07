@@ -32,5 +32,7 @@ Should look something like this.
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Notifier](../notifier/README.md)
 
+![IMAGE: last-contact-report_microservice_relationships](/docs/img/system_overview/use_cases/last-contact-report_microservice_relationships.png)
+
 # Running in docker-compose 
 `docker-compose up --build redis last-contact-report velocloud-bridge notifier nats-server`

@@ -13,6 +13,8 @@ the task history. If it is then it will send that ticket's task history to T7.
 - [Notifier](../notifier/README.md)
 - [T7 bridge](../t7-bridge/README.md)
 
+![IMAGE: tnba-feedback_microservice_relationships](/docs/img/system_overview/use_cases/tnba-feedback_microservice_relationships.png)
+
 # Running in docker-compose
 1. Turn VPN on
 2. `docker-compose up --build redis nats-server t7-bridge notifier`

@@ -185,6 +185,8 @@ This is the algorithm implemented to carry out the triage process of edges:
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+ 
+![IMAGE: service-outage-monitor_microservice_relationships](/docs/img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png)
 
 # Running in docker-compose
 

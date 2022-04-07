@@ -1,24 +1,28 @@
 # Email Tagger Monitor
   * [Description](#description)
   * [Work Flow](#work-flow)
-  * [Behaviour in dev and in pro](#behaviour-in-development-and-in-production)
   * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
+  * [Behaviour in dev and in pro](#behaviour-in-dev-and-in-pro)
 
 # Description
+This service is responsible for tagging e-mails pushed by Bruin to an exposed REST API by using E-mail Tagger’s KRE, which returns the best suited tag for an e-mail based on the results of a predictive model.
+
 # Work Flow
-# Behaviour in dev and in pro
+
 # Capabilities used
 - [Bruin bridge](../bruin-bridge/README.md)
-- [T7 bridge](../email-tagger-kre-bridge/README.md)
+- [Email tagger KRE bridge](../email-tagger-kre-bridge/README.md)
 - [Notifier](../notifier/README.md)
+
+![IMAGE: email-tagger-monitor_microservice_relationships](/docs/img/system_overview/use_cases/email-tagger-monitor_microservice_relationships.png)
 
 # Running in docker-compose
 `docker-compose up --build nats-server redis redis-email-tagger`
 `docker-compose up --build bruin-bridge email-tagger-kre-bridge notifier`
 `docker-compose up --build email-tagger-monitor`
 
-# Running with Bruin mock and Konstellation local 
+## Running with Bruin mock and Konstellation local 
 
 You need a `bruin-mock-local` module and a file `docker-compose.local.yml` like this:
 
@@ -78,3 +82,5 @@ docker-compose up --build nats-server redis redis-email-tagger
 ```
 docker-compose up --build email-tagger-monitor
 ```
+
+# Behaviour in dev and in pro

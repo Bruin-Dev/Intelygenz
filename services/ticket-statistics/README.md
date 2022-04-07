@@ -7,6 +7,8 @@
 - [Technologies used](#technologies-used)
 - [Useful documentation](#useful-documentation)
 
+![IMAGE: ticket-statistics_microservice_relationships](/docs/img/system_overview/isolated_services/ticket-statistics_microservice_relationships.png)
+
 # Workflow
 - Install python 3.6
 - Install pip for python 3.6
