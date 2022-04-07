@@ -3,7 +3,6 @@ import json
 
 import aiohttp
 import humps
-from typing import List
 
 
 class BruinClient:
@@ -1233,6 +1232,64 @@ class BruinClient:
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got HTTP {response.status} from Bruin")
+                return_response["body"] = "Got internal error from Bruin"
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
+
+    async def post_notification_email_milestone(self, payload):
+        try:
+            self._logger.info(f'Sending milestone email for ticket id {payload["ticket_id"]}, service number'
+                              f' {payload["detail"]["service_number"]} and notification type'
+                              f' {payload["notification_type"]}')
+            payload = humps.pascalize(payload)
+            self._logger.info(f'Payload that will be applied : {json.dumps(payload, indent=2)}')
+
+            response = await self._session.post(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Notification/email/milestone',
+                json=payload,
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
+
+            return_response = dict.fromkeys(["body", "status"])
+
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
+
+            if response.status == 401:
+                self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = "Got 401 from Bruin"
+                return_response["status"] = response.status
+
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
+
+            if response.status == 404:
+                self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
+                return_response["body"] = "Resource not found"
+                return_response["status"] = 404
+
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}.")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
 

@@ -5,14 +5,11 @@ from unittest.mock import patch
 
 import humps
 import pytest
-
 from aiohttp import ClientConnectionError
-
-from asynctest import CoroutineMock
-from pytest import raises
-
 from application.clients.bruin_client import BruinClient
+from asynctest import CoroutineMock
 from config import testconfig as config
+from pytest import raises
 
 
 class TestBruinClient:
@@ -4197,3 +4194,159 @@ class TestChangeTicketSeverity:
         logger.error.assert_called_once_with("Got HTTP 500 from Bruin")
         assert response['status'] == 500
         assert response['body'] == "Got internal error from Bruin"
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_test(self):
+        logger = Mock()
+        payload = {
+            'ticket_id': 321,
+            'detail': {
+                'service_number': 'VC1234567',
+            },
+            'notification_type': 'Some Notification type',
+        }
+        expected_post_response = {
+            "eventId": 12,
+            "jobId": 5
+        }
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 200
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)) as mock_post:
+            post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
+            mock_post.assert_called_once()
+
+            assert post_notification_email_milestone['body'] == expected_post_response
+            assert post_notification_email_milestone['status'] == 200
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_400_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        payload = {
+            'ticket_id': 321,
+            'detail': {
+                'service_number': 'VC1234567',
+            },
+            'notification_type': 'Some Notification type',
+        }
+        expected_post_response = 'Bad request'
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 400
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = CoroutineMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
+            logger.error.assert_called()
+
+            assert post_notification_email_milestone["body"] == expected_post_response
+            assert post_notification_email_milestone["status"] == 400
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_401_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        payload = {
+            'ticket_id': 321,
+            'detail': {
+                'service_number': 'VC1234567',
+            },
+            'notification_type': 'Some Notification type',
+        }
+        expected_post_response = 'Unauthorized request. Please authorize first'
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 401
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = CoroutineMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
+            logger.error.assert_called()
+            bruin_client.login.assert_awaited()
+
+            assert post_notification_email_milestone["body"] == "Got 401 from Bruin"
+            assert post_notification_email_milestone["status"] == 401
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_403_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        payload = {
+            'ticket_id': 321,
+            'detail': {
+                'service_number': 'VC1234567',
+            },
+            'notification_type': 'Some Notification type',
+        }
+        expected_post_response = "Forbidden. You don't have the permission to access this function"
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 403
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = CoroutineMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
+            logger.error.assert_called()
+
+            assert post_notification_email_milestone["body"] == expected_post_response
+            assert post_notification_email_milestone["status"] == 403
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_404_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        payload = {
+            'ticket_id': 321,
+            'detail': {
+                'service_number': 'VC1234567',
+            },
+            'notification_type': 'Some Notification type',
+        }
+        expected_post_response = 'Could not find the specified ticket ID'
+        response_mock = CoroutineMock()
+        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock.status = 404
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = CoroutineMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
+            logger.error.assert_called()
+
+            assert post_notification_email_milestone["body"] == "Resource not found"
+            assert post_notification_email_milestone["status"] == 404
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_500_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        payload = {
+            'ticket_id': 321,
+            'detail': {
+                'service_number': 'VC1234567',
+            },
+            'notification_type': 'Some Notification type',
+        }
+        response_mock = CoroutineMock()
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = CoroutineMock()
+        response_mock.status = 500
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
+            logger.error.assert_called()
+
+            assert post_notification_email_milestone["body"] == "Got internal error from Bruin"
+            assert post_notification_email_milestone["status"] == 500

@@ -3,11 +3,9 @@ from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
-
-from asynctest import CoroutineMock
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories.bruin_repository import BruinRepository
+from asynctest import CoroutineMock
 from config import testconfig as config
 
 
@@ -2463,3 +2461,28 @@ class TestBruinRepository:
 
         assert result['body'] == f"Problem linking ticket {ticket_id} and email {email_id}"
         assert result['status'] == 400
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_test(self):
+        logger = Mock()
+        payload = {
+            'notification_type': 'TicketPublicAPITest_E-mail',
+            'ticket_id': 3549040,
+            'service_number': 'VC1234567',
+        }
+        fixed_payload = {
+            'notification_type': 'TicketPublicAPITest_E-mail',
+            'ticket_id': 3549040,
+            'detail': {
+                'service_number': 'VC1234567',
+            }
+        }
+        expected_post_response = {'status': 200, 'body': {"eventId": 12, "jobId": 5}}
+        bruin_client = Mock()
+        bruin_client.post_notification_email_milestone = CoroutineMock(return_value=expected_post_response)
+
+        bruin_repository = BruinRepository(logger, config, bruin_client)
+        post_response = await bruin_repository.post_notification_email_milestone(payload)
+
+        bruin_client.post_notification_email_milestone.assert_awaited_once_with(fixed_payload)
+        assert post_response == expected_post_response

@@ -386,3 +386,11 @@ class BruinRepository:
             response['status'] = 200
 
         return response
+
+    async def post_notification_email_milestone(self, payload):
+        service_number = payload.pop('service_number')
+        payload['detail'] = {
+            'service_number': service_number,
+        }
+
+        return await self._bruin_client.post_notification_email_milestone(payload)

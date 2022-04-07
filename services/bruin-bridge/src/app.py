@@ -1,44 +1,44 @@
-import redis
+import asyncio
 
+import redis
+from igz.packages.Logger.logger_client import LoggerClient
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
+from igz.packages.nats.clients import NATSClient
+from igz.packages.server.api import QuartServer
 from prometheus_client import start_http_server
 
-from config import config
+from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
+from application.actions.change_ticket_severity import ChangeTicketSeverity
+from application.actions.get_attributes_serial import GetAttributeSerial
+from application.actions.get_circuit_id import GetCircuitID
+from application.actions.get_client_info import GetClientInfo
+from application.actions.get_client_info_by_did import GetClientInfoByDID
+from application.actions.get_management_status import GetManagementStatus
+from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
+from application.actions.get_single_ticket_basic_info import GetSingleTicketBasicInfo
+from application.actions.get_site import GetSite
+from application.actions.get_ticket_details import GetTicketDetails
+from application.actions.get_ticket_overview import GetTicketOverview
+from application.actions.get_ticket_task_history import GetTicketTaskHistory
+from application.actions.get_tickets import GetTicket
+from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
+from application.actions.link_ticket_to_email import LinkTicketToEmail
+from application.actions.mark_email_as_done import MarkEmailAsDone
+from application.actions.open_ticket import OpenTicket
+from application.actions.post_email_tag import PostEmailTag
+from application.actions.post_multiple_notes import PostMultipleNotes
+from application.actions.post_note import PostNote
+from application.actions.post_notification_email_milestone import PostNotificationEmailMilestone
+from application.actions.post_outage_ticket import PostOutageTicket
+from application.actions.post_ticket import PostTicket
+from application.actions.resolve_ticket import ResolveTicket
+from application.actions.unpause_ticket import UnpauseTicket
 from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
-from application.actions.change_ticket_severity import ChangeTicketSeverity
-from application.actions.get_circuit_id import GetCircuitID
-from application.actions.get_tickets import GetTicket
-from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
-from application.actions.get_single_ticket_basic_info import GetSingleTicketBasicInfo
-from application.actions.get_ticket_details import GetTicketDetails
-from application.actions.get_ticket_overview import GetTicketOverview
-from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
-from application.actions.get_ticket_task_history import GetTicketTaskHistory
-from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
-from application.actions.get_attributes_serial import GetAttributeSerial
-from application.actions.get_management_status import GetManagementStatus
-from application.actions.post_note import PostNote
-from application.actions.post_multiple_notes import PostMultipleNotes
-from application.actions.open_ticket import OpenTicket
-from application.actions.post_outage_ticket import PostOutageTicket
-from application.actions.resolve_ticket import ResolveTicket
-from application.actions.get_client_info import GetClientInfo
-from application.actions.get_client_info_by_did import GetClientInfoByDID
-from application.actions.unpause_ticket import UnpauseTicket
-from application.actions.post_email_tag import PostEmailTag
-from application.actions.get_site import GetSite
-from application.actions.mark_email_as_done import MarkEmailAsDone
-from application.actions.link_ticket_to_email import LinkTicketToEmail
-from igz.packages.nats.clients import NATSClient
-from application.actions.post_ticket import PostTicket
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.eventbus.action import ActionWrapper
-
-from igz.packages.Logger.logger_client import LoggerClient
-import asyncio
-from igz.packages.server.api import QuartServer
+from config import config
 
 
 class Container:
@@ -90,6 +90,7 @@ class Container:
         self._subscriber_get_site = NATSClient(config, logger=self._logger)
         self._subscriber_mark_email_as_done = NATSClient(config, logger=self._logger)
         self._subscriber_link_ticket_to_email = NATSClient(config, logger=self._logger)
+        self._subscriber_post_notification_email_milestone = NATSClient(config, self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -129,6 +130,10 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_get_site, consumer_name="get_site")
         self._event_bus.add_consumer(self._subscriber_mark_email_as_done, consumer_name="mark_email_as_done")
         self._event_bus.add_consumer(self._subscriber_link_ticket_to_email, consumer_name="link_ticket_to_email")
+        self._event_bus.add_consumer(
+            self._subscriber_post_notification_email_milestone,
+            consumer_name='post_notification_email_milestone'
+        )
 
         self._event_bus.set_producer(self._publisher)
 
@@ -162,6 +167,11 @@ class Container:
         self._get_site = GetSite(self._logger, self._event_bus, self._bruin_repository)
         self._mark_email_as_done = MarkEmailAsDone(self._logger, self._event_bus, self._bruin_repository)
         self._link_ticket_to_email = LinkTicketToEmail(self._logger, self._event_bus, self._bruin_repository)
+        self._post_notification_email_milestone = PostNotificationEmailMilestone(
+            self._logger,
+            self._event_bus,
+            self._bruin_repository
+        )
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -223,6 +233,13 @@ class Container:
                                                         "mark_email_as_done", is_async=True, logger=self._logger)
         self._action_link_ticket_to_email = ActionWrapper(self._link_ticket_to_email,
                                                           "link_ticket_to_email", is_async=True, logger=self._logger)
+
+        self._action_post_notification_email_milestone = ActionWrapper(
+            self._post_notification_email_milestone,
+            'post_notification_email_milestone',
+            is_async=True,
+            logger=self._logger
+        )
 
         self._server = QuartServer(config)
 
@@ -324,6 +341,12 @@ class Container:
                                                  topic="bruin.link.ticket.email",
                                                  action_wrapper=self._action_link_ticket_to_email,
                                                  queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(
+            consumer_name='post_notification_email_milestone',
+            topic='bruin.notification.email.milestone',
+            action_wrapper=self._action_post_notification_email_milestone,
+            queue='bruin_bridge'
+        )
 
     async def start_server(self):
         await self._server.run_server()
