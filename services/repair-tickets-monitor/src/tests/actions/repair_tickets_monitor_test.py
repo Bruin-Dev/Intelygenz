@@ -1196,7 +1196,7 @@ class TestRepairTicketsMonitor:
 
         assert validated_ticket_numbers == {
             "validated_ticket_numbers": ["12345"],
-            "bruin_ticket_status_map": [{"12345": "inProgress"}],
-            "bruin_ticket_call_type_map": [{"12345": "repair"}],
-            "bruin_ticket_category_map": [{"12345": "VOO"}],
+            "bruin_ticket_status_map": {"12345": "inProgress"},
+            "bruin_ticket_call_type_map": {"12345": "repair"},
+            "bruin_ticket_category_map": {"12345": "VOO"},
         }

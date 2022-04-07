@@ -139,9 +139,9 @@ class RepairTicketsMonitor:
         tickets_could_be_updated: List[Dict[str, Any]] = None,
         tickets_cannot_be_created: List[Dict[str, Any]] = None,
         validated_ticket_numbers: List[Dict[str, Any]] = None,
-        bruin_ticket_status_map: List[Dict[str, Any]] = None,
-        bruin_ticket_call_type_map: List[Dict[str, Any]] = None,
-        bruin_ticket_category_map: List[Dict[str, Any]] = None,
+        bruin_ticket_status_map: Dict[str, Any] = None,
+        bruin_ticket_call_type_map: Dict[str, Any] = None,
+        bruin_ticket_category_map: Dict[str, Any] = None,
     ):
         """Save the output from the ticket creation / inference verification"""
         service_number_sites_map = service_number_sites_map or {}
@@ -151,9 +151,9 @@ class RepairTicketsMonitor:
         tickets_could_be_updated = tickets_could_be_updated or []
         tickets_cannot_be_created = tickets_cannot_be_created or []
         validated_ticket_numbers = validated_ticket_numbers or []
-        bruin_ticket_status_map = bruin_ticket_status_map or []
-        bruin_ticket_call_type_map = bruin_ticket_call_type_map or []
-        bruin_ticket_category_map = bruin_ticket_category_map or []
+        bruin_ticket_status_map = bruin_ticket_status_map or {}
+        bruin_ticket_call_type_map = bruin_ticket_call_type_map or {}
+        bruin_ticket_category_map = bruin_ticket_category_map or {}
 
         output_response = await self._repair_tickets_kre_repository.save_outputs(
             str(email_id),
@@ -214,27 +214,22 @@ class RepairTicketsMonitor:
             feedback_not_created_due_cancellations.append(site_id_feedback)
         return feedback_not_created_due_cancellations
 
-    async def _get_validated_ticket_numbers(self, tickets_id: List[int]) -> Dict[str, list]:
+    async def _get_validated_ticket_numbers(self, tickets_id: List[int]) -> Dict[str, dict]:
         """
         Return the tickets that already exist in Bruin
         """
-        validated_tickets = defaultdict(list)
+        validated_tickets = defaultdict(dict)
+        validated_tickets['validated_ticket_numbers'] = []
 
         for ticket_id in tickets_id:
             bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             if bruin_bridge_response["status"] == 200:
-                ticket_id = bruin_bridge_response["body"]["ticket_id"]
+                ticket_id = bruin_bridge_response["body"]['ticket_id']
 
                 validated_tickets["validated_ticket_numbers"].append(ticket_id)
-                validated_tickets["bruin_ticket_status_map"].append(
-                    {ticket_id: bruin_bridge_response["body"]["ticket_status"]}
-                )
-                validated_tickets["bruin_ticket_call_type_map"].append(
-                    {ticket_id: bruin_bridge_response["body"]["call_type"]}
-                )
-                validated_tickets["bruin_ticket_category_map"].append(
-                    {ticket_id: bruin_bridge_response["body"]["category"]}
-                )
+                validated_tickets["bruin_ticket_status_map"][ticket_id] = bruin_bridge_response["body"]["ticket_status"]
+                validated_tickets["bruin_ticket_call_type_map"][ticket_id] = bruin_bridge_response["body"]["call_type"]
+                validated_tickets["bruin_ticket_category_map"][ticket_id] = bruin_bridge_response["body"]["category"]
 
         return validated_tickets
 
