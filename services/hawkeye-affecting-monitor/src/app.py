@@ -66,10 +66,16 @@ class Container:
         )
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._affecting_monitor.start_hawkeye_affecting_monitoring(exec_on_start=True)
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

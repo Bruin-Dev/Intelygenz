@@ -1,5 +1,6 @@
 import asyncio
 from igz.packages.Logger.logger_client import LoggerClient
+from prometheus_client import start_http_server
 
 from application.actions.get_link_metrics import GetLinkMetrics
 from application.clients.mongo_client import MyMongoClient
@@ -23,7 +24,13 @@ class Container:
         self._api_server = APIServer(self._logger, config, self._get_links_metrics)
 
     async def start_server(self):
+        self._start_prometheus_metrics_server()
+
         await self._api_server.run_server()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
 
 if __name__ == '__main__':

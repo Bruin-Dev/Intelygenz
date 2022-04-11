@@ -1,6 +1,7 @@
 import asyncio
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from prometheus_client import start_http_server
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
@@ -45,9 +46,15 @@ class Container:
                                                          self._scheduler)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
         await self._links_metrics_collector.start_links_metrics_collector()
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

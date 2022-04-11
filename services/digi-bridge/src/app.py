@@ -1,4 +1,5 @@
 import redis
+from prometheus_client import start_http_server
 
 from config import config
 from application.actions.digi_reboot import DiGiReboot
@@ -55,6 +56,8 @@ class Container:
         self._server = QuartServer(config)
 
     async def start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
         await self._digi_repository.login_job(exec_on_start=True)
         self._scheduler.start()
@@ -65,6 +68,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="digi_recovery_logs", topic="get.digi.recovery.logs",
                                                  action_wrapper=self._action_digi_recovery_logs,
                                                  queue="digi_bridge")
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

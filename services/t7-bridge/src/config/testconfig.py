@@ -27,3 +27,7 @@ LOG_CONFIG = {
 KRE_CONFIG = {
     'base_url': 'http://test-url.com'
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

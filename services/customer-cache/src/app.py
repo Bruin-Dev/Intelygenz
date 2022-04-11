@@ -1,6 +1,7 @@
 import asyncio
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from prometheus_client import start_http_server
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
@@ -68,6 +69,8 @@ class Container:
                                               is_async=True, logger=self._logger)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._event_bus.subscribe_consumer(consumer_name="get_customers", topic="customer.cache.get",
@@ -76,6 +79,10 @@ class Container:
 
         self._scheduler.start()
         await self._refresh_cache.schedule_cache_refresh()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

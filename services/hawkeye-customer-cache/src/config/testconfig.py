@@ -56,3 +56,7 @@ REDIS = {
 REDIS_CUSTOMER_CACHE = {
     "host": "redis-customer-cache"
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

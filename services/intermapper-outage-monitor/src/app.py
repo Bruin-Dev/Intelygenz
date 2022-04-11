@@ -1,6 +1,7 @@
 import asyncio
 
 import redis
+from prometheus_client import start_http_server
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from igz.packages.eventbus.eventbus import EventBus
@@ -52,10 +53,16 @@ class Container:
                                                           self._bruin_repository, self._dri_repository)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
         await self._intermapper_monitoring.start_intermapper_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

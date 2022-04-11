@@ -24,6 +24,10 @@ QUART_CONFIG = {
     'port': 5000
 }
 
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}
+
 
 def get_config():
     APP_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')  # refers to application_top

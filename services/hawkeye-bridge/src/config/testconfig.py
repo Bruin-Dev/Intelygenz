@@ -30,3 +30,7 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

@@ -72,3 +72,7 @@ REDIS = {
 REDIS_CACHE = {
     "host": os.environ["REDIS_EMAIL_TAGGER_HOSTNAME"]
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

@@ -63,3 +63,7 @@ QUART_CONFIG = {
     'title': 'tnba-monitor',
     'port': 5000
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

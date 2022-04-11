@@ -25,3 +25,7 @@ KRE_CONFIG = {
     'base_url': 'http://test-url.com',
     'grpc_secure_mode': False
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

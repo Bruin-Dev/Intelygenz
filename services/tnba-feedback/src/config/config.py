@@ -60,3 +60,7 @@ REDIS = {
 REDIS_TNBA_FEEDBACK = {
     "host": os.environ["REDIS_TNBA_FEEDBACK_HOSTNAME"]
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

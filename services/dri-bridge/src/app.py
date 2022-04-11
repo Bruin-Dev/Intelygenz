@@ -62,7 +62,8 @@ class Container:
     async def start_server(self):
         await self._server.run_server()
 
-    def _start_prometheus_metrics_server(self):
+    @staticmethod
+    def _start_prometheus_metrics_server():
         start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
 

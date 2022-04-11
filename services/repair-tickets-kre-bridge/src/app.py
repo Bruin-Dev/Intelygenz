@@ -1,4 +1,5 @@
 import redis
+from prometheus_client import start_http_server
 
 from config import config
 from application.clients.repair_ticket_client import RepairTicketClient
@@ -88,6 +89,8 @@ class Container:
         self._logger.info("KRE repair tickets bridge started!")
 
     async def start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._event_bus.subscribe_consumer(consumer_name="outputs",
@@ -109,6 +112,10 @@ class Container:
                                                  topic="rta.closed_ticket_feedback.request",
                                                  action_wrapper=self._action_save_closed_ticket_feedback,
                                                  queue="rta_kre_bridge")
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

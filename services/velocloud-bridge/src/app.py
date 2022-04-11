@@ -1,5 +1,6 @@
 import asyncio
 import redis
+from prometheus_client import start_http_server
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
@@ -99,6 +100,8 @@ class Container:
         self._server = QuartServer(config)
 
     async def start(self):
+        self._start_prometheus_metrics_server()
+
         await self._velocloud_repository.connect_to_all_servers()
         await self._event_bus.connect()
         self._scheduler.start()
@@ -138,6 +141,10 @@ class Container:
                                                  topic="request.network.enterprise.edges",
                                                  action_wrapper=self._list_network_enterprise_edge,
                                                  queue="velocloud_bridge")
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

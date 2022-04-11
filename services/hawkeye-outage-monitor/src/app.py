@@ -61,6 +61,8 @@ class Container:
                                              self._notifications_repository, self._customer_cache_repository)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=True)

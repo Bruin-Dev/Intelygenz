@@ -67,3 +67,7 @@ REDIS = {
 REDIS_CUSTOMER_CACHE = {
     "host": os.environ["REDIS_CUSTOMER_CACHE_HOSTNAME"]
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

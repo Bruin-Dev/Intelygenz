@@ -63,3 +63,7 @@ INTERMAPPER_CONFIG = {
     'wait_max': 0
 
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

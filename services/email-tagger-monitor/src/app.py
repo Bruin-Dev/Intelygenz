@@ -1,6 +1,7 @@
 import asyncio
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from prometheus_client import start_http_server
 from pytz import timezone
 
 from config import config
@@ -79,12 +80,18 @@ class Container:
                                      self._utils_repository)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._new_emails_monitor.start_email_events_monitor(exec_on_start=True)
         await self._new_tickets_monitor.start_ticket_events_monitor(exec_on_start=True)
 
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._api_server.run_server()

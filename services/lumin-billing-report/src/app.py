@@ -1,5 +1,6 @@
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from prometheus_client import start_http_server
 from pytz import timezone
 
 from application.actions.billing_report import BillingReport
@@ -40,9 +41,15 @@ class Container:
         )
 
     async def start(self):
+        self._start_prometheus_metrics_server()
+
         self._billing_report.start_billing_report_job(exec_on_start=False)
         self._billing_report.register_error_handler()
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

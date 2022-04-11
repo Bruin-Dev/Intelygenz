@@ -48,3 +48,7 @@ QUART_CONFIG = {
 REDIS = {
     "host": "redis"
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

@@ -81,3 +81,7 @@ QUART_CONFIG = {
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

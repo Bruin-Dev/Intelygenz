@@ -1,5 +1,6 @@
 import asyncio
 import redis
+from prometheus_client import start_http_server
 from application.actions.alert import Alert
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
@@ -43,10 +44,16 @@ class Container:
                             config, self._velocloud_repository, self._template_renderer, self._notifications_repository)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._alert.start_alert_job(exec_on_start=False)
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

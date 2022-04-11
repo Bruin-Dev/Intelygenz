@@ -45,3 +45,7 @@ QUART_CONFIG = {
     'title': 'billing-automation',
     'port': 5000
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

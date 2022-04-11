@@ -106,7 +106,8 @@ class Container:
 
         self._scheduler.start()
 
-    def _start_prometheus_metrics_server(self):
+    @staticmethod
+    def _start_prometheus_metrics_server():
         start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):

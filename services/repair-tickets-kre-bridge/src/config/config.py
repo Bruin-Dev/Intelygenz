@@ -39,3 +39,7 @@ KRE_CONFIG = {
 QUART_CONFIG = {"title": "repair-tickets-kre-bridge", "port": 5000}
 
 REDIS = {"host": os.environ["REDIS_HOSTNAME"]}
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

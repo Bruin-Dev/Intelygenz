@@ -1,6 +1,7 @@
 import asyncio
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from prometheus_client import start_http_server
 from pytz import timezone
 
 from config import config
@@ -101,11 +102,17 @@ class Container:
         await self._server.run_server()
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
         await self._new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
         await self._new_closed_tickets_feedback.start_closed_ticket_feedback(exec_on_start=True)
         await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)
         self._scheduler.start()
+
+    @staticmethod
+    def _start_prometheus_metrics_server():
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def run(self):
         await self._start()

@@ -54,3 +54,7 @@ QUART_CONFIG = {
     'title': 'lumin-billing-report',
     'port': 5000
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}

@@ -129,3 +129,7 @@ QUART_CONFIG = {
 ASR_CONFIG = {
     'link_labels_blacklist': ['BYOB', 'Customer Owned', 'customer owned']
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090
+}
