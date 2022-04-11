@@ -332,6 +332,7 @@ env_dict = {
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
     ],
     os.path.join('services', 'digi-reboot-report', 'src', 'config', 'env'): [
+        f'CURRENT_ENVIRONMENT={ENVIRONMENT_NAME}',
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}',
         f'NATS_SERVER1={NATS_SERVER1}',
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
