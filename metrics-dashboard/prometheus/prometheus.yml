@@ -22,11 +22,147 @@ scrape_configs:
     static_configs:
       - targets: ['bruin-bridge:9090']
 
+  - job_name: 'customer-cache'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['customer-cache:9090']
+
+  - job_name: 'digi-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['digi-bridge:9090']
+
+  - job_name: 'digi-reboot-report'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['digi-reboot-report:9090']
+
   - job_name: 'dri-bridge'
 
     scrape_interval: 5s
     static_configs:
       - targets: ['dri-bridge:9090']
+
+  - job_name: 'email-tagger-kre-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['email-tagger-kre-bridge:9090']
+
+  - job_name: 'email-tagger-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['email-tagger-monitor:9090']
+
+  - job_name: 'fraud-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['fraud-monitor:9090']
+
+  - job_name: 'hawkeye-affecting-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['hawkeye-affecting-monitor:9090']
+
+  - job_name: 'hawkeye-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['hawkeye-bridge:9090']
+
+  - job_name: 'hawkeye-customer-cache'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['hawkeye-customer-cache:9090']
+
+  - job_name: 'hawkeye-outage-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['hawkeye-outage-monitor:9090']
+
+  - job_name: 'intermapper-outage-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['intermapper-outage-monitor:9090']
+
+  - job_name: 'last-contact-report'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['last-contact-report:9090']
+
+  - job_name: 'links-metrics-api'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['links-metrics-api:9090']
+
+  - job_name: 'links-metrics-collector'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['links-metrics-collector:9090']
+
+  - job_name: 'notifier'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['notifier:9090']
+
+  - job_name: 'repair-tickets-kre-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['repair-tickets-kre-bridge:9090']
+
+  - job_name: 'repair-tickets-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['repair-tickets-monitor:9090']
+
+# service-affecting-monitor instances vary depending on the environment you want to test, so their scrapping
+# configuration can't be hardcoded in this file
+#
+# Use the following template if you need to scrape such instances:
+# -------------------------------------------------------------------------------------
+#  - job_name: 'service-affecting-monitor-<id>'
+#
+#    scrape_interval: 5s
+#    static_configs:
+#      - targets: ['service-affecting-monitor-<id>:9090']
+# -------------------------------------------------------------------------------------
+# where:
+#  - <id> is an identifier for the service
+
+# service-outage-monitor instances vary depending on the environment you want to test, so their scrapping
+# configuration can't be hardcoded in this file
+#
+# Use the following template if you need to scrape such instances:
+# -------------------------------------------------------------------------------------
+#  - job_name: 'service-outage-monitor-<id>'
+#
+#    scrape_interval: 5s
+#    static_configs:
+#      - targets: ['service-outage-monitor-<id>:9090']
+# -------------------------------------------------------------------------------------
+# where:
+#  - <id> is an identifier for the service
+
+  - job_name: 'service-outage-monitor-triage'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-triage:9090']
 
   - job_name: 'sites-monitor'
 
@@ -34,38 +170,38 @@ scrape_configs:
     static_configs:
       - targets: ['sites-monitor:9090']
 
-  - job_name: 'service-affecting-monitor'
+  - job_name: 't7-bridge'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['service-affecting-monitor:9090']
+      - targets: ['t7-bridge:9090']
 
-  - job_name: 'service-outage-monitor-1'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['service-outage-monitor-1:9090']
-
-  - job_name: 'service-outage-monitor-2'
+  - job_name: 'ticket-collector'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['service-outage-monitor-2:9090']
+      - targets: ['ticket-collector:9090']
 
-  - job_name: 'service-outage-monitor-3'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['service-outage-monitor-3:9090']
-
-  - job_name: 'service-outage-monitor-4'
+  - job_name: 'ticket-statistics'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['service-outage-monitor-4:9090']
+      - targets: ['ticket-statistics:9090']
 
-  - job_name: 'service-outage-monitor-triage'
+  - job_name: 'tnba-feedback'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['service-outage-monitor-triage:9090']
+      - targets: ['tnba-feedback:9090']
+
+  - job_name: 'tnba-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['tnba-monitor:9090']
+
+  - job_name: 'velocloud-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['velocloud-bridge:9090']
