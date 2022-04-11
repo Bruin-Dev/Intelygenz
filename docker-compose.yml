@@ -54,6 +54,7 @@ services:
       - redis-customer-cache
     ports:
       - 5013:5000
+      - 9390:9090
 
   digi-bridge:
     build:
@@ -70,6 +71,7 @@ services:
       - redis
     ports:
       - 5015:5000
+      - 9490:9090
 
   digi-reboot-report:
     build:
@@ -83,6 +85,7 @@ services:
       - services/digi-reboot-report/src/config/env
     ports:
       - 5016:5000
+      - 9590:9090
 
   dri-bridge:
     build:
@@ -113,6 +116,7 @@ services:
       - redis
     ports:
       - 5056:5000
+      - 9690:9090
 
     # extra_hosts:
     #  - "host.docker.internal:192.168.1.51"
@@ -133,6 +137,7 @@ services:
       - redis-email-tagger
     ports:
       - 5055:5000
+      - 9790:9090
 
   fraud-monitor:
     build:
@@ -149,6 +154,7 @@ services:
       - redis
     ports:
       - 5024:5000
+      - 9890:9090
       
   hawkeye-affecting-monitor:
     build:
@@ -182,6 +188,7 @@ services:
       - redis
     ports:
       - 5507:5000
+      - 9990:9090
 
   hawkeye-customer-cache:
     build:
@@ -199,6 +206,7 @@ services:
       - redis-customer-cache
     ports:
       - 5023:5000
+      - 9091:9090
 
   hawkeye-outage-monitor:
     build:
@@ -232,6 +240,7 @@ services:
       - redis
     ports:
       - 5017:5000
+      - 9092:9090
 
   last-contact-report:
     build:
@@ -248,6 +257,7 @@ services:
       - redis
     ports:
       - 5003:5000
+      - 9093:9090
 
   links-metrics-api:
     build:
@@ -264,6 +274,7 @@ services:
       - redis
     ports:
       - 5019:5000
+      - 9192:9090
 
   links-metrics-collector:
     build:
@@ -280,6 +291,7 @@ services:
       - redis
     ports:
       - 5018:5000
+      - 9193:9090
 
   lumin-billing-report:
     build:
@@ -293,6 +305,7 @@ services:
       - services/lumin-billing-report/src/config/env
     ports:
       - 5099:5000
+      - 9094:9090
 
   nats-server:
     restart: on-failure
@@ -339,6 +352,7 @@ services:
       - redis
     ports:
       - 5002:5000
+      - 9095:9090
 
   repair-tickets-monitor:
     build:
@@ -358,6 +372,7 @@ services:
       - redis-email-tagger
     ports:
       - 5057:5000
+      - 9096:9090
     volumes:
       - ./services/repair-tickets-monitor:/service/app:z
     stdin_open: true # for debug
@@ -473,7 +488,7 @@ services:
       - "nats-server"
       - redis
     ports:
-      - 5000:5000
+      - 5200:5000
       - 9110:9090
 
   t7-bridge:
@@ -491,6 +506,7 @@ services:
       - redis
     ports:
       - 5009:5000
+      - 9097:9090
 
   ticket-collector:
     build:
@@ -509,6 +525,7 @@ services:
     - ./services/ticket-collector:/service/app
     ports:
       - 5617:5000
+      - 9194:9000
 
   ticket-statistics:
     build:
@@ -528,6 +545,7 @@ services:
     - ./services/ticket-statistics:/service/app
     ports:
       - 3000:3000
+      - 9195:9000
 
   tnba-feedback:
     build:
@@ -545,6 +563,7 @@ services:
       - redis-tnba-feedback
     ports:
       - 5014:5000
+      - 9098:9090
 
   tnba-monitor:
     build:
@@ -561,6 +580,7 @@ services:
       - redis
     ports:
       - 5012:5000
+      - 9099:9090
       
   velocloud-bridge:
     build:
@@ -577,6 +597,7 @@ services:
       - redis
     ports:
       - 5001:5000
+      - 9191:9090
 
   redis:
     image: redis:5.0.4
