@@ -1,4 +1,4 @@
-FROM prom/prometheus:v2.7.2
+FROM prom/prometheus:v2.33.1
 
 USER 0
 
