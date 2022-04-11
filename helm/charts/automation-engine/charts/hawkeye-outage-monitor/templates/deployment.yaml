@@ -55,8 +55,13 @@ spec:
                 name: {{ include "hawkeye-outage-monitor.secretName" . }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
+            {{- if .Values.config.metrics.enabled }}
+            - name: {{ .Values.config.metrics.svc.name }}
+              containerPort: {{ .Values.config.metrics.svc.port }}
+              protocol: TCP
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /_health

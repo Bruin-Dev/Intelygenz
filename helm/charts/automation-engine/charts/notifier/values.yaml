@@ -39,6 +39,19 @@ global:
     # -- Name of the imagePullSecret created to access the images stored in ECR.
     name: "ecr-registry"
 
+config:
+  metrics:
+    # -- Indicates whether the microservice will expose metrics through prometheus.
+    enabled: true
+    svc:
+      port: 9090
+      name: metrics
+    ## Additional labels for the service monitor
+    ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+    labels: {}
+    #labels:
+    #  servicediscovery: true
+
 # -- Number of notifier pods
 replicaCount: 1
 

@@ -48,7 +48,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
             {{- if .Values.config.metrics.enabled }}
-            - name: metrics
+            - name: {{ .Values.config.metrics.svc.name }}
               containerPort: {{ .Values.config.metrics.svc.port }}
               protocol: TCP
             {{- end }}

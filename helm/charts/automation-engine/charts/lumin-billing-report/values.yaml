@@ -63,6 +63,17 @@ config:
   billing_recipient: ""
   # -- Email account password
   email_acc_pwd: ""
+  metrics:
+    # -- Indicates whether the microservice will expose metrics through prometheus.
+    enabled: true
+    svc:
+      port: 9090
+      name: metrics
+    ## Additional labels for the service monitor
+    ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+    labels: {}
+    #labels:
+    #  servicediscovery: true
 
 
 image:

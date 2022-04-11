@@ -51,7 +51,7 @@ config:
       name: metrics
     ## Additional labels for the service monitor
     ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-    labels: { }
+    labels: {}
     #labels:
     #  servicediscovery: true
   capabilities_enabled:

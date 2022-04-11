@@ -1,0 +1,15 @@
+{{- if and .Values.config.metrics.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "customer-cache.fullname" . }}
+  labels:
+    {{- include "customer-cache.labels" . | nindent 4 }}
+{{ with .Values.config.metrics.labels }}{{ toYaml . | indent 4 }}{{ end }}
+spec:
+  endpoints:
+  - port: {{ .Values.config.metrics.svc.name }}
+  selector:
+    matchLabels:
+      {{- include "customer-cache.selectorLabels" . | nindent 6 }}
+{{- end }}

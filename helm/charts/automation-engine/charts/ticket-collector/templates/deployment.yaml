@@ -34,6 +34,15 @@ spec:
                 name: {{ include "ticket-collector.secretName" . }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- if .Values.config.metrics.enabled }}
+            - name: {{ .Values.config.metrics.svc.name }}
+              containerPort: {{ .Values.config.metrics.svc.port }}
+              protocol: TCP
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

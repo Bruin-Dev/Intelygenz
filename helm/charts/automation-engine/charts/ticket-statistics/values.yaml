@@ -108,6 +108,17 @@ config:
     # will be created in the microservice deployment that will wait until the
     # velocloud-bridge service responds correctly to healthcheck calls.
     velocloud_bridge: true
+  metrics:
+    # -- Indicates whether the microservice will expose metrics through prometheus.
+    enabled: true
+    svc:
+      port: 9090
+      name: metrics
+    ## Additional labels for the service monitor
+    ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+    labels: {}
+    #labels:
+    #  servicediscovery: true
 
 image:
   repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-statistics

@@ -164,7 +164,7 @@ bruin-bridge:
         name: metrics
       ## Additional labels for the service monitor
       ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: { }
+      labels: {}
       #labels:
       #  servicediscovery: true
   # -- bruin-bridge resource definition
@@ -186,6 +186,17 @@ customer-cache:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/customer-cache
     pullPolicy: Always
@@ -218,6 +229,17 @@ digi-bridge:
     digi_api_test_ip: ""
     # -- Record name for Digi Test Environment
     digi_api_test_dns_record_name: ""
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     # -- digi-bridge image image
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
@@ -254,6 +276,17 @@ digi-reboot-report:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-reboot-report
     pullPolicy: Always
@@ -378,6 +411,18 @@ email-tagger-kre-bridge:
   service:
     type: ClusterIP
     port: 5000
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   resources:
     limits:
       cpu: 200m
@@ -403,6 +448,17 @@ email-tagger-monitor:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-tagger-monitor
     pullPolicy: Always
@@ -429,6 +485,17 @@ fraud-monitor:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/fraud-monitor
     pullPolicy: Always
@@ -455,6 +522,17 @@ hawkeye-affecting-monitor:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-affecting-monitor
     pullPolicy: Always
@@ -486,6 +564,18 @@ hawkeye-bridge:
   service:
     type: ClusterIP
     port: 5000
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   resources:
     limits:
       cpu: 200m
@@ -511,6 +601,17 @@ hawkeye-customer-cache:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-customer-cache
     pullPolicy: Always
@@ -537,6 +638,17 @@ hawkeye-outage-monitor:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/hawkeye-outage-monitor
     pullPolicy: Always
@@ -563,6 +675,17 @@ intermapper-outage-monitor:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/intermapper-outage-monitor
     pullPolicy: Always
@@ -589,6 +712,17 @@ last-contact-report:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/last-contact-report
     pullPolicy: Always
@@ -633,6 +767,17 @@ links-metrics-api:
     # -- Indicate mongo port to use
     mongodb_port: ""
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-api
     pullPolicy: Always
@@ -680,6 +825,17 @@ links-metrics-collector:
     mongodb_port: ""
     # -- Indicate the whitelist source range CIDR to allow access
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/links-metrics-collector
     pullPolicy: Always
@@ -726,6 +882,17 @@ lumin-billing-report:
     billing_recipient: ""
     # -- Email account password
     email_acc_pwd: ""
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lumin-billing-report
     pullPolicy: Always
@@ -749,6 +916,18 @@ notifier:
   enabled: true
   # -- Number of replicas of notifier module
   replicaCount: 1
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   # -- notifier image details
   image:
     # -- notifier repository for docker images
@@ -781,6 +960,18 @@ repair-tickets-kre-bridge:
   enabled: true
   # -- Number of replicas of repair-tickets-kre-bridge module
   replicaCount: 1
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/repair-tickets-kre-bridge
     pullPolicy: Always
@@ -975,6 +1166,11 @@ sites-monitor:
       svc:
         port: 9090
         name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor
     pullPolicy: Always
@@ -998,6 +1194,18 @@ t7-bridge:
   enabled: true
   # -- Number of replicas of t7-bridge module
   replicaCount: 1
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/t7-bridge
     pullPolicy: Always
@@ -1054,6 +1262,17 @@ ticket-collector:
     bruin_client_secret: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-collector
     pullPolicy: Always
@@ -1104,6 +1323,17 @@ ticket-statistics:
     server_name: ""
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/ticket-statistics
     pullPolicy: Always
@@ -1130,6 +1360,17 @@ tnba-feedback:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-feedback
     pullPolicy: Always
@@ -1156,6 +1397,17 @@ tnba-monitor:
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/tnba-monitor
     pullPolicy: Always
@@ -1179,6 +1431,18 @@ velocloud-bridge:
   enabled: true
   # -- Number of replicas of velocloud-bridge module
   replicaCount: 2
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
   image:
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-bridge
     pullPolicy: Always

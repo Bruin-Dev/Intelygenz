@@ -9,5 +9,9 @@ spec:
   ports:
     - name: http
       port: {{ .Values.service.port }}
+    {{- if .Values.config.metrics.enabled }}
+    - name: {{ .Values.config.metrics.svc.name }}
+      port: {{ .Values.config.metrics.svc.port }}
+    {{- end }}
   selector:
     {{- include "ticket-statistics.selectorLabels" . | nindent 4 }}
