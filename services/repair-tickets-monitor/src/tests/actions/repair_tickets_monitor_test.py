@@ -1,8 +1,10 @@
 import asyncio
+import os
 from collections import defaultdict
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+import html2text
 import pytest
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
@@ -1040,6 +1042,30 @@ class TestRepairTicketsMonitor:
 
         result = repair_tickets_monitor._is_inference_actionable(inference_data)
         assert result == expected
+
+    def _compose_bec_note_text_update_test(self, repair_tickets_monitor):
+        body = "<html><body>algo</body></html>"
+        call = {
+            "subject": "Example subject",
+            "from_address": "from@address.com",
+            "body": body,
+            "date": datetime(2022, 1, 11),
+            "is_update_note": True,
+        }
+
+        note_text = repair_tickets_monitor._compose_bec_note_text(**call)
+
+        expected_body = html2text.html2text(body)
+        assert note_text == os.linesep.join([
+            "#*MetTel's IPA*#",
+            "BEC AI RTA",
+            "",
+            "This note is new commentary from the client and posted via BEC AI engine.",
+            "Please review the full narrative provided in the email attached:\n" "From: from@address.com",
+            "Date Stamp: 2022-01-11 00:00:00",
+            "Subject: Example subject",
+            f"Body: \n {expected_body}",
+        ])
 
     def _compose_bec_note_to_ticket_update_test(self, repair_tickets_monitor):
         call = {

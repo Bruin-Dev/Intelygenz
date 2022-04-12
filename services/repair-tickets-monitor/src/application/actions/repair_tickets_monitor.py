@@ -422,22 +422,20 @@ class RepairTicketsMonitor:
 
         return tickets_with_site_id
 
-    def _compose_bec_note_to_ticket(
+    def _compose_bec_note_text(
         self,
-        ticket_id: int,
-        service_numbers: List[str],
         subject: str,
         from_address: str,
         body: str,
         date: datetime,
         is_update_note: bool = False,
-    ) -> List[Dict]:
+    ) -> str:
         new_ticket_message = "This ticket was opened via MetTel Email Center AI Engine."
         update_ticket_message = "This note is new commentary from the client and posted via BEC AI engine."
         operator_message = update_ticket_message if is_update_note else new_ticket_message
         body_cleaned = html2text.html2text(body)
 
-        note_text = os.linesep.join(
+        return os.linesep.join(
             [
                 "#*MetTel's IPA*#",
                 "BEC AI RTA",
@@ -449,6 +447,23 @@ class RepairTicketsMonitor:
                 f"Body: \n {body_cleaned}",
             ]
         )
+
+    def _compose_bec_note_to_ticket(
+        self,
+        ticket_id: int,
+        service_numbers: List[str],
+        subject: str,
+        from_address: str,
+        body: str,
+        date: datetime,
+        is_update_note: bool = False,
+    ) -> List[Dict]:
+        note_text =  self._compose_bec_note_text(
+            subject=subject,
+            from_address=from_address,
+            body=body,
+            date=date,
+            is_update_note=is_update_note)
         notes = [{"text": note_text, "service_number": service_number} for service_number in service_numbers]
         self._logger.info("ticket_id=%s Sending note: %s", ticket_id, notes)
 
