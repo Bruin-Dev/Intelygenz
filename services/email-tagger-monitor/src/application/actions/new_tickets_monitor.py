@@ -60,7 +60,8 @@ class NewTicketsMonitor:
             if self._new_tickets_repository.validate_ticket(data)
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info("NewTicketsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
+        self._logger.info(
+            "NewTicketsMonitor process finished! Took {:.3f}s".format(time.time() - start_time))
 
     def _check_error(self, error_code: int, ticket_id: int, email_id: str):
         if error_code == 404:

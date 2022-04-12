@@ -1,0 +1,50 @@
+{
+    "ticketNotes": [
+      {
+        "noteID": 0,
+        "noteType": "string",
+        "noteValue": "string",
+        "actionID": 0,
+        "detailID": 0,
+        "enteredBy": 0,
+        "enteredDate": "2022-04-12T16:14:46.458Z",
+        "lastViewedBy": 0,
+        "lastViewedDate": "2022-04-12T16:14:46.458Z",
+        "refNoteID": 0,
+        "parentNoteID": 0,
+        "noteStatus": "string",
+        "noteText": "string",
+        "childNotes": [
+          null
+        ],
+        "documents": [
+          {
+            "id": 0,
+            "ticketId": 0,
+            "detailId": 0,
+            "noteId": 0,
+            "fileName": "string",
+            "filePath": "string",
+            "fileExtension": "string",
+            "fileSize": 0,
+            "createdAt": "2022-04-12T16:14:46.458Z",
+            "createdBy": 0
+          }
+        ],
+        "alerts": [
+          {
+            "id": 0,
+            "noteId": 0,
+            "assignTo": 0,
+            "createdAt": "2022-04-12T16:14:46.458Z",
+            "createdBy": 0,
+            "clearedAt": "2022-04-12T16:14:46.458Z",
+            "clearedBy": 0
+          }
+        ],
+        "taggedUserDirIDs": [
+          0
+        ]
+      }
+    ]
+  }

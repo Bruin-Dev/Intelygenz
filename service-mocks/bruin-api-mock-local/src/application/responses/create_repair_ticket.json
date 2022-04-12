@@ -1,0 +1,11 @@
+{
+  "items": [
+    {
+      "ticketId": 10,
+      "inventoryId": 0,
+      "wtn": "string",
+      "errorMessage": "string",
+      "errorCode": 0
+    }
+  ]
+}
