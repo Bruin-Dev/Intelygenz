@@ -412,6 +412,52 @@ class BruinRepository:
         )
         return response
 
+    async def append_note_to_ticket(self, ticket_id: int, text_note: str) -> Dict[str, int]:
+        # Preparing the request to bruin-bridge
+        rpc_request = {
+            "topic": "bruin.ticket.note.append.request",
+            "content": {
+                "request_id": uuid(),
+                "body": {
+                    "ticket_id": ticket_id,
+                    "note": text_note,
+                },
+            },
+            "timeout": 15,
+        }
+        try:
+            response = await self._event_bus.rpc_request(
+                rpc_request["topic"], rpc_request["content"], timeout=rpc_request["timeout"]
+            )
+        # TODO: only capture specific exceptions that requires to be managed
+        except Exception as e:
+            err_msg = (
+                f"ticket_id={ticket_id} An error occurred during RPC comunication\n"
+                f"Request sent: {rpc_request}\n"
+                f"Error: {e}"
+            )
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            # This response has the same structe that bruin responses
+            return nats_error_response
+
+        # Checking RPC response
+        if response["status"] != 200:
+            err_msg = (
+                f"ticket_id={ticket_id} Bruin returned a not success status\n"
+                f"Request: {rpc_request}\n"
+                f"Response: {response['status']} - {response['body']}"
+            )
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            return response
+
+        # we need this log because we can see private note onces they have been plubished
+        self._logger.info(
+            "ticket_id=%s Note appended to ticket successfully!\n Note published: %s", ticket_id, response["body"]
+        )
+        return response
+
     async def get_tickets_basic_info(self, ticket_statuses: List[str], **kwargs):
         @retry(
             wait=wait_exponential(

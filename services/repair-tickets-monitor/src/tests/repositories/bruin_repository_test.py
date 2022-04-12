@@ -614,3 +614,58 @@ class TestBruinRepository:
             bruin_bridge_response = await bruin_repository_real.append_notes_to_ticket(ticket_id=ticket_id, notes=note)
         # then
         assert bruin_bridge_response == rpc_response
+
+    @pytest.mark.asyncio
+    async def append_note_to_ticket_rpc_error_test(self, bruin_repository_real):
+        # given
+        ticket_id = "12345"
+        text_note = "I'm a note of test"
+
+        # when
+        bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(
+            ticket_id=ticket_id,
+            text_note=text_note)
+
+        # then
+        bruin_repository_real._notifications_repository.send_slack_message.assert_awaited_once()
+        assert bruin_bridge_response == {"body": None, "status": 503}
+
+    @pytest.mark.asyncio
+    async def append_note_to_ticket_400__test(self, bruin_repository_real):
+        """
+        When request_rpc was successful and return a status code not equal
+        to 200
+        Then the request_rpc response is returned
+        """
+        # given
+        ticket_id = "12345"
+        text_note = "I'm a note of test"
+        rpc_response = {"status": 400, "body": "400 error"}
+
+        # when
+        with patch.object(bruin_repository_real._event_bus, "rpc_request", return_value=asyncio.Future()) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response)
+            bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(ticket_id=ticket_id, text_note=text_note)
+
+        # then
+        bruin_repository_real._notifications_repository.send_slack_message.assert_awaited_once()
+        assert bruin_bridge_response == rpc_response
+
+    @pytest.mark.asyncio
+    async def append_note_to_ticket_200__test(self, bruin_repository_real):
+        """
+        When request_rpc was successful and return status code 200
+        Then the request_rpc response is returned
+        """
+        # given
+        ticket_id = "12345"
+        text_note = "I'm a note of test"
+        rpc_response = {"status": 200, "body": "All my body"}
+
+        # when
+        with patch.object(bruin_repository_real._event_bus, "rpc_request", return_value=asyncio.Future()) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response)
+            bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(ticket_id=ticket_id, text_note=text_note)
+
+        # then
+        assert bruin_bridge_response == rpc_response
