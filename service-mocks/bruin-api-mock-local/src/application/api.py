@@ -1,6 +1,6 @@
-import json 
+import json
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -28,10 +28,21 @@ def get_ticket_detail(ticket_id):
     return jsonify(json_content)
 
 
+@api_blueprint.route("/api/Ticket/repair", methods=["POST"])
+def post_ticket_repair():
+    return jsonify(''), 200
+
+
 # Inventory
 @api_blueprint.route("/api/Inventory/", methods=["GET"])
 def get_inventory():
     response_path = "src/application/responses/inventory.json"
     with open(response_path) as file_object:
         json_content = json.load(file_object)
+
+    args_dict = request.args.to_dict()
+    service_number = args_dict.get("ServiceNumber")
+    if service_number:
+        json_content['documents'][0]['ServiceNumber'] = service_number
+
     return jsonify(json_content)

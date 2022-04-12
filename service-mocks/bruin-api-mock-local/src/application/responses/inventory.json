@@ -1,44 +1,44 @@
 {
     "documents": [
-        {
-            "clientID": 10,
-            "clientName": "client",
-            "vendor": "a vendor",
-            "accountNumber": "accountnumber",
-            "subAccountNumber": "string",
-            "inventoryID": "string",
-            "serviceNumber": "string",
-            "siteId": 10,
-            "siteLabel": "string",
-            "address": {
-                "address": "string",
-                "city": "string",
-                "state": "string",
-                "zip": "string",
-                "country": "string"
-            },
-            "hierarchy": "string",
-            "costCenter": "string",
-            "assignee": "string",
-            "description": "string",
-            "installDate": "2022-02-11T17:11:21.347Z",
-            "disconnectDate": "2022-02-11T17:11:21.347Z",
-            "status": "string",
-            "verified": "string",
-            "productCategory": "string",
-            "productType": "string",
-            "items": [
-                {
-                    "itemName": "string",
-                    "primaryIndicator": "string"
-                }
-            ],
-            "contractIdentifier": "string",
-            "rateCardIdentifier": "string",
-            "lastInvoiceUsageDate": "2022-02-11T17:11:21.347Z",
-            "lastUsageDate": "2022-02-11T17:11:21.347Z",
-            "longitude": 10,
-            "latitude": 10
-        }
+      {
+        "clientID": 84975,
+        "clientName": "Wand NewCo3 dba Caliber",
+        "vendor": "MetTel",
+        "accountNumber": "0100523343",
+        "subAccountNumber": "757013",
+        "inventoryID": "12859722",
+        "serviceNumber": "3102660134",
+        "siteId": 424694,
+        "siteLabel": "Caliber Collision",
+        "address": {
+          "address": "any place",
+          "city": "SANTA MONICA",
+          "state": "CA",
+          "zip": "90405",
+          "country": "USA"
+        },
+        "hierarchy": "|LE023|1085|SP0082|",
+        "costCenter": "LE023 - 1085 - SP0081",
+        "assignee": "Someone",
+        "description": "Who",
+        "installDate": "2020-01-28T05:00:00Z",
+        "disconnectDate": null,
+        "status": "A",
+        "verified": "Y",
+        "productCategory": "Wireless",
+        "productType": "Smart Phone",
+        "items": [
+          {
+            "itemName": "Apple iPhone 8",
+            "primaryIndicator": "Smart Phone"
+          }
+        ],
+        "contractIdentifier": "0",
+        "rateCardIdentifier": null,
+        "lastInvoiceUsageDate": "2022-04-08T04:00:00Z",
+        "lastUsageDate": "2022-04-01T22:25:00Z",
+        "longitude": -118.111111,
+        "latitude": 34.111111
+      }
     ]
-}
+  }
