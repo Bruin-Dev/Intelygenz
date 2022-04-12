@@ -1,6 +1,5 @@
 import asyncio
 import time
-from collections import defaultdict
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 import os
@@ -13,6 +12,8 @@ from application.exceptions import ResponseException
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
+
+ACTIVE_TICKET_STATUS = ["New", "InProgress"]
 
 
 class RepairTicketsMonitor:
@@ -183,11 +184,12 @@ class RepairTicketsMonitor:
                     site_ids.add(ticket["site_id"])
         return list(site_ids)
 
+    @staticmethod
     def get_service_number_site_id_map_with_and_without_cancellations(
-        self, service_number_site_map: Dict[str, str], site_ids_with_cancellations: Tuple[str]
+            service_number_site_map: Dict[str, str], site_ids_with_cancellations: List[str]
     ) -> Tuple[Dict[str, str], Dict[str, str]]:
-        service_number_site_id_map_with_cancellations = DefaultDict()
-        service_number_site_id_map_without_cancellations = DefaultDict()
+        service_number_site_id_map_with_cancellations = DefaultDict[str, str]()
+        service_number_site_id_map_without_cancellations = DefaultDict[str, str]()
 
         for service_number, site_id in service_number_site_map.items():
             if site_id in site_ids_with_cancellations:
@@ -201,7 +203,7 @@ class RepairTicketsMonitor:
         self, map_with_cancellations: Dict[str, str]
     ) -> List[Dict[str, Any]]:
         feedback_not_created_due_cancellations = []
-        service_numbers_by_site_id_map = DefaultDict(list)
+        service_numbers_by_site_id_map = defaultdict(list)
         for service_number, site_id in map_with_cancellations.items():
             service_numbers_by_site_id_map[site_id].append(service_number)
 
@@ -214,24 +216,29 @@ class RepairTicketsMonitor:
             feedback_not_created_due_cancellations.append(site_id_feedback)
         return feedback_not_created_due_cancellations
 
-    async def _get_validated_ticket_numbers(self, tickets_id: List[int]) -> Dict[str, dict]:
+    async def _get_validated_ticket_numbers(self, tickets_id: List[int]) -> Tuple[Dict[str, any], List[str]]:
         """
         Return the tickets that already exist in Bruin
         """
         validated_tickets = defaultdict(dict)
         validated_tickets['validated_ticket_numbers'] = []
+        active_tickets = []
 
         for ticket_id in tickets_id:
             bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             if bruin_bridge_response["status"] == 200:
                 ticket_id = bruin_bridge_response["body"]['ticket_id']
+                ticket_status = bruin_bridge_response["body"]["ticket_status"]
 
                 validated_tickets["validated_ticket_numbers"].append(ticket_id)
-                validated_tickets["bruin_ticket_status_map"][ticket_id] = bruin_bridge_response["body"]["ticket_status"]
+                validated_tickets["bruin_ticket_status_map"][ticket_id] = ticket_status
                 validated_tickets["bruin_ticket_call_type_map"][ticket_id] = bruin_bridge_response["body"]["call_type"]
                 validated_tickets["bruin_ticket_category_map"][ticket_id] = bruin_bridge_response["body"]["category"]
 
-        return validated_tickets
+                if ticket_status in ACTIVE_TICKET_STATUS:
+                    active_tickets.append(ticket_id)
+
+        return validated_tickets, active_tickets
 
     async def _process_repair_email(self, email_tag_info: Dict[str, Any]):
         """
@@ -309,6 +316,12 @@ class RepairTicketsMonitor:
                 map_without_cancellations,
             )
 
+            validated_tickets, active_tickets = (
+                await self._get_validated_ticket_numbers(potential_ticket_numbers)
+                if potential_ticket_numbers
+                else (defaultdict(list), [])
+            )
+
             is_actionable = self._is_inference_actionable(inference_data)
             self._logger.info(
                 "email_id=%s is_actionable=%s predicted_class=%s",
@@ -321,6 +334,7 @@ class RepairTicketsMonitor:
                     email_data,
                     map_without_cancellations,
                 )
+
             elif not is_actionable and inference_data["predicted_class"] != "Other":
                 tickets_could_be_created, tickets_could_be_updated = self._get_potential_tickets(
                     inference_data,
@@ -335,12 +349,6 @@ class RepairTicketsMonitor:
             )
 
             tickets_cannot_be_created += feedback_not_created_due_cancellations
-
-            validated_tickets = (
-                await self._get_validated_ticket_numbers(potential_ticket_numbers)
-                if potential_ticket_numbers
-                else defaultdict(list)
-            )
 
             output_send_to_save = {
                 "service_number_sites_map": service_number_site_map,
@@ -607,6 +615,10 @@ class RepairTicketsMonitor:
             )
 
         return not_created_tickets
+
+    @staticmethod
+    def _get_active_tickets(validated_tickets: List[Dict]):
+        pass
 
     @staticmethod
     def _create_output_ticket_dict(

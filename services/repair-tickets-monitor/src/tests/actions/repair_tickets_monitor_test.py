@@ -576,6 +576,7 @@ class TestRepairTicketsMonitor:
             "bruin_ticket_call_type_map": [],
             "bruin_ticket_category_map": [],
         }
+        active_tickets = []
         create_ticket_response = (tickets_created, tickets_updated, tickets_not_created)
         existing_tickets_response = [
             resolved_ticket_data_with_cancellation,
@@ -589,7 +590,7 @@ class TestRepairTicketsMonitor:
 
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(return_value=service_number_site_map)
-        repair_tickets_monitor._get_validated_ticket_numbers = CoroutineMock(return_value=validated_tickets)
+        repair_tickets_monitor._get_validated_ticket_numbers = CoroutineMock(return_value=(validated_tickets,active_tickets))
         repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
         repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
@@ -1181,7 +1182,7 @@ class TestRepairTicketsMonitor:
         rpc_response_200 = {
             "status": 200,
             "body": {
-                "ticketStatus": "inProgress",
+                "ticketStatus": "Ready",
                 "callType": "repair",
                 "category": "VOO",
                 "createDate": "2021-01-01",
@@ -1194,9 +1195,61 @@ class TestRepairTicketsMonitor:
             rpc_mock.return_value.set_result(rpc_response_200)
             validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
 
-        assert validated_ticket_numbers == {
+        assert validated_ticket_numbers == ({
             "validated_ticket_numbers": ["12345"],
-            "bruin_ticket_status_map": {"12345": "inProgress"},
+            "bruin_ticket_status_map": {"12345": "Ready"},
             "bruin_ticket_call_type_map": {"12345": "repair"},
             "bruin_ticket_category_map": {"12345": "VOO"},
+        }, [])
+
+    @pytest.mark.asyncio
+    async def get_active_tickets_in_progress_test(self, repair_tickets_monitor):
+        tickets_id = ['12345']
+        rpc_response_200 = {
+            'status': 200,
+            'body': {
+                'ticketStatus': 'InProgress',
+                'callType': 'repair',
+                'category': 'VOO',
+                'createDate': '2021-01-01',
+            },
         }
+
+        with patch.object(
+                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+        ) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response_200)
+            validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
+
+        assert validated_ticket_numbers == ({
+            'validated_ticket_numbers': ['12345'],
+            'bruin_ticket_status_map': {'12345': 'InProgress'},
+            'bruin_ticket_call_type_map': {'12345': 'repair'},
+            'bruin_ticket_category_map': {'12345': 'VOO'},
+        }, ['12345'])
+
+    @pytest.mark.asyncio
+    async def get_active_tickets_new_test(self, repair_tickets_monitor):
+        tickets_id = ['12345']
+        rpc_response_200 = {
+            'status': 200,
+            'body': {
+                'ticketStatus': 'New',
+                'callType': 'repair',
+                'category': 'VOO',
+                'createDate': '2021-01-01',
+            },
+        }
+
+        with patch.object(
+                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+        ) as rpc_mock:
+            rpc_mock.return_value.set_result(rpc_response_200)
+            validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
+
+        assert validated_ticket_numbers == ({
+            'validated_ticket_numbers': ['12345'],
+            'bruin_ticket_status_map': {'12345': 'New'},
+            'bruin_ticket_call_type_map': {'12345': 'repair'},
+            'bruin_ticket_category_map': {'12345': 'VOO'},
+        }, ['12345'])
