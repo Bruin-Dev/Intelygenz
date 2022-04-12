@@ -12,6 +12,8 @@ from pytz import timezone
 
 from application.exceptions import ResponseException
 
+ACTIVE_TICKET_STATUS = ["New", "InProgress"]
+
 
 class RepairTicketsMonitor:
     def __init__(
@@ -181,11 +183,12 @@ class RepairTicketsMonitor:
                     site_ids.add(ticket["site_id"])
         return list(site_ids)
 
+    @staticmethod
     def get_service_number_site_id_map_with_and_without_cancellations(
-        self, service_number_site_map: Dict[str, str], site_ids_with_cancellations: Tuple[str]
+            service_number_site_map: Dict[str, str], site_ids_with_cancellations: List[str]
     ) -> Tuple[Dict[str, str], Dict[str, str]]:
-        service_number_site_id_map_with_cancellations = DefaultDict()
-        service_number_site_id_map_without_cancellations = DefaultDict()
+        service_number_site_id_map_with_cancellations = DefaultDict[str, str]()
+        service_number_site_id_map_without_cancellations = DefaultDict[str, str]()
 
         for service_number, site_id in service_number_site_map.items():
             if site_id in site_ids_with_cancellations:
@@ -199,7 +202,7 @@ class RepairTicketsMonitor:
         self, map_with_cancellations: Dict[str, str]
     ) -> List[Dict[str, Any]]:
         feedback_not_created_due_cancellations = []
-        service_numbers_by_site_id_map = DefaultDict(list)
+        service_numbers_by_site_id_map = defaultdict(list)
         for service_number, site_id in map_with_cancellations.items():
             service_numbers_by_site_id_map[site_id].append(service_number)
 
@@ -212,24 +215,29 @@ class RepairTicketsMonitor:
             feedback_not_created_due_cancellations.append(site_id_feedback)
         return feedback_not_created_due_cancellations
 
-    async def _get_validated_ticket_numbers(self, tickets_id: List[int]) -> Dict[str, dict]:
+    async def _get_validated_ticket_numbers(self, tickets_id: List[int]) -> Tuple[Dict[str, any], List[str]]:
         """
         Return the tickets that already exist in Bruin
         """
         validated_tickets = defaultdict(dict)
         validated_tickets['validated_ticket_numbers'] = []
+        active_tickets = []
 
         for ticket_id in tickets_id:
             bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             if bruin_bridge_response["status"] == 200:
                 ticket_id = bruin_bridge_response["body"]['ticket_id']
+                ticket_status = bruin_bridge_response["body"]["ticket_status"]
 
                 validated_tickets["validated_ticket_numbers"].append(ticket_id)
-                validated_tickets["bruin_ticket_status_map"][ticket_id] = bruin_bridge_response["body"]["ticket_status"]
+                validated_tickets["bruin_ticket_status_map"][ticket_id] = ticket_status
                 validated_tickets["bruin_ticket_call_type_map"][ticket_id] = bruin_bridge_response["body"]["call_type"]
                 validated_tickets["bruin_ticket_category_map"][ticket_id] = bruin_bridge_response["body"]["category"]
 
-        return validated_tickets
+                if ticket_status in ACTIVE_TICKET_STATUS:
+                    active_tickets.append(ticket_id)
+
+        return validated_tickets, active_tickets
 
     async def _process_repair_email(self, email_tag_info: Dict[str, Any]):
         """
@@ -271,10 +279,10 @@ class RepairTicketsMonitor:
                 potential_ticket_numbers,
             )
 
-            validated_tickets = (
+            validated_tickets, active_tickets = (
                 await self._get_validated_ticket_numbers(potential_ticket_numbers)
                 if potential_ticket_numbers
-                else defaultdict(list)
+                else (defaultdict(list), [])
             )
 
             try:
