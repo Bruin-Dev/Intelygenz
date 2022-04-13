@@ -10035,6 +10035,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -10047,6 +10048,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
             await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
             serial_number=serial_number,
@@ -10105,6 +10107,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -10117,6 +10120,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
             await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
             serial_number=serial_number,
@@ -10175,6 +10179,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -10186,6 +10191,7 @@ class TestServiceOutageMonitor:
 
         await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
             serial_number=serial_number,
@@ -10244,6 +10250,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -10255,6 +10262,7 @@ class TestServiceOutageMonitor:
 
         await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
             serial_number=serial_number,
@@ -10301,6 +10309,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
         bruin_repository.change_detail_work_queue = CoroutineMock()
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -10312,6 +10321,7 @@ class TestServiceOutageMonitor:
 
         await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
+        bruin_repository.post_notification_email_milestone.assert_awaited_once_with(ticket_id, serial_number)
         bruin_repository.get_ticket_details.assert_not_awaited()
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         notifications_repository.send_slack_message.assert_not_awaited()
@@ -10355,6 +10365,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock()
         bruin_repository.change_detail_work_queue = CoroutineMock()
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -10366,6 +10377,7 @@ class TestServiceOutageMonitor:
 
         await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, outage_type)
 
+        bruin_repository.post_notification_email_milestone.assert_awaited_once_with(ticket_id, serial_number)
         bruin_repository.get_ticket_details.assert_not_awaited()
         bruin_repository.change_detail_work_queue.assert_not_awaited()
         notifications_repository.send_slack_message.assert_not_awaited()
