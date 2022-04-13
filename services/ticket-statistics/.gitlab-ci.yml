@@ -7,9 +7,12 @@ ticket-statistics-linter:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
-        - services/ticket-statistics/src/application/**/*
+        - services/ticket-statistics/src/adapters/**/*
         - services/ticket-statistics/src/config/**/*
+        - services/ticket-statistics/src/delivery/**/*
+        - services/ticket-statistics/src/usecases/**/*
         - services/ticket-statistics/src/app.py
+        - services/ticket-statistics/src/containers.py
         - services/ticket-statistics/Dockerfile
         - services/ticket-statistics/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
@@ -27,9 +30,12 @@ ticket-statistics-build:
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_STATISTICS_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - services/ticket-statistics/src/application/**/*
+        - services/ticket-statistics/src/adapters/**/*
         - services/ticket-statistics/src/config/**/*
+        - services/ticket-statistics/src/delivery/**/*
+        - services/ticket-statistics/src/usecases/**/*
         - services/ticket-statistics/src/app.py
+        - services/ticket-statistics/src/containers.py
         - services/ticket-statistics/Dockerfile
         - services/ticket-statistics/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_STATISTICS_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
