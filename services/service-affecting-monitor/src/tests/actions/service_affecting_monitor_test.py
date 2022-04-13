@@ -1997,6 +1997,10 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info)
 
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
+            ticket_id,
+            serial_number
+        )
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
@@ -2014,6 +2018,10 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info)
 
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
+            ticket_id,
+            serial_number
+        )
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
@@ -2031,6 +2039,7 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info)
 
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
@@ -2054,6 +2063,7 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info)
 
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
@@ -2080,6 +2090,7 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info)
 
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id, service_number=serial_number,
@@ -2108,6 +2119,7 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info)
 
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id, service_number=serial_number,
@@ -2141,6 +2153,7 @@ class TestServiceAffectingMonitor:
                                                                           serial_number=serial_number,
                                                                           link_data=link_info)
             service_affecting_monitor._should_be_forwarded_to_HNOC.assert_not_called()
+            service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
             service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
             service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
                 ticket_id=ticket_id, service_number=serial_number,
@@ -2174,6 +2187,7 @@ class TestServiceAffectingMonitor:
                                                                           serial_number=serial_number,
                                                                           link_data=link_info)
             service_affecting_monitor._should_be_forwarded_to_HNOC.assert_not_called()
+            service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
             service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
             service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
                 ticket_id=ticket_id, service_number=serial_number,

@@ -291,6 +291,23 @@ def make_change_detail_work_queue_request(make_rpc_request):
 
 
 @pytest.fixture(scope='session')
+def make_post_notification_email_milestone_request(make_rpc_request):
+    def _inner(*, request_id: str = '', ticket_id: int = 0, service_number: str = ''):
+        payload = {
+            'notification_type': 'TicketBYOBAffectingRepairAcknowledgement-E-Mail',
+            'ticket_id': ticket_id,
+            'service_number': service_number,
+        }
+
+        return make_rpc_request(
+            request_id=request_id,
+            **payload,
+        )
+
+    return _inner
+
+
+@pytest.fixture(scope='session')
 def make_get_site_details_request(make_rpc_request):
     def _inner(*, request_id: str = '', client_id: int = 0, site_id: int = 0):
         payload = {

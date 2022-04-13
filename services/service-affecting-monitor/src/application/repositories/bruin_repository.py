@@ -384,6 +384,46 @@ class BruinRepository:
 
         return response
 
+    async def post_notification_email_milestone(self, ticket_id: int, service_number: str):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'notification_type': 'TicketBYOBAffectingRepairAcknowledgement-E-Mail',
+                'ticket_id': ticket_id,
+                'service_number': service_number,
+            },
+        }
+
+        try:
+            self._logger.info(f'Sending email for ticket id {ticket_id} '
+                              f'and service_number {service_number}...')
+            response = await self._event_bus.rpc_request('bruin.notification.email.milestone', request, timeout=90)
+        except Exception as e:
+            err_msg = (f'An error occurred when sending email for ticket id {ticket_id} '
+                       f'and service_number {service_number}...-> {e}')
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status in range(200, 300):
+                self._logger.info(f'Email sent for ticket {ticket_id} and service number {service_number}!')
+            else:
+                err_msg = (
+                    f'Error while sending email for ticket {ticket_id} and '
+                    f'service_number {service_number} in '
+                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     @staticmethod
     def get_contact_info_for_site(site_details):
         site_detail_name = site_details["primaryContactName"]

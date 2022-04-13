@@ -926,8 +926,9 @@ class ServiceAffectingMonitor:
                     and not self._should_be_forwarded_to_HNOC(link_data):
                 self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                                   f"{link_data['link_status']['displayName']} is a blacklisted link and "
-                                  f"should not be forwarded to HNOC. "
-                                  f"Skipping forward to HNOC...")
+                                  f"should not be forwarded to HNOC. Sending an email and "
+                                  f"skipping forward to HNOC...")
+                await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
                 return
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)

@@ -1,16 +1,16 @@
+import asyncio
 from unittest.mock import Mock
 from unittest.mock import patch, call
 
-import asyncio
 import pytest
 from asynctest import CoroutineMock
 from shortuuid import uuid
+from tests.fixtures._constants import CURRENT_DATETIME
 
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories import notifications_repository as notifications_repository_module
 from config import testconfig
-from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
@@ -882,6 +882,74 @@ class TestBruinRepository:
             ticket_id, ticket_note, service_numbers=[serial_number]
         )
         assert result == bruin_generic_200_response
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone__200_test(
+            self, bruin_repository, make_post_notification_email_milestone_request, bruin_generic_200_response):
+        ticket_id = 12345
+        service_number = 'VC1234567'
+        request = make_post_notification_email_milestone_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+        )
+        bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+
+        with uuid_mock:
+            result = await bruin_repository.post_notification_email_milestone(ticket_id, service_number)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.notification.email.milestone', request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_not_awaited()
+        bruin_repository._logger.error.assert_not_called()
+        assert result == bruin_generic_200_response
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone__exception_test(
+            self, bruin_repository, make_post_notification_email_milestone_request):
+        ticket_id = 12345
+        service_number = 'VC1234567'
+        request = make_post_notification_email_milestone_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+        )
+        bruin_repository._event_bus.rpc_request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.post_notification_email_milestone(ticket_id, service_number)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.notification.email.milestone', request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        bruin_repository._logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone__non_2xx_status_test(
+            self, bruin_repository, make_post_notification_email_milestone_request, bruin_500_response):
+        ticket_id = 12345
+        service_number = 'VC1234567'
+        request = make_post_notification_email_milestone_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+        )
+        bruin_repository._event_bus.rpc_request.return_value = bruin_500_response
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        with uuid_mock:
+            result = await bruin_repository.post_notification_email_milestone(ticket_id, service_number)
+
+        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.notification.email.milestone', request, timeout=90
+        )
+        bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        bruin_repository._logger.error.assert_called_once()
+        assert result == bruin_500_response
 
     # ------------------------ Legacy tests for methods used in SA reports ------------------------
     @pytest.mark.asyncio
