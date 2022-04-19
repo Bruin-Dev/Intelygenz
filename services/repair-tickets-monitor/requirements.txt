@@ -4,3 +4,6 @@ igzpackages==2.0.1
 APScheduler==3.6.0
 prometheus_client==0.6.0
 html2text==2020.1.16
+multipledispatch==0.6.0
+dataclasses==0.8.0
+pytest-lazy-fixture==0.6.3
