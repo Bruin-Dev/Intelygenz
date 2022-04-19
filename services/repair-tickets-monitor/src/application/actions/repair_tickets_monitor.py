@@ -1,20 +1,20 @@
-import asyncio
+import os
 import time
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
-import os
-from collections import defaultdict
 
+import asyncio
 import html2text
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from pytz import timezone
 
 from application.domain.create_tickets_output import CreateTicketsOutput
 from application.domain.potential_tickets_output import PotentialTicketsOutput
 from application.domain.repair_email_output import RepairEmailOutput
 from application.domain.ticket_output import TicketOutput
 from application.exceptions import ResponseException
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from pytz import timezone
 
 ACTIVE_TICKET_STATUS = ["New", "InProgress"]
 REPAIR_CATEGORIES = [
@@ -61,14 +61,14 @@ def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str,
 
 class RepairTicketsMonitor:
     def __init__(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            bruin_repository,
-            new_tagged_emails_repository,
-            repair_tickets_kre_repository,
+        self,
+        event_bus,
+        logger,
+        scheduler,
+        config,
+        bruin_repository,
+        new_tagged_emails_repository,
+        repair_tickets_kre_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -195,7 +195,7 @@ class RepairTicketsMonitor:
 
     @staticmethod
     def get_service_number_site_id_map_with_and_without_cancellations(
-            service_number_site_map: Dict[str, str], site_ids_with_cancellations: List[str]
+        service_number_site_map: Dict[str, str], site_ids_with_cancellations: List[str]
     ) -> Tuple[Dict[str, str], Dict[str, str]]:
         service_number_site_id_map_with_cancellations = DefaultDict[str, str]()
         service_number_site_id_map_without_cancellations = DefaultDict[str, str]()
@@ -209,8 +209,8 @@ class RepairTicketsMonitor:
         return service_number_site_id_map_with_cancellations, service_number_site_id_map_without_cancellations
 
     async def _get_validated_ticket_numbers(
-            self,
-            tickets_id: List[int]
+        self,
+        tickets_id: List[int]
     ) -> Tuple[List[TicketOutput], List[TicketOutput]]:
         """
         Return the tickets that already exist in Bruin
@@ -354,7 +354,7 @@ class RepairTicketsMonitor:
             return
 
     async def _get_valid_service_numbers_site_map(
-            self, client_id: str, potential_service_numbers: List[str]
+        self, client_id: str, potential_service_numbers: List[str]
     ) -> Dict[str, str]:
         """Give a dictionary with keys as service numbers with their site ids"""
         service_number_site_map = {}
@@ -373,7 +373,7 @@ class RepairTicketsMonitor:
         return service_number_site_map
 
     async def _get_existing_tickets(
-            self, client_id: str, service_number_site_map: Dict[str, str]
+        self, client_id: str, service_number_site_map: Dict[str, str]
     ) -> List[Dict[str, Any]]:
         """
         Return a list of preexisting tickets that has not previous cancellations in bruin with the given sites.
@@ -401,12 +401,12 @@ class RepairTicketsMonitor:
         return tickets_with_site_id
 
     def _compose_bec_note_text(
-            self,
-            subject: str,
-            from_address: str,
-            body: str,
-            date: datetime,
-            is_update_note: bool = False,
+        self,
+        subject: str,
+        from_address: str,
+        body: str,
+        date: datetime,
+        is_update_note: bool = False,
     ) -> str:
         new_ticket_message = "This ticket was opened via MetTel Email Center AI Engine."
         update_ticket_message = "This note is new commentary from the client and posted via BEC AI engine."
@@ -427,14 +427,14 @@ class RepairTicketsMonitor:
         )
 
     def _compose_bec_note_to_ticket(
-            self,
-            ticket_id: int,
-            service_numbers: List[str],
-            subject: str,
-            from_address: str,
-            body: str,
-            date: datetime,
-            is_update_note: bool = False,
+        self,
+        ticket_id: int,
+        service_numbers: List[str],
+        subject: str,
+        from_address: str,
+        body: str,
+        date: datetime,
+        is_update_note: bool = False,
     ) -> List[Dict]:
         note_text = self._compose_bec_note_text(
             subject=subject,
@@ -448,9 +448,9 @@ class RepairTicketsMonitor:
         return notes
 
     async def _create_tickets(
-            self,
-            email_data: Dict[str, Any],
-            service_number_site_map: Dict[str, str],
+        self,
+        email_data: Dict[str, Any],
+        service_number_site_map: Dict[str, str],
     ) -> CreateTicketsOutput:
         """
         Try to create tickets for valid service_number
@@ -550,10 +550,10 @@ class RepairTicketsMonitor:
         return create_tickets_output
 
     def _get_potential_tickets(
-            self,
-            inference_data: Dict[str, Any],
-            service_number_site_map: Dict[str, str],
-            existing_tickets: List[Dict[str, Any]],
+        self,
+        inference_data: Dict[str, Any],
+        service_number_site_map: Dict[str, str],
+        existing_tickets: List[Dict[str, Any]],
     ) -> PotentialTicketsOutput:
         """Get potential updated/created tickets"""
         output = PotentialTicketsOutput()
@@ -587,8 +587,8 @@ class RepairTicketsMonitor:
         return output
 
     def _get_class_other_tickets(
-            self,
-            service_number_site_map: Dict[str, str],
+        self,
+        service_number_site_map: Dict[str, str],
     ) -> List[TicketOutput]:
         not_created_tickets = []
         site_ids = set(service_number_site_map.values())

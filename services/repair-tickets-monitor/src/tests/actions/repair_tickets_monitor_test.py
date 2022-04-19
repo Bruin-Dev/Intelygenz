@@ -1,18 +1,18 @@
-import asyncio
 import os
 from collections import defaultdict
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+import asyncio
 import html2text
 import pytest
+from asynctest import CoroutineMock
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor, get_feedback_not_created_due_cancellations
 from application.domain.create_tickets_output import CreateTicketsOutput
 from application.domain.repair_email_output import RepairEmailOutput
 from application.domain.ticket_output import TicketOutput
 from application.exceptions import ResponseException
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 
@@ -120,13 +120,13 @@ def tag_data_new_order():
 
 class TestRepairTicketsMonitor:
     def instance_test(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            bruin_repository,
-            new_tagged_emails_repository,
-            repair_ticket_kre_repository,
+        self,
+        event_bus,
+        logger,
+        scheduler,
+        bruin_repository,
+        new_tagged_emails_repository,
+        repair_ticket_kre_repository,
     ):
         repair_tickets_monitor = RepairTicketsMonitor(
             event_bus,
@@ -178,12 +178,12 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _get_inference__ok_test(
-            self,
-            repair_tickets_monitor,
-            inference_data_voo_validation_set,
-            make_rpc_response,
-            email_data_full_details,
-            tag_data_repair,
+        self,
+        repair_tickets_monitor,
+        inference_data_voo_validation_set,
+        make_rpc_response,
+        email_data_full_details,
+        tag_data_repair,
     ):
         email_data = email_data_full_details["email"]
         expected_cc = ", ".join(email_data["send_cc"])
@@ -214,12 +214,12 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _get_inference__no_cc_test(
-            self,
-            repair_tickets_monitor,
-            inference_data_voo_validation_set,
-            make_rpc_response,
-            email_data_full_details,
-            tag_data_repair,
+        self,
+        repair_tickets_monitor,
+        inference_data_voo_validation_set,
+        make_rpc_response,
+        email_data_full_details,
+        tag_data_repair,
     ):
         email_data = email_data_full_details["email"]
         expected_cc = ""
@@ -250,11 +250,11 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _get_inference__not_200_test(
-            self,
-            repair_tickets_monitor,
-            make_rpc_response,
-            email_data_full_details,
-            tag_data_repair,
+        self,
+        repair_tickets_monitor,
+        make_rpc_response,
+        email_data_full_details,
+        tag_data_repair,
     ):
         email_data = email_data_full_details["email"]
         tag_info = tag_data_repair
@@ -274,9 +274,9 @@ class TestRepairTicketsMonitor:
         tickets_created = make_rta_ticket_payload(ticket_id="5678", site_id="5678")
 
         with patch.object(
-                repair_tickets_monitor._repair_tickets_kre_repository._event_bus,
-                "rpc_request",
-                return_value=asyncio.Future(),
+            repair_tickets_monitor._repair_tickets_kre_repository._event_bus,
+            "rpc_request",
+            return_value=asyncio.Future(),
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
 
@@ -294,9 +294,9 @@ class TestRepairTicketsMonitor:
         rpc_response_400 = make_rpc_response(status=400, body="Error")
 
         with patch.object(
-                repair_tickets_monitor._repair_tickets_kre_repository._event_bus,
-                "rpc_request",
-                return_value=asyncio.Future(),
+            repair_tickets_monitor._repair_tickets_kre_repository._event_bus,
+            "rpc_request",
+            return_value=asyncio.Future(),
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_400)
             result = await repair_tickets_monitor._save_output(
@@ -309,10 +309,10 @@ class TestRepairTicketsMonitor:
         assert result is None
 
     def get_site_ids_with_previous_cancellations__test(
-            self,
-            repair_tickets_monitor,
-            existing_ticket_data_voo_with_service_numbers,
-            resolved_ticket_data_with_cancellation,
+        self,
+        repair_tickets_monitor,
+        existing_ticket_data_voo_with_service_numbers,
+        resolved_ticket_data_with_cancellation,
     ):
         """
         existing_tickets has site_ids ['site_name']
@@ -329,17 +329,17 @@ class TestRepairTicketsMonitor:
         assert site_id == ["site_name_2"]
 
     def get_site_ids_with_previous_cancellations_empty_tickets__test(
-            self,
-            repair_tickets_monitor,
+        self,
+        repair_tickets_monitor,
     ):
         site_id = repair_tickets_monitor.get_site_ids_with_previous_cancellations([])
 
         assert site_id == []
 
     def get_site_ids_with_previous_cancellations_no_cancellations__test(
-            self,
-            repair_tickets_monitor,
-            existing_ticket_data_voo_with_service_numbers,
+        self,
+        repair_tickets_monitor,
+        existing_ticket_data_voo_with_service_numbers,
     ):
         """
         existing_tickets has site_ids ['site_name']
@@ -456,11 +456,11 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _process_repair_email__ok_test(
-            self,
-            repair_tickets_monitor,
-            make_inference_data,
-            make_ticket_decamelized,
-            make_email,
+        self,
+        repair_tickets_monitor,
+        make_inference_data,
+        make_ticket_decamelized,
+        make_email,
     ):
         email_id = "1234"
         tagged_email = {"email_id": email_id, "tag_id": 1}
@@ -527,13 +527,13 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _process_repair_email__ok__with_cancellations_test(
-            self,
-            repair_tickets_monitor,
-            make_inference_data,
-            existing_ticket_data_voo_with_service_numbers,
-            resolved_ticket_data_with_cancellation,
-            make_email,
-            make_filter_flags,
+        self,
+        repair_tickets_monitor,
+        make_inference_data,
+        existing_ticket_data_voo_with_service_numbers,
+        resolved_ticket_data_with_cancellation,
+        make_email,
+        make_filter_flags,
     ):
         email_id = "1234"
         tagged_email = {"email_id": email_id, "tag_id": 1}
@@ -591,15 +591,15 @@ class TestRepairTicketsMonitor:
                 reason="A previous ticket on that site was recently cancelled")
         ]
         assert (
-                repair_tickets_monitor._save_output.await_args[0][0].validated_ticket_numbers
-                == ["1234", "1235"]
+            repair_tickets_monitor._save_output.await_args[0][0].validated_ticket_numbers
+            == ["1234", "1235"]
         )
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
         repair_tickets_monitor._bruin_repository.mark_email_as_done.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def _process_repair_email__site_map_error_test(
-            self, repair_tickets_monitor, make_email, make_filter_flags, make_inference_data
+        self, repair_tickets_monitor, make_email, make_filter_flags, make_inference_data
     ):
         email_id = "1234"
         tagged_email = {"email_id": email_id, "tag_id": 1}
@@ -631,12 +631,12 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _process_repair_email__not_actionable_predicted_other_test(
-            self,
-            repair_tickets_monitor,
-            make_email,
-            make_filter_flags,
-            make_inference_data,
-            make_ticket_decamelized,
+        self,
+        repair_tickets_monitor,
+        make_email,
+        make_filter_flags,
+        make_inference_data,
+        make_ticket_decamelized,
     ):
         email_id = "1234"
         tagged_email = {"email_id": email_id, "tag_id": 1}
@@ -677,8 +677,8 @@ class TestRepairTicketsMonitor:
         await repair_tickets_monitor._process_repair_email(tagged_email)
 
         assert (
-                repair_tickets_monitor._save_output.call_args_list[0][0][0].tickets_cannot_be_created[0].reason
-                == "predicted class is Other"
+            repair_tickets_monitor._save_output.call_args_list[0][0][0].tickets_cannot_be_created[0].reason
+            == "predicted class is Other"
         )
 
     @pytest.mark.asyncio
@@ -730,10 +730,10 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _get_existing_tickets__ok_test(
-            self,
-            repair_tickets_monitor,
-            make_ticket,
-            make_rpc_response,
+        self,
+        repair_tickets_monitor,
+        make_ticket,
+        make_rpc_response,
     ):
         client_id = "1234"
         site_id = "5678"
@@ -758,9 +758,9 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _get_existing_tickets__404_test(
-            self,
-            repair_tickets_monitor,
-            make_rpc_response,
+        self,
+        repair_tickets_monitor,
+        make_rpc_response,
     ):
         client_id = "1234"
         site_id = "5678"
@@ -781,9 +781,9 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _get_existing_tickets__not_200_test(
-            self,
-            repair_tickets_monitor,
-            make_rpc_response,
+        self,
+        repair_tickets_monitor,
+        make_rpc_response,
     ):
         client_id = "1234"
         site_id = "5678"
@@ -800,11 +800,11 @@ class TestRepairTicketsMonitor:
             await repair_tickets_monitor._get_existing_tickets(client_id, service_number_site_map)
 
     def _get_potential_tickets__could_be_updated_tickets_test(
-            self,
-            repair_tickets_monitor,
-            make_filter_flags,
-            make_inference_data,
-            existing_ticket_data_voo_with_service_numbers,
+        self,
+        repair_tickets_monitor,
+        make_filter_flags,
+        make_inference_data,
+        existing_ticket_data_voo_with_service_numbers,
     ):
         predicted_class = "VOO"
         filter_flags = make_filter_flags(in_validation_set=True)
@@ -836,10 +836,10 @@ class TestRepairTicketsMonitor:
         assert potential_tickets_output.tickets_could_be_updated == expected_tickets_could_be_updated
 
     def get_potential_tickets__could_be_created_tickets_test(
-            self,
-            repair_tickets_monitor,
-            make_filter_flags,
-            make_inference_data,
+        self,
+        repair_tickets_monitor,
+        make_filter_flags,
+        make_inference_data,
     ):
         predicted_class = "VOO"
         filter_flags = make_filter_flags(in_validation_set=True)
@@ -899,91 +899,91 @@ class TestRepairTicketsMonitor:
         "predicted_class, filter_flags, expected",
         [
             (
-                    "Other",
-                    {
-                        "is_filtered": False,
-                        "in_validation_set": False,
-                        "tagger_is_below_threshold": False,
-                        "rta_model1_is_below_threshold": False,
-                        "rta_model2_is_below_threshold": False,
-                    },
-                    False,
+                "Other",
+                {
+                    "is_filtered": False,
+                    "in_validation_set": False,
+                    "tagger_is_below_threshold": False,
+                    "rta_model1_is_below_threshold": False,
+                    "rta_model2_is_below_threshold": False,
+                },
+                False,
             ),
             (
-                    "VOO",
-                    {
-                        "is_filtered": True,
-                        "in_validation_set": False,
-                        "tagger_is_below_threshold": False,
-                        "rta_model1_is_below_threshold": False,
-                        "rta_model2_is_below_threshold": False,
-                    },
-                    False,
+                "VOO",
+                {
+                    "is_filtered": True,
+                    "in_validation_set": False,
+                    "tagger_is_below_threshold": False,
+                    "rta_model1_is_below_threshold": False,
+                    "rta_model2_is_below_threshold": False,
+                },
+                False,
             ),
             (
-                    "VOO",
-                    {
-                        "is_filtered": False,
-                        "in_validation_set": True,
-                        "tagger_is_below_threshold": False,
-                        "rta_model1_is_below_threshold": False,
-                        "rta_model2_is_below_threshold": False,
-                    },
-                    False,
+                "VOO",
+                {
+                    "is_filtered": False,
+                    "in_validation_set": True,
+                    "tagger_is_below_threshold": False,
+                    "rta_model1_is_below_threshold": False,
+                    "rta_model2_is_below_threshold": False,
+                },
+                False,
             ),
             (
-                    "VAS",
-                    {
-                        "is_filtered": False,
-                        "in_validation_set": False,
-                        "tagger_is_below_threshold": True,
-                        "rta_model1_is_below_threshold": False,
-                        "rta_model2_is_below_threshold": False,
-                    },
-                    False,
+                "VAS",
+                {
+                    "is_filtered": False,
+                    "in_validation_set": False,
+                    "tagger_is_below_threshold": True,
+                    "rta_model1_is_below_threshold": False,
+                    "rta_model2_is_below_threshold": False,
+                },
+                False,
             ),
             (
-                    "VAS",
-                    {
-                        "is_filtered": False,
-                        "in_validation_set": False,
-                        "tagger_is_below_threshold": False,
-                        "rta_model1_is_below_threshold": True,
-                        "rta_model2_is_below_threshold": False,
-                    },
-                    False,
+                "VAS",
+                {
+                    "is_filtered": False,
+                    "in_validation_set": False,
+                    "tagger_is_below_threshold": False,
+                    "rta_model1_is_below_threshold": True,
+                    "rta_model2_is_below_threshold": False,
+                },
+                False,
             ),
             # Model 2 is not checked now
             (
-                    "VOO",
-                    {
-                        "is_filtered": False,
-                        "in_validation_set": False,
-                        "tagger_is_below_threshold": False,
-                        "rta_model1_is_below_threshold": False,
-                        "rta_model2_is_below_threshold": True,
-                    },
-                    True,
+                "VOO",
+                {
+                    "is_filtered": False,
+                    "in_validation_set": False,
+                    "tagger_is_below_threshold": False,
+                    "rta_model1_is_below_threshold": False,
+                    "rta_model2_is_below_threshold": True,
+                },
+                True,
             ),
             (
-                    "VAS",
-                    {
-                        "is_filtered": False,
-                        "in_validation_set": False,
-                        "tagger_is_below_threshold": False,
-                        "rta_model1_is_below_threshold": False,
-                        "rta_model2_is_below_threshold": False,
-                    },
-                    True,
+                "VAS",
+                {
+                    "is_filtered": False,
+                    "in_validation_set": False,
+                    "tagger_is_below_threshold": False,
+                    "rta_model1_is_below_threshold": False,
+                    "rta_model2_is_below_threshold": False,
+                },
+                True,
             ),
         ],
     )
     def _is_inference_actionable_test(
-            self,
-            repair_tickets_monitor,
-            predicted_class,
-            filter_flags,
-            expected,
+        self,
+        repair_tickets_monitor,
+        predicted_class,
+        filter_flags,
+        expected,
     ):
         inference_data = {
             "filter_flags": filter_flags,
@@ -1068,7 +1068,7 @@ class TestRepairTicketsMonitor:
         )
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             # when
@@ -1093,7 +1093,7 @@ class TestRepairTicketsMonitor:
         )
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             # when
@@ -1119,7 +1119,7 @@ class TestRepairTicketsMonitor:
         )
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_500)
             # when
@@ -1142,7 +1142,7 @@ class TestRepairTicketsMonitor:
         }
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
@@ -1167,7 +1167,7 @@ class TestRepairTicketsMonitor:
         }
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
@@ -1192,7 +1192,7 @@ class TestRepairTicketsMonitor:
         }
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)

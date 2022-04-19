@@ -1,9 +1,9 @@
-import asyncio
 from unittest.mock import patch
 
+import asyncio
 import pytest
-from shortuuid import uuid
 from asynctest import CoroutineMock
+from shortuuid import uuid
 
 from application.domain.repair_email_output import RepairEmailOutput
 from application.domain.ticket_output import TicketOutput
@@ -25,14 +25,14 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def get_email_inference__ok_test(
-            self,
-            event_bus,
-            repair_ticket_kre_repository,
-            make_email,
-            make_rpc_request,
-            make_rpc_response,
-            make_inference_data,
-            make_inference_request_payload,
+        self,
+        event_bus,
+        repair_ticket_kre_repository,
+        make_email,
+        make_rpc_request,
+        make_rpc_response,
+        make_inference_data,
+        make_inference_request_payload,
     ):
         email_id = "1234"
         client_id = "2145"
@@ -56,13 +56,13 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def get_email_inference__not_2XX_test(
-            self,
-            event_bus,
-            repair_ticket_kre_repository,
-            make_email,
-            make_rpc_request,
-            make_rpc_response,
-            make_inference_request_payload,
+        self,
+        event_bus,
+        repair_ticket_kre_repository,
+        make_email,
+        make_rpc_request,
+        make_rpc_response,
+        make_inference_request_payload,
     ):
         email_id = "1234"
         client_id = "2145"
@@ -90,7 +90,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_created_ticket_feedback__ok_test(
-            self, event_bus, repair_ticket_kre_repository, make_email, make_rpc_request, make_rpc_response
+        self, event_bus, repair_ticket_kre_repository, make_email, make_rpc_request, make_rpc_response
     ):
         ticket_id = 1234
         email_id = 5678
@@ -119,7 +119,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_created_ticket_feedback__not_2XX_test(
-            self, event_bus, repair_ticket_kre_repository, notifications_repository, make_email, make_rpc_response
+        self, event_bus, repair_ticket_kre_repository, notifications_repository, make_email, make_rpc_response
     ):
         ticket_id = 1234
         email_id = 5678
@@ -152,7 +152,7 @@ class TestRepairTicketRepository:
         rpc_response = make_rpc_response(request_id=uuid_, status=200, body={"success": True})
 
         with patch.object(
-                repair_ticket_kre_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_ticket_kre_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_request_mock:
             rpc_request_mock.return_value.set_result(rpc_response)
             save_output_response = await repair_ticket_kre_repository.save_outputs(
@@ -167,7 +167,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_outputs__not_200_test(
-            self, repair_ticket_kre_repository, make_rta_ticket_payload, make_rpc_response
+        self, repair_ticket_kre_repository, make_rta_ticket_payload, make_rpc_response
     ):
         email_id = "1234"
 
@@ -177,7 +177,7 @@ class TestRepairTicketRepository:
         rpc_response = make_rpc_response(request_id=uuid_, status=400, body="Error")
 
         with patch.object(
-                repair_ticket_kre_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_ticket_kre_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_request_mock:
             rpc_request_mock.return_value.set_result(rpc_response)
             save_output_response = await repair_ticket_kre_repository.save_outputs(
@@ -211,11 +211,11 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback__not_2xx_test(
-            self,
-            event_bus,
-            repair_ticket_kre_repository,
-            notifications_repository,
-            make_rpc_response,
+        self,
+        event_bus,
+        repair_ticket_kre_repository,
+        notifications_repository,
+        make_rpc_response,
     ):
         ticket_id = 1235
         client_id = 5679
