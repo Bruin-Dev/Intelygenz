@@ -52,7 +52,7 @@ class Container:
         # ACTIONS
         self._fraud_monitoring = FraudMonitor(self._event_bus, self._logger, self._scheduler, config,
                                               self._notifications_repository, self._bruin_repository,
-                                              self._ticket_repository)
+                                              self._ticket_repository, self._utils_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()

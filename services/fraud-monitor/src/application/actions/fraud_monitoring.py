@@ -8,16 +8,18 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 
-DID_PATTERN = re.compile(r'.+').pattern
-
-EMAIL_SUBJECT_REGEX = re.compile(rf'Possible Fraud on {DID_PATTERN}')
-EMAIL_BODY_REGEX = re.compile(r'(?P<email_body>Possible Fraud Warning.*)\n\nThanks,\nFraud Detection System', re.DOTALL)
-DID_REGEX = re.compile(rf'DID: (?P<did>{DID_PATTERN})')
+EMAIL_REGEXES = [
+    {
+        'subject': re.compile(r'Possible Fraud on .*'),
+        'body': re.compile(r'(?P<email_body>Possible Fraud Warning.*)\n\nThanks,\nFraud Detection System', re.DOTALL),
+        'did': re.compile(r'DID: (?P<did>.*)'),
+    },
+]
 
 
 class FraudMonitor:
     def __init__(self, event_bus, logger, scheduler, config, notifications_repository, bruin_repository,
-                 ticket_repository):
+                 ticket_repository, utils_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -25,6 +27,7 @@ class FraudMonitor:
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
         self._ticket_repository = ticket_repository
+        self._utils_repository = utils_repository
 
     async def start_fraud_monitoring(self, exec_on_start=False):
         self._logger.info('Scheduling Fraud Monitor job...')
@@ -59,20 +62,25 @@ class FraudMonitor:
             msg_uid = email['msg_uid']
             subject = email['subject']
 
+            email_regex = self._utils_repository.get_first_element_matching(
+                EMAIL_REGEXES,
+                lambda regex: regex['subject'].search(subject)
+            )
+
             if message is None or msg_uid == -1:
                 self._logger.error(f'Invalid message: {email}')
                 continue
 
-            if not EMAIL_SUBJECT_REGEX.search(subject):
+            if not email_regex:
                 self._logger.info(f'Email with msg_uid {msg_uid} is not a fraud warning. Skipping...')
                 continue
 
-            if not EMAIL_BODY_REGEX.search(body):
+            if not email_regex['body'].search(body):
                 self._logger.error(f'Email with msg_uid {msg_uid} has an unexpected body')
                 continue
 
             self._logger.info(f'Processing email with msg_uid {msg_uid}')
-            processed = await self._process_fraud(body, msg_uid)
+            processed = await self._process_fraud(email_regex, body, msg_uid)
 
             if processed and self._config.CURRENT_ENVIRONMENT == 'production':
                 mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
@@ -90,9 +98,9 @@ class FraudMonitor:
         self._logger.info(f'Finished processing all unread email from {self._config.FRAUD_CONFIG["inbox_email"]}. '
                           f'Elapsed time: {round((stop - start) / 60, 2)} minutes')
 
-    async def _process_fraud(self, email_body: str, msg_uid: str) -> bool:
-        did = DID_REGEX.search(email_body).group('did')
-        email_body = EMAIL_BODY_REGEX.search(email_body).group('email_body')
+    async def _process_fraud(self, email_regex: dict, email_body: str, msg_uid: str) -> bool:
+        did = email_regex['did'].search(email_body).group('did')
+        email_body = email_regex['body'].search(email_body).group('email_body')
 
         client_info_by_did_response = await self._bruin_repository.get_client_info_by_did(did)
         if client_info_by_did_response['status'] in range(200, 300):

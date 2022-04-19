@@ -8,6 +8,7 @@ from apscheduler.util import undefined
 from apscheduler.jobstores.base import ConflictingIdError
 
 from application.actions import fraud_monitoring as fraud_monitor_module
+from application.actions.fraud_monitoring import EMAIL_REGEXES
 from application.repositories import bruin_repository as bruin_repository_module
 from config import testconfig
 
@@ -19,7 +20,7 @@ config_mock = patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production')
 
 class TestFraudMonitor:
     def instance_test(self, fraud_monitor, event_bus, logger, scheduler, notifications_repository,
-                      bruin_repository, ticket_repository):
+                      bruin_repository, ticket_repository, utils_repository):
         assert fraud_monitor._event_bus == event_bus
         assert fraud_monitor._logger == logger
         assert fraud_monitor._scheduler == scheduler
@@ -27,6 +28,7 @@ class TestFraudMonitor:
         assert fraud_monitor._notifications_repository == notifications_repository
         assert fraud_monitor._bruin_repository == bruin_repository
         assert fraud_monitor._ticket_repository == ticket_repository
+        assert fraud_monitor._utils_repository == utils_repository
 
     @pytest.mark.asyncio
     async def start_fraud_monitoring__success_test(self, fraud_monitor, scheduler):
@@ -137,7 +139,7 @@ class TestFraudMonitor:
         with config_mock:
             await fraud_monitor._fraud_monitoring_process()
 
-        fraud_monitor._process_fraud.assert_called_once_with(body, msg_uid)
+        fraud_monitor._process_fraud.assert_called_once_with(EMAIL_REGEXES[0], body, msg_uid)
         fraud_monitor._notifications_repository.mark_email_as_read.assert_called_once_with(msg_uid)
 
     @pytest.mark.asyncio
@@ -168,7 +170,7 @@ class TestFraudMonitor:
 
         await fraud_monitor._fraud_monitoring_process()
 
-        fraud_monitor._process_fraud.assert_called_once_with(body, msg_uid)
+        fraud_monitor._process_fraud.assert_called_once_with(EMAIL_REGEXES[0], body, msg_uid)
         fraud_monitor._notifications_repository.mark_email_as_read.assert_not_called()
 
     @pytest.mark.asyncio
@@ -199,7 +201,7 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response(ticket)
         fraud_monitor._get_oldest_fraud_ticket.return_value = detail_info
 
-        await fraud_monitor._process_fraud(full_body, msg_uid)
+        await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
         fraud_monitor._append_note_to_ticket.assert_awaited_once_with(detail_info, service_number, body, msg_uid)
 
@@ -232,7 +234,7 @@ class TestFraudMonitor:
         fraud_monitor._get_oldest_fraud_ticket.return_value = detail_info
         fraud_monitor._ticket_repository.is_task_resolved.return_value = True
 
-        await fraud_monitor._process_fraud(full_body, msg_uid)
+        await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
         fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, body, msg_uid)
 
@@ -265,7 +267,7 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.get_resolved_fraud_tickets.return_value = make_get_tickets_response(ticket)
         fraud_monitor._get_oldest_fraud_ticket.side_effect = [None, detail_info]
 
-        await fraud_monitor._process_fraud(full_body, msg_uid)
+        await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
         fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, body, msg_uid)
 
@@ -294,7 +296,7 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
         fraud_monitor._bruin_repository.get_resolved_fraud_tickets.return_value = make_get_tickets_response()
 
-        await fraud_monitor._process_fraud(full_body, msg_uid)
+        await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
         fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, body, msg_uid)
 
@@ -324,7 +326,7 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
         fraud_monitor._bruin_repository.get_resolved_fraud_tickets.return_value = make_get_tickets_response()
 
-        await fraud_monitor._process_fraud(full_body, msg_uid)
+        await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
         fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, body, msg_uid)
 

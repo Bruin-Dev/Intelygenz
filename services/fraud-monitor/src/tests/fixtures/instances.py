@@ -70,7 +70,8 @@ def utils_repository():
 
 
 @pytest.fixture(scope='function')
-def fraud_monitor(event_bus, logger, scheduler, notifications_repository, bruin_repository, ticket_repository):
+def fraud_monitor(event_bus, logger, scheduler, notifications_repository, bruin_repository, ticket_repository,
+                  utils_repository):
     instance = FraudMonitor(
         event_bus=event_bus,
         logger=logger,
@@ -79,6 +80,7 @@ def fraud_monitor(event_bus, logger, scheduler, notifications_repository, bruin_
         notifications_repository=notifications_repository,
         bruin_repository=bruin_repository,
         ticket_repository=ticket_repository,
+        utils_repository=utils_repository,
     )
     wrap_all_methods(instance)
 
