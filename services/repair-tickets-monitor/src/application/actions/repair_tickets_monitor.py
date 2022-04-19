@@ -195,7 +195,7 @@ class RepairTicketsMonitor:
 
     @staticmethod
     def get_service_number_site_id_map_with_and_without_cancellations(
-            service_number_site_map: Dict[str, str], site_ids_with_cancellations: List[str]
+        service_number_site_map: Dict[str, str], site_ids_with_cancellations: List[str]
     ) -> Tuple[Dict[str, str], Dict[str, str]]:
         service_number_site_id_map_with_cancellations = DefaultDict[str, str]()
         service_number_site_id_map_without_cancellations = DefaultDict[str, str]()
@@ -209,8 +209,8 @@ class RepairTicketsMonitor:
         return service_number_site_id_map_with_cancellations, service_number_site_id_map_without_cancellations
 
     async def _get_validated_ticket_numbers(
-            self,
-            tickets_id: List[int]
+        self,
+        tickets_id: List[int]
     ) -> Tuple[List[TicketOutput], List[TicketOutput]]:
         """
         Return the tickets that already exist in Bruin
@@ -347,9 +347,7 @@ class RepairTicketsMonitor:
 
             if not service_number_site_map:
                 output.tickets_cannot_be_created.append(
-                    self._create_output_ticket_dict(
-                        service_numbers=[], site_id="", reason="No validated service numbers"
-                    )
+                    TicketOutput(reason="No validated service numbers")
                 )
 
             self._logger.info("email_id=%s output_send_to_save=%s", email_id, output)
@@ -366,7 +364,7 @@ class RepairTicketsMonitor:
             return
 
     async def _get_valid_service_numbers_site_map(
-            self, client_id: str, potential_service_numbers: List[str]
+        self, client_id: str, potential_service_numbers: List[str]
     ) -> Dict[str, str]:
         """Give a dictionary with keys as service numbers with their site ids"""
         service_number_site_map = {}
@@ -382,7 +380,7 @@ class RepairTicketsMonitor:
         return service_number_site_map
 
     async def _get_existing_tickets(
-            self, client_id: str, service_number_site_map: Dict[str, str]
+        self, client_id: str, service_number_site_map: Dict[str, str]
     ) -> List[Dict[str, Any]]:
         """
         Return a list of preexisting tickets that has not previous cancellations in bruin with the given sites.
@@ -460,7 +458,7 @@ class RepairTicketsMonitor:
         self,
         email_data: Dict[str, Any],
         service_number_site_map: Dict[str, str],
-    ) -> Tuple[List[str], List[str], List[str]]:
+    ) -> CreateTicketsOutput:
         """
         Try to create tickets for valid service_number
         """
@@ -559,10 +557,10 @@ class RepairTicketsMonitor:
         return create_tickets_output
 
     def _get_potential_tickets(
-            self,
-            inference_data: Dict[str, Any],
-            service_number_site_map: Dict[str, str],
-            existing_tickets: List[Dict[str, Any]],
+        self,
+        inference_data: Dict[str, Any],
+        service_number_site_map: Dict[str, str],
+        existing_tickets: List[Dict[str, Any]],
     ) -> PotentialTicketsOutput:
         """Get potential updated/created tickets"""
         output = PotentialTicketsOutput()
@@ -596,8 +594,8 @@ class RepairTicketsMonitor:
         return output
 
     def _get_class_other_tickets(
-            self,
-            service_number_site_map: Dict[str, str],
+        self,
+        service_number_site_map: Dict[str, str],
     ) -> List[TicketOutput]:
         not_created_tickets = []
         site_ids = set(service_number_site_map.values())

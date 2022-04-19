@@ -584,8 +584,8 @@ class TestRepairTicketsMonitor:
                 reason="A previous ticket on that site was recently cancelled")
         ]
         assert (
-                repair_tickets_monitor._save_output.await_args[0][0].validated_ticket_numbers
-                == ["1234", "1235"]
+            repair_tickets_monitor._save_output.await_args[0][0].validated_ticket_numbers
+            == ["1234", "1235"]
         )
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
         repair_tickets_monitor._bruin_repository.mark_email_as_done.assert_not_awaited()
@@ -715,8 +715,8 @@ class TestRepairTicketsMonitor:
         await repair_tickets_monitor._process_repair_email(tagged_email)
 
         assert (
-                repair_tickets_monitor._save_output.call_args_list[0][0][0].tickets_cannot_be_created[0].reason
-                == "predicted class is Other"
+            repair_tickets_monitor._save_output.call_args_list[0][0][0].tickets_cannot_be_created[0].reason
+            == "predicted class is Other"
         )
 
     @pytest.mark.asyncio
@@ -1284,7 +1284,7 @@ class TestRepairTicketsMonitor:
         }
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
@@ -1309,7 +1309,7 @@ class TestRepairTicketsMonitor:
         }
 
         with patch.object(
-                repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
+            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response_200)
             validated_ticket_numbers = await repair_tickets_monitor._get_validated_ticket_numbers(tickets_id)
