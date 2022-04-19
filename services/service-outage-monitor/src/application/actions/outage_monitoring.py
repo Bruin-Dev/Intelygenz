@@ -701,6 +701,7 @@ class OutageMonitor:
 
         self._logger.info(f"Scheduling HNOC forwarding for ticket_id {ticket_id} and serial {serial_number}"
                           f" to happen at timestamp: {forward_task_run_date}")
+
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue, 'date',
             kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
