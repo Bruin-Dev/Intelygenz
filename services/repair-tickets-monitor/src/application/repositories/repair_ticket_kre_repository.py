@@ -2,8 +2,11 @@ from shortuuid import uuid
 
 from tenacity import retry, wait_exponential, stop_after_delay
 
+from application.domain.repair_email_output import RepairEmailOutput
 from application.repositories import nats_error_response
 from typing import Any, Dict, List
+
+from application.repositories.repair_ticket_kre_repository_mapper import to_output_message
 
 
 class RepairTicketKreRepository:
@@ -75,21 +78,7 @@ class RepairTicketKreRepository:
         except Exception as e:
             self._logger.error("email_id=%s Error trying to get prediction from rta KRE %e", email_id, e)
 
-    async def save_outputs(
-        self,
-        email_id: str,
-        service_numbers_sites_map: Dict[str, str],
-        tickets_created: List[Dict[str, Any]],
-        tickets_updated: List[Dict[str, Any]],
-        tickets_could_be_created: List[Dict[str, Any]],
-        tickets_could_be_updated: List[Dict[str, Any]],
-        tickets_cannot_be_created: List[Dict[str, Any]],
-        validated_ticket_numbers: List[Dict[str, Any]],
-        bruin_ticket_status_map: Dict[str, Any],
-        bruin_ticket_call_type_map: Dict[str, Any],
-        bruin_ticket_category_map: Dict[str, Any]
-    ):
-        validated_service_numbers = list(service_numbers_sites_map.keys())
+    async def save_outputs(self, output: RepairEmailOutput):
 
         @retry(
             wait=wait_exponential(
@@ -100,27 +89,11 @@ class RepairTicketKreRepository:
         )
         async def save_outputs():
             request_id = uuid()
-            request_msg = {
-                "request_id": request_id,
-                "body": {
-                    "email_id": email_id,
-                    "validated_service_numbers": validated_service_numbers,
-                    "service_numbers_sites_map": service_numbers_sites_map,
-                    "tickets_created": tickets_created,
-                    "tickets_updated": tickets_updated,
-                    "tickets_could_be_created": tickets_could_be_created,
-                    "tickets_could_be_updated": tickets_could_be_updated,
-                    "tickets_cannot_be_created": tickets_cannot_be_created,
-                    "validated_ticket_numbers": validated_ticket_numbers,
-                    "bruin_ticket_status_map": bruin_ticket_status_map,
-                    "bruin_ticket_call_type_map": bruin_ticket_call_type_map,
-                    "bruin_ticket_category_map": bruin_ticket_category_map
-                },
-            }
+            request_msg = to_output_message(output)
             self._logger.info(
                 "request_id=%s email_id=%s Sending data to save output in repair-tickets-kre-bridge",
                 request_id,
-                email_id,
+                output.email_id,
             )
 
             try:
@@ -130,9 +103,9 @@ class RepairTicketKreRepository:
 
             except Exception as exception:
                 err_msg = (
-                    "request_id=%s email_id=%s "
-                    "Exception occurred when getting inference from repair-tickets-kre-bridge: %s"
-                    % (request_id, email_id, exception)
+                        "request_id=%s email_id=%s "
+                        "Exception occurred when getting inference from repair-tickets-kre-bridge: %s"
+                        % (request_id, output.email_id, exception)
                 )
                 response = nats_error_response
                 self._logger.error(err_msg)
@@ -144,20 +117,20 @@ class RepairTicketKreRepository:
 
             if response_status != 200:
                 err_msg = (
-                    "request_id=%s email_id=%s "
-                    "Bad response code received from repair-tickets-kre-bridge: %s - %s"
-                    % (
-                        request_id,
-                        email_id,
-                        response_status,
-                        response_body,
-                    )
+                        "request_id=%s email_id=%s "
+                        "Bad response code received from repair-tickets-kre-bridge: %s - %s"
+                        % (
+                            request_id,
+                            output.email_id,
+                            response_status,
+                            response_body,
+                        )
                 )
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
                 return response
 
-            self._logger.info("request_id=%s email_id=%s Output saved", request_id, email_id)
+            self._logger.info("request_id=%s email_id=%s Output saved", request_id, output.email_id)
             return response
 
         return await save_outputs()
@@ -228,7 +201,7 @@ class RepairTicketKreRepository:
             )
 
     async def save_closed_ticket_feedback(
-        self, ticket_id: str, client_id: str, status: str, cancelled_reasons: List[str]
+            self, ticket_id: str, client_id: str, status: str, cancelled_reasons: List[str]
     ):
         @retry(
             wait=wait_exponential(
