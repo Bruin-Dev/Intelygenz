@@ -545,11 +545,12 @@ class OutageMonitor:
                         )
 
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
-                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                            serial_number,
-                                                            edge_status['links'],
-                                                            outage_type,
-                                                            forward_time=forward_time)
+                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                            ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
+                        if should_schedule_hnoc_forwarding:
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                                serial_number,
+                                                                forward_time=forward_time)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -565,12 +566,13 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
+                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                            ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
+                        if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED and \
+                                should_schedule_hnoc_forwarding:
                             forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                                 serial_number,
-                                                                edge_status['links'],
-                                                                outage_type,
                                                                 forward_time=forward_time)
 
                         await self._check_for_failed_digi_reboot(ticket_creation_response_body,
@@ -590,12 +592,13 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
+                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                            ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
-                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                            serial_number,
-                                                            edge_status['links'],
-                                                            outage_type,
-                                                            forward_time=forward_time)
+                        if should_schedule_hnoc_forwarding:
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                                serial_number,
+                                                                forward_time=forward_time)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -615,12 +618,13 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
+                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                            ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
-                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                            serial_number,
-                                                            edge_status['links'],
-                                                            outage_type,
-                                                            forward_time=forward_time)
+                        if should_schedule_hnoc_forwarding:
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                                serial_number,
+                                                                forward_time=forward_time)
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
                             f'[{outage_type.value}] There is a resolve outage ticket for the same location of faulty '
@@ -638,12 +642,13 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
+                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                            ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
-                        self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                            serial_number,
-                                                            edge_status['links'],
-                                                            outage_type,
-                                                            forward_time=forward_time)
+                        if should_schedule_hnoc_forwarding:
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
+                                                                serial_number,
+                                                                forward_time=forward_time)
 
             else:
                 self._logger.info(
@@ -677,7 +682,19 @@ class OutageMonitor:
         else:
             return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
 
-    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data, outage_type, *, forward_time):
+    async def _should_schedule_hnoc_forwarding(self, ticket_id, serial_number, link_data, outage_type):
+        if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
+                and (outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN) \
+                and not self._should_be_forwarded_to_HNOC(link_data):
+            self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_data: "
+                              f"{link_data} has a blacklisted link and "
+                              f"should not be forwarded to HNOC. Sending an email and "
+                              f"skipping forward to HNOC...")
+            await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+            return False
+        return True
+
+    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, *, forward_time):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
@@ -686,8 +703,7 @@ class OutageMonitor:
                           f" to happen at timestamp: {forward_task_run_date}")
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_data,
-                    'outage_type': outage_type},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=True,
             misfire_grace_time=9999,
@@ -695,22 +711,13 @@ class OutageMonitor:
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
-    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, link_data, outage_type):
+    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
         async def forward_ticket_to_hnoc_queue():
             self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
                               f'attempting to forward to HNOC...')
-            if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
-                    and (outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN) \
-                    and not self._should_be_forwarded_to_HNOC(link_data):
-                self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_data: "
-                                  f"{link_data} has a blacklisted link and "
-                                  f"should not be forwarded to HNOC. Sending an email and "
-                                  f"skipping forward to HNOC...")
-                await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
-                return
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response['status'] not in range(200, 300):

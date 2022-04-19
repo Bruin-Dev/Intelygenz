@@ -1869,6 +1869,108 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
+    async def unresolve_task_for_affecting_ticket__ticket_task_reopened_byob_link_test(
+            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
+            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response,
+            make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+
+        detail_info = make_detail_item_with_notes_and_ticket_info()
+        link_data = make_link(display_name='BYOB test')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def unresolve_task_for_affecting_ticket__ticket_task_reopened_ip_address_link_test(
+            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
+            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response,
+            make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+
+        detail_info = make_detail_item_with_notes_and_ticket_info()
+        link_data = make_link(display_name='192.158.1.38')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def unresolve_task_for_affecting_ticket__ticket_task_reopened_byob_link_metvco4_test(
+            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
+            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response,
+            make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+
+        detail_info = make_detail_item_with_notes_and_ticket_info()
+        link_data = make_link(display_name='BYOB test')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+                await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def unresolve_task_for_affecting_ticket__ticket_task_reopened_ip_address_link_metvco4_test(
+            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
+            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response,
+            make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+
+        detail_info = make_detail_item_with_notes_and_ticket_info()
+        link_data = make_link(display_name='192.158.1.38')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+                await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
+
+    @pytest.mark.asyncio
     async def unresolve_task_for_affecting_ticket__ticket_task_reopened_test(
             self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
             make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response):
@@ -1885,6 +1987,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
         service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
     @pytest.mark.asyncio
@@ -1938,6 +2041,100 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
+    async def create_affecting_ticket__ticket_created_byob_link_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_with_events_and_contact_info,
+            bruin_generic_200_response, make_create_ticket_200_response, make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        link_data = make_link(display_name='BYOB test')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_with_events_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+            make_create_ticket_200_response()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def create_affecting_ticket__ticket_created_ip_address_link_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_with_events_and_contact_info,
+            bruin_generic_200_response, make_create_ticket_200_response, make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        link_data = make_link(display_name='192.158.1.38')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_with_events_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+            make_create_ticket_200_response()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def create_affecting_ticket__ticket_created_byob_link_metvco4_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_with_events_and_contact_info,
+            bruin_generic_200_response, make_create_ticket_200_response, make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        link_data = make_link(display_name='BYOB test')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_with_events_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+            make_create_ticket_200_response()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+                await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def create_affecting_ticket__ticket_created_ip_address_link_metvco4_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_with_events_and_contact_info,
+            bruin_generic_200_response, make_create_ticket_200_response, make_link, make_structured_metrics_object):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        link_data = make_link(display_name='192.158.1.38')
+        link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_info = make_structured_metrics_object_with_cache_with_events_and_contact_info(
+            metrics_object=link_metric_object)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+            make_create_ticket_200_response()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+                await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
+
+    @pytest.mark.asyncio
     async def create_affecting_ticket__ticket_created_test(
             self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
             bruin_generic_200_response, make_create_ticket_200_response):
@@ -1976,55 +2173,13 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
             service_affecting_monitor._forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_info},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
             coalesce=True,
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__BYOB_link_test(
-            self, service_affecting_monitor,
-            make_structured_metrics_object, make_link):
-        ticket_id = 12345
-        serial_number = 'VC1234567'
-
-        link_data = make_link(display_name='BYOB test')
-        link_info = make_structured_metrics_object(link_info=link_data)
-
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info)
-
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
-            ticket_id,
-            serial_number
-        )
-        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
-        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__IP_link_test(
-            self, service_affecting_monitor,
-            make_structured_metrics_object, make_link):
-        ticket_id = 12345
-        serial_number = 'VC1234567'
-
-        link_data = make_link(display_name='192.158.1.38')
-        link_info = make_structured_metrics_object(link_info=link_data)
-
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info)
-
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
-            ticket_id,
-            serial_number
-        )
-        service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
-        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
@@ -2036,8 +2191,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2060,8 +2214,7 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2087,8 +2240,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2116,8 +2268,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_generic_200_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2127,74 +2278,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_awaited_once_with(
             ticket_id=ticket_id, serial_number=serial_number,
         )
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_with_BYOB_link_in_vco4_test(
-            self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
-            make_rpc_response, make_link, make_structured_metrics_object):
-        ticket_id = 12345
-        serial_number = 'VC1234567'
-        link_data = make_link(display_name='BYOB test')
-        link_info = make_structured_metrics_object(link_info=link_data)
-
-        detail_item = make_detail_item(value=serial_number, status='O')
-        ticket_details = make_ticket_details(detail_items=[detail_item])
-
-        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
-            body=ticket_details,
-            status=200,
-        )
-
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
-            bruin_generic_200_response
-
-        with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id,
-                                                                          serial_number=serial_number,
-                                                                          link_data=link_info)
-            service_affecting_monitor._should_be_forwarded_to_HNOC.assert_not_called()
-            service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
-            service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-            service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
-                ticket_id=ticket_id, service_number=serial_number,
-            )
-            service_affecting_monitor._notifications_repository.\
-                notify_successful_ticket_forward.assert_awaited_once_with(ticket_id=ticket_id,
-                                                                          serial_number=serial_number)
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_with_IP_link_in_vco4_test(
-            self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
-            make_rpc_response, make_link, make_structured_metrics_object):
-        ticket_id = 12345
-        serial_number = 'VC1234567'
-        link_data = make_link(display_name='192.158.1.38')
-        link_info = make_structured_metrics_object(link_info=link_data)
-
-        detail_item = make_detail_item(value=serial_number, status='O')
-        ticket_details = make_ticket_details(detail_items=[detail_item])
-
-        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
-            body=ticket_details,
-            status=200,
-        )
-
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
-            bruin_generic_200_response
-
-        with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id,
-                                                                          serial_number=serial_number,
-                                                                          link_data=link_info)
-            service_affecting_monitor._should_be_forwarded_to_HNOC.assert_not_called()
-            service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
-            service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-            service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
-                ticket_id=ticket_id, service_number=serial_number,
-            )
-            service_affecting_monitor._notifications_repository. \
-                notify_successful_ticket_forward.assert_awaited_once_with(ticket_id=ticket_id,
-                                                                          serial_number=serial_number)
 
     @pytest.mark.asyncio
     async def run_autoresolve_process__no_metrics_found_test(

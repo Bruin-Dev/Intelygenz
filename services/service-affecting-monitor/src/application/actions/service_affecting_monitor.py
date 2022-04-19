@@ -844,10 +844,14 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        self._logger.info(
-            f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
-        )
-        self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number, link_data=link_data)
+        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                      serial_number,
+                                                                                      link_data)
+        if should_schedule_hnoc_forwarding:
+            self._logger.info(
+                f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
+            )
+            self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number, link_data=link_data)
 
     async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
         serial_number = link_data['cached_info']['serial_number']
@@ -891,10 +895,24 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        if trouble is not AffectingTroubles.BOUNCING:
+        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                      serial_number,
+                                                                                      link_data)
+        if trouble is not AffectingTroubles.BOUNCING and should_schedule_hnoc_forwarding:
             self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data)
 
         return ticket_id
+
+    async def _should_schedule_hnoc_forwarding(self, ticket_id, serial_number, link_data):
+        if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
+                and not self._should_be_forwarded_to_HNOC(link_data):
+            self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
+                              f"{link_data['link_status']['displayName']} is a blacklisted link and "
+                              f"should not be forwarded to HNOC. Sending an email and "
+                              f"skipping forward to HNOC...")
+            await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+            return False
+        return True
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data):
         tz = timezone(self._config.TIMEZONE)
@@ -907,7 +925,7 @@ class ServiceAffectingMonitor:
 
         self._scheduler.add_job(
             self._forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_data},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
             run_date=forward_task_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
@@ -915,21 +933,13 @@ class ServiceAffectingMonitor:
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
-    async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, link_data):
+    async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
         async def forward_ticket_to_hnoc_queue():
             self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
                               f'attempting to forward to HNOC...')
-            if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
-                    and not self._should_be_forwarded_to_HNOC(link_data):
-                self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
-                                  f"{link_data['link_status']['displayName']} is a blacklisted link and "
-                                  f"should not be forwarded to HNOC. Sending an email and "
-                                  f"skipping forward to HNOC...")
-                await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
-                return
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
