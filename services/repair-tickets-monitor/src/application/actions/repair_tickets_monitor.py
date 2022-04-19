@@ -610,10 +610,6 @@ class RepairTicketsMonitor:
         return not_created_tickets
 
     @staticmethod
-    def _get_active_tickets(validated_tickets: List[Dict]):
-        pass
-
-    @staticmethod
     def _should_update_ticket(ticket: Dict[str, Any], site_ids: Set[str], predicted_class: str) -> bool:
         """Check if existing ticket should be updated"""
         ticket_category = ticket["category"]
