@@ -14,6 +14,11 @@ EMAIL_REGEXES = [
         'body': re.compile(r'(?P<email_body>Possible Fraud Warning.*)\n\nThanks,\nFraud Detection System', re.DOTALL),
         'did': re.compile(r'DID: (?P<did>.*)'),
     },
+    {
+        'subject': re.compile(r'Request Rate Monitor Violation\(High\)'),
+        'body': re.compile(r'Subject: (?P<email_body>.*)\n\nConfidentiality Notice', re.DOTALL),
+        'did': re.compile(r'Destination Phone : (?P<did>.*)'),
+    },
 ]
 
 
