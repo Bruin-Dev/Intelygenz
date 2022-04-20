@@ -48,21 +48,21 @@ the hood.
 
 ```python
 request_message = {
-    'request_id': 'kNxC7FxXpg5ApdgGaX7otC',  # UUID
-    'body': {
-        'ticket_id': 123,  # Optional
-        'service_number': 'VC05400002265',  # Optional
-        'client_id': 85940,
-        'category': 'SD-WAN',
-        'ticket_topic': 'VOO',
-        'ticket_status': ['New', 'InProgress'],
+    "request_id": "kNxC7FxXpg5ApdgGaX7otC",  # UUID
+    "body": {
+        "ticket_id": 123,  # Optional
+        "service_number": "VC05400002265",  # Optional
+        "client_id": 85940,
+        "category": "SD-WAN",
+        "ticket_topic": "VOO",
+        "ticket_status": ["New", "InProgress"],
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [], # All tickets recieved from bruin client
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": [], # All tickets recieved from bruin client
+    "status": 200,
 }
 ```
 
@@ -77,16 +77,16 @@ and publish it to the response topic that was built by NATS under the hood.
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'ticket_id': 123,
+    "request_id": 123,
+    "body": {
+        "ticket_id": 123,
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [], # List of ticket details
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": [], # List of ticket details
+    "status": 200,
 }
 ```
 
@@ -101,17 +101,17 @@ And then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'ticket_id': 123,
-        'note': "Some Ticket Note",
+    "request_id": 123,
+    "body": {
+        "ticket_id": 123,
+        "note": "Some Ticket Note",
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': 'Some response',
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": "Some response",
+    "status": 200,
 }
 ```
 
@@ -132,36 +132,36 @@ hood
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'clientId': 321,
-        'category': '[VAS|VOO]', # VAS: affecting service, VOO: outage
-        'services': [
+    "request_id": 123,
+    "body": {
+        "clientId": 321,
+        "category": "[VAS|VOO]", # VAS: affecting service, VOO: outage
+        "services": [
             {
-                'serviceNumber': '', # Serial Number
+                "serviceNumber": "", # Serial Number
             },
         ],
-        'contacts': [
+        "contacts": [
             {
-                'email': 'Email@email.com',
-                'phone': '5108324567',
-                'name': 'Sample name',
-                'type': 'site',
+                "email": "Email@email.com",
+                "phone": "5108324567",
+                "name": "Sample name",
+                "type": "site",
             },
             {
-               'email': 'Email@email.com',
-               'phone': '5108324567',
-               'name': 'Sample name',
-               'type': 'ticket',
+               "email": "Email@email.com",
+               "phone": "5108324567",
+               "name": "Sample name",
+               "type": "ticket",
             },
         ],
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': 321,
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": 321,
+    "status": 200,
 }
 ```
 
@@ -176,17 +176,17 @@ And then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'ticket_id': 321,
-        'detail_id': 123,
+    "request_id": 123,
+    "body": {
+        "ticket_id": 321,
+        "detail_id": 123,
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': 'Some response',
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": "Some response",
+    "status": 200,
 }
 ```
 
@@ -201,17 +201,17 @@ And then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'ticket_id': 321,
-        'detail_id': 123,
+    "request_id": 123,
+    "body": {
+        "ticket_id": 321,
+        "detail_id": 123,
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': 'Some response',
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": "Some response",
+    "status": 200,
 }
 ```
 
@@ -222,8 +222,8 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
+    "request_id": 123,
+    "body": {
         "client_id": 191919, # MANDATORY parameter,
         "status": "A", # MANDATORY Can be A(Active), D(Decomissined), S(Suspended),
         "service_number": "VCO128739819", # MANDATORY Is the serial number in velocloud
@@ -231,9 +231,9 @@ request_message = {
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body':"Active – Platinum Monitoring",
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body":"Active – Platinum Monitoring",
+    "status": 200,
 }
 ```
 
@@ -249,15 +249,15 @@ hood
 
 ```python
 request_message = {
-    'request_id': 123,
-    'client_id': 9994,
-    'service_number': 'VC05400002265',
+    "request_id": 123,
+    "client_id": 9994,
+    "service_number": "VC05400002265",
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': 123456, # Ticket ID
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": 123456, # Ticket ID
+    "status": 200,
 }
 ```
 
@@ -271,18 +271,18 @@ The bruin client should return a message contanining the information of the cust
 
 ```python
 request_message = {
-    'request_id': 123,
-    'service_number': 'VC05400002265',
+    "request_id": 123,
+    "service_number": "VC05400002265",
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': {
-        'client_id': 9994,
-        'client_name': 'METTEL/NEW YORK',
-        'site_id': 1234,
+    "request_id": request_message["request_id"],
+    "body": {
+        "client_id": 9994,
+        "client_name": "METTEL/NEW YORK",
+        "site_id": 1234,
     },
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -298,28 +298,28 @@ And then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'ticket_id': 12345,
-    'notes': [
+    "request_id": 123,
+    "ticket_id": 12345,
+    "notes": [
         {
-            'text': 'Note contents',
-            'service_number': 'VC123457',
-            'detail_id': 99999,
+            "text": "Note contents",
+            "service_number": "VC123457",
+            "detail_id": 99999,
         },
     ],
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [
+    "request_id": request_message["request_id"],
+    "body": [
         {
-            'noteID': 12345,
-            'noteType': 'ADN',
-            'noteValue': 'Note contents',
-            'detailID': 99999,
+            "noteID": 12345,
+            "noteType": "ADN",
+            "noteValue": "Note contents",
+            "detailID": 99999,
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -336,21 +336,21 @@ And then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'ticket_id': 12345,
-    'detail_id': 99999,
-    'service_number': 'VC123457',
+    "request_id": 123,
+    "ticket_id": 12345,
+    "detail_id": 99999,
+    "service_number": "VC123457",
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [
+    "request_id": request_message["request_id"],
+    "body": [
         {
-            'resultTypeId': 620,
-            'resultName': 'No Trouble Found - Carrier Issue',
+            "resultTypeId": 620,
+            "resultName": "No Trouble Found - Carrier Issue",
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -364,28 +364,28 @@ that was built by NATS under the hood.
 
 ```python
 request_message = {
-    'request_id': 123,
-    'ticket_id': 12345,
+    "request_id": 123,
+    "ticket_id": 12345,
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': {
-        'clientID': 9994,
-        'clientName': 'METTEL/NEW YORK',
-        'ticketID': 12345,
-        'topic': 'VAS',
-        'ticketStatus': 'InProgress',
-        'address': {
-            'address': 'Fake Street 123',
-            'city': 'Newark',
-            'state': 'NJ',
-            'zip': '12345-6789',
-            'country': 'USA'
+    "request_id": request_message["request_id"],
+    "body": {
+        "clientID": 9994,
+        "clientName": "METTEL/NEW YORK",
+        "ticketID": 12345,
+        "topic": "VAS",
+        "ticketStatus": "InProgress",
+        "address": {
+            "address": "Fake Street 123",
+            "city": "Newark",
+            "state": "NJ",
+            "zip": "12345-6789",
+            "country": "USA"
         },
-        'createDate': '4/23/2019 7:59:50 PM',
+        "createDate": "4/23/2019 7:59:50 PM",
     },
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -402,41 +402,41 @@ that was built by NATS under the hood.
 
 ```python
 request_message = {
-    'request_id': 123,
-    'ticket_id': 12345,
+    "request_id": 123,
+    "ticket_id": 12345,
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [
+    "request_id": request_message["request_id"],
+    "body": [
         {
-          'ClientName': 'METTEL/NEW YORK',
-          'Ticket Entered Date': '202010292252',
-          'EnteredDate': '2020-10-29T22:52:49.22-04:00',
-          'CallTicketID': 4906680,
-          'Initial Note @ Ticket Creation': 'Automation Engine -- Service Outage Trouble',
-          'DetailID': None,
-          'Product': None,
-          'Asset': None,
-          'Address1': 'Fake Street 123',
-          'Address2': None,
-          'City': 'Rapture',
-          'State': 'NY',
-          'Zip': '12345-6789',
-          'Site Name': 'Some pretty cool place',
-          'NoteType': 'ADN',
-          'Notes': 'Request Description: Automation Engine -- Service Outage Trouble\n',
-          'Note Entered Date': '202010292252',
-          'EnteredDate_N': '2020-10-29T22:52:51.063-04:00',
-          'Note Entered By': 'Travis Touchdown',
-          'Task Assigned To': None,
-          'Task': None,
-          'Task Result': None,
-          'SLA': None,
-          'Ticket Status': 'Closed',
+          "ClientName": "METTEL/NEW YORK",
+          "Ticket Entered Date": "202010292252",
+          "EnteredDate": "2020-10-29T22:52:49.22-04:00",
+          "CallTicketID": 4906680,
+          "Initial Note @ Ticket Creation": "Automation Engine -- Service Outage Trouble",
+          "DetailID": None,
+          "Product": None,
+          "Asset": None,
+          "Address1": "Fake Street 123",
+          "Address2": None,
+          "City": "Rapture",
+          "State": "NY",
+          "Zip": "12345-6789",
+          "Site Name": "Some pretty cool place",
+          "NoteType": "ADN",
+          "Notes": "Request Description: Automation Engine -- Service Outage Trouble\n",
+          "Note Entered Date": "202010292252",
+          "EnteredDate_N": "2020-10-29T22:52:51.063-04:00",
+          "Note Entered By": "Travis Touchdown",
+          "Task Assigned To": None,
+          "Task": None,
+          "Task Result": None,
+          "SLA": None,
+          "Ticket Status": "Closed",
        },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -451,22 +451,22 @@ and then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'circuit_id': 'DS1IT-22880336',
+    "request_id": 123,
+    "body": {
+        "circuit_id": "DS1IT-22880336",
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': {
-        'clientID': 83959,
-        'subAccount': 'string',
-        'wtn': '3214',
-        'inventoryID': 0,
-        'addressID': 0,
+    "request_id": request_message["request_id"],
+    "body": {
+        "clientID": 83959,
+        "subAccount": "string",
+        "wtn": "3214",
+        "inventoryID": 0,
+        "addressID": 0,
     },
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -481,40 +481,40 @@ and then a response message is published to the response topic that was built by
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'client_id': 85719,
-        'site_id': 999,
+    "request_id": 123,
+    "body": {
+        "client_id": 85719,
+        "site_id": 999,
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [
+    "request_id": request_message["request_id"],
+    "body": [
         {
-            'clientID': 85719,
-            'clientName': 'Rotech Healthcare, Inc.',
-            'siteID': 999,
-            'siteLabel': '4074320248 - DEBORAH ROBERTSON',
-            'siteAddDate': '2016-10-06T15:32:23.897Z',
-            'address': {
-                'addressID': 1675311,
-                'address': '3600 Vineland Rd Ste 114',
-                'city': 'Orlando',
-                'state': 'FL',
-                'zip': '32811-6460',
-                'country': 'USA'
+            "clientID": 85719,
+            "clientName": "Rotech Healthcare, Inc.",
+            "siteID": 999,
+            "siteLabel": "4074320248 - DEBORAH ROBERTSON",
+            "siteAddDate": "2016-10-06T15:32:23.897Z",
+            "address": {
+                "addressID": 1675311,
+                "address": "3600 Vineland Rd Ste 114",
+                "city": "Orlando",
+                "state": "FL",
+                "zip": "32811-6460",
+                "country": "USA"
             },
-            'longitude': -81.429743,
-            'latitude': 28.5047608,
-            'businessHours': 'SUNDAY|NOT AVAILABLE,MONDAY|8PM-6PM,TUESDAY|8PM-6PM,WEDNESDAY|8PM-6PM,THURSDAY|8PM-6PM,FRIDAY|8PM-6PM,SATURDAY|NOT AVAILABLE',
-            'timeZone': 'Eastern',
-            'primaryContactName': 'Help Desk',
-            'primaryContactPhone': None,
-            'primaryContactEmail': 'test@email.com',
+            "longitude": -81.429743,
+            "latitude": 28.5047608,
+            "businessHours": "SUNDAY|NOT AVAILABLE,MONDAY|8PM-6PM,TUESDAY|8PM-6PM,WEDNESDAY|8PM-6PM,THURSDAY|8PM-6PM,FRIDAY|8PM-6PM,SATURDAY|NOT AVAILABLE",
+            "timeZone": "Eastern",
+            "primaryContactName": "Help Desk",
+            "primaryContactPhone": None,
+            "primaryContactEmail": "test@email.com",
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -525,18 +525,18 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'client_id': 89267, # MANDATORY parameter,
-        'status': 'A', # MANDATORY Can be A(Active), D(Decomissined), S(Suspended),
-        'service_number': '5006950173', # MANDATORY Is the serial number or something similar (i.e circuit id)
+    "request_id": 123,
+    "body": {
+        "client_id": 89267, # MANDATORY parameter,
+        "status": "A", # MANDATORY Can be A(Active), D(Decomissined), S(Suspended),
+        "service_number": "5006950173", # MANDATORY Is the serial number or something similar (i.e circuit id)
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': '705286',
-    'status': 200,
+    "request_id": request_message["request_id"],
+    "body": "705286",
+    "status": 200,
 }
 
 ```

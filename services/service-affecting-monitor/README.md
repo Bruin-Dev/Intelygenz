@@ -1,9 +1,9 @@
-# Table of contents
-  * [Description](#description)
-  * [Work Flow](#work-flow)
-  * [Behaviour in dev and in pro](#behaviour-in-development-and-in-production)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# Service affecting monitor
+* [Description](#description)
+* [Workflow](#workflow)
+* [Thresholds](#thresholds)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The service affecting monitor is currently used to monitor a subset of edges (located at `config/contact_info.py`)
@@ -13,18 +13,17 @@ If it does, then a ticket is created or reopened, in case it exists and it"s res
 
 > Bear in mind that the whole affecting monitoring process runs every 10 minutes.
 
-# Work Flow
+# Workflow
 This is the algorithm implemented to carry out the monitoring of edges:
 
 1. Get the cache of customers for the Velocloud host(s) specified in `config/contact_info.py
 2. Run three different processes, one for each kind of trouble: latency, packet loss, jitter and bandwidth over utilization.
 3. Get the metrics collected during the last `10 minutes` for all links in the Velocloud host(s) specified in `config/contact_info.py
 4. Filter links metrics to get metrics of those links under edges that exist in the cache of customers and also in `config/contact_info.py`
-5. Map link metrics with contact info (extracted from `config/contact_info.py`) and Bruin customer info (extracted from customer cache).
- 
+5. Map link metrics with contact info (extracted from `config/contact_info.py`) and Bruin customer info (extracted from customer cache).  
    This mapping leads to a structure very similar to this (may contain more fields, but they are not used throughout the process):
    ```json
-    [
+   [
         {
             "edge_status": {
                 "host": "mettel.velocloud.net",
@@ -78,7 +77,6 @@ This is the algorithm implemented to carry out the monitoring of edges:
         }
     ]
    ```
-
 6. For every link in the mapping above:
    1. Check if any of the metrics exceeds the thresholds defined for the trouble check (latency, packet loss or jitter)
       1. If so, and if the current environment is `PRODUCTION`:
@@ -88,28 +86,28 @@ This is the algorithm implemented to carry out the monitoring of edges:
             3. Otherwise, don't take any further action
       2. Otherwise, don't take any further action
 
-## Thesholds
-### Latency
+# Thresholds
+## Latency
 A link can have a latency of up to `120 milliseconds` when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue.
 
-### Packet loss
+## Packet loss
 A link can lose up to `8 packets` when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue.
 
-### Jitter
+## Jitter
 A link can stay in jitter state up to `30 milliseconds` when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue.
 
-### Bandwidth Over Utilization
+## Bandwidth Over Utilization
 A link can use up to `80%` of the available bandwidth when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue. 
 
 # Capabilities used
 - [Customer cache](../customer-cache/README.md)
+- [Notifier](../notifier/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
 
 ![IMAGE: service-affecting-monitor_microservice_relationships](/docs/img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png)
 

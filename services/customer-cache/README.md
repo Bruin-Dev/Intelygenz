@@ -1,13 +1,19 @@
-# Table of contents
-  - [Service logic](#service-logic)
-  - [Get customers](#get-customers)
-      * [Description](#description)
-      * [Request message](#request-message)
-      * [Response message](#response-message)
-  
-![IMAGE: customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/customer-cache_microservice_relationships.png)
+# Customer cache
+* [Description](#description)
+* [Workflow](#workflow)
+* [Requests](#requests)
+  * [Get customers](#get-customers)
+* [Capabilities used](#capabilities-used)
 
-# Service logic
+# Description
+This service is responsible for crossing Bruin and VeloCloud data. 
+More specifically, it focus on associating Bruin customers with Velocloud edges. 
+On the other hand, it also serves this information to the rest of services.
+
+This service is a REQuester since it needs to get data from multiple sources to make a correlation. 
+However, it also is a REPlier as it has the ability to return a copy of the correlated data to whichever service asks for it.
+  
+# Workflow
 This service will ask velocloud-bridge for all the edges across all the velocloud instances.
 
 Once it has all velocloud devices it will discard any device with no serial.
@@ -31,8 +37,10 @@ minutes redis will be checked in case a refresh is due.
 If a force refresh is needed, you only need to flush the customer-cache redis, so there's not a next refresh
 date stored in Redis. The system enforces a refresh in that scenario.
 
-# Get Customers
-### Description
+![IMAGE: customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/customer-cache_microservice_relationships.png)
+
+# Requests
+## Get customers
 When the customer cache receives a request from topic customer.cache.get it makes a callback to function get_customers.
 If the request message is in the correct format then it should grab the caches from the storage_repository of the hosts in the `filter` key in the `body` key of the request message. And if there are anything in `enterprise_id` list then it will filter the cache even more to only include those enterprises. If the `filter` is an empty list (i.e. no filter), it will grab all the caches by default.
 Another filter that can be requested to be applied through the rpc_request is the `last_contact`. This filter, if the value is not `None`, essentially would check the `last_contact` value of each edge in the cache and filter out any edges with a `last_contact` time before the `last_contact` time specified in the RPC's payload.
@@ -45,22 +53,19 @@ And with that cache, we format it into a response message and publish it to the 
 was built by NATS under the hood.
 
 ### Request message
-```json
-{
-    "request_id" : "some-uuid", 
+```python
+request_message = {
+    "request_id": "some-uuid", 
     "body": {
         "filter": {
-            "mettel.velocloud.com": [] // Format -> host: <list of enterprise_ids>
+            "mettel.velocloud.com": [] # Format -> host: <list of enterprise_ids>
         },
-        "last_contact_filter": "2020-07-15T15:25:42.000Z" // Only get edges that were last contacted after this time
+        "last_contact_filter": "2020-07-15T15:25:42.000Z" # Only get edges that were last contacted after this time
     }
 }
-```
-### Response message
-Non empty response
-```json
-{
-    "request_id" : "some-uuid", 
+
+non_rempty_response_message = {
+    "request_id" : request_message["request_id"], 
     "body": [
         {
             "edge": {
@@ -78,23 +83,23 @@ Non empty response
     ],
     "status": 200
 }
-```
 
-Response when cache is still being built
-```json
-{
-    "request_id": "some-uuid",
+cache_being_built_response_message = {
+    "request_id" : request_message["request_id"], 
     "body": "Cache is still being built for host(s): mettel.velocloud.net",
     "status": 202
 }
-```
 
-Response when no edges satisfy specified filters
-```json
-{
-    "request_id": "some-uuid",
+no_edges_found_response_message = {
+    "request_id" : request_message["request_id"], 
     "body": "No edges were found for the specified filters",
     "status": 404
 }
 ```
 
+# Capabilities used
+- [Notifier](../notifier/README.md)
+- [Velocloud bridge](../velocloud-bridge/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
+
+![IMAGE: digi-reboot-report_microservice_relationships](/docs/img/system_overview/use_cases/digi-reboot-report_microservice_relationships.png)

@@ -1,34 +1,35 @@
-# Table of contents
-  * [Description](#description)
-  * [Work Flow](#work-flow)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# DiGi reboot report
+* [Description](#description)
+* [Workflow](#workflow)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The `digi-reboot-report` service creates a report every day of the last full day based on the DiGi recovery logs, 
 and then emails it out.
-# Work Flow
+
+# Workflow
 The DiGi reboot report is called every 24 hours, and starts off by getting all the DiGi recovery logs from the past 3 days.
 It then takes all the ticket IDs from those logs and makes a list. From the list we get all the ticket task histories
 one by one. 
 
 Using the function `_parse_ticket_history` we parse through the task histories to create a dict similar to this:
-```angular2html
-{
-            'outage_type': 'Unclassified',
-            'reboot_attempted': False,
-            'reboot_time': None,
-            'process_attempted': False,
-            'process_successful': False,
-            'process_start': None,
-            'process_end': None,
-            'process_length': None,
-            'reboot_method': None,
-            'autoresolved': False,
-            'autoresolve_time': None,
-            'autoresolve_correlation': False,
-            'autoresolve_diff': None,
-            'forwarded': False
+```python
+task_history = {
+    "outage_type": "Unclassified",
+    "reboot_attempted": False,
+    "reboot_time": None,
+    "process_attempted": False,
+    "process_successful": False,
+    "process_start": None,
+    "process_end": None,
+    "process_length": None,
+    "reboot_method": None,
+    "autoresolved": False,
+    "autoresolve_time": None,
+    "autoresolve_correlation": False,
+    "autoresolve_diff": None,
+    "forwarded": False
 }
 ```
 
@@ -41,13 +42,13 @@ After that we take all the recovery logs data and fill in the other values of ea
 on matching ticket ids. 
 
 Last step is take all the data from the ticket map to create a csv file that then is sent out through email.
+
 # Capabilities used
+- [Notifier](../notifier/README.md)
 - [DiGi bridge](../digi-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
 
 ![IMAGE: digi-reboot-report_microservice_relationships](/docs/img/system_overview/use_cases/digi-reboot-report_microservice_relationships.png)
 
 # Running in docker-compose 
-
 `docker-compose up --build nats-server redis digi-bridge bruin-bridge notifier digi-reboot-report`

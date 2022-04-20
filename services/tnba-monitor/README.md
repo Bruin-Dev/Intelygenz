@@ -1,8 +1,8 @@
-# Table of contents
-  * [Description](#description)
-  * [Work Flow](#work-flow)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# TNBA monitor
+* [Description](#description)
+* [Workflow](#workflow)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The TNBA monitor is currently used to monitor all the tickets created for Bruin clients that are relevant
@@ -10,7 +10,7 @@ for the Automation Engine, and to attach to them TNBA notes when needed. These n
 indicating what is **T**he **N**ext **B**est **A**ction a member from the support team of Bruin can take to
 move forward on the resolution of the ticket.
 
-# Work Flow
+# Workflow
 First of all, the process claims the cache of customers for the Velocloud host(s) specified in the config file
 of this service.
 
@@ -20,7 +20,7 @@ details and notes, from Bruin. Before moving on, the process discards irrelevant
 After claiming the set of tickets, the process splits this set into two: tickets with one or more TNBA notes and
 tickets without TNBA notes. The process then runs two tasks to deal with both sets of tickets simultaneously.
 
-### Processing tickets with at least one TNBA note
+## Processing tickets with at least one TNBA note
 Every time one of these tickets is processed, a request is sent to T7 API. The response contains
 a list of predictions grouped by serial number, and each prediction has a list of actions and probabilities.
 Every probability points out how good it is to take that action; the higher the probability is, the better
@@ -41,7 +41,7 @@ The note is then appended to the ticket along with all the TNBA notes built in s
 if the environment is `PRODUCTION`. If the environment is `DEV`,  the note is simply delivered
 as a Slack notification; no real action over Bruin is taken.
 
-#### Processing tickets without TNBA notes
+## Processing tickets without TNBA notes
 Every time one of these tickets is processed, a request is sent to T7 API. The response contains
 a list of predictions grouped by serial number, and each prediction has a list of actions and probabilities.
 Every probability points out how good it is to take that action; the higher the probability is, the better
@@ -61,10 +61,11 @@ if the environment is `PRODUCTION`. If the environment is `DEV`,  the note is si
 as a Slack notification.
 
 # Capabilities used
-- [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
-- [T7 bridge](../t7-bridge/README.md)
+- [Customer cache](../customer-cache/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
+- [Notifier](../notifier/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
+- [T7 bridge](../t7-bridge/README.md)
 
 ![IMAGE: tnba-monitor_microservice_relationships](/docs/img/system_overview/use_cases/tnba-monitor_microservice_relationships.png)
 

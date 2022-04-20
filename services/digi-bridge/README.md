@@ -19,37 +19,37 @@ to call the DiGi API to reboot the given DiGi link. The required fields needed a
 
 ```python
 request_message = {
-    'request_id': 'kNxC7FxXpg5ApdgGaX7otC',  ## UUID
-    'body': {
-        'velo_serial': 'VC05400002265',  
-        'ticket': 321,  
-        'MAC': '00:04:2D:123',
+    "request_id": "kNxC7FxXpg5ApdgGaX7otC",  ## UUID
+    "body": {
+        "velo_serial": "VC05400002265",  
+        "ticket": 321,  
+        "MAC": "00:04:2D:123",
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'], 
-    'body': [
+    "request_id": request_message["request_id"], 
+    "body": [
         {
-            'Message': 'DiGi Device Recovery started, check Bruin ticket 5200960 later for details.. Process ID = 9847446', 
-            'VeloSerial': 'VC05200038370', 
-            'SiteName': 'KA02316VC', 
-            'VeloInterface': {
-                'Interface': 'GE2',
+            "Message": "DiGi Device Recovery started, check Bruin ticket 5200960 later for details.. Process ID = 9847446", 
+            "VeloSerial": "VC05200038370", 
+            "SiteName": "KA02316VC", 
+            "VeloInterface": {
+                "Interface": "GE2",
             }, 
-            'DiscoveredIP': {
-                'IPAddress': '10.1.3.4',
+            "DiscoveredIP": {
+                "IPAddress": "10.1.3.4",
             }, 
-            'Carrier': {
-                'Carrier': 'VZW',
+            "Carrier": {
+                "Carrier": "VZW",
             }, 
-            'DiscoveredMAC': {
-                'MAC': '00042d09c44b',
+            "DiscoveredMAC": {
+                "MAC": "00042d09c44b",
             }, 
-            'Ticket': '5200960',
+            "Ticket": "5200960",
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -60,38 +60,38 @@ to call the DiGi API to get the DiGi recovery logs. All the fields are optional,
 
 ```python
 request_message = {
-    'request_id': 'kNxC7FxXpg5ApdgGaX7otC',  ## UUID
-    'body': {
-        'igzID': '42',  ## Optional
-        'start_date_time': '2021-02-15T16:08:26Z',  ## Optional
-        'size': '10', ## Optional
-        'offset': '0', ## Optional
+    "request_id": "kNxC7FxXpg5ApdgGaX7otC",  ## UUID
+    "body": {
+        "igzID": "42",  ## Optional
+        "start_date_time": "2021-02-15T16:08:26Z",  ## Optional
+        "size": "10", ## Optional
+        "offset": "0", ## Optional
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'], 
-    'body': {
-        'Logs': [
+    "request_id": request_message["request_id"], 
+    "body": {
+        "Logs": [
             {
-                'Id': 142,
-                'igzID': '42',
-                'RequestID': '959b1e34-2b10-4e04-967e-7ac268d2cb1b',
-                'Method': 'API Start',
-                'System': 'NYD',
-                'VeloSerial': 'VC00000613',
-                'TicketID': '3569284',
-                'DeviceSN': 'NYD',
-                'Notes': 'Notes',
-                'TimestampSTART': '2021-02-15T16:08:26Z',
-                'TimestampEND': '2021-02-15T16:08:28Z',
+                "Id": 142,
+                "igzID": "42",
+                "RequestID": "959b1e34-2b10-4e04-967e-7ac268d2cb1b",
+                "Method": "API Start",
+                "System": "NYD",
+                "VeloSerial": "VC00000613",
+                "TicketID": "3569284",
+                "DeviceSN": "NYD",
+                "Notes": "Notes",
+                "TimestampSTART": "2021-02-15T16:08:26Z",
+                "TimestampEND": "2021-02-15T16:08:28Z",
             },
         ],
-        'Count': 10,
-        'Size': '50',
-        'Offset': '0',
+        "Count": 10,
+        "Size": "50",
+        "Offset": "0",
    },
-   'status': 200,
+   "status": 200,
 }
 ```
 

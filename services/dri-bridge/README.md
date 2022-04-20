@@ -33,46 +33,46 @@ the results back to the event bus.
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'serial_number': 700059,
-        'parameter_set': {
-            'ParameterNames': [
-                'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert',
-                'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers',
-                'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid',
-                'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum',
-                'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei',
-                'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress',
+    "request_id": 123,
+    "body": {
+        "serial_number": 700059,
+        "parameter_set": {
+            "ParameterNames": [
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum",
+                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei",
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress",
             ],
-            'Source': 0,
+            "Source": 0,
         },
     },
 }
 
 complete_response_message = {
-    'request_id': request_message['request_id'],
-    'body': {
-        'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei': '864839040023968',
-        'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers': 'ATT',
-        'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid': '89014103272191198072',
-        'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert': 'SIM1 Active',
-        'InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum': '15245139487',
-        'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress': '8C:19:2D:23:30:69',
+    "request_id": request_message["request_id"],
+    "body": {
+        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active",
+        "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+        "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:23:30:69",
     }, 
-    'status': 200,
+    "status": 200,
 }
 
 pending_response_message = {
-    'request_id': request_message['request_id'],
-    'body': 'Data is still being fetched from DRI for serial {serial_number}', 
-    'status': 204,
+    "request_id": request_message["request_id"],
+    "body": "Data is still being fetched from DRI for serial {serial_number}", 
+    "status": 204,
 }
 
 rejected_response_message = {
-    'request_id': request_message['request_id'],
-    'body': 'DRI task was rejected for serial {serial_number}', 
-    'status': 403,
+    "request_id": request_message["request_id"],
+    "body": "DRI task was rejected for serial {serial_number}", 
+    "status": 403,
 }
 ```
 

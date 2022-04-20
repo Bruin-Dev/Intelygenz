@@ -1,7 +1,7 @@
-# Table of contents
-  * [Description](#description)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# TNBA feedback
+* [Description](#description)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 Every hour the `tnba-feedback` service will collect all the closed tickets from the past
@@ -9,8 +9,9 @@ day. Then it will check the task history of all those tickets and see if there i
 the task history. If it is then it will send that ticket's task history to T7.
 
 # Capabilities used
-- [Bruin bridge](../bruin-bridge/README.md)
+- [Customer cache](../customer-cache/README.md)
 - [Notifier](../notifier/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
 - [T7 bridge](../t7-bridge/README.md)
 
 ![IMAGE: tnba-feedback_microservice_relationships](/docs/img/system_overview/use_cases/tnba-feedback_microservice_relationships.png)

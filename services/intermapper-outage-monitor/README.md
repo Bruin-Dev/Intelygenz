@@ -1,14 +1,14 @@
-# Table of contents
-  * [Description](#description)
-  * [Overview](#overview)  
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# Intermapper outage monitor
+* [Description](#description)
+* [Workflow](#workflow)  
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The objective of `intermapper-outage-monitor` is to grab unread emails and create any outage tickets based on the email
 contents.
 
-# Overview
+# Workflow
 Every 10 mins the `intermapper-outage-monitor` makes a rpc request to grab all the unread emails in the inbox of the `inbox_email` config, and
 look for emails from senders in the `sender_emails_list` config. 
 
@@ -25,8 +25,9 @@ Once the ticket has been created, we then can proceed to send a slack message al
 Which is then followed up by appending the full `body` of the InterMapper email as the triage note to this new ticket.
 
 # Capabilities used
-- [Bruin Bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Dri Bridge](../dri-bridge/README.md)
+- [Bruin Bridge](../bruin-bridge/README.md)
 
 ![IMAGE: intermapper-outage-monitor_microservice_relationships](/docs/img/system_overview/use_cases/intermapper-outage-monitor_microservice_relationships.png)
 

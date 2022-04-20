@@ -1,10 +1,11 @@
-# Table of contents
-  * [Description](#description)
-  * [Setting up Velocloud hosts and filters](#setting-up-velocloud-hosts-and-filters)
+# Service outage monitor
+* [Description](#description)
+* [Setting up Velocloud hosts and filters](#setting-up-velocloud-hosts-and-filters)
+* [Workflow](#workflow)
   * [Outage monitoring](#outage-monitoring)
   * [Triage](#triage)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The objective of `service-outage-monitor` is to monitor edges and make decisions according to the state of these edges.
@@ -16,7 +17,6 @@ This microservice is in charge of running two processes:
 * Triage. This process is aimed at updating existing outage tickets in Bruin with information related to recent edge events.
 
 # Setting up Velocloud hosts and filters
-
 For development, you can change depending on each instance the different hosts and filters associated to them.
 The values should be separated by `:` character `host1:host2`, `filter_host_1:filter_host_2`
 
@@ -31,7 +31,7 @@ The values should be separated by `:` character `host1:host2`, `filter_host_1:fi
 - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER="${VELOCLOUD_HOST_3_FILTER}:${VELOCLOUD_HOST_4_FILTER}"
 - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=""
 - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=""
-````
+```
 
 Example values for velocloud host and filter
 
@@ -45,7 +45,7 @@ VELOCLOUD_HOSTS="mettel.velocloud.net:metvco02.mettel.net"
 VELOCLOUD_HOSTS_FILTER="[1, 2, 3]:[]"
 ```
 
-For change env files used by [docker-compose](../.docker-compose.yml) it's necessary modify the file [environment_files_generator.py](../installation-utils/environment_files_generator.py) as exposed below:
+For change env files used by [docker-compose](../../docker-compose.yml) it's necessary modify the file [environment_files_generator.py](../../installation-utils/environment_files_generator.py) as exposed below:
 ```
 # Service outage monitor hosts filter for service-outage-monitor instances
 SERVICE_OUTAGE_MONITOR_1_VELOCLOUD_HOSTS = VELOCLOUD_HOST_1
@@ -58,23 +58,18 @@ SERVICE_OUTAGE_MONITOR_4_VELOCLOUD_HOSTS = ""
 SERVICE_OUTAGE_MONITOR_4_VELOCLOUD_HOSTS_FILTER = ""
 ```
 
-Also it is necessary to change the desired tasks for each instance, as explained in section [Deploying just a subset of microservices](../README.md#deploying-just-a-subset-of-microservices) of the main README.
+Also it is necessary to change the desired tasks for each instance, as explained in section [Deploying just a subset of microservices](../../README.md#deploying-just-a-subset-of-microservices) of the main README.
 If any `service-outage-monitor` instance is not to be used, the value of `service_outage_monitor_<X>_desired_tasks` should be set to 0, being `X` the number of the service-outage-monitor instance that is going to be disabled. 
 
-# Outage monitoring
-
-### Overview
+# Workflow
+## Outage monitoring
 The objective of the outage monitoring process is to detect edges that remains faulty for a period of time and create outage tickets in Bruin
 for them in that case. If these edges are already under an existing outage ticket then the system makes a choice to either resolve
 or unresolve it depending on the outage state of the edge.
 
 > Bear in mind that the whole outage monitoring process runs every 10 minutes.
 
-### Work Flow
-
-This is the algorithm implemented to carry out the monitoring of edges:
-
-#### First traversal of edges
+### First traversal of edges
 1. Get the cache of customers for the Velocloud host specified in the outage monitoring config
 2. Get the list of statuses of all links in the host specified in the outage monitoring config
 3. Group all links by edge so the logic can work with a list of edge statuses
@@ -84,7 +79,7 @@ This is the algorithm implemented to carry out the monitoring of edges:
 7. For every healthy edge:
    1. Attempt to autoresolve the outage ticket it is under, in case it exists.
 
-#### Re-checking an edge that was in outage state
+### Re-checking an edge that was in outage state
 1. Get the list of statuses for all links in the host specified in the outage monitoring config
 2. Group all links by edge so the logic can work with a list of edge statuses
 3. Filter edges statuses to get statuses of those edges in the list of edges that were scheduled for re-check
@@ -102,19 +97,13 @@ This is the algorithm implemented to carry out the monitoring of edges:
 6. For every healthy edge:
    1. Attempt to autoresolve the outage ticket it is under, in case it exists.
 
-# Triage
-
-### Overview
+## Triage
 The objective of the triage process is to update existing outage tickets in Bruin with information related to recent
 edge events.
 
 > Bear in mind that the whole triage process runs every 10 minutes.
 
-### Work Flow
-
-This is the algorithm implemented to carry out the triage process of edges:
-
-#### Collecting data for the actual processing
+### Collecting data for the actual processing
 1. Get the list of statuses for all links in the hosts specified in the triage config
 2. Group all links by edge so the logic can work with a list of edge statuses
 3. Group the list of edge statuses by serial number.
@@ -146,7 +135,7 @@ This is the algorithm implemented to carry out the triage process of edges:
    ```
 9. Finally, both sets of ticket details are processed concurrently.
 
-#### Processing ticket details with at least one triage note
+### Processing ticket details with at least one triage note
 1. For every one of these ticket details:
    1. Look for the most recent triage note
    2. Check if this note was appended recently (30 minutes or less ago)
@@ -167,7 +156,7 @@ This is the algorithm implemented to carry out the triage process of edges:
                   1. If so, deliver a Slack notification to keep the development team posted about the ticket updates
                   2. If not, skip this ticket
 
-#### Processing ticket details without triage notes
+### Processing ticket details without triage notes
 1. For every one of these ticket details:
    1. Claim all the events related to the serial number under the current ticket detail for the period between 7 days ago
       and the current moment.
@@ -181,20 +170,20 @@ This is the algorithm implemented to carry out the triage process of edges:
             plus the status of the edge and its links.
 
 # Capabilities used
+- [DiGi bridge](../digi-bridge/README.md)
 - [Customer cache](../customer-cache/README.md)
+- [Notifier](../notifier/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
  
 ![IMAGE: service-outage-monitor_microservice_relationships](/docs/img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png)
 
 # Running in docker-compose
+To run any of the outage monitors:
+- Velocloud host #1 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-1`
+- Velocloud host #2 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-2`
+- Velocloud host #3 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-3`
+- Velocloud host #4 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-4`
 
-* To run any of the outage monitors:
-Velocloud host #1 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-1`
-Velocloud host #2 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-2`
-Velocloud host #3 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-3`
-Velocloud host #4 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-4`
-
-* To run the triage process:
+To run the triage process:
 `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-triage`

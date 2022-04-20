@@ -30,20 +30,20 @@ the hood. If any error occurs during the process then an error message is printe
 
 ```python
 request_message = {
-    'request_id': 123,
-    'email_data': {
-        'subject': 'Some Subject',
-        'recipient': 'some-email',
-        'text': 'this is the accessible text for the email',
-        'html': 'email_html',
-        'images': [],
-        'attachments': [],
+    "request_id": 123,
+    "email_data": {
+        "subject": "Some Subject",
+        "recipient": "some-email",
+        "text": "this is the accessible text for the email",
+        "html": "email_html",
+        "images": [],
+        "attachments": [],
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'], 
-    'status': 200,
+    "request_id": request_message["request_id"], 
+    "status": 200,
 }
 ```
 
@@ -71,13 +71,13 @@ the hood.
 
 ```python
 request_message = {
-    'request_id': 123,
-    'message':'Some message',
+    "request_id": 123,
+    "message":"Some message",
 }
 
 response_message = {
-    'request_id': request_message['request_id'], 
-    'status': 200,
+    "request_id": request_message["request_id"], 
+    "status": 200,
 }
 ```
 
@@ -94,24 +94,24 @@ by email addresses specified in the `email_filter` and they were sent the day th
 
  ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'email_account': 'fakeemail@gmail.com',
-        'email_filter': ['senderemail@gmail.com'],
+    "request_id": 123,
+    "body": {
+        "email_account": "fakeemail@gmail.com",
+        "email_filter": ["senderemail@gmail.com"],
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'], 
-    'body': [
+    "request_id": request_message["request_id"], 
+    "body": [
         {
-            'message': 'msg', 
-            'subject': 'subject', 
-            'body': 'body', 
-            'msg_uid': 'msg_uid',
+            "message": "msg", 
+            "subject": "subject", 
+            "body": "body", 
+            "msg_uid": "msg_uid",
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 
@@ -128,17 +128,17 @@ to the action level.
 
 ```python
 request_message = {
-    'request_id': 123,
-    'body': {
-        'email_account': 'fakeemail@gmail.com',
-        'msg_uid': '123',
+    "request_id": 123,
+    "body": {
+        "email_account": "fakeemail@gmail.com",
+        "msg_uid": "123",
     },
 }
 
 response_message = {
-    'request_id': request_message['request_id'], 
-    'body': 'Successfully marked message {msg_uid} as read',
-    'status': 200,
+    "request_id": request_message["request_id"], 
+    "body": "Successfully marked message {msg_uid} as read",
+    "status": 200,
 }
 ```
 

@@ -1,13 +1,19 @@
-# Table of contents
-  - [Service logic](#service-logic)
-  - [Get customers](#get-customers)
-      * [Description](#description)
-      * [Request message](#request-message)
-      * [Response message](#response-message)
+# Hawkeye customer cache
+* [Description](#description)
+* [Workflow](#workflow)
+* [Requests](#requests)
+    * [Get customers](#get-customers)
+* [Capabilities used](#capabilities-used)
 
-![IMAGE: hawkeye-customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/hawkeye-customer-cache_microservice_relationships.png)
+# Description
+This service is responsible for crossing Bruin and Hawkeye data. 
+More specifically, it focus on associating Bruin customers with Hawkeye probes. 
+On the other hand, it also serves this information to the rest of services.
 
-# Service logic
+This service is a REQuester since it needs to get data from multiple sources to make a correlation. 
+However, it also is a REPlier as it has the ability to return a copy of the correlated data to whichever service asks for it.
+
+# Workflow
 This service will ask hawkeye-bridge for all the devices across in Hawkeye.
 
 Once it has all Hawkeye devices it will discard any device with no serial.
@@ -24,8 +30,8 @@ When all the devices in Hawkeye are processed it will store that map in Redis un
 On start and each 4 hours, the process should be executed again to refresh the cache, but the substitution will only be 
 done when process is finished and the length of the new cache is greater than 0 elements.
 
-# Get Customers
-### Description
+# Requests
+## Get Customers
 When the customer cache receives a request from topic `hawkeye.customer.cache.get` it makes a callback to function get_customers.
 If the request message is in the correct format then it should grab the cache from the storage_repository.
 
@@ -40,22 +46,16 @@ the specified filters. In case that the cache is still being built, a message in
 And with that cache, we format it into a response message and publish it to the response topic that 
 was built by NATS under the hood.
 
-### Request message
-```json
-{
-    "request_id" : "some-uuid", 
+```python
+request_message = {
+    "request_id": "some-uuid", 
     "body": {
-        "last_contact_filter": "2020-07-15T15:25:42.000Z" // Only get devices that were last contacted after this time
+        "last_contact_filter": "2020-07-15T15:25:42.000Z" # Only get devices that were last contacted after this time
     }
 }
-```
 
-
-### Response message
-Non empty response
-```json
-{
-    "request_id" : "some-uuid", 
+non_empty_response_message = {
+    "request_id" : request_message["request_id"], 
     "body": [
         {
             "serial_number": "B827EB76A8DE",
@@ -68,22 +68,23 @@ Non empty response
     ],
     "status": 200
 }
-```
 
-Response when cache is still being built
-```json
-{
-    "request_id": "some-uuid",
+building_cache_response_message = {
+    "request_id" : request_message["request_id"], 
     "body": "Cache is still being built",
     "status": 202
 }
-```
 
-Response when no devices satisfy specified filters
-```json
-{
-    "request_id": "some-uuid",
+no_devices_found_response_message = {
+    "request_id" : request_message["request_id"], 
     "body": "No devices were found for the specified filters",
     "status": 404
 }
 ```
+
+# Capabilities used
+- [Notifier](../notifier/README.md)
+- [Velocloud bridge](../velocloud-bridge/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
+
+![IMAGE: hawkeye-customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/hawkeye-customer-cache_microservice_relationships.png)

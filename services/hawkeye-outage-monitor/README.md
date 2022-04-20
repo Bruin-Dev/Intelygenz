@@ -1,8 +1,8 @@
-# Table of contents
-  * [Description](#description)
-  * [Workflow](#work-flow)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# Hawkeye outage monitor
+* [Description](#description)
+* [Workflow](#workflow)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The objective of `hawkeye-outage-monitor` is to detect devices that remains faulty for a period of time and create outage tickets in Bruin
@@ -11,8 +11,8 @@ or unresolve it depending on the outage state of the device.
 
 > Bear in mind that the whole outage monitoring process runs every 3 minutes.
 
-# Work Flow
-#### First traversal of devices
+# Workflow
+## First traversal of devices
 1. Get the cache of customers for Hawkeye devices
 2. Get the list of probes from Hawkeye
 3. Filter probes related to those devices in the cache of customers
@@ -21,7 +21,7 @@ or unresolve it depending on the outage state of the device.
 6. For every healthy device:
    1. Attempt to autoresolve the outage ticket it is under, in case it exists.
 
-#### Re-checking a device that was in outage state
+## Re-checking a device that was in outage state
 1. Get the list of probes from Hawkeye
 2. Filter probes related to the devices in the list of devices that were scheduled for re-check
    in the previous step of the process.
@@ -40,9 +40,9 @@ or unresolve it depending on the outage state of the device.
 
 # Capabilities used
 - [Hawkeye customer cache](../hawkeye-customer-cache/README.md)
+- [Notifier](../notifier/README.md)
 - [Hawkeye bridge](../hawkeye-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
 
 ![IMAGE: hawkeye-outage-monitor_microservice_relationships](/docs/img/system_overview/use_cases/hawkeye-outage-monitor_microservice_relationships.png)
 

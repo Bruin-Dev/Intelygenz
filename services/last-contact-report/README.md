@@ -1,16 +1,15 @@
-# Table of contents
-  * [Description](#description)
-  * [Work Flow](#work-flow)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# Last contact report
+* [Description](#description)
+* [Workflow](#workflow)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The last contact service's job is to report on edges that have were last contacted more than 30 days ago.
 This report is sent in an email with contents of the name of the enterprise and the amount of edges that were last
 contacted more than 30 days ago along with a csv file attached. The CSV contains each edge detailed, with the time elapsed since activation, and the months that are left before 36 months of service has passed. Also there's an URL to visit the edge overview in Velocloud.
 
-
-# Work Flow
+# Workflow
 Last contact's function `_alert_process` is called by apscheduler the first day of every month. 
 Last contact makes a call to the velocloud bridge to return a list of links statuses. Since this process doesn't care about info specifically related to links,
 it retains information about the edges from these links and discards the rest of info.
@@ -29,8 +28,8 @@ Should look something like this.
  [example-csv](readme-resources/example.csv)
  
 # Capabilities used
-- [Velocloud bridge](../velocloud-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Velocloud bridge](../velocloud-bridge/README.md)
 
 ![IMAGE: last-contact-report_microservice_relationships](/docs/img/system_overview/use_cases/last-contact-report_microservice_relationships.png)
 

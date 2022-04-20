@@ -38,82 +38,82 @@ As usual, the response message will have the following fields:
 
 ```python
 request_message = {
-    'request_id': 'kNxC7FxXpg5ApdgGaX7otC',
-    'body': {
-        'ticket_id': 123
+    "request_id": "kNxC7FxXpg5ApdgGaX7otC",
+    "body": {
+        "ticket_id": 123
     }
 }
 
 response_message = {
-    'request_id': request_message['request_id'],
-    'body': [
+    "request_id": request_message["request_id"],
+    "body": [
         {
-            'assetId': 'VC1234567',
-            'predictions': [
+            "assetId": "VC1234567",
+            "predictions": [
                 {
-                    'name': 'Request Completed',
-                    'probability': 0.1823748273483734,
+                    "name": "Request Completed",
+                    "probability": 0.1823748273483734,
                 },
                 {
-                    'name': 'Wireless Repair Intervention Needed',
-                    'probability': 0.8287249348922389,
+                    "name": "Wireless Repair Intervention Needed",
+                    "probability": 0.8287249348922389,
                 },
             ],
         },
         {
-            'assetId': 'VC1122334',
-            'predictions': [
+            "assetId": "VC1122334",
+            "predictions": [
                 {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454
+                    "name": "Repair Completed",
+                    "probability": 0.9484384655952454
                 },
                 {
-                    'name': 'Holmdel NOC Investigate',
-                    'probability': 0.1234567890123456
+                    "name": "Holmdel NOC Investigate",
+                    "probability": 0.1234567890123456
                 },
             ],
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 
 no_body_response_message = {
-    'request_id': request_message['request_id'],
-    'body': "You must specify {..\"body\": {\"ticket_id\"}..} in the request",
-    'status': 400,
+    "request_id": request_message["request_id"],
+    "body": "You must specify {..\"body\": {\"ticket_id\"}..} in the request",
+    "status": 400,
 }
 
 missing_parameters_response_message = {
-    'request_id': request_message['request_id'],
-    'body': "You must specify {..\"body\": {\"ticket_id\"}..} in the request",
-    'status': 400,
+    "request_id": request_message["request_id"],
+    "body": "You must specify {..\"body\": {\"ticket_id\"}..} in the request",
+    "status": 400,
 }
 
 error_response_message = {
-    'request_id': request_message['request_id'],
-    'body': [
+    "request_id": request_message["request_id"],
+    "body": [
         {
-            'assetId': 'VC1234567',
-            'error': {
-                'code': 'error_in_prediction',
-                'message': "Error executing prediction: The labels ['Line Test Results Provided'] are not in the \"Task Result\" labels map.",
+            "assetId": "VC1234567",
+            "error": {
+                "code": "error_in_prediction",
+                "message": "Error executing prediction: The labels ['Line Test Results Provided'] are not in the \"Task Result\" labels map.",
             },
         },
         {
-            'assetId': 'VC1122334',
-            'predictions': [
+            "assetId": "VC1122334",
+            "predictions": [
                 {
-                    'name': 'Repair Completed',
-                    'probability': 0.9484384655952454,
+                    "name": "Repair Completed",
+                    "probability": 0.9484384655952454,
                 },
                 {
-                    'name': 'Holmdel NOC Investigate',
-                    'probability': 0.1234567890123456,
+                    "name": "Holmdel NOC Investigate",
+                    "probability": 0.1234567890123456,
                 },
             ],
         },
     ],
-    'status': 200,
+    "status": 200,
 }
 ```
 

@@ -1,13 +1,13 @@
-# Table of contents
-  * [Description](#description)
-  * [Overview](#overview)  
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
+# Fraud monitor
+* [Description](#description)
+* [Workflow](#workflow)  
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The goal of the `fraud-monitor` service is to get unread fraud warning emails and create fraud tickets for them.
 
-# Overview
+# Workflow
 Every 5 minutes the `fraud-monitor` makes an RPC request to get recent unread emails from the configured `inbox_email` that were sent by anyone in the configured `sender_emails_list`. 
 Then we loop through each email, skipping the ones that are invalid or not a fraud warning.
 
@@ -20,8 +20,8 @@ If the email was processed successfully we make an RPC request to mark it as rea
 otherwise we need to keep it unread in order to reattempt processing it next time the `fraud-monitor` runs.
 
 # Capabilities used
-- [Bruin Bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Bruin Bridge](../bruin-bridge/README.md)
 
 ![IMAGE: fraud-monitor_microservice_relationships](/docs/img/system_overview/use_cases/fraud-monitor_microservice_relationships.png)
 

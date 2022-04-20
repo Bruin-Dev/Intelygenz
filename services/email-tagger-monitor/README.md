@@ -1,19 +1,19 @@
-# Email Tagger Monitor
-  * [Description](#description)
-  * [Work Flow](#work-flow)
-  * [Capabilities used](#capabilities-used) 
-  * [Running in docker-compose](#running-in-docker-compose)
-  * [Behaviour in dev and in pro](#behaviour-in-dev-and-in-pro)
+# Email tagger monitor
+* [Description](#description)
+* [Workflow](#workflow)
+* [Capabilities used](#capabilities-used) 
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 This service is responsible for tagging e-mails pushed by Bruin to an exposed REST API by using E-mail Tagger’s KRE, which returns the best suited tag for an e-mail based on the results of a predictive model.
 
-# Work Flow
+# Workflow
+__TODO__
 
 # Capabilities used
-- [Bruin bridge](../bruin-bridge/README.md)
-- [Email tagger KRE bridge](../email-tagger-kre-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Email tagger KRE bridge](../email-tagger-kre-bridge/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
 
 ![IMAGE: email-tagger-monitor_microservice_relationships](/docs/img/system_overview/use_cases/email-tagger-monitor_microservice_relationships.png)
 
@@ -23,10 +23,9 @@ This service is responsible for tagging e-mails pushed by Bruin to an exposed RE
 `docker-compose up --build email-tagger-monitor`
 
 ## Running with Bruin mock and Konstellation local 
-
 You need a `bruin-mock-local` module and a file `docker-compose.local.yml` like this:
 
-```
+```yml
 version: '3.6'
 services:
 
@@ -47,10 +46,8 @@ services:
 And you should edit `BRUIN_BASE_URL=http://bruin-mock-local:8066/` on `bruin-bridge/src/config/env` 
 
 Find your local ip and edit and uncomment this code `docker-compose.yml`:
-```json
+```yml
   email-tagger-kre-bridge:
-    ....
-    ....
     # NOTE: Extra hosts is needed only for local development with a KRE local
     #       Change to your host IP
     extra_hosts:
@@ -58,7 +55,7 @@ Find your local ip and edit and uncomment this code `docker-compose.yml`:
 ```
 
 you should edit `grpc_secure_mode` to `False` on `email-tagger-kre-bridge/src/config/config.py`
-```json
+```python
 KRE_CONFIG = {
     'base_url': os.environ['KRE_BASE_URL'],
     # NOTE: Set to False for local development or manual tests
@@ -73,14 +70,6 @@ the `REQUEST_SIGNATURE_SECRET_KEY=secret` should match with `email-tagger-monito
 
 open a portforward on KST entrypoint pod to port 9000 and address 0.0.0.0 
 
-```
-docker-compose -f docker-compose.yml -f docker-compose.local.yml up --build bruin-bridge email-tagger-kre-bridge bruin-mock-local
-```
-```
-docker-compose up --build nats-server redis redis-email-tagger
-```
-```
-docker-compose up --build email-tagger-monitor
-```
-
-# Behaviour in dev and in pro
+`docker-compose -f docker-compose.yml -f docker-compose.local.yml up --build bruin-bridge email-tagger-kre-bridge bruin-mock-local`
+`docker-compose up --build nats-server redis redis-email-tagger`
+`docker-compose up --build email-tagger-monitor`
