@@ -1304,3 +1304,34 @@ class BruinClient:
                 'body': e.args[0],
                 'status': 500
             }
+
+    async def get_service_number_topics(self, params):
+        try:
+            return_response = dict.fromkeys(["body", "status"])
+            parsed_params = humps.pascalize(params)
+            self._logger.info(f'Getting service number topics for: {params}')
+
+            try:
+                response = await self._session.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/topics',
+                    params=parsed_params,
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            except aiohttp.ClientConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {
+                "body": e.args[0],
+                "status": 500
+            }

@@ -6,10 +6,11 @@ from unittest.mock import patch
 import humps
 import pytest
 from aiohttp import ClientConnectionError
-from application.clients.bruin_client import BruinClient
 from asynctest import CoroutineMock
-from config import testconfig as config
 from pytest import raises
+
+from application.clients.bruin_client import BruinClient
+from config import testconfig as config
 
 
 class TestBruinClient:
@@ -3867,30 +3868,30 @@ class TestChangeTicketSeverity:
             "site_id": site_id
         }
         get_site_response = {
-          "documents": [
-            {
-              "clientID": client_id,
-              "clientName": "TENET",
-              "siteID": f"{site_id}",
-              "siteLabel": "TENET",
-              "siteAddDate": "2018-07-05T06:18:20.723Z",
-              "address": {
-                "addressID": 311716,
-                "address": "8200 Perrin Beitel Rd",
-                "city": "San Antonio",
-                "state": "TX",
-                "zip": "78218-1547",
-                "country": "USA"
-              },
-              "longitude": -98.4096658,
-              "latitude": 29.5125306,
-              "businessHours": None,
-              "timeZone": None,
-              "primaryContactName": "primaryContactName string",
-              "primaryContactPhone": "primaryContactPhone string",
-              "primaryContactEmail": "some@email.com"
-            }
-          ]
+            "documents": [
+                {
+                    "clientID": client_id,
+                    "clientName": "TENET",
+                    "siteID": f"{site_id}",
+                    "siteLabel": "TENET",
+                    "siteAddDate": "2018-07-05T06:18:20.723Z",
+                    "address": {
+                        "addressID": 311716,
+                        "address": "8200 Perrin Beitel Rd",
+                        "city": "San Antonio",
+                        "state": "TX",
+                        "zip": "78218-1547",
+                        "country": "USA"
+                    },
+                    "longitude": -98.4096658,
+                    "latitude": 29.5125306,
+                    "businessHours": None,
+                    "timeZone": None,
+                    "primaryContactName": "primaryContactName string",
+                    "primaryContactPhone": "primaryContactPhone string",
+                    "primaryContactEmail": "some@email.com"
+                }
+            ]
         }
 
         response_mock = CoroutineMock()
@@ -4350,3 +4351,87 @@ class TestChangeTicketSeverity:
 
             assert post_notification_email_milestone["body"] == "Got internal error from Bruin"
             assert post_notification_email_milestone["status"] == 500
+
+    @pytest.mark.asyncio
+    async def get_service_number_topics_test(self):
+        # Given
+        params = {
+            'client_id': 321,
+            'service_number': 'VC1234567',
+        }
+
+        mocked_response_status = 200
+        mocked_response_body = {
+            "callTypes": [
+                {
+                    "callType": "CHG",
+                    "callTypeDescription": "Service Changes",
+                    "category": "053",
+                    "categoryDescription": "Add Additional Lines"
+                },
+            ]
+        }
+
+        mocked_response = CoroutineMock()
+        mocked_response.json = CoroutineMock(return_value=mocked_response_body)
+        mocked_response.status = mocked_response_status
+
+        logger = Mock()
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client._session.get = CoroutineMock(return_value=mocked_response)
+
+        # When
+        response = await bruin_client.get_service_number_topics(params)
+
+        # Then
+        assert response == {
+            "status": mocked_response_status,
+            "body": mocked_response_body,
+        }
+
+    @pytest.mark.asyncio
+    async def get_service_number_topics_connection_error_test(self):
+        # Given
+        params = {
+            'client_id': 321,
+            'service_number': 'VC1234567',
+        }
+        mocked_cause = "mocked_cause"
+
+        logger = Mock()
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client._session.get = CoroutineMock(side_effect=ClientConnectionError(mocked_cause))
+
+        # When
+        response = await bruin_client.get_service_number_topics(params)
+
+        # Then
+        assert response == {
+            "status": 500,
+            "body": f"Connection error in Bruin API. {mocked_cause}",
+        }
+
+    @pytest.mark.asyncio
+    async def get_service_number_topics_500_test(self):
+        # Given
+        params = {
+            'client_id': 321,
+            'service_number': 'VC1234567',
+        }
+        mocked_cause = "mocked_cause"
+
+        logger = Mock()
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client._session.get = CoroutineMock(side_effect=Exception(mocked_cause))
+
+        # When
+        response = await bruin_client.get_service_number_topics(params)
+
+        # Then
+        assert response == {
+            "status": 500,
+            "body": mocked_cause,
+        }
