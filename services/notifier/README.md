@@ -1,11 +1,11 @@
 # Notifier
-# [Description](#description)
-# [Requests](#requests)
-  # [Send to Email](#send-to-email)
-  # [Send to Slack](#send-to-slack)
-  # [Get Unread Emails](#get-unread-emails)
-  # [Mark Email as Read](#mark-email-as-read)
-# [Running in docker-compose](#running-in-docker-compose)
+* [Description](#description)
+* [Requests](#requests)
+  * [Send to Email](#send-to-email)
+  * [Send to Slack](#send-to-slack)
+  * [Get Unread Emails](#get-unread-emails)
+  * [Mark Email as Read](#mark-email-as-read)
+* [Running in docker-compose](#running-in-docker-compose)
 
 # Description
 The notifier receives requests messages, and based on the topic that it received the message from, it can either send an email

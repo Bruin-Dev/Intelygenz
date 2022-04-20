@@ -1,15 +1,20 @@
 ## DiGi bridge
 * [Description](#description)
+* [Entrypoint note](#entrypoint-note)
 * [Requests](#requests)
    * [DiGi reboot](#digi-reboot) 
    * [Get DiGi recovery logs](#get-digi-recovery-logs) 
-* [Entrypoint note](#entrypoint-note)
 * [Running in docker-compose](#running-in-docker-compose)
 
 ## Description
 The DiGi bridge is used to call the DiGi API to reboot DiGi links.
 
 ![IMAGE: digi-bridge_microservice_relationships](/docs/img/system_overview/capabilities/digi-bridge_microservice_relationships.png)
+
+# Entrypoint note
+Since Mettel won't expose their DNS server, we need to modify the /etc/hosts file to contain the domain name translation.
+That's why, instead of executing app.py as the rest of the services, this service has a `entrypoint.sh`
+script which first will modify the /etc/hosts file and then will launch with python the `app.py` file.
 
 # Requests
 ## DiGi reboot
@@ -94,11 +99,6 @@ response_message = {
    "status": 200,
 }
 ```
-
-# Entrypoint note
-Since Mettel won't expose their DNS server, we need to modify the /etc/hosts file to contain the domain name translation.
-That's why, instead of executing app.py as the rest of the services, this service has a `entrypoint.sh`
-script which first will modify the /etc/hosts file and then will launch with python the `app.py` file.
 
 # Running in docker-compose 
 `docker-compose up --build redis nats-server digi-bridge`

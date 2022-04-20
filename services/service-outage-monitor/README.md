@@ -179,11 +179,9 @@ edge events.
 ![IMAGE: service-outage-monitor_microservice_relationships](/docs/img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png)
 
 # Running in docker-compose
-To run any of the outage monitors:
-- Velocloud host #1 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-1`
-- Velocloud host #2 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-2`
-- Velocloud host #3 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-3`
-- Velocloud host #4 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-4`
-
-To run the triage process:
-`docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-triage`
+- To run any of the outage monitors:
+   - Velocloud host #1: `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-1`
+   - Velocloud host #2: `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-2`
+   - Velocloud host #3: `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-3`
+   - Velocloud host #4: `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-4`
+- To run the triage process: `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifier customer-cache service-outage-monitor-triage`

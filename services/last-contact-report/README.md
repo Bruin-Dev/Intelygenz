@@ -23,9 +23,10 @@ more months are left until its been 3 years, and the url to the edge.
 Next using the `compose_email_object` function we format this ordered dict for the csv file to be sent with the email.
 At the same time we are counting the number of edges that were last contacted per enterprise for the template of the email.
 Should look something like this.
+
 ![last-contact-image](readme-resources/last_contact.png)
- And the attached csv should look like this:
- [example-csv](readme-resources/example.csv)
+
+ And the attached csv should look like this: [example-csv](readme-resources/example.csv)
  
 # Capabilities used
 - [Notifier](../notifier/README.md)

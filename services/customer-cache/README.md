@@ -37,8 +37,6 @@ minutes redis will be checked in case a refresh is due.
 If a force refresh is needed, you only need to flush the customer-cache redis, so there's not a next refresh
 date stored in Redis. The system enforces a refresh in that scenario.
 
-![IMAGE: customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/customer-cache_microservice_relationships.png)
-
 # Requests
 ## Get customers
 When the customer cache receives a request from topic customer.cache.get it makes a callback to function get_customers.
@@ -102,4 +100,4 @@ no_edges_found_response_message = {
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 
-![IMAGE: digi-reboot-report_microservice_relationships](/docs/img/system_overview/use_cases/digi-reboot-report_microservice_relationships.png)
+![IMAGE: customer-cache_microservice_relationships](/docs/img/system_overview/mixed_services/customer-cache_microservice_relationships.png)

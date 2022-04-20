@@ -18,9 +18,9 @@ __TODO__
 ![IMAGE: email-tagger-monitor_microservice_relationships](/docs/img/system_overview/use_cases/email-tagger-monitor_microservice_relationships.png)
 
 # Running in docker-compose
-`docker-compose up --build nats-server redis redis-email-tagger`
-`docker-compose up --build bruin-bridge email-tagger-kre-bridge notifier`
-`docker-compose up --build email-tagger-monitor`
+- `docker-compose up --build nats-server redis redis-email-tagger`
+- `docker-compose up --build bruin-bridge email-tagger-kre-bridge notifier`
+- `docker-compose up --build email-tagger-monitor`
 
 ## Running with Bruin mock and Konstellation local 
 You need a `bruin-mock-local` module and a file `docker-compose.local.yml` like this:
@@ -67,9 +67,7 @@ edit `KRE_BASE_URL=host.docker.internal:9000` en `email-tagger-kre-bridge/src/co
 
 the `REQUEST_SIGNATURE_SECRET_KEY=secret` should match with `email-tagger-monitor/scripts/local_notify_ticket.sh` secret field.
 
-
 open a portforward on KST entrypoint pod to port 9000 and address 0.0.0.0 
-
-`docker-compose -f docker-compose.yml -f docker-compose.local.yml up --build bruin-bridge email-tagger-kre-bridge bruin-mock-local`
-`docker-compose up --build nats-server redis redis-email-tagger`
-`docker-compose up --build email-tagger-monitor`
+- `docker-compose -f docker-compose.yml -f docker-compose.local.yml up --build bruin-bridge email-tagger-kre-bridge bruin-mock-local`
+- `docker-compose up --build nats-server redis redis-email-tagger`
+- `docker-compose up --build email-tagger-monitor`
