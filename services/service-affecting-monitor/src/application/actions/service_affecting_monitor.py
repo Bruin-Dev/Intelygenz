@@ -910,7 +910,7 @@ class ServiceAffectingMonitor:
                               f"{link_data['link_status']['displayName']} is a blacklisted link and "
                               f"should not be forwarded to HNOC. Sending an email and "
                               f"skipping forward to HNOC...")
-            await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+            # await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
             return False
         return True
 
