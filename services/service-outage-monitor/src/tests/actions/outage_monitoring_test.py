@@ -5918,6 +5918,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -5942,7 +5943,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=True)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -5957,6 +5958,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=False,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id,
             edge_primary_serial,
@@ -6150,7 +6152,6 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
-        ha_repository = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
@@ -6159,6 +6160,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -6183,7 +6185,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=False)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -6198,6 +6200,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=False,
         )
+        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6398,6 +6401,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -6423,7 +6427,7 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY)
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=True)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6436,6 +6440,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id,
             edge_primary_serial,
@@ -6643,6 +6648,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -6668,7 +6674,7 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY)
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=False)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6681,6 +6687,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6882,6 +6889,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -6906,7 +6914,7 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.NOT_CHANGED)
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=True)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6919,6 +6927,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -7120,6 +7129,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7143,7 +7153,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=True)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7155,6 +7165,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id,
             edge_primary_serial,
@@ -7359,6 +7370,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7382,7 +7394,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=False)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7394,6 +7406,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -7596,6 +7609,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7620,7 +7634,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=True)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7632,6 +7646,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id,
             edge_primary_serial,
@@ -7837,6 +7852,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7861,7 +7877,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=False)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7873,6 +7889,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
+        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
@@ -8072,6 +8089,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -8095,7 +8113,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=True)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -8107,6 +8125,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=False,
         )
+        bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             ticket_id,
             edge_primary_serial,
@@ -8309,6 +8328,7 @@ class TestServiceOutageMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -8332,7 +8352,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = CoroutineMock(return_value=False)
+        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -8345,14 +8365,14 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=False,
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_metvco4_host_byob_link_return_true_test(self):
+    def _should_schedule_hnoc_forwarding_metvco4_host_byob_link_display_return_true_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
@@ -8375,7 +8395,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8385,15 +8404,13 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                           serial,
-                                                                                           link_data,
-                                                                                           outage_type)
-        bruin_repository.post_notification_email_milestone.assert_not_awaited()
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                     serial,
+                                                                                     link_data,
+                                                                                     outage_type)
         assert should_forward_to_hnoc is True
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_metvco4_host_ip_link_return_true_test(self):
+    def _should_schedule_hnoc_forwarding_metvco4_host_ip_link_display_name_return_true_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
@@ -8416,7 +8433,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8426,15 +8442,13 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                           serial,
-                                                                                           link_data,
-                                                                                           outage_type)
-        bruin_repository.post_notification_email_milestone.assert_not_awaited()
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                     serial,
+                                                                                     link_data,
+                                                                                     outage_type)
         assert should_forward_to_hnoc is True
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_not_link_down_byob_link_return_true_test(self):
+    def _should_schedule_hnoc_forwarding_not_link_down_byob_link_display_name_return_true_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
@@ -8457,7 +8471,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8466,15 +8479,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                       serial,
-                                                                                       link_data,
-                                                                                       outage_type)
-        bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                 serial,
+                                                                                 link_data,
+                                                                                 outage_type)
         assert should_forward_to_hnoc is True
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_not_link_down_ip_link_return_true_test(self):
+    def _should_schedule_hnoc_forwarding_not_link_down_ip_link_display_name_return_true_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
@@ -8497,7 +8508,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8506,15 +8516,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                       serial,
-                                                                                       link_data,
-                                                                                       outage_type)
-        bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                 serial,
+                                                                                 link_data,
+                                                                                 outage_type)
         assert should_forward_to_hnoc is True
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_byob_return_false_test(self):
+    def _should_schedule_hnoc_forwarding_byob_link_display_name_return_false_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.HA_LINK_DOWN  # We can use whatever outage type
@@ -8537,7 +8545,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8546,15 +8553,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                       serial,
-                                                                                       link_data,
-                                                                                       outage_type)
-        # bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                 serial,
+                                                                                 link_data,
+                                                                                 outage_type)
         assert should_forward_to_hnoc is False
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_ip_return_false_test(self):
+    def _should_schedule_hnoc_forwarding_ip_link_display_name_return_false_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
@@ -8577,7 +8582,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8586,15 +8590,13 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                       serial,
-                                                                                       link_data,
-                                                                                       outage_type)
-        # bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                 serial,
+                                                                                 link_data,
+                                                                                 outage_type)
         assert should_forward_to_hnoc is False
 
-    @pytest.mark.asyncio
-    async def _should_schedule_hnoc_forwarding_ip_return_true_test(self):
+    def _should_schedule_hnoc_forwarding_non_byob_and_non_ip_link_display_name_return_true_test(self):
         ticket_id = 12345
         serial = 'VC1234567'
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
@@ -8617,7 +8619,6 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_notification_email_milestone = CoroutineMock()
 
         outage_repository = Mock()
         config = testconfig
@@ -8626,11 +8627,10 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = await outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                       serial,
-                                                                                       link_data,
-                                                                                       outage_type)
-        bruin_repository.post_notification_email_milestone.assert_not_awaited()
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                 serial,
+                                                                                 link_data,
+                                                                                 outage_type)
         assert should_forward_to_hnoc is True
 
     @pytest.mark.asyncio

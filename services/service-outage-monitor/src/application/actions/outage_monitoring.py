@@ -545,12 +545,17 @@ class OutageMonitor:
                         )
 
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
-                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
                             ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                                 serial_number,
                                                                 forward_time=forward_time)
+                        else:
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.post_notification_email_milestone(
+                                ticket_creation_response_body, serial_number)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -566,7 +571,7 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
                             ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED and \
                                 should_schedule_hnoc_forwarding:
@@ -592,13 +597,18 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
                             ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                                 serial_number,
                                                                 forward_time=forward_time)
+                        else:
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.post_notification_email_milestone(
+                                ticket_creation_response_body, serial_number)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -618,13 +628,19 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
                             ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                                 serial_number,
                                                                 forward_time=forward_time)
+                        else:
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.post_notification_email_milestone(
+                                ticket_creation_response_body, serial_number)
+
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
                             f'[{outage_type.value}] There is a resolve outage ticket for the same location of faulty '
@@ -642,13 +658,18 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
-                        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(
+                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
                             ticket_creation_response_body, serial_number, edge_status['links'], outage_type)
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                                 serial_number,
                                                                 forward_time=forward_time)
+                        else:
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.post_notification_email_milestone(
+                                ticket_creation_response_body, serial_number)
 
             else:
                 self._logger.info(
@@ -682,15 +703,13 @@ class OutageMonitor:
         else:
             return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
 
-    async def _should_schedule_hnoc_forwarding(self, ticket_id, serial_number, link_data, outage_type):
+    def _should_schedule_hnoc_forwarding(self, ticket_id, serial_number, link_data, outage_type):
         if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
                 and (outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN) \
                 and not self._should_be_forwarded_to_HNOC(link_data):
             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_data: "
                               f"{link_data} has a blacklisted link and "
-                              f"should not be forwarded to HNOC. Sending an email and "
-                              f"skipping forward to HNOC...")
-            # await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+                              f"should not be forwarded to HNOC. Skipping forward to HNOC...")
             return False
         return True
 
@@ -722,7 +741,7 @@ class OutageMonitor:
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response['status'] not in range(200, 300):
-                self._logger.error(f'Getting ticket details of ticket_id {ticket_id} and serial {serial_number}'
+                self._logger.error(f'Getting ticket details of ticket_id {ticket_id} and serial {serial_number} '
                                    f'from Bruin failed: {ticket_details_response}. '
                                    f'Retrying forward to HNOC...')
                 raise Exception

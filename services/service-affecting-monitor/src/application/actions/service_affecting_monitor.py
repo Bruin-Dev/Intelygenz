@@ -844,14 +844,18 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                      serial_number,
-                                                                                      link_data)
+        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                serial_number,
+                                                                                link_data)
         if should_schedule_hnoc_forwarding:
             self._logger.info(
                 f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
             )
             self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number, link_data=link_data)
+        else:
+            self._logger.info(f"Sending an email for the reopened task of ticket_id: {ticket_id} "
+                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+            await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
 
     async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
         serial_number = link_data['cached_info']['serial_number']
@@ -895,22 +899,25 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        should_schedule_hnoc_forwarding = await self._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                      serial_number,
-                                                                                      link_data)
-        if trouble is not AffectingTroubles.BOUNCING and should_schedule_hnoc_forwarding:
-            self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data)
+        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(ticket_id,
+                                                                                serial_number,
+                                                                                link_data)
+        if trouble is not AffectingTroubles.BOUNCING:
+            if should_schedule_hnoc_forwarding:
+                self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data)
+            else:
+                self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
+                                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
 
         return ticket_id
 
-    async def _should_schedule_hnoc_forwarding(self, ticket_id, serial_number, link_data):
+    def _should_schedule_hnoc_forwarding(self, ticket_id, serial_number, link_data):
         if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
                 and not self._should_be_forwarded_to_HNOC(link_data):
             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                               f"{link_data['link_status']['displayName']} is a blacklisted link and "
-                              f"should not be forwarded to HNOC. Sending an email and "
-                              f"skipping forward to HNOC...")
-            # await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+                              f"should not be forwarded to HNOC. Skipping forward to HNOC...")
             return False
         return True
 
@@ -944,7 +951,7 @@ class ServiceAffectingMonitor:
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response['status'] not in range(200, 300):
-                self._logger.error(f'Getting ticket details of ticket_id: {ticket_id} and serial: {serial_number}'
+                self._logger.error(f'Getting ticket details of ticket_id: {ticket_id} and serial: {serial_number} '
                                    f'from Bruin failed: {ticket_details_response}. '
                                    f'Retrying forward to HNOC...')
                 raise Exception
@@ -995,7 +1002,7 @@ class ServiceAffectingMonitor:
                 link_interface_type = link_configuration['type']
 
         if link_interface_type != 'WIRED':
-            self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward'
+            self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward '
                               f'to HNOC...')
             await self._forward_ticket_to_hnoc_queue(ticket_id, serial_number)
             return
