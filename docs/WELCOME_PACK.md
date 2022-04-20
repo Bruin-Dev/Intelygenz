@@ -6,9 +6,9 @@
 - Dani - Tech Lead
 - Ángel - Devops
 - Brandon - Developer
-- David - Developer
 - Sergio - Developer
 - Javier - Developer
+- Gabriel - Developer
 
 ## First steps
 
