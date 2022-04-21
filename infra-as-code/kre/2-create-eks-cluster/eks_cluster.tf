@@ -77,6 +77,7 @@ module "mettel-automation-eks-cluster" {
 
     ebs_optimized          = true
     enable_monitoring      = true
+    cloudwatch_log_group_retention_in_days = 30
 
     block_device_mappings = {
       xvda = {
