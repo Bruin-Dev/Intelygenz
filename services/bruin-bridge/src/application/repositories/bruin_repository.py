@@ -1,7 +1,7 @@
-import asyncio
-
 from typing import Callable
 from typing import List
+
+import asyncio
 
 
 class BruinRepository:
@@ -394,3 +394,6 @@ class BruinRepository:
         }
 
         return await self._bruin_client.post_notification_email_milestone(payload)
+
+    async def get_service_number_topics(self, params):
+        return await self._bruin_client.get_service_number_topics(params)
