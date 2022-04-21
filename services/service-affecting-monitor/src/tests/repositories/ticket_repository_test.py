@@ -606,3 +606,13 @@ class TestTicketRepository:
         result = ticket_repository.is_ticket_task_in_ipa_queue(detail_item)
 
         assert not result
+
+    def build_reminder_note_test(self, ticket_repository):
+        expected = os.linesep.join([
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ])
+
+        result = ticket_repository.build_reminder_note()
+
+        assert result == expected

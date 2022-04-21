@@ -420,3 +420,45 @@ to be updated in AWS and the polling rate was set to `5 minutes`, all ephemeral 
 the same reference. So essentially, the set of configurations for ephemeral environments that are stored in AWS are used as a template
 to populate `ExternalSecret` and `Secret` objects in ephemeral environments. If a secret needs to be updated, `k9s` should be used
 to edit the `Secret` in place.
+
+## Using an AWS param key in our services
+
+1. Add the new variable to `automation-engine/installation-utils/environment_files_generator.py`
+
+    ``` python
+    SERVICE__DOMAIN__PARAM_KEY_NAME = parameters['environment']['service']['domain']['param-key-name'] 
+    ```
+    And inside the env dictionary in the same file
+    ``` python
+    f'DOMAIN__PARAM_KEY_NAME={SERVICE__DOMAIN__PARAM_KEY_NAME}',
+    ```
+
+2. Add the new variable as a template to `services/<service>/src/config/.template.env`
+    ``` python
+    DOMAIN__PARAM_KEY_NAME=
+    ```
+
+3. Add the new variable retrieving the value from the environment to `services/<service>/src/config/config.py`
+    ``` python
+    'param_key_name': (
+        os.environ['DOMAIN__PARAM_KEY_NAME']
+    ),
+    ```
+    Any parameter that should be used with a primitive type other than `str`, should be cast here.
+    We MUST use primitive types. DO NOT convert values to complex types like `timedelta` or `datetime`. 
+    Consumers of the service configuration should be responsible for doing that.
+
+
+4. Add the new variable to `services/<service>/src/config/testconfig.py` for being available when testing
+    ``` python
+    'param_key_name': 86400
+    ```
+
+5. After that you can use it in the service
+    ``` python
+    self._config.MONITOR_CONFIG['param_key_name']
+    ```
+    And while testing
+    ``` python
+    param_key_name = action._config.MONITOR_CONFIG['param_key_name']
+    ```

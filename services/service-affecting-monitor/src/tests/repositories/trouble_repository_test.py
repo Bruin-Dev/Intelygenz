@@ -5,7 +5,8 @@ from unittest.mock import patch
 from dateutil.parser import parse
 from pytz import utc
 
-from application.repositories import trouble_repository as trouble_repository_module
+from application import AFFECTING_NOTE_REGEX
+from application.repositories import utils_repository as utils_repository_module
 from config import testconfig
 
 
@@ -25,7 +26,7 @@ class TestTroubleRepository:
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
@@ -34,7 +35,7 @@ class TestTroubleRepository:
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
@@ -43,11 +44,18 @@ class TestTroubleRepository:
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
             assert result is False
+
+        trouble_repository._utils_repository.has_last_event_happened_recently.assert_called_with(
+            notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=3600,
+            regex=AFFECTING_NOTE_REGEX
+        )
 
     def was_last_trouble_detected_recently__standard_trouble_note_found_test(
             self, trouble_repository, make_ticket_note, make_list_of_ticket_notes):
@@ -68,7 +76,7 @@ class TestTroubleRepository:
 
         new_now = parse(trouble_note_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
@@ -76,7 +84,7 @@ class TestTroubleRepository:
 
         new_now = parse(trouble_note_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
@@ -84,11 +92,18 @@ class TestTroubleRepository:
 
         new_now = parse(trouble_note_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
             assert result is False
+
+        trouble_repository._utils_repository.has_last_event_happened_recently.assert_called_with(
+            notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=3600,
+            regex=AFFECTING_NOTE_REGEX
+        )
 
     def was_last_trouble_detected_recently__reopen_trouble_note_found_test(
             self, trouble_repository, make_ticket_note, make_list_of_ticket_notes):
@@ -109,7 +124,7 @@ class TestTroubleRepository:
 
         new_now = parse(trouble_note_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
@@ -117,7 +132,7 @@ class TestTroubleRepository:
 
         new_now = parse(trouble_note_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
@@ -125,11 +140,18 @@ class TestTroubleRepository:
 
         new_now = parse(trouble_note_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(trouble_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
             result = trouble_repository.was_last_trouble_detected_recently(
                 notes, ticket_creation_date, max_seconds_since_last_trouble=3600,
             )
             assert result is False
+
+        trouble_repository._utils_repository.has_last_event_happened_recently.assert_called_with(
+            notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=3600,
+            regex=AFFECTING_NOTE_REGEX
+        )
 
     def is_latency_rx_within_threshold_test(self, trouble_repository, make_metrics):
         metrics = make_metrics(best_latency_ms_rx=139)

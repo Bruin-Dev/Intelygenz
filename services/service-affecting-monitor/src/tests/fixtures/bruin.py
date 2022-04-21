@@ -4,8 +4,8 @@ from typing import Optional
 
 import pytest
 
-from tests.fixtures._helpers import _undefined
 from tests.fixtures._helpers import _missing
+from tests.fixtures._helpers import _undefined
 from tests.fixtures._helpers import bruinize_date
 
 
@@ -292,9 +292,9 @@ def make_change_detail_work_queue_request(make_rpc_request):
 
 @pytest.fixture(scope='session')
 def make_post_notification_email_milestone_request(make_rpc_request):
-    def _inner(*, request_id: str = '', ticket_id: int = 0, service_number: str = ''):
+    def _inner(*, request_id: str = '', ticket_id: int = 0, service_number: str = '', notification_type: str = ''):
         payload = {
-            'notification_type': 'TicketBYOBAffectingRepairAcknowledgement-E-Mail',
+            'notification_type': notification_type,
             'ticket_id': ticket_id,
             'service_number': service_number,
         }

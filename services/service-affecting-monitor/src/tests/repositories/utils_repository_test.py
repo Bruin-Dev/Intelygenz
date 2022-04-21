@@ -1,3 +1,6 @@
+import re
+from datetime import datetime
+
 from application.repositories.utils_repository import UtilsRepository
 
 
@@ -124,3 +127,16 @@ class TestUtilsRepository:
         result = UtilsRepository.is_ip_address('127.0.0.1')
         expected = True
         assert result == expected
+
+    def has_last_event_happened_recently_test(self, make_ticket_note, make_list_of_ticket_notes):
+        ticket_creation_date = datetime.now()
+        note_1 = make_ticket_note(text="Dummy note")
+        note_2 = make_ticket_note(text="Dummy note 2")
+        notes = make_list_of_ticket_notes(note_1, note_2)
+        utils_repository = UtilsRepository()
+
+        result = utils_repository.has_last_event_happened_recently(
+            notes, ticket_creation_date, max_seconds_since_last_event=3600, regex=re.compile(r'(^Dummy)')
+        )
+
+        assert result is True

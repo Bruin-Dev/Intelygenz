@@ -55,17 +55,21 @@
     * [Request message](#request-message-13)
     * [Response message](#response-message-13)
   * [Get circuit id](#get-circuit-id)
-    * [Description](#description-14)
-    * [Request message](#request-message-13)
-    * [Response message](#response-message-13)
-  * [Get Site](#get-site)
     * [Description](#description-15)
     * [Request message](#request-message-14)
     * [Response message](#response-message-14)
-  * [Get Attributes Serial](#get-attributes-serial)
+  * [Get Site](#get-site)
     * [Description](#description-16)
     * [Request message](#request-message-15)
-    * [Response message](#response-message-15)   
+    * [Response message](#response-message-15)
+  * [Get Attributes Serial](#get-attributes-serial)
+    * [Description](#description-17)
+    * [Request message](#request-message-16)
+    * [Response message](#response-message-16)   
+  * [Post notification email milestone](#post-notification-email-milestone)
+    * [Description](#description-18)
+    * [Request message](#request-message-17)
+    * [Response message](#response-message-17)
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -686,6 +690,54 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
     'status': 200
 }
 
+```
+
+#Post Notification Email Milestone
+## Description
+When the bruin bridge receives a request with a request message from topic `bruin.notification.email.milestone` it makes a callback
+to the function `post_notification_email_milestone`. From the request message, we need the `ticket_id` to know what ticket we're sending the email for, 
+the `service_number` of the edge we're sending the email for, and the `notificationType` field
+which is the template Bruin is going to use for the email. Depending on the notification type we use we will send an acknowledgement email: \
+`TicketBYOBAffectingRepairAcknowledgement-E-Mail`/`TicketBYOBOutageRepairAcknowledgement-E-Mail` \
+or reminder email: \
+`TicketBYOBAffectingRepairReminder-E-Mail`/`TicketBYOBOutageRepairReminder-E-Mail`.
+
+We call the bruin repository with these fields so that it can call the bruin client to send the email.
+The bruin client should return a success message indicating that our email was sent successfully. And then a response message is published to the response topic that was built by NATS under the
+hood
+## Request message
+### Service Affecting
+```
+{
+    'request_id': uuid(),
+    'body':{
+        'ticket_id': 321,
+        'notification_type': 'TicketBYOBAffectingRepairAcknowledgement',
+        'service_number': 'VC05200028267'
+    }
+}
+```
+###Service Outage
+```
+{
+    'request_id': uuid(),
+    'body':{
+        'ticket_id': 321,
+        'notification_type': 'TicketBYOBOutageRepairAcknowledgement',
+        'service_number': 'VC05200028267'
+    }
+}
+```
+## Response message
+```
+{
+    'request_id': uuid(),
+    'body':{
+        'eventId': 123,
+        'jobId': 321,
+    },
+    'status': 200
+}
 ```
 
 # Running in docker-compose 

@@ -1,3 +1,4 @@
+import asyncio
 import time
 from collections import ChainMap
 from datetime import datetime
@@ -5,7 +6,6 @@ from datetime import timedelta
 from typing import List
 from typing import Optional
 
-import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
@@ -13,6 +13,7 @@ from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application import AffectingTroubles, ForwardQueues
+from application import REMINDER_NOTE_REGEX
 
 
 class ServiceAffectingMonitor:
@@ -693,6 +694,13 @@ class ServiceAffectingMonitor:
             else:
                 await self._append_latest_trouble_to_ticket(open_affecting_ticket, trouble, link_data)
                 trouble_processed = True
+
+                link_label = link_data['link_status']['displayName']
+                should_stay_in_ipa_queue = self._should_always_stay_in_ipa_queue(
+                    link_label
+                )
+                if should_stay_in_ipa_queue:
+                    await self._send_reminder(open_affecting_ticket)
         else:
             self._logger.info(f'No open Service Affecting ticket was found for edge {serial_number}')
 
@@ -858,7 +866,10 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(link_data)
+        link_label = link_data['link_status']['displayName']
+        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+            link_label
+        )
         if should_schedule_hnoc_forwarding:
             self._logger.info(
                 f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
@@ -869,9 +880,16 @@ class ServiceAffectingMonitor:
             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                               f"{link_data['link_status']['displayName']} is a blacklisted link and "
                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-            # self._logger.info(f"Sending an email for the reopened task of ticket_id: {ticket_id} "
-            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-            # await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+            self._logger.info(f"Sending an email for the reopened task of ticket_id: {ticket_id} "
+                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+            await self._bruin_repository.send_initial_email_milestone_notification(ticket_id, serial_number)
+            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+            if append_note_response['status'] not in range(200, 300):
+                self._logger.error(
+                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                    f' {ticket_id}!'
+                )
+                return
 
     async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
         serial_number = link_data['cached_info']['serial_number']
@@ -917,7 +935,10 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
 
-        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(link_data)
+        link_label = link_data['link_status']['displayName']
+        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+            link_label
+        )
         if trouble is not AffectingTroubles.BOUNCING:
             if should_schedule_hnoc_forwarding:
                 self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
@@ -925,17 +946,23 @@ class ServiceAffectingMonitor:
                 self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                                   f"{link_data['link_status']['displayName']} is a blacklisted link and "
                                   f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                # self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
-                #                   f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                # await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+                self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
+                                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                await self._bruin_repository.send_initial_email_milestone_notification(ticket_id, serial_number)
+                append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                if append_note_response['status'] not in range(200, 300):
+                    self._logger.error(
+                        f'Reminder note of edge {serial_number} could not be appended to ticket'
+                        f' {ticket_id}!'
+                    )
+                    return
 
         return ticket_id
 
-    def _should_schedule_hnoc_forwarding(self, link_data):
-        if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
-                and not self._should_be_forwarded_to_HNOC(link_data):
+    def _should_always_stay_in_ipa_queue(self, link_label: str) -> bool:
+        if self._config.VELOCLOUD_HOST == 'metvco04.mettel.net':
             return False
-        return True
+        return self._is_link_label_blacklisted_for_HNOC(link_label)
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data, trouble):
         tz = timezone(self._config.TIMEZONE)
@@ -1108,12 +1135,8 @@ class ServiceAffectingMonitor:
         blacklisted_link_labels = self._config.ASR_CONFIG['link_labels_blacklist']
         return any(label for label in blacklisted_link_labels if label in link_label)
 
-    def _should_be_forwarded_to_HNOC(self, link_data: dict) -> bool:
-        link_label = link_data['link_status']['displayName'].lower()
-        is_blacklisted = self._is_link_label_blacklisted_for_HNOC(link_label)
-        return not is_blacklisted
-
     def _is_link_label_blacklisted_for_HNOC(self, link_label: str) -> bool:
+        link_label = link_label.lower()
         blacklisted_link_labels = self._config.MONITOR_CONFIG['link_labels__hnoc_blacklist']
         return any(label for label in blacklisted_link_labels if label.lower() in link_label)
 
@@ -1136,3 +1159,82 @@ class ServiceAffectingMonitor:
             return last_affecting_trouble_seconds['day']
         else:
             return last_affecting_trouble_seconds['night']
+
+    async def _send_reminder(self, ticket: dict):
+        ticket_id = ticket['ticket_overview']['ticketID']
+        service_number = ticket['ticket_task']['detailValue']
+        self._logger.info(
+            f'Attempting to send reminder for service number {service_number} to ticket {ticket_id}'
+        )
+
+        notes_from_ticket = ticket['ticket_notes']
+        filtered_notes = self._ticket_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
+            notes_from_ticket
+        )
+        last_documentation_cycle_start_date = (
+            filtered_notes[0]['createdDate'] if filtered_notes else ticket['ticket_overview']['createDate']
+        )
+
+        wait_time_before_sending_new_milestone_reminder = self._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        should_send_reminder_notification = not self._was_last_reminder_sent_recently(
+            filtered_notes,
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        if not should_send_reminder_notification:
+            self._logger.info(
+                f'No Reminder note will be appended for service number {service_number} to ticket {ticket_id},'
+                f' since either the last documentation cycle started or the last reminder'
+                f' was sent too recently'
+            )
+            return
+
+        working_environment = self._config.CURRENT_ENVIRONMENT
+        if not working_environment == 'production':
+            self._logger.info(
+                f'No Reminder note will be appended for service number {service_number} to ticket {ticket_id} since '
+                f'the current environment is {working_environment.upper()}'
+            )
+            return
+
+        await self._bruin_repository.send_reminder_email_milestone_notification(
+            ticket_id,
+            service_number
+        )
+
+        append_note_response = await self._append_reminder_note(ticket_id, service_number)
+        if append_note_response['status'] not in range(200, 300):
+            self._logger.error(
+                f'Reminder note of edge {service_number} could not be appended to ticket'
+                f' {ticket_id}!'
+            )
+            return
+
+        self._logger.info(
+            f'Reminder note of edge {service_number} was successfully appended to ticket'
+            f' {ticket_id}!'
+        )
+        await self._notifications_repository.notify_successful_reminder_note_append(
+            ticket_id,
+            service_number
+        )
+
+    def _was_last_reminder_sent_recently(self, ticket_notes: list, ticket_creation_date: str,
+                                         max_seconds_since_last_reminder: int) -> bool:
+        reminder_regex = REMINDER_NOTE_REGEX
+        return self._utils_repository.has_last_event_happened_recently(
+            ticket_notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=max_seconds_since_last_reminder,
+            regex=reminder_regex
+        )
+
+    async def _append_reminder_note(self, ticket_id: int, service_number: str):
+        reminder_note = self._ticket_repository.build_reminder_note()
+        return await self._bruin_repository.append_note_to_ticket(
+            ticket_id,
+            reminder_note,
+            service_numbers=[service_number],
+        )

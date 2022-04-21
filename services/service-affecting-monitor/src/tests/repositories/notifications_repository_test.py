@@ -130,3 +130,19 @@ class TestNotificationsRepository:
             f'Detected trouble was {trouble.value.upper()}. https://app.bruin.com/t/{ticket_id}'
         )
         notifications_repository.send_slack_message.assert_awaited_once_with(message)
+
+    @pytest.mark.asyncio
+    async def notify_successful_reminder_note_append_test(self, notifications_repository):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+
+        await notifications_repository.notify_successful_reminder_note_append(
+            ticket_id=ticket_id,
+            serial_number=serial_number
+        )
+
+        message = (
+            f'Service Affecting reminder note posted for serial number {serial_number} of ticket {ticket_id}. '
+            f'https://app.bruin.com/t/{ticket_id}'
+        )
+        notifications_repository.send_slack_message.assert_awaited_once_with(message)

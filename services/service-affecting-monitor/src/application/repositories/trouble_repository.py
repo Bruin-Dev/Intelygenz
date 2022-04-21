@@ -1,7 +1,4 @@
-from datetime import datetime
 
-from dateutil.parser import parse
-from pytz import utc
 
 from application import AFFECTING_NOTE_REGEX
 from application import AffectingTroubles
@@ -14,22 +11,13 @@ class TroubleRepository:
 
     def was_last_trouble_detected_recently(self, ticket_notes: list, ticket_creation_date: str, *,
                                            max_seconds_since_last_trouble: int) -> bool:
-        current_datetime = datetime.now(utc)
-
-        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
-
-        last_affecting_note = self._utils_repository.get_last_element_matching(
-            notes_sorted_by_date_asc,
-            lambda note: AFFECTING_NOTE_REGEX.search(note['noteValue'])
+        trouble_regex = AFFECTING_NOTE_REGEX
+        return self._utils_repository.has_last_event_happened_recently(
+            ticket_notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=max_seconds_since_last_trouble,
+            regex=trouble_regex
         )
-        if last_affecting_note:
-            note_creation_date = parse(last_affecting_note['createdDate']).astimezone(utc)
-            seconds_elapsed_since_last_affecting_trouble = (current_datetime - note_creation_date).total_seconds()
-            return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_trouble
-
-        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
-        seconds_elapsed_since_last_affecting_trouble = (current_datetime - ticket_creation_datetime).total_seconds()
-        return seconds_elapsed_since_last_affecting_trouble <= max_seconds_since_last_trouble
 
     def is_latency_rx_within_threshold(self, link_metrics: dict) -> bool:
         trouble = AffectingTroubles.LATENCY

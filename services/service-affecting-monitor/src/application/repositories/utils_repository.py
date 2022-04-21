@@ -1,5 +1,10 @@
+from datetime import datetime
 from ipaddress import ip_address
 from typing import Callable
+from typing import Pattern
+
+from dateutil.parser import parse
+from pytz import utc
 
 from application import EVENT_INTERFACE_REGEX
 
@@ -37,3 +42,24 @@ class UtilsRepository:
             return bool(ip_address(string))
         except ValueError:
             return False
+
+    def has_last_event_happened_recently(self, ticket_notes: list, documentation_cycle_start_date: str,
+                                         max_seconds_since_last_event: int, regex: Pattern[str]) -> bool:
+        current_datetime = datetime.now(utc)
+
+        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
+
+        last_event_note = self.get_last_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: regex.search(note['noteValue'])
+        )
+        if last_event_note:
+            note_creation_date = parse(last_event_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_affecting_event = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_affecting_event <= max_seconds_since_last_event
+
+        documentation_cycle_start_datetime = parse(documentation_cycle_start_date).replace(tzinfo=utc)
+        seconds_elapsed_since_last_affecting_event = (
+                current_datetime - documentation_cycle_start_datetime
+        ).total_seconds()
+        return seconds_elapsed_since_last_affecting_event <= max_seconds_since_last_event

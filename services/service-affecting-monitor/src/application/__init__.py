@@ -42,3 +42,8 @@ EVENT_INTERFACE_REGEX = re.compile(
     r'(^Interface (?P<interface>[a-zA-Z0-9]+) is (up|down)$)|'
     r'(^Link (?P<link_interface>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'
 )
+
+REMINDER_NOTE_REGEX = re.compile(
+    r"^#\*MetTel's IPA\*#\nClient Reminder",
+    re.DOTALL | re.MULTILINE,
+)

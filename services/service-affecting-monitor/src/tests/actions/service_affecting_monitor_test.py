@@ -1,16 +1,19 @@
+import os
 from datetime import datetime, timedelta
 from unittest.mock import Mock, call
 from unittest.mock import patch
 
 import pytest
-from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
-from application import AffectingTroubles, ForwardQueues
+from application import AffectingTroubles
+from application import REMINDER_NOTE_REGEX
+from application.actions import service_affecting_monitor as service_affecting_monitor_module
+from application.repositories import utils_repository as utils_repository_module
 from config import testconfig
 
 uuid_ = uuid()
@@ -261,7 +264,6 @@ class TestServiceAffectingMonitor:
             make_list_of_structured_metrics_objects_with_cache_and_contact_info,
             make_contact_info, make_site_details,
     ):
-
         site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
         site_detail_name = "Help Desk"
@@ -315,7 +317,6 @@ class TestServiceAffectingMonitor:
             make_list_of_structured_metrics_objects_with_cache_and_contact_info,
             make_contact_info, make_site_details, make_bruin_client_info,
     ):
-
         site_detail_email = None
         site_detail_phone = None
         site_detail_name = None
@@ -459,7 +460,6 @@ class TestServiceAffectingMonitor:
             self, service_affecting_monitor, make_edge, make_link, make_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_cached_edge, make_customer_cache, make_site_details):
-
         site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
         site_detail_name = "Help Desk"
@@ -548,7 +548,6 @@ class TestServiceAffectingMonitor:
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -681,7 +680,6 @@ class TestServiceAffectingMonitor:
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -723,7 +721,6 @@ class TestServiceAffectingMonitor:
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_structured_metrics_object_with_cache_and_contact_info,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -815,7 +812,6 @@ class TestServiceAffectingMonitor:
             make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -857,7 +853,6 @@ class TestServiceAffectingMonitor:
             make_structured_metrics_object, make_list_of_structured_metrics_objects,
             make_structured_metrics_object_with_cache_and_contact_info,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -948,7 +943,6 @@ class TestServiceAffectingMonitor:
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
             make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -997,7 +991,6 @@ class TestServiceAffectingMonitor:
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
             make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1046,7 +1039,6 @@ class TestServiceAffectingMonitor:
             make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
             make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1098,7 +1090,6 @@ class TestServiceAffectingMonitor:
             make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
             make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1206,7 +1197,6 @@ class TestServiceAffectingMonitor:
             make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics, make_event,
             make_events_by_serial_and_interface, make_structured_metrics_object_with_events,
             make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1257,7 +1247,6 @@ class TestServiceAffectingMonitor:
             make_events_by_serial_and_interface, make_structured_metrics_object_with_events,
             make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1380,6 +1369,8 @@ class TestServiceAffectingMonitor:
             client_id, service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
@@ -1417,6 +1408,8 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_awaited_once_with(
             detail_object, trouble, link_info,
         )
@@ -1454,8 +1447,50 @@ class TestServiceAffectingMonitor:
             client_id, service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_awaited_once_with(
             detail_object, trouble, link_info,
+        )
+        service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
+        service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_affecting_trouble__open_ticket_found_with_in_progress_detail_for_serial_send_reminder_test(
+            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
+            make_structured_metrics_object_with_cache_and_contact_info,
+            make_ticket, make_list_of_tickets, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+            make_rpc_response):
+        service_number = 'VC1234567'
+        client_id = 12345
+        ticket_id = 123
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=service_number, bruin_client_info=bruin_client_info)
+        link_info = make_structured_metrics_object_with_cache_and_contact_info(cache_info=edge_cache_info)
+        ticket = make_ticket(ticket_id=ticket_id)
+        open_affecting_tickets = make_list_of_tickets(ticket)
+        detail_item = make_detail_item(status='I')
+        detail_object = make_detail_item_with_notes_and_ticket_info(detail_item=detail_item, ticket_info=ticket)
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
+            body=open_affecting_tickets,
+            status=200,
+        )
+        service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.return_value = detail_object
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+
+        await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
+
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
+            client_id, service_number=service_number,
+        )
+        service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
+        service_affecting_monitor._append_latest_trouble_to_ticket.assert_awaited_once_with(
+            detail_object, trouble, link_info,
+        )
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._send_reminder.assert_awaited_once_with(
+            detail_object
         )
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
@@ -1464,8 +1499,7 @@ class TestServiceAffectingMonitor:
     async def process_affecting_trouble__get_resolved_affecting_tickets_request_has_not_2xx_status_test(
             self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
             make_structured_metrics_object_with_cache_and_contact_info,
-            make_ticket, make_list_of_tickets, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            make_rpc_response, bruin_500_response):
+            make_list_of_tickets, make_rpc_response, bruin_500_response):
         service_number = 'VC1234567'
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
@@ -1474,11 +1508,7 @@ class TestServiceAffectingMonitor:
         edge_cache_info = make_cached_edge(serial_number=service_number, bruin_client_info=bruin_client_info)
         link_info = make_structured_metrics_object_with_cache_and_contact_info(cache_info=edge_cache_info)
 
-        ticket = make_ticket()
         open_affecting_tickets = make_list_of_tickets()
-
-        detail_item = make_detail_item()
-        detail_object = make_detail_item_with_notes_and_ticket_info(detail_item=detail_item, ticket_info=ticket)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
@@ -1497,6 +1527,8 @@ class TestServiceAffectingMonitor:
             client_id, service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
@@ -1530,7 +1562,7 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.side_effect = [
-            None,           # No Open ticket was found
+            None,  # No Open ticket was found
             detail_object,  # Resolved ticket was found
         ]
 
@@ -1543,6 +1575,8 @@ class TestServiceAffectingMonitor:
             client_id, service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_awaited_once_with(
             detail_object, trouble, link_info,
         )
@@ -1584,6 +1618,8 @@ class TestServiceAffectingMonitor:
             client_id, service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_awaited_once_with(trouble, link_info)
 
@@ -1878,15 +1914,19 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_schedule_hnoc_forwarding.return_value = False
+        service_affecting_monitor._bruin_repository.post_notification_email_milestone.return_value = (
+            bruin_generic_200_response
+        )
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
         with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
-        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
-#        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
+        service_affecting_monitor._append_reminder_note.assert_awaited_once()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
@@ -1899,7 +1939,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_schedule_hnoc_forwarding.return_value = True
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = False
 
         with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
@@ -1907,6 +1947,9 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
         service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
@@ -1970,15 +2013,19 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
             make_create_ticket_200_response()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_schedule_hnoc_forwarding.return_value = False
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_generic_200_response
+        )
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
         with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
-        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
-#        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
+        service_affecting_monitor._append_reminder_note.assert_awaited_once()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
@@ -1991,40 +2038,49 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
             make_create_ticket_200_response()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_schedule_hnoc_forwarding.return_value = True
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = False
 
         with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
-    def should_schedule_hnoc_forwarding_non_byob_return_true_test(
+    def should_always_stay_in_ipa_queue_non_byob_return_true_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
         link_data = make_link(display_name='Test')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_label = link_metric_object['link_status']['displayName']
 
-        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
+        should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(
+            link_label
+        )
         assert should_schedule_hnoc is True
 
-    def should_schedule_hnoc_forwarding_byob_link_display_name_return_false_test(
+    def should_always_stay_in_ipa_queue_byob_link_display_name_return_false_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
         link_data = make_link(display_name='BYOB Test')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_label = link_metric_object['link_status']['displayName']
 
-        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
+        should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
         assert should_schedule_hnoc is False
 
-    def should_schedule_hnoc_forwarding_byob_link_display_name_host_metvco4_return_true_test(
+    def should_always_stay_in_ipa_queue_byob_link_display_name_host_metvco4_return_true_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
         link_data = make_link(display_name='BYOB Test')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
+        link_label = link_metric_object['link_status']['displayName']
 
         with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
+            should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
         assert should_schedule_hnoc is True
 
     def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime,
@@ -2070,6 +2126,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info, trouble=trouble)
 
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
@@ -2095,6 +2153,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info, trouble=trouble)
 
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
@@ -2123,6 +2183,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info, trouble=trouble)
 
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
@@ -2153,6 +2215,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
                                                                       link_data=link_info, trouble=trouble)
 
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
@@ -2225,7 +2289,6 @@ class TestServiceAffectingMonitor:
             make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
             make_list_of_structured_metrics_objects_with_cache_and_contact_info, make_events_by_serial_and_interface,
             make_rpc_response, make_contact_info):
-
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -3543,3 +3606,305 @@ class TestServiceAffectingMonitor:
             with patch.dict(day_schedule, start_hour=2, end_hour=8):
                 result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
                 assert result == last_affecting_trouble_seconds['night']
+
+    def was_last_reminder_sent_recently_with_previous_reminder_test(
+            self,
+            service_affecting_monitor,
+            make_ticket_note,
+            make_list_of_ticket_notes
+    ):
+        ticket_creation_date = str(CURRENT_DATETIME)
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        datetime_mock = Mock()
+        note_1 = make_ticket_note(
+            text='Dummy note',
+            creation_date=str(CURRENT_DATETIME - timedelta(seconds=10)),
+        )
+        reminder_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ])
+        note_2 = make_ticket_note(
+            text=reminder_note,
+            creation_date=str(CURRENT_DATETIME + timedelta(hours=42)),
+        )
+        notes = make_list_of_ticket_notes(note_1, note_2)
+
+        now = CURRENT_DATETIME + timedelta(hours=42)
+        datetime_mock.now = Mock(return_value=now)
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_reminder_sent_recently(
+                notes,
+                ticket_creation_date,
+                wait_time_before_sending_new_milestone_reminder
+            )
+
+            assert result is True
+
+        ticket_creation_date = str(CURRENT_DATETIME + timedelta(hours=54))
+        now = CURRENT_DATETIME + timedelta(hours=54)
+        datetime_mock.now = Mock(return_value=now)
+        note_2 = make_ticket_note(
+            text=reminder_note,
+            creation_date=str(CURRENT_DATETIME - timedelta(hours=24)),
+        )
+        notes = make_list_of_ticket_notes(note_1, note_2)
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_reminder_sent_recently(
+                notes,
+                ticket_creation_date,
+                wait_time_before_sending_new_milestone_reminder
+            )
+
+            assert result is False
+
+        service_affecting_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
+            notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=86400.0,
+            regex=REMINDER_NOTE_REGEX
+        )
+        service_affecting_monitor._logger.error.assert_not_called()
+
+    def was_last_reminder_sent_recently_without_previous_reminder_test(
+            self,
+            service_affecting_monitor,
+            make_ticket_note,
+            make_list_of_ticket_notes
+    ):
+        ticket_creation_date = str(CURRENT_DATETIME)
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        datetime_mock = Mock()
+        note_1 = make_ticket_note(
+            text='Dummy note',
+            creation_date=str(CURRENT_DATETIME - timedelta(seconds=10)),
+        )
+        note_2 = make_ticket_note(
+            text='This email is not a reminder',
+            creation_date=str(CURRENT_DATETIME),
+        )
+        notes = make_list_of_ticket_notes(note_1, note_2)
+
+        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_reminder_sent_recently(
+                notes,
+                ticket_creation_date,
+                wait_time_before_sending_new_milestone_reminder
+            )
+
+            assert result is True
+
+        now = CURRENT_DATETIME + timedelta(hours=42)
+        datetime_mock.now = Mock(return_value=now)
+        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+            result = service_affecting_monitor._was_last_reminder_sent_recently(
+                notes,
+                ticket_creation_date,
+                wait_time_before_sending_new_milestone_reminder
+            )
+
+            assert result is False
+
+        service_affecting_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
+            notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=86400.0,
+            regex=REMINDER_NOTE_REGEX
+        )
+        service_affecting_monitor._logger.error.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def send_reminder__last_trouble_documented_on_ticket_creation_and_detected_one_day_ago_test(
+            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+            bruin_generic_200_response
+    ):
+        serial_number = 'VC1234567'
+        ticket = make_ticket(
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(hours=24)),
+        )
+        ticket_id = ticket['ticketID']
+        last_documentation_cycle_start_date = ticket['createDate']
+        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(
+            detail_item=detail_item,
+            ticket_info=ticket,
+        )
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        reminder_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ])
+        service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._send_reminder(detail_object)
+
+        service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
+            [],
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        service_affecting_monitor._append_reminder_note.assert_awaited_once_with(
+            ticket_id,
+            serial_number,
+        )
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id,
+            reminder_note,
+            service_numbers=[serial_number],
+        )
+        service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_awaited_with(
+            ticket_id,
+            serial_number
+        )
+        service_affecting_monitor._logger.error.assert_not_called()
+        service_affecting_monitor._logger.info.assert_called_with(
+            f'Reminder note of edge {serial_number} was successfully appended to ticket'
+            f' {ticket_id}!'
+        )
+
+    @pytest.mark.asyncio
+    async def send_reminder__creation_date_less_than_24_hours_test(
+            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+    ):
+        serial_number = 'VC1234567'
+        ticket = make_ticket(
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(hours=1)),
+        )
+        ticket_id = ticket['ticketID']
+        last_documentation_cycle_start_date = ticket['createDate']
+        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(
+            detail_item=detail_item,
+            ticket_info=ticket
+        )
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._send_reminder(detail_object)
+
+        service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
+            [],
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
+        service_affecting_monitor._logger.error.assert_not_called()
+        service_affecting_monitor._logger.info.assert_called_with(
+            f'No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},'
+            f' since either the last documentation cycle started or the last reminder'
+            f' was sent too recently'
+        )
+
+    @pytest.mark.asyncio
+    async def send_reminder__last_note_less_than_24_hours_test(
+            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+            make_ticket_note
+    ):
+        serial_number = 'VC1234567'
+        ticket = make_ticket(
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
+        )
+        reminder_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ])
+        last_note_date = str(CURRENT_DATETIME)
+        note = make_ticket_note(
+            text=reminder_note,
+            creation_date=last_note_date,
+        )
+        ticket_id = ticket['ticketID']
+        last_documentation_cycle_start_date = last_note_date
+        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(
+            detail_item=detail_item,
+            ticket_info=ticket,
+            notes=[note]
+        )
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._send_reminder(detail_object)
+
+        service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
+            [note],
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
+        service_affecting_monitor._logger.error.assert_not_called()
+        service_affecting_monitor._logger.info.assert_called_with(
+            f'No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},'
+            f' since either the last documentation cycle started or the last reminder'
+            f' was sent too recently'
+        )
+
+    @pytest.mark.asyncio
+    async def send_reminder__failed_to_append_note_test(
+            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+            bruin_generic_200_response, bruin_500_response
+    ):
+        serial_number = 'VC1234567'
+        ticket = make_ticket(
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
+        )
+        ticket_id = ticket['ticketID']
+        last_documentation_cycle_start_date = ticket['createDate']
+        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(
+            detail_item=detail_item,
+            ticket_info=ticket,
+        )
+        reminder_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ])
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._send_reminder(detail_object)
+
+        service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
+            [],
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        service_affecting_monitor._append_reminder_note.assert_awaited_once_with(
+            ticket_id,
+            serial_number,
+        )
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id,
+            reminder_note,
+            service_numbers=[serial_number],
+        )
+        service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
+        service_affecting_monitor._logger.error.assert_called_once_with(
+            f'Reminder note of edge {serial_number} could not be appended to ticket'
+            f' {ticket_id}!'
+        )

@@ -86,7 +86,10 @@ MONITOR_CONFIG = {
     },
     'customers_with_bandwidth_enabled': json.loads(
         os.environ['MONITORING__CUSTOMERS_WITH_BANDWIDTH_MONITORING_ENABLED']),
-}
+    'wait_time_before_sending_new_milestone_reminder': int(
+        os.environ['MONITORING__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER']
+    ),
+ }
 
 # JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
 recipients_by_host_and_client_id_raw = json.loads(
