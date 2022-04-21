@@ -1,18 +1,16 @@
-import asyncio
-import time
+import os
 from collections import defaultdict
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
-import os
-from collections import defaultdict
 
-
+import asyncio
 import html2text
-
-from application.exceptions import ResponseException
+import time
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
+
+from application.exceptions import ResponseException
 
 
 class RepairTicketsMonitor:
@@ -256,10 +254,6 @@ class RepairTicketsMonitor:
             if not inference_data:
                 self._logger.error("email_id=%s No inference data. Marking email as complete in Redis", email_id)
                 self._new_tagged_emails_repository.mark_complete(email_id)
-                tickets_cannot_be_created.append(
-                    self._create_output_ticket_dict(service_numbers=[], site_id="", reason="No inference data")
-                )
-                await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
                 return
 
             potential_service_numbers = inference_data.get("potential_service_numbers")

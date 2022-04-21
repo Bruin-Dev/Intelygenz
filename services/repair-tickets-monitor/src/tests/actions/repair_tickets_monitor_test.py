@@ -1,13 +1,13 @@
-import asyncio
 from collections import defaultdict
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+import asyncio
 import pytest
+from asynctest import CoroutineMock
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.exceptions import ResponseException
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 
@@ -534,12 +534,7 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=None)
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
-        repair_tickets_monitor._save_output.assert_awaited_once_with(
-            "1234",
-            tickets_cannot_be_created=[
-                {"site_id": "", "service_numbers": [], "ticket_id": "", "not_creation_reason": "No inference data"}
-            ],
-        )
+        repair_tickets_monitor._save_output.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def _process_repair_email__ok__with_cancellations_test(
