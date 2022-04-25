@@ -8373,8 +8373,6 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     def _should_schedule_hnoc_forwarding_metvco4_host_byob_link_display_return_true_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8404,15 +8402,11 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                     serial,
-                                                                                     link_data,
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                      outage_type)
         assert should_forward_to_hnoc is True
 
     def _should_schedule_hnoc_forwarding_metvco4_host_ip_link_display_name_return_true_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8442,15 +8436,11 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                     serial,
-                                                                                     link_data,
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                      outage_type)
         assert should_forward_to_hnoc is True
 
     def _should_schedule_hnoc_forwarding_not_link_down_byob_link_display_name_return_true_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8479,15 +8469,11 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                 serial,
-                                                                                 link_data,
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                  outage_type)
         assert should_forward_to_hnoc is True
 
     def _should_schedule_hnoc_forwarding_not_link_down_ip_link_display_name_return_true_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8516,15 +8502,11 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                 serial,
-                                                                                 link_data,
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                  outage_type)
         assert should_forward_to_hnoc is True
 
     def _should_schedule_hnoc_forwarding_byob_link_display_name_return_false_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.HA_LINK_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8553,15 +8535,11 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                 serial,
-                                                                                 link_data,
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                  outage_type)
         assert should_forward_to_hnoc is False
 
     def _should_schedule_hnoc_forwarding_ip_link_display_name_return_false_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8590,15 +8568,11 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                 serial,
-                                                                                 link_data,
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                  outage_type)
         assert should_forward_to_hnoc is False
 
     def _should_schedule_hnoc_forwarding_non_byob_and_non_ip_link_display_name_return_true_test(self):
-        ticket_id = 12345
-        serial = 'VC1234567'
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         link_data = [{
             # Some fields omitted for simplicity
@@ -8627,9 +8601,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(ticket_id,
-                                                                                 serial,
-                                                                                 link_data,
+        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
                                                                                  outage_type)
         assert should_forward_to_hnoc is True
 

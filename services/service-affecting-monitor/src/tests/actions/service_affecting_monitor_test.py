@@ -2004,59 +2004,44 @@ class TestServiceAffectingMonitor:
 
     def should_schedule_hnoc_forwarding_non_byob_and_non_ip_link_display_name_return_true_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        ticket_id = 123
-        serial_number = 'VCO123'
         link_data = make_link(display_name='Test')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
 
-        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(ticket_id, serial_number,
-                                                                                          link_metric_object)
+        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
         assert should_schedule_hnoc is True
 
     def should_schedule_hnoc_forwarding_byob_link_display_name_return_false_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        ticket_id = 123
-        serial_number = 'VCO123'
         link_data = make_link(display_name='BYOB Test')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
 
-        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(ticket_id, serial_number,
-                                                                                          link_metric_object)
+        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
         assert should_schedule_hnoc is False
 
     def should_schedule_hnoc_forwarding_ip_link_display_name_return_false_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        ticket_id = 123
-        serial_number = 'VCO123'
         link_data = make_link(display_name='192.158.1.38')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
 
-        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(ticket_id, serial_number,
-                                                                                          link_metric_object)
+        should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
         assert should_schedule_hnoc is False
 
     def should_schedule_hnoc_forwarding_byob_link_display_name_host_metvco4_return_true_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        ticket_id = 123
-        serial_number = 'VCO123'
         link_data = make_link(display_name='BYOB Test')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
 
         with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(ticket_id, serial_number,
-                                                                                              link_metric_object)
+            should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
         assert should_schedule_hnoc is True
 
     def should_schedule_hnoc_forwarding_ip_link_display_namehost_metvco4_return_true_test(
             self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        ticket_id = 123
-        serial_number = 'VCO123'
         link_data = make_link(display_name='192.158.1.38')
         link_metric_object = make_structured_metrics_object(link_info=link_data)
 
         with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(ticket_id, serial_number,
-                                                                                              link_metric_object)
+            should_schedule_hnoc = service_affecting_monitor._should_schedule_hnoc_forwarding(link_metric_object)
         assert should_schedule_hnoc is True
 
     def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime,
