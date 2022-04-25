@@ -20,6 +20,8 @@ NATS_CONFIG = {
 
 PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ['IPA_SYSTEM_USERNAME_IN_BRUIN']
+
 MONITOR_CONFIG = {
     'monitoring_interval_seconds': int(os.environ['MONITORING_JOB_INTERVAL']),
     'blacklisted_edges': json.loads(os.environ['BLACKLISTED_EDGES']),

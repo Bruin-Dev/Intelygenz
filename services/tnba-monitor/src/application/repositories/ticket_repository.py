@@ -59,9 +59,8 @@ class TicketRepository:
     def is_detail_in_affecting_ticket(ticket_detail: dict) -> bool:
         return ticket_detail['ticket_topic'] == 'VAS'
 
-    @staticmethod
-    def was_ticket_created_by_automation_engine(ticket_detail: dict) -> bool:
-        return ticket_detail['ticket_creator'] == 'Intelygenz Ai'
+    def was_ticket_created_by_automation_engine(self, ticket_detail: dict) -> bool:
+        return ticket_detail['ticket_creator'] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
 
     @staticmethod
     def build_tnba_note_from_prediction(prediction: dict, serial_number: str) -> str:

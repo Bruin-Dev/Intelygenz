@@ -33,6 +33,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
+
 BRUIN_CONFIG = {
     'base_url': os.environ["BRUIN_BASE_URL"],
     'client_id': os.environ["BRUIN_CLIENT_ID"],

@@ -42,6 +42,7 @@ if ENABLE_TRIAGE_MONITORING:
 else:
     VELOCLOUD_HOST = os.environ['MONITORING__VELOCLOUD_HOST']
     METRICS_RELEVANT_CLIENTS = json.loads(os.environ['METRICS_RELEVANT_CLIENTS'])
+    IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ['IPA_SYSTEM_USERNAME_IN_BRUIN']
     MONITOR_CONFIG = {
         'multiplier': 5,
         'min': 5,

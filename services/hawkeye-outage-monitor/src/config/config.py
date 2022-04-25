@@ -18,6 +18,8 @@ NATS_CONFIG = {
 
 TIMEZONE = os.environ["TIMEZONE"]
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
+
 MONITOR_CONFIG = {
     'multiplier': 5,
     'min': 5,

@@ -1159,8 +1159,8 @@ class BruinClient:
             payload = {
                 "emailId": email_id,
                 "status": "Done",
-                "resolution": "Mark as done by Intelygenz Ai",
-                "updatedBy": "Intelygenz Ai",
+                "resolution": f"Mark as done by {self._config.IPA_SYSTEM_USERNAME_IN_BRUIN}",
+                "updatedBy": self._config.IPA_SYSTEM_USERNAME_IN_BRUIN,
             }
 
             try:

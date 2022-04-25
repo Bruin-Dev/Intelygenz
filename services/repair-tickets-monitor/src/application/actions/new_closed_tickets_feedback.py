@@ -54,7 +54,7 @@ class NewClosedTicketsFeedback:
             self._logger.info(f'Skipping start of NewClosedTicketsFeedback feedback job. Reason: {conflict}')
 
     def _get_igz_created_tickets(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return [ticket for ticket in tickets if ticket['created_by'] == 'Intelygenz Ai']
+        return [ticket for ticket in tickets if ticket['created_by'] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN]
 
     async def get_closed_tickets_created_during_last_3_days(self) -> List[Dict[str, Any]]:
         creation_date_limit = datetime.utcnow() - timedelta(days=3)

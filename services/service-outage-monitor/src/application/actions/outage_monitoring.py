@@ -433,9 +433,8 @@ class OutageMonitor:
                 f'edge {serial_number} was autoresolved!'
             )
 
-    @staticmethod
-    def _was_ticket_created_by_automation_engine(ticket: dict) -> bool:
-        return ticket['createdBy'] == 'Intelygenz Ai'
+    def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
+        return ticket['createdBy'] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
 
     @staticmethod
     def _is_detail_resolved(ticket_detail: dict):

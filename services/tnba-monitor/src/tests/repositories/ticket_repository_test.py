@@ -132,13 +132,13 @@ class TestTicketRepository:
         result = TicketRepository.is_detail_in_outage_ticket(detail_object)
         assert result is False
 
-    def was_ticket_created_by_automation_engine_test(self, make_detail_object):
+    def was_ticket_created_by_automation_engine_test(self, ticket_repository, make_detail_object):
         detail_object = make_detail_object(ticket_creator='Intelygenz Ai')
-        result = TicketRepository.was_ticket_created_by_automation_engine(detail_object)
+        result = ticket_repository.was_ticket_created_by_automation_engine(detail_object)
         assert result is True
 
         detail_object = make_detail_object(ticket_creator='Otacon')
-        result = TicketRepository.was_ticket_created_by_automation_engine(detail_object)
+        result = ticket_repository.was_ticket_created_by_automation_engine(detail_object)
         assert result is False
 
     def build_tnba_note_from_prediction_test(self, serial_number_1, holmdel_noc_prediction):

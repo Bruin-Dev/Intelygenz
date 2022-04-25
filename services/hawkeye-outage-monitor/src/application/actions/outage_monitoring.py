@@ -195,9 +195,8 @@ class OutageMonitor:
             self._logger.info(
                 f'Ticket {outage_ticket_id} linked to device {serial_number} was autoresolved!')
 
-    @staticmethod
-    def _was_ticket_created_by_automation_engine(ticket: dict) -> bool:
-        return ticket['createdBy'] == 'Intelygenz Ai'
+    def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
+        return ticket['createdBy'] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
 
     @staticmethod
     def is_outage_ticket_auto_resolvable(ticket_notes: list, max_autoresolves: int) -> bool:

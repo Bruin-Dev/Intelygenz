@@ -17,6 +17,8 @@ NATS_CONFIG = {
     'reconnects': 0
 }
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = 'Intelygenz Ai'
+
 BRUIN_CONFIG = {
     'base_url': "some.bruin.url",
     'client_id': "client_id",

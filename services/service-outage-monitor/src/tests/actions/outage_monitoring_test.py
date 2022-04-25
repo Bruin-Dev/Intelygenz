@@ -4628,6 +4628,25 @@ class TestServiceOutageMonitor:
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_1_id)
 
     def was_ticket_created_by_automation_engine_test(self):
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        config = testconfig
+        bruin_repository = Mock()
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
         ticket = {
             "clientID": 12345,
             "clientName": "Aperture Science",
@@ -4638,7 +4657,7 @@ class TestServiceOutageMonitor:
             "createDate": "9/25/2020 6:31:54 AM",
             "createdBy": "Intelygenz Ai",
         }
-        result = OutageMonitor._was_ticket_created_by_automation_engine(ticket)
+        result = outage_monitor._was_ticket_created_by_automation_engine(ticket)
         assert result is True
 
         ticket = {
@@ -4651,7 +4670,7 @@ class TestServiceOutageMonitor:
             "createDate": "9/25/2020 6:31:54 AM",
             "createdBy": "InterMapper Service",
         }
-        result = OutageMonitor._was_ticket_created_by_automation_engine(ticket)
+        result = outage_monitor._was_ticket_created_by_automation_engine(ticket)
         assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self):

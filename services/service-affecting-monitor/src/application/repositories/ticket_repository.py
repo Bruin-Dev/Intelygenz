@@ -22,9 +22,8 @@ class TicketRepository:
     def is_task_resolved(ticket_task: dict) -> bool:
         return ticket_task['detailStatus'] == 'R'
 
-    @staticmethod
-    def was_ticket_created_by_automation_engine(ticket: dict) -> bool:
-        return ticket['createdBy'] == 'Intelygenz Ai'
+    def was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
+        return ticket['createdBy'] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
 
     def is_autoresolve_threshold_maxed_out(self, ticket_notes: list) -> bool:
         autoresolve_notes = [

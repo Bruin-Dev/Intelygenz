@@ -19,6 +19,8 @@ NATS_CONFIG = {
 
 TIMEZONE = 'US/Eastern'
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = 'Intelygenz Ai'
+
 PRODUCT_CATEGORY = 'SD-WAN'
 
 VELOCLOUD_HOST = 'test-host'

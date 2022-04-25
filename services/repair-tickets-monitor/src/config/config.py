@@ -20,6 +20,8 @@ NATS_CONFIG = {
 
 TIMEZONE = os.environ['TIMEZONE']
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
+
 MONITOR_CONFIG = {
     'max_retries_error_404': 5,
     'tag_ids': json.loads(os.environ['TAG_IDS_MAPPING']),

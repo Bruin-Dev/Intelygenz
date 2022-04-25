@@ -35,6 +35,8 @@ for host in default_contact_info_raw.keys():
 
 TIMEZONE = os.environ['TIMEZONE']
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
+
 PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 VELOCLOUD_HOST = os.environ['MONITORED_VELOCLOUD_HOST']

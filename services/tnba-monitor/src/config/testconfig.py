@@ -19,6 +19,8 @@ NATS_CONFIG = {
 
 PRODUCT_CATEGORY = 'SD-WAN'
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = 'Intelygenz Ai'
+
 MONITOR_CONFIG = {
     'monitoring_interval_seconds': 60 * 5,
     'blacklisted_edges': [

@@ -15,6 +15,8 @@ NATS_CONFIG = {
 
 TIMEZONE = 'US/Eastern'
 
+IPA_SYSTEM_USERNAME_IN_BRUIN = 'Intelygenz Ai'
+
 MONITOR_CONFIG = {
     'max_retries_error_404': 5,
     'tag_ids': {
