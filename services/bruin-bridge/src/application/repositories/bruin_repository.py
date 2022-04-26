@@ -3,6 +3,8 @@ from typing import List
 
 import asyncio
 
+from application.clients.bruin_session import BruinResponse
+
 
 class BruinRepository:
 
@@ -395,5 +397,5 @@ class BruinRepository:
 
         return await self._bruin_client.post_notification_email_milestone(payload)
 
-    async def get_service_number_topics(self, params):
+    async def get_service_number_topics(self, params) -> BruinResponse:
         return await self._bruin_client.get_service_number_topics(params)

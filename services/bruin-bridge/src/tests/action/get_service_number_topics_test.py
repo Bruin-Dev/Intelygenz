@@ -4,6 +4,7 @@ import pytest
 from asynctest import CoroutineMock
 
 from application.actions.get_service_number_topics import *
+from application.clients.bruin_session import BruinResponse
 
 
 class TestGetServiceNumberTopics:
@@ -35,7 +36,8 @@ class TestGetServiceNumberTopics:
         # Then
         event_bus.publish_message.assert_awaited_once_with(a_request_topic, {
             "request_id": a_request_id,
-            **mocked_response
+            "status": mocked_response.status,
+            "body": mocked_response.body
         })
 
     @pytest.mark.asyncio
@@ -169,9 +171,9 @@ def event_bus():
 
 @pytest.fixture
 def mocked_response():
-    return {
-        "status": 200,
-        "body": {
+    return BruinResponse(
+        status=200,
+        body={
             "callTypes": [
                 {
                     "callType": "CHG",
@@ -181,4 +183,4 @@ def mocked_response():
                 },
             ]
         }
-    }
+    )

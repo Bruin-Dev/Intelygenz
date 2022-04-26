@@ -1,10 +1,13 @@
 import base64
 import json
 import ssl
+from typing import Any
 
 import aiohttp
 import certifi
 import humps
+
+from application.clients.bruin_session import BruinResponse, BruinSession
 
 
 class BruinClient:
@@ -16,6 +19,9 @@ class BruinClient:
 
         self.__ssl_context = ssl.create_default_context(cafile=certifi.where())
         self._session = aiohttp.ClientSession(trace_configs=config.AIOHTTP_CONFIG['tracers'])
+        self._bruin_session = BruinSession(
+            session=self._session, base_url=config.BRUIN_CONFIG["base_url"], logger=logger
+        )
 
     async def login(self):
         self._logger.info("Logging into Bruin...")
@@ -1305,33 +1311,14 @@ class BruinClient:
                 'status': 500
             }
 
-    async def get_service_number_topics(self, params):
-        try:
-            return_response = dict.fromkeys(["body", "status"])
-            parsed_params = humps.pascalize(params)
-            self._logger.info(f'Getting service number topics for: {params}')
+    async def get_service_number_topics(self, params: Any) -> BruinResponse:
+        self._logger.info(f'Getting service number topics for: {params}')
+        response = await self._bruin_session.get(
+            path="/api/Ticket/topics", query_params=params, access_token=self._bearer_token
+        )
 
-            try:
-                response = await self._session.get(
-                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/topics',
-                    params=parsed_params,
-                    headers=self._get_request_headers(),
-                    ssl=False,
-                )
+        if response.status == 401:
+            self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+            await self.login()
 
-                response_json = await response.json()
-                return_response["body"] = response_json
-                return_response["status"] = response.status
-
-            except aiohttp.ClientConnectionError as e:
-                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
-                return_response["body"] = f"Connection error in Bruin API. {e}"
-                return_response["status"] = 500
-
-            return return_response
-
-        except Exception as e:
-            return {
-                "body": e.args[0],
-                "status": 500
-            }
+        return response
