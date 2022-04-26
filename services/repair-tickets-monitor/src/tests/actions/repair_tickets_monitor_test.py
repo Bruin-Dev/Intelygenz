@@ -736,10 +736,11 @@ class TestRepairTicketsMonitor:
         )
 
         # No valid service numbers
-        with pytest.raises(ResponseException):
-            await repair_tickets_monitor._get_valid_service_numbers_site_map(
-                "1345", potential_service_numbers=["10111"]  # Client_id
-            )
+        subject = await repair_tickets_monitor._get_valid_service_numbers_site_map(
+            "1345", potential_service_numbers=["10111"]  # Client_id
+        )
+
+        assert subject == {}
 
     @pytest.mark.asyncio
     async def _get_existing_tickets__ok_test(
@@ -1195,3 +1196,62 @@ class TestRepairTicketsMonitor:
             "bruin_ticket_call_type_map": {"12345": "repair"},
             "bruin_ticket_category_map": {"12345": "VOO"},
         }
+
+    @pytest.mark.asyncio
+    async def tickets_only_inferences_are_properly_handled_test(
+        self,
+        repair_tickets_monitor,
+        make_email,
+        make_filter_flags,
+        make_inference_data,
+    ):
+        email_id = "1234"
+        email = make_email(email_id=email_id)
+        tagged_email = {"email_id": email_id, "tag_id": 1}
+        filter_flags = make_filter_flags(
+            tagger_is_below_threshold=True,
+            rta_model1_is_below_threshold=True,
+            rta_model2_is_below_threshold=True,
+            is_filtered=True,
+            in_validation_set=True,
+        )
+        inference_data = make_inference_data(
+            potential_tickets_numbers=["1234"],
+            filter_flags=filter_flags,
+            predicted_class="Other",
+        )
+        repair_tickets_monitor._new_tagged_emails_repository = Mock()
+        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+        repair_tickets_monitor._save_output = CoroutineMock()
+        repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
+        repair_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value={
+            "status": 200,
+            "body": {
+                "ticket_id": "1234",
+                "ticket_status": "InProgress",
+                "call_type": "REP",
+                "category": "VOO"
+            }
+        })
+
+        await repair_tickets_monitor._process_repair_email(tagged_email)
+
+        expected_output = {
+            "service_number_sites_map": {},
+            "tickets_created": [],
+            "tickets_updated": [],
+            "tickets_could_be_created": [],
+            "tickets_could_be_updated": [],
+            "tickets_cannot_be_created": [],
+            "validated_ticket_numbers": ['1234'],
+            "bruin_ticket_status_map": {
+                "1234": "InProgress"
+            },
+            "bruin_ticket_call_type_map": {
+                "1234": "REP"
+            },
+            "bruin_ticket_category_map": {
+                "1234": "VOO"
+            },
+        }
+        repair_tickets_monitor._save_output.assert_awaited_once_with(email_id, **expected_output)

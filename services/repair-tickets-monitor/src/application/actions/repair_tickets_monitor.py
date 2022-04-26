@@ -257,7 +257,13 @@ class RepairTicketsMonitor:
                 return
 
             potential_service_numbers = inference_data.get("potential_service_numbers")
+            if potential_service_numbers is None:
+                potential_service_numbers = []
+
             potential_ticket_numbers = inference_data.get("potential_ticket_numbers")
+            if potential_ticket_numbers is None:
+                potential_ticket_numbers = []
+
             self._logger.info(
                 "email_id=%s inference: potential services numbers=%s potential_tickets_numbers=%s",
                 email_id,
@@ -374,9 +380,6 @@ class RepairTicketsMonitor:
                 continue
             else:
                 raise ResponseException(f"Exception while verifying service_number: {potential_service_number}")
-
-        if not service_number_site_map:
-            raise ResponseException("No validated service numbers")
 
         return service_number_site_map
 
