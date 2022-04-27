@@ -271,6 +271,12 @@ class RepairTicketsMonitor:
                 potential_ticket_numbers,
             )
 
+            validated_tickets = (
+                await self._get_validated_ticket_numbers(potential_ticket_numbers)
+                if potential_ticket_numbers
+                else defaultdict(list)
+            )
+
             try:
                 # Check if the service number is valid against Bruin API
                 service_number_site_map = await self._get_valid_service_numbers_site_map(
@@ -285,7 +291,14 @@ class RepairTicketsMonitor:
                     self._create_output_ticket_dict(service_numbers=[], site_id="", reason=e)
                 )
 
-                await self._save_output(email_id, tickets_cannot_be_created=tickets_cannot_be_created)
+                await self._save_output(
+                    email_id,
+                    tickets_cannot_be_created=tickets_cannot_be_created,
+                    validated_ticket_numbers=validated_tickets.get("validated_ticket_numbers", []),
+                    bruin_ticket_status_map=validated_tickets.get("bruin_ticket_status_map", {}),
+                    bruin_ticket_call_type_map=validated_tickets.get("bruin_ticket_call_type_map", {}),
+                    bruin_ticket_category_map=validated_tickets.get("bruin_ticket_category_map", {}),
+                )
                 self._new_tagged_emails_repository.mark_complete(email_id)
                 return
 
@@ -336,11 +349,12 @@ class RepairTicketsMonitor:
 
             tickets_cannot_be_created += feedback_not_created_due_cancellations
 
-            validated_tickets = (
-                await self._get_validated_ticket_numbers(potential_ticket_numbers)
-                if potential_ticket_numbers
-                else defaultdict(list)
-            )
+            if not existing_tickets:
+                tickets_cannot_be_created.append(
+                    self._create_output_ticket_dict(
+                        service_numbers=[], site_id="", reason="No validated service numbers"
+                    )
+                )
 
             output_send_to_save = {
                 "service_number_sites_map": service_number_site_map,
@@ -349,10 +363,10 @@ class RepairTicketsMonitor:
                 "tickets_could_be_created": tickets_could_be_created,
                 "tickets_could_be_updated": tickets_could_be_updated,
                 "tickets_cannot_be_created": tickets_cannot_be_created,
-                "validated_ticket_numbers": validated_tickets["validated_ticket_numbers"],
-                "bruin_ticket_status_map": validated_tickets["bruin_ticket_status_map"],
-                "bruin_ticket_call_type_map": validated_tickets["bruin_ticket_call_type_map"],
-                "bruin_ticket_category_map": validated_tickets["bruin_ticket_category_map"],
+                "validated_ticket_numbers": validated_tickets.get("validated_ticket_numbers", []),
+                "bruin_ticket_status_map": validated_tickets.get("bruin_ticket_status_map", {}),
+                "bruin_ticket_call_type_map": validated_tickets.get("bruin_ticket_call_type_map", {}),
+                "bruin_ticket_category_map": validated_tickets.get("bruin_ticket_category_map", {}),
             }
             self._logger.info("email_id=%s output_send_to_save=%s", email_id, output_send_to_save)
             await self._save_output(email_id, **output_send_to_save)

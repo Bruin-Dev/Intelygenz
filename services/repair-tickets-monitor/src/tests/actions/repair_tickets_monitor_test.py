@@ -639,6 +639,58 @@ class TestRepairTicketsMonitor:
             tickets_cannot_be_created=[
                 {"site_id": "", "service_numbers": [], "ticket_id": "", "not_creation_reason": response_exception}
             ],
+            validated_ticket_numbers=[],
+            bruin_ticket_status_map={},
+            bruin_ticket_call_type_map={},
+            bruin_ticket_category_map={},
+        )
+
+    @pytest.mark.asyncio
+    async def _process_repair_email__site_map_error_with_validated_tickets_test(
+        self, repair_tickets_monitor, make_email, make_filter_flags, make_inference_data
+    ):
+        email_id = "1234"
+        tagged_email = {"email_id": email_id, "tag_id": 1}
+        email = make_email(email_id=email_id)
+        filter_flags = make_filter_flags(
+            tagger_is_below_threshold=True,
+            rta_model1_is_below_threshold=True,
+            rta_model2_is_below_threshold=True,
+            is_filtered=True,
+            in_validation_set=True,
+        )
+        inference_data = make_inference_data(
+            potential_tickets_numbers=["1234"],
+            filter_flags=filter_flags
+        )
+
+        response_exception = ResponseException("Error")
+        new_tagged_emails_repository = Mock()
+        repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
+        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+        repair_tickets_monitor._save_output = CoroutineMock(return_value=None)
+        repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
+        repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(side_effect=response_exception)
+        repair_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value={
+            "status": 200,
+            "body": {
+                "ticket_id": "1234",
+                "ticket_status": "InProgress",
+                "call_type": "REP",
+                "category": "VOO"
+            }
+        })
+
+        await repair_tickets_monitor._process_repair_email(tagged_email)
+        repair_tickets_monitor._save_output.assert_awaited_once_with(
+            "1234",
+            tickets_cannot_be_created=[
+                {"site_id": "", "service_numbers": [], "ticket_id": "", "not_creation_reason": response_exception}
+            ],
+            validated_ticket_numbers=["1234"],
+            bruin_ticket_status_map={"1234": "InProgress"},
+            bruin_ticket_call_type_map={"1234": "REP"},
+            bruin_ticket_category_map={"1234": "VOO"},
         )
 
     @pytest.mark.asyncio
@@ -1242,7 +1294,14 @@ class TestRepairTicketsMonitor:
             "tickets_updated": [],
             "tickets_could_be_created": [],
             "tickets_could_be_updated": [],
-            "tickets_cannot_be_created": [],
+            "tickets_cannot_be_created": [
+                {
+                    "site_id": "",
+                    "service_numbers": [],
+                    "ticket_id": "",
+                    "not_creation_reason": "No validated service numbers"
+                }
+            ],
             "validated_ticket_numbers": ['1234'],
             "bruin_ticket_status_map": {
                 "1234": "InProgress"
@@ -1253,5 +1312,57 @@ class TestRepairTicketsMonitor:
             "bruin_ticket_category_map": {
                 "1234": "VOO"
             },
+        }
+        repair_tickets_monitor._save_output.assert_awaited_once_with(email_id, **expected_output)
+
+    @pytest.mark.asyncio
+    async def no_validated_service_numbers_test(
+        self,
+        repair_tickets_monitor,
+        make_email,
+        make_filter_flags,
+        make_inference_data,
+    ):
+        email_id = "1234"
+        email = make_email(email_id=email_id)
+        tagged_email = {"email_id": email_id, "tag_id": 1}
+        filter_flags = make_filter_flags(
+            tagger_is_below_threshold=True,
+            rta_model1_is_below_threshold=True,
+            rta_model2_is_below_threshold=True,
+            is_filtered=True,
+            in_validation_set=True,
+        )
+        inference_data = make_inference_data(
+            potential_service_numbers=["1234"],
+            filter_flags=filter_flags,
+            predicted_class="Other",
+        )
+        repair_tickets_monitor._get_valid_service_numbers_site_map = CoroutineMock(return_value={})
+        repair_tickets_monitor._new_tagged_emails_repository = Mock()
+        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+        repair_tickets_monitor._save_output = CoroutineMock()
+        repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
+
+        await repair_tickets_monitor._process_repair_email(tagged_email)
+
+        expected_output = {
+            "service_number_sites_map": {},
+            "tickets_created": [],
+            "tickets_updated": [],
+            "tickets_could_be_created": [],
+            "tickets_could_be_updated": [],
+            "tickets_cannot_be_created": [
+                {
+                    "site_id": "",
+                    "service_numbers": [],
+                    "ticket_id": "",
+                    "not_creation_reason": "No validated service numbers"
+                }
+            ],
+            "validated_ticket_numbers": [],
+            "bruin_ticket_status_map": {},
+            "bruin_ticket_call_type_map": {},
+            "bruin_ticket_category_map": {},
         }
         repair_tickets_monitor._save_output.assert_awaited_once_with(email_id, **expected_output)
