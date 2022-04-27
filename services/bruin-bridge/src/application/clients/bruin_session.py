@@ -23,7 +23,7 @@ class BruinResponse:
         try:
             json = await client_response.json()
             return cls(body=json, status=client_response.status)
-        except:
+        except Exception:
             text = await client_response.text()
             return cls(body=text, status=client_response.status)
 
