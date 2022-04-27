@@ -89,15 +89,28 @@ class TestBruinResponse:
 
         subject = await BruinResponse.from_client_response(client_response)
 
-        assert subject.status is a_response_status
-        assert subject.body is a_response_body
+        assert subject.status == a_response_status
+        assert subject.body == a_response_body
 
     @mark.asyncio
-    async def bruin_responses_raise_errors_on_client_response_json_deserializing_error_test(self):
+    async def bruin_response_json_errors_fallback_to_text_test(self, some_text):
         client_response = Mock(ClientResponse)
-        client_response.json = CoroutineMock(side_effect=ValueError("a value error"))
+        client_response.json = CoroutineMock(side_effect=ValueError())
+        client_response.text = CoroutineMock(return_value=some_text)
 
-        with pytest.raises(ValueError, match="a value error"):
+        subject = await BruinResponse.from_client_response(client_response)
+
+        assert subject.body == some_text
+
+    @mark.asyncio
+    async def bruin_responses_raise_proper_error_on_client_response_error_test(self):
+        json_error = "json_error"
+        text_error = "text_error"
+        client_response = Mock(ClientResponse)
+        client_response.json = CoroutineMock(side_effect=ValueError(json_error))
+        client_response.text = CoroutineMock(side_effect=ValueError(text_error))
+
+        with pytest.raises(ValueError, match=text_error):
             await BruinResponse.from_client_response(client_response)
 
     @mark.asyncio
@@ -171,6 +184,11 @@ def a_path():
 @fixture
 def a_response_body():
     return {"key": "value"}
+
+
+@fixture
+def some_text():
+    return "text"
 
 
 @fixture

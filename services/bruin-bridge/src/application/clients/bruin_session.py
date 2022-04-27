@@ -20,8 +20,12 @@ class BruinResponse:
 
     @classmethod
     async def from_client_response(cls, client_response: ClientResponse):
-        json = await client_response.json()
-        return cls(body=json, status=client_response.status)
+        try:
+            json = await client_response.json()
+            return cls(body=json, status=client_response.status)
+        except:
+            text = await client_response.text()
+            return cls(body=text, status=client_response.status)
 
     def ok(self) -> bool:
         return self.status in range(200, 300)
@@ -35,7 +39,7 @@ class BruinSession:
     session: ClientSession
     base_url: str
     logger: Logger
-   
+
     access_token: Optional[str] = None
 
     def __post_init__(self):
