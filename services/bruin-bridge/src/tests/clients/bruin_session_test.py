@@ -31,12 +31,12 @@ class TestBruinSession:
         a_response_status: int, a_url: str, a_path: str, an_access_token: str,
         a_response_body: Dict[str, str]
     ):
-        bruin_session = bruin_session_builder(base_url=a_url)
+        bruin_session = bruin_session_builder(base_url=a_url, access_token=an_access_token)
         a_client_response = client_response_builder(json=a_response_body, status=a_response_status)
         bruin_session.session.get = CoroutineMock(return_value=a_client_response)
         query_params = {"query_param": "value"}
 
-        subject = await bruin_session.get(path=a_path, access_token=an_access_token, query_params=query_params)
+        subject = await bruin_session.get(path=a_path, query_params=query_params)
 
         assert subject == BruinResponse(status=a_response_status, body=a_response_body)
         bruin_session.session.get.assert_awaited_once_with(
@@ -49,12 +49,12 @@ class TestBruinSession:
     async def client_connection_error_get_requests_are_properly_handled_test(
         self,
         bruin_session_builder: Callable[..., BruinSession],
-        a_path: str, an_access_token: str, some_query_params: Dict[str, str]
+        a_path: str, some_query_params: Dict[str, str]
     ):
         bruin_session = bruin_session_builder()
         bruin_session.session.get = CoroutineMock(side_effect=aiohttp.ClientConnectionError("some error"))
 
-        subject = await bruin_session.get(path=a_path, access_token=an_access_token, query_params=some_query_params)
+        subject = await bruin_session.get(path=a_path, query_params=some_query_params)
 
         assert subject == BruinResponse(status=500, body=f"ClientConnectionError: some error")
 
@@ -62,12 +62,12 @@ class TestBruinSession:
     async def unexpected_error_get_requests_are_properly_handled_test(
         self,
         bruin_session_builder: Callable[..., BruinSession],
-        a_path: str, an_access_token: str, some_query_params: Dict[str, str]
+        a_path: str, some_query_params: Dict[str, str]
     ):
         bruin_session = bruin_session_builder()
         bruin_session.session.get = CoroutineMock(side_effect=Exception("some error"))
 
-        subject = await bruin_session.get(path=a_path, access_token=an_access_token, query_params=some_query_params)
+        subject = await bruin_session.get(path=a_path, query_params=some_query_params)
 
         assert subject == BruinResponse(status=500, body=f"Unexpected error: some error")
 
@@ -122,11 +122,14 @@ class TestBruinResponse:
 #
 
 @fixture
-def bruin_session_builder(a_url, a_response_body):
+def bruin_session_builder(a_url, a_response_body, an_access_token):
     def builder(
-        logger: Logger = Mock(Logger), session: ClientSession = Mock(ClientSession), base_url: str = a_url
+        logger: Logger = Mock(Logger),
+        session: ClientSession = Mock(ClientSession),
+        base_url: str = a_url,
+        access_token: str = an_access_token,
     ) -> BruinSession:
-        return BruinSession(session=session, base_url=base_url, logger=logger)
+        return BruinSession(session=session, base_url=base_url, logger=logger, access_token=access_token)
 
     return builder
 

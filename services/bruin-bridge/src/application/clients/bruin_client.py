@@ -47,6 +47,7 @@ class BruinClient:
             )
 
             self._bearer_token = (await response.json())["access_token"]
+            self._bruin_session.access_token = self._bearer_token
             self._logger.info("Logged into Bruin!")
         except Exception as err:
             self._logger.error("An error occurred while trying to login to Bruin")
@@ -1313,9 +1314,7 @@ class BruinClient:
 
     async def get_service_number_topics(self, params: Any) -> BruinResponse:
         self._logger.info(f'Getting service number topics for: {params}')
-        response = await self._bruin_session.get(
-            path="/api/Ticket/topics", query_params=params, access_token=self._bearer_token
-        )
+        response = await self._bruin_session.get(path="/api/Ticket/topics", query_params=params)
 
         if response.status == 401:
             self._logger.error(f"Got 401 from Bruin. Re-logging in...")

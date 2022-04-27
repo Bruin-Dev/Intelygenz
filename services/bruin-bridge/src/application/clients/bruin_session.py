@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import aiohttp
 import humps
@@ -35,19 +35,21 @@ class BruinSession:
     session: ClientSession
     base_url: str
     logger: Logger
+   
+    access_token: Optional[str] = None
 
     def __post_init__(self):
         self.logger.info(f"Started Bruin session")
 
-    async def get(self, path: str, query_params: Dict[str, str], access_token: str) -> BruinResponse:
+    async def get(self, path: str, query_params: Dict[str, str]) -> BruinResponse:
         self.logger.debug(f"get(path={path}, query_params={query_params}")
 
-        headers = _bruin_headers(access_token=access_token)
         url = f"{self.base_url}{path}"
+        headers = self.bruin_headers()
         params = humps.pascalize(query_params)
 
         try:
-            client_response = await self.session.get(url, params=params, headers=headers, ssl=False)
+            client_response = await self.session.get(url, headers=headers, params=params, ssl=False)
             response = await BruinResponse.from_client_response(client_response)
 
             if not response.ok():
@@ -63,9 +65,8 @@ class BruinSession:
             self.logger.error(f"get(path={path}) => UnexpectedError: {e}")
             return BruinResponse(body=f"Unexpected error: {e}", status=500)
 
-
-def _bruin_headers(access_token: str) -> Dict[str, str]:
-    return {
-        "authorization": f"Bearer {access_token}",
-        **COMMON_HEADERS
-    }
+    def bruin_headers(self) -> Dict[str, str]:
+        return {
+            "authorization": f"Bearer {self.access_token}",
+            **COMMON_HEADERS
+        }

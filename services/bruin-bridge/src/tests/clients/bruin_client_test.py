@@ -4408,7 +4408,6 @@ class TestGetServiceNumberTopics:
 
         logger = Mock()
         bruin_client = BruinClient(logger, config)
-        bruin_client._bearer_token = "Someverysecretaccesstoken"
         bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
 
         # When
@@ -4417,7 +4416,7 @@ class TestGetServiceNumberTopics:
         # Then
         assert response == mocked_response
         bruin_client._bruin_session.get.assert_awaited_once_with(
-            path="/api/Ticket/topics", query_params=params, access_token=bruin_client._bearer_token
+            path="/api/Ticket/topics", query_params=params
         )
 
     @pytest.mark.asyncio
@@ -4429,11 +4428,13 @@ class TestGetServiceNumberTopics:
         }
 
         mocked_response = BruinResponse(status=401, body="")
+        mocked_access_token = "access_token"
+        login_response = Mock()
+        login_response.json = CoroutineMock(return_value={"access_token": mocked_access_token})
 
         logger = Mock()
         bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
-        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client._session.post = CoroutineMock(return_value=login_response)
         bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
 
         # When
@@ -4441,4 +4442,4 @@ class TestGetServiceNumberTopics:
 
         # Then
         assert response == mocked_response
-        bruin_client.login.assert_awaited_once()
+        assert bruin_client._bruin_session.access_token == mocked_access_token
