@@ -15,13 +15,10 @@ from application.clients.bruin_session import BruinSession, BruinResponse, COMMO
 
 class TestBruinSession:
     def instance_test(self):
-        # Given
         session, base_url, logger = Mock(), Mock(), Mock()
 
-        # When
         subject = BruinSession(session, base_url, logger)
 
-        # Then
         assert subject.session is session
         assert subject.base_url is base_url
         assert subject.logger is logger
@@ -34,16 +31,13 @@ class TestBruinSession:
         a_response_status: int, a_url: str, a_path: str, an_access_token: str,
         a_response_body: Dict[str, str]
     ):
-        # Given
         bruin_session = bruin_session_builder(base_url=a_url)
         a_client_response = client_response_builder(json=a_response_body, status=a_response_status)
         bruin_session.session.get = CoroutineMock(return_value=a_client_response)
         query_params = {"query_param": "value"}
 
-        # When
         subject = await bruin_session.get(path=a_path, access_token=an_access_token, query_params=query_params)
 
-        # Then
         assert subject == BruinResponse(status=a_response_status, body=a_response_body)
         bruin_session.session.get.assert_awaited_once_with(
             f"{a_url}{a_path}",
@@ -57,14 +51,11 @@ class TestBruinSession:
         bruin_session_builder: Callable[..., BruinSession],
         a_path: str, an_access_token: str, some_query_params: Dict[str, str]
     ):
-        # Given
         bruin_session = bruin_session_builder()
         bruin_session.session.get = CoroutineMock(side_effect=aiohttp.ClientConnectionError("some error"))
 
-        # When
         subject = await bruin_session.get(path=a_path, access_token=an_access_token, query_params=some_query_params)
 
-        # Then
         assert subject == BruinResponse(status=500, body=f"ClientConnectionError: some error")
 
     @mark.asyncio
@@ -73,26 +64,20 @@ class TestBruinSession:
         bruin_session_builder: Callable[..., BruinSession],
         a_path: str, an_access_token: str, some_query_params: Dict[str, str]
     ):
-        # Given
         bruin_session = bruin_session_builder()
         bruin_session.session.get = CoroutineMock(side_effect=Exception("some error"))
 
-        # When
         subject = await bruin_session.get(path=a_path, access_token=an_access_token, query_params=some_query_params)
 
-        # Then
         assert subject == BruinResponse(status=500, body=f"Unexpected error: some error")
 
 
 class TestBruinResponse:
     def instance_test(self):
-        # Given
         status, body = Mock(), Mock()
 
-        # When
         subject = BruinResponse(status, body)
 
-        # Then
         assert subject.status is status
         assert subject.body is body
 
@@ -100,46 +85,35 @@ class TestBruinResponse:
     async def bruin_responses_are_properly_built_from_client_response_test(
         self, client_response_builder, a_response_body, a_response_status
     ):
-        # Given
         client_response = client_response_builder(json=a_response_body, status=a_response_status)
 
-        # When
         subject = await BruinResponse.from_client_response(client_response)
 
-        # Then
         assert subject.status is a_response_status
         assert subject.body is a_response_body
 
     @mark.asyncio
     async def bruin_responses_raise_errors_on_client_response_json_deserializing_error_test(self):
-        # Given
         client_response = Mock(ClientResponse)
         client_response.json = CoroutineMock(side_effect=ValueError("a value error"))
 
-        # Then
         with pytest.raises(ValueError, match="a value error"):
             await BruinResponse.from_client_response(client_response)
 
     @mark.asyncio
     async def bruin_ok_responses_are_properly_detected_test(self, client_response_builder, an_ok_response_status):
-        # Given
         client_response = client_response_builder(status=an_ok_response_status)
 
-        # When
         subject = await BruinResponse.from_client_response(client_response)
 
-        # Then
         assert subject.ok()
 
     @mark.asyncio
     async def bruin_ko_responses_are_properly_detected_test(self, client_response_builder, a_ko_response_status):
-        # Given
         client_response = client_response_builder(status=a_ko_response_status)
 
-        # When
         subject = await BruinResponse.from_client_response(client_response)
 
-        # Then
         assert not subject.ok()
 
 
