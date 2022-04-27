@@ -349,7 +349,7 @@ class RepairTicketsMonitor:
 
             tickets_cannot_be_created += feedback_not_created_due_cancellations
 
-            if not existing_tickets:
+            if not service_number_site_map:
                 tickets_cannot_be_created.append(
                     self._create_output_ticket_dict(
                         service_numbers=[], site_id="", reason="No validated service numbers"
