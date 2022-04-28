@@ -53,7 +53,7 @@ MONITOR_CONFIG = {
         "some-host": [],
     },
     'blacklisted_link_labels_for_asr_forwards': ['BYOB', 'Customer Owned', 'customer owned', 'PIAB'],
-    'blacklisted_link_labels_for_hnoc_forwards': ['BYOB'],
+    'blacklisted_link_labels_for_hnoc_forwards': ['byob'],
     'blacklisted_edges': [],
     'forward_link_outage_seconds': 60 * 60,
     'last_digi_reboot_seconds': 30 * 60,
