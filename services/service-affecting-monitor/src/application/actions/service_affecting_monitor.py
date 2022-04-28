@@ -1085,8 +1085,7 @@ class ServiceAffectingMonitor:
     def _should_be_forwarded_to_HNOC(self, link_data: dict) -> bool:
         link_label = link_data['link_status']['displayName']
         is_blacklisted = self._is_link_label_blacklisted_for_HNOC(link_label)
-        is_ip_address = self._utils_repository.is_ip_address(link_label)
-        return not is_blacklisted and not is_ip_address
+        return not is_blacklisted
 
     def _is_link_label_blacklisted_for_HNOC(self, link_label: str) -> bool:
         blacklisted_link_labels = self._config.MONITOR_CONFIG['link_labels__hnoc_blacklist']
