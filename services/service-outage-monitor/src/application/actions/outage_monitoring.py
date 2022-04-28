@@ -1099,8 +1099,7 @@ class OutageMonitor:
         ]
 
     def _should_be_forwarded_to_HNOC(self, links: list):
-        return not any(link for link in links if self._is_link_label_black_listed_from_hnoc(link['displayName'])) and \
-               not any(link for link in links if self._is_link_label_an_ip(link['displayName']))
+        return not any(link for link in links if self._is_link_label_black_listed_from_hnoc(link['displayName']))
 
     def _was_digi_rebooted_recently(self, ticket_note) -> bool:
         current_datetime = datetime.now(utc)
