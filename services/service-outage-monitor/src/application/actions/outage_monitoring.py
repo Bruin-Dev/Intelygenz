@@ -1088,7 +1088,7 @@ class OutageMonitor:
 
     def _is_link_label_black_listed_from_hnoc(self, link_label):
         blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_hnoc_forwards"]
-        return any(label for label in blacklisted_link_labels if label in link_label)
+        return any(label for label in blacklisted_link_labels if label.lower() in link_label)
 
     def _find_whitelisted_links_for_asr_forward(self, links: list) -> list:
         return [

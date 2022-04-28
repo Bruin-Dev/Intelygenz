@@ -1083,13 +1083,13 @@ class ServiceAffectingMonitor:
         return any(label for label in blacklisted_link_labels if label in link_label)
 
     def _should_be_forwarded_to_HNOC(self, link_data: dict) -> bool:
-        link_label = link_data['link_status']['displayName']
+        link_label = link_data['link_status']['displayName'].lower()
         is_blacklisted = self._is_link_label_blacklisted_for_HNOC(link_label)
         return not is_blacklisted
 
     def _is_link_label_blacklisted_for_HNOC(self, link_label: str) -> bool:
         blacklisted_link_labels = self._config.MONITOR_CONFIG['link_labels__hnoc_blacklist']
-        return any(label for label in blacklisted_link_labels if label in link_label)
+        return any(label for label in blacklisted_link_labels if label.lower() in link_label)
 
     def _get_max_seconds_since_last_trouble(self, edge: dict) -> int:
         from datetime import timezone
