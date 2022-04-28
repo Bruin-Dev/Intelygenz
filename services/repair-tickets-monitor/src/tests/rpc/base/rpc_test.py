@@ -13,7 +13,6 @@ from application.rpc.base.rpc_response import RpcResponse
 
 class TestRpc:
     def instance_test(self):
-        # with patch.object('config'):
         event_bus, topic, timeout, logger = Mock(EventBus), Mock(str), Mock(int), Mock(Logger)
 
         subject = Rpc(event_bus, topic, timeout, logger)
