@@ -11,4 +11,3 @@ class TestDevice:
 
         assert subject.service_number == service_number
         assert subject.client_id == client_id
-        assert subject.allowed_topics == []

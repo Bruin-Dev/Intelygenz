@@ -1,8 +1,4 @@
-from typing import List
-
-from dataclasses import dataclass, field
-
-from application.domain.topic import Topic
+from dataclasses import dataclass
 
 
 @dataclass
@@ -12,5 +8,3 @@ class Device:
     """
     service_number: str
     client_id: int
-
-    allowed_topics: List[Topic] = field(default_factory=list)
