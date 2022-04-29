@@ -8372,15 +8372,25 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
-    def _should_schedule_hnoc_forwarding_metvco4_host_byob_link_display_return_true_test(self):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
-        link_data = [{
-            # Some fields omitted for simplicity
-            'displayName': 'BYOB Jeff',
-            'interface': 'REX',
-            'linkState': 'STABLE',
-            'linkId': 5293,
-        }]
+    def should_schedule_hnoc_forwarding__vco4_test(self):
+        outage_type = Outages.LINK_DOWN
+        links = [
+            {
+                # Some fields omitted for simplicity
+                'displayName': 'BYOB Jeff',
+                'interface': 'REX',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+            },
+            {
+                # Some fields omitted for simplicity
+                'displayName': '192.168.10.100',
+                'interface': 'RAY',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+        ]
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8391,9 +8401,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         notifications_repository = Mock()
         ha_repository = Mock()
-
         bruin_repository = Mock()
-
         outage_repository = Mock()
         config = testconfig
 
@@ -8401,20 +8409,31 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
-                                                                                     outage_type)
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+
         assert should_forward_to_hnoc is True
 
-    def _should_schedule_hnoc_forwarding_not_link_down_byob_link_display_name_return_true_test(self):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
-        link_data = [{
-            # Some fields omitted for simplicity
-            'displayName': 'BYOB Jeff',
-            'interface': 'REX',
-            'linkState': 'STABLE',
-            'linkId': 5293,
-        }]
+    def should_schedule_hnoc_forwarding__vco4_and_edge_down_outage_test(self):
+        outage_type = Outages.HARD_DOWN
+        links = [
+            {
+                # Some fields omitted for simplicity
+                'displayName': 'BYOB Jeff',
+                'interface': 'REX',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+            {
+                # Some fields omitted for simplicity
+                'displayName': '192.168.10.100',
+                'interface': 'RAY',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+        ]
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8425,9 +8444,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         notifications_repository = Mock()
         ha_repository = Mock()
-
         bruin_repository = Mock()
-
         outage_repository = Mock()
         config = testconfig
 
@@ -8435,19 +8452,31 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
-                                                                                 outage_type)
+
+        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'mettel.velocloud.net'):
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+
         assert should_forward_to_hnoc is True
 
-    def _should_schedule_hnoc_forwarding_byob_link_display_name_return_false_test(self):
-        outage_type = Outages.HA_LINK_DOWN  # We can use whatever outage type
-        link_data = [{
-            # Some fields omitted for simplicity
-            'displayName': 'BYOB Jeff',
-            'interface': 'REX',
-            'linkState': 'STABLE',
-            'linkId': 5293,
-        }]
+    def should_schedule_hnoc_forwarding__vco4_and_link_down_outage_and_qualifies_for_hnoc_forwarding_test(self):
+        outage_type = Outages.LINK_DOWN
+        links = [
+            {
+                # Some fields omitted for simplicity
+                'displayName': 'BYOB Jeff',
+                'interface': 'REX',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+            },
+            {
+                # Some fields omitted for simplicity
+                'displayName': '192.168.10.100',
+                'interface': 'RAY',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+        ]
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8458,9 +8487,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         notifications_repository = Mock()
         ha_repository = Mock()
-
         bruin_repository = Mock()
-
         outage_repository = Mock()
         config = testconfig
 
@@ -8468,19 +8495,75 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
-                                                                                 outage_type)
+        outage_monitor._should_be_forwarded_to_HNOC = Mock(return_value=True)
+
+        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'mettel.velocloud.net'):
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+
+        assert should_forward_to_hnoc is True
+
+    def should_schedule_hnoc_forwarding__vco4_and_link_down_outage_and_doesnt_qualify_for_hnoc_forwarding_test(self):
+        outage_type = Outages.LINK_DOWN
+        links = [
+            {
+                # Some fields omitted for simplicity
+                'displayName': 'BYOB Jeff',
+                'interface': 'REX',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+            {
+                # Some fields omitted for simplicity
+                'displayName': '192.168.10.100',
+                'interface': 'RAY',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+            },
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        ha_repository = Mock()
+        bruin_repository = Mock()
+        outage_repository = Mock()
+        config = testconfig
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._should_be_forwarded_to_HNOC = Mock(return_value=False)
+
+        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'mettel.velocloud.net'):
+            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+
         assert should_forward_to_hnoc is False
 
-    def _should_schedule_hnoc_forwarding_non_byob_display_name_return_true_test(self):
-        outage_type = Outages.LINK_DOWN  # We can use whatever outage type
-        link_data = [{
-            # Some fields omitted for simplicity
-            'displayName': 'Jeff',
-            'interface': 'REX',
-            'linkState': 'STABLE',
-            'linkId': 5293,
-        }]
+    def should_be_forwarded_to_HNOC__blacklisted_stable_link_and_whitelisted_disconnected_link_test(self):
+        links = [
+            {
+                # Some fields omitted for simplicity
+                'displayName': 'BYOB Jeff',
+                'interface': 'REX',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+            },
+            {
+                # Some fields omitted for simplicity
+                'displayName': '192.168.10.100',
+                'interface': 'RAY',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+        ]
+
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8491,19 +8574,63 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         notifications_repository = Mock()
         ha_repository = Mock()
-
         bruin_repository = Mock()
+        config = testconfig
 
         outage_repository = Mock()
-        config = testconfig
+        outage_repository.is_faulty_link = Mock(side_effect=[False, True])
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(link_data,
-                                                                                 outage_type)
-        assert should_forward_to_hnoc is True
+
+        result = outage_monitor._should_be_forwarded_to_HNOC(links)
+
+        assert result is True
+
+    def should_be_forwarded_to_HNOC__blacklisted_disconnected_link_and_whitelisted_stable_link_test(self):
+        links = [
+            {
+                # Some fields omitted for simplicity
+                'displayName': 'BYOB Jeff',
+                'interface': 'REX',
+                'linkState': 'DISCONNECTED',
+                'linkId': 5293,
+            },
+            {
+                # Some fields omitted for simplicity
+                'displayName': '192.168.10.100',
+                'interface': 'RAY',
+                'linkState': 'STABLE',
+                'linkId': 5293,
+            },
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        velocloud_repository = Mock()
+        notifications_repository = Mock()
+        ha_repository = Mock()
+        bruin_repository = Mock()
+        config = testconfig
+
+        outage_repository = Mock()
+        outage_repository.is_faulty_link = Mock(side_effect=[True, False])
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+
+        result = outage_monitor._should_be_forwarded_to_HNOC(links)
+
+        assert result is False
 
     @pytest.mark.asyncio
     async def append_triage_note_with_retrieval_of_edge_events_returning_non_2xx_status_test(self):
