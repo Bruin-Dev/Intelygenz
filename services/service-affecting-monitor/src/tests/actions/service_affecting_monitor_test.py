@@ -1978,7 +1978,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
+#        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_awaited_once()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio

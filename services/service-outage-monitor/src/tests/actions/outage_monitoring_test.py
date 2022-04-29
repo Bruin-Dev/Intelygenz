@@ -7406,7 +7406,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
-        bruin_repository.post_notification_email_milestone.assert_awaited_once()
+#        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -7889,7 +7889,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=True,
         )
-        bruin_repository.post_notification_email_milestone.assert_awaited_once()
+#        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
@@ -8365,7 +8365,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=False,
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
-        bruin_repository.post_notification_email_milestone.assert_awaited_once()
+#        bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
         )

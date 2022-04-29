@@ -616,10 +616,10 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
                                               f"with link_data: {edge_status['links']} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.post_notification_email_milestone(
-                                ticket_creation_response_body, serial_number)
+                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            # await self._bruin_repository.post_notification_email_milestone(
+                            #    ticket_creation_response_body, serial_number)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -650,10 +650,10 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
                                               f"with link_data: {edge_status['links']} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.post_notification_email_milestone(
-                                ticket_creation_response_body, serial_number)
+                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                            #                 f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            # await self._bruin_repository.post_notification_email_milestone(
+                            #    ticket_creation_response_body, serial_number)
 
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
@@ -683,10 +683,10 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
                                               f"with link_data: {edge_status['links']} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.post_notification_email_milestone(
-                                ticket_creation_response_body, serial_number)
+                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
+                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            # await self._bruin_repository.post_notification_email_milestone(
+                            #    ticket_creation_response_body, serial_number)
 
             else:
                 self._logger.info(
