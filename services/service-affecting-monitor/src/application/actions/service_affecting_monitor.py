@@ -854,9 +854,9 @@ class ServiceAffectingMonitor:
             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                               f"{link_data['link_status']['displayName']} is a blacklisted link and "
                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-            self._logger.info(f"Sending an email for the reopened task of ticket_id: {ticket_id} "
-                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-            await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
+            # self._logger.info(f"Sending an email for the reopened task of ticket_id: {ticket_id} "
+            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+            # await self._bruin_repository.post_notification_email_milestone(ticket_id, serial_number)
 
     async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
         serial_number = link_data['cached_info']['serial_number']
