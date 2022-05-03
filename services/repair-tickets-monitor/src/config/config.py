@@ -2,8 +2,9 @@
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
 import json
-import os
 import logging
+import os
+
 import sys
 
 NATS_CONFIG = {
@@ -28,7 +29,7 @@ MONITOR_CONFIG = {
         'new_closed_tickets_feedback': int(os.environ['NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL']),
     },
     'nats_request_timeout': {
-        'kre_seconds': 10,
+        'kre_seconds': 30,
         'bruin_request_seconds': 30,
     },
     'semaphores': {
