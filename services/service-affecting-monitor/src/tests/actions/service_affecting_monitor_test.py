@@ -10,7 +10,7 @@ from asynctest import CoroutineMock
 from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
-from application import AffectingTroubles
+from application import AffectingTroubles, ForwardQueues
 from config import testconfig
 
 uuid_ = uuid()
@@ -1357,7 +1357,7 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_bouncing_trouble(link_info)
 
         service_affecting_monitor._process_affecting_trouble.assert_awaited_once_with(link_info, trouble)
-        service_affecting_monitor._attempt_forward_to_asr.assert_awaited_once_with(link_info, None)
+        service_affecting_monitor._attempt_forward_to_asr.assert_awaited_once_with(link_info, trouble, None)
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__get_open_affecting_tickets_request_has_not_2xx_status_test(
@@ -2028,10 +2028,11 @@ class TestServiceAffectingMonitor:
         assert should_schedule_hnoc is True
 
     def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime,
-                                            make_structured_metrics_object):
+                                            make_structured_metrics_object_with_cache_and_contact_info):
         ticket_id = 12345
         serial_number = 'VC1234567'
-        link_info = make_structured_metrics_object()
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         current_datetime = frozen_datetime.now()
         autoresolve_config = service_affecting_monitor._config.MONITOR_CONFIG['autoresolve']
@@ -2042,12 +2043,12 @@ class TestServiceAffectingMonitor:
 
         with patch.multiple(service_affecting_monitor_module, datetime=frozen_datetime, timezone=Mock()):
             service_affecting_monitor._schedule_forward_to_hnoc_queue(
-                ticket_id=ticket_id, serial_number=serial_number, link_data=link_info
+                ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
             )
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
             service_affecting_monitor._forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_info, 'trouble': trouble},
             run_date=forward_task_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
@@ -2058,14 +2059,16 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
             self, service_affecting_monitor, bruin_500_response,
-            make_structured_metrics_object):
+            make_structured_metrics_object_with_cache_and_contact_info):
         ticket_id = 12345
         serial_number = 'VC1234567'
-        link_info = make_structured_metrics_object()
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info, trouble=trouble)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2075,10 +2078,11 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__resolved_ticket_test(
             self, service_affecting_monitor, make_detail_item, make_ticket_details,
-            make_rpc_response, make_structured_metrics_object):
+            make_rpc_response, make_structured_metrics_object_with_cache_and_contact_info):
         ticket_id = 12345
         serial_number = 'VC1234567'
-        link_info = make_structured_metrics_object()
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         detail_item = make_detail_item(value=serial_number, status='R')
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -2088,7 +2092,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info, trouble=trouble)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2098,10 +2103,11 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__change_work_queue_request_has_not_2xx_status_test(
             self, service_affecting_monitor, bruin_500_response, make_detail_item, make_ticket_details,
-            make_rpc_response, make_structured_metrics_object):
+            make_rpc_response, make_structured_metrics_object_with_cache_and_contact_info):
         ticket_id = 12345
         serial_number = 'VC1234567'
-        link_info = make_structured_metrics_object()
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         detail_item = make_detail_item(value=serial_number)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -2114,7 +2120,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info, trouble=trouble)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2126,10 +2133,11 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_test(
             self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
-            make_rpc_response, make_structured_metrics_object):
+            make_rpc_response, make_structured_metrics_object_with_cache_and_contact_info):
         ticket_id = 12345
         serial_number = 'VC1234567'
-        link_info = make_structured_metrics_object()
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         detail_item = make_detail_item(value=serial_number, status='O')
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -2142,7 +2150,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
             bruin_generic_200_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
+                                                                      link_data=link_info, trouble=trouble)
 
         service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2940,6 +2949,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -2967,7 +2977,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -2987,6 +2997,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE2')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -3014,9 +3025,10 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
-        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial)
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial, link_data,
+                                                                                         trouble)
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -3030,6 +3042,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1')
         link_configuration = make_links_configuration(type_='WIRELESS', interfaces=['GE1'])
@@ -3057,9 +3070,10 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
-        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial)
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial, link_data,
+                                                                                         trouble)
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -3073,6 +3087,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1', display_name='BYOB')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -3100,7 +3115,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
@@ -3116,6 +3131,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -3137,7 +3153,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -3153,6 +3169,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -3181,7 +3198,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -3197,6 +3214,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -3225,7 +3243,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
@@ -3241,6 +3259,7 @@ class TestServiceAffectingMonitor:
         ticket_id = 12345
         serial = 'VC1234567'
         task_result = 'No Trouble Found - Carrier Issue'
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         link = make_link(interface='GE1')
         link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
@@ -3265,7 +3284,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue = CoroutineMock()
 
-        await service_affecting_monitor._attempt_forward_to_asr(link_data, ticket_id)
+        await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)

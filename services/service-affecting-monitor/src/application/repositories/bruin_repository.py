@@ -9,7 +9,7 @@ from pytz import timezone
 from shortuuid import uuid
 from tenacity import wait_fixed, retry, stop_after_attempt
 
-from application import AffectingTroubles
+from application import AffectingTroubles, ForwardQueues
 from application.repositories import nats_error_response
 
 INTERFACE_NOTE_REGEX = re.compile(r'Interface: (?P<interface_name>[a-zA-Z0-9]+)')
@@ -468,10 +468,10 @@ class BruinRepository:
         return await self.get_affecting_tickets(client_id, ticket_statuses, service_number=service_number)
 
     async def change_detail_work_queue_to_hnoc(self, ticket_id: int, *, service_number: str = None):
-        task_result = 'HNOC Investigate'
+        target_queue = ForwardQueues.HNOC.value
 
         return await self.change_detail_work_queue(
-            ticket_id=ticket_id, task_result=task_result, service_number=service_number
+            ticket_id=ticket_id, task_result=target_queue, service_number=service_number
         )
 
     async def append_autoresolve_note_to_ticket(self, ticket_id: int, serial_number: str):
@@ -759,12 +759,13 @@ class BruinRepository:
         return filter_reports
 
     async def append_asr_forwarding_note(self, ticket_id, link, serial_number):
+        target_queue = ForwardQueues.ASR.value
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
 
         note_lines = [
             f"#*MetTel's IPA*#",
             f'Status of Wired Link {link["interface"]} ({link["displayName"]}) is {link["linkState"]}.',
-            f'Moving task to: ASR Investigate',
+            f'Moving task to: {target_queue}',
             f'TimeStamp: {current_datetime_tz_aware}',
         ]
 

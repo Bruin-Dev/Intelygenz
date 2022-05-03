@@ -38,6 +38,9 @@ TIMEZONE = parameters['dev']['timezone']
 AUTORESOLVE_DAY_START_HOUR = parameters['dev']['autoresolve-day-start-hour']
 AUTORESOLVE_DAY_END_HOUR = parameters['dev']['autoresolve-day-end-hour']
 
+# Metrics variables
+METRICS_RELEVANT_CLIENTS = parameters['dev']['metrics']['relevant-clients']
+
 # We should use DEV variables here, but their test inventories lack lots of data so it's not worth it
 # Bruin Bridge variables
 BRUIN_CLIENT_ID = parameters['pro']['bruin-bridge']['client-id']
@@ -779,6 +782,7 @@ for host in SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f'EXEC_MONITOR_REPORTS_ON_START={SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__EXEC_ON_START}',
         f'EXEC_BANDWIDTH_REPORTS_ON_START={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXEC_ON_START}',
         f'TIMEZONE={TIMEZONE}',
+        f'METRICS_RELEVANT_CLIENTS={METRICS_RELEVANT_CLIENTS}',
         f'MONITORED_PRODUCT_CATEGORY={SERVICE_AFFECTING__MONITORED_PRODUCT_CATEGORY}',
         f'MONITORED_VELOCLOUD_HOST={host}',
         f'MONITORING__MONITORING_JOB_INTERVAL={SERVICE_AFFECTING__MONITOR__MONITORING_JOB_INTERVAL}',

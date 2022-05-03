@@ -39,6 +39,8 @@ PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 VELOCLOUD_HOST = os.environ['MONITORED_VELOCLOUD_HOST']
 
+METRICS_RELEVANT_CLIENTS = json.loads(os.environ['METRICS_RELEVANT_CLIENTS'])
+
 MONITOR_CONFIG = {
     'contact_by_host_and_client_id': default_contact_info,
     'customers_to_always_use_default_contact_info': json.loads(

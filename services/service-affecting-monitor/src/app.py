@@ -54,7 +54,7 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         # METRICS
-        self._metrics_repository = MetricsRepository()
+        self._metrics_repository = MetricsRepository(config=config)
 
         # REPOSITORIES
         self._utils_repository = UtilsRepository()

@@ -10,6 +10,11 @@ class AffectingTroubles(Enum):
     BOUNCING = 'Circuit Instability'
 
 
+class ForwardQueues(Enum):
+    ASR = 'ASR Investigate'
+    HNOC = 'HNOC Investigate'
+
+
 TROUBLES_DISJUNCTION_FOR_REGEX = '|'.join(trouble.value for trouble in AffectingTroubles)
 
 AFFECTING_NOTE_REGEX = re.compile(

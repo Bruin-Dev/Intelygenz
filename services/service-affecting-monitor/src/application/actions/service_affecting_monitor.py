@@ -12,7 +12,7 @@ from dateutil.parser import parse
 from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
-from application import AffectingTroubles
+from application import AffectingTroubles, ForwardQueues
 
 
 class ServiceAffectingMonitor:
@@ -277,6 +277,8 @@ class ServiceAffectingMonitor:
         async with self.__autoresolve_semaphore:
             serial_number = edge['cached_info']['serial_number']
             client_id = edge['cached_info']['bruin_client_info']['client_id']
+            client_name = edge['cached_info']['bruin_client_info']['client_name']
+            host = edge['cached_info']['edge']['host']
 
             self._logger.info(f'Starting autoresolve for edge {serial_number}...')
 
@@ -383,6 +385,7 @@ class ServiceAffectingMonitor:
                 if resolve_ticket_response['status'] not in range(200, 300):
                     continue
 
+                self._metrics_repository.increment_tasks_autoresolved(client=client_name, host=host)
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
                 await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
 
@@ -634,7 +637,7 @@ class ServiceAffectingMonitor:
     async def _process_bouncing_trouble(self, link_data: dict):
         trouble = AffectingTroubles.BOUNCING
         ticket_id = await self._process_affecting_trouble(link_data, trouble)
-        await self._attempt_forward_to_asr(link_data, ticket_id)
+        await self._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
     async def _process_affecting_trouble(self, link_data: dict, trouble: AffectingTroubles) -> Optional[int]:
         trouble_processed = False
@@ -808,6 +811,8 @@ class ServiceAffectingMonitor:
         ticket_id = ticket_info['ticket_overview']['ticketID']
         serial_number = link_data['cached_info']['serial_number']
         interface = link_data['link_status']['interface']
+        client_name = link_data['cached_info']['bruin_client_info']['client_name']
+        host = link_data['cached_info']['edge']['host']
 
         self._logger.info(
             f'Unresolving task related to edge {serial_number} of Service Affecting ticket {ticket_id} due to a '
@@ -834,8 +839,9 @@ class ServiceAffectingMonitor:
             f'Task related to edge {serial_number} of Service Affecting ticket {ticket_id} was successfully '
             f'unresolved! The cause was a {trouble.value} trouble detected in interface {interface}'
         )
+
+        self._metrics_repository.increment_tasks_reopened(client=client_name, host=host, trouble=trouble.value)
         await self._notifications_repository.notify_successful_reopen(ticket_id, serial_number, trouble)
-        self._metrics_repository.increment_tickets_reopened()
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
         reopen_trouble_note = build_note_fn(link_data, is_reopen_note=True)
@@ -849,7 +855,8 @@ class ServiceAffectingMonitor:
             self._logger.info(
                 f'Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue...'
             )
-            self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number, link_data=link_data)
+            self._schedule_forward_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number, link_data=link_data,
+                                                 trouble=trouble)
         else:
             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                               f"{link_data['link_status']['displayName']} is a blacklisted link and "
@@ -863,6 +870,8 @@ class ServiceAffectingMonitor:
         interface = link_data['link_status']['interface']
         client_id = link_data['cached_info']['bruin_client_info']['client_id']
         contact_info = link_data['contact_info']
+        client_name = link_data['cached_info']['bruin_client_info']['client_name']
+        host = link_data['cached_info']['edge']['host']
 
         self._logger.info(
             f'Creating Service Affecting ticket to report a {trouble.value} trouble detected in interface {interface} '
@@ -889,7 +898,8 @@ class ServiceAffectingMonitor:
             f'Service Affecting ticket to report {trouble.value} trouble detected in interface {interface} '
             f'of edge {serial_number} was successfully created! Ticket ID is {ticket_id}'
         )
-        self._metrics_repository.increment_tickets_created()
+
+        self._metrics_repository.increment_tasks_created(client=client_name, host=host, trouble=trouble.value)
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
@@ -903,7 +913,7 @@ class ServiceAffectingMonitor:
         should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(link_data)
         if trouble is not AffectingTroubles.BOUNCING:
             if should_schedule_hnoc_forwarding:
-                self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data)
+                self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
             else:
                 self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                                   f"{link_data['link_status']['displayName']} is a blacklisted link and "
@@ -920,7 +930,7 @@ class ServiceAffectingMonitor:
             return False
         return True
 
-    def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data):
+    def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data, trouble):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(link_data)
@@ -931,7 +941,7 @@ class ServiceAffectingMonitor:
 
         self._scheduler.add_job(
             self._forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_data, 'trouble': trouble},
             run_date=forward_task_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
@@ -939,11 +949,15 @@ class ServiceAffectingMonitor:
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
-    async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
+    async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, link_data, trouble):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
         async def forward_ticket_to_hnoc_queue():
+            target_queue = ForwardQueues.HNOC.value
+            client_name = link_data['cached_info']['bruin_client_info']['client_name']
+            host = link_data['cached_info']['edge']['host']
+
             self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
                               f'attempting to forward to HNOC...')
 
@@ -972,6 +986,9 @@ class ServiceAffectingMonitor:
                                    f'returning {change_work_queue_response} when attempting to forward to HNOC.')
                 return
 
+            self._metrics_repository.increment_tasks_forwarded(client=client_name, host=host, trouble=trouble.value,
+                                                               target_queue=target_queue)
+
             await self._notifications_repository.notify_successful_ticket_forward(
                 ticket_id=ticket_id, serial_number=serial_number
             )
@@ -983,7 +1000,7 @@ class ServiceAffectingMonitor:
                 f" -> {e}"
             )
 
-    async def _attempt_forward_to_asr(self, link_data: dict, ticket_id: Optional[int]):
+    async def _attempt_forward_to_asr(self, link_data: dict, trouble: AffectingTroubles, ticket_id: Optional[int]):
         if not ticket_id:
             return
 
@@ -992,8 +1009,11 @@ class ServiceAffectingMonitor:
             f'Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...'
         )
 
+        target_queue = ForwardQueues.ASR.value
         interface = link_data['link_status']['interface']
         links_configuration = link_data['cached_info']['links_configuration']
+        client_name = link_data['cached_info']['bruin_client_info']['client_name']
+        host = link_data['cached_info']['edge']['host']
         link_interface_type = ''
 
         for link_configuration in links_configuration:
@@ -1003,7 +1023,7 @@ class ServiceAffectingMonitor:
         if link_interface_type != 'WIRED':
             self._logger.info(f'Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward '
                               f'to HNOC...')
-            await self._forward_ticket_to_hnoc_queue(ticket_id, serial_number)
+            await self._forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
             return
 
         self._logger.info(f'Filtering out any of the wired links of serial {serial_number} that contains any of the '
@@ -1014,7 +1034,7 @@ class ServiceAffectingMonitor:
         if not self._should_be_forwarded_to_asr(link_data):
             self._logger.info(
                 f'No links with whitelisted labels were found for serial {serial_number}. '
-                f'Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate.'
+                f'Related detail of ticket {ticket_id} will not be forwarded to {target_queue}.'
             )
             return
 
@@ -1048,11 +1068,10 @@ class ServiceAffectingMonitor:
                               f'to asr...')
             return
 
-        watermark = 'ASR Investigate'
         task_result = 'No Trouble Found - Carrier Issue'
         task_result_note = self._utils_repository.get_first_element_matching(
             ticket_notes,
-            lambda note: watermark in note.get('noteValue')
+            lambda note: target_queue in note.get('noteValue')
         )
 
         if task_result_note is not None:
@@ -1065,6 +1084,8 @@ class ServiceAffectingMonitor:
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             ticket_id, task_result, service_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
+            self._metrics_repository.increment_tasks_forwarded(client=client_name, host=host, trouble=trouble.value,
+                                                               target_queue=target_queue)
             await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_data['link_status'], serial_number)
             slack_message = (
                 f'Detail of Circuit Instability ticket {ticket_id} related to serial {serial_number} '
