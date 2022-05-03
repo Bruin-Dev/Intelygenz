@@ -2951,8 +2951,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -2983,7 +2982,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_response = {
@@ -3038,8 +3036,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3070,7 +3067,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_response = {
@@ -3123,8 +3119,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3155,7 +3150,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -3226,8 +3220,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3258,7 +3251,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -3337,8 +3329,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3357,7 +3348,7 @@ class TestServiceOutageMonitor:
                     'edgeLongitude': None,
                     'links': [
                         {
-                            'displayName': '70.59.5.185',
+                            'displayName': 'BYOB test name',
                             'isp': None,
                             'interface': 'REX',
                             'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -3369,7 +3360,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -3395,11 +3385,7 @@ class TestServiceOutageMonitor:
             "detailID": 2746937,
             "detailValue": serial_number_1,
             "detailStatus": "I",
-        }
-        outage_ticket_detail_2 = {
-            "detailID": 2746938,
-            "detailValue": serial_number_2,
-            "detailStatus": "I",
+            "currentTaskName": "test",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -3519,8 +3505,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3539,7 +3524,7 @@ class TestServiceOutageMonitor:
                     'edgeLongitude': None,
                     'links': [
                         {
-                            'displayName': '70.59.5.185',
+                            'displayName': 'test name',
                             'isp': None,
                             'interface': 'REX',
                             'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -3551,7 +3536,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -3577,6 +3561,7 @@ class TestServiceOutageMonitor:
             "detailID": 2746937,
             "detailValue": serial_number_1,
             "detailStatus": "I",
+            "currentTaskName": "test",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -3702,8 +3687,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3722,7 +3706,7 @@ class TestServiceOutageMonitor:
                     'edgeLongitude': None,
                     'links': [
                         {
-                            'displayName': '70.59.5.185',
+                            'displayName': 'test name',
                             'isp': None,
                             'interface': 'REX',
                             'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -3734,7 +3718,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -3760,6 +3743,7 @@ class TestServiceOutageMonitor:
             "detailID": 2746937,
             "detailValue": serial_number_1,
             "detailStatus": "R",
+            "currentTaskName": "test",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -3882,8 +3866,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -3902,7 +3885,7 @@ class TestServiceOutageMonitor:
                     'edgeLongitude': None,
                     'links': [
                         {
-                            'displayName': '70.59.5.185',
+                            'displayName': 'test name',
                             'isp': None,
                             'interface': 'REX',
                             'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -3914,7 +3897,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -3940,6 +3922,7 @@ class TestServiceOutageMonitor:
             "detailID": 2746937,
             "detailValue": serial_number_1,
             "detailStatus": "R",
+            "currentTaskName": "test",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -4028,7 +4011,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
-        outage_monitor._is_detail_resolved = Mock(return_value=True)
+        outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'dev'):
@@ -4070,8 +4053,7 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
+            'status': {
                     'host': 'mettel.velocloud.net',
                     'enterpriseName': 'Militaires Sans Frontières',
                     'enterpriseId': 1,
@@ -4090,7 +4072,7 @@ class TestServiceOutageMonitor:
                     'edgeLongitude': None,
                     'links': [
                         {
-                            'displayName': '70.59.5.185',
+                            'displayName': 'test name',
                             'isp': None,
                             'interface': 'REX',
                             'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
@@ -4102,7 +4084,6 @@ class TestServiceOutageMonitor:
                         },
                     ],
                 }
-            ]
         }
 
         outage_ticket_1_id = 99999
@@ -4129,6 +4110,7 @@ class TestServiceOutageMonitor:
             "detailID": outage_ticket_detail_1_id,
             "detailValue": serial_number_1,
             "detailStatus": "I",
+            "currentTaskName": "test",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -4251,7 +4233,7 @@ class TestServiceOutageMonitor:
         outage_monitor._notify_successful_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_all_conditions_met_test(self):
+    async def run_ticket_autoresolve_autoresolve_immediately_test(self):
         serial_number_1 = 'VC1234567'
         serial_number_2 = 'VC9999999'
         client_id = 12345
@@ -4270,39 +4252,37 @@ class TestServiceOutageMonitor:
                     'client_name': 'METTEL/NEW YORK',
                 },
             },
-            'status': [
-                {
-                    'host': 'mettel.velocloud.net',
-                    'enterpriseName': 'Militaires Sans Frontières',
-                    'enterpriseId': 1,
-                    'enterpriseProxyId': None,
-                    'enterpriseProxyName': None,
-                    'edgeName': 'Big Boss',
-                    'edgeState': 'CONNECTED',
-                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
-                    'edgeId': 1,
-                    'edgeSerialNumber': serial_number_1,
-                    'edgeHASerialNumber': None,
-                    'edgeModelNumber': 'edge520',
-                    'edgeLatitude': None,
-                    'edgeLongitude': None,
-                    'links': [
-                        {
-                            'displayName': '70.59.5.185',
-                            'isp': None,
-                            'interface': 'REX',
-                            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-                            'linkState': 'DISCONNECTED',
-                            'linkLastActive': '2020-09-29T04:45:15.000Z',
-                            'linkVpnState': 'STABLE',
-                            'linkId': 5293,
-                            'linkIpAddress': '70.59.5.185',
-                        },
-                    ],
-                }
-            ]
+            'status': {
+                'host': 'mettel.velocloud.net',
+                'enterpriseName': 'Militaires Sans Frontières',
+                'enterpriseId': 1,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'Big Boss',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': '2020-09-29T04:48:55.000Z',
+                'edgeId': 1,
+                'edgeSerialNumber': serial_number_1,
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'links': [
+                    {
+                        'displayName': 'BYOB test name',
+                        'isp': None,
+                        'interface': 'REX',
+                        'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                        'linkState': 'DISCONNECTED',
+                        'linkLastActive': '2020-09-29T04:45:15.000Z',
+                        'linkVpnState': 'STABLE',
+                        'linkId': 5293,
+                        'linkIpAddress': '70.59.5.185',
+                    },
+                ],
+            }
         }
 
         outage_ticket_1_id = 99999
@@ -4329,6 +4309,194 @@ class TestServiceOutageMonitor:
             "detailID": outage_ticket_detail_1_id,
             "detailValue": serial_number_1,
             "detailStatus": "I",
+            "currentTaskName": 'IPA Investigate',
+        }
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_3 = {
+            "noteId": 68246616,
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_4 = {
+            "noteId": 68246617,
+            "noteValue": "Some note",
+            "serviceNumber": [
+                serial_number_2,
+            ],
+        }
+        ticket_note_5 = {
+            "noteId": 68246618,
+            "noteValue": "Some other note",
+            "serviceNumber": [
+                serial_number_1,
+                serial_number_2,
+            ],
+        }
+        outage_ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
+            ticket_note_4,
+            ticket_note_5,
+        ]
+
+        ticket_details_response = {
+            'body': {
+                'ticketDetails': [
+                    outage_ticket_detail_1,
+                ],
+                'ticketNotes': outage_ticket_notes,
+            },
+            'status': 200,
+        }
+
+        resolve_outage_ticket_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+        velocloud_repository = Mock()
+        customer_cache_repository = Mock()
+        digi_repository = Mock()
+        ha_repository = Mock()
+        config = testconfig
+
+        bruin_repository = Mock()
+        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        bruin_repository.unpause_ticket_detail = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
+        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
+
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, customer_cache_repository, metrics_repository,
+                                       digi_repository, ha_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
+        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
+        outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+            await outage_monitor._run_ticket_autoresolve_for_edge(edge)
+
+        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id=client_id,
+                                                                          service_number=serial_number_1)
+        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
+        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        outage_monitor._was_last_outage_detected_recently.assert_not_called()
+        outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
+        outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
+        bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+            outage_ticket_1_id, service_number=serial_number_1, detail_id=outage_ticket_detail_1_id
+        )
+        bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
+        bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(outage_ticket_1_id, serial_number_1)
+        outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_1_id)
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_all_conditions_met_test(self):
+        serial_number_1 = 'VC1234567'
+        serial_number_2 = 'VC9999999'
+        client_id = 12345
+
+        edge = {
+            'cached_info': {
+                'edge': {
+                    'host': 'mettel.velocloud.net',
+                    'enterprise_id': 1,
+                    'edge_id': 1
+                },
+                'last_contact': '2020-08-17T02:23:59',
+                'serial_number': serial_number_1,
+                'bruin_client_info': {
+                    'client_id': client_id,
+                    'client_name': 'METTEL/NEW YORK',
+                },
+            },
+            'status': {
+                    'host': 'mettel.velocloud.net',
+                    'enterpriseName': 'Militaires Sans Frontières',
+                    'enterpriseId': 1,
+                    'enterpriseProxyId': None,
+                    'enterpriseProxyName': None,
+                    'edgeName': 'Big Boss',
+                    'edgeState': 'CONNECTED',
+                    'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                    'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                    'edgeLastContact': '2020-09-29T04:48:55.000Z',
+                    'edgeId': 1,
+                    'edgeSerialNumber': serial_number_1,
+                    'edgeHASerialNumber': None,
+                    'edgeModelNumber': 'edge520',
+                    'edgeLatitude': None,
+                    'edgeLongitude': None,
+                    'links': [
+                        {
+                            'displayName': 'test name',
+                            'isp': None,
+                            'interface': 'REX',
+                            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                            'linkState': 'DISCONNECTED',
+                            'linkLastActive': '2020-09-29T04:45:15.000Z',
+                            'linkVpnState': 'STABLE',
+                            'linkId': 5293,
+                            'linkIpAddress': '70.59.5.185',
+                        },
+                    ],
+                }
+        }
+
+        outage_ticket_1_id = 99999
+        outage_ticket_1_creation_date = "9/25/2020 6:31:54 AM"
+        outage_ticket_1 = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": outage_ticket_1_id,
+            "category": testconfig.PRODUCT_CATEGORY,
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": outage_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        outage_ticket_response = {
+            'body': [
+                outage_ticket_1
+            ],
+            'status': 200,
+        }
+
+        outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_1 = {
+            "detailID": outage_ticket_detail_1_id,
+            "detailValue": serial_number_1,
+            "detailStatus": "I",
+            "currentTaskName": "test",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -5727,7 +5895,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_200_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_200_forward_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
@@ -5943,7 +6111,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -5971,7 +6139,7 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_200_not_forward_to_hnoc_test(self):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+        outage_type = Outages.LINK_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -6174,18 +6342,21 @@ class TestServiceOutageMonitor:
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
             return_value=all_links_grouped_by_edge_with_ha_info
         )
+        wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=wait_seconds_until_forward)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -6200,7 +6371,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             check_ticket_tasks=False,
         )
-#        bruin_repository.post_notification_email_milestone.assert_awaited_once()
+        # bruin_repository.post_notification_email_milestone.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6427,7 +6598,7 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY)
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6674,7 +6845,7 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY)
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6914,7 +7085,7 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.NOT_CHANGED)
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6939,7 +7110,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_471_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_471_forward_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
@@ -7153,7 +7324,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7181,7 +7352,7 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_471_not_forward_to_hnoc_test(self):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+        outage_type = Outages.HA_LINK_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -7385,16 +7556,19 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
+        wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=wait_seconds_until_forward)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7417,7 +7591,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_472_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_472_forward_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
@@ -7634,7 +7808,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7661,7 +7835,7 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_472_not_forward_to_hnoc_test(self):
-        outage_type = Outages.LINK_DOWN  # We can use whatever outage type
+        outage_type = Outages.LINK_DOWN
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -7877,7 +8051,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7899,7 +8073,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_473_test(self):
+    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_473_forward_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
@@ -8113,7 +8287,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=True)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -8139,7 +8313,7 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_473_not_forward_to_hnoc_test(self):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
+        outage_type = Outages.LINK_DOWN  # We can use whatever outage type
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -8343,16 +8517,19 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
+        wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=wait_seconds_until_forward)
         outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_schedule_hnoc_forwarding = Mock(return_value=False)
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -8372,25 +8549,14 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
-    def should_schedule_hnoc_forwarding__vco4_test(self):
-        outage_type = Outages.LINK_DOWN
-        links = [
-            {
-                # Some fields omitted for simplicity
-                'displayName': 'BYOB Jeff',
-                'interface': 'REX',
-                'linkState': 'STABLE',
-                'linkId': 5293,
-            },
-            {
-                # Some fields omitted for simplicity
-                'displayName': '192.168.10.100',
-                'interface': 'RAY',
-                'linkState': 'DISCONNECTED',
-                'linkId': 5293,
-            },
-        ]
-
+    def _should_always_stay_in_ipa_queue_metvco4_host_byob_link_display_test(self):
+        link_data = [{
+            # Some fields omitted for simplicity
+            'displayName': 'BYOB Jeff',
+            'interface': 'REX',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }]
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8409,31 +8575,19 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-
         with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+            should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
 
-        assert should_forward_to_hnoc is True
+            assert should_stay_in_ipa_queue is False
 
-    def should_schedule_hnoc_forwarding__vco4_and_edge_down_outage_test(self):
-        outage_type = Outages.HARD_DOWN
-        links = [
-            {
-                # Some fields omitted for simplicity
-                'displayName': 'BYOB Jeff',
-                'interface': 'REX',
-                'linkState': 'DISCONNECTED',
-                'linkId': 5293,
-            },
-            {
-                # Some fields omitted for simplicity
-                'displayName': '192.168.10.100',
-                'interface': 'RAY',
-                'linkState': 'DISCONNECTED',
-                'linkId': 5293,
-            },
-        ]
-
+    def _should_always_stay_in_ipa_queue_non_byob_and_not_faulty_display_name_test(self):
+        link_data = [{
+            # Some fields omitted for simplicity
+            'displayName': 'Jeff',
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }]
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8446,27 +8600,24 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
         bruin_repository = Mock()
         outage_repository = Mock()
+        outage_repository.is_faulty_link = Mock(return_value=False)
         config = testconfig
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
+        should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
 
-        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'mettel.velocloud.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+        assert should_stay_in_ipa_queue is False
 
-        assert should_forward_to_hnoc is True
-
-    def should_schedule_hnoc_forwarding__vco4_and_link_down_outage_and_qualifies_for_hnoc_forwarding_test(self):
-        outage_type = Outages.LINK_DOWN
-        links = [
-            {
-                # Some fields omitted for simplicity
-                'displayName': 'BYOB Jeff',
-                'interface': 'REX',
-                'linkState': 'STABLE',
-                'linkId': 5293,
+    def _should_always_stay_in_ipa_queue_byob_and_not_faulty_display_name_test(self):
+        link_data = [{
+            # Some fields omitted for simplicity
+            'displayName': 'BYOB Jeff',
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
             },
             {
                 # Some fields omitted for simplicity
@@ -8474,9 +8625,8 @@ class TestServiceOutageMonitor:
                 'interface': 'RAY',
                 'linkState': 'DISCONNECTED',
                 'linkId': 5293,
-            },
+            }
         ]
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8489,28 +8639,24 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
         bruin_repository = Mock()
         outage_repository = Mock()
+        outage_repository.is_faulty_link = Mock(return_value=False)
         config = testconfig
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        outage_monitor._should_be_forwarded_to_HNOC = Mock(return_value=True)
+        should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
 
-        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'mettel.velocloud.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
+        assert should_stay_in_ipa_queue is False
 
-        assert should_forward_to_hnoc is True
-
-    def should_schedule_hnoc_forwarding__vco4_and_link_down_outage_and_doesnt_qualify_for_hnoc_forwarding_test(self):
-        outage_type = Outages.LINK_DOWN
-        links = [
-            {
-                # Some fields omitted for simplicity
-                'displayName': 'BYOB Jeff',
-                'interface': 'REX',
-                'linkState': 'DISCONNECTED',
-                'linkId': 5293,
+    def _should_always_stay_in_ipa_queue_byob_link_display_name_test(self):
+        link_data = [{
+            # Some fields omitted for simplicity
+            'displayName': 'BYOB Jeff',
+            'interface': 'REX',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
             },
             {
                 # Some fields omitted for simplicity
@@ -8518,9 +8664,8 @@ class TestServiceOutageMonitor:
                 'interface': 'RAY',
                 'linkState': 'STABLE',
                 'linkId': 5293,
-            },
+            }
         ]
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -8532,105 +8677,18 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         ha_repository = Mock()
         bruin_repository = Mock()
+
         outage_repository = Mock()
+        outage_repository.is_faulty_link = Mock(return_value=True)
         config = testconfig
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
-        outage_monitor._should_be_forwarded_to_HNOC = Mock(return_value=False)
+        should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
 
-        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'mettel.velocloud.net'):
-            should_forward_to_hnoc = outage_monitor._should_schedule_hnoc_forwarding(links, outage_type)
-
-        assert should_forward_to_hnoc is False
-
-    def should_be_forwarded_to_HNOC__blacklisted_stable_link_and_whitelisted_disconnected_link_test(self):
-        links = [
-            {
-                # Some fields omitted for simplicity
-                'displayName': 'BYOB Jeff',
-                'interface': 'REX',
-                'linkState': 'STABLE',
-                'linkId': 5293,
-            },
-            {
-                # Some fields omitted for simplicity
-                'displayName': '192.168.10.100',
-                'interface': 'RAY',
-                'linkState': 'DISCONNECTED',
-                'linkId': 5293,
-            },
-        ]
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        ha_repository = Mock()
-        bruin_repository = Mock()
-        config = testconfig
-
-        outage_repository = Mock()
-        outage_repository.is_faulty_link = Mock(side_effect=[False, True])
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-
-        result = outage_monitor._should_be_forwarded_to_HNOC(links)
-
-        assert result is True
-
-    def should_be_forwarded_to_HNOC__blacklisted_disconnected_link_and_whitelisted_stable_link_test(self):
-        links = [
-            {
-                # Some fields omitted for simplicity
-                'displayName': 'BYOB Jeff',
-                'interface': 'REX',
-                'linkState': 'DISCONNECTED',
-                'linkId': 5293,
-            },
-            {
-                # Some fields omitted for simplicity
-                'displayName': '192.168.10.100',
-                'interface': 'RAY',
-                'linkState': 'STABLE',
-                'linkId': 5293,
-            },
-        ]
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-        customer_cache_repository = Mock()
-        digi_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        ha_repository = Mock()
-        bruin_repository = Mock()
-        config = testconfig
-
-        outage_repository = Mock()
-        outage_repository.is_faulty_link = Mock(side_effect=[True, False])
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, customer_cache_repository, metrics_repository,
-                                       digi_repository, ha_repository)
-
-        result = outage_monitor._should_be_forwarded_to_HNOC(links)
-
-        assert result is False
+        assert should_stay_in_ipa_queue is True
 
     @pytest.mark.asyncio
     async def append_triage_note_with_retrieval_of_edge_events_returning_non_2xx_status_test(self):

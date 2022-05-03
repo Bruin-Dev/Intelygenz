@@ -370,25 +370,33 @@ class OutageMonitor:
                 if serial_number in note['serviceNumber']
                 if note['noteValue'] is not None
             ]
-            if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date, edge):
+            if self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution):
                 self._logger.info(
-                    f'Edge {serial_number} has been in outage state for a long time, so detail {ticket_detail_id} '
-                    f'(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping '
-                    f'autoresolve...'
+                    f'Task for serial {serial_number} in ticket {outage_ticket_id} is in the IPA Investigate queue. '
+                    f'Skipping checks for max auto-resolves and grace period to auto-resolve after last documented '
+                    f'outage...'
                 )
-                return
+            else:
+                if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date, edge):
+                    self._logger.info(
+                        f'Edge {serial_number} has been in outage state for a long time, so detail {ticket_detail_id} '
+                        f'(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping '
+                        f'autoresolve...'
+                    )
+                    return
 
-            can_detail_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_detail_auto_resolvable(
-                notes_from_outage_ticket, serial_number,
-                max_autoresolves=self._config.MONITOR_CONFIG['autoresolve']['max_autoresolves'],
-            )
-            if not can_detail_be_autoresolved_one_more_time:
-                self._logger.info(
-                    f'[ticket-autoresolve] Limit to autoresolve detail {ticket_detail_id} (serial {serial_number}) '
-                    f'of ticket {outage_ticket_id} linked to edge {serial_number} has been maxed out already. '
-                    'Skipping autoresolve...'
-                )
-                return
+                can_detail_be_autoresolved_one_more_time = \
+                    self._outage_repository.is_outage_ticket_detail_auto_resolvable(
+                        notes_from_outage_ticket,
+                        serial_number,
+                        max_autoresolves=self._config.MONITOR_CONFIG['autoresolve']['max_autoresolves'],)
+                if not can_detail_be_autoresolved_one_more_time:
+                    self._logger.info(
+                        f'[ticket-autoresolve] Limit to autoresolve detail {ticket_detail_id} (serial {serial_number}) '
+                        f'of ticket {outage_ticket_id} linked to edge {serial_number} has been maxed out already. '
+                        'Skipping autoresolve...'
+                    )
+                    return
 
             if self._is_detail_resolved(detail_for_ticket_resolution):
                 self._logger.info(
@@ -544,9 +552,11 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
+                        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+                            edge_status['links'])
+
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
-                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
-                            edge_status['links'], outage_type)
+
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
                                                                 serial_number,
@@ -558,7 +568,7 @@ class OutageMonitor:
                             # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
                             #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
                             # await self._bruin_repository.post_notification_email_milestone(
-                            #    ticket_creation_response_body, serial_number)
+                            #     ticket_creation_response_body, serial_number)
 
                         await self._check_for_digi_reboot(ticket_creation_response_body,
                                                           logical_id_list, serial_number, edge_status)
@@ -574,8 +584,9 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
-                            edge_status['links'], outage_type)
+                        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+                            edge_status['links'])
+
                         if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
                             if should_schedule_hnoc_forwarding:
                                 forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type,
@@ -605,8 +616,9 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
-                            edge_status['links'], outage_type)
+                        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+                            edge_status['links'])
+
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
@@ -639,8 +651,9 @@ class OutageMonitor:
                             check_ticket_tasks=True,
                         )
 
-                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
-                            edge_status['links'], outage_type)
+                        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+                            edge_status['links'])
+
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
@@ -651,7 +664,7 @@ class OutageMonitor:
                                               f"with link_data: {edge_status['links']} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
                             # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                            #                 f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
                             # await self._bruin_repository.post_notification_email_milestone(
                             #    ticket_creation_response_body, serial_number)
 
@@ -672,8 +685,9 @@ class OutageMonitor:
                             check_ticket_tasks=False,
                         )
 
-                        should_schedule_hnoc_forwarding = self._should_schedule_hnoc_forwarding(
-                            edge_status['links'], outage_type)
+                        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(
+                            edge_status['links'])
+
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
@@ -720,12 +734,10 @@ class OutageMonitor:
         else:
             return self._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
 
-    def _should_schedule_hnoc_forwarding(self, link_data, outage_type):
-        if self._config.VELOCLOUD_HOST != 'metvco04.mettel.net' \
-                and (outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN) \
-                and not self._should_be_forwarded_to_HNOC(link_data):
+    def _should_always_stay_in_ipa_queue(self, link_data: list) -> bool:
+        if self._config.VELOCLOUD_HOST == 'metvco04.mettel.net':
             return False
-        return True
+        return self._has_blacklisted_faulty_link(link_data)
 
     def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, *, forward_time):
         tz = timezone(self._config.TIMEZONE)
@@ -1098,8 +1110,8 @@ class OutageMonitor:
             if self._is_link_label_an_ip(link['displayName']) is False
         ]
 
-    def _should_be_forwarded_to_HNOC(self, links: list):
-        return not any(
+    def _has_blacklisted_faulty_link(self, links: list) -> bool:
+        return any(
             link
             for link in links
             if self._is_link_label_black_listed_from_hnoc(link['displayName'].lower())
@@ -1201,6 +1213,10 @@ class OutageMonitor:
     @staticmethod
     def _is_ticket_already_in_severity_level(ticket_info: dict, severity_level: int) -> bool:
         return ticket_info['severity'] == severity_level
+
+    @staticmethod
+    def _is_ticket_task_in_ipa_queue(ticket_task: dict) -> bool:
+        return ticket_task['currentTaskName'] == 'IPA Investigate'
 
     def _get_max_seconds_since_last_outage(self, edge: dict) -> int:
         from datetime import timezone
