@@ -8,8 +8,7 @@ from pytest import fixture, mark, raises
 
 from application.domain.device import Device
 from application.domain.topic import Topic
-from application.rpc.base.rpc_response import OK_STATUS, RpcResponse
-from application.rpc.base_rpc import RpcLogger, RpcError
+from application.rpc.base_rpc import RpcLogger, RpcError, RpcResponse, OK_STATUS
 from application.rpc.get_device_topics_rpc import GetDeviceTopicsRpc, DeviceTopicsRequest, CallType, DeviceTopicsBody
 
 
