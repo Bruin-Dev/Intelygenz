@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 53,
-  "iteration": 1651620650063,
+  "iteration": 1651626093195,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -382,7 +382,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{topic=~\"$topic\"}[$__rate_interval])) by (topic)",
+          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{topic=~\"$topic\"}[5m])) by (topic)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{topic}}",
@@ -1188,7 +1188,7 @@
     "list": [
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "master",
           "value": "master"
         },
@@ -1217,12 +1217,8 @@
       {
         "current": {
           "selected": false,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
         "definition": "label_values(kafka_server_KafkaServer_BrokerState_Value, instance)",
         "hide": 0,
@@ -1243,7 +1239,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": [
             "All"
           ],
@@ -1271,13 +1267,13 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kafka (WIP)",
+  "title": "Kafka",
   "uid": "RleS-If7k_wip",
-  "version": 10,
+  "version": 12,
   "weekStart": ""
 }
