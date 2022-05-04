@@ -43,16 +43,16 @@ repair-tickets-monitor-build:
     MODULE_NAME: repair-tickets-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKETS_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/repair-tickets-monitor/src/application/**/*
         - services/repair-tickets-monitor/src/config/**/*
         - services/repair-tickets-monitor/src/app.py
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/requirements.txt
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKETS_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
-#    - job: repair-tickets-monitor-test
+    - job: repair-tickets-monitor-test
     - job: semantic-release
       optional: true
