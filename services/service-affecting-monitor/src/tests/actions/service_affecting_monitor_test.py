@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from unittest.mock import patch
 
 import pytest
@@ -2540,10 +2540,9 @@ class TestServiceAffectingMonitor:
             make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
         serial_number = 'VC1234567'
         client_id = 12345
-
+        ticket_id = '432532'
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
-
         link_metrics = make_metrics(
             best_latency_ms_tx=0, best_latency_ms_rx=0,
             best_packet_loss_tx=0, best_packet_loss_rx=0,
@@ -2556,18 +2555,16 @@ class TestServiceAffectingMonitor:
         links_grouped_by_edge_obj = make_links_by_edge_object(
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
-
         ticket = make_ticket(
+            ticket_id=ticket_id,
             created_by='Intelygenz Ai',
             create_date=str(CURRENT_DATETIME - timedelta(days=30)),
         )
         open_affecting_tickets = make_list_of_tickets(ticket)
-
         detail_item = make_detail_item(value=serial_number)
         detail_items = make_list_of_detail_items(detail_item)
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
-
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -2582,6 +2579,11 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
             client_id, service_number=serial_number,
         )
+        assert call(
+            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
+            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+            f' documented trouble...'
+        ) not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -2595,10 +2597,9 @@ class TestServiceAffectingMonitor:
             make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
         serial_number = 'VC1234567'
         client_id = 12345
-
+        ticket_id = '432532'
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
-
         link_metrics = make_metrics(
             best_latency_ms_tx=0, best_latency_ms_rx=0,
             best_packet_loss_tx=0, best_packet_loss_rx=0,
@@ -2611,10 +2612,8 @@ class TestServiceAffectingMonitor:
         links_grouped_by_edge_obj = make_links_by_edge_object(
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
-
-        ticket = make_ticket(created_by='Intelygenz Ai')
+        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai')
         open_affecting_tickets = make_list_of_tickets(ticket)
-
         detail_item = make_detail_item(value=serial_number)
         detail_items = make_list_of_detail_items(detail_item)
         note_1 = make_ticket_note(
@@ -2624,7 +2623,6 @@ class TestServiceAffectingMonitor:
         )
         notes = make_list_of_ticket_notes(note_1)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
-
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -2639,6 +2637,11 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
             client_id, service_number=serial_number,
         )
+        assert call(
+            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
+            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+            f' documented trouble...'
+        ) not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -2650,12 +2653,11 @@ class TestServiceAffectingMonitor:
             make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
             make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
             make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
+        ticket_id = '432532'
         serial_number = 'VC1234567'
         client_id = 12345
-
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
-
         link_metrics = make_metrics(
             best_latency_ms_tx=0, best_latency_ms_rx=0,
             best_packet_loss_tx=0, best_packet_loss_rx=0,
@@ -2668,10 +2670,8 @@ class TestServiceAffectingMonitor:
         links_grouped_by_edge_obj = make_links_by_edge_object(
             cache_info=edge_cache_info, links=links_status_and_metrics,
         )
-
-        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
-
         detail_item = make_detail_item(value=serial_number)
         detail_items = make_list_of_detail_items(detail_item)
         note_1 = make_ticket_note(
@@ -2688,7 +2688,6 @@ class TestServiceAffectingMonitor:
         )
         notes = make_list_of_ticket_notes(note_1, note_2, note_3)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
-
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -2703,10 +2702,207 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
             client_id, service_number=serial_number,
         )
+        assert call(
+            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
+            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+            f' documented trouble...'
+        ) not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge__last_trouble_documented_on_ticket_creation_and_detected_long_ago_ipa_queue_test(
+            self, bruin_generic_200_response, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
+            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
+            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
+            make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
+        ticket_id = '432532'
+        serial_number = 'VC1234567'
+        client_id = 12345
+        current_task_name = 'IPA Investigate'
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
+        link_metrics = make_metrics(
+            best_latency_ms_tx=0, best_latency_ms_rx=0,
+            best_packet_loss_tx=0, best_packet_loss_rx=0,
+            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
+            bytes_tx=1, bytes_rx=1,
+            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+        )
+        link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
+        links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
+        links_grouped_by_edge_obj = make_links_by_edge_object(
+            cache_info=edge_cache_info, links=links_status_and_metrics,
+        )
+        ticket = make_ticket(
+            ticket_id=ticket_id,
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(days=30)),
+        )
+        open_affecting_tickets = make_list_of_tickets(ticket)
+        detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
+        detail_items = make_list_of_detail_items(detail_item)
+        notes = make_list_of_ticket_notes()
+        ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
+            body=open_affecting_tickets,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
+
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number,
+        )
+        service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
+        assert call(
+            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
+            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+            f' documented trouble...'
+        ) in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
+        service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
+        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge__last_trouble_documented_after_reopen_and_detected_long_ago_ipa_queue_test(
+            self, bruin_generic_200_response, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
+            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
+            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
+            make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
+        ticket_id = '432532'
+        serial_number = 'VC1234567'
+        client_id = 12345
+        current_task_name = 'IPA Investigate'
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
+        link_metrics = make_metrics(
+            best_latency_ms_tx=0, best_latency_ms_rx=0,
+            best_packet_loss_tx=0, best_packet_loss_rx=0,
+            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
+            bytes_tx=1, bytes_rx=1,
+            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+        )
+        link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
+        links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
+        links_grouped_by_edge_obj = make_links_by_edge_object(
+            cache_info=edge_cache_info, links=links_status_and_metrics,
+        )
+        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai')
+        open_affecting_tickets = make_list_of_tickets(ticket)
+        detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
+        detail_items = make_list_of_detail_items(detail_item)
+        note_1 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nTrouble: Latency",
+            service_numbers=[serial_number],
+            creation_date=str(CURRENT_DATETIME - timedelta(days=30)),
+        )
+        notes = make_list_of_ticket_notes(note_1)
+        ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
+            body=open_affecting_tickets,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
+
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number,
+        )
+        service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
+        assert call(
+            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
+            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+            f' documented trouble...'
+        ) in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
+        service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
+        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge__maximum_number_of_autoresolves_reached_in_ipa_queue_test(
+            self, bruin_generic_200_response, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
+            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
+            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
+            make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
+        ticket_id = '432532'
+        serial_number = 'VC1234567'
+        client_id = 12345
+        current_task_name = 'IPA Investigate'
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
+        link_metrics = make_metrics(
+            best_latency_ms_tx=0, best_latency_ms_rx=0,
+            best_packet_loss_tx=0, best_packet_loss_rx=0,
+            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
+            bytes_tx=1, bytes_rx=1,
+            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+        )
+        link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
+        links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
+        links_grouped_by_edge_obj = make_links_by_edge_object(
+            cache_info=edge_cache_info, links=links_status_and_metrics,
+        )
+        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        open_affecting_tickets = make_list_of_tickets(ticket)
+        detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
+        detail_items = make_list_of_detail_items(detail_item)
+        note_1 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nAuto-resolving task for serial: {serial_number}",
+            service_numbers=[serial_number],
+        )
+        note_2 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nAuto-resolving task for serial: {serial_number}",
+            service_numbers=[serial_number],
+        )
+        note_3 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nAuto-resolving task for serial: {serial_number}",
+            service_numbers=[serial_number],
+        )
+        notes = make_list_of_ticket_notes(note_1, note_2, note_3)
+        ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
+            body=open_affecting_tickets,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
+
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number,
+        )
+        service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
+        assert call(
+            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
+            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+            f' documented trouble...'
+        ) in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
+        service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
+        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__task_for_serial_already_resolved_test(

@@ -345,20 +345,30 @@ class ServiceAffectingMonitor:
                     affecting_ticket_creation_date,
                     max_seconds_since_last_trouble=max_seconds_since_last_trouble,
                 )
-                if not last_trouble_was_detected_recently:
+                remove_auto_resolution_restrictions_for_byob = self._ticket_repository.is_ticket_task_in_ipa_queue(
+                    detail_for_ticket_resolution
+                )
+                if remove_auto_resolution_restrictions_for_byob:
                     self._logger.info(
-                        f'Edge with serial number {serial_number} has been under an affecting trouble for a long time, '
-                        f'so the detail of ticket {affecting_ticket_id} related to it will not be autoresolved. '
-                        'Skipping autoresolve...'
+                        f'Task for serial {serial_number} in ticket {affecting_ticket_id} is in the IPA Investigate'
+                        f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
+                        f' documented trouble...'
                     )
-                    continue
+                else:
+                    if not last_trouble_was_detected_recently:
+                        self._logger.info(
+                            f'Edge with serial number {serial_number} has been under an affecting trouble for a long '
+                            f'time, so the detail of ticket {affecting_ticket_id} related to it will not be '
+                            f'autoresolved. Skipping autoresolve...'
+                        )
+                        continue
 
-                if self._ticket_repository.is_autoresolve_threshold_maxed_out(relevant_notes):
-                    self._logger.info(
-                        f'Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial '
-                        f'{serial_number} has been maxed out already. Skipping autoresolve...'
-                    )
-                    continue
+                    if self._ticket_repository.is_autoresolve_threshold_maxed_out(relevant_notes):
+                        self._logger.info(
+                            f'Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial '
+                            f'{serial_number} has been maxed out already. Skipping autoresolve...'
+                        )
+                        continue
 
                 if self._ticket_repository.is_task_resolved(detail_for_ticket_resolution):
                     self._logger.info(

@@ -586,3 +586,23 @@ class TestTicketRepository:
                 "[Transport|https://mettel.velocloud.net/#!/operator/customer/1/monitor/edge/1/links/]"
             ])
             assert result == expected
+
+    def is_ticket_task_in_ipa_queue__in_ipa_test(self, ticket_repository, make_detail_item):
+        ticket_id = '432532'
+        serial_number = 'VC1234567'
+        current_task_name = 'IPA Investigate'
+        detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
+
+        result = ticket_repository.is_ticket_task_in_ipa_queue(detail_item)
+
+        assert result
+
+    def is_ticket_task_in_ipa_queue__not_in_ipa_test(self, ticket_repository, make_detail_item):
+        ticket_id = '432532'
+        serial_number = 'VC1234567'
+        current_task_name = 'Task Investigate'
+        detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
+
+        result = ticket_repository.is_ticket_task_in_ipa_queue(detail_item)
+
+        assert not result

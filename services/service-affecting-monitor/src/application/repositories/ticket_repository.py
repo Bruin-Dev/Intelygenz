@@ -448,3 +448,7 @@ class TicketRepository:
         ]
 
         return os.linesep.join(note_lines)
+
+    @staticmethod
+    def is_ticket_task_in_ipa_queue(ticket_task: dict) -> bool:
+        return ticket_task['currentTaskName'] == 'IPA Investigate'
