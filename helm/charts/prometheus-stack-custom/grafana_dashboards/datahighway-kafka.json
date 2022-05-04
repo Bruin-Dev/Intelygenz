@@ -813,14 +813,14 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{topic=~\".*${env}\"}[$__rate_interval])) by (instance)",
+          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesOutPerSec_Count{topic=~\".*${env}\"}[$__rate_interval])) by (instance)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
       ],
-      "title": "Bytes In Per Broker",
+      "title": "Bytes Out Per Broker",
       "transformations": [],
       "type": "timeseries"
     },
