@@ -277,7 +277,6 @@ class RepairTicketsMonitor:
 
             output.validated_ticket_numbers = [ticket.ticket_id for ticket in validated_tickets]
 
-
             try:
                 # Check if the service number is valid against Bruin API
                 service_number_site_map = await self._get_valid_service_numbers_site_map(

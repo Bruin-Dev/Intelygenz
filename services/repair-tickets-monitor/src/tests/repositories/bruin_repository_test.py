@@ -1,7 +1,7 @@
 from datetime import datetime
 from unittest.mock import patch, Mock, call
-import asyncio
 
+import asyncio
 import pytest
 from asynctest import CoroutineMock
 from shortuuid import uuid
@@ -645,7 +645,10 @@ class TestBruinRepository:
         # when
         with patch.object(bruin_repository_real._event_bus, "rpc_request", return_value=asyncio.Future()) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response)
-            bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(ticket_id=ticket_id, text_note=text_note)
+            bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(
+                ticket_id=ticket_id,
+                text_note=text_note
+            )
 
         # then
         bruin_repository_real._notifications_repository.send_slack_message.assert_awaited_once()
@@ -665,7 +668,10 @@ class TestBruinRepository:
         # when
         with patch.object(bruin_repository_real._event_bus, "rpc_request", return_value=asyncio.Future()) as rpc_mock:
             rpc_mock.return_value.set_result(rpc_response)
-            bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(ticket_id=ticket_id, text_note=text_note)
+            bruin_bridge_response = await bruin_repository_real.append_note_to_ticket(
+                ticket_id=ticket_id,
+                text_note=text_note
+            )
 
         # then
         assert bruin_bridge_response == rpc_response
