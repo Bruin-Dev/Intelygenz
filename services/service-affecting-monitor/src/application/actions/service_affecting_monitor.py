@@ -278,7 +278,6 @@ class ServiceAffectingMonitor:
             serial_number = edge['cached_info']['serial_number']
             client_id = edge['cached_info']['bruin_client_info']['client_id']
             client_name = edge['cached_info']['bruin_client_info']['client_name']
-            host = edge['cached_info']['edge']['host']
 
             self._logger.info(f'Starting autoresolve for edge {serial_number}...')
 
@@ -395,7 +394,7 @@ class ServiceAffectingMonitor:
                 if resolve_ticket_response['status'] not in range(200, 300):
                     continue
 
-                self._metrics_repository.increment_tasks_autoresolved(client=client_name, host=host)
+                self._metrics_repository.increment_tasks_autoresolved(client=client_name)
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
                 await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
 
@@ -822,7 +821,6 @@ class ServiceAffectingMonitor:
         serial_number = link_data['cached_info']['serial_number']
         interface = link_data['link_status']['interface']
         client_name = link_data['cached_info']['bruin_client_info']['client_name']
-        host = link_data['cached_info']['edge']['host']
 
         self._logger.info(
             f'Unresolving task related to edge {serial_number} of Service Affecting ticket {ticket_id} due to a '
@@ -850,7 +848,7 @@ class ServiceAffectingMonitor:
             f'unresolved! The cause was a {trouble.value} trouble detected in interface {interface}'
         )
 
-        self._metrics_repository.increment_tasks_reopened(client=client_name, host=host, trouble=trouble.value)
+        self._metrics_repository.increment_tasks_reopened(client=client_name, trouble=trouble.value)
         await self._notifications_repository.notify_successful_reopen(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
@@ -881,7 +879,6 @@ class ServiceAffectingMonitor:
         client_id = link_data['cached_info']['bruin_client_info']['client_id']
         contact_info = link_data['contact_info']
         client_name = link_data['cached_info']['bruin_client_info']['client_name']
-        host = link_data['cached_info']['edge']['host']
 
         self._logger.info(
             f'Creating Service Affecting ticket to report a {trouble.value} trouble detected in interface {interface} '
@@ -909,7 +906,7 @@ class ServiceAffectingMonitor:
             f'of edge {serial_number} was successfully created! Ticket ID is {ticket_id}'
         )
 
-        self._metrics_repository.increment_tasks_created(client=client_name, host=host, trouble=trouble.value)
+        self._metrics_repository.increment_tasks_created(client=client_name, trouble=trouble.value)
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
@@ -966,7 +963,6 @@ class ServiceAffectingMonitor:
         async def forward_ticket_to_hnoc_queue():
             target_queue = ForwardQueues.HNOC.value
             client_name = link_data['cached_info']['bruin_client_info']['client_name']
-            host = link_data['cached_info']['edge']['host']
 
             self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
                               f'attempting to forward to HNOC...')
@@ -996,7 +992,7 @@ class ServiceAffectingMonitor:
                                    f'returning {change_work_queue_response} when attempting to forward to HNOC.')
                 return
 
-            self._metrics_repository.increment_tasks_forwarded(client=client_name, host=host, trouble=trouble.value,
+            self._metrics_repository.increment_tasks_forwarded(client=client_name, trouble=trouble.value,
                                                                target_queue=target_queue)
 
             await self._notifications_repository.notify_successful_ticket_forward(
@@ -1023,7 +1019,6 @@ class ServiceAffectingMonitor:
         interface = link_data['link_status']['interface']
         links_configuration = link_data['cached_info']['links_configuration']
         client_name = link_data['cached_info']['bruin_client_info']['client_name']
-        host = link_data['cached_info']['edge']['host']
         link_interface_type = ''
 
         for link_configuration in links_configuration:
@@ -1094,7 +1089,7 @@ class ServiceAffectingMonitor:
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             ticket_id, task_result, service_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
-            self._metrics_repository.increment_tasks_forwarded(client=client_name, host=host, trouble=trouble.value,
+            self._metrics_repository.increment_tasks_forwarded(client=client_name, trouble=trouble.value,
                                                                target_queue=target_queue)
             await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_data['link_status'], serial_number)
             slack_message = (

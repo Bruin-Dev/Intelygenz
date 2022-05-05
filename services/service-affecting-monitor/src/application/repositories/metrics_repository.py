@@ -6,15 +6,8 @@ REOPEN_LABELS = ['trouble']
 FORWARD_LABELS = ['trouble', 'target_queue']
 AUTORESOLVE_LABELS = []
 
-STATIC_LABELS = {
-    'feature': 'Service Affecting Monitor',
-    'system': 'VeloCloud',
-    'ticket_type': 'VAS',
-    'severity': 3,
-}
 
-
-class MetricsRepository:  # pragma: no cover
+class MetricsRepository:
     _tasks_created = Counter('tasks_created', 'Tasks created', COMMON_LABELS + CREATE_LABELS)
     _tasks_reopened = Counter('tasks_reopened', 'Tasks reopened', COMMON_LABELS + REOPEN_LABELS)
     _tasks_forwarded = Counter('tasks_forwarded', 'Tasks forwarded', COMMON_LABELS + FORWARD_LABELS)
@@ -22,6 +15,14 @@ class MetricsRepository:  # pragma: no cover
 
     def __init__(self, config):
         self._config = config
+
+        self._STATIC_LABELS = {
+            'feature': 'Service Affecting Monitor',
+            'system': 'VeloCloud',
+            'ticket_type': 'VAS',
+            'severity': 3,
+            'host': self._config.VELOCLOUD_HOST
+        }
 
     def _get_client_label(self, client):
         relevant_clients = self._config.METRICS_RELEVANT_CLIENTS
@@ -35,20 +36,20 @@ class MetricsRepository:  # pragma: no cover
 
     def increment_tasks_created(self, client, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **STATIC_LABELS}
+        labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_created.labels(**labels).inc()
 
     def increment_tasks_reopened(self, client, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **STATIC_LABELS}
+        labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_reopened.labels(**labels).inc()
 
     def increment_tasks_forwarded(self, client, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **STATIC_LABELS}
+        labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
     def increment_tasks_autoresolved(self, client, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **STATIC_LABELS}
+        labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()
