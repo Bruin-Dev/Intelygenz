@@ -21,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 53,
-  "iteration": 1651626093195,
+  "id": 54,
+  "iteration": 1651706063897,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -193,7 +193,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{instance=~\"$broker_id\", topic=~\"$topic\"}[5m])) by (instance)",
+          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{instance=~\"$broker_id\", topic=~\"$topic\"}[$__rate_interval])) by (instance)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "Bytes in",
@@ -205,7 +205,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesOutPerSec_Count{instance=~\"$broker_id\", topic=~\"$topic\"}[5m])) by (instance)",
+          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesOutPerSec_Count{instance=~\"$broker_id\", topic=~\"$topic\"}[$__rate_interval])) by (instance)",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -382,7 +382,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{topic=~\"$topic\"}[5m])) by (topic)",
+          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesInPerSec_Count{topic=~\"$topic\"}[$__rate_interval])) by (topic)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{topic}}",
@@ -473,7 +473,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesOutPerSec_Count{topic=~\"$topic\"}[5m])) by (topic)",
+          "expr": "sum(rate(kafka_server_BrokerTopicMetrics_BytesOutPerSec_Count{topic=~\"$topic\"}[$__rate_interval])) by (topic)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{topic}}",
@@ -1273,7 +1273,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Kafka",
-  "uid": "RleS-If7k_wip",
-  "version": 12,
+  "uid": "RleS-If7k",
+  "version": 100,
   "weekStart": ""
 }
