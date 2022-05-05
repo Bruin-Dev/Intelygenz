@@ -1,8 +1,10 @@
+import os
 from collections import defaultdict
 from datetime import datetime
 from unittest.mock import Mock, patch
 
 import asyncio
+import html2text
 import pytest
 from asynctest import CoroutineMock
 
@@ -1221,7 +1223,12 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._get_inference = CoroutineMock(return_value=inference_data)
         repair_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(return_value={
             "status": 200,
-            "body": {"ticket_id": "1234"}
+            "body": {
+                "ticket_id": "1234",
+                "ticket_status": "InProgress",
+                "call_type": "REP",
+                "category": "VOO"
+            }
         })
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
