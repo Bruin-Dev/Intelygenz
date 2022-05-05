@@ -1,6 +1,6 @@
 from prometheus_client import Counter
 
-COMMON_LABELS = ['feature', 'system', 'ticket_type', 'severity', 'client', 'host']
+COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'client', 'host']
 CREATE_LABELS = ['trouble']
 REOPEN_LABELS = ['trouble']
 FORWARD_LABELS = ['trouble', 'target_queue']
@@ -19,7 +19,7 @@ class MetricsRepository:
         self._STATIC_LABELS = {
             'feature': 'Service Affecting Monitor',
             'system': 'VeloCloud',
-            'ticket_type': 'VAS',
+            'topic': 'VAS',
             'severity': 3,
             'host': self._config.VELOCLOUD_HOST
         }
