@@ -15,9 +15,9 @@ class Rpc:
     Component that acts as an event_bus wrapper.
     """
     event_bus: EventBus
+    logger: Logger
     topic: str
     timeout: int
-    logger: Logger
 
     def start(self) -> (str, 'RpcLogger'):
         """

@@ -111,10 +111,10 @@ def make_rpc_logger() -> Callable[..., RpcLogger]:
 def make_rpc() -> Callable[..., Rpc]:
     def builder(
         event_bus: EventBus = Mock(EventBus),
+        logger: Logger = Mock(Logger),
         topic: str = "any_topic",
-        timeout: int = hash("any_timeout"),
-        logger: Logger = Mock(Logger)
+        timeout: int = hash("any_timeout")
     ):
-        return Rpc(event_bus, topic, timeout, logger)
+        return Rpc(event_bus, logger, topic, timeout)
 
     return builder
