@@ -36,6 +36,20 @@ class TestRpc:
         assert subject == RpcResponse(status=status, body=body)
 
     @mark.asyncio
+    async def no_body_responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
+        # given
+        status = hash("any_status")
+
+        rpc = make_rpc()
+        rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": status})
+
+        # when
+        subject = await rpc.send(any_rpc_request)
+
+        # then
+        assert subject == RpcResponse(status=status)
+
+    @mark.asyncio
     async def non_dict_responses_raise_an_error_test(self, make_rpc, any_rpc_request):
         rpc = make_rpc()
         rpc.event_bus.rpc_request = CoroutineMock(return_value=None)
@@ -47,14 +61,6 @@ class TestRpc:
     async def non_status_responses_raise_an_error_test(self, make_rpc, any_rpc_request):
         rpc = make_rpc()
         rpc.event_bus.rpc_request = CoroutineMock(return_value={"body": {}})
-
-        with raises(ValidationError):
-            await rpc.send(any_rpc_request)
-
-    @mark.asyncio
-    async def non_body_responses_raise_an_error_test(self, make_rpc, any_rpc_request):
-        rpc = make_rpc()
-        rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": 200})
 
         with raises(ValidationError):
             await rpc.send(any_rpc_request)
