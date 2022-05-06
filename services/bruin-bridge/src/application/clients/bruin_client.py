@@ -1,7 +1,9 @@
 import base64
 import json
+import ssl
 
 import aiohttp
+import certifi
 import humps
 
 
@@ -12,6 +14,7 @@ class BruinClient:
 
         self._bearer_token = ""
 
+        self.__ssl_context = ssl.create_default_context(cafile=certifi.where())
         self._session = aiohttp.ClientSession(trace_configs=config.AIOHTTP_CONFIG['tracers'])
 
     async def login(self):
@@ -34,7 +37,7 @@ class BruinClient:
                 f'{self._config.BRUIN_CONFIG["login_url"]}/identity/connect/token',
                 data=form_data,
                 headers=headers,
-                ssl=False
+                ssl=self.__ssl_context,
             )
 
             self._bearer_token = (await response.json())["access_token"]
