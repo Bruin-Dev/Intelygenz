@@ -34,6 +34,7 @@ class BruinClient:
                 f'{self._config.BRUIN_CONFIG["login_url"]}/identity/connect/token',
                 data=form_data,
                 headers=headers,
+                ssl=False
             )
 
             self._bearer_token = (await response.json())["access_token"]
