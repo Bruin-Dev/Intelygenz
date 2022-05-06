@@ -13,6 +13,7 @@ from igz.packages.server.api import QuartServer
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.ticket_repository import TicketRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.actions.fraud_monitoring import FraudMonitor
 from config import config
@@ -43,6 +44,9 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # METRICS
+        self._metrics_repository = MetricsRepository()
+
         # REPOSITORIES
         self._utils_repository = UtilsRepository()
         self._notifications_repository = NotificationsRepository(self._logger, self._event_bus, config)
@@ -51,8 +55,8 @@ class Container:
 
         # ACTIONS
         self._fraud_monitoring = FraudMonitor(self._event_bus, self._logger, self._scheduler, config,
-                                              self._notifications_repository, self._bruin_repository,
-                                              self._ticket_repository, self._utils_repository)
+                                              self._metrics_repository, self._notifications_repository,
+                                              self._bruin_repository, self._ticket_repository, self._utils_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()

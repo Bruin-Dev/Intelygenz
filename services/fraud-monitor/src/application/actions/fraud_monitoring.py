@@ -23,12 +23,13 @@ EMAIL_REGEXES = [
 
 
 class FraudMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, notifications_repository, bruin_repository,
-                 ticket_repository, utils_repository):
+    def __init__(self, event_bus, logger, scheduler, config, metrics_repository, notifications_repository,
+                 bruin_repository, ticket_repository, utils_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._metrics_repository = metrics_repository
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
         self._ticket_repository = ticket_repository
