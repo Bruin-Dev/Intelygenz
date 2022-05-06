@@ -1,4 +1,5 @@
-from enum import Enum, auto
+import re
+from enum import Enum, auto, IntEnum
 
 
 class Outages(Enum):
@@ -20,3 +21,25 @@ class ChangeTicketSeverityStatus(Enum):
     CHANGED_TO_LINK_DOWN_SEVERITY = auto()
     CHANGED_TO_EDGE_DOWN_SEVERITY = auto()
     NOT_CHANGED = auto()
+
+
+class BruinCreateTicketCustomStatus(IntEnum):
+    UNRESOLVED_TICKET_EXISTS = 409
+    RESOLVED_TICKET_EXISTS_REOPENING = 471
+    RESOLVED_TICKET_EXISTS_BRUIN_REOPENING = 472
+    RESOLVED_TICKET_EXISTS_BRUIN_REOPENING_ADDING_NEW_TASK = 473
+
+
+TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
+REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
+AUTORESOLVE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving detail for serial")
+EVENT_INTERFACE_NAME_REGEX = re.compile(
+    r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'
+    r'(^Link (?P<interface_name2>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'
+)
+REMINDER_NOTE_REGEX = re.compile(
+    r"^#\*MetTel's IPA\*#\nClient Reminder",
+    re.DOTALL | re.MULTILINE,
+)
+OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(re.escape(outage_type.value) for outage_type in Outages)
+OUTAGE_TYPE_REGEX = re.compile(rf'Outage Type: (?P<outage_type>{OUTAGES_DISJUNCTION_FOR_REGEX})')

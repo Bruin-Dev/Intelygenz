@@ -5,14 +5,9 @@ from config import testconfig
 
 
 class TestHaRepository:
-    def instance_test(self):
-        logger = Mock()
-        config = testconfig
-
-        ha_repository = HaRepository(logger, config)
-
+    def instance_test(self, ha_repository, logger):
         assert ha_repository._logger is logger
-        assert ha_repository._config is config
+        assert ha_repository._config is testconfig
 
     def is_ha_enabled_test(self):
         base_edge = {

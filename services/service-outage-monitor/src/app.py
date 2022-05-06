@@ -1,11 +1,10 @@
 import asyncio
 
 import redis
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 from prometheus_client import start_http_server
@@ -14,6 +13,7 @@ from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
+from application.repositories.digi_repository import DiGiRepository
 from application.repositories.ha_repository import HaRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
@@ -21,7 +21,6 @@ from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from application.repositories.digi_repository import DiGiRepository
 from config import config
 
 

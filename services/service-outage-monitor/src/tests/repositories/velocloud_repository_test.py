@@ -19,17 +19,10 @@ uuid_mock = patch.object(velocloud_repository_module, 'uuid', return_value=uuid_
 
 
 class TestVelocloudRepository:
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-
+    def instance_test(self, velocloud_repository, event_bus, logger, notifications_repository):
         assert velocloud_repository._event_bus is event_bus
         assert velocloud_repository._logger is logger
-        assert velocloud_repository._config is config
+        assert velocloud_repository._config is testconfig
         assert velocloud_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio

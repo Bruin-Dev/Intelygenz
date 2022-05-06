@@ -534,7 +534,15 @@ class BruinRepository:
 
         return response
 
-    async def post_notification_email_milestone(self, ticket_id: int, service_number: str):
+    async def send_initial_email_milestone_notification(self, ticket_id: int, service_number: str) -> dict:
+        notification_type = 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
+        return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
+
+    async def send_reminder_email_milestone_notification(self, ticket_id: int, service_number: str) -> dict:
+        notification_type = 'TicketBYOBOutageRepairReminder-E-Mail'
+        return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
+
+    async def post_notification_email_milestone(self, ticket_id: int, service_number: str, notification_type: str):
         err_msg = None
 
         request = {
@@ -542,27 +550,31 @@ class BruinRepository:
             'body': {
                 'ticket_id': ticket_id,
                 'service_number': service_number,
-                'notification_type': 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
-
+                'notification_type': notification_type,
             },
         }
 
         try:
-            self._logger.info(f'Sending email for ticket id {ticket_id} and service_number {service_number}...')
+            self._logger.info(f'Sending email for ticket id {ticket_id}, '
+                              f'service_number {service_number} '
+                              f'and notification type {notification_type}...')
             response = await self._event_bus.rpc_request("bruin.notification.email.milestone", request, timeout=90)
         except Exception as e:
-            err_msg = f'An error occurred when sending email for ticket id {ticket_id} and ' \
-                      f'service_number {service_number} -> {e}'
+            err_msg = (f'An error occurred when sending email for ticket id {ticket_id}, '
+                       f'service_number {service_number} '
+                       f'and notification type {notification_type}...-> {e}')
             response = nats_error_response
         else:
             response_body = response['body']
             response_status = response['status']
 
             if response_status in range(200, 300):
-                self._logger.info(f'Email sent for ticket {ticket_id} and service_number {service_number}!')
+                self._logger.info(f'Email sent for ticket {ticket_id}, service number {service_number} '
+                                  f'and notification type {notification_type}!')
             else:
                 err_msg = (
-                    f'Error while sending email for ticket id {ticket_id} and service_number {service_number} in '
+                    f'Error while sending email for ticket id {ticket_id}, service_number {service_number} '
+                    f'and notification type {notification_type} in '
                     f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )

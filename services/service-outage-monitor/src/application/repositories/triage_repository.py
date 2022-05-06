@@ -1,19 +1,11 @@
 import os
-import re
-
 from datetime import datetime
 from typing import List
 
 from dateutil.parser import parse
 from pytz import timezone
 
-from application import Outages
-
-
-EVENT_INTERFACE_NAME_REGEX = re.compile(
-    r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'
-    r'(^Link (?P<interface_name2>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'
-)
+from application import Outages, EVENT_INTERFACE_NAME_REGEX
 
 
 class TriageRepository:

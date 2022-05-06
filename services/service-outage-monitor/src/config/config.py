@@ -1,10 +1,10 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
-import os
-import logging
-import sys
 import json
+import logging
+import os
+import sys
 
 from application import Outages
 
@@ -86,6 +86,9 @@ else:
             },
             'max_autoresolves': int(os.environ['MONITORING__MAX_AUTORESOLVES_PER_TICKET']),
         },
+        'wait_time_before_sending_new_milestone_reminder': int(
+            os.environ['MONITORING__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER']
+        ),
     }
 
 LOG_CONFIG = {

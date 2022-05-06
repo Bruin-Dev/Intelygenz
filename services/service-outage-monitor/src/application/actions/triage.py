@@ -1,22 +1,20 @@
 import asyncio
-import re
 import time
-
 from datetime import datetime
 from datetime import timedelta
 from typing import Set
 
 from apscheduler.util import undefined
 from dateutil.parser import parse
+from igz.packages.eventbus.eventbus import EventBus
 from pytz import timezone
 from pytz import utc
 from tenacity import retry, wait_exponential, stop_after_delay
 
-from igz.packages.eventbus.eventbus import EventBus
+from application import TRIAGE_NOTE_REGEX
 
 
 class Triage:
-    __triage_note_regex = re.compile(r"#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, outage_repository,
                  customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
@@ -209,7 +207,7 @@ class Triage:
                 note
                 for note in ticket['ticket_notes']
                 if note['noteValue'] is not None
-                if bool(self.__triage_note_regex.match(note['noteValue']))
+                if bool(TRIAGE_NOTE_REGEX.match(note['noteValue']))
             ]
 
             for index, note in enumerate(relevant_notes):

@@ -4,12 +4,12 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 import pytest
-from application.repositories.bruin_repository import BruinRepository
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
+from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
 
 uuid_ = uuid()
@@ -17,17 +17,10 @@ uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
 
 
 class TestBruinRepository:
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-
+    def instance_test(self, bruin_repository, event_bus, logger, notifications_repository):
         assert bruin_repository._event_bus is event_bus
         assert bruin_repository._logger is logger
-        assert bruin_repository._config is config
+        assert bruin_repository._config is testconfig
         assert bruin_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
@@ -1734,118 +1727,153 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def post_notification_email_milestone_test(self):
+    async def send_initial_email_milestone_notification_test(self, bruin_repository, bruin_generic_200_response):
         ticket_id = 12345
         service_number = 'VC1234567'
+        notification_type = 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
+        bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
 
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'service_number': service_number,
-                'notification_type': 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
-            },
-        }
-        response = {
-            'request_id': uuid_,
-            'body': {
-                "eventId": 0,
-                "jobId": "ac-130"
-            },
-            'status': 200,
-        }
+        response = await bruin_repository.send_initial_email_milestone_notification(ticket_id, service_number)
 
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await bruin_repository.post_notification_email_milestone(ticket_id, service_number)
-        event_bus.rpc_request.assert_awaited_once_with("bruin.notification.email.milestone", request, timeout=90)
-        notifications_repository.send_slack_message.assert_not_awaited()
-        assert result == response
+        bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
+            ticket_id,
+            service_number,
+            notification_type
+        )
+        assert response == bruin_generic_200_response
+        bruin_repository._logger.error.assert_not_called()
 
     @pytest.mark.asyncio
-    async def post_notification_email_milestone_with_rpc_request_failing_test(self):
+    async def send_reminder_email_milestone_notification_test(self, bruin_repository, bruin_generic_200_response):
         ticket_id = 12345
         service_number = 'VC1234567'
+        notification_type = 'TicketBYOBOutageRepairReminder-E-Mail'
+        bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
 
-        request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'service_number': service_number,
-                'notification_type': 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
-            },
-        }
+        response = await bruin_repository.send_reminder_email_milestone_notification(ticket_id, service_number)
 
-        slack_message = f'An error occurred when sending email for ticket id {ticket_id} and ' \
-                        f'service_number {service_number} -> '
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-
-        with uuid_mock:
-            result = await bruin_repository.post_notification_email_milestone(ticket_id, service_number)
-        event_bus.rpc_request.assert_awaited_once_with("bruin.notification.email.milestone", request, timeout=90)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        assert result == nats_error_response
+        bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
+            ticket_id,
+            service_number,
+            notification_type
+        )
+        assert response == bruin_generic_200_response
+        bruin_repository._logger.error.assert_not_called()
 
     @pytest.mark.asyncio
-    async def post_notification_email_milestone_with_rpc_request_returning__non_2xx_status_test(self):
+    async def post_notification_email_milestone_test(
+            self,
+            bruin_repository,
+            bruin_generic_200_response
+    ):
         ticket_id = 12345
         service_number = 'VC1234567'
-
+        notification_type = 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
         request = {
             'request_id': uuid_,
             'body': {
                 'ticket_id': ticket_id,
                 'service_number': service_number,
-                'notification_type': 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
+                'notification_type': notification_type
             },
         }
+        bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
 
-        response = {
-            'request_id': uuid_,
-            'body': "failed",
-            'status': 400,
-        }
+        with uuid_mock:
+            result = await bruin_repository.post_notification_email_milestone(
+                ticket_id,
+                service_number,
+                notification_type
+            )
 
+            bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+                'bruin.notification.email.milestone', request, timeout=90
+            )
+            bruin_repository._notifications_repository.send_slack_message.assert_not_awaited()
+            bruin_repository._logger.error.assert_not_called()
+            bruin_repository._notifications_repository.send_slack_message.assert_not_awaited()
+            assert result == bruin_generic_200_response
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_with_rpc_request_failing_test(
+            self,
+            bruin_repository,
+            make_post_notification_email_milestone_request
+    ):
+        ticket_id = 12345
+        service_number = 'VC1234567'
+        notification_type = 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
+        request = make_post_notification_email_milestone_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+            notification_type=notification_type
+        )
+        bruin_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        slack_message = f'An error occurred when sending email for ticket id {ticket_id}, ' \
+                        f'service_number {service_number} and notification type {notification_type}...-> '
+
+        with uuid_mock:
+            result = await bruin_repository.post_notification_email_milestone(
+                ticket_id,
+                service_number,
+                notification_type
+            )
+
+            bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+                'bruin.notification.email.milestone', request, timeout=90
+            )
+            bruin_repository._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+            bruin_repository._logger.error.assert_called_once_with(
+                'An error occurred when sending email for ticket id 12345, service_number VC1234567 '
+                'and notification type TicketBYOBOutageRepairAcknowledgement-E-Mail...-> '
+            )
+            assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def post_notification_email_milestone_with_rpc_request_returning__non_2xx_status_test(
+        self,
+        bruin_repository,
+        bruin_500_response,
+        make_post_notification_email_milestone_request
+    ):
+        ticket_id = 12345
+        service_number = 'VC1234567'
+        notification_type = 'TicketBYOBOutageRepairAcknowledgement-E-Mail'
+        request = make_post_notification_email_milestone_request(
+            request_id=uuid_,
+            ticket_id=ticket_id,
+            service_number=service_number,
+            notification_type=notification_type
+        )
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._event_bus.rpc_request.return_value = bruin_500_response
+        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
         slack_message = (
-                    f'Error while sending email for ticket id {ticket_id} and service_number {service_number} in '
-                    f'{testconfig.CURRENT_ENVIRONMENT.upper()} environment: '
-                    f'Error {response["status"]} - {response["body"]}'
-                )
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+            f'Error while sending email for ticket id {ticket_id}, service_number {service_number} '
+            f'and notification type {notification_type} in '
+            f'{testconfig.CURRENT_ENVIRONMENT.upper()} environment: '
+            f'Error {bruin_500_response["status"]} - {bruin_500_response["body"]}'
+        )
 
         with uuid_mock:
-            result = await bruin_repository.post_notification_email_milestone(ticket_id, service_number)
-        event_bus.rpc_request.assert_awaited_once_with("bruin.notification.email.milestone", request, timeout=90)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        assert result == response
+            result = await bruin_repository.post_notification_email_milestone(
+                ticket_id,
+                service_number,
+                notification_type
+            )
+
+            bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
+                'bruin.notification.email.milestone', request, timeout=90
+            )
+            bruin_repository._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+            bruin_repository._logger.error.assert_called_once_with(
+                'Error while sending email for ticket id 12345, service_number VC1234567 '
+                'and notification type TicketBYOBOutageRepairAcknowledgement-E-Mail '
+                'in DEV environment: Error 500 - Got internal error from Bruin'
+            )
+            assert result == bruin_500_response
 
     @pytest.mark.asyncio
     async def append_autoresolve_note_to_ticket_test(self):

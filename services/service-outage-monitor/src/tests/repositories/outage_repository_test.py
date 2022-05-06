@@ -5,12 +5,7 @@ from application.repositories.outage_repository import OutageRepository
 
 
 class TestOutageRepository:
-    def instance_test(self):
-        logger = Mock()
-        ha_repository = Mock()
-
-        outage_repository = OutageRepository(logger, ha_repository)
-
+    def instance_test(self, outage_repository, logger, ha_repository):
         assert outage_repository._logger is logger
         assert outage_repository._ha_repository is ha_repository
 

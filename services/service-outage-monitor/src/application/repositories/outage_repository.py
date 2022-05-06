@@ -1,8 +1,7 @@
-import re
 from typing import List
 from typing import Optional
 
-from application import Outages
+from application import Outages, AUTORESOLVE_NOTE_REGEX
 
 
 class OutageRepository:
@@ -47,12 +46,11 @@ class OutageRepository:
     def is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
                                                 serial_number: str,
                                                 max_autoresolves: int) -> bool:
-        regex = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving detail for serial")
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:
             note_value = ticket_note['noteValue']
-            is_autoresolve_note = bool(regex.match(note_value))
+            is_autoresolve_note = bool(AUTORESOLVE_NOTE_REGEX.match(note_value))
             is_note_related_to_serial = serial_number in ticket_note['serviceNumber']
             times_autoresolved += int(is_autoresolve_note and is_note_related_to_serial)
 

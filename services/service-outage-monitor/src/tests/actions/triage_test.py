@@ -19,27 +19,13 @@ from config import testconfig
 
 class TestTriage:
 
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        outage_repository = Mock()
-        customer_cache_repository = Mock()
-        bruin_repository = Mock()
-        velocloud_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        ha_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, outage_repository,
-                        customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
-                        triage_repository, ha_repository)
-
+    def instance_test(self, triage, event_bus, logger, scheduler, outage_repository, customer_cache_repository,
+                      bruin_repository, velocloud_repository, notifications_repository, triage_repository,
+                      metrics_repository, ha_repository):
         assert triage._event_bus is event_bus
         assert triage._logger is logger
         assert triage._scheduler is scheduler
-        assert triage._config is config
+        assert triage._config is testconfig
         assert triage._outage_repository is outage_repository
         assert triage._customer_cache_repository is customer_cache_repository
         assert triage._bruin_repository is bruin_repository
@@ -47,7 +33,6 @@ class TestTriage:
         assert triage._notifications_repository is notifications_repository
         assert triage._triage_repository is triage_repository
         assert triage._ha_repository is ha_repository
-
         assert triage._customer_cache == []
 
     @pytest.mark.asyncio

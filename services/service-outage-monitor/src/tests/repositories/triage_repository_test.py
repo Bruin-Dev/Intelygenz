@@ -1,5 +1,4 @@
 import os
-
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -12,6 +11,10 @@ from config import testconfig
 
 
 class TestTriageRepository:
+    def instance_test(self, triage_repository, utils_repository):
+        assert triage_repository._utils_repository is utils_repository
+        assert triage_repository._config is testconfig
+
     def build_triage_note_for_link_down_outage_test(self):
         outage_type = Outages.LINK_DOWN
 

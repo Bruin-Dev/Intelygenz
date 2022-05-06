@@ -1,15 +1,15 @@
+import asyncio
 import base64
 import json
-import re
 import time
 from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
 from ipaddress import ip_address
 from time import perf_counter
+from typing import Coroutine
 from typing import List, Callable, Optional
 
-import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
@@ -18,13 +18,8 @@ from pytz import utc
 from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
-from application import Outages, ForwardQueues, ChangeTicketSeverityStatus
-
-TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
-REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
-
-OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(re.escape(outage_type.value) for outage_type in Outages)
-OUTAGE_TYPE_REGEX = re.compile(rf'Outage Type: (?P<outage_type>{OUTAGES_DISJUNCTION_FOR_REGEX})')
+from application import Outages, ForwardQueues, ChangeTicketSeverityStatus, REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX,\
+    OUTAGE_TYPE_REGEX, BruinCreateTicketCustomStatus
 
 
 class OutageMonitor:
@@ -362,7 +357,7 @@ class OutageMonitor:
                 return
 
             details_from_ticket = ticket_details_response_body['ticketDetails']
-            detail_for_ticket_resolution = self._get_first_element_matching(
+            detail_for_ticket_resolution = self._utils_repository.get_first_element_matching(
                 details_from_ticket,
                 lambda detail: detail['detailValue'] == serial_number,
             )
@@ -381,8 +376,16 @@ class OutageMonitor:
                     f'Skipping checks for max auto-resolves and grace period to auto-resolve after last documented '
                     f'outage...'
                 )
+
             else:
-                if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date, edge):
+                max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
+                was_last_outage_detected_recently = self._utils_repository.has_last_event_happened_recently(
+                        ticket_notes=relevant_notes,
+                        documentation_cycle_start_date=outage_ticket_creation_date,
+                        max_seconds_since_last_event=max_seconds_since_last_outage,
+                        note_regex=REOPEN_NOTE_REGEX
+                )
+                if not was_last_outage_detected_recently:
                     self._logger.info(
                         f'Edge {serial_number} has been in outage state for a long time, so detail {ticket_detail_id} '
                         f'(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping '
@@ -449,22 +452,12 @@ class OutageMonitor:
     def _is_detail_resolved(ticket_detail: dict):
         return ticket_detail['detailStatus'] == 'R'
 
-    @staticmethod
-    def _get_first_element_matching(iterable, condition: Callable, fallback=None):
-        try:
-            return next(elem for elem in iterable if condition(elem))
-        except StopIteration:
-            return fallback
-
     def _find_note(self, ticket_notes, watermark):
-        return self._get_first_element_matching(
+        return self._utils_repository.get_first_element_matching(
             iterable=ticket_notes,
             condition=lambda note: watermark in note.get('noteValue'),
             fallback=None
         )
-
-    def _get_last_element_matching(self, iterable, condition: Callable, fallback=None):
-        return self._get_first_element_matching(reversed(iterable), condition, fallback)
 
     async def _notify_successful_autoresolve(self, ticket_id):
         message = f'Outage ticket {ticket_id} was autoresolved. Details at https://app.bruin.com/t/{ticket_id}'
@@ -547,7 +540,7 @@ class OutageMonitor:
                     ticket_creation_response = await self._bruin_repository.create_outage_ticket(
                         client_id, serial_number
                     )
-                    ticket_creation_response_body = ticket_creation_response['body']
+                    ticket_id = ticket_creation_response['body']
                     ticket_creation_response_status = ticket_creation_response['status']
                     self._logger.info(f"[{outage_type.value}] Bruin response for ticket creation for edge {edge}: "
                                       f"{ticket_creation_response}")
@@ -559,14 +552,14 @@ class OutageMonitor:
                         )
                         slack_message = (
                             f'Service Outage ticket created for edge {serial_number} in {outage_type.value} state: '
-                            f'https://app.bruin.com/t/{ticket_creation_response_body}.'
+                            f'https://app.bruin.com/t/{ticket_id}.'
                         )
                         await self._notifications_repository.send_slack_message(slack_message)
                         await self._append_triage_note(
-                            ticket_creation_response_body, cached_edge, edge_status, outage_type
+                            ticket_id, cached_edge, edge_status, outage_type
                         )
                         await self._change_ticket_severity(
-                            ticket_id=ticket_creation_response_body,
+                            ticket_id=ticket_id,
                             edge_status=edge_status,
                             target_severity=target_severity,
                             check_ticket_tasks=False,
@@ -577,28 +570,34 @@ class OutageMonitor:
 
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(
-                                forward_time, ticket_creation_response_body, serial_number, client_name, outage_type,
+                                forward_time, ticket_id, serial_number, client_name, outage_type,
                                 target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                             )
                         else:
-                            self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
+                            self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            # await self._bruin_repository.post_notification_email_milestone(
-                            #     ticket_creation_response_body, serial_number)
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.send_initial_email_milestone_notification(
+                                 ticket_id, serial_number)
+                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                            if append_note_response['status'] not in range(200, 300):
+                                self._logger.error(
+                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f' {ticket_id}!'
+                                 )
 
-                        await self._check_for_digi_reboot(ticket_creation_response_body,
-                                                          logical_id_list, serial_number, edge_status)
-                    elif ticket_creation_response_status == 409:
+                        await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
+                    elif (ticket_creation_response_status ==
+                          BruinCreateTicketCustomStatus.UNRESOLVED_TICKET_EXISTS):
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} already has an outage ticket in '
-                            f'progress (ID = {ticket_creation_response_body}). Skipping outage ticket creation for '
+                            f'progress (ID = {ticket_id}). Skipping outage ticket creation for '
                             'this edge...'
                         )
                         change_severity_result = await self._change_ticket_severity(
-                            ticket_id=ticket_creation_response_body,
+                            ticket_id=ticket_id,
                             edge_status=edge_status,
                             target_severity=target_severity,
                             check_ticket_tasks=True,
@@ -611,30 +610,38 @@ class OutageMonitor:
                                 forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type,
                                                                                           first_outage_edge)
                                 self.schedule_forward_to_hnoc_queue(
-                                    forward_time, ticket_creation_response_body, serial_number, client_name,
+                                    forward_time, ticket_id, serial_number, client_name,
                                     outage_type, target_severity, has_faulty_digi_link, has_faulty_byob_link,
                                     faulty_link_types
                                 )
                             else:
                                 self._logger.info(
-                                    f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
+                                    f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                     f"with link_data: {edge_links} has a blacklisted link and "
                                     f"should not be forwarded to HNOC. Skipping forward to HNOC...")
+                                ticket_details = await self._bruin_repository.get_ticket_details(ticket_id)
+                                ticket_notes = ticket_details['body']['ticketNotes']
+                                await self._send_reminder(
+                                    ticket_id=ticket_id,
+                                    service_number=serial_number,
+                                    ticket_notes=ticket_notes
+                                )
                         await self._check_for_failed_digi_reboot(
-                            ticket_creation_response_body, logical_id_list, serial_number, edge_status, client_name,
+                            ticket_id, logical_id_list, serial_number, edge_status, client_name,
                             outage_type, target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                         )
                         await self._attempt_forward_to_asr(
-                            cached_edge, edge_status, ticket_creation_response_body, client_name, outage_type,
+                            cached_edge, edge_status, ticket_id, client_name, outage_type,
                             target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                         )
-                    elif ticket_creation_response_status == 471:
+                    elif (ticket_creation_response_status ==
+                          BruinCreateTicketCustomStatus.RESOLVED_TICKET_EXISTS_REOPENING):
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
-                            f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
+                            f'(ID = {ticket_id}). Re-opening ticket...'
                         )
                         was_ticket_reopened = await self._reopen_outage_ticket(
-                            ticket_creation_response_body, edge_status, cached_edge, outage_type
+                            ticket_id, edge_status, cached_edge, outage_type
                         )
                         if was_ticket_reopened:
                             self._metrics_repository.increment_tasks_reopened(
@@ -644,7 +651,7 @@ class OutageMonitor:
                             )
 
                         await self._change_ticket_severity(
-                            ticket_id=ticket_creation_response_body,
+                            ticket_id=ticket_id,
                             edge_status=edge_status,
                             target_severity=target_severity,
                             check_ticket_tasks=True,
@@ -655,24 +662,32 @@ class OutageMonitor:
 
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(
-                                forward_time, ticket_creation_response_body, serial_number, client_name, outage_type,
+                                forward_time, ticket_id, serial_number, client_name, outage_type,
                                 target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                             )
                         else:
-                            self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
+                            self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            # await self._bruin_repository.post_notification_email_milestone(
-                            #    ticket_creation_response_body, serial_number)
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.send_initial_email_milestone_notification(
+                                ticket_id,
+                                serial_number
+                            )
+                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                            if append_note_response['status'] not in range(200, 300):
+                                self._logger.error(
+                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f' {ticket_id}!'
+                                )
 
-                        await self._check_for_digi_reboot(ticket_creation_response_body,
-                                                          logical_id_list, serial_number, edge_status)
-                    elif ticket_creation_response_status == 472:
+                        await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
+                    elif (ticket_creation_response_status ==
+                          BruinCreateTicketCustomStatus.RESOLVED_TICKET_EXISTS_BRUIN_REOPENING):
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
-                            f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
+                            f'(ID = {ticket_id}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
                         self._metrics_repository.increment_tasks_reopened(
@@ -681,10 +696,14 @@ class OutageMonitor:
                         )
 
                         await self._append_triage_note(
-                            ticket_creation_response_body, cached_edge, edge_status, outage_type, is_reopen_note=True,
+                            ticket_id,
+                            cached_edge,
+                            edge_status,
+                            outage_type,
+                            is_reopen_note=True,
                         )
                         await self._change_ticket_severity(
-                            ticket_id=ticket_creation_response_body,
+                            ticket_id=ticket_id,
                             edge_status=edge_status,
                             target_severity=target_severity,
                             check_ticket_tasks=True,
@@ -695,22 +714,29 @@ class OutageMonitor:
 
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(
-                                forward_time, ticket_creation_response_body, serial_number, client_name, outage_type,
+                                forward_time, ticket_id, serial_number, client_name, outage_type,
                                 target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                             )
                         else:
-                            self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
+                            self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            # await self._bruin_repository.post_notification_email_milestone(
-                            #    ticket_creation_response_body, serial_number)
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.send_initial_email_milestone_notification(
+                                 ticket_id, serial_number)
+                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                            if append_note_response['status'] not in range(200, 300):
+                                self._logger.error(
+                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f' {ticket_id}!'
+                                 )
 
-                    elif ticket_creation_response_status == 473:
+                    elif (ticket_creation_response_status ==
+                          BruinCreateTicketCustomStatus.RESOLVED_TICKET_EXISTS_BRUIN_REOPENING_ADDING_NEW_TASK):
                         self._logger.info(
                             f'[{outage_type.value}] There is a resolve outage ticket for the same location of faulty '
-                            f'edge {serial_number} (ticket ID = {ticket_creation_response_body}). The ticket was '
+                            f'edge {serial_number} (ticket ID = {ticket_id}). The ticket was '
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
@@ -719,11 +745,9 @@ class OutageMonitor:
                             has_digi=has_faulty_digi_link, has_byob=has_faulty_byob_link, link_types=faulty_link_types
                         )
 
-                        await self._append_triage_note(
-                            ticket_creation_response_body, cached_edge, edge_status, outage_type
-                        )
+                        await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
                         await self._change_ticket_severity(
-                            ticket_id=ticket_creation_response_body,
+                            ticket_id=ticket_id,
                             edge_status=edge_status,
                             target_severity=target_severity,
                             check_ticket_tasks=False,
@@ -734,17 +758,25 @@ class OutageMonitor:
 
                         if should_schedule_hnoc_forwarding:
                             self.schedule_forward_to_hnoc_queue(
-                                forward_time, ticket_creation_response_body, serial_number, client_name, outage_type,
+                                forward_time, ticket_id, serial_number, client_name, outage_type,
                                 target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                             )
                         else:
-                            self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
+                            self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                            # self._logger.info(f"Sending an email for ticket_id: {ticket_creation_response_body} "
-                            #                  f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            # await self._bruin_repository.post_notification_email_milestone(
-                            #    ticket_creation_response_body, serial_number)
+                            self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
+                                              f"with serial: {serial_number} instead of scheduling forward to HNOC...")
+                            await self._bruin_repository.send_initial_email_milestone_notification(
+                                ticket_id,
+                                serial_number
+                            )
+                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                            if append_note_response['status'] not in range(200, 300):
+                                self._logger.error(
+                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f' {ticket_id}!'
+                                )
 
             else:
                 self._logger.info(
@@ -821,7 +853,7 @@ class OutageMonitor:
                 raise Exception
 
             ticket_details = ticket_details_response['body']['ticketDetails']
-            most_recent_detail = self._get_first_element_matching(
+            most_recent_detail = self._utils_repository.get_first_element_matching(
                 ticket_details,
                 lambda detail: detail['detailValue'] == serial_number,
             )
@@ -918,7 +950,7 @@ class OutageMonitor:
         if ticket_details_response_status not in range(200, 300):
             return
 
-        ticket_detail_for_reopen = self._get_first_element_matching(
+        ticket_detail_for_reopen = self._utils_repository.get_first_element_matching(
             ticket_details_response_body['ticketDetails'],
             lambda detail: detail['detailValue'] == serial_number,
         )
@@ -939,34 +971,6 @@ class OutageMonitor:
         else:
             self._logger.error(f'Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.')
             return False
-
-    def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str, edge: dict) -> bool:
-        current_datetime = datetime.now(utc)
-        max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
-
-        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
-
-        last_reopen_note = self._get_last_element_matching(
-            notes_sorted_by_date_asc,
-            lambda note: REOPEN_NOTE_REGEX.match(note['noteValue'])
-        )
-        if last_reopen_note:
-            note_creation_date = parse(last_reopen_note['createdDate']).astimezone(utc)
-            seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
-            return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
-
-        triage_note = self._get_first_element_matching(
-            notes_sorted_by_date_asc,
-            lambda note: TRIAGE_NOTE_REGEX.match(note['noteValue'])
-        )
-        if triage_note:
-            note_creation_date = parse(triage_note['createdDate']).astimezone(utc)
-            seconds_elapsed_since_last_outage = (current_datetime - note_creation_date).total_seconds()
-            return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
-
-        ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
-        seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
-        return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
     async def _check_for_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status):
         self._logger.info(f'Checking edge {serial_number} for DiGi Links')
@@ -1008,7 +1012,7 @@ class OutageMonitor:
                     return
 
                 details_from_ticket = ticket_details_response_body['ticketDetails']
-                detail_for_ticket_resolution = self._get_first_element_matching(
+                detail_for_ticket_resolution = self._utils_repository.get_first_element_matching(
                     details_from_ticket,
                     lambda detail: detail['detailValue'] == serial_number,
                 )
@@ -1114,7 +1118,7 @@ class OutageMonitor:
             return
 
         details_from_ticket = ticket_details_response_body['ticketDetails']
-        detail_for_ticket_resolution = self._get_first_element_matching(
+        detail_for_ticket_resolution = self._utils_repository.get_first_element_matching(
             details_from_ticket,
             lambda detail: detail['detailValue'] == serial_number,
         )
@@ -1340,3 +1344,77 @@ class OutageMonitor:
             match = OUTAGE_TYPE_REGEX.search(note['noteValue'])
             if match:
                 return match.group('outage_type')
+
+    async def _send_reminder(self, ticket_id: str, service_number: str, ticket_notes: list):
+        self._logger.info(
+            f'Attempting to send reminder for service number {service_number} to ticket {ticket_id}'
+        )
+
+        filtered_notes = self._utils_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
+            ticket_notes
+        )
+        last_documentation_cycle_start_date = filtered_notes[0]['createdDate']
+
+        wait_time_before_sending_new_milestone_reminder = self._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        should_send_reminder_notification = not self._was_last_reminder_sent_recently(
+            filtered_notes,
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        if not should_send_reminder_notification:
+            self._logger.info(
+                f'No Reminder note will be appended for service number {service_number} to ticket {ticket_id},'
+                f' since either the last documentation cycle started or the last reminder'
+                f' was sent too recently'
+            )
+            return
+
+        working_environment = self._config.CURRENT_ENVIRONMENT
+        if not working_environment == 'production':
+            self._logger.info(
+                f'No Reminder note will be appended for service number {service_number} to ticket {ticket_id} since '
+                f'the current environment is {working_environment.upper()}'
+            )
+            return
+
+        await self._bruin_repository.send_reminder_email_milestone_notification(
+            ticket_id,
+            service_number
+        )
+
+        append_note_response = await self._append_reminder_note(ticket_id, service_number)
+        if append_note_response['status'] not in range(200, 300):
+            self._logger.error(
+                f'Reminder note of edge {service_number} could not be appended to ticket'
+                f' {ticket_id}!'
+            )
+            return
+
+        self._logger.info(
+            f'Reminder note of edge {service_number} was successfully appended to ticket'
+            f' {ticket_id}!'
+        )
+        await self._notifications_repository.notify_successful_reminder_note_append(
+            ticket_id,
+            service_number
+        )
+
+    def _was_last_reminder_sent_recently(self, ticket_notes: list, ticket_creation_date: str,
+                                         max_seconds_since_last_reminder: int) -> bool:
+        reminder_regex = REMINDER_NOTE_REGEX
+        return self._utils_repository.has_last_event_happened_recently(
+            ticket_notes,
+            ticket_creation_date,
+            max_seconds_since_last_event=max_seconds_since_last_reminder,
+            note_regex=reminder_regex
+        )
+
+    async def _append_reminder_note(self, ticket_id: int, service_number: str):
+        reminder_note = self._utils_repository.build_reminder_note()
+        return await self._bruin_repository.append_note_to_ticket(
+            ticket_id,
+            reminder_note,
+            service_numbers=[service_number],
+        )

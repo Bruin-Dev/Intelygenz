@@ -4,7 +4,6 @@ import sys
 
 from application import Outages
 
-
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
     'subscriber': {
@@ -75,6 +74,7 @@ MONITOR_CONFIG = {
         },
         'max_autoresolves': 3,
     },
+    'wait_time_before_sending_new_milestone_reminder': 86400
 }
 
 LOG_CONFIG = {

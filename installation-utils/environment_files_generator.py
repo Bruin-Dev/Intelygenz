@@ -1,9 +1,10 @@
 # Note: Please ignore "line too long" warnings in this file
 
-import os
-import json
-import getpass
 import argparse
+import getpass
+import json
+import os
+
 import boto3
 
 
@@ -205,6 +206,7 @@ SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS = param
 SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_EDGE_DOWN_OUTAGES = parameters['dev']['service-outage']['monitor']['severity-for-edge-down-outages']
 SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_LINK_DOWN_OUTAGES = parameters['dev']['service-outage']['monitor']['severity-for-link-down-outages']
 SERVICE_OUTAGE__MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters['dev']['service-outage']['monitor']['max-autoresolves-per-ticket']
+SERVICE_OUTAGE__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER = parameters['dev']['service-outage']['monitor']['wait-time-before-sending-new-milestone-reminder']
 
 # Service Outage Monitor - Triage variables
 SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL = parameters['dev']['service-outage']['triage']['monitoring-job-interval']
@@ -779,6 +781,7 @@ for host in SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f'MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS={SERVICE_OUTAGE__MONITOR__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS}',
         f'MONITORING__BLACKLISTED_EDGES={SERVICE_OUTAGE__MONITOR__BLACKLISTED_EDGES}',
         f'MONITORING__MAX_AUTORESOLVES_PER_TICKET={SERVICE_OUTAGE__MONITOR__MAX_AUTORESOLVES_PER_TICKET}',
+        f'MONITORING__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER={SERVICE_OUTAGE__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER}',
     ]
 
 for host in SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS:
