@@ -4,6 +4,7 @@ from datetime import datetime
 from pytz import timezone
 from shortuuid import uuid
 
+from application import ForwardQueues
 from application.repositories import nats_error_response
 
 
@@ -453,8 +454,8 @@ class BruinRepository:
         return response
 
     async def change_detail_work_queue_to_hnoc(self, ticket_id: int, *, service_number: str = None):
-        task_result = 'HNOC Investigate'
+        target_queue = ForwardQueues.HNOC.value
 
         return await self.change_detail_work_queue(
-            ticket_id=ticket_id, task_result=task_result, service_number=service_number
+            ticket_id=ticket_id, task_result=target_queue, service_number=service_number
         )
