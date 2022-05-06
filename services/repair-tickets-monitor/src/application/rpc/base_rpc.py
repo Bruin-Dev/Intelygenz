@@ -49,7 +49,7 @@ class RpcResponse(BaseModel):
     Data structure that represents an rpc response.
     """
     status: int
-    body: Dict[str, Any]
+    body: Dict[str, Any] = None
 
     def is_ok(self) -> bool:
         return self.status == OK_STATUS
