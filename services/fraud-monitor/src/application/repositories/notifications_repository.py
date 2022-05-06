@@ -101,6 +101,11 @@ class NotificationsRepository:
             f'https://app.bruin.com/t/{ticket_id}'
         )
 
+    async def notify_successful_ticket_forward(self, ticket_id: int, service_number: str):
+        await self.send_slack_message(
+            f'Task for service number {service_number} of Fraud ticket {ticket_id} has been forwarded to the HNOC queue'
+        )
+
     async def notify_successful_note_append(self, ticket_id: int, service_number: str):
         await self.send_slack_message(
             f'Fraud note posted for service number {service_number} of ticket {ticket_id}. '

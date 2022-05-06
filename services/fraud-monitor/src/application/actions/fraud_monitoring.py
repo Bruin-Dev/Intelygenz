@@ -282,8 +282,12 @@ class FraudMonitor:
         self._logger.info(f'Fraud note was successfully appended to ticket {ticket_id}!')
         await self._notifications_repository.notify_successful_note_append(ticket_id, service_number)
 
-        await self._bruin_repository.change_detail_work_queue_to_hnoc(ticket_id=ticket_id,
-                                                                      service_number=service_number)
+        self._logger.info(f'Forwarding ticket {ticket_id} to HNOC')
+        change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
+            ticket_id=ticket_id, service_number=service_number)
+
+        if change_work_queue_response['status'] in range(200, 300):
+            await self._notifications_repository.notify_successful_ticket_forward(ticket_id, service_number)
 
         return True
 
