@@ -8,13 +8,17 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
 
+from application import ForwardQueues
+
 EMAIL_REGEXES = [
     {
+        'type': 'Possible Fraud',
         'subject': re.compile(r'Possible Fraud on .*'),
         'body': re.compile(r'(?P<email_body>Possible Fraud Warning.*)\n\nThanks,\nFraud Detection System', re.DOTALL),
         'did': re.compile(r'DID: (?P<did>.*)'),
     },
     {
+        'type': 'Request Rate Monitor Violation',
         'subject': re.compile(r'Request Rate Monitor Violation\(High\)'),
         'body': re.compile(r'Subject: (?P<email_body>.*)\n\nConfidentiality Notice', re.DOTALL),
         'did': re.compile(r'Destination Phone : (?P<did>.*)'),
@@ -155,11 +159,12 @@ class FraudMonitor:
         if resolved_fraud_ticket:
             ticket_id = resolved_fraud_ticket['ticket_overview']['ticketID']
             self._logger.info(f'A resolved Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}')
-            return await self._unresolve_task_for_ticket(resolved_fraud_ticket, service_number, email_body, msg_uid)
+            return await self._unresolve_task_for_ticket(resolved_fraud_ticket, service_number, email_regex, email_body,
+                                                         msg_uid)
 
         # If not a single ticket was found, create a new one
         self._logger.info(f'No open or resolved Fraud ticket was found for {service_number}')
-        return await self._create_fraud_ticket(client_id, service_number, email_body, msg_uid)
+        return await self._create_fraud_ticket(client_id, service_number, email_regex, email_body, msg_uid)
 
     async def _get_oldest_fraud_ticket(self, tickets: List[dict], service_number: str) -> Optional[dict]:
         tickets = sorted(tickets, key=lambda item: parse(item['createDate']))
@@ -224,8 +229,8 @@ class FraudMonitor:
 
         return True
 
-    async def _unresolve_task_for_ticket(self, ticket_info: dict, service_number: str, email_body: str,
-                                         msg_uid: str) -> bool:
+    async def _unresolve_task_for_ticket(self, ticket_info: dict, service_number: str, email_regex: dict,
+                                         email_body: str, msg_uid: str) -> bool:
         ticket_id = ticket_info['ticket_overview']['ticketID']
         task_id = ticket_info['ticket_task']['detailID']
         self._logger.info(f'Unresolving task related to {service_number} of Fraud ticket {ticket_id}...')
@@ -242,6 +247,7 @@ class FraudMonitor:
             return False
 
         self._logger.info(f'Task related to {service_number} of Fraud ticket {ticket_id} was successfully unresolved!')
+        self._metrics_repository.increment_tasks_reopened(trouble=email_regex['type'])
         await self._notifications_repository.notify_successful_reopen(ticket_id, service_number)
 
         append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, service_number, email_body,
@@ -254,7 +260,8 @@ class FraudMonitor:
 
         return True
 
-    async def _create_fraud_ticket(self, client_id: int, service_number: str, email_body: str, msg_uid: str) -> bool:
+    async def _create_fraud_ticket(self, client_id: int, service_number: str, email_regex: dict, email_body: str,
+                                   msg_uid: str) -> bool:
         self._logger.info(f'Creating Fraud ticket for client {client_id} and service number {service_number}')
         contacts = await self._get_contacts(client_id, service_number)
 
@@ -272,6 +279,7 @@ class FraudMonitor:
 
         ticket_id = create_fraud_ticket_response['body']['ticketIds'][0]
         self._logger.info(f'Fraud ticket was successfully created! Ticket ID is {ticket_id}')
+        self._metrics_repository.increment_tasks_created(trouble=email_regex['type'])
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, service_number)
 
         append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, service_number, email_body,
@@ -287,6 +295,8 @@ class FraudMonitor:
             ticket_id=ticket_id, service_number=service_number)
 
         if change_work_queue_response['status'] in range(200, 300):
+            self._metrics_repository.increment_tasks_forwarded(trouble=email_regex['type'],
+                                                               target_queue=ForwardQueues.HNOC.value)
             await self._notifications_repository.notify_successful_ticket_forward(ticket_id, service_number)
 
         return True

@@ -236,7 +236,8 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, body, msg_uid)
+        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, EMAIL_REGEXES[0],
+                                                                          body, msg_uid)
 
     @pytest.mark.asyncio
     async def process_fraud__reopen_closed_ticket_test(
@@ -269,7 +270,8 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, body, msg_uid)
+        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, EMAIL_REGEXES[0],
+                                                                          body, msg_uid)
 
     @pytest.mark.asyncio
     async def process_fraud__create_ticket_test(
@@ -298,7 +300,8 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, body, msg_uid)
+        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, EMAIL_REGEXES[0], body,
+                                                                    msg_uid)
 
     @pytest.mark.asyncio
     async def process_fraud__create_ticket__default_client_info_test(
@@ -328,7 +331,8 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, body, msg_uid)
+        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, EMAIL_REGEXES[0], body,
+                                                                    msg_uid)
 
     @pytest.mark.asyncio
     async def get_oldest_fraud_ticket__found_test(
@@ -468,7 +472,8 @@ class TestFraudMonitor:
 
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
-        result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, email_body, msg_uid)
+        result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
+                                                                email_body, msg_uid)
 
         fraud_monitor._bruin_repository.open_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_reopen.assert_not_awaited()
@@ -491,7 +496,8 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.open_ticket.return_value = bruin_500_response
 
         with config_mock:
-            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, email_body, msg_uid)
+            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
+                                                                    email_body, msg_uid)
 
         fraud_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, task_id)
         fraud_monitor._notifications_repository.notify_successful_reopen.assert_not_awaited()
@@ -515,7 +521,8 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
         with config_mock:
-            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, email_body, msg_uid)
+            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
+                                                                    email_body, msg_uid)
 
         fraud_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, task_id)
         fraud_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once_with(ticket_id,
@@ -544,7 +551,8 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
         with config_mock:
-            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, email_body, msg_uid)
+            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
+                                                                    email_body, msg_uid)
 
         fraud_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, task_id)
         fraud_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once_with(ticket_id,
@@ -565,7 +573,8 @@ class TestFraudMonitor:
 
         fraud_monitor._get_contacts.return_value = None
 
-        result = await fraud_monitor._create_fraud_ticket(client_id, service_number, email_body, msg_uid)
+        result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
+                                                          msg_uid)
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
@@ -581,7 +590,8 @@ class TestFraudMonitor:
 
         fraud_monitor._get_contacts.return_value = make_contact_info()
 
-        result = await fraud_monitor._create_fraud_ticket(client_id, service_number, email_body, msg_uid)
+        result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
+                                                          msg_uid)
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
@@ -604,7 +614,8 @@ class TestFraudMonitor:
         )
 
         with config_mock:
-            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, email_body, msg_uid)
+            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
+                                                              msg_uid)
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
                                                                                      contacts)
@@ -629,7 +640,8 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
         with config_mock:
-            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, email_body, msg_uid)
+            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
+                                                              msg_uid)
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
                                                                                      contacts)
@@ -659,7 +671,8 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
         with config_mock:
-            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, email_body, msg_uid)
+            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
+                                                              msg_uid)
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
                                                                                      contacts)
