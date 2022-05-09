@@ -29,4 +29,4 @@ Which is then followed up by appending the full `body` of the InterMapper email 
 - [Notifier](../notifier/README.md)
 
 # Running in docker-compose
-`docker-compose up --build nats-server notifier bruin_bridge dri-bridge intermapper-outage-monitor`
+`docker-compose up --build nats-server notifier bruin-bridge dri-bridge intermapper-outage-monitor`
