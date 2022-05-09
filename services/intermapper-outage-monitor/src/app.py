@@ -12,6 +12,7 @@ from igz.packages.server.api import QuartServer
 
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.dri_repository import DRIRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.actions.intermapper_monitoring import InterMapperMonitor
 from config import config
@@ -42,14 +43,17 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # METRICS
+        self._metrics_repository = MetricsRepository()
+
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(self._logger, self._event_bus, config)
         self._dri_repository = DRIRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
 
         # ACTIONS
-        self._intermapper_monitoring = InterMapperMonitor(self._event_bus, self._logger, self._scheduler,
-                                                          config, self._notifications_repository,
+        self._intermapper_monitoring = InterMapperMonitor(self._event_bus, self._logger, self._scheduler, config,
+                                                          self._metrics_repository, self._notifications_repository,
                                                           self._bruin_repository, self._dri_repository)
 
     async def _start(self):
