@@ -197,6 +197,9 @@ class InterMapperMonitor:
         return extracted_value
 
     async def _autoresolve_ticket(self, circuit_id, client_id, parsed_email_dict):
+        event = parsed_email_dict['event']
+        is_piab = self._is_piab_device(parsed_email_dict)
+
         self._logger.info('Starting the autoresolve process')
         tickets_response = await self._bruin_repository.get_ticket_basic_info(client_id, circuit_id)
         tickets_body = tickets_response['body']
@@ -213,9 +216,7 @@ class InterMapperMonitor:
             self._logger.info(f'Posting InterMapper UP note to task of ticket id {ticket_id} '
                               f'related to circuit ID {circuit_id}...')
             up_note_response = await self._bruin_repository.append_intermapper_up_note(ticket_id, circuit_id,
-                                                                                       parsed_email_dict,
-                                                                                       self._is_piab_device(
-                                                                                           parsed_email_dict))
+                                                                                       parsed_email_dict, is_piab)
             if up_note_response['status'] not in range(200, 300):
                 return False
 
@@ -293,7 +294,7 @@ class InterMapperMonitor:
             if self._config.CURRENT_ENVIRONMENT != 'production':
                 self._logger.info(f'Skipping autoresolve for circuit ID {circuit_id} '
                                   f'since the current environment is not production')
-                return True
+                continue
 
             await self._bruin_repository.unpause_ticket_detail(
                 ticket_id,
@@ -306,6 +307,7 @@ class InterMapperMonitor:
 
             self._logger.info(f'Autoresolve was successful for task of ticket {ticket_id} related to '
                               f'circuit ID {circuit_id}. Posting autoresolve note...')
+            self._metrics_repository.increment_tasks_autoresolved(event=event, is_piab=is_piab)
             await self._bruin_repository.append_autoresolve_note(ticket_id, circuit_id)
             slack_message = (
                 f'Outage ticket {ticket_id} for circuit_id {circuit_id} was autoresolved through InterMapper emails. '
@@ -319,6 +321,9 @@ class InterMapperMonitor:
         return True
 
     async def _create_outage_ticket(self, circuit_id, client_id, parsed_email_dict, dri_parameters):
+        event = parsed_email_dict['event']
+        is_piab = self._is_piab_device(parsed_email_dict)
+
         self._logger.info(f'Attempting outage ticket creation for client_id {client_id}, '
                           f'and circuit_id {circuit_id}')
 
@@ -337,6 +342,7 @@ class InterMapperMonitor:
 
         if outage_ticket_status in range(200, 300):
             self._logger.info(f'Successfully created outage ticket with ticket_id {outage_ticket_body}')
+            self._metrics_repository.increment_tasks_created(event=event, is_piab=is_piab)
             slack_message = (
                 f'Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket '
                 f'details at https://app.bruin.com/t/{outage_ticket_body}.'
@@ -349,8 +355,10 @@ class InterMapperMonitor:
                 self._logger.info(f'In Progress ticket exists for location of circuit id {circuit_id}')
             if outage_ticket_status == 472:
                 self._logger.info(f'Resolved ticket exists for circuit id {circuit_id}')
+                self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab)
             if outage_ticket_status == 473:
                 self._logger.info(f'Resolved ticket exists for location of circuit id {circuit_id}')
+                self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab)
         else:
             return False
         if dri_parameters:
