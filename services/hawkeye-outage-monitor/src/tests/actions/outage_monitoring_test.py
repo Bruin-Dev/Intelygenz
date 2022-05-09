@@ -1,20 +1,18 @@
 import os
-
 from datetime import datetime
 from datetime import timedelta
-from dateutil.parser import parse
-from unittest.mock import call
 from unittest.mock import Mock
+from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
-
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
-from shortuuid import uuid
+from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
+from shortuuid import uuid
 
 from application.actions import outage_monitoring as outage_monitoring_module
 from application.actions.outage_monitoring import OutageMonitor
@@ -1863,7 +1861,7 @@ class TestServiceOutageMonitor:
             'status': 472,
         }
 
-        outage_causes = 'These are the outage causes'
+        reopen_note = "#*MetTel's IPA*#\nRe-opening task"
 
         event_bus = Mock()
         logger = Mock()
@@ -1876,7 +1874,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
-        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        bruin_repository.append_note_to_ticket = CoroutineMock()
 
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
@@ -1891,7 +1889,7 @@ class TestServiceOutageMonitor:
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
-        outage_monitor._get_outage_causes_for_reopen_note = Mock(return_value=outage_causes)
+        outage_monitor._build_triage_note = Mock(return_value=reopen_note)
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
@@ -1902,13 +1900,13 @@ class TestServiceOutageMonitor:
             call(bruin_client_id, serial_number_1),
             call(bruin_client_id, serial_number_2),
         ])
-        outage_monitor._get_outage_causes_for_reopen_note.assert_has_calls([
-            call(device_1_info),
-            call(device_2_info),
+        outage_monitor._build_triage_note.assert_has_calls([
+            call(device_1_info['device_info'], is_reopen_note=True),
+            call(device_2_info['device_info'], is_reopen_note=True),
         ])
-        bruin_repository.append_reopening_note_to_ticket.assert_has_awaits([
-            call(ticket_id, serial_number_1, outage_causes),
-            call(ticket_id, serial_number_2, outage_causes),
+        bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id, reopen_note, service_numbers=[serial_number_1]),
+            call(ticket_id, reopen_note, service_numbers=[serial_number_2]),
         ])
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
 
@@ -2091,7 +2089,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
-        bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        bruin_repository.append_note_to_ticket = CoroutineMock()
 
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
@@ -3308,45 +3306,68 @@ class TestServiceOutageMonitor:
 
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
         outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_exception_response)
-        outage_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        outage_monitor._bruin_repository.append_note_to_ticket = CoroutineMock()
 
         await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
 
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
-        outage_monitor._bruin_repository.append_reopening_note_to_ticket.assert_not_awaited()
+        outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_ok_test(self, device_1_info, ticket_id, ticket_detail_for_serial_1,
                                            bruin_response_ok, bruin_reopen_response_ok, outage_monitor):
         ticket_detail_for_serial_1_id = ticket_detail_for_serial_1['detailID']
         serial_number = ticket_detail_for_serial_1['detailValue']
-        outage_causes = 'These are the outage causes'
+        reopen_note = "#*MetTel's IPA*#\nRe-opening task"
 
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
         outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_reopen_response_ok)
-        outage_monitor._get_outage_causes_for_reopen_note = Mock(return_value=outage_causes)
-        outage_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        outage_monitor._build_triage_note = Mock(return_value=reopen_note)
+        outage_monitor._bruin_repository.append_note_to_ticket = CoroutineMock()
         outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
 
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
-        outage_monitor._get_outage_causes_for_reopen_note.assert_called_once_with(device_1_info)
-        outage_monitor._bruin_repository.append_reopening_note_to_ticket.assert_awaited_once_with(
-            ticket_id, serial_number, outage_causes
+        outage_monitor._build_triage_note.assert_called_once_with(device_1_info['device_info'], is_reopen_note=True)
+        outage_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, reopen_note, service_numbers=[serial_number]
         )
         outage_monitor._notifications_repository.send_slack_message.assert_awaited()
 
-    def get_outage_causes_for_reopen_note_test(self, device_1_info, outage_monitor):
-        result = outage_monitor._get_outage_causes_for_reopen_note(device_1_info)
+    def build_reopen_note_test(self, device_1_info, outage_monitor):
+        device_info = device_1_info['device_info']
+        tz_object = timezone(outage_monitor._config.TIMEZONE)
+        current_datetime = datetime.now(utc).astimezone(tz_object)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
         expected = os.linesep.join([
-            'Outage cause(s):',
-            'Real Service status is DOWN.',
+            "#*MetTel's IPA*#",
+            f"Re-opening task",
+            "",
+            "Hawkeye Instance: https://ixia.metconnect.net/",
+            "Links: [Dashboard|https://ixia.metconnect.net/ixrr_main.php?type=ProbesManagement] - "
+            f"[Probe|https://ixia.metconnect.net/probeinformation.php?probeid={device_info['probeId']}]",
+            f"Device Name: {device_info['name']}",
+            f"Device Type: {device_info['typeName']}",
+            f"Device Group(s): {device_info['probeGroup']}",
+            f"Serial: {device_info['serialNumber']}",
+            f"Hawkeye ID: {device_info['probeId']}",
+            "",
+            f"Device Node to Node Status: UP",
+            f"Node to Node Last Update: {str(parse(device_info['nodetonode']['lastUpdate']).astimezone(tz_object))}",
+            f"Device Real Service Status: DOWN",
+            f"Real Service Last Update: {str(parse(device_info['realservice']['lastUpdate']).astimezone(tz_object))}",
+            "",
+            f"TimeStamp: {str(current_datetime)}",
         ])
 
-        assert result == expected
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._build_triage_note(device_1_info['device_info'], is_reopen_note=True)
+
+            assert result == expected
 
     @pytest.mark.asyncio
     async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(self):

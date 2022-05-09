@@ -353,13 +353,15 @@ class OutageMonitor:
                     await self._notifications_repository.send_slack_message(slack_message)
 
                     self._logger.info(f'Appending triage note to outage ticket {ticket_id}...')
-                    triage_note = self._build_triage_note(device['device_info'])
+                    device_info = device['device_info']
+                    triage_note = self._build_triage_note(device_info)
                     await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
                 elif ticket_creation_status == 409:
                     self._logger.info(
                         f'Faulty device {serial_number} already has an outage ticket in progress (ID = {ticket_id}).'
                     )
-                    await self._append_triage_note_if_needed(ticket_id, device['device_info'])
+                    device_info = device['device_info']
+                    await self._append_triage_note_if_needed(ticket_id, device_info)
                 elif ticket_creation_status == 471:
                     self._logger.info(
                         f'Faulty device {serial_number} has a resolved outage ticket (ID = {ticket_id}). '
@@ -375,10 +377,13 @@ class OutageMonitor:
                         f'by Bruin. Appending reopen note to ticket...'
                     )
                     self._metrics_repository.increment_tasks_reopened(client=client_name, outage_types=outage_types)
-                    outage_causes = self._get_outage_causes_for_reopen_note(device)
-                    await self._bruin_repository.append_reopening_note_to_ticket(ticket_id,
-                                                                                 device['cached_info']['serial_number'],
-                                                                                 outage_causes)
+                    device_info = device['device_info']
+                    reopen_note = self._build_triage_note(device_info, is_reopen_note=True)
+                    await self._bruin_repository.append_note_to_ticket(
+                        ticket_id,
+                        reopen_note,
+                        service_numbers=[device_info['serialNumber']],
+                    )
                 elif ticket_creation_status == 473:
                     self._logger.info(
                         f'[outage-recheck] There is a resolve outage ticket for the same location of faulty device '
@@ -387,7 +392,8 @@ class OutageMonitor:
                         f'appended to it. Appending initial triage note for this service number...'
                     )
                     self._metrics_repository.increment_tasks_reopened(client=client_name, outage_types=outage_types)
-                    triage_note = self._build_triage_note(device['device_info'])
+                    device_info = device['device_info']
+                    triage_note = self._build_triage_note(device_info)
                     await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
 
         else:
@@ -465,30 +471,19 @@ class OutageMonitor:
                 f'Hawkeye outage ticket {ticket_id} reopening succeeded.')
             slack_message = f'Hawkeye outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}'
             await self._notifications_repository.send_slack_message(slack_message)
-            outage_causes = self._get_outage_causes_for_reopen_note(device)
-            await self._bruin_repository.append_reopening_note_to_ticket(ticket_id,
-                                                                         device['cached_info']['serial_number'],
-                                                                         outage_causes)
+            device_info = device['device_info']
+            reopen_note = self._build_triage_note(device_info, is_reopen_note=True)
+            await self._bruin_repository.append_note_to_ticket(
+                ticket_id,
+                reopen_note,
+                service_numbers=[device_info['serialNumber']],
+            )
             return True
         else:
             self._logger.error(f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.')
             return False
 
-    def _get_outage_causes_for_reopen_note(self, device: dict) -> str:
-        lines = [
-            'Outage cause(s):',
-        ]
-
-        node_to_node_status: str = 'DOWN' if device['device_info']['nodetonode']['status'] == 0 else 'UP'
-        real_service_status: str = 'DOWN' if device['device_info']['realservice']['status'] == 0 else 'UP'
-        if real_service_status == "DOWN":
-            lines.append(f'{Outages.REAL_SERVICE.value} status is {real_service_status}.')
-        if node_to_node_status == "DOWN":
-            lines.append(f'{Outages.NODE_TO_NODE.value} status is {node_to_node_status}.')
-
-        return os.linesep.join(lines)
-
-    def _build_triage_note(self, device_info: dict) -> str:
+    def _build_triage_note(self, device_info: dict, is_reopen_note: bool = False) -> str:
         tz_object = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(utc).astimezone(tz_object)
 
@@ -503,9 +498,10 @@ class OutageMonitor:
         if real_service_last_update != 'never':
             real_service_last_update = str(parse(real_service_last_update).astimezone(tz_object))
 
-        triage_note = os.linesep.join([
+        scope_watermark = "Re-opening task" if is_reopen_note else "Triage (Ixia)"
+        scope_note = os.linesep.join([
             "#*MetTel's IPA*#",
-            "Triage (Ixia)",
+            f"{scope_watermark}",
             "",
             "Hawkeye Instance: https://ixia.metconnect.net/",
             "Links: [Dashboard|https://ixia.metconnect.net/ixrr_main.php?type=ProbesManagement] - "
@@ -523,7 +519,7 @@ class OutageMonitor:
             "",
             f"TimeStamp: {str(current_datetime)}",
         ])
-        return triage_note
+        return scope_note
 
     def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str) -> bool:
         current_datetime = datetime.now(utc)

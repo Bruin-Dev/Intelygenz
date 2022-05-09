@@ -1,7 +1,10 @@
 import os
 from datetime import datetime
-from shortuuid import uuid
+
+from dateutil.parser import parse
 from pytz import timezone
+from pytz import utc
+from shortuuid import uuid
 
 from application.repositories import nats_error_response
 
@@ -388,14 +391,3 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
-
-    async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, affecting_causes: str):
-        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
-        reopening_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f'Re-opening detail for serial: {service_number}.',
-            f'{affecting_causes}',
-            f'TimeStamp: {current_datetime_tz_aware}',
-        ])
-
-        return await self.append_note_to_ticket(ticket_id, reopening_note, service_numbers=[service_number])
