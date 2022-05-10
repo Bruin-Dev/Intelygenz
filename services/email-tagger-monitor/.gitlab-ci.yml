@@ -18,20 +18,20 @@ email-tagger-monitor-linter:
 # =================================================
 # Unit tests jobs for email-tagger-monitor module
 # =================================================
-email-tagger-monitor-test:
-  variables:
-    MODULE: email-tagger-monitor
-  rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
-      changes:
-        - services/email-tagger-monitor/src/application/**/*
-        - services/email-tagger-monitor/src/config/**/*
-        - services/email-tagger-monitor/src/app.py
-        - services/email-tagger-monitor/Dockerfile
-        - services/email-tagger-monitor/requirements.txt
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python
-  needs: ["email-tagger-monitor-linter"]
+#email-tagger-monitor-test:
+#  variables:
+#    MODULE: email-tagger-monitor
+#  rules:
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+#      changes:
+#        - services/email-tagger-monitor/src/application/**/*
+#        - services/email-tagger-monitor/src/config/**/*
+#        - services/email-tagger-monitor/src/app.py
+#        - services/email-tagger-monitor/Dockerfile
+#        - services/email-tagger-monitor/requirements.txt
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+#  extends: .unittest_module_python
+#  needs: ["email-tagger-monitor-linter"]
 
 # ================================================
 # Images builds jobs for email-tagger-monitor module
