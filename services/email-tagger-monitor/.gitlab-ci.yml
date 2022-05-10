@@ -52,6 +52,6 @@ email-tagger-monitor-build:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
-    - job: email-tagger-monitor-test
+    #    - job: email-tagger-monitor-test
     - job: semantic-release
       optional: true
