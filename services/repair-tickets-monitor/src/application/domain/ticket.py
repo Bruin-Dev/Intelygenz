@@ -1,0 +1,40 @@
+from enum import Enum
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Ticket:
+    id: int
+    site_id: int = None
+    status: 'TicketStatus' = None
+    call_type: str = None
+    category: str = None
+
+    # We will keep this here for now but it may need to be refactored somewhere else
+    # as "active ticket" may or may not be an ubiquitous term.
+    def is_active(self):
+        return self.status in ACTIVE_TICKET_STATUS
+
+    # We will keep this here for now but it may need to be refactored somewhere else
+    # as "repair ticket" may or may not be an ubiquitous term.
+    def is_repair(self):
+        return self.category in [category for category in RepairCategory]
+
+
+class RepairCategory(str, Enum):
+    SERVICE_AFFECTING = "VAS"
+    SERVICE_OUTAGE = "VOO"
+
+
+class TicketStatus(str, Enum):
+    CLOSED = "Closed"
+    NEW = "New"
+    RESOLVED = "Resolved"
+    DRAFT = "Draft"
+    IN_PROGRESS = "InProgress"
+    IN_REVIEW = "InReview"
+    UNKNOWN = None
+
+
+ACTIVE_TICKET_STATUS = [TicketStatus.NEW.value, TicketStatus.IN_PROGRESS.value]
