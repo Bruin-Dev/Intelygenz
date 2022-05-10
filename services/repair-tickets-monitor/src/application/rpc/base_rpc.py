@@ -1,5 +1,5 @@
 from logging import Logger, LoggerAdapter
-from typing import Any, Dict
+from typing import Any
 
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
@@ -49,7 +49,7 @@ class RpcResponse(BaseModel):
     Data structure that represents an rpc response.
     """
     status: int
-    body: Dict[str, Any] = None
+    body: Any = None
 
     def is_ok(self) -> bool:
         return self.status == OK_STATUS

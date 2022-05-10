@@ -24,7 +24,7 @@ class TestRpc:
     async def responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
         # given
         status = hash("any_status")
-        body = {"any": "body"}
+        body = "any_body"
 
         rpc = make_rpc()
         rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": status, "body": body})
@@ -93,11 +93,11 @@ class TestRpcResponse:
 class TestRpcLogger:
     def messages_are_properly_formatted_test(self, make_rpc_logger):
         kwargs = Mock()
-        rpc_logger = make_rpc_logger(request_id="a_request_id")
+        rpc_logger = make_rpc_logger(request_id="any_request_id")
 
-        subject_message, subject_kwargs = rpc_logger.process("a_message", kwargs)
+        subject_message, subject_kwargs = rpc_logger.process("any_message", kwargs)
 
-        assert subject_message == "[request_id=a_request_id] a_message"
+        assert subject_message == "[request_id=any_request_id] any_message"
 
 
 @fixture
