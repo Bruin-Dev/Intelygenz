@@ -8,7 +8,6 @@ from datetime import timedelta
 from ipaddress import ip_address
 from time import perf_counter
 from typing import Callable
-from typing import Coroutine
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -519,16 +518,16 @@ class OutageMonitor:
             if working_environment == 'production':
                 for edge in edges_still_down:
                     cached_edge = edge['cached_info']
-                    edge_full_id = cached_edge['edge']
                     edge_status = edge['status']
                     serial_number = edge['cached_info']['serial_number']
+                    target_severity = self._get_target_severity(edge_status)
                     self._logger.info(
                         f'[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...'
                     )
 
-                    bruin_client_id = edge['cached_info']['bruin_client_info']['client_id']
+                    client_id = edge['cached_info']['bruin_client_info']['client_id']
                     ticket_creation_response = await self._bruin_repository.create_outage_ticket(
-                        bruin_client_id, serial_number
+                        client_id, serial_number
                     )
                     ticket_creation_response_body = ticket_creation_response['body']
                     ticket_creation_response_status = ticket_creation_response['status']
@@ -549,6 +548,7 @@ class OutageMonitor:
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
+                            target_severity=target_severity,
                             check_ticket_tasks=False,
                         )
 
@@ -581,6 +581,7 @@ class OutageMonitor:
                         change_severity_result = await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
+                            target_severity=target_severity,
                             check_ticket_tasks=True,
                         )
 
@@ -613,6 +614,7 @@ class OutageMonitor:
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
+                            target_severity=target_severity,
                             check_ticket_tasks=True,
                         )
 
@@ -648,6 +650,7 @@ class OutageMonitor:
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
+                            target_severity=target_severity,
                             check_ticket_tasks=True,
                         )
 
@@ -682,6 +685,7 @@ class OutageMonitor:
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
+                            target_severity=target_severity,
                             check_ticket_tasks=False,
                         )
 
@@ -1135,15 +1139,17 @@ class OutageMonitor:
 
         return seconds_elapsed_since_creation >= max_seconds_since_creation
 
-    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, *,
+    def _get_target_severity(self, edge_status: dict):
+        if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
+            return self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        else:
+            return self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']
+
+    async def _change_ticket_severity(self, ticket_id: int, edge_status: dict, target_severity: int, *,
                                       check_ticket_tasks: bool) -> ChangeTicketSeverityStatus:
         self._logger.info(f'Attempting to change severity level of ticket {ticket_id}...')
 
         serial_number = edge_status['edgeSerialNumber']
-
-        change_severity_task: Coroutine = None
-        target_severity_level = None
-        change_severity_status: ChangeTicketSeverityStatus = None
 
         if self._outage_repository.is_faulty_edge(edge_status['edgeState']):
             self._logger.info(
@@ -1151,7 +1157,6 @@ class OutageMonitor:
                 f'is that edge {serial_number} is offline.'
             )
             change_severity_task = self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
-            target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
         else:
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
@@ -1178,7 +1183,6 @@ class OutageMonitor:
             change_severity_task = self._bruin_repository.change_ticket_severity_for_disconnected_links(
                 ticket_id, disconnected_interfaces
             )
-            target_severity_level = self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']
 
         get_ticket_response = await self._bruin_repository.get_ticket(ticket_id)
         if not get_ticket_response['status'] in range(200, 300):
@@ -1186,9 +1190,9 @@ class OutageMonitor:
             return ChangeTicketSeverityStatus.NOT_CHANGED
 
         ticket_info = get_ticket_response['body']
-        if self._is_ticket_already_in_severity_level(ticket_info, target_severity_level):
+        if self._is_ticket_already_in_severity_level(ticket_info, target_severity):
             self._logger.info(
-                f'Ticket {ticket_id} is already in severity level {target_severity_level}, so there is no need '
+                f'Ticket {ticket_id} is already in severity level {target_severity}, so there is no need '
                 'to change it.'
             )
             change_severity_task.close()
@@ -1198,12 +1202,12 @@ class OutageMonitor:
         if result['status'] not in range(200, 300):
             return ChangeTicketSeverityStatus.NOT_CHANGED
 
-        if target_severity_level == self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']:
+        if target_severity == self._config.MONITOR_CONFIG['severity_by_outage_type']['link_down']:
             change_severity_status = ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
         else:
             change_severity_status = ChangeTicketSeverityStatus.CHANGED_TO_EDGE_DOWN_SEVERITY
 
-        self._logger.info(f'Finished changing severity level of ticket {ticket_id} to {target_severity_level}!')
+        self._logger.info(f'Finished changing severity level of ticket {ticket_id} to {target_severity}!')
         return change_severity_status
 
     def _has_ticket_multiple_unresolved_tasks(self, ticket_tasks: list) -> bool:
