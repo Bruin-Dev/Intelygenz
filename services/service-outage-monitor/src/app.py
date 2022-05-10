@@ -18,7 +18,6 @@ from application.repositories.ha_repository import HaRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.outage_monitoring_metrics_repository import OutageMonitoringMetricsRepository
 from application.repositories.outage_repository import OutageRepository
-from application.repositories.triage_metrics_repository import TriageMetricsRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
@@ -52,7 +51,6 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         # METRICS
-        self._triage_metrics_repository = TriageMetricsRepository()
         self._outage_monitoring_metrics_repository = OutageMonitoringMetricsRepository()
 
         # REPOSITORIES
@@ -76,12 +74,9 @@ class Container:
 
         # ACTIONS
         if config.ENABLE_TRIAGE_MONITORING:
-            self._triage = Triage(self._event_bus, self._logger, self._scheduler,
-                                  config, self._outage_repository,
-                                  self._customer_cache_repository, self._bruin_repository,
-                                  self._velocloud_repository, self._notifications_repository,
-                                  self._triage_repository, self._triage_metrics_repository,
-                                  self._ha_repository)
+            self._triage = Triage(self._event_bus, self._logger, self._scheduler, config, self._outage_repository,
+                                  self._customer_cache_repository, self._bruin_repository, self._velocloud_repository,
+                                  self._notifications_repository, self._triage_repository, self._ha_repository)
         else:
             self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
                                                  config, self._outage_repository, self._bruin_repository,

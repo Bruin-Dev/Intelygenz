@@ -20,7 +20,7 @@ class Triage:
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, outage_repository,
                  customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
-                 triage_repository, metrics_repository, ha_repository):
+                 triage_repository, ha_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -31,7 +31,6 @@ class Triage:
         self._velocloud_repository = velocloud_repository
         self._notifications_repository = notifications_repository
         self._triage_repository = triage_repository
-        self._metrics_repository = metrics_repository
         self._ha_repository = ha_repository
         self._edges_status_by_serial = {}
         self._cached_info_by_serial = {}
@@ -119,7 +118,6 @@ class Triage:
         open_tickets_response_status = open_tickets_response['status']
 
         if open_tickets_response_status not in range(200, 300):
-            self._metrics_repository.increment_open_tickets_errors()
             return []
 
         filtered_ticket_list = [ticket for ticket in open_tickets_response_body
@@ -299,7 +297,6 @@ class Triage:
             await self._append_new_triage_notes_based_on_recent_events(detail, newest_triage_note_timestamp,
                                                                        edge_data['edge'])
             self._logger.info(f'Events appended to detail {ticket_detail_id} of ticket {ticket_id}!')
-            self._metrics_repository.increment_tickets_with_triage_processed()
 
             self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
 
@@ -359,14 +356,11 @@ class Triage:
                 response = await self._bruin_repository.append_note_to_ticket(
                     ticket_id, triage_note_contents, service_numbers=[service_number]
                 )
-                if response['status'] == 503:
-                    self._metrics_repository.increment_note_append_errors()
 
                 if response['status'] not in range(200, 300):
                     continue
 
                 self._logger.info(f'Triage appended to detail {ticket_detail_id} of ticket {ticket_id}!')
-                self._metrics_repository.increment_notes_appended()
             else:
                 self._logger.info(
                     f'Not going to append a new triage note to detail {ticket_detail_id} of ticket '
@@ -458,12 +452,7 @@ class Triage:
                 ticket_note = self._triage_repository.build_triage_note(
                     edge_data, edge_status, recent_events, outage_type
                 )
-                note_appended = await self._bruin_repository.append_triage_note(detail, ticket_note)
-
-                if note_appended == 200:
-                    self._metrics_repository.increment_tickets_without_triage_processed()
-                if note_appended == 503:
-                    self._metrics_repository.increment_note_append_errors()
+                await self._bruin_repository.append_triage_note(detail, ticket_note)
 
             self._logger.info(f'Finished processing detail {ticket_detail_id} of ticket {ticket_id}!')
 
