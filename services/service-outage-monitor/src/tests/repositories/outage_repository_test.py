@@ -1120,7 +1120,7 @@ class TestOutageRepository:
         }
         ha_repository.is_ha_enabled = Mock(return_value=True)
         result = outage_repository.is_ha_link_down_outage(edge_status)
-        assert result is True
+        assert result is False
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1141,7 +1141,7 @@ class TestOutageRepository:
         }
         ha_repository.is_ha_enabled = Mock(return_value=True)
         result = outage_repository.is_ha_link_down_outage(edge_status)
-        assert result is True
+        assert result is False
 
     def is_HA_soft_down_outage_test(self):
         logger = Mock()
