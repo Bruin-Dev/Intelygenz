@@ -48,6 +48,7 @@ def make_append_note_to_ticket_rpc() -> Callable[..., AppendNoteToTicketRpc]:
     ):
         append_note_to_ticket_rpc = AppendNoteToTicketRpc(event_bus, logger, timeout)
         append_note_to_ticket_rpc.start = Mock(return_value=("a_request_id", Mock(RpcLogger)))
+        append_note_to_ticket_rpc.send = CoroutineMock()
         return append_note_to_ticket_rpc
 
     return builder

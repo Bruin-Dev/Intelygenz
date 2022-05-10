@@ -1,11 +1,11 @@
-import pytest
-from asynctest import create_autospec
-from igz.packages.eventbus.eventbus import EventBus
-from tests.fixtures._helpers import wrap_all_methods
 from unittest.mock import Mock
 
-from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
+import pytest
+from asynctest import create_autospec, CoroutineMock
+from igz.packages.eventbus.eventbus import EventBus
+
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
+from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
@@ -14,6 +14,7 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from application.repositories.storage_repository import StorageRepository
 from config import testconfig as config
+from tests.fixtures._helpers import wrap_all_methods
 
 
 @pytest.fixture(scope='function')
@@ -95,12 +96,12 @@ def repair_ticket_kre_repository(event_bus, logger, notifications_repository):
 
 @pytest.fixture(scope='function')
 def new_created_tickets_feedback(
-        event_bus,
-        logger,
-        scheduler,
-        new_created_tickets_repository,
-        repair_ticket_kre_repository,
-        bruin_repository
+    event_bus,
+    logger,
+    scheduler,
+    new_created_tickets_repository,
+    repair_ticket_kre_repository,
+    bruin_repository
 ):
     return NewCreatedTicketsFeedback(
         event_bus,
@@ -115,12 +116,12 @@ def new_created_tickets_feedback(
 
 @pytest.fixture(scope='function')
 def repair_tickets_monitor(
-        event_bus,
-        logger,
-        scheduler,
-        bruin_repository_real,
-        new_tagged_emails_repository,
-        repair_ticket_kre_repository
+    event_bus,
+    logger,
+    scheduler,
+    bruin_repository_real,
+    new_tagged_emails_repository,
+    repair_ticket_kre_repository
 ):
     return RepairTicketsMonitor(
         event_bus,
@@ -130,16 +131,17 @@ def repair_tickets_monitor(
         bruin_repository_real,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
+        CoroutineMock(),
     )
 
 
 @pytest.fixture(scope='function')
 def new_closed_tickets_feedback(
-        event_bus,
-        logger,
-        scheduler,
-        repair_ticket_kre_repository,
-        bruin_repository
+    event_bus,
+    logger,
+    scheduler,
+    repair_ticket_kre_repository,
+    bruin_repository
 ):
     return NewClosedTicketsFeedback(
         event_bus,

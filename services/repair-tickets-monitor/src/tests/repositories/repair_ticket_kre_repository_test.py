@@ -5,8 +5,7 @@ import pytest
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
-from application.domain.repair_email_output import RepairEmailOutput
-from application.domain.ticket_output import TicketOutput
+from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from config import testconfig as config
 

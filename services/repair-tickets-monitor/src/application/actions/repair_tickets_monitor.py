@@ -10,37 +10,12 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
 
-from application.domain.create_tickets_output import CreateTicketsOutput
-from application.domain.potential_tickets_output import PotentialTicketsOutput
-from application.domain.repair_email_output import RepairEmailOutput
-from application.domain.ticket_output import TicketOutput
+from application.domain.repair_email_output import RepairEmailOutput, TicketOutput, \
+    CreateTicketsOutput, PotentialTicketsOutput
+from application.domain.ticket import Ticket, TicketStatus
 from application.exceptions import ResponseException
-
-ACTIVE_TICKET_STATUS = ["New", "InProgress"]
-REPAIR_CATEGORIES = [
-    "VAS",
-    "VOO",
-    "VVV",
-    "066",
-    "888",
-    "018",
-    "125",
-    "059",
-    "045",
-    "081",
-    "040",
-    "016",
-    "102",
-    "058",
-    "029",
-    "082",
-    "024",
-    "013",
-    "014",
-    "008",
-    "017",
-    "019",
-]
+from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
+from application.rpc.base_rpc import RpcError
 
 
 def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str, str]) -> List[TicketOutput]:
@@ -69,6 +44,7 @@ class RepairTicketsMonitor:
         bruin_repository,
         new_tagged_emails_repository,
         repair_tickets_kre_repository,
+        append_note_to_ticket_rpc: AppendNoteToTicketRpc,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -77,6 +53,7 @@ class RepairTicketsMonitor:
         self._bruin_repository = bruin_repository
         self._new_tagged_emails_repository = new_tagged_emails_repository
         self._repair_tickets_kre_repository = repair_tickets_kre_repository
+        self.append_note_to_ticket_rpc = append_note_to_ticket_rpc
 
         self._semaphore = asyncio.BoundedSemaphore(
             self._config.MONITOR_CONFIG["semaphores"]["repair_tickets_concurrent"]
@@ -208,31 +185,40 @@ class RepairTicketsMonitor:
 
         return service_number_site_id_map_with_cancellations, service_number_site_id_map_without_cancellations
 
-    async def _get_validated_ticket_numbers(
+    async def _get_tickets(
         self,
+        email_id: str,
         tickets_id: List[int]
-    ) -> Tuple[List[TicketOutput], List[TicketOutput]]:
+    ) -> List[Ticket]:
         """
         Return the tickets that already exist in Bruin
         """
-        active_tickets = []
         validated_tickets = []
 
         for ticket_id in tickets_id:
             bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             if bruin_bridge_response["status"] == 200:
-                ticket_output = TicketOutput(
-                    ticket_id=bruin_bridge_response["body"]['ticket_id'],
-                    ticket_status=bruin_bridge_response["body"]["ticket_status"],
+                try:
+                    ticket_status = TicketStatus(bruin_bridge_response["body"]["ticket_status"])
+                except ValueError as e:
+                    ticket_status = TicketStatus.UNKNOWN
+                    self._logger.warning(
+                        "email_id=%s Unknown ticket status, response=%s, error=%s",
+                        email_id,
+                        bruin_bridge_response,
+                        e
+                    )
+
+                ticket = Ticket(
+                    id=int(bruin_bridge_response["body"]['ticket_id']),
+                    status=ticket_status,
                     call_type=bruin_bridge_response["body"]["call_type"],
                     category=bruin_bridge_response["body"]["category"]
                 )
 
-                validated_tickets.append(ticket_output)
-                if ticket_output.ticket_status in ACTIVE_TICKET_STATUS and ticket_output.category in REPAIR_CATEGORIES:
-                    active_tickets.append(ticket_output)
+                validated_tickets.append(ticket)
 
-        return validated_tickets, active_tickets
+        return validated_tickets
 
     async def _process_repair_email(self, email_tag_info: Dict[str, Any]):
         """
@@ -245,7 +231,7 @@ class RepairTicketsMonitor:
         email_data["tag"] = email_tag_info
         client_id = email_data["client_id"]
 
-        output = RepairEmailOutput(email_id=email_id)
+        output = RepairEmailOutput(email_id=int(email_id))
         async with self._semaphore:
             # Ask for potential services numbers to KRE
             inference_data = await self._get_inference(email_data, email_tag_info)
@@ -269,20 +255,26 @@ class RepairTicketsMonitor:
                 potential_ticket_numbers,
             )
 
-            validated_tickets, active_tickets = (
-                await self._get_validated_ticket_numbers(potential_ticket_numbers)
-                if potential_ticket_numbers
-                else (defaultdict(list), [])
-            )
+            output.validated_tickets = await self._get_tickets(email_id, potential_ticket_numbers)
+            operable_tickets = [
+                ticket
+                for ticket in output.validated_tickets if
+                ticket.is_active() and ticket.is_repair()
+            ]
 
-            output.validated_ticket_numbers = [ticket.ticket_id for ticket in validated_tickets]
+            for ticket in operable_tickets:
+                ticket_updated = await self._update_ticket(ticket, email_id, email_data)
+                if ticket_updated:
+                    output.tickets_updated.append(TicketOutput(ticket_id=ticket.id, reason="update_with_ticket_found"))
 
             try:
                 # Check if the service number is valid against Bruin API
                 service_number_site_map = await self._get_valid_service_numbers_site_map(
                     client_id, potential_service_numbers
                 )
+                output.service_numbers_sites_map = service_number_site_map
                 self._logger.info("email_id=%s service_numbers_site_map=%s", email_id, service_number_site_map)
+
                 existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
                 self._logger.info("email_id=%s existing_tickets=%s", email_id, existing_tickets)
             except ResponseException as e:
@@ -344,7 +336,7 @@ class RepairTicketsMonitor:
 
             output.tickets_cannot_be_created.extend(feedback_not_created_due_cancellations)
 
-            if not service_number_site_map:
+            if not service_number_site_map and not output.tickets_updated:
                 output.tickets_cannot_be_created.append(
                     TicketOutput(reason="No validated service numbers")
                 )
@@ -515,9 +507,10 @@ class RepairTicketsMonitor:
                 )
 
                 updated_ticket = TicketOutput(
-                    ticket_id=str(ticket_id),
+                    ticket_id=ticket_id,
                     site_id=str(site_id),
                     service_numbers=service_numbers,
+                    reason="update_with_asset_found"
                 )
                 create_tickets_output.tickets_updated.append(updated_ticket)
                 ticket_updated_flag = True
@@ -572,7 +565,7 @@ class RepairTicketsMonitor:
                     TicketOutput(
                         site_id=ticket["site_id"],
                         service_numbers=ticket["service_numbers"],
-                        ticket_id=str(ticket["ticket_id"]),
+                        ticket_id=ticket["ticket_id"],
                     )
                 )
                 site_ids.remove(ticket["site_id"])
@@ -650,3 +643,26 @@ class RepairTicketsMonitor:
                 rta_model1_is_below_threshold,
             ]
         )
+
+    async def _update_ticket(self, ticket: Ticket, email_id: int, email_data: Dict[str, Any]) -> bool:
+        note = self._compose_bec_note_text(
+            subject=email_data.get("subject"),
+            from_address=email_data.get("from_address"),
+            body=email_data.get("body"),
+            date=email_data.get("date"),
+            is_update_note=True
+        )
+
+        try:
+            note_appended = await self.append_note_to_ticket_rpc(ticket.id, note)
+            if not note_appended:
+                return False
+        except RpcError as e:
+            # TODO: send notification to slack
+            self._logger.error("email_id=%s append_note_to_ticket_rpc(%s, %s) => %s", ticket.id, note, e)
+
+        response = await self._bruin_repository.link_email_to_ticket(ticket.id, email_id)
+        if response.get("status") != 200:
+            return False
+        else:
+            return True
