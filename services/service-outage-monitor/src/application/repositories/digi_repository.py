@@ -46,16 +46,19 @@ class DiGiRepository:
 
         return response
 
-    def get_digi_links(self, logical_id_list):
+    @staticmethod
+    def is_digi_link(link):
         digi_headers = ['00:04:2d', '00:27:04']
-        digi_links = []
         for header in digi_headers:
-            digi_link = [link for link in logical_id_list if header in link["logical_id"]]
-            digi_links = digi_links + digi_link
+            if header in link['logical_id']:
+                return True
+        return False
 
-        return digi_links
+    def get_digi_links(self, logical_id_list):
+        return [link for link in logical_id_list if self.is_digi_link(link)]
 
-    def get_interface_name_from_digi_note(self, digi_note):
+    @staticmethod
+    def get_interface_name_from_digi_note(digi_note):
         if digi_note and digi_note.get('noteValue'):
             interface_name = None
             lines = digi_note.get('noteValue').splitlines()

@@ -139,6 +139,20 @@ class TestDiGiRepository:
         logger.error.assert_called_once()
         assert result == return_body
 
+    def is_digi_link_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        link_1 = {'interface_name': 'GE1', 'logical_id': '00:27:04:122'}
+        link_2 = {'interface_name': 'GE2', 'logical_id': '00:00:00:000'}
+
+        digi_repository = DiGiRepository(event_bus, logger, config, notifications_repository)
+
+        assert digi_repository.is_digi_link(link_1) is True
+        assert digi_repository.is_digi_link(link_2) is False
+
     def get_digi_links_test(self):
         event_bus = Mock()
         logger = Mock()
@@ -149,7 +163,7 @@ class TestDiGiRepository:
                            {'interface_name': 'GE1', 'logical_id': '00:27:04:123'},
                            {'interface_name': 'GE3', 'logical_id': '00:27:04:122'},
                            {'interface_name': 'GE2', 'logical_id': '00:04:2d:123'}]
-        expected_digi_list = [logical_id_list[3], logical_id_list[1], logical_id_list[2]]
+        expected_digi_list = [logical_id_list[1], logical_id_list[2], logical_id_list[3]]
 
         digi_repository = DiGiRepository(event_bus, logger, config, notifications_repository)
 
