@@ -660,6 +660,7 @@ class RepairTicketsMonitor:
         except RpcError as e:
             # TODO: send notification to slack
             self._logger.error("email_id=%s append_note_to_ticket_rpc(%s, %s) => %s", ticket.id, note, e)
+            return False
 
         response = await self._bruin_repository.link_email_to_ticket(ticket.id, email_id)
         if response.get("status") != 200:

@@ -1,20 +1,27 @@
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from dataclasses import dataclass, field
 
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.domain.ticket import Ticket, TicketStatus
+from application.rpc.base_rpc import RpcError
 
 
 @dataclass
 class RepairTicketsMonitorScenario:
     # Existing Bruin assets and their site
     assets: Dict[str, str] = field(default_factory=dict)
-    # Bruin POST api/Ticker/repair responses
-    post_responses: Dict[str, 'PostResponse'] = field(default_factory=dict)
 
     # Existing Bruin tickets
     tickets: List['Ticket'] = field(default_factory=list)
+
+    # Integration behavior
+    # Bruin POST api/Ticker/repair responses
+    post_responses: Dict[str, 'PostResponse'] = field(default_factory=dict)
+    # append_note_to_ticket_rpc response
+    append_note_to_ticket_effect: Any = lambda x, y: True
+    # link_email_to_ticket response
+    link_email_to_ticket_response: Any = field(default_factory=lambda: {"status": 200})
 
     # Expected behavior
     expected_output: RepairEmailOutput = None
@@ -192,9 +199,7 @@ def make_repair_tickets_monitor_scenarios():
         email_linked_to=[hash("ticket_1")],
         expected_output=RepairEmailOutput(
             email_id=0,
-            validated_tickets=[
-                Ticket(hash("ticket_1"), status=TicketStatus.NEW, call_type="REP", category="VOO"),
-            ],
+            validated_tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, call_type="REP", category="VOO")],
             tickets_updated=[TicketOutput(ticket_id=hash("ticket_1"), reason="update_with_ticket_found")]
         )
     ))
@@ -203,12 +208,8 @@ def make_repair_tickets_monitor_scenarios():
         email_processed=False,
         expected_output=RepairEmailOutput(
             email_id=0,
-            validated_tickets=[
-                Ticket(hash("ticket_1"), status=TicketStatus.DRAFT),
-            ],
-            tickets_cannot_be_created=[TicketOutput(
-                reason="No validated service numbers"
-            )]
+            validated_tickets=[Ticket(hash("ticket_1"), status=TicketStatus.DRAFT)],
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
         )
     ))
     multiple_operable_tickets = (RepairTicketsMonitorScenario(
@@ -224,13 +225,10 @@ def make_repair_tickets_monitor_scenarios():
                 Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO"),
                 Ticket(hash("ticket_2"), status=TicketStatus.IN_PROGRESS, category="VAS")
             ],
-            tickets_updated=[TicketOutput(
-                ticket_id=hash("ticket_1"),
-                reason="update_with_ticket_found"
-            ), TicketOutput(
-                ticket_id=hash("ticket_2"),
-                reason="update_with_ticket_found"
-            )]
+            tickets_updated=[
+                TicketOutput(ticket_id=hash("ticket_1"), reason="update_with_ticket_found"),
+                TicketOutput(ticket_id=hash("ticket_2"), reason="update_with_ticket_found")
+            ]
         )
     ))
     multiple_inoperable_tickets = (RepairTicketsMonitorScenario(
@@ -261,10 +259,41 @@ def make_repair_tickets_monitor_scenarios():
                 Ticket(hash("ticket_1"), status=TicketStatus.NEW, call_type="REP", category="VOO"),
                 Ticket(hash("ticket_2"), status=TicketStatus.DRAFT)
             ],
-            tickets_updated=[TicketOutput(
-                ticket_id=hash("ticket_1"),
-                reason="update_with_ticket_found"
-            )],
+            tickets_updated=[TicketOutput(ticket_id=hash("ticket_1"), reason="update_with_ticket_found")],
+        )
+    ))
+    append_global_note_not_ok = (RepairTicketsMonitorScenario(
+        tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO")],
+        email_processed=False,
+        global_note_added_to=[hash("ticket_1")],
+        append_note_to_ticket_effect=lambda x, y: False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            validated_tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO")],
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
+        )
+    ))
+    append_global_note_error = (RepairTicketsMonitorScenario(
+        tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO")],
+        email_processed=False,
+        global_note_added_to=[hash("ticket_1")],
+        append_note_to_ticket_effect=RpcError,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            validated_tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO")],
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
+        )
+    ))
+    link_email_not_ok = (RepairTicketsMonitorScenario(
+        tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO")],
+        email_processed=False,
+        link_email_to_ticket_response={"status": 400},
+        global_note_added_to=[hash("ticket_1")],
+        email_linked_to=[hash("ticket_1")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            validated_tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, category="VOO")],
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
         )
     ))
 
@@ -281,4 +310,7 @@ def make_repair_tickets_monitor_scenarios():
         "multiple_operable_tickets": multiple_operable_tickets,
         "multiple_inoperable_tickets": multiple_inoperable_tickets,
         "multiple_mixed_operability_tickets": multiple_mixed_operability_tickets,
+        "append_global_note_not_ok": append_global_note_not_ok,
+        "append_global_note_error": append_global_note_error,
+        "link_email_not_ok": link_email_not_ok,
     }
