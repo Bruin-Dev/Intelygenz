@@ -86,8 +86,8 @@ class NewEmailsMonitor:
                 response = await self._bruin_repository.post_email_tag(email_id, tag["id"])
 
                 # NOTE: Status 409 means "Tag already present", and the email is treated as complete
-                if not (response["status"] in range(200, 300) or response["status"] == 409):
-                    return
+                # if not (response["status"] in range(200, 300) or response["status"] == 409):
+                #     return
 
             # Remove from email tagger namespace
             self._new_emails_repository.mark_complete(email_id)
