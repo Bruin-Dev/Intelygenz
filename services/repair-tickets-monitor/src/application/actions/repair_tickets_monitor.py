@@ -185,6 +185,7 @@ class RepairTicketsMonitor:
 
         return service_number_site_id_map_with_cancellations, service_number_site_id_map_without_cancellations
 
+    # To be refactored in an RPC
     async def _get_tickets(
         self,
         email_id: str,
@@ -199,7 +200,10 @@ class RepairTicketsMonitor:
             bruin_bridge_response = await self._bruin_repository.get_single_ticket_basic_info(ticket_id)
             if bruin_bridge_response["status"] == 200:
                 try:
-                    ticket_status = TicketStatus(bruin_bridge_response["body"]["ticket_status"])
+                    ticket_status_raw = str(bruin_bridge_response["body"]["ticket_status"])
+                    # Remove the dash for In-Progress and In-Review status
+                    ticket_status_raw.replace("-", "")
+                    ticket_status = TicketStatus(ticket_status_raw)
                 except ValueError as e:
                     ticket_status = TicketStatus.UNKNOWN
                     self._logger.warning(
