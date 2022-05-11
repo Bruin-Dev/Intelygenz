@@ -202,7 +202,7 @@ class RepairTicketsMonitor:
                 try:
                     ticket_status_raw = str(bruin_bridge_response["body"]["ticket_status"])
                     # Remove the dash for In-Progress and In-Review status
-                    ticket_status_raw.replace("-", "")
+                    ticket_status_raw = ticket_status_raw.replace("-", "")
                     ticket_status = TicketStatus(ticket_status_raw)
                 except ValueError as e:
                     ticket_status = TicketStatus.UNKNOWN

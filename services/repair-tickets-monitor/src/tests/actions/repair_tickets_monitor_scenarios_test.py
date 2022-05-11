@@ -108,7 +108,7 @@ def mock_bruin_repository(bruin_repository, scenario: RepairTicketsMonitorScenar
                 "status": 200,
                 "body": {
                     "ticket_id": ticket.id,
-                    "ticket_status": ticket.status,
+                    "ticket_status": ticket.status.value,
                     "call_type": ticket.call_type,
                     "category": ticket.category,
                 }
