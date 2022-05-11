@@ -1114,7 +1114,7 @@ class OutageMonitor:
         return any(
             link
             for link in links
-            if self._is_link_label_black_listed_from_hnoc(link['displayName'].lower())
+            if link['displayName'] and self._is_link_label_black_listed_from_hnoc(link['displayName'].lower())
             if self._outage_repository.is_faulty_link(link['linkState'])
         )
 
