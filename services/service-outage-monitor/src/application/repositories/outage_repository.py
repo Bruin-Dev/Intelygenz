@@ -40,12 +40,8 @@ class OutageRepository:
         return [link for link in links if self.is_faulty_link(link['linkState'])]
 
     def find_disconnected_wired_links(self, edge_status, links_configuration):
-        return [
-            link
-            for link in edge_status['links']
-            if self._is_link_wired(link, links_configuration)
-            if self.is_faulty_link(link['linkState'])
-        ]
+        disconnected_links = self.find_disconnected_links(edge_status['links'])
+        return [link for link in disconnected_links if self._is_link_wired(link, links_configuration)]
 
     def is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
                                                 serial_number: str,
