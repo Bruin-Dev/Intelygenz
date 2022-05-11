@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"(\n\x03Tag\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"\xb8\x01\n\x05\x45mail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x14\n\x0c\x66rom_address\x18\x06 \x01(\t\x12\n\n\x02to\x18\x07 \x03(\t\x12\n\n\x02\x63\x63\x18\x08 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\t \x01(\t\x12\x1c\n\x03tag\x18\n \x01(\x0b\x32\x0f.entrypoint.Tag\"\x83\x01\n\x15PreprocessEmailFields\x12\x17\n\x0fsubject_no_html\x18\x01 \x01(\t\x12\x14\n\x0c\x62ody_no_html\x18\x02 \x01(\t\x12\x1e\n\x16subject_mlp_classifier\x18\x03 \x01(\t\x12\x1b\n\x13\x62ody_mlp_classifier\x18\x04 \x01(\t\"u\n\x15PreprocessEmailOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\"\xc0\x01\n\x1b\x45xtractServiceNumbersOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\x12 \n\x18potential_ticket_numbers\x18\x04 \x03(\t\"\xec\x01\n\x1f\x43lassifyOutageVsAffectingFields\x12\x17\n\x0fpredicted_class\x18\x01 \x01(\t\x12\'\n\x1fpredicted_class_voovas_vs_other\x18\x02 \x01(\t\x12\x33\n+predicted_class_voovas_vs_other_probability\x18\x03 \x01(\x02\x12\"\n\x1apredicted_class_voo_vs_vas\x18\x04 \x01(\t\x12.\n&predicted_class_voo_vs_vas_probability\x18\x05 \x01(\x02\"\x89\x02\n\x1f\x43lassifyOutageVsAffectingOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\x12\x43\n\x0e\x63lassification\x18\x04 \x01(\x0b\x32+.entrypoint.ClassifyOutageVsAffectingFields\x12 \n\x18potential_ticket_numbers\x18\x05 \x03(\t\"\xdb\x02\n\x13PrepareOutputFields\x12\x1e\n\x16tagger_threshold_value\x18\x01 \x01(\x02\x12!\n\x19tagger_is_below_threshold\x18\x02 \x01(\x08\x12\"\n\x1arta_model1_threshold_value\x18\x03 \x01(\x02\x12%\n\x1drta_model1_is_below_threshold\x18\x04 \x01(\x08\x12\"\n\x1arta_model2_threshold_value\x18\x05 \x01(\x02\x12%\n\x1drta_model2_is_below_threshold\x18\x06 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x07 \x01(\x08\x12\x17\n\x0f\x66iltered_reason\x18\x08 \x01(\t\x12\x19\n\x11in_validation_set\x18\t \x01(\x08\x12\"\n\x1avalidation_set_probability\x18\n \x01(\x02\"5\n\x11PredictionRequest\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\"\xb4\x01\n\x11OutputFilterFlags\x12!\n\x19tagger_is_below_threshold\x18\x01 \x01(\x08\x12%\n\x1drta_model1_is_below_threshold\x18\x02 \x01(\x08\x12%\n\x1drta_model2_is_below_threshold\x18\x03 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x04 \x01(\x08\x12\x19\n\x11in_validation_set\x18\x05 \x01(\x08\"\xa7\x01\n\x12PredictionResponse\x12!\n\x19potential_service_numbers\x18\x01 \x03(\t\x12\x17\n\x0fpredicted_class\x18\x02 \x01(\t\x12\x33\n\x0c\x66ilter_flags\x18\x03 \x01(\x0b\x32\x1d.entrypoint.OutputFilterFlags\x12 \n\x18potential_ticket_numbers\x18\x04 \x03(\t\"b\n\x06Ticket\x12\x0f\n\x07site_id\x18\x01 \x01(\t\x12\x17\n\x0fservice_numbers\x18\x02 \x03(\t\x12\x11\n\tticket_id\x18\x03 \x01(\t\x12\x1b\n\x13not_creation_reason\x18\x04 \x01(\t\"\xdb\x07\n\x12SaveOutputsRequest\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12]\n\x19service_numbers_sites_map\x18\x02 \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.ServiceNumbersSitesMapEntry\x12!\n\x19validated_service_numbers\x18\x03 \x03(\t\x12+\n\x0ftickets_created\x18\x04 \x03(\x0b\x32\x12.entrypoint.Ticket\x12+\n\x0ftickets_updated\x18\x05 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_created\x18\x06 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_updated\x18\x07 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x35\n\x19tickets_cannot_be_created\x18\t \x03(\x0b\x32\x12.entrypoint.Ticket\x12 \n\x18validated_ticket_numbers\x18\n \x03(\t\x12Y\n\x17\x62ruin_ticket_status_map\x18\x0b \x03(\x0b\x32\x38.entrypoint.SaveOutputsRequest.BruinTicketStatusMapEntry\x12^\n\x1a\x62ruin_ticket_call_type_map\x18\x0c \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.BruinTicketCallTypeMapEntry\x12]\n\x19\x62ruin_ticket_category_map\x18\r \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.BruinTicketCategoryMapEntry\x1a=\n\x1bServiceNumbersSitesMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x42ruinTicketStatusMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a=\n\x1b\x42ruinTicketCallTypeMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a=\n\x1b\x42ruinTicketCategoryMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"&\n\x13SaveOutputsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x9e\x02\n!SaveCreatedTicketsFeedbackRequest\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x10\n\x08\x65mail_id\x18\x02 \x01(\t\x12\x11\n\tparent_id\x18\x03 \x01(\t\x12\x11\n\tclient_id\x18\x04 \x01(\t\x12\x1c\n\x14real_service_numbers\x18\x05 \x03(\t\x12\x12\n\nreal_class\x18\x06 \x01(\t\x12L\n\x08site_map\x18\x07 \x03(\x0b\x32:.entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry\x1a.\n\x0cSiteMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"5\n\"SaveCreatedTicketsFeedbackResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"z\n SaveClosedTicketsFeedbackRequest\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x11\n\tclient_id\x18\x02 \x01(\t\x12\x15\n\rticket_status\x18\x03 \x01(\t\x12\x19\n\x11\x63\x61ncelled_reasons\x18\x04 \x03(\t\"4\n!SaveClosedTicketsFeedbackResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xab\x03\n\nEntrypoint\x12P\n\rGetPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveOutputs\x12\x1e.entrypoint.SaveOutputsRequest\x1a\x1f.entrypoint.SaveOutputsResponse\"\x00\x12}\n\x1aSaveCreatedTicketsFeedback\x12-.entrypoint.SaveCreatedTicketsFeedbackRequest\x1a..entrypoint.SaveCreatedTicketsFeedbackResponse\"\x00\x12z\n\x19SaveClosedTicketsFeedback\x12,.entrypoint.SaveClosedTicketsFeedbackRequest\x1a-.entrypoint.SaveClosedTicketsFeedbackResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x12public_input.proto\x12\nentrypoint\"(\n\x03Tag\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\"\xb8\x01\n\x05\x45mail\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12\x11\n\tparent_id\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x14\n\x0c\x66rom_address\x18\x06 \x01(\t\x12\n\n\x02to\x18\x07 \x03(\t\x12\n\n\x02\x63\x63\x18\x08 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\t \x01(\t\x12\x1c\n\x03tag\x18\n \x01(\x0b\x32\x0f.entrypoint.Tag\"\x83\x01\n\x15PreprocessEmailFields\x12\x17\n\x0fsubject_no_html\x18\x01 \x01(\t\x12\x14\n\x0c\x62ody_no_html\x18\x02 \x01(\t\x12\x1e\n\x16subject_mlp_classifier\x18\x03 \x01(\t\x12\x1b\n\x13\x62ody_mlp_classifier\x18\x04 \x01(\t\"u\n\x15PreprocessEmailOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\"\xc0\x01\n\x1b\x45xtractServiceNumbersOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\x12 \n\x18potential_ticket_numbers\x18\x04 \x03(\t\"\xec\x01\n\x1f\x43lassifyOutageVsAffectingFields\x12\x17\n\x0fpredicted_class\x18\x01 \x01(\t\x12\'\n\x1fpredicted_class_voovas_vs_other\x18\x02 \x01(\t\x12\x33\n+predicted_class_voovas_vs_other_probability\x18\x03 \x01(\x02\x12\"\n\x1apredicted_class_voo_vs_vas\x18\x04 \x01(\t\x12.\n&predicted_class_voo_vs_vas_probability\x18\x05 \x01(\x02\"\x89\x02\n\x1f\x43lassifyOutageVsAffectingOutput\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\x12:\n\x0fprocessed_email\x18\x02 \x01(\x0b\x32!.entrypoint.PreprocessEmailFields\x12!\n\x19potential_service_numbers\x18\x03 \x03(\t\x12\x43\n\x0e\x63lassification\x18\x04 \x01(\x0b\x32+.entrypoint.ClassifyOutageVsAffectingFields\x12 \n\x18potential_ticket_numbers\x18\x05 \x03(\t\"\xdb\x02\n\x13PrepareOutputFields\x12\x1e\n\x16tagger_threshold_value\x18\x01 \x01(\x02\x12!\n\x19tagger_is_below_threshold\x18\x02 \x01(\x08\x12\"\n\x1arta_model1_threshold_value\x18\x03 \x01(\x02\x12%\n\x1drta_model1_is_below_threshold\x18\x04 \x01(\x08\x12\"\n\x1arta_model2_threshold_value\x18\x05 \x01(\x02\x12%\n\x1drta_model2_is_below_threshold\x18\x06 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x07 \x01(\x08\x12\x17\n\x0f\x66iltered_reason\x18\x08 \x01(\t\x12\x19\n\x11in_validation_set\x18\t \x01(\x08\x12\"\n\x1avalidation_set_probability\x18\n \x01(\x02\"5\n\x11PredictionRequest\x12 \n\x05\x65mail\x18\x01 \x01(\x0b\x32\x11.entrypoint.Email\"\xb4\x01\n\x11OutputFilterFlags\x12!\n\x19tagger_is_below_threshold\x18\x01 \x01(\x08\x12%\n\x1drta_model1_is_below_threshold\x18\x02 \x01(\x08\x12%\n\x1drta_model2_is_below_threshold\x18\x03 \x01(\x08\x12\x13\n\x0bis_filtered\x18\x04 \x01(\x08\x12\x19\n\x11in_validation_set\x18\x05 \x01(\x08\"\xa7\x01\n\x12PredictionResponse\x12!\n\x19potential_service_numbers\x18\x01 \x03(\t\x12\x17\n\x0fpredicted_class\x18\x02 \x01(\t\x12\x33\n\x0c\x66ilter_flags\x18\x03 \x01(\x0b\x32\x1d.entrypoint.OutputFilterFlags\x12 \n\x18potential_ticket_numbers\x18\x04 \x03(\t\"b\n\x06Ticket\x12\x0f\n\x07site_id\x18\x01 \x01(\t\x12\x17\n\x0fservice_numbers\x18\x02 \x03(\t\x12\x11\n\tticket_id\x18\x03 \x01(\t\x12\x1b\n\x13not_creation_reason\x18\x04 \x01(\t\"q\n\x0fValidatedTicket\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x15\n\rticket_status\x18\x02 \x01(\t\x12\x10\n\x08\x63\x61tegory\x18\x03 \x01(\t\x12\x11\n\tcall_type\x18\x04 \x01(\t\x12\x0f\n\x07site_id\x18\x05 \x01(\t\"\xa3\x08\n\x12SaveOutputsRequest\x12\x10\n\x08\x65mail_id\x18\x01 \x01(\t\x12]\n\x19service_numbers_sites_map\x18\x02 \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.ServiceNumbersSitesMapEntry\x12!\n\x19validated_service_numbers\x18\x03 \x03(\t\x12+\n\x0ftickets_created\x18\x04 \x03(\x0b\x32\x12.entrypoint.Ticket\x12+\n\x0ftickets_updated\x18\x05 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_created\x18\x06 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x34\n\x18tickets_could_be_updated\x18\x07 \x03(\x0b\x32\x12.entrypoint.Ticket\x12\x35\n\x19tickets_cannot_be_created\x18\t \x03(\x0b\x32\x12.entrypoint.Ticket\x12$\n\x18validated_ticket_numbers\x18\n \x03(\tB\x02\x18\x01\x12]\n\x17\x62ruin_ticket_status_map\x18\x0b \x03(\x0b\x32\x38.entrypoint.SaveOutputsRequest.BruinTicketStatusMapEntryB\x02\x18\x01\x12\x62\n\x1a\x62ruin_ticket_call_type_map\x18\x0c \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.BruinTicketCallTypeMapEntryB\x02\x18\x01\x12\x61\n\x19\x62ruin_ticket_category_map\x18\r \x03(\x0b\x32:.entrypoint.SaveOutputsRequest.BruinTicketCategoryMapEntryB\x02\x18\x01\x12\x36\n\x11validated_tickets\x18\x0e \x03(\x0b\x32\x1b.entrypoint.ValidatedTicket\x1a=\n\x1bServiceNumbersSitesMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x42ruinTicketStatusMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a=\n\x1b\x42ruinTicketCallTypeMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a=\n\x1b\x42ruinTicketCategoryMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"&\n\x13SaveOutputsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x9e\x02\n!SaveCreatedTicketsFeedbackRequest\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x10\n\x08\x65mail_id\x18\x02 \x01(\t\x12\x11\n\tparent_id\x18\x03 \x01(\t\x12\x11\n\tclient_id\x18\x04 \x01(\t\x12\x1c\n\x14real_service_numbers\x18\x05 \x03(\t\x12\x12\n\nreal_class\x18\x06 \x01(\t\x12L\n\x08site_map\x18\x07 \x03(\x0b\x32:.entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry\x1a.\n\x0cSiteMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"5\n\"SaveCreatedTicketsFeedbackResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"z\n SaveClosedTicketsFeedbackRequest\x12\x11\n\tticket_id\x18\x01 \x01(\t\x12\x11\n\tclient_id\x18\x02 \x01(\t\x12\x15\n\rticket_status\x18\x03 \x01(\t\x12\x19\n\x11\x63\x61ncelled_reasons\x18\x04 \x03(\t\"4\n!SaveClosedTicketsFeedbackResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xab\x03\n\nEntrypoint\x12P\n\rGetPrediction\x12\x1d.entrypoint.PredictionRequest\x1a\x1e.entrypoint.PredictionResponse\"\x00\x12P\n\x0bSaveOutputs\x12\x1e.entrypoint.SaveOutputsRequest\x1a\x1f.entrypoint.SaveOutputsResponse\"\x00\x12}\n\x1aSaveCreatedTicketsFeedback\x12-.entrypoint.SaveCreatedTicketsFeedbackRequest\x1a..entrypoint.SaveCreatedTicketsFeedbackResponse\"\x00\x12z\n\x19SaveClosedTicketsFeedback\x12,.entrypoint.SaveClosedTicketsFeedbackRequest\x1a-.entrypoint.SaveClosedTicketsFeedbackResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -717,6 +717,66 @@ _TICKET = _descriptor.Descriptor(
 )
 
 
+_VALIDATEDTICKET = _descriptor.Descriptor(
+  name='ValidatedTicket',
+  full_name='entrypoint.ValidatedTicket',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ticket_id', full_name='entrypoint.ValidatedTicket.ticket_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ticket_status', full_name='entrypoint.ValidatedTicket.ticket_status', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category', full_name='entrypoint.ValidatedTicket.category', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='call_type', full_name='entrypoint.ValidatedTicket.call_type', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='site_id', full_name='entrypoint.ValidatedTicket.site_id', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2076,
+  serialized_end=2189,
+)
+
+
 _SAVEOUTPUTSREQUEST_SERVICENUMBERSSITESMAPENTRY = _descriptor.Descriptor(
   name='ServiceNumbersSitesMapEntry',
   full_name='entrypoint.SaveOutputsRequest.ServiceNumbersSitesMapEntry',
@@ -751,8 +811,8 @@ _SAVEOUTPUTSREQUEST_SERVICENUMBERSSITESMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2816,
-  serialized_end=2877,
+  serialized_start=3003,
+  serialized_end=3064,
 )
 
 _SAVEOUTPUTSREQUEST_BRUINTICKETSTATUSMAPENTRY = _descriptor.Descriptor(
@@ -789,8 +849,8 @@ _SAVEOUTPUTSREQUEST_BRUINTICKETSTATUSMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2879,
-  serialized_end=2938,
+  serialized_start=3066,
+  serialized_end=3125,
 )
 
 _SAVEOUTPUTSREQUEST_BRUINTICKETCALLTYPEMAPENTRY = _descriptor.Descriptor(
@@ -827,8 +887,8 @@ _SAVEOUTPUTSREQUEST_BRUINTICKETCALLTYPEMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2940,
-  serialized_end=3001,
+  serialized_start=3127,
+  serialized_end=3188,
 )
 
 _SAVEOUTPUTSREQUEST_BRUINTICKETCATEGORYMAPENTRY = _descriptor.Descriptor(
@@ -865,8 +925,8 @@ _SAVEOUTPUTSREQUEST_BRUINTICKETCATEGORYMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3003,
-  serialized_end=3064,
+  serialized_start=3190,
+  serialized_end=3251,
 )
 
 _SAVEOUTPUTSREQUEST = _descriptor.Descriptor(
@@ -939,24 +999,31 @@ _SAVEOUTPUTSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='bruin_ticket_status_map', full_name='entrypoint.SaveOutputsRequest.bruin_ticket_status_map', index=9,
       number=11, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='bruin_ticket_call_type_map', full_name='entrypoint.SaveOutputsRequest.bruin_ticket_call_type_map', index=10,
       number=12, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='bruin_ticket_category_map', full_name='entrypoint.SaveOutputsRequest.bruin_ticket_category_map', index=11,
       number=13, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='validated_tickets', full_name='entrypoint.SaveOutputsRequest.validated_tickets', index=12,
+      number=14, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -973,8 +1040,8 @@ _SAVEOUTPUTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2077,
-  serialized_end=3064,
+  serialized_start=2192,
+  serialized_end=3251,
 )
 
 
@@ -1005,8 +1072,8 @@ _SAVEOUTPUTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3066,
-  serialized_end=3104,
+  serialized_start=3253,
+  serialized_end=3291,
 )
 
 
@@ -1044,8 +1111,8 @@ _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3347,
-  serialized_end=3393,
+  serialized_start=3534,
+  serialized_end=3580,
 )
 
 _SAVECREATEDTICKETSFEEDBACKREQUEST = _descriptor.Descriptor(
@@ -1117,8 +1184,8 @@ _SAVECREATEDTICKETSFEEDBACKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3107,
-  serialized_end=3393,
+  serialized_start=3294,
+  serialized_end=3580,
 )
 
 
@@ -1149,8 +1216,8 @@ _SAVECREATEDTICKETSFEEDBACKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3395,
-  serialized_end=3448,
+  serialized_start=3582,
+  serialized_end=3635,
 )
 
 
@@ -1202,8 +1269,8 @@ _SAVECLOSEDTICKETSFEEDBACKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3450,
-  serialized_end=3572,
+  serialized_start=3637,
+  serialized_end=3759,
 )
 
 
@@ -1234,8 +1301,8 @@ _SAVECLOSEDTICKETSFEEDBACKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3574,
-  serialized_end=3626,
+  serialized_start=3761,
+  serialized_end=3813,
 )
 
 _EMAIL.fields_by_name['tag'].message_type = _TAG
@@ -1261,6 +1328,7 @@ _SAVEOUTPUTSREQUEST.fields_by_name['tickets_cannot_be_created'].message_type = _
 _SAVEOUTPUTSREQUEST.fields_by_name['bruin_ticket_status_map'].message_type = _SAVEOUTPUTSREQUEST_BRUINTICKETSTATUSMAPENTRY
 _SAVEOUTPUTSREQUEST.fields_by_name['bruin_ticket_call_type_map'].message_type = _SAVEOUTPUTSREQUEST_BRUINTICKETCALLTYPEMAPENTRY
 _SAVEOUTPUTSREQUEST.fields_by_name['bruin_ticket_category_map'].message_type = _SAVEOUTPUTSREQUEST_BRUINTICKETCATEGORYMAPENTRY
+_SAVEOUTPUTSREQUEST.fields_by_name['validated_tickets'].message_type = _VALIDATEDTICKET
 _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY.containing_type = _SAVECREATEDTICKETSFEEDBACKREQUEST
 _SAVECREATEDTICKETSFEEDBACKREQUEST.fields_by_name['site_map'].message_type = _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY
 DESCRIPTOR.message_types_by_name['Tag'] = _TAG
@@ -1275,6 +1343,7 @@ DESCRIPTOR.message_types_by_name['PredictionRequest'] = _PREDICTIONREQUEST
 DESCRIPTOR.message_types_by_name['OutputFilterFlags'] = _OUTPUTFILTERFLAGS
 DESCRIPTOR.message_types_by_name['PredictionResponse'] = _PREDICTIONRESPONSE
 DESCRIPTOR.message_types_by_name['Ticket'] = _TICKET
+DESCRIPTOR.message_types_by_name['ValidatedTicket'] = _VALIDATEDTICKET
 DESCRIPTOR.message_types_by_name['SaveOutputsRequest'] = _SAVEOUTPUTSREQUEST
 DESCRIPTOR.message_types_by_name['SaveOutputsResponse'] = _SAVEOUTPUTSRESPONSE
 DESCRIPTOR.message_types_by_name['SaveCreatedTicketsFeedbackRequest'] = _SAVECREATEDTICKETSFEEDBACKREQUEST
@@ -1287,85 +1356,92 @@ Tag = _reflection.GeneratedProtocolMessageType('Tag', (_message.Message,), {
   'DESCRIPTOR' : _TAG,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.Tag)
-  })
+})
 _sym_db.RegisterMessage(Tag)
 
 Email = _reflection.GeneratedProtocolMessageType('Email', (_message.Message,), {
   'DESCRIPTOR' : _EMAIL,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.Email)
-  })
+})
 _sym_db.RegisterMessage(Email)
 
 PreprocessEmailFields = _reflection.GeneratedProtocolMessageType('PreprocessEmailFields', (_message.Message,), {
   'DESCRIPTOR' : _PREPROCESSEMAILFIELDS,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.PreprocessEmailFields)
-  })
+})
 _sym_db.RegisterMessage(PreprocessEmailFields)
 
 PreprocessEmailOutput = _reflection.GeneratedProtocolMessageType('PreprocessEmailOutput', (_message.Message,), {
   'DESCRIPTOR' : _PREPROCESSEMAILOUTPUT,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.PreprocessEmailOutput)
-  })
+})
 _sym_db.RegisterMessage(PreprocessEmailOutput)
 
 ExtractServiceNumbersOutput = _reflection.GeneratedProtocolMessageType('ExtractServiceNumbersOutput', (_message.Message,), {
   'DESCRIPTOR' : _EXTRACTSERVICENUMBERSOUTPUT,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.ExtractServiceNumbersOutput)
-  })
+})
 _sym_db.RegisterMessage(ExtractServiceNumbersOutput)
 
 ClassifyOutageVsAffectingFields = _reflection.GeneratedProtocolMessageType('ClassifyOutageVsAffectingFields', (_message.Message,), {
   'DESCRIPTOR' : _CLASSIFYOUTAGEVSAFFECTINGFIELDS,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.ClassifyOutageVsAffectingFields)
-  })
+})
 _sym_db.RegisterMessage(ClassifyOutageVsAffectingFields)
 
 ClassifyOutageVsAffectingOutput = _reflection.GeneratedProtocolMessageType('ClassifyOutageVsAffectingOutput', (_message.Message,), {
   'DESCRIPTOR' : _CLASSIFYOUTAGEVSAFFECTINGOUTPUT,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.ClassifyOutageVsAffectingOutput)
-  })
+})
 _sym_db.RegisterMessage(ClassifyOutageVsAffectingOutput)
 
 PrepareOutputFields = _reflection.GeneratedProtocolMessageType('PrepareOutputFields', (_message.Message,), {
   'DESCRIPTOR' : _PREPAREOUTPUTFIELDS,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.PrepareOutputFields)
-  })
+})
 _sym_db.RegisterMessage(PrepareOutputFields)
 
 PredictionRequest = _reflection.GeneratedProtocolMessageType('PredictionRequest', (_message.Message,), {
   'DESCRIPTOR' : _PREDICTIONREQUEST,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.PredictionRequest)
-  })
+})
 _sym_db.RegisterMessage(PredictionRequest)
 
 OutputFilterFlags = _reflection.GeneratedProtocolMessageType('OutputFilterFlags', (_message.Message,), {
   'DESCRIPTOR' : _OUTPUTFILTERFLAGS,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.OutputFilterFlags)
-  })
+})
 _sym_db.RegisterMessage(OutputFilterFlags)
 
 PredictionResponse = _reflection.GeneratedProtocolMessageType('PredictionResponse', (_message.Message,), {
   'DESCRIPTOR' : _PREDICTIONRESPONSE,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.PredictionResponse)
-  })
+})
 _sym_db.RegisterMessage(PredictionResponse)
 
 Ticket = _reflection.GeneratedProtocolMessageType('Ticket', (_message.Message,), {
   'DESCRIPTOR' : _TICKET,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.Ticket)
-  })
+})
 _sym_db.RegisterMessage(Ticket)
+
+ValidatedTicket = _reflection.GeneratedProtocolMessageType('ValidatedTicket', (_message.Message,), {
+  'DESCRIPTOR' : _VALIDATEDTICKET,
+  '__module__' : 'public_input_pb2'
+  # @@protoc_insertion_point(class_scope:entrypoint.ValidatedTicket)
+})
+_sym_db.RegisterMessage(ValidatedTicket)
 
 SaveOutputsRequest = _reflection.GeneratedProtocolMessageType('SaveOutputsRequest', (_message.Message,), {
 
@@ -1373,33 +1449,33 @@ SaveOutputsRequest = _reflection.GeneratedProtocolMessageType('SaveOutputsReques
     'DESCRIPTOR' : _SAVEOUTPUTSREQUEST_SERVICENUMBERSSITESMAPENTRY,
     '__module__' : 'public_input_pb2'
     # @@protoc_insertion_point(class_scope:entrypoint.SaveOutputsRequest.ServiceNumbersSitesMapEntry)
-    })
+  })
   ,
 
   'BruinTicketStatusMapEntry' : _reflection.GeneratedProtocolMessageType('BruinTicketStatusMapEntry', (_message.Message,), {
     'DESCRIPTOR' : _SAVEOUTPUTSREQUEST_BRUINTICKETSTATUSMAPENTRY,
     '__module__' : 'public_input_pb2'
     # @@protoc_insertion_point(class_scope:entrypoint.SaveOutputsRequest.BruinTicketStatusMapEntry)
-    })
+  })
   ,
 
   'BruinTicketCallTypeMapEntry' : _reflection.GeneratedProtocolMessageType('BruinTicketCallTypeMapEntry', (_message.Message,), {
     'DESCRIPTOR' : _SAVEOUTPUTSREQUEST_BRUINTICKETCALLTYPEMAPENTRY,
     '__module__' : 'public_input_pb2'
     # @@protoc_insertion_point(class_scope:entrypoint.SaveOutputsRequest.BruinTicketCallTypeMapEntry)
-    })
+  })
   ,
 
   'BruinTicketCategoryMapEntry' : _reflection.GeneratedProtocolMessageType('BruinTicketCategoryMapEntry', (_message.Message,), {
     'DESCRIPTOR' : _SAVEOUTPUTSREQUEST_BRUINTICKETCATEGORYMAPENTRY,
     '__module__' : 'public_input_pb2'
     # @@protoc_insertion_point(class_scope:entrypoint.SaveOutputsRequest.BruinTicketCategoryMapEntry)
-    })
+  })
   ,
   'DESCRIPTOR' : _SAVEOUTPUTSREQUEST,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveOutputsRequest)
-  })
+})
 _sym_db.RegisterMessage(SaveOutputsRequest)
 _sym_db.RegisterMessage(SaveOutputsRequest.ServiceNumbersSitesMapEntry)
 _sym_db.RegisterMessage(SaveOutputsRequest.BruinTicketStatusMapEntry)
@@ -1410,7 +1486,7 @@ SaveOutputsResponse = _reflection.GeneratedProtocolMessageType('SaveOutputsRespo
   'DESCRIPTOR' : _SAVEOUTPUTSRESPONSE,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveOutputsResponse)
-  })
+})
 _sym_db.RegisterMessage(SaveOutputsResponse)
 
 SaveCreatedTicketsFeedbackRequest = _reflection.GeneratedProtocolMessageType('SaveCreatedTicketsFeedbackRequest', (_message.Message,), {
@@ -1419,12 +1495,12 @@ SaveCreatedTicketsFeedbackRequest = _reflection.GeneratedProtocolMessageType('Sa
     'DESCRIPTOR' : _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY,
     '__module__' : 'public_input_pb2'
     # @@protoc_insertion_point(class_scope:entrypoint.SaveCreatedTicketsFeedbackRequest.SiteMapEntry)
-    })
+  })
   ,
   'DESCRIPTOR' : _SAVECREATEDTICKETSFEEDBACKREQUEST,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveCreatedTicketsFeedbackRequest)
-  })
+})
 _sym_db.RegisterMessage(SaveCreatedTicketsFeedbackRequest)
 _sym_db.RegisterMessage(SaveCreatedTicketsFeedbackRequest.SiteMapEntry)
 
@@ -1432,21 +1508,21 @@ SaveCreatedTicketsFeedbackResponse = _reflection.GeneratedProtocolMessageType('S
   'DESCRIPTOR' : _SAVECREATEDTICKETSFEEDBACKRESPONSE,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveCreatedTicketsFeedbackResponse)
-  })
+})
 _sym_db.RegisterMessage(SaveCreatedTicketsFeedbackResponse)
 
 SaveClosedTicketsFeedbackRequest = _reflection.GeneratedProtocolMessageType('SaveClosedTicketsFeedbackRequest', (_message.Message,), {
   'DESCRIPTOR' : _SAVECLOSEDTICKETSFEEDBACKREQUEST,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveClosedTicketsFeedbackRequest)
-  })
+})
 _sym_db.RegisterMessage(SaveClosedTicketsFeedbackRequest)
 
 SaveClosedTicketsFeedbackResponse = _reflection.GeneratedProtocolMessageType('SaveClosedTicketsFeedbackResponse', (_message.Message,), {
   'DESCRIPTOR' : _SAVECLOSEDTICKETSFEEDBACKRESPONSE,
   '__module__' : 'public_input_pb2'
   # @@protoc_insertion_point(class_scope:entrypoint.SaveClosedTicketsFeedbackResponse)
-  })
+})
 _sym_db.RegisterMessage(SaveClosedTicketsFeedbackResponse)
 
 
@@ -1454,6 +1530,10 @@ _SAVEOUTPUTSREQUEST_SERVICENUMBERSSITESMAPENTRY._options = None
 _SAVEOUTPUTSREQUEST_BRUINTICKETSTATUSMAPENTRY._options = None
 _SAVEOUTPUTSREQUEST_BRUINTICKETCALLTYPEMAPENTRY._options = None
 _SAVEOUTPUTSREQUEST_BRUINTICKETCATEGORYMAPENTRY._options = None
+_SAVEOUTPUTSREQUEST.fields_by_name['validated_ticket_numbers']._options = None
+_SAVEOUTPUTSREQUEST.fields_by_name['bruin_ticket_status_map']._options = None
+_SAVEOUTPUTSREQUEST.fields_by_name['bruin_ticket_call_type_map']._options = None
+_SAVEOUTPUTSREQUEST.fields_by_name['bruin_ticket_category_map']._options = None
 _SAVECREATEDTICKETSFEEDBACKREQUEST_SITEMAPENTRY._options = None
 
 _ENTRYPOINT = _descriptor.ServiceDescriptor(
@@ -1463,50 +1543,50 @@ _ENTRYPOINT = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=3629,
-  serialized_end=4056,
+  serialized_start=3816,
+  serialized_end=4243,
   methods=[
-  _descriptor.MethodDescriptor(
-    name='GetPrediction',
-    full_name='entrypoint.Entrypoint.GetPrediction',
-    index=0,
-    containing_service=None,
-    input_type=_PREDICTIONREQUEST,
-    output_type=_PREDICTIONRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='SaveOutputs',
-    full_name='entrypoint.Entrypoint.SaveOutputs',
-    index=1,
-    containing_service=None,
-    input_type=_SAVEOUTPUTSREQUEST,
-    output_type=_SAVEOUTPUTSRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='SaveCreatedTicketsFeedback',
-    full_name='entrypoint.Entrypoint.SaveCreatedTicketsFeedback',
-    index=2,
-    containing_service=None,
-    input_type=_SAVECREATEDTICKETSFEEDBACKREQUEST,
-    output_type=_SAVECREATEDTICKETSFEEDBACKRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='SaveClosedTicketsFeedback',
-    full_name='entrypoint.Entrypoint.SaveClosedTicketsFeedback',
-    index=3,
-    containing_service=None,
-    input_type=_SAVECLOSEDTICKETSFEEDBACKREQUEST,
-    output_type=_SAVECLOSEDTICKETSFEEDBACKRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-])
+    _descriptor.MethodDescriptor(
+      name='GetPrediction',
+      full_name='entrypoint.Entrypoint.GetPrediction',
+      index=0,
+      containing_service=None,
+      input_type=_PREDICTIONREQUEST,
+      output_type=_PREDICTIONRESPONSE,
+      serialized_options=None,
+      create_key=_descriptor._internal_create_key,
+    ),
+    _descriptor.MethodDescriptor(
+      name='SaveOutputs',
+      full_name='entrypoint.Entrypoint.SaveOutputs',
+      index=1,
+      containing_service=None,
+      input_type=_SAVEOUTPUTSREQUEST,
+      output_type=_SAVEOUTPUTSRESPONSE,
+      serialized_options=None,
+      create_key=_descriptor._internal_create_key,
+    ),
+    _descriptor.MethodDescriptor(
+      name='SaveCreatedTicketsFeedback',
+      full_name='entrypoint.Entrypoint.SaveCreatedTicketsFeedback',
+      index=2,
+      containing_service=None,
+      input_type=_SAVECREATEDTICKETSFEEDBACKREQUEST,
+      output_type=_SAVECREATEDTICKETSFEEDBACKRESPONSE,
+      serialized_options=None,
+      create_key=_descriptor._internal_create_key,
+    ),
+    _descriptor.MethodDescriptor(
+      name='SaveClosedTicketsFeedback',
+      full_name='entrypoint.Entrypoint.SaveClosedTicketsFeedback',
+      index=3,
+      containing_service=None,
+      input_type=_SAVECLOSEDTICKETSFEEDBACKREQUEST,
+      output_type=_SAVECLOSEDTICKETSFEEDBACKRESPONSE,
+      serialized_options=None,
+      create_key=_descriptor._internal_create_key,
+    ),
+  ])
 _sym_db.RegisterServiceDescriptor(_ENTRYPOINT)
 
 DESCRIPTOR.services_by_name['Entrypoint'] = _ENTRYPOINT
