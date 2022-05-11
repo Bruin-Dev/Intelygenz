@@ -15,8 +15,8 @@ from application.actions.triage import Triage
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.ha_repository import HaRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.outage_monitoring_metrics_repository import OutageMonitoringMetricsRepository
 from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
@@ -51,7 +51,7 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         # METRICS
-        self._outage_monitoring_metrics_repository = OutageMonitoringMetricsRepository()
+        self._metrics_repository = MetricsRepository(config=config)
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
@@ -78,12 +78,11 @@ class Container:
                                   self._customer_cache_repository, self._bruin_repository, self._velocloud_repository,
                                   self._notifications_repository, self._triage_repository, self._ha_repository)
         else:
-            self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                                 config, self._outage_repository, self._bruin_repository,
+            self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler, config,
+                                                 self._outage_repository, self._bruin_repository,
                                                  self._velocloud_repository, self._notifications_repository,
                                                  self._triage_repository, self._customer_cache_repository,
-                                                 self._outage_monitoring_metrics_repository, self._digi_repository,
-                                                 self._ha_repository)
+                                                 self._metrics_repository, self._digi_repository, self._ha_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()

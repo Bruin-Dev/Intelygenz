@@ -9058,7 +9058,6 @@ class TestServiceOutageMonitor:
         triage_repository.build_triage_note = Mock(return_value=triage_note)
 
         metrics_repository = Mock()
-        metrics_repository.increment_first_triage_errors = Mock()
 
         velocloud_repository = Mock()
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
@@ -9093,7 +9092,6 @@ class TestServiceOutageMonitor:
             cached_edge, edge_status, events_sorted_by_event_time, outage_type, is_reopen_note=False,
         )
         bruin_repository.append_triage_note.assert_awaited_with(ticket_detail_object, triage_note)
-        metrics_repository.increment_first_triage_errors.assert_called_once()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_with_failing_reopening_test(self):

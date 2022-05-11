@@ -115,7 +115,6 @@ class OutageMonitor:
         stop = time.time()
         self._logger.info(f'[outage_monitoring_process] Outage monitoring process finished! Elapsed time:'
                           f'{round((stop - start) / 60, 2)} minutes')
-        self._metrics_repository.set_last_cycle_duration(round((stop - start) / 60, 2))
 
     async def _process_velocloud_host(self, host, host_cache):
         self._logger.info(f"Processing {len(host_cache)} edges in Velocloud {host}...")
@@ -172,7 +171,6 @@ class OutageMonitor:
         self._logger.info(f'{len(standby_serials)} edges are the standby of a HA pair: {standby_serials}')
 
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, all_edges)
-        self._metrics_repository.increment_edges_processed(amount=len(edges_full_info))
         mapped_serials_w_status = [edge["cached_info"]["serial_number"] for edge in edges_full_info]
         self._logger.info(f"Mapped cache serials with status: {mapped_serials_w_status}")
 
@@ -853,10 +851,7 @@ class OutageMonitor:
             'ticket_id': ticket_id,
             'ticket_detail': ticket_detail,
         }
-        note_appended = await self._bruin_repository.append_triage_note(detail_object, ticket_note)
-
-        if note_appended == 503:
-            self._metrics_repository.increment_first_triage_errors()
+        await self._bruin_repository.append_triage_note(detail_object, ticket_note)
 
     async def _reopen_outage_ticket(self, ticket_id: int, edge_status: dict, cached_edge: dict, outage_type: Outages):
         serial_number = edge_status['edgeSerialNumber']
