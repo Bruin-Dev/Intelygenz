@@ -3162,6 +3162,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
             "createdBy": "InterMapper Service",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -3263,6 +3264,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": "9/25/2020 6:31:54 AM",
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -3373,6 +3375,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -3549,6 +3552,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -3731,6 +3735,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -3910,6 +3915,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -4097,6 +4103,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -4296,6 +4303,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [
@@ -4483,6 +4491,7 @@ class TestServiceOutageMonitor:
             "ticketStatus": "New",
             "createDate": outage_ticket_1_creation_date,
             "createdBy": "Intelygenz Ai",
+            "severity": 2,
         }
         outage_ticket_response = {
             'body': [

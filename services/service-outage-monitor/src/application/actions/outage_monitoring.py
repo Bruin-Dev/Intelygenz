@@ -324,6 +324,7 @@ class OutageMonitor:
                 return
 
             client_id = edge['cached_info']['bruin_client_info']['client_id']
+            client_name = edge['cached_info']['bruin_client_info']['client_name']
             outage_ticket_response = await self._bruin_repository.get_open_outage_tickets(
                 client_id=client_id, service_number=serial_number
             )
@@ -340,6 +341,7 @@ class OutageMonitor:
             outage_ticket: dict = outage_ticket_response_body[0]
             outage_ticket_id = outage_ticket['ticketID']
             outage_ticket_creation_date = outage_ticket['createDate']
+            outage_ticket_severity = outage_ticket['severity']
 
             if not self._was_ticket_created_by_automation_engine(outage_ticket):
                 self._logger.info(
@@ -423,7 +425,9 @@ class OutageMonitor:
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
             await self._notify_successful_autoresolve(outage_ticket_id)
 
-            self._metrics_repository.increment_tickets_autoresolved()
+            self._metrics_repository.increment_tickets_autoresolved(
+                client=client_name, outage_type='', severity=outage_ticket_severity
+            )
             self._logger.info(
                 f'Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} linked to '
                 f'edge {serial_number} was autoresolved!'
