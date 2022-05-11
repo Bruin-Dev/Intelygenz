@@ -865,7 +865,7 @@ notifier:
   autoscaling:
     enabled: ${NOTIFIER_ENABLED}
     minReplicas: ${NOTIFIER_DESIRED_TASKS}
-    maxReplicas: 2
+    maxReplicas: 5
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
 
