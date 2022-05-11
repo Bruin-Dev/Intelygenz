@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pydantic.main import BaseModel
 
 from application.rpc.base_rpc import Rpc, RpcRequest, RpcError
 
@@ -24,10 +25,11 @@ class AppendNoteToTicketRpc(Rpc):
         :return if the note was appended or not
         """
         request_id, logger = self.start()
-        logger.debug(f"__call__(ticket_id={ticket_id}, note={note})")
+        logger.debug(f"__call__(ticket_id={ticket_id}, note=*may contain sensitive information*)")
 
         try:
-            request = Request(request_id=request_id, ticket_id=ticket_id, note=note)
+            body = RequestBody(ticket_id=ticket_id, note=note)
+            request = Request(request_id=request_id, body=body)
             response = await self.send(request)
 
             if response.is_ok():
@@ -42,5 +44,13 @@ class AppendNoteToTicketRpc(Rpc):
 
 
 class Request(RpcRequest):
+    body: 'RequestBody'
+
+
+class RequestBody(BaseModel):
     ticket_id: int
     note: str
+
+
+# Resolve forward refs for pydantic
+Request.update_forward_refs()
