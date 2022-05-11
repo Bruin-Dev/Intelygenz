@@ -515,26 +515,30 @@ class OutageMonitor:
             working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment == 'production':
                 for edge in edges_still_down:
-                    cached_edge = edge['cached_info']
                     edge_status = edge['status']
+                    cached_edge = edge['cached_info']
                     serial_number = edge['cached_info']['serial_number']
+                    logical_id_list = edge['cached_info']['logical_ids']
+                    client_id = edge['cached_info']['bruin_client_info']['client_id']
+                    client_name = edge['cached_info']['bruin_client_info']['client_name']
                     target_severity = self._get_target_severity(edge_status)
+
                     self._logger.info(
                         f'[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...'
                     )
 
-                    client_id = edge['cached_info']['bruin_client_info']['client_id']
                     ticket_creation_response = await self._bruin_repository.create_outage_ticket(
                         client_id, serial_number
                     )
                     ticket_creation_response_body = ticket_creation_response['body']
                     ticket_creation_response_status = ticket_creation_response['status']
-                    logical_id_list = edge['cached_info']['logical_ids']
                     self._logger.info(f"[{outage_type.value}] Bruin response for ticket creation for edge {edge}: "
                                       f"{ticket_creation_response}")
                     if ticket_creation_response_status in range(200, 300):
                         self._logger.info(f'[{outage_type.value}] Successfully created outage ticket for edge {edge}.')
-                        self._metrics_repository.increment_tickets_created()
+                        self._metrics_repository.increment_tickets_created(
+                            client=client_name, outage_type=outage_type.value, severity=target_severity
+                        )
                         slack_message = (
                             f'Service Outage ticket created for edge {serial_number} in {outage_type.value} state: '
                             f'https://app.bruin.com/t/{ticket_creation_response_body}.'
@@ -606,9 +610,14 @@ class OutageMonitor:
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                         )
-                        await self._reopen_outage_ticket(
+                        was_ticket_reopened = await self._reopen_outage_ticket(
                             ticket_creation_response_body, edge_status, cached_edge, outage_type
                         )
+                        if was_ticket_reopened:
+                            self._metrics_repository.increment_tickets_reopened(
+                                client=client_name, outage_type=outage_type.value, severity=target_severity
+                            )
+
                         await self._change_ticket_severity(
                             ticket_id=ticket_creation_response_body,
                             edge_status=edge_status,
@@ -640,6 +649,9 @@ class OutageMonitor:
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
+                        )
+                        self._metrics_repository.increment_tickets_reopened(
+                            client=client_name, outage_type=outage_type.value, severity=target_severity
                         )
 
                         await self._append_triage_note(
@@ -675,6 +687,9 @@ class OutageMonitor:
                             f'edge {serial_number} (ticket ID = {ticket_creation_response_body}). The ticket was '
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
+                        )
+                        self._metrics_repository.increment_tickets_reopened(
+                            client=client_name, outage_type=outage_type.value, severity=target_severity
                         )
 
                         await self._append_triage_note(
@@ -880,10 +895,10 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
             await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True)
-
-            self._metrics_repository.increment_tickets_reopened()
+            return True
         else:
             self._logger.error(f'Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.')
+            return False
 
     def _was_last_outage_detected_recently(self, ticket_notes: list, ticket_creation_date: str, edge: dict) -> bool:
         current_datetime = datetime.now(utc)
