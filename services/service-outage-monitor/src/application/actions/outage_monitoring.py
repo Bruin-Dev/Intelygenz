@@ -18,7 +18,7 @@ from pytz import utc
 from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
-from application import Outages, ChangeTicketSeverityStatus
+from application import Outages, ForwardQueues, ChangeTicketSeverityStatus
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
@@ -564,8 +564,8 @@ class OutageMonitor:
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
 
                         if should_schedule_hnoc_forwarding:
-                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                                serial_number,
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                                client_name, outage_type, target_severity,
                                                                 forward_time=forward_time)
                         else:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
@@ -598,17 +598,19 @@ class OutageMonitor:
                             if should_schedule_hnoc_forwarding:
                                 forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type,
                                                                                           first_outage_edge)
-                                self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                                    serial_number,
+                                self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                                    client_name, outage_type, target_severity,
                                                                     forward_time=forward_time)
                             else:
                                 self._logger.info(
                                     f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
                                     f"with link_data: {edge_status['links']} has a blacklisted link and "
                                     f"should not be forwarded to HNOC. Skipping forward to HNOC...")
-                        await self._check_for_failed_digi_reboot(ticket_creation_response_body,
-                                                                 logical_id_list, serial_number, edge_status)
-                        await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body)
+                        await self._check_for_failed_digi_reboot(ticket_creation_response_body, logical_id_list,
+                                                                 serial_number, edge_status, client_name, outage_type,
+                                                                 target_severity)
+                        await self._attempt_forward_to_asr(cached_edge, edge_status, ticket_creation_response_body,
+                                                           client_name, outage_type, target_severity)
                     elif ticket_creation_response_status == 471:
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
@@ -634,8 +636,8 @@ class OutageMonitor:
 
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
-                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                                serial_number,
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                                client_name, outage_type, target_severity,
                                                                 forward_time=forward_time)
                         else:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
@@ -673,8 +675,8 @@ class OutageMonitor:
 
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
-                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                                serial_number,
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                                client_name, outage_type, target_severity,
                                                                 forward_time=forward_time)
                         else:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
@@ -711,8 +713,8 @@ class OutageMonitor:
 
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
                         if should_schedule_hnoc_forwarding:
-                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body,
-                                                                serial_number,
+                            self.schedule_forward_to_hnoc_queue(ticket_creation_response_body, serial_number,
+                                                                client_name, outage_type, target_severity,
                                                                 forward_time=forward_time)
                         else:
                             self._logger.info(f"Ticket_id: {ticket_creation_response_body} for serial: {serial_number} "
@@ -749,7 +751,7 @@ class OutageMonitor:
         self._logger.info(f'[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges')
 
     def _get_hnoc_forward_time_by_outage_type(self, outage_type: Outages, edge: dict) -> float:
-        if outage_type is Outages.LINK_DOWN or outage_type is Outages.HA_LINK_DOWN:
+        if outage_type in [Outages.LINK_DOWN, Outages.HA_LINK_DOWN]:
             max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
             return max_seconds_since_last_outage / 60
         else:
@@ -760,7 +762,8 @@ class OutageMonitor:
             return False
         return self._has_blacklisted_faulty_link(link_data)
 
-    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, *, forward_time):
+    def schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, client_name, outage_type, severity, *,
+                                       forward_time):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
@@ -770,7 +773,8 @@ class OutageMonitor:
 
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number},
+            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'client_name': client_name,
+                    'outage_type': outage_type, 'severity': severity},
             run_date=forward_task_run_date,
             replace_existing=True,
             misfire_grace_time=9999,
@@ -778,7 +782,7 @@ class OutageMonitor:
             id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
         )
 
-    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number):
+    async def forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, client_name, outage_type, severity):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
@@ -805,7 +809,9 @@ class OutageMonitor:
             self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is not resolved. "
                               f"Forwarding to HNOC...")
 
-            await self.change_detail_work_queue(ticket_id=ticket_id, serial_number=serial_number)
+            await self.change_detail_work_queue_to_hnoc(ticket_id=ticket_id, serial_number=serial_number,
+                                                        client_name=client_name, outage_type=outage_type,
+                                                        severity=severity)
 
         try:
             await forward_ticket_to_hnoc_queue()
@@ -815,24 +821,27 @@ class OutageMonitor:
                 f" -> {e}"
             )
 
-    async def change_detail_work_queue(self, ticket_id, serial_number):
-        task_result = 'HNOC Investigate'
+    async def change_detail_work_queue_to_hnoc(self, ticket_id, serial_number, client_name, outage_type, severity):
+        target_queue = ForwardQueues.HNOC.value
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             serial_number=serial_number,
             ticket_id=ticket_id,
-            task_result=task_result)
+            task_result=target_queue)
 
         if change_detail_work_queue_response['status'] in range(200, 300):
+            self._metrics_repository.increment_tasks_forwarded(
+                client=client_name, outage_type=outage_type.value, severity=severity, target_queue=target_queue
+            )
             slack_message = (
                 f'Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded '
-                f'to {task_result} queue!'
+                f'to {target_queue} queue!'
             )
             await self._notifications_repository.send_slack_message(slack_message)
             self._logger.info(f'Successfully forwarded ticket_id {ticket_id} and '
-                              f'serial {serial_number} to {task_result}.')
+                              f'serial {serial_number} to {target_queue}.')
         else:
             self._logger.error(f'Failed to forward ticket_id {ticket_id} and '
-                               f'serial {serial_number} to {task_result} due to bruin '
+                               f'serial {serial_number} to {target_queue} due to bruin '
                                f'returning {change_detail_work_queue_response} when attempting to forward to HNOC.')
 
     async def _append_triage_note(self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages, *,
@@ -952,7 +961,8 @@ class OutageMonitor:
                     )
                     await self._notifications_repository.send_slack_message(slack_message)
 
-    async def _check_for_failed_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status):
+    async def _check_for_failed_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status, client_name,
+                                            outage_type, severity):
         if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
             return
         self._logger.info(f'Checking edge {serial_number} for DiGi Links')
@@ -1000,17 +1010,21 @@ class OutageMonitor:
                 digi_note_interface_name = self._digi_repository.get_interface_name_from_digi_note(digi_note)
 
                 if digi_note_interface_name == link_status['interface']:
-                    task_result = "Wireless Repair Intervention Needed"
-                    task_result_note = self._find_note(relevant_notes, 'Wireless Repair Intervention Needed')
+                    target_queue = ForwardQueues.WIRELESS.value
+                    task_result_note = self._find_note(relevant_notes, target_queue)
 
                     if task_result_note is not None:
-                        self._logger.info(f'Task results has already been changed to "{task_result}"')
+                        self._logger.info(f'Task results has already been changed to "{target_queue}"')
                         return
                     self._logger.info(f'DiGi reboot attempt failed. Forwarding ticket {ticket_id} to Wireless team')
                     change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-                        ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
+                        ticket_id, target_queue, serial_number=serial_number, detail_id=ticket_detail_id)
                     if change_detail_work_queue_response['status'] in range(200, 300):
-                        await self._bruin_repository.append_task_result_change_note(ticket_id, task_result)
+                        self._metrics_repository.increment_tasks_forwarded(
+                            client=client_name, outage_type=outage_type.value, severity=severity,
+                            target_queue=target_queue
+                        )
+                        await self._bruin_repository.append_task_result_change_note(ticket_id, target_queue)
                         slack_message = f'Forwarding ticket {ticket_id} to Wireless team'
                         await self._notifications_repository.send_slack_message(slack_message)
                         return
@@ -1029,7 +1043,7 @@ class OutageMonitor:
                         await self._notifications_repository.send_slack_message(slack_message)
                         return
 
-    async def _attempt_forward_to_asr(self, cached_edge, edge_status, ticket_id):
+    async def _attempt_forward_to_asr(self, cached_edge, edge_status, ticket_id, client_name, outage_type, severity):
         serial_number = cached_edge['serial_number']
         self._logger.info(
             f'Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...'
@@ -1086,23 +1100,27 @@ class OutageMonitor:
             if note['noteValue'] is not None
         ]
 
-        task_result = "No Trouble Found - Carrier Issue"
-        task_result_note = self._find_note(relevant_notes, 'ASR Investigate')
+        target_queue = "No Trouble Found - Carrier Issue"
+        task_result_note = self._find_note(relevant_notes, ForwardQueues.ASR.value)
 
         if task_result_note is not None:
             self._logger.info(
                 f'Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to '
-                f'"{task_result}"'
+                f'"{target_queue}"'
             )
             return
 
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-            ticket_id, task_result, serial_number=serial_number, detail_id=ticket_detail_id)
+            ticket_id, target_queue, serial_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
+            self._metrics_repository.increment_tasks_forwarded(
+                client=client_name, outage_type=outage_type.value, severity=severity,
+                target_queue=ForwardQueues.ASR.value
+            )
             await self._bruin_repository.append_asr_forwarding_note(ticket_id, whitelisted_links, serial_number)
             slack_message = (
                 f'Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded '
-                f'to {task_result} queue!'
+                f'to {target_queue} queue!'
             )
             await self._notifications_repository.send_slack_message(slack_message)
 

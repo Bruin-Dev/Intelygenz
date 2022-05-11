@@ -10,6 +10,12 @@ class Outages(Enum):
     HA_HARD_DOWN = 'Hard Down Outage (HA)'
 
 
+class ForwardQueues(Enum):
+    ASR = 'ASR Investigate'
+    HNOC = 'HNOC Investigate'
+    WIRELESS = 'Wireless Repair Intervention Needed'
+
+
 class ChangeTicketSeverityStatus(Enum):
     CHANGED_TO_LINK_DOWN_SEVERITY = auto()
     CHANGED_TO_EDGE_DOWN_SEVERITY = auto()
