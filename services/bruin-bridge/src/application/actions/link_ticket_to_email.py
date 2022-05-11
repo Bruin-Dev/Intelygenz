@@ -42,4 +42,4 @@ class LinkTicketToEmail:
         response["status"] = result['status']
         self._logger.info(f'Ticket {ticket_id} successfully posted to email_id:{email_id} ')
 
-        await self._event_bus.publish_message(msg['response_topic'], response)
+        await self._event_bus.publish_message(msg['response_topic'], {"status": 200})
