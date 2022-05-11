@@ -33,10 +33,12 @@ class AppendNoteToTicketRpc(Rpc):
             response = await self.send(request)
 
             if response.is_ok():
-                logger.debug(f"__call__(): [OK] response={response}")
+                logger.debug(f"__call__(): [OK] response=("
+                             f"status={response.status}, "
+                             f"body=*may contain sensitive information*)")
                 return True
             else:
-                logger.warning(f"__call__(): [KO] response={response}")
+                logger.warning(f"__call__(): [KO] response=({response})")
                 return False
 
         except Exception as e:
