@@ -26,12 +26,9 @@ TIMEZONE = os.environ['TIMEZONE']
 
 PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
-METRICS_RELEVANT_CLIENTS = json.loads(os.environ['METRICS_RELEVANT_CLIENTS'])
-
 ENABLE_TRIAGE_MONITORING = bool(int(os.environ['ENABLE_TRIAGE_MONITORING']))
 
 if ENABLE_TRIAGE_MONITORING:
-    VELOCLOUD_HOST = None
     TRIAGE_CONFIG = {
         'polling_minutes': int(os.environ['TRIAGE__MONITORING_JOB_INTERVAL']) // 60,
         'event_limit': int(os.environ['TRIAGE__MAX_EVENTS_PER_EVENT_NOTE']),
@@ -44,6 +41,7 @@ if ENABLE_TRIAGE_MONITORING:
     }
 else:
     VELOCLOUD_HOST = os.environ['MONITORING__VELOCLOUD_HOST']
+    METRICS_RELEVANT_CLIENTS = json.loads(os.environ['METRICS_RELEVANT_CLIENTS'])
     MONITOR_CONFIG = {
         'multiplier': 5,
         'min': 5,
