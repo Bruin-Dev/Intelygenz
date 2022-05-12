@@ -183,6 +183,8 @@ class TestTriageRepository:
             "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
             '',
+            'Outage Type: Link Down (no HA)',
+            '',
             'Orchestrator Instance: mettel.velocloud.net',
             'Edge Name: Travis Touchdown',
             'Links: [Edge|https://mettel.velocloud.net/#!/operator/customer/100/monitor/edge/200/] - '
@@ -390,6 +392,8 @@ class TestTriageRepository:
         assert triage_note == os.linesep.join([
             "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
+            '',
+            'Outage Type: Hard Down (no HA)',
             '',
             'Orchestrator Instance: mettel.velocloud.net',
             'Edge Name: Travis Touchdown',
@@ -602,6 +606,8 @@ class TestTriageRepository:
         assert triage_note == os.linesep.join([
             "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
+            '',
+            'Outage Type: Link Down (HA)',
             '',
             'Orchestrator Instance: mettel.velocloud.net',
             'Edge Name: Travis Touchdown',
@@ -820,6 +826,7 @@ class TestTriageRepository:
             "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
             '',
+            'Outage Type: Soft Down (HA)',
             'High Availability - Edge Offline',
             '',
             'Orchestrator Instance: mettel.velocloud.net',
@@ -1040,6 +1047,7 @@ class TestTriageRepository:
             "#*MetTel's IPA*#",
             'Triage (VeloCloud)',
             '',
+            'Outage Type: Hard Down (HA)',
             'High Availability - Location Offline',
             '',
             'Orchestrator Instance: mettel.velocloud.net',
@@ -1259,6 +1267,8 @@ class TestTriageRepository:
         assert triage_note == os.linesep.join([
             "#*MetTel's IPA*#",
             'Re-opening ticket.',
+            '',
+            'Outage Type: Link Down (no HA)',
             '',
             'Orchestrator Instance: mettel.velocloud.net',
             'Edge Name: Travis Touchdown',

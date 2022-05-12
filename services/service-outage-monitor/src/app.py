@@ -78,11 +78,12 @@ class Container:
             # METRICS
             self._metrics_repository = MetricsRepository(config=config)
 
-            self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler, config,
-                                                 self._outage_repository, self._bruin_repository,
-                                                 self._velocloud_repository, self._notifications_repository,
-                                                 self._triage_repository, self._customer_cache_repository,
-                                                 self._metrics_repository, self._digi_repository, self._ha_repository)
+            self._outage_monitor = OutageMonitor(
+                self._event_bus, self._logger, self._scheduler, config, self._utils_repository, self._outage_repository,
+                self._bruin_repository, self._velocloud_repository, self._notifications_repository,
+                self._triage_repository, self._customer_cache_repository, self._metrics_repository,
+                self._digi_repository, self._ha_repository
+            )
 
     async def _start(self):
         self._start_prometheus_metrics_server()

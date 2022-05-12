@@ -7,7 +7,7 @@ from datetime import datetime
 from datetime import timedelta
 from ipaddress import ip_address
 from time import perf_counter
-from typing import Callable
+from typing import List, Callable, Optional
 
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
@@ -23,15 +23,19 @@ from application import Outages, ForwardQueues, ChangeTicketSeverityStatus
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
+OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(outage_type.value for outage_type in Outages)
+OUTAGE_TYPE_REGEX = re.compile(rf'Outage Type: (?P<outage_type>{OUTAGES_DISJUNCTION_FOR_REGEX})')
+
 
 class OutageMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, outage_repository, bruin_repository, velocloud_repository,
-                 notifications_repository, triage_repository, customer_cache_repository, metrics_repository,
-                 digi_repository, ha_repository):
+    def __init__(self, event_bus, logger, scheduler, config, utils_repository, outage_repository, bruin_repository,
+                 velocloud_repository, notifications_repository, triage_repository, customer_cache_repository,
+                 metrics_repository, digi_repository, ha_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._utils_repository = utils_repository
         self._outage_repository = outage_repository
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
@@ -410,6 +414,9 @@ class OutageMonitor:
                                   f'current environment is {working_environment.upper()}.')
                 return
 
+            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+            outage_type = self._get_outage_type_from_ticket_notes(last_cycle_notes)
+
             self._logger.info(
                 f'Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge '
                 f'{serial_number} with serial number {serial_number}...'
@@ -426,7 +433,7 @@ class OutageMonitor:
             await self._notify_successful_autoresolve(outage_ticket_id)
 
             self._metrics_repository.increment_tasks_autoresolved(
-                client=client_name, outage_type='', severity=outage_ticket_severity
+                client=client_name, outage_type=outage_type, severity=outage_ticket_severity
             )
             self._logger.info(
                 f'Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} linked to '
@@ -1272,3 +1279,24 @@ class OutageMonitor:
             return last_outage_seconds['day']
         else:
             return last_outage_seconds['night']
+
+    def _get_notes_appended_since_latest_reopen_or_ticket_creation(self, ticket_notes: List[dict]) -> List[dict]:
+        sorted_ticket_notes = sorted(ticket_notes, key=lambda note: note['createdDate'])
+        latest_reopen = self._utils_repository.get_last_element_matching(
+            sorted_ticket_notes,
+            lambda note: REOPEN_NOTE_REGEX.search(note['noteValue'])
+        )
+
+        if not latest_reopen:
+            # If there's no re-open, all notes in the ticket are the ones posted since the last outage
+            return ticket_notes
+
+        latest_reopen_position = ticket_notes.index(latest_reopen)
+        return ticket_notes[latest_reopen_position:]
+
+    @staticmethod
+    def _get_outage_type_from_ticket_notes(ticket_notes: List[dict]) -> Optional[str]:
+        for note in ticket_notes:
+            match = OUTAGE_TYPE_REGEX.search(note['noteValue'])
+            if match:
+                return match.group('outage_type')

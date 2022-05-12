@@ -28,6 +28,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -38,7 +39,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -47,6 +48,7 @@ class TestServiceOutageMonitor:
         assert outage_monitor._logger is logger
         assert outage_monitor._scheduler is scheduler
         assert outage_monitor._config is config
+        assert outage_monitor._utils_repository is utils_repository
         assert outage_monitor._outage_repository is outage_repository
         assert outage_monitor._bruin_repository is bruin_repository
         assert outage_monitor._velocloud_repository is velocloud_repository
@@ -65,6 +67,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -75,7 +78,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -101,6 +104,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -111,7 +115,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -134,6 +138,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -147,7 +152,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -175,6 +180,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
@@ -187,7 +193,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -209,6 +215,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
@@ -221,7 +228,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -255,6 +262,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
@@ -273,7 +281,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['blacklisted_edges'] = [edge_full_id]
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -329,6 +337,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         velocloud_repository = Mock()
         bruin_repository = Mock()
@@ -341,7 +350,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=get_cache_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -698,6 +707,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges,
@@ -724,7 +734,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -803,6 +813,7 @@ class TestServiceOutageMonitor:
         config = testconfig
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
@@ -813,7 +824,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         velocloud_repository.get_links_with_edge_info = CoroutineMock(return_value=links_with_edge_info_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -979,11 +990,12 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock()
         outage_repository.is_any_link_disconnected = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -1237,6 +1249,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges,
@@ -1247,7 +1260,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -1483,6 +1496,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
@@ -1494,7 +1508,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -1732,6 +1746,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
@@ -1743,7 +1758,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2032,6 +2047,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
@@ -2048,7 +2064,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2236,6 +2252,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=all_links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
@@ -2249,7 +2266,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=all_links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2539,6 +2556,7 @@ class TestServiceOutageMonitor:
         velocloud_repository.get_network_enterprises = CoroutineMock(return_value=network_enterprises_response)
         velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
             link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
@@ -2555,7 +2573,7 @@ class TestServiceOutageMonitor:
         ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2741,6 +2759,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
@@ -2748,7 +2767,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2829,6 +2848,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
@@ -2836,7 +2856,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2913,6 +2933,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         velocloud_repository = Mock()
         notifications_repository = Mock()
@@ -2925,7 +2946,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -2993,6 +3014,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -3008,7 +3030,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3078,6 +3100,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -3091,7 +3114,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3175,6 +3198,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -3188,7 +3212,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3282,6 +3306,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -3295,7 +3320,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3455,6 +3480,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -3468,7 +3494,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3644,10 +3670,11 @@ class TestServiceOutageMonitor:
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=False)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3820,10 +3847,11 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock()
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -3994,6 +4022,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -4010,7 +4039,7 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock()
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4122,6 +4151,7 @@ class TestServiceOutageMonitor:
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4129,6 +4159,7 @@ class TestServiceOutageMonitor:
         ticket_note_2 = {
             "noteId": 68246615,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4136,6 +4167,7 @@ class TestServiceOutageMonitor:
         ticket_note_3 = {
             "noteId": 68246616,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4143,6 +4175,7 @@ class TestServiceOutageMonitor:
         ticket_note_4 = {
             "noteId": 68246617,
             "noteValue": "Some note",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_2,
             ],
@@ -4150,6 +4183,7 @@ class TestServiceOutageMonitor:
         ticket_note_5 = {
             "noteId": 68246618,
             "noteValue": "Some other note",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
                 serial_number_2,
@@ -4204,10 +4238,11 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4215,6 +4250,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -4322,6 +4358,7 @@ class TestServiceOutageMonitor:
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4329,6 +4366,7 @@ class TestServiceOutageMonitor:
         ticket_note_2 = {
             "noteId": 68246615,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4336,6 +4374,7 @@ class TestServiceOutageMonitor:
         ticket_note_3 = {
             "noteId": 68246616,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4343,6 +4382,7 @@ class TestServiceOutageMonitor:
         ticket_note_4 = {
             "noteId": 68246617,
             "noteValue": "Some note",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_2,
             ],
@@ -4350,6 +4390,7 @@ class TestServiceOutageMonitor:
         ticket_note_5 = {
             "noteId": 68246618,
             "noteValue": "Some other note",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
                 serial_number_2,
@@ -4397,10 +4438,11 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4408,6 +4450,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -4510,6 +4553,7 @@ class TestServiceOutageMonitor:
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4517,6 +4561,7 @@ class TestServiceOutageMonitor:
         ticket_note_2 = {
             "noteId": 68246615,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4524,6 +4569,7 @@ class TestServiceOutageMonitor:
         ticket_note_3 = {
             "noteId": 68246616,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
             ],
@@ -4531,6 +4577,7 @@ class TestServiceOutageMonitor:
         ticket_note_4 = {
             "noteId": 68246617,
             "noteValue": "Some note",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_2,
             ],
@@ -4538,6 +4585,7 @@ class TestServiceOutageMonitor:
         ticket_note_5 = {
             "noteId": 68246618,
             "noteValue": "Some other note",
+            "createdDate": "",
             "serviceNumber": [
                 serial_number_1,
                 serial_number_2,
@@ -4592,10 +4640,11 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4603,6 +4652,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -4640,9 +4690,10 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
         config = testconfig
         bruin_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4682,6 +4733,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -4692,7 +4744,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4752,6 +4804,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -4761,7 +4814,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4819,6 +4872,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -4828,7 +4882,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4876,6 +4930,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -4885,7 +4940,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4934,6 +4989,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -4943,7 +4999,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -4976,6 +5032,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
         velocloud_repository = Mock()
@@ -4989,7 +5046,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -5138,6 +5195,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
 
         velocloud_repository = Mock()
@@ -5147,7 +5205,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -5271,6 +5329,7 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
 
         velocloud_repository = Mock()
@@ -5280,7 +5339,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -5481,6 +5540,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=True)
@@ -5491,7 +5551,7 @@ class TestServiceOutageMonitor:
             return_value=all_links_grouped_by_edge_with_ha_info
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -5690,6 +5750,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -5700,7 +5761,7 @@ class TestServiceOutageMonitor:
             return_value=all_links_grouped_by_edge_with_ha_info
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -5898,6 +5959,7 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -5908,7 +5970,7 @@ class TestServiceOutageMonitor:
             return_value=all_links_grouped_by_edge_with_ha_info
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -6118,6 +6180,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -6131,7 +6194,7 @@ class TestServiceOutageMonitor:
             return_value=all_links_grouped_by_edge_with_ha_info
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -6362,6 +6425,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -6376,7 +6440,7 @@ class TestServiceOutageMonitor:
         )
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -6609,6 +6673,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -6622,7 +6687,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -6860,6 +6925,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -6873,7 +6939,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -7106,6 +7172,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -7119,7 +7186,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -7351,6 +7418,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -7364,7 +7432,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -7593,6 +7661,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -7608,7 +7677,7 @@ class TestServiceOutageMonitor:
 
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -7838,6 +7907,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -7851,7 +7921,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8082,6 +8152,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -8095,7 +8166,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8322,6 +8393,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -8335,7 +8407,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8562,6 +8634,7 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
         bruin_repository.post_notification_email_milestone = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_repository.is_edge_up = Mock(return_value=False)
@@ -8577,7 +8650,7 @@ class TestServiceOutageMonitor:
 
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8627,10 +8700,11 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         ha_repository = Mock()
         bruin_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8658,11 +8732,12 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         ha_repository = Mock()
         bruin_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_link = Mock(return_value=False)
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8697,11 +8772,12 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         ha_repository = Mock()
         bruin_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_link = Mock(return_value=False)
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8737,11 +8813,12 @@ class TestServiceOutageMonitor:
         ha_repository = Mock()
         bruin_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_link = Mock(return_value=True)
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8808,6 +8885,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         notifications_repository = Mock()
         triage_repository = Mock()
@@ -8822,7 +8900,7 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_events_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -8942,6 +9020,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         triage_repository = Mock()
         triage_repository.build_triage_note = Mock(return_value=triage_note)
@@ -8961,7 +9040,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9086,6 +9165,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         customer_cache_repository = Mock()
         digi_repository = Mock()
@@ -9106,7 +9186,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9229,6 +9309,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         velocloud_repository = Mock()
         triage_repository = Mock()
@@ -9244,7 +9325,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9356,6 +9437,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         velocloud_repository = Mock()
         triage_repository = Mock()
@@ -9371,7 +9453,7 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9482,6 +9564,7 @@ class TestServiceOutageMonitor:
             ]
         }
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_link = Mock(return_value=True)
 
@@ -9500,7 +9583,7 @@ class TestServiceOutageMonitor:
             f'details at https://app.bruin.com/t/{ticket_id}.'
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9542,11 +9625,12 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9579,11 +9663,12 @@ class TestServiceOutageMonitor:
         triage_repository = Mock()
         metrics_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9747,6 +9832,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(side_effect=[False, True])
@@ -9757,7 +9843,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -9939,6 +10025,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
         bruin_repository.append_digi_reboot_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(side_effect=[True, False])
@@ -9950,7 +10037,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -10133,6 +10220,7 @@ class TestServiceOutageMonitor:
         bruin_repository.append_task_result_change_note = CoroutineMock()
         bruin_repository.append_digi_reboot_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(side_effect=[True, False])
@@ -10144,7 +10232,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -10320,6 +10408,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_repository.is_faulty_link = Mock(return_value=True)
@@ -10330,7 +10419,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -10504,6 +10593,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(side_effect=[False, True])
@@ -10514,7 +10604,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -10689,6 +10779,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
@@ -10699,7 +10790,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -10864,6 +10955,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
@@ -10874,7 +10966,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11027,6 +11119,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
@@ -11037,7 +11130,7 @@ class TestServiceOutageMonitor:
 
         task_result = "Wireless Repair Intervention Needed"
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11206,6 +11299,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(side_effect=[False, True])
@@ -11214,7 +11308,7 @@ class TestServiceOutageMonitor:
         digi_repository.get_digi_links = Mock(return_value=digi_list)
         digi_repository.get_interface_name_from_digi_note = Mock(return_value='GE3')
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11386,6 +11480,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_detail_work_queue = CoroutineMock()
         bruin_repository.append_task_result_change_note = CoroutineMock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.is_faulty_link = Mock(return_value=True)
@@ -11394,7 +11489,7 @@ class TestServiceOutageMonitor:
         digi_repository.get_digi_links = Mock(return_value=digi_list)
         digi_repository.get_interface_name_from_digi_note = Mock(return_value='GE3')
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11434,6 +11529,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -11444,7 +11540,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11504,10 +11600,11 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         bruin_repository = Mock()
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_queue_ticket_response)
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11552,10 +11649,11 @@ class TestServiceOutageMonitor:
         velocloud_repository = Mock()
         bruin_repository = Mock()
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_queue_ticket_response)
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11628,10 +11726,11 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11697,10 +11796,11 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11767,10 +11867,11 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11837,10 +11938,11 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=change_detail_work_queue_response)
 
+        utils_repository = Mock()
         outage_repository = Mock()
         config = testconfig
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -11863,6 +11965,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -11873,7 +11976,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12049,6 +12152,7 @@ class TestServiceOutageMonitor:
             f'to {task_result} queue!'
         )
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
@@ -12072,7 +12176,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12153,6 +12257,7 @@ class TestServiceOutageMonitor:
                 ]
         }
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_repository.find_disconnected_wired_links = Mock()
@@ -12176,7 +12281,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12252,6 +12357,7 @@ class TestServiceOutageMonitor:
                 ]
         }
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=[])
@@ -12275,7 +12381,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12396,6 +12502,7 @@ class TestServiceOutageMonitor:
                 ]
         }
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
@@ -12419,7 +12526,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12500,6 +12607,7 @@ class TestServiceOutageMonitor:
             'status': 400,
         }
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
@@ -12523,7 +12631,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12676,6 +12784,7 @@ class TestServiceOutageMonitor:
 
         change_detail_work_queue_response = {'body': "Success", 'status': 200}
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
@@ -12699,7 +12808,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12839,6 +12948,7 @@ class TestServiceOutageMonitor:
 
         change_detail_work_queue_response = {'body': "Failed", 'status': 400}
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status['links'])
@@ -12862,7 +12972,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12925,6 +13035,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
 
@@ -12932,7 +13043,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock(return_value=severity_change_success)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -12988,6 +13099,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
 
@@ -12995,7 +13107,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock(return_value=severity_change_success)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13084,6 +13196,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
@@ -13093,7 +13206,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock(
             return_value=severity_change_success)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13197,6 +13310,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
@@ -13207,7 +13321,7 @@ class TestServiceOutageMonitor:
         bruin_repository.change_ticket_severity_for_disconnected_links = CoroutineMock(
             return_value=severity_change_success)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13304,6 +13418,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
@@ -13315,7 +13430,7 @@ class TestServiceOutageMonitor:
             return_value=severity_change_success
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13394,6 +13509,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
@@ -13405,7 +13521,7 @@ class TestServiceOutageMonitor:
             return_value=severity_change_success
         )
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13454,6 +13570,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
 
@@ -13461,7 +13578,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13513,6 +13630,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
+        utils_repository = Mock()
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(return_value=True)
 
@@ -13520,7 +13638,7 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket = CoroutineMock(return_value=get_ticket_response)
         bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13546,10 +13664,11 @@ class TestServiceOutageMonitor:
         customer_cache_repository = Mock()
         digi_repository = Mock()
         ha_repository = Mock()
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
@@ -13636,6 +13755,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
         velocloud_repository = Mock()
@@ -13646,7 +13766,7 @@ class TestServiceOutageMonitor:
         digi_repository = Mock()
         ha_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, utils_repository, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)

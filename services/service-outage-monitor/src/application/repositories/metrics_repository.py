@@ -33,6 +33,10 @@ class MetricsRepository:
         else:
             return 'Other'
 
+    @staticmethod
+    def _get_outage_type_label(outage_type):
+        return outage_type or 'Unknown'
+
     def increment_tasks_created(self, client, **labels):
         client = self._get_client_label(client)
         labels = {'client': client, **labels, **self._STATIC_LABELS}
@@ -48,7 +52,8 @@ class MetricsRepository:
         labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
-    def increment_tasks_autoresolved(self, client, **labels):
+    def increment_tasks_autoresolved(self, client, outage_type, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        outage_type = self._get_outage_type_label(outage_type)
+        labels = {'client': client, 'outage_type': outage_type, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()

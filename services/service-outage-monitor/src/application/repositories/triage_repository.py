@@ -68,10 +68,15 @@ class TriageRepository:
                 '',
             ]
 
-        if outage_type is Outages.HA_SOFT_DOWN:
-            ticket_note_lines.append('High Availability - Edge Offline\n')
-        elif outage_type is Outages.HA_HARD_DOWN:
-            ticket_note_lines.append('High Availability - Location Offline\n')
+        if outage_type:
+            ticket_note_lines.append(f'Outage Type: {outage_type.value}')
+
+            if outage_type is Outages.HA_SOFT_DOWN:
+                ticket_note_lines.append('High Availability - Edge Offline')
+            elif outage_type is Outages.HA_HARD_DOWN:
+                ticket_note_lines.append('High Availability - Location Offline')
+
+            ticket_note_lines.append('')
 
         ticket_note_lines += [
             f'Orchestrator Instance: {host}',
