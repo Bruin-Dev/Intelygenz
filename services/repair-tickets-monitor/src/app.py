@@ -1,27 +1,25 @@
 import asyncio
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from prometheus_client import start_http_server
-from pytz import timezone
-
-from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from prometheus_client import start_http_server
+from pytz import timezone
 
-from application.repositories.storage_repository import StorageRepository
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.new_tagged_emails_repository import NewTaggedEmailsRepository
-from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
-from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
-
-
-from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
+from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
+from application.repositories.new_tagged_emails_repository import NewTaggedEmailsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
+from application.repositories.storage_repository import StorageRepository
+from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
+from config import config
 
 
 class Container:
@@ -69,6 +67,12 @@ class Container:
         )
         self._repair_ticket_repository = RepairTicketKreRepository(self._event_bus, self._logger, config,
                                                                    self._notifications_repository)
+        # RPCs
+        append_note_to_ticket_rpc = AppendNoteToTicketRpc(
+            event_bus=self._event_bus,
+            logger=self._logger,
+            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"]
+        )
 
         # ACTIONS
         self._new_created_tickets_feedback = NewCreatedTicketsFeedback(
@@ -96,6 +100,7 @@ class Container:
             self._bruin_repository,
             self._new_tagged_emails_repository,
             self._repair_ticket_repository,
+            append_note_to_ticket_rpc
         )
 
     async def start_server(self):

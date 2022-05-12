@@ -1,11 +1,11 @@
-from shortuuid import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
 
 import humps
+from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application.repositories import nats_error_response
-from typing import Any, Dict, List, Tuple
 
 
 class BruinRepository:

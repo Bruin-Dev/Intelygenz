@@ -1,10 +1,11 @@
-import asyncio
 from unittest.mock import patch
 
+import asyncio
 import pytest
-from shortuuid import uuid
 from asynctest import CoroutineMock
+from shortuuid import uuid
 
+from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from config import testconfig as config
 
@@ -145,59 +146,45 @@ class TestRepairTicketRepository:
         email_id = "1234"
         validated_service_numbers = ["1234", "4567"]
         service_numbers_sites_map = {"1234": "site_1", "5678": "site_1"}
-        tickets_created = make_rta_ticket_payload(site_id="site_1", service_numbers=validated_service_numbers)
+        tickets_created = [TicketOutput(site_id="site_1", service_numbers=validated_service_numbers)]
 
         rpc_response = make_rpc_response(request_id=uuid_, status=200, body={"success": True})
 
         with patch.object(
             repair_ticket_kre_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_request_mock:
-
             rpc_request_mock.return_value.set_result(rpc_response)
             save_output_response = await repair_ticket_kre_repository.save_outputs(
-                email_id=email_id,
-                service_numbers_sites_map=service_numbers_sites_map,
-                tickets_created=tickets_created,
-                tickets_updated=[],
-                tickets_could_be_created=[],
-                tickets_could_be_updated=[],
-                tickets_cannot_be_created=[],
-                validated_ticket_numbers=[],
-                bruin_ticket_status_map=[],
-                bruin_ticket_call_type_map=[],
-                bruin_ticket_category_map=[],
+                RepairEmailOutput(
+                    email_id=email_id,
+                    service_numbers_sites_map=service_numbers_sites_map,
+                    tickets_created=tickets_created,
+                )
             )
 
         assert save_output_response["status"] == 200
 
     @pytest.mark.asyncio
     async def save_outputs__not_200_test(
-        self, event_bus, repair_ticket_kre_repository, make_rta_ticket_payload, make_rpc_response
+        self, repair_ticket_kre_repository, make_rta_ticket_payload, make_rpc_response
     ):
         email_id = "1234"
 
         validated_service_numbers = ["1234", "4567"]
         service_numbers_sites_map = {"1234": "site_1", "5678": "site_1"}
-        tickets_created = make_rta_ticket_payload(site_id="site_1", service_numbers=validated_service_numbers)
+        tickets_created = [TicketOutput(site_id="site_1", service_numbers=validated_service_numbers)]
         rpc_response = make_rpc_response(request_id=uuid_, status=400, body="Error")
 
         with patch.object(
             repair_ticket_kre_repository._event_bus, "rpc_request", return_value=asyncio.Future()
         ) as rpc_request_mock:
-
             rpc_request_mock.return_value.set_result(rpc_response)
             save_output_response = await repair_ticket_kre_repository.save_outputs(
-                email_id=email_id,
-                service_numbers_sites_map=service_numbers_sites_map,
-                tickets_created=tickets_created,
-                tickets_updated=[],
-                tickets_could_be_created=[],
-                tickets_could_be_updated=[],
-                tickets_cannot_be_created=[],
-                validated_ticket_numbers=[],
-                bruin_ticket_status_map=[],
-                bruin_ticket_call_type_map=[],
-                bruin_ticket_category_map=[],
+                RepairEmailOutput(
+                    email_id=email_id,
+                    service_numbers_sites_map=service_numbers_sites_map,
+                    tickets_created=tickets_created,
+                )
             )
 
         assert save_output_response["status"] == 400

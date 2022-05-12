@@ -1,7 +1,7 @@
 from datetime import datetime
 from unittest.mock import patch, Mock, call
-import asyncio
 
+import asyncio
 import pytest
 from asynctest import CoroutineMock
 from shortuuid import uuid
