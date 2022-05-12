@@ -1,5 +1,4 @@
 import asyncio
-
 import redis
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
@@ -17,6 +16,7 @@ from application.actions.get_client_info import GetClientInfo
 from application.actions.get_client_info_by_did import GetClientInfoByDID
 from application.actions.get_management_status import GetManagementStatus
 from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
+from application.actions.get_service_number_topics import GetServiceNumberTopics
 from application.actions.get_single_ticket_basic_info import GetSingleTicketBasicInfo
 from application.actions.get_site import GetSite
 from application.actions.get_ticket_details import GetTicketDetails
@@ -91,6 +91,7 @@ class Container:
         self._subscriber_mark_email_as_done = NATSClient(config, logger=self._logger)
         self._subscriber_link_ticket_to_email = NATSClient(config, logger=self._logger)
         self._subscriber_post_notification_email_milestone = NATSClient(config, self._logger)
+        self._subscriber_get_service_number_topics = NATSClient(config, self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -134,6 +135,10 @@ class Container:
             self._subscriber_post_notification_email_milestone,
             consumer_name='post_notification_email_milestone'
         )
+        self._event_bus.add_consumer(
+            self._subscriber_get_service_number_topics,
+            consumer_name='get_service_number_topics'
+        )
 
         self._event_bus.set_producer(self._publisher)
 
@@ -168,6 +173,11 @@ class Container:
         self._mark_email_as_done = MarkEmailAsDone(self._logger, self._event_bus, self._bruin_repository)
         self._link_ticket_to_email = LinkTicketToEmail(self._logger, self._event_bus, self._bruin_repository)
         self._post_notification_email_milestone = PostNotificationEmailMilestone(
+            self._logger,
+            self._event_bus,
+            self._bruin_repository
+        )
+        self._get_service_number_topics = GetServiceNumberTopics(
             self._logger,
             self._event_bus,
             self._bruin_repository
@@ -233,10 +243,15 @@ class Container:
                                                         "mark_email_as_done", is_async=True, logger=self._logger)
         self._action_link_ticket_to_email = ActionWrapper(self._link_ticket_to_email,
                                                           "link_ticket_to_email", is_async=True, logger=self._logger)
-
         self._action_post_notification_email_milestone = ActionWrapper(
             self._post_notification_email_milestone,
             'post_notification_email_milestone',
+            is_async=True,
+            logger=self._logger
+        )
+        self._action_get_service_number_topics = ActionWrapper(
+            self._get_service_number_topics,
+            'get_service_number_topics',
             is_async=True,
             logger=self._logger
         )
@@ -341,12 +356,14 @@ class Container:
                                                  topic="bruin.link.ticket.email",
                                                  action_wrapper=self._action_link_ticket_to_email,
                                                  queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(
-            consumer_name='post_notification_email_milestone',
-            topic='bruin.notification.email.milestone',
-            action_wrapper=self._action_post_notification_email_milestone,
-            queue='bruin_bridge'
-        )
+        await self._event_bus.subscribe_consumer(consumer_name='post_notification_email_milestone',
+                                                 topic='bruin.notification.email.milestone',
+                                                 action_wrapper=self._action_post_notification_email_milestone,
+                                                 queue='bruin_bridge')
+        await self._event_bus.subscribe_consumer(consumer_name='get_service_number_topics',
+                                                 topic='bruin.get.topics',
+                                                 action_wrapper=self._action_get_service_number_topics,
+                                                 queue='bruin_bridge')
 
     async def start_server(self):
         await self._server.run_server()
