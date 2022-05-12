@@ -425,7 +425,7 @@ class OutageMonitor:
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
             await self._notify_successful_autoresolve(outage_ticket_id)
 
-            self._metrics_repository.increment_tickets_autoresolved(
+            self._metrics_repository.increment_tasks_autoresolved(
                 client=client_name, outage_type='', severity=outage_ticket_severity
             )
             self._logger.info(
@@ -540,7 +540,7 @@ class OutageMonitor:
                                       f"{ticket_creation_response}")
                     if ticket_creation_response_status in range(200, 300):
                         self._logger.info(f'[{outage_type.value}] Successfully created outage ticket for edge {edge}.')
-                        self._metrics_repository.increment_tickets_created(
+                        self._metrics_repository.increment_tasks_created(
                             client=client_name, outage_type=outage_type.value, severity=target_severity
                         )
                         slack_message = (
@@ -620,7 +620,7 @@ class OutageMonitor:
                             ticket_creation_response_body, edge_status, cached_edge, outage_type
                         )
                         if was_ticket_reopened:
-                            self._metrics_repository.increment_tickets_reopened(
+                            self._metrics_repository.increment_tasks_reopened(
                                 client=client_name, outage_type=outage_type.value, severity=target_severity
                             )
 
@@ -656,7 +656,7 @@ class OutageMonitor:
                             f'(ID = {ticket_creation_response_body}). Its ticket detail was automatically unresolved '
                             f'by Bruin. Appending reopen note to ticket...'
                         )
-                        self._metrics_repository.increment_tickets_reopened(
+                        self._metrics_repository.increment_tasks_reopened(
                             client=client_name, outage_type=outage_type.value, severity=target_severity
                         )
 
@@ -694,7 +694,7 @@ class OutageMonitor:
                             f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                             f'appended to it. Appending initial triage note for this service number...'
                         )
-                        self._metrics_repository.increment_tickets_reopened(
+                        self._metrics_repository.increment_tasks_reopened(
                             client=client_name, outage_type=outage_type.value, severity=target_severity
                         )
 
