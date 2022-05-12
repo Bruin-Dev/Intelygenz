@@ -2,12 +2,12 @@ from enum import Enum, auto
 
 
 class Outages(Enum):
-    LINK_DOWN = 'Link Down Outage (no HA)'
-    HARD_DOWN = 'Hard Down Outage (no HA)'
+    LINK_DOWN = 'Link Down (no HA)'
+    HARD_DOWN = 'Hard Down (no HA)'
 
-    HA_LINK_DOWN = 'Link Down Outage (HA)'
-    HA_SOFT_DOWN = 'Soft Down Outage (HA)'
-    HA_HARD_DOWN = 'Hard Down Outage (HA)'
+    HA_LINK_DOWN = 'Link Down (HA)'
+    HA_SOFT_DOWN = 'Soft Down (HA)'
+    HA_HARD_DOWN = 'Hard Down (HA)'
 
 
 class ForwardQueues(Enum):
