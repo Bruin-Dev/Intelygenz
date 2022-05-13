@@ -5,8 +5,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Assets(List['Asset']):
-    def get_by_allowed_topic_category(self, category: str):
-        return [asset for asset in self if asset.is_topic_category_allowed(category)]
+    def get_allowed_for(self, category: str):
+        return [asset for asset in self if asset.is_allowed_for(category)]
 
 
 @dataclass
@@ -17,7 +17,7 @@ class Asset:
     id: 'AssetId'
     allowed_topics: List['Topic']
 
-    def is_topic_category_allowed(self, category: str):
+    def is_allowed_for(self, category: str):
         return any([allowed_topic.category == category for allowed_topic in self.allowed_topics])
 
 
