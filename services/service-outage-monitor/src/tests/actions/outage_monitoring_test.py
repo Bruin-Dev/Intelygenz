@@ -5988,6 +5988,10 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_200_forward_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        forward_time = testconfig.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -6004,6 +6008,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -6019,6 +6024,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -6027,6 +6033,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -6205,6 +6212,9 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -6222,8 +6232,8 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+            forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
+            has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6235,6 +6245,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_200_not_forward_to_hnoc_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -6251,6 +6264,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         bruin_client_info = {
@@ -6265,6 +6279,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -6273,6 +6288,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -6453,6 +6469,9 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -6480,6 +6499,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_409_forward_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -6496,6 +6518,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -6511,6 +6534,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -6519,6 +6543,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -6654,6 +6679,7 @@ class TestServiceOutageMonitor:
         }
 
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+        forward_time = wait_seconds_until_forward / 60
 
         event_bus = Mock()
         scheduler = Mock()
@@ -6699,6 +6725,9 @@ class TestServiceOutageMonitor:
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY)
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6714,16 +6743,16 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
-            forward_time=wait_seconds_until_forward / 60,
+            forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
+            has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info, client_name,
-            outage_type, target_severity,
+            outage_type, target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
             cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, ticket_id, client_name, outage_type,
-            target_severity,
+            target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -6732,6 +6761,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_in_same_outage_state_ticket_creation_return_409_not_forward_to_hnoc_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -6748,6 +6780,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -6763,6 +6796,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -6771,6 +6805,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -6951,6 +6986,9 @@ class TestServiceOutageMonitor:
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY)
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -6968,11 +7006,11 @@ class TestServiceOutageMonitor:
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info, client_name,
-            outage_type, target_severity,
+            outage_type, target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
             cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, ticket_id, client_name, outage_type,
-            target_severity,
+            target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -6981,6 +7019,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_return_409_unchanged_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -6997,6 +7038,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -7012,6 +7054,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -7020,6 +7063,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -7197,6 +7241,9 @@ class TestServiceOutageMonitor:
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.NOT_CHANGED)
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
@@ -7214,11 +7261,11 @@ class TestServiceOutageMonitor:
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info, client_name,
-            outage_type, target_severity,
+            outage_type, target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
             cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, ticket_id, client_name, outage_type,
-            target_severity,
+            target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -7227,6 +7274,10 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_471_forward_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        forward_time = testconfig.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -7243,6 +7294,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -7258,6 +7310,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -7266,6 +7319,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -7442,6 +7496,9 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7456,8 +7513,8 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+            forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
+            has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -7471,6 +7528,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_471_not_forward_to_hnoc_test(self):
         outage_type = Outages.HA_LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -7487,6 +7547,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         bruin_client_info = {
@@ -7501,6 +7562,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -7509,6 +7571,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -7688,6 +7751,9 @@ class TestServiceOutageMonitor:
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7714,6 +7780,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_472_forward_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -7730,6 +7799,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -7745,6 +7815,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -7753,6 +7824,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -7888,6 +7960,7 @@ class TestServiceOutageMonitor:
         }
 
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+        forward_time = wait_seconds_until_forward / 60
 
         event_bus = Mock()
         scheduler = Mock()
@@ -7932,6 +8005,9 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -7946,8 +8022,8 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
-            forward_time=wait_seconds_until_forward / 60,
+            forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
+            has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
@@ -7960,6 +8036,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_472_not_forward_to_hnoc_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -7976,6 +8055,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         bruin_client_info = {
@@ -7990,6 +8070,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -7998,6 +8079,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -8177,6 +8259,9 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -8202,6 +8287,10 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_returning_473_forward_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        forward_time = testconfig.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -8218,6 +8307,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         client_name = 'METTEL/NEW YORK'
@@ -8233,6 +8323,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -8241,6 +8332,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -8417,6 +8509,9 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -8431,8 +8526,8 @@ class TestServiceOutageMonitor:
         )
         bruin_repository.post_notification_email_milestone.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
-            ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
-            forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+            forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
+            has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
@@ -8444,6 +8539,9 @@ class TestServiceOutageMonitor:
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_473_not_forward_to_hnoc_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         edge_primary_serial = 'VC1234567'
         edge_standby_serial = 'VC5678901'
@@ -8460,6 +8558,7 @@ class TestServiceOutageMonitor:
         edge_id = 1
         edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
         logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
 
         client_id = 9994
         bruin_client_info = {
@@ -8474,6 +8573,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_standby_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
         cached_edge_standby = {
             'edge': edge_full_id,
@@ -8482,6 +8582,7 @@ class TestServiceOutageMonitor:
             'ha_serial_number': edge_primary_serial,
             'bruin_client_info': bruin_client_info,
             'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
         }
 
         edge_link_1_info = {
@@ -8661,6 +8762,9 @@ class TestServiceOutageMonitor:
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor.schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -9681,6 +9785,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -9852,7 +9959,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -9869,6 +9976,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_wrong_interface_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -10046,7 +10156,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -10064,6 +10174,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_wrong_interface_failed_reboot_request_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -10241,7 +10354,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -10258,6 +10371,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_edge_outage_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -10428,7 +10544,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_not_called()
@@ -10443,6 +10559,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_failed_to_change_task_result_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -10613,7 +10732,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -10630,6 +10749,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_under_30_mins_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -10799,7 +10921,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -10816,6 +10938,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_failed_rpc_call_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -10975,7 +11100,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -10990,6 +11115,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_no_digi_note_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -11136,7 +11264,7 @@ class TestServiceOutageMonitor:
                                        digi_repository, ha_repository)
         await outage_monitor._check_for_failed_digi_reboot(
             ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-            target_severity,
+            target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
         )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -11151,6 +11279,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_task_result_already_changed_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -11317,7 +11448,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -11331,6 +11462,9 @@ class TestServiceOutageMonitor:
     async def check_for_failed_digi_reboot_no_digi_links_test(self):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number_1 = 'VC1234567'
@@ -11498,7 +11632,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._check_for_failed_digi_reboot(
                 ticket_id, logical_id_list, edge_1_serial, new_links_grouped_by_edge_1, client_name, outage_type,
-                target_severity,
+                target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
             )
 
         digi_repository.get_digi_links.assert_called_once_with(logical_id_list)
@@ -11524,6 +11658,10 @@ class TestServiceOutageMonitor:
 
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        forward_time = testconfig.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         event_bus = Mock()
         logger = Mock()
@@ -11553,15 +11691,18 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
                 outage_monitor.schedule_forward_to_hnoc_queue(
-                    ticket_id=ticket_id, serial_number=serial_number, client_name=client_name,
-                    outage_type=outage_type, severity=target_severity,
-                    forward_time=config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down'],
+                    forward_time=forward_time, ticket_id=ticket_id, serial_number=serial_number,
+                    client_name=client_name, outage_type=outage_type, severity=target_severity,
+                    has_faulty_digi_link=has_faulty_digi_link, has_faulty_byob_link=has_faulty_byob_link,
+                    faulty_link_types=faulty_link_types
                 )
 
         scheduler.add_job.assert_called_once_with(
             outage_monitor.forward_ticket_to_hnoc_queue, 'date',
             kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'client_name': client_name,
-                    'outage_type': outage_type, 'severity': target_severity},
+                    'outage_type': outage_type, 'severity': target_severity,
+                    'has_faulty_digi_link': has_faulty_digi_link, 'has_faulty_byob_link': has_faulty_byob_link,
+                    'faulty_link_types': faulty_link_types},
             run_date=forward_task_run_date,
             replace_existing=True,
             misfire_grace_time=9999,
@@ -11573,6 +11714,9 @@ class TestServiceOutageMonitor:
     async def change_detail_work_queue_2xx_status_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number = 'VC1234567'
@@ -11614,8 +11758,10 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                await outage_monitor.change_detail_work_queue_to_hnoc(ticket_id, serial_number, client_name,
-                                                                      outage_type, target_severity)
+                await outage_monitor.change_detail_work_queue_to_hnoc(
+                    ticket_id, serial_number, client_name, outage_type, target_severity, has_faulty_digi_link,
+                    has_faulty_byob_link, faulty_link_types
+                )
 
         outage_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(serial_number=serial_number,
                                                                                           ticket_id=ticket_id,
@@ -11626,6 +11772,9 @@ class TestServiceOutageMonitor:
     async def change_detail_work_queue_4xx_status_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number = 'VC1234567'
@@ -11663,8 +11812,10 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
-                await outage_monitor.change_detail_work_queue_to_hnoc(ticket_id, serial_number, client_name,
-                                                                      outage_type, target_severity)
+                await outage_monitor.change_detail_work_queue_to_hnoc(
+                    ticket_id, serial_number, client_name, outage_type, target_severity, has_faulty_digi_link,
+                    has_faulty_byob_link, faulty_link_types
+                )
 
         outage_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(serial_number=serial_number,
                                                                                           ticket_id=ticket_id,
@@ -11675,6 +11826,9 @@ class TestServiceOutageMonitor:
     async def forward_ticket_to_hnoc_queue_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number = 'VC1234567'
@@ -11735,8 +11889,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, client_name, outage_type,
-                                                          target_severity)
+        await outage_monitor.forward_ticket_to_hnoc_queue(
+            ticket_id, serial_number, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
@@ -11749,6 +11905,9 @@ class TestServiceOutageMonitor:
     async def forward_ticket_to_hnoc_queue_non_2xx_ticket_detail_return_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number = 'VC1234567'
@@ -11805,8 +11964,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, client_name, outage_type,
-                                                          target_severity)
+        await outage_monitor.forward_ticket_to_hnoc_queue(
+            ticket_id, serial_number, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_not_awaited()
@@ -11816,6 +11977,9 @@ class TestServiceOutageMonitor:
     async def forward_ticket_to_hnoc_queue_resolved_ticket_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number = 'VC1234567'
@@ -11876,8 +12040,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, client_name, outage_type,
-                                                          target_severity)
+        await outage_monitor.forward_ticket_to_hnoc_queue(
+            ticket_id, serial_number, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_not_awaited()
@@ -11887,6 +12053,9 @@ class TestServiceOutageMonitor:
     async def forward_ticket_to_hnoc_queue_non_2xx_change_work_queue_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         serial_number = 'VC1234567'
@@ -11947,8 +12116,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor.forward_ticket_to_hnoc_queue(ticket_id, serial_number, client_name, outage_type,
-                                                          target_severity)
+        await outage_monitor.forward_ticket_to_hnoc_queue(
+            ticket_id, serial_number, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         bruin_repository.change_detail_work_queue.assert_awaited_once_with(
@@ -12008,6 +12179,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12181,8 +12355,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_called_once_with(
@@ -12203,6 +12379,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_faulty_edge_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12286,8 +12465,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_not_called()
@@ -12303,6 +12484,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_no_wired_links_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12386,8 +12570,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_called_once_with(
@@ -12404,6 +12590,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_no_whitelist_links_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12531,8 +12720,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_called_once_with(
@@ -12549,6 +12740,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_failed_ticket_details_rpc_call_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12636,8 +12830,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_called_once_with(
@@ -12654,6 +12850,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_already_forwarded_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12813,8 +13012,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_called_once_with(
@@ -12831,6 +13032,9 @@ class TestServiceOutageMonitor:
     async def attempt_forward_to_asr_failed_to_change_task_result_test(self):
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
 
         client_name = 'METTEL/NEW YORK'
         ticket_id = 12345
@@ -12977,8 +13181,10 @@ class TestServiceOutageMonitor:
                                        triage_repository, customer_cache_repository, metrics_repository,
                                        digi_repository, ha_repository)
 
-        await outage_monitor._attempt_forward_to_asr(cached_edge, edge_status, ticket_id, client_name, outage_type,
-                                                     target_severity)
+        await outage_monitor._attempt_forward_to_asr(
+            cached_edge, edge_status, ticket_id, client_name, outage_type, target_severity, has_faulty_digi_link,
+            has_faulty_byob_link, faulty_link_types
+        )
 
         outage_repository.is_faulty_edge.assert_called_once_with(edge_status["edgeState"])
         outage_repository.find_disconnected_wired_links.assert_called_once_with(

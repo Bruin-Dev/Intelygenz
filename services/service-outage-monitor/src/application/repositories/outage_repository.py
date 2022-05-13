@@ -25,13 +25,13 @@ class OutageRepository:
     def is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
-    def _get_link_type(self, link, links_configuration):
+    def get_link_type(self, link, links_configuration):
         for link_configuration in links_configuration:
             if link['interface'] in link_configuration['interfaces']:
                 return link_configuration['type']
 
     def _is_link_wired(self, link, links_configuration):
-        link_type = self._get_link_type(link, links_configuration)
+        link_type = self.get_link_type(link, links_configuration)
         return link_type == 'WIRED'
 
     def is_any_link_disconnected(self, links: list) -> bool:

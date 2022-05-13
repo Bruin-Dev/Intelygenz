@@ -1,9 +1,9 @@
 from prometheus_client import Counter
 
 COMMON_LABELS = ['feature', 'system', 'topic', 'client', 'host', 'outage_type', 'severity']
-CREATE_LABELS = []
-REOPEN_LABELS = []
-FORWARD_LABELS = ['target_queue']
+CREATE_LABELS = ['has_digi', 'has_byob', 'link_types']
+REOPEN_LABELS = ['has_digi', 'has_byob', 'link_types']
+FORWARD_LABELS = ['has_digi', 'has_byob', 'link_types', 'target_queue']
 AUTORESOLVE_LABELS = []
 
 
@@ -34,22 +34,34 @@ class MetricsRepository:
             return 'Other'
 
     @staticmethod
+    def _get_link_types_label(link_types):
+        if not link_types:
+            return ''
+        elif len(link_types) == 1:
+            return link_types[0].title()
+        else:
+            return 'Both'
+
+    @staticmethod
     def _get_outage_type_label(outage_type):
         return outage_type or 'Unknown'
 
-    def increment_tasks_created(self, client, **labels):
+    def increment_tasks_created(self, client, link_types, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_types = self._get_link_types_label(link_types)
+        labels = {'client': client, 'link_types': link_types, **labels, **self._STATIC_LABELS}
         self._tasks_created.labels(**labels).inc()
 
-    def increment_tasks_reopened(self, client, **labels):
+    def increment_tasks_reopened(self, client, link_types, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_types = self._get_link_types_label(link_types)
+        labels = {'client': client, 'link_types': link_types, **labels, **self._STATIC_LABELS}
         self._tasks_reopened.labels(**labels).inc()
 
-    def increment_tasks_forwarded(self, client, **labels):
+    def increment_tasks_forwarded(self, client, link_types, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_types = self._get_link_types_label(link_types)
+        labels = {'client': client, 'link_types': link_types, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
     def increment_tasks_autoresolved(self, client, outage_type, **labels):
