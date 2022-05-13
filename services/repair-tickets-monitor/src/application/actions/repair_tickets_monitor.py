@@ -14,8 +14,8 @@ from application.domain.repair_email_output import RepairEmailOutput, TicketOutp
     CreateTicketsOutput, PotentialTicketsOutput
 from application.domain.ticket import Ticket, TicketStatus
 from application.exceptions import ResponseException
+from application.rpc import RpcError
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
-from application.rpc.base_rpc import RpcError
 
 
 def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str, str]) -> List[TicketOutput]:

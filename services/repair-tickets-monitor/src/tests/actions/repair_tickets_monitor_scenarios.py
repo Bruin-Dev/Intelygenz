@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.domain.ticket import Ticket, TicketStatus
-from application.rpc.base_rpc import RpcError
+from application.rpc import RpcError
 
 
 @dataclass

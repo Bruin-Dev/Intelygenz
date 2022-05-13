@@ -6,8 +6,8 @@ from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 from pytest import mark, raises, fixture
 
-from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc, Request, RequestBody
-from application.rpc.base_rpc import RpcLogger, RpcError, RpcResponse
+from application.rpc import RpcLogger, RpcError, RpcResponse, RpcRequest
+from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc, RequestBody
 
 
 class TestAppendNoteToTicket:
@@ -23,7 +23,7 @@ class TestAppendNoteToTicket:
         await append_note_to_ticket_rpc(ticket_id, note)
 
         # then
-        append_note_to_ticket_rpc.send.assert_awaited_once_with(Request.construct(
+        append_note_to_ticket_rpc.send.assert_awaited_once_with(RpcRequest.construct(
             request_id=ANY,
             body=RequestBody(ticket_id=hash("any_ticket_id"), note="any_note")
         ))
@@ -64,7 +64,7 @@ def make_append_note_to_ticket_rpc() -> Callable[..., AppendNoteToTicketRpc]:
         timeout: int = hash("any_timeout"),
     ):
         append_note_to_ticket_rpc = AppendNoteToTicketRpc(event_bus, logger, timeout)
-        append_note_to_ticket_rpc.start = Mock(return_value=("a_request_id", Mock(RpcLogger)))
+        append_note_to_ticket_rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
         append_note_to_ticket_rpc.send = CoroutineMock()
         return append_note_to_ticket_rpc
 

@@ -1,24 +1,24 @@
 from logging import Logger
 from typing import Callable
-from unittest.mock import Mock
+from unittest.mock import Mock, ANY
 
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 from pydantic import ValidationError
 from pytest import fixture, mark, raises
 
-from application.rpc.base_rpc import Rpc, RpcLogger, RpcRequest, RpcResponse, OK_STATUS
+from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse, OK_STATUS
 
 
 class TestRpc:
     def requests_are_properly_started_test(self, make_rpc):
         rpc = make_rpc()
 
-        subject_request_id, subject_logger = rpc.start()
+        subject_request, subject_logger = rpc.start()
 
-        assert subject_request_id is not None
-        assert isinstance(subject_request_id, str)
-        assert subject_logger.extra.get("request_id") == subject_request_id
+        assert subject_request is not None
+        assert subject_request == RpcRequest.construct(request_id=ANY)
+        assert subject_logger.extra.get("request_id") == subject_request.request_id
 
     @mark.asyncio
     async def responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
