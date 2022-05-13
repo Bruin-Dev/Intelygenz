@@ -4,17 +4,26 @@ No requirements.
 
 ## Providers
 
-No provider.
+No providers.
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_kre-rta-runtime"></a> [kre-rta-runtime](#module\_kre-rta-runtime) | ../../modules/kre-runtime | n/a |
+
+## Resources
+
+No resources.
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| CURRENT\_ENVIRONMENT | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
+| <a name="input_CURRENT_ENVIRONMENT"></a> [CURRENT\_ENVIRONMENT](#input\_CURRENT\_ENVIRONMENT) | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| kre\_runtime\_hosted\_zone\_id | n/a |
-
+| <a name="output_kre_runtime_hosted_zone_id"></a> [kre\_runtime\_hosted\_zone\_id](#output\_kre\_runtime\_hosted\_zone\_id) | n/a |

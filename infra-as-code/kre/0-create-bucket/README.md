@@ -2,32 +2,34 @@
 
 | Name | Version |
 |------|---------|
-| terraform | = 0.14.4 |
-| aws | =3.4.0 |
-| external | = 1.2.0 |
-| helm | = 1.3.2 |
-| kubernetes | = 2.0.1 |
-| local | = 1.4.0 |
-| null | = 2.1.0 |
-| random | = 2.3.0 |
-| template | = 2.1.0 |
-| tls | = 2.2.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1, < 1.2 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | = 3.70.0 |
+| <a name="requirement_local"></a> [local](#requirement\_local) | = 2.1.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | =3.4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | = 3.70.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_s3_bucket.bucket](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/s3_bucket) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| AWS\_SECRET\_ACCESS\_KEY | AWS Secret Access Key credentials | `string` | `""` | no |
-| CURRENT\_ENVIRONMENT | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
-| common\_info | Global Tags # kre infrastructure for mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation-kre",<br>  "provisioning": "Terraform"<br>}</pre> | no |
+| <a name="input_AWS_SECRET_ACCESS_KEY"></a> [AWS\_SECRET\_ACCESS\_KEY](#input\_AWS\_SECRET\_ACCESS\_KEY) | AWS Secret Access Key credentials | `string` | `""` | no |
+| <a name="input_CURRENT_ENVIRONMENT"></a> [CURRENT\_ENVIRONMENT](#input\_CURRENT\_ENVIRONMENT) | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
+| <a name="input_common_info"></a> [common\_info](#input\_common\_info) | Global Tags # kre infrastructure for mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation-kre",<br>  "provisioning": "Terraform"<br>}</pre> | no |
 
 ## Outputs
 
-No output.
-
+No outputs.
