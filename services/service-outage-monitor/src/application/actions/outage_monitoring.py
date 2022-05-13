@@ -23,7 +23,7 @@ from application import Outages, ForwardQueues, ChangeTicketSeverityStatus
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
-OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(outage_type.value for outage_type in Outages)
+OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(re.escape(outage_type.value) for outage_type in Outages)
 OUTAGE_TYPE_REGEX = re.compile(rf'Outage Type: (?P<outage_type>{OUTAGES_DISJUNCTION_FOR_REGEX})')
 
 
