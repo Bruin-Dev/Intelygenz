@@ -273,9 +273,8 @@ class InterMapperMonitor:
                 )
                 continue
 
-            can_detail_be_autoresolved_one_more_time = self._is_outage_ticket_detail_auto_resolvable(
-                relevant_notes, circuit_id, max_autoresolves=10
-            )
+            can_detail_be_autoresolved_one_more_time = self._is_outage_ticket_detail_auto_resolvable(relevant_notes,
+                                                                                                     circuit_id)
             if not can_detail_be_autoresolved_one_more_time:
                 self._logger.info(
                     f'Limit to autoresolve detail {ticket_detail_id} (circuit ID {circuit_id}) '
@@ -420,10 +419,9 @@ class InterMapperMonitor:
         seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
         return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
-    def _is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list,
-                                                 serial_number: str,
-                                                 max_autoresolves: int) -> bool:
+    def _is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list, serial_number: str) -> bool:
         regex = re.compile(r"^#\*(MetTel's IPA)\*#\nAuto-resolving task for")
+        max_autoresolves = self._config.INTERMAPPER_CONFIG['autoresolve']['max_autoresolves']
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:

@@ -46,6 +46,7 @@ INTERMAPPER_CONFIG = {
             'day': 1.5 * 60 * 60,
             'night': 3 * 60 * 60
         },
+        'max_autoresolves': 3,
         'product_category_list': ['Cloud Connect', 'Cloud Firewall', 'POTS in a Box', 'Premise Firewall',
                                   'Routers', 'SIP Trunking', 'Switches', 'VPNS', 'Wi-Fi'],
     },

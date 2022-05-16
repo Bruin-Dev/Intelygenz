@@ -39,6 +39,7 @@ INTERMAPPER_CONFIG = {
             'day': int(os.environ['GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME']),
             'night': int(os.environ['GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME'])
         },
+        'max_autoresolves': int(os.environ['MAX_AUTORESOLVES_PER_TICKET']),
         'product_category_list': json.loads(os.environ['WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE']),
     },
     'dri_parameters': json.loads(os.environ['DRI_PARAMETERS_FOR_PIAB_NOTES']),

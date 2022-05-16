@@ -1260,9 +1260,8 @@ class TestInterMapperMonitor:
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
-        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            relevant_notes_for_edge, circuit_id, max_autoresolves=10
-        )
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(relevant_notes_for_edge,
+                                                                                             circuit_id)
 
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
         bruin_repository.append_autoresolve_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id)
@@ -2114,9 +2113,8 @@ class TestInterMapperMonitor:
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
-        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            relevant_notes_for_edge, circuit_id, max_autoresolves=10
-        )
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(relevant_notes_for_edge,
+                                                                                             circuit_id)
 
         bruin_repository.resolve_ticket.assert_not_awaited()
         bruin_repository.append_autoresolve_note.assert_not_awaited()
@@ -2272,9 +2270,8 @@ class TestInterMapperMonitor:
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
-        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            relevant_notes_for_edge, circuit_id, max_autoresolves=10
-        )
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(relevant_notes_for_edge,
+                                                                                             circuit_id)
 
         bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
         bruin_repository.append_autoresolve_note.assert_not_awaited()
@@ -2748,36 +2745,23 @@ class TestInterMapperMonitor:
 
         intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
                                                  notifications_repository, bruin_repository, dri_repository)
-        autoresolve_limit = 3
 
-        ticket_bool1 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(
-            ticket_notes1, serial_number_1, autoresolve_limit
-        )
+        ticket_bool1 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes1, serial_number_1)
         assert ticket_bool1 is True
 
-        ticket_bool2 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(
-            ticket_notes2, serial_number_1, autoresolve_limit
-        )
+        ticket_bool2 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes2, serial_number_1)
         assert ticket_bool2 is True
 
-        ticket_bool3 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(
-            ticket_notes3, serial_number_1, autoresolve_limit
-        )
+        ticket_bool3 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes3, serial_number_1)
         assert ticket_bool3 is False
 
-        ticket_bool4 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(
-            ticket_notes4, serial_number_2, autoresolve_limit
-        )
+        ticket_bool4 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes4, serial_number_2)
         assert ticket_bool4 is False
 
-        ticket_bool5 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(
-            ticket_notes5, serial_number_1, autoresolve_limit
-        )
+        ticket_bool5 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes5, serial_number_1)
         assert ticket_bool5 is True
 
-        ticket_bool6 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(
-            ticket_notes5, serial_number_2, autoresolve_limit
-        )
+        ticket_bool6 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes5, serial_number_2)
         assert ticket_bool6 is True
 
     @pytest.mark.asyncio
