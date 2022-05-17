@@ -510,10 +510,10 @@ The following tools are required to access to the EKS clusters created for each 
   $ sudo apt-get install python3-pip
   ```
 
-- **kubectl**: It is necessary to have the command-line tool for Kubernetes in version `1.17.0` to interact with the cluster. It can be installed by following the commands shown below:
+- **kubectl**: It is necessary to have the command-line tool for Kubernetes in version `1.21.9` to interact with the cluster. It can be installed by following the commands shown below:
 
   ```sh
-  $ curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/linux/amd64/kubectl
+  $ curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.21.9/bin/linux/amd64/kubectl
   $ chmod +x ./kubectl
   $ sudo mv ./kubectl /usr/local/bin/kubectl
   ```
@@ -654,7 +654,7 @@ Remember: you have to know the role (developer, devops or ops) assigned per envi
     $ aws eks update-kubeconfig --name mettel-automation-dev --profile ops-role-automation-dev
 
     # example Automation-Enginer PRO cluster with profile Developer:
-    $ aws eks update-kubeconfig --name mettel-automation --profile ops-role-automation-pro
+    $ aws eks update-kubeconfig --name mettel-automation --profile developer-role-automation-pro
 
     # example Konstellation PRO cluster with profile Devops:
     $ aws eks update-kubeconfig --name mettel-automation-kre --profile devops-role-kre-pro
