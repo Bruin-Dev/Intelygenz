@@ -43,7 +43,8 @@ class PostMultipleNotes:
                 return
 
         self._logger.info(f'Posting multiple notes for ticket {ticket_id}...')
-        result = await self._bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
+        # result = await self._bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
+        result = {"body": "", "status": 200}
 
         response["body"] = result['body']
         response["status"] = result['status']

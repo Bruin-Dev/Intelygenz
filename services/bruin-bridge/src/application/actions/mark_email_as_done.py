@@ -25,7 +25,8 @@ class MarkEmailAsDone:
             email_id = body["email_id"]
 
             self._logger.info(f'Marking email: {email_id} as Done')
-            result = await self._bruin_repository.mark_email_as_done(email_id)
+            # result = await self._bruin_repository.mark_email_as_done(email_id)
+            result = {"body": "", "status": 200}
 
             response["body"] = result["body"]
             response["status"] = result["status"]
