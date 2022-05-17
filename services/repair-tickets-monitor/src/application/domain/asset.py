@@ -3,10 +3,12 @@ from typing import List
 from dataclasses import dataclass
 
 
-@dataclass
 class Assets(List['Asset']):
-    def get_allowed_for(self, category: str):
-        return [asset for asset in self if asset.is_allowed_for(category)]
+    def with_allowed_category(self, category: str) -> 'Assets':
+        return Assets(asset for asset in self if asset.is_allowed_for(category))
+
+    def with_no_topics(self) -> 'Assets':
+        return Assets(asset for asset in self if not asset.allowed_topics)
 
 
 @dataclass
@@ -17,8 +19,8 @@ class Asset:
     id: 'AssetId'
     allowed_topics: List['Topic']
 
-    def is_allowed_for(self, category: str):
-        return any([allowed_topic.category == category for allowed_topic in self.allowed_topics])
+    def is_allowed_for(self, category: str) -> bool:
+        return any(allowed_topic.category == category for allowed_topic in self.allowed_topics)
 
 
 @dataclass
@@ -27,8 +29,8 @@ class AssetId:
     Data structure that represents a Bruin asset identification.
     """
     service_number: str
-    client_id: int
-    site_id: int
+    client_id: str
+    site_id: str
 
 
 @dataclass

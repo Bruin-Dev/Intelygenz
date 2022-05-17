@@ -10,12 +10,14 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
 
+from application.domain.asset import Assets, AssetId, Asset
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput, \
     CreateTicketsOutput, PotentialTicketsOutput
-from application.domain.ticket import Ticket, TicketStatus
+from application.domain.ticket import Ticket, TicketStatus, Category
 from application.exceptions import ResponseException
 from application.rpc import RpcError
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
+from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 
 
 def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str, str]) -> List[TicketOutput]:
@@ -45,6 +47,7 @@ class RepairTicketsMonitor:
         new_tagged_emails_repository,
         repair_tickets_kre_repository,
         append_note_to_ticket_rpc: AppendNoteToTicketRpc,
+        get_asset_topics_rpc: GetAssetTopicsRpc,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -53,7 +56,9 @@ class RepairTicketsMonitor:
         self._bruin_repository = bruin_repository
         self._new_tagged_emails_repository = new_tagged_emails_repository
         self._repair_tickets_kre_repository = repair_tickets_kre_repository
+
         self.append_note_to_ticket_rpc = append_note_to_ticket_rpc
+        self.get_asset_topics_rpc = get_asset_topics_rpc
 
         self._semaphore = asyncio.BoundedSemaphore(
             self._config.MONITOR_CONFIG["semaphores"]["repair_tickets_concurrent"]
@@ -271,7 +276,51 @@ class RepairTicketsMonitor:
                 output.service_numbers_sites_map = service_number_site_map
                 self._logger.info("email_id=%s service_numbers_site_map=%s", email_id, service_number_site_map)
 
-                existing_tickets = await self._get_existing_tickets(client_id, service_number_site_map)
+                # Build the assets list
+                # This logic will be refactored into a new email_service.extract_entities() method
+
+                assets = Assets()
+                for service_number, site_id in service_number_site_map.items():
+                    asset_id = AssetId(
+                        service_number=service_number,
+                        site_id=site_id,
+                        client_id=client_id
+                    )
+
+                    try:
+                        allowed_asset_topics = await self.get_asset_topics_rpc(asset_id)
+                    except RpcError as e:
+                        allowed_asset_topics = {}
+                        self._logger.warning(f"[email_id={email_id}] _process_repair_email():"
+                                             f"get_topics_device_rpc({asset_id}): {e}")
+
+                    asset = Asset(id=asset_id, allowed_topics=allowed_asset_topics)
+                    assets.append(asset)
+
+                assets_without_topics = assets.with_no_topics()
+                assets_with_topics = Assets(asset for asset in assets if asset not in assets_without_topics)
+
+                allowed_assets = assets_with_topics.with_allowed_category(Category.SERVICE_OUTAGE.value)
+                not_allowed_assets = Assets(asset for asset in assets_with_topics if asset not in allowed_assets)
+
+                wireless_assets = not_allowed_assets.with_allowed_category(Category.WIRELESS_SERVICE_NOT_WORKING.value)
+                other_category_assets = Assets(asset for asset in not_allowed_assets if asset not in wireless_assets)
+
+                allowed_service_number_site_map = {asset.id.service_number: asset.id.site_id
+                                                   for asset in allowed_assets}
+                self._logger.info("email_id=%s allowed_service_numbers_site_map=%s",
+                                  email_id,
+                                  allowed_service_number_site_map)
+
+                if wireless_assets:
+                    output.tickets_cannot_be_created.append(TicketOutput(reason="contains_wireless_assets"))
+                elif other_category_assets:
+                    output.tickets_cannot_be_created.append(TicketOutput(reason="contains_other_assets"))
+                elif assets_without_topics:
+                    output.tickets_cannot_be_created.append(TicketOutput(reason="no_topics_detected"))
+
+                # Gather any existing tickets for the extracted assets
+                existing_tickets = await self._get_existing_tickets(client_id, allowed_service_number_site_map)
                 self._logger.info("email_id=%s existing_tickets=%s", email_id, existing_tickets)
             except ResponseException as e:
                 self._logger.error("email_id=%s Error in bruin %s, could not process email", email_id, e)
@@ -292,7 +341,7 @@ class RepairTicketsMonitor:
                 map_with_cancellations,
                 map_without_cancellations,
             ) = self.get_service_number_site_id_map_with_and_without_cancellations(
-                service_number_site_map, site_ids_with_previous_cancellations
+                allowed_service_number_site_map, site_ids_with_previous_cancellations
             )
             self._logger.info(
                 "email_id=%s map_with_cancellations=%s map_without_cancellations=%s",
@@ -317,13 +366,13 @@ class RepairTicketsMonitor:
             elif not is_actionable and inference_data["predicted_class"] != "Other":
                 potential_tickets_output = self._get_potential_tickets(
                     inference_data,
-                    service_number_site_map,
+                    allowed_service_number_site_map,
                     existing_tickets,
                 )
                 output.extend(potential_tickets_output)
 
             else:
-                output.tickets_cannot_be_created = self._get_class_other_tickets(service_number_site_map)
+                output.tickets_cannot_be_created = self._get_class_other_tickets(allowed_service_number_site_map)
 
             feedback_not_created_due_cancellations = get_feedback_not_created_due_cancellations(
                 map_with_cancellations

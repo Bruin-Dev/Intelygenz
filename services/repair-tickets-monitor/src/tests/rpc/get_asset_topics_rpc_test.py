@@ -6,29 +6,30 @@ from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 from pytest import fixture, mark, raises
 
-from application.domain.asset import AssetId, Topic
+from application.domain.asset import Topic
 from application.rpc import RpcLogger, RpcError, RpcResponse, OK_STATUS, RpcRequest
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc, RequestBody
 
 
 class TestGetAssetTopicsRpc:
     @mark.asyncio
-    async def requests_are_properly_built_test(self, make_get_asset_topics_rpc, any_device_id):
+    async def requests_are_properly_built_test(self, make_get_asset_topics_rpc, make_asset_id):
+        any_asset_id = make_asset_id()
         get_asset_topics_rpc = make_get_asset_topics_rpc()
         get_asset_topics_rpc.send = CoroutineMock()
 
-        await get_asset_topics_rpc(any_device_id)
+        await get_asset_topics_rpc(any_asset_id)
 
         get_asset_topics_rpc.send.assert_awaited_once_with(RequestBody.construct(
             request_id=ANY,
             body=RequestBody(
-                client_id=any_device_id.client_id,
-                service_number=any_device_id.service_number
+                client_id=any_asset_id.client_id,
+                service_number=any_asset_id.service_number
             )
         ))
 
     @mark.asyncio
-    async def ok_responses_are_properly_parsed_test(self, make_get_asset_topics_rpc, any_device_id):
+    async def ok_responses_are_properly_parsed_test(self, make_get_asset_topics_rpc, make_asset_id):
         rpc_response = RpcResponse(
             status=200,
             body={
@@ -48,22 +49,22 @@ class TestGetAssetTopicsRpc:
         get_asset_topics_rpc = make_get_asset_topics_rpc()
         get_asset_topics_rpc.send = CoroutineMock(return_value=rpc_response)
 
-        subject = await get_asset_topics_rpc(any_device_id)
+        subject = await get_asset_topics_rpc(make_asset_id())
 
         assert subject == [Topic(call_type="any_call_type", category="any_category")]
 
     @mark.asyncio
-    async def unparseable_responses_are_properly_handled_test(self, make_get_asset_topics_rpc, any_device_id):
+    async def unparseable_responses_are_properly_handled_test(self, make_get_asset_topics_rpc, make_asset_id):
         rpc_response = RpcResponse(status=200, body="any_wrong_body")
         get_asset_topics_rpc = make_get_asset_topics_rpc()
         get_asset_topics_rpc.send = CoroutineMock(return_value=rpc_response)
 
-        subject = await get_asset_topics_rpc(any_device_id)
+        subject = await get_asset_topics_rpc(make_asset_id())
 
         assert subject == []
 
     @mark.asyncio
-    async def ko_responses_are_properly_handled_test(self, make_get_asset_topics_rpc, any_device_id):
+    async def ko_responses_are_properly_handled_test(self, make_get_asset_topics_rpc, make_asset_id):
         rpc_response = RpcResponse(
             status=400,
             body={
@@ -73,7 +74,7 @@ class TestGetAssetTopicsRpc:
         get_asset_topics_rpc = make_get_asset_topics_rpc()
         get_asset_topics_rpc.send = CoroutineMock(return_value=rpc_response)
 
-        subject = await get_asset_topics_rpc(any_device_id)
+        subject = await get_asset_topics_rpc(make_asset_id())
 
         assert subject == []
 
@@ -81,22 +82,13 @@ class TestGetAssetTopicsRpc:
     async def exceptions_are_properly_wrapped_test(
         self,
         make_get_asset_topics_rpc,
-        any_device_id
+        make_asset_id
     ):
         get_asset_topics_rpc = make_get_asset_topics_rpc()
         get_asset_topics_rpc.send = CoroutineMock(side_effect=Exception)
 
         with raises(RpcError):
-            await get_asset_topics_rpc(any_device_id)
-
-
-@fixture
-def any_device_id() -> AssetId:
-    return AssetId(
-        service_number="any_service_number",
-        client_id=hash("any_client_id"),
-        site_id=hash("any_site_id")
-    )
+            await get_asset_topics_rpc(make_asset_id())
 
 
 @fixture

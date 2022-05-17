@@ -136,6 +136,7 @@ class TestRepairTicketsMonitor:
             new_tagged_emails_repository,
             repair_ticket_kre_repository,
             CoroutineMock(),
+            CoroutineMock(),
         )
 
         assert repair_tickets_monitor._event_bus == event_bus

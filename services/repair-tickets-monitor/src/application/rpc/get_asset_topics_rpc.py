@@ -31,10 +31,8 @@ class GetAssetTopicsRpc(Rpc):
             if response.is_ok():
                 try:
                     body = ResponseBody.parse_obj(response.body)
-                    topics = [Topic(
-                        call_type=item.call_type,
-                        category=item.category
-                    ) for item in body.call_types]
+                    topics = [Topic(call_type=item.call_type, category=item.category)
+                              for item in body.call_types]
 
                     logger.debug(f"__call__(): [OK] topics={topics}")
                     return topics
