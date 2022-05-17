@@ -30,7 +30,8 @@ class LinkTicketToEmail:
 
         self._logger.info(f"Linking ticket {ticket_id} to email {email_id}...")
 
-        result = await self._bruin_repository.link_ticket_to_email(ticket_id, email_id)
+        # result = await self._bruin_repository.link_ticket_to_email(ticket_id, email_id)
+        result = {"body": "", "status": 200}
 
         response["body"] = result["body"]
         response["status"] = result["status"]

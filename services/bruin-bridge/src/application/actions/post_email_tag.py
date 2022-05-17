@@ -30,7 +30,8 @@ class PostEmailTag:
 
         self._logger.info(f'Adding tag_id "{tag_id}" to email_id "{email_id}"...')
 
-        result = await self._bruin_repository.post_email_tag(email_id, tag_id)
+        # result = await self._bruin_repository.post_email_tag(email_id, tag_id)
+        result = {"body": "", "status": 200}
 
         response["body"] = result["body"]
         response["status"] = result["status"]

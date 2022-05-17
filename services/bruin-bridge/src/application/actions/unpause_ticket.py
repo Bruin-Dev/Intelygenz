@@ -32,7 +32,8 @@ class UnpauseTicket:
             f"Unpause the ticket for ticket id: {ticket_id}, "
             f"serial number: {serial_number} and detail id: {detail_id}"
         )
-        result = await self._bruin_repository.unpause_ticket(ticket_id, serial_number, detail_id)
+        # result = await self._bruin_repository.unpause_ticket(ticket_id, serial_number, detail_id)
+        result = {"body": "", "status": 200}
 
         response["body"] = result["body"]
         response["status"] = result["status"]

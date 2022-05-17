@@ -35,7 +35,8 @@ class ChangeTicketSeverity:
 
         self._logger.info(f"Changing ticket severity level using parameters {json.dumps(payload)}...")
         ticket_id = payload.pop("ticket_id")
-        change_ticket_severity_response: dict = await self._bruin_repository.change_ticket_severity(ticket_id, payload)
+        # response: dict = await self._bruin_repository.change_ticket_severity(ticket_id, payload)
+        change_ticket_severity_response = {"body": "", "status": 200}
 
         response_msg["body"] = change_ticket_severity_response["body"]
         response_msg["status"] = change_ticket_severity_response["status"]

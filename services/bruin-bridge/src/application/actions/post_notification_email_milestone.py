@@ -37,7 +37,8 @@ class PostNotificationEmailMilestone:
             f' and notification type "{notification_type}"...'
         )
 
-        result = await self._bruin_repository.post_notification_email_milestone(payload)
+        # result = await self._bruin_repository.post_notification_email_milestone(payload)
+        result = {"body": "", "status": 200}
 
         response["body"] = result["body"]
         response["status"] = result["status"]

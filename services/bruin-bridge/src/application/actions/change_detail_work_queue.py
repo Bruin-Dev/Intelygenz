@@ -41,7 +41,8 @@ class ChangeDetailWorkQueue:
         ticket_id = msg_body.pop("ticket_id")
         self._logger.info(f"Changing work queue of ticket {ticket_id} with filters: {json.dumps(msg_body)}")
 
-        result = await self._bruin_repository.change_detail_work_queue(ticket_id, filters=msg_body)
+        # result = await self._bruin_repository.change_detail_work_queue(ticket_id, filters=msg_body)
+        result = {"body": "", "status": 200}
 
         response["body"] = result["body"]
         response["status"] = result["status"]
