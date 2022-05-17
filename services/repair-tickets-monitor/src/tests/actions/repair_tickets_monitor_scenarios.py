@@ -214,7 +214,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="no_topics_detected")]
         )
     ))
-
     single_wireless_asset = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
         asset_topics={"asset_1": [wireless_topic]},
@@ -225,7 +224,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
     ))
-
     single_other_category_asset = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
         asset_topics={"asset_1": [other_category_topic]},
@@ -236,7 +234,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")]
         )
     ))
-
     several_wireless_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         asset_topics={"asset_1": [wireless_topic], "asset_2": [wireless_topic]},
@@ -247,7 +244,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
     ))
-
     several_other_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         asset_topics={"asset_1": [other_category_topic], "asset_2": [other_category_topic]},
@@ -258,7 +254,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")]
         )
     ))
-
     wireless_and_no_topic_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         asset_topics={"asset_1": [wireless_topic], "asset_2": []},
@@ -269,7 +264,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
     ))
-
     wireless_and_other_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         asset_topics={"asset_1": [wireless_topic], "asset_2": [other_category_topic]},
@@ -280,7 +274,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
     ))
-
     voo_and_wireless_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         post_responses={"asset_1": CreatedResponse(hash("site_1_ticket"))},
@@ -299,7 +292,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
     ))
-
     voo_and_other_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         post_responses={"asset_1": CreatedResponse(hash("site_1_ticket"))},
@@ -318,7 +310,6 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")]
         )
     ))
-
     voo_wireless_and_other_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1", "asset_3": "site_1"},
         post_responses={"asset_1": UpdatedResponse(hash("site_1_ticket"))},
@@ -334,6 +325,24 @@ def make_repair_tickets_monitor_scenarios():
                 site_id="site_1",
                 service_numbers=["asset_1"],
                 reason="update_with_asset_found"
+            )],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    several_sites_mixed_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_2", "asset_3": "site_2"},
+        asset_topics={"asset_1": [other_category_topic], "asset_2": [wireless_topic], "asset_3": [voo_topic]},
+        post_responses={"asset_3": CreatedResponse(hash("site_2_ticket"))},
+        email_processed=False,
+        note_added_to=[hash("site_2_ticket")],
+        email_linked_to=[hash("site_2_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_2", "asset_3": "site_2"},
+            tickets_created=[TicketOutput(
+                ticket_id=hash("site_2_ticket"),
+                site_id="site_2",
+                service_numbers=["asset_3"]
             )],
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
@@ -476,6 +485,21 @@ def make_repair_tickets_monitor_scenarios():
             )]
         )
     ))
+    single_no_voo_asset_single_operable_ticket = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        tickets=[Ticket(hash("site_1_ticket"), status=TicketStatus.NEW, call_type="REP", category="VOO")],
+        asset_topics={"asset_1": [wireless_topic]},
+        email_processed=False,
+        email_linked_to=[hash("site_1_ticket")],
+        global_note_added_to=[hash("site_1_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1"},
+            validated_tickets=[Ticket(hash("site_1_ticket"), status=TicketStatus.NEW, call_type="REP", category="VOO")],
+            tickets_updated=[TicketOutput(ticket_id=hash("site_1_ticket"), reason="update_with_ticket_found")],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
 
     return {
         # Assets
@@ -497,6 +521,7 @@ def make_repair_tickets_monitor_scenarios():
         "voo_and_wireless_category_assets": voo_and_wireless_category_assets,
         "voo_and_other_category_assets": voo_and_other_category_assets,
         "voo_wireless_and_other_category_assets": voo_wireless_and_other_category_assets,
+        "several_sites_mixed_category_assets": several_sites_mixed_category_assets,
         # Tickets
         "single_operable_ticket": single_operable_ticket,
         "single_inoperable_ticket": single_inoperable_ticket,
@@ -507,5 +532,6 @@ def make_repair_tickets_monitor_scenarios():
         "append_global_note_error": append_global_note_error,
         "link_email_not_ok": link_email_not_ok,
         "email_not_actionable_and_single_operable_ticket": email_not_actionable_and_single_operable_ticket,
-        "single_reported_asset_single_operable_ticket": single_reported_asset_single_operable_ticket
+        "single_reported_asset_single_operable_ticket": single_reported_asset_single_operable_ticket,
+        "single_no_voo_asset_single_operable_ticket": single_no_voo_asset_single_operable_ticket,
     }

@@ -290,7 +290,7 @@ class RepairTicketsMonitor:
                     try:
                         allowed_asset_topics = await self.get_asset_topics_rpc(asset_id)
                     except RpcError as e:
-                        allowed_asset_topics = {}
+                        allowed_asset_topics = []
                         self._logger.warning(f"[email_id={email_id}] _process_repair_email():"
                                              f"get_topics_device_rpc({asset_id}): {e}")
 
@@ -384,7 +384,7 @@ class RepairTicketsMonitor:
             operable_tickets = [ticket for ticket in output.validated_tickets if
                                 ticket.is_active() and ticket.is_repair()]
 
-            if not service_number_site_map:
+            if not allowed_service_number_site_map:
                 if is_actionable:
                     for ticket in operable_tickets:
                         ticket_updated = await self._update_ticket(ticket, email_id, email_data)
