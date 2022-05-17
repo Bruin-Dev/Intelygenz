@@ -9,6 +9,7 @@ from application.actions.outage_monitoring import OutageMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.hawkeye_repository import HawkeyeRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 
 from config import testconfig as config
@@ -34,6 +35,11 @@ def scheduler():
 
 
 @pytest.fixture(scope='function')
+def metrics_repository():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
 def notifications_repository(event_bus):
     return NotificationsRepository(event_bus)
 
@@ -54,10 +60,10 @@ def hawkeye_repository(event_bus, logger, notifications_repository):
 
 
 @pytest.fixture(scope='function')
-def outage_monitor(event_bus, logger, scheduler, bruin_repository, hawkeye_repository, notifications_repository):
-    return OutageMonitor(event_bus, logger, scheduler, config, bruin_repository, hawkeye_repository,
-                         notifications_repository,
-                         customer_cache_repository)
+def outage_monitor(event_bus, logger, scheduler, metrics_repository, bruin_repository, hawkeye_repository,
+                   notifications_repository):
+    return OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+                         notifications_repository, customer_cache_repository)
 
 
 @pytest.fixture(scope='function')

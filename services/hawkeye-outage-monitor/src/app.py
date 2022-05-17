@@ -15,6 +15,7 @@ from application.actions.outage_monitoring import OutageMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.hawkeye_repository import HawkeyeRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from config import config
 
@@ -44,6 +45,9 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # METRICS
+        self._metrics_repository = MetricsRepository(config=config)
+
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
         self._hawkeye_repository = HawkeyeRepository(event_bus=self._event_bus, logger=self._logger, config=config,
@@ -56,9 +60,10 @@ class Container:
         )
 
         # ACTIONS
-        self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                             config, self._bruin_repository, self._hawkeye_repository,
-                                             self._notifications_repository, self._customer_cache_repository)
+        self._outage_monitor = OutageMonitor(
+            self._event_bus, self._logger, self._scheduler, config, self._metrics_repository, self._bruin_repository,
+            self._hawkeye_repository, self._notifications_repository, self._customer_cache_repository
+        )
 
     async def _start(self):
         self._start_prometheus_metrics_server()
