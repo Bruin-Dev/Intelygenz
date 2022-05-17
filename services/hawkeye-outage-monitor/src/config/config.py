@@ -4,6 +4,7 @@
 import os
 import logging
 import sys
+import json
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -19,6 +20,8 @@ NATS_CONFIG = {
 TIMEZONE = os.environ["TIMEZONE"]
 
 IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
+
+METRICS_RELEVANT_CLIENTS = json.loads(os.environ['METRICS_RELEVANT_CLIENTS'])
 
 MONITOR_CONFIG = {
     'multiplier': 5,
