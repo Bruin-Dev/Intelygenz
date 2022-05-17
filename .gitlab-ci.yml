@@ -22,37 +22,37 @@ variables:
   DOCKER_IMAGE_UTILS_VERSION: 1.3.5
   # Desired replicas of microservices
   BRUIN_BRIDGE_DESIRED_TASKS: "2"
-  CUSTOMER_CACHE_DESIRED_TASKS: "1"
-  DIGI_BRIDGE_DESIRED_TASKS: "1"
-  DIGI_REBOOT_REPORT_DESIRED_TASKS: "1"
-  DRI_BRIDGE_DESIRED_TASKS: "1"
+  CUSTOMER_CACHE_DESIRED_TASKS: "0"
+  DIGI_BRIDGE_DESIRED_TASKS: "0"
+  DIGI_REBOOT_REPORT_DESIRED_TASKS: "0"
+  DRI_BRIDGE_DESIRED_TASKS: "0"
   EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS: "1"
   EMAIL_TAGGER_MONITOR_DESIRED_TASKS: "1"
-  FRAUD_MONITOR_DESIRED_TASKS: "1"
+  FRAUD_MONITOR_DESIRED_TASKS: "0"
   HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS: "0"
-  HAWKEYE_BRIDGE_DESIRED_TASKS: "1"
-  HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS: "1"
-  HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS: "1"
-  INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS: "1"
-  LAST_CONTACT_REPORT_DESIRED_TASKS: "1"
-  LINKS_METRICS_API_DESIRED_TASKS: "1"
-  LINKS_METRICS_COLLECTOR_DESIRED_TASKS: "1"
-  LUMIN_BILLING_REPORT_DESIRED_TASKS: "1"
+  HAWKEYE_BRIDGE_DESIRED_TASKS: "0"
+  HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS: "0"
+  HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS: "0"
+  INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS: "0"
+  LAST_CONTACT_REPORT_DESIRED_TASKS: "0"
+  LINKS_METRICS_API_DESIRED_TASKS: "0"
+  LINKS_METRICS_COLLECTOR_DESIRED_TASKS: "0"
+  LUMIN_BILLING_REPORT_DESIRED_TASKS: "0"
   NATS_SERVER_DESIRED_TASKS: "3"
   NOTIFIER_DESIRED_TASKS: "5"
-  PROMETHEUS_NATS_EXPORTER_DESIRED_TASKS: "1"
+  PROMETHEUS_NATS_EXPORTER_DESIRED_TASKS: "0"
   REPAIR_TICKETS_KRE_BRIDGE_DESIRED_TASKS: "1"
   REPAIR_TICKETS_MONITOR_DESIRED_TASKS: "1"
-  SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "1"
-  SERVICE_OUTAGE_MONITOR_DESIRED_TASKS: "1"
-  SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS: "1"
-  SITES_MONITOR_DESIRED_TASKS: "1"
-  TICKET_COLLECTOR_DESIRED_TASKS: "1"
-  TICKET_STATISTICS_DESIRED_TASKS: "1"
-  TNBA_FEEDBACK_DESIRED_TASKS: "1"
-  TNBA_MONITOR_DESIRED_TASKS: "1"
-  T7_BRIDGE_DESIRED_TASKS: "1"
-  VELOCLOUD_BRIDGE_DESIRED_TASKS: "2"
+  SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "0"
+  SERVICE_OUTAGE_MONITOR_DESIRED_TASKS: "0"
+  SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS: "0"
+  SITES_MONITOR_DESIRED_TASKS: "0"
+  TICKET_COLLECTOR_DESIRED_TASKS: "0"
+  TICKET_STATISTICS_DESIRED_TASKS: "0"
+  TNBA_FEEDBACK_DESIRED_TASKS: "0"
+  TNBA_MONITOR_DESIRED_TASKS: "0"
+  T7_BRIDGE_DESIRED_TASKS: "0"
+  VELOCLOUD_BRIDGE_DESIRED_TASKS: "0"
 
 include:
   # Templates used in Gitlab-CI jobs for validation jobs
@@ -80,34 +80,34 @@ include:
   - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'services/bruin-bridge/.gitlab-ci.yml'
-  - local: 'services/customer-cache/.gitlab-ci.yml'
-  - local: 'services/digi-bridge/.gitlab-ci.yml'
-  - local: 'services/digi-reboot-report/.gitlab-ci.yml'
-  - local: 'services/dri-bridge/.gitlab-ci.yml'
+  # - local: 'services/customer-cache/.gitlab-ci.yml'
+  # - local: 'services/digi-bridge/.gitlab-ci.yml'
+  # - local: 'services/digi-reboot-report/.gitlab-ci.yml'
+  # - local: 'services/dri-bridge/.gitlab-ci.yml'
   - local: 'services/email-tagger-kre-bridge/.gitlab-ci.yml'
   - local: 'services/email-tagger-monitor/.gitlab-ci.yml'
-  - local: 'services/fraud-monitor/.gitlab-ci.yml'
-  - local: 'services/hawkeye-affecting-monitor/.gitlab-ci.yml'
-  - local: 'services/hawkeye-bridge/.gitlab-ci.yml'
-  - local: 'services/hawkeye-customer-cache/.gitlab-ci.yml'
-  - local: 'services/hawkeye-outage-monitor/.gitlab-ci.yml'
-  - local: 'services/intermapper-outage-monitor/.gitlab-ci.yml'
-  - local: 'services/last-contact-report/.gitlab-ci.yml'
-  - local: 'services/links-metrics-api/.gitlab-ci.yml'
-  - local: 'services/links-metrics-collector/.gitlab-ci.yml'
-  - local: 'services/lumin-billing-report/.gitlab-ci.yml'
+  # - local: 'services/fraud-monitor/.gitlab-ci.yml'
+  # - local: 'services/hawkeye-affecting-monitor/.gitlab-ci.yml'
+  # - local: 'services/hawkeye-bridge/.gitlab-ci.yml'
+  # - local: 'services/hawkeye-customer-cache/.gitlab-ci.yml'
+  # - local: 'services/hawkeye-outage-monitor/.gitlab-ci.yml'
+  # - local: 'services/intermapper-outage-monitor/.gitlab-ci.yml'
+  # - local: 'services/last-contact-report/.gitlab-ci.yml'
+  # - local: 'services/links-metrics-api/.gitlab-ci.yml'
+  # - local: 'services/links-metrics-collector/.gitlab-ci.yml'
+  # - local: 'services/lumin-billing-report/.gitlab-ci.yml'
   - local: 'services/notifier/.gitlab-ci.yml'
   - local: 'services/repair-tickets-kre-bridge/.gitlab-ci.yml'
-  - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
-  - local: 'services/service-outage-monitor/.gitlab-ci.yml'
-  - local: 'services/sites-monitor/.gitlab-ci.yml'
+  # - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
+  # - local: 'services/service-outage-monitor/.gitlab-ci.yml'
+  # - local: 'services/sites-monitor/.gitlab-ci.yml'
   - local: 'services/repair-tickets-monitor/.gitlab-ci.yml'
-  - local: 'services/t7-bridge/.gitlab-ci.yml'
-  - local: 'services/tnba-feedback/.gitlab-ci.yml'
-  - local: 'services/tnba-monitor/.gitlab-ci.yml'
-  - local: 'services/ticket-collector/.gitlab-ci.yml'
-  - local: 'services/ticket-statistics/.gitlab-ci.yml'
-  - local: 'services/velocloud-bridge/.gitlab-ci.yml'
+  # - local: 'services/t7-bridge/.gitlab-ci.yml'
+  # - local: 'services/tnba-feedback/.gitlab-ci.yml'
+  # - local: 'services/tnba-monitor/.gitlab-ci.yml'
+  # - local: 'services/ticket-collector/.gitlab-ci.yml'
+  # - local: 'services/ticket-statistics/.gitlab-ci.yml'
+  # - local: 'services/velocloud-bridge/.gitlab-ci.yml'
 
 semantic-release:
   stage: release
