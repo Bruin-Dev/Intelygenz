@@ -20,7 +20,7 @@ REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-ope
 
 class OutageMonitor:
     def __init__(self, event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-                 notifications_repository, customer_cache_repository):
+                 notifications_repository, customer_cache_repository, utils_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -30,6 +30,7 @@ class OutageMonitor:
         self._hawkeye_repository = hawkeye_repository
         self._notifications_repository = notifications_repository
         self._customer_cache_repository = customer_cache_repository
+        self._utils_repository = utils_repository
 
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
 

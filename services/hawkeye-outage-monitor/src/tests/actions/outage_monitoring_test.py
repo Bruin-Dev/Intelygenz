@@ -35,9 +35,12 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         assert outage_monitor._event_bus is event_bus
         assert outage_monitor._logger is logger
@@ -60,9 +63,12 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -90,9 +96,12 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=False)
 
@@ -117,12 +126,15 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         try:
             await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=False)
@@ -379,6 +391,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
@@ -386,8 +399,10 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=active_probes_with_customer_cache_info)
         outage_monitor._schedule_recheck_job_for_devices = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -414,6 +429,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
@@ -421,8 +437,10 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -449,6 +467,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
@@ -456,8 +475,10 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -518,6 +539,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
@@ -525,8 +547,10 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -587,6 +611,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
@@ -594,8 +619,10 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -712,6 +739,7 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        utils_repository = Mock()
 
         customer_cache_repository = Mock()
         customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
@@ -719,8 +747,10 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -938,10 +968,13 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         hawkeye_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         result = outage_monitor._map_probes_info_with_customer_cache(probes, customer_cache)
 
@@ -992,10 +1025,13 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         hawkeye_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -1186,6 +1222,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -1199,8 +1236,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -1394,6 +1433,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -1407,8 +1447,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._append_triage_note_if_needed = CoroutineMock()
@@ -1599,6 +1641,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -1612,8 +1655,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
@@ -1808,6 +1853,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -1822,8 +1868,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -2020,6 +2068,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -2034,8 +2083,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -2349,6 +2400,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -2362,8 +2414,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=fresh_devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
@@ -2538,6 +2592,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
@@ -2550,8 +2605,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._build_triage_note = Mock()
 
@@ -2720,6 +2777,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
@@ -2732,8 +2790,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._build_triage_note = Mock()
 
@@ -2959,6 +3019,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
@@ -2971,8 +3032,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._build_triage_note = Mock()
 
@@ -3156,6 +3219,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -3169,8 +3233,10 @@ class TestServiceOutageMonitor:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
 
@@ -3339,14 +3405,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._build_triage_note = Mock()
         outage_monitor._triage_note_exists = Mock()
 
@@ -3450,14 +3519,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._build_triage_note = Mock()
         outage_monitor._triage_note_exists = Mock(return_value=True)
 
@@ -3554,14 +3626,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._triage_note_exists = Mock(return_value=False)
 
@@ -3582,9 +3657,12 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         ticket_notes = []
         triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
@@ -3695,9 +3773,12 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         current_datetime = datetime.now(utc)
         datetime_mock = Mock()
@@ -3810,14 +3891,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         await outage_monitor._run_ticket_autoresolve(device)
 
@@ -3907,14 +3991,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         await outage_monitor._run_ticket_autoresolve(device)
 
@@ -4017,14 +4104,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
 
         await outage_monitor._run_ticket_autoresolve(device)
@@ -4134,14 +4224,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
 
@@ -4252,14 +4345,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
 
@@ -4423,14 +4519,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=False)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock()
@@ -4605,14 +4704,17 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=False)
@@ -4789,6 +4891,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
 
         bruin_repository = Mock()
@@ -4796,8 +4899,10 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -4974,6 +5079,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -4982,8 +5088,10 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -5166,6 +5274,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -5176,8 +5285,10 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -5364,6 +5475,7 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         config = testconfig
 
@@ -5374,8 +5486,10 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -5404,12 +5518,15 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
         config = testconfig
         metrics_repository = Mock()
         bruin_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         ticket = {
             "clientID": 12345,
@@ -5447,9 +5564,12 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         autoresolve_limit = 3
 
@@ -5521,12 +5641,15 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
         bruin_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         await outage_monitor._notify_successful_autoresolve(ticket_id, detail_id)
 
@@ -5548,9 +5671,12 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
@@ -5609,9 +5735,12 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         datetime_mock = Mock()
 
@@ -5669,9 +5798,12 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         datetime_mock = Mock()
 
@@ -5719,9 +5851,12 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         datetime_mock = Mock()
 
@@ -5770,9 +5905,12 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
+        utils_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository,
-                                       hawkeye_repository, notifications_repository, customer_cache_repository)
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
 
         datetime_mock = Mock()
 

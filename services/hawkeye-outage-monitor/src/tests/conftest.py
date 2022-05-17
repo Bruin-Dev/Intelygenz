@@ -11,6 +11,7 @@ from application.repositories.customer_cache_repository import CustomerCacheRepo
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.utils_repository import UtilsRepository
 
 from config import testconfig as config
 
@@ -60,10 +61,15 @@ def hawkeye_repository(event_bus, logger, notifications_repository):
 
 
 @pytest.fixture(scope='function')
+def utils_repository():
+    return UtilsRepository()
+
+
+@pytest.fixture(scope='function')
 def outage_monitor(event_bus, logger, scheduler, metrics_repository, bruin_repository, hawkeye_repository,
-                   notifications_repository):
+                   notifications_repository, utils_repository):
     return OutageMonitor(event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-                         notifications_repository, customer_cache_repository)
+                         notifications_repository, customer_cache_repository, utils_repository)
 
 
 @pytest.fixture(scope='function')

@@ -17,6 +17,7 @@ from application.repositories.customer_cache_repository import CustomerCacheRepo
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.utils_repository import UtilsRepository
 from config import config
 
 
@@ -58,11 +59,13 @@ class Container:
             event_bus=self._event_bus, logger=self._logger, config=config,
             notifications_repository=self._notifications_repository
         )
+        self._utils_repository = UtilsRepository()
 
         # ACTIONS
         self._outage_monitor = OutageMonitor(
             self._event_bus, self._logger, self._scheduler, config, self._metrics_repository, self._bruin_repository,
-            self._hawkeye_repository, self._notifications_repository, self._customer_cache_repository
+            self._hawkeye_repository, self._notifications_repository, self._customer_cache_repository,
+            self._utils_repository
         )
 
     async def _start(self):
