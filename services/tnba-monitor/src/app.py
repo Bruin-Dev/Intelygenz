@@ -13,6 +13,7 @@ from igz.packages.server.api import QuartServer
 
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.prediction_repository import PredictionRepository
 from application.repositories.ticket_repository import TicketRepository
@@ -40,6 +41,8 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        self._metrics_repository = MetricsRepository(config=config)
+
         self._utils_repository = UtilsRepository()
         self._ticket_repo = TicketRepository(config, self._utils_repository)
         self._prediction_repo = PredictionRepository(config, self._utils_repository)
@@ -57,11 +60,11 @@ class Container:
             config=config, notifications_repository=self._notifications_repository,
         )
 
-        self._tnba_monitor = TNBAMonitor(self._event_bus, self._logger, self._scheduler, config, self._t7_repository,
-                                         self._ticket_repo, self._customer_cache_repository, self._bruin_repository,
-                                         self._velocloud_repository, self._prediction_repo,
-                                         self._notifications_repository, self._utils_repository,
-                                         self._trouble_repository)
+        self._tnba_monitor = TNBAMonitor(
+            self._event_bus, self._logger, self._scheduler, config, self._metrics_repository, self._t7_repository,
+            self._ticket_repo, self._customer_cache_repository, self._bruin_repository, self._velocloud_repository,
+            self._prediction_repo, self._notifications_repository, self._utils_repository, self._trouble_repository
+        )
 
     async def _start(self):
         self._start_prometheus_metrics_server()

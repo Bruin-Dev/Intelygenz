@@ -18,13 +18,14 @@ from config import testconfig
 
 class TestTNBAMonitor:
 
-    def instance_test(self, tnba_monitor, event_bus, logger, scheduler, t7_repository, customer_cache_repository,
-                      bruin_repository, velocloud_repository, ticket_repository, prediction_repository,
-                      notifications_repository, utils_repository):
+    def instance_test(self, tnba_monitor, event_bus, logger, scheduler, metrics_repository, t7_repository,
+                      customer_cache_repository, bruin_repository, velocloud_repository, ticket_repository,
+                      prediction_repository, notifications_repository, utils_repository):
         assert tnba_monitor._event_bus is event_bus
         assert tnba_monitor._logger is logger
         assert tnba_monitor._scheduler is scheduler
         assert tnba_monitor._config is testconfig
+        assert tnba_monitor._metrics_repository is metrics_repository
         assert tnba_monitor._t7_repository is t7_repository
         assert tnba_monitor._ticket_repository is ticket_repository
         assert tnba_monitor._customer_cache_repository is customer_cache_repository

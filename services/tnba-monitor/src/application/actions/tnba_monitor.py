@@ -21,13 +21,14 @@ REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-ope
 
 
 class TNBAMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+    def __init__(self, event_bus, logger, scheduler, config, metrics_repository, t7_repository, ticket_repository,
                  customer_cache_repository, bruin_repository, velocloud_repository, prediction_repository,
                  notifications_repository, utils_repository, trouble_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._metrics_repository = metrics_repository
         self._t7_repository = t7_repository
         self._ticket_repository = ticket_repository
         self._customer_cache_repository = customer_cache_repository

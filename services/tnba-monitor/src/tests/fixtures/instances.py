@@ -12,6 +12,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.prediction_repository import PredictionRepository
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.t7_repository import T7Repository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
@@ -35,6 +36,11 @@ def event_bus():
 @pytest.fixture(scope='function')
 def scheduler():
     return create_autospec(AsyncIOScheduler)
+
+
+@pytest.fixture(scope='function')
+def metrics_repository():
+    return create_autospec(MetricsRepository)
 
 
 @pytest.fixture(scope='function')
@@ -140,9 +146,9 @@ def trouble_repository(utils_repository):
 
 
 @pytest.fixture(scope='function')
-def tnba_monitor(event_bus, logger, scheduler, t7_repository, bruin_repository, velocloud_repository,
-                 customer_cache_repository, notifications_repository, prediction_repository, ticket_repository,
-                 utils_repository, trouble_repository):
+def tnba_monitor(event_bus, logger, scheduler, metrics_repository, t7_repository, bruin_repository,
+                 velocloud_repository, customer_cache_repository, notifications_repository, prediction_repository,
+                 ticket_repository, utils_repository, trouble_repository):
     instance = TNBAMonitor(
         event_bus=event_bus,
         logger=logger,
@@ -150,6 +156,7 @@ def tnba_monitor(event_bus, logger, scheduler, t7_repository, bruin_repository, 
         config=config,
         bruin_repository=bruin_repository,
         velocloud_repository=velocloud_repository,
+        metrics_repository=metrics_repository,
         t7_repository=t7_repository,
         customer_cache_repository=customer_cache_repository,
         notifications_repository=notifications_repository,
