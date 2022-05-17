@@ -791,6 +791,22 @@ class TestServiceOutageMonitor:
         assert result is False
 
     def is_there_an_outage_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        metrics_repository = Mock()
+        bruin_repository = Mock()
+        hawkeye_repository = Mock()
+        notifications_repository = Mock()
+        customer_cache_repository = Mock()
+        utils_repository = Mock()
+
+        outage_monitor = OutageMonitor(
+            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
+            notifications_repository, customer_cache_repository, utils_repository
+        )
+
         probe = {
             "probeId": "1",
             "uid": "b8:27:eb:76:a8:de",
@@ -809,7 +825,7 @@ class TestServiceOutageMonitor:
                 "lastUpdate": "2020-10-15T02:18:28Z"
             }
         }
-        result = OutageMonitor._is_there_an_outage(probe)
+        result = outage_monitor._is_there_an_outage(probe)
         assert result is False
 
         probe = {
@@ -830,7 +846,7 @@ class TestServiceOutageMonitor:
                 "lastUpdate": "2020-10-15T02:18:28Z"
             }
         }
-        result = OutageMonitor._is_there_an_outage(probe)
+        result = outage_monitor._is_there_an_outage(probe)
         assert result is True
 
         probe = {
@@ -851,7 +867,7 @@ class TestServiceOutageMonitor:
                 "lastUpdate": "2020-10-15T02:18:28Z"
             }
         }
-        result = OutageMonitor._is_there_an_outage(probe)
+        result = outage_monitor._is_there_an_outage(probe)
         assert result is True
 
         probe = {
@@ -872,7 +888,7 @@ class TestServiceOutageMonitor:
                 "lastUpdate": "2020-10-15T02:18:28Z"
             }
         }
-        result = OutageMonitor._is_there_an_outage(probe)
+        result = outage_monitor._is_there_an_outage(probe)
         assert result is True
 
     def map_probes_info_with_customer_cache_test(self):
@@ -3327,7 +3343,7 @@ class TestServiceOutageMonitor:
         result = outage_monitor._get_outage_causes_for_reopen_note(device_1_info)
         expected = os.linesep.join([
             'Outage cause(s):',
-            'Real service status is DOWN.',
+            'Real Service status is DOWN.',
         ])
 
         assert result == expected
@@ -5293,6 +5309,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
             await outage_monitor._run_ticket_autoresolve(device)
@@ -5494,6 +5511,7 @@ class TestServiceOutageMonitor:
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
         with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):

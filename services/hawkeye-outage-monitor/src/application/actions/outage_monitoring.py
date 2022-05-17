@@ -5,7 +5,7 @@ import re
 
 from datetime import datetime
 from datetime import timedelta
-from typing import Callable
+from typing import List, Callable
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -13,9 +13,14 @@ from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
 
+from application import Outages
+
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(Ixia\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
+
+OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(re.escape(outage_type.value) for outage_type in Outages)
+OUTAGE_TYPE_REGEX = re.compile(rf'Device (?P<outage_type>{OUTAGES_DISJUNCTION_FOR_REGEX}) Status: DOWN')
 
 
 class OutageMonitor:
@@ -109,6 +114,8 @@ class OutageMonitor:
             serial_number = device['cached_info']['serial_number']
             self._logger.info(f'Starting autoresolve for device {serial_number}...')
             client_id = device['cached_info']['bruin_client_info']['client_id']
+            client_name = device['cached_info']['bruin_client_info']['client_name']
+
             outage_ticket_response = await self._bruin_repository.get_open_outage_tickets(
                 client_id, service_number=serial_number
             )
@@ -180,6 +187,9 @@ class OutageMonitor:
                     f'current environment is {working_environment.upper()}.')
                 return
 
+            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+            outage_types = self._get_outage_types_from_ticket_notes(last_cycle_notes)
+
             self._logger.info(
                 f'Autoresolving detail {ticket_detail_id} (serial: {serial_number}) of ticket {outage_ticket_id}...')
             await self._bruin_repository.unpause_ticket_detail(
@@ -191,6 +201,7 @@ class OutageMonitor:
             if resolve_ticket_response['status'] not in range(200, 300):
                 return
 
+            self._metrics_repository.increment_tasks_autoresolved(client=client_name, outage_types=outage_types)
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
             await self._notify_successful_autoresolve(outage_ticket_id, ticket_detail_id)
 
@@ -231,8 +242,19 @@ class OutageMonitor:
         return int(probe['active']) == 1
 
     @staticmethod
-    def _is_there_an_outage(probe: dict) -> bool:
-        return probe['nodetonode']['status'] == 0 or probe['realservice']['status'] == 0
+    def _get_outage_types(probe: dict) -> List[Outages]:
+        outage_types = []
+
+        if probe['nodetonode']['status'] == 0:
+            outage_types.append(Outages.NODE_TO_NODE)
+        if probe['realservice']['status'] == 0:
+            outage_types.append(Outages.REAL_SERVICE)
+
+        return outage_types
+
+    def _is_there_an_outage(self, probe: dict) -> bool:
+        outages = self._get_outage_types(probe)
+        return any(outages)
 
     def _map_probes_info_with_customer_cache(self, probes: list, customer_cache: list) -> list:
         result = []
@@ -313,18 +335,18 @@ class OutageMonitor:
             )
 
             for device in devices_still_in_outage:
-                bruin_client_id = device['cached_info']['bruin_client_info']['client_id']
+                client_id = device['cached_info']['bruin_client_info']['client_id']
+                client_name = device['cached_info']['bruin_client_info']['client_name']
                 serial_number = device['cached_info']['serial_number']
+                outage_types = self._get_outage_types(device['device_info'])
 
                 self._logger.info(f'Attempting outage ticket creation for faulty device {serial_number}...')
-                ticket_creation_response = await self._bruin_repository.create_outage_ticket(
-                    bruin_client_id, serial_number
-                )
+                ticket_creation_response = await self._bruin_repository.create_outage_ticket(client_id, serial_number)
                 ticket_creation_status = ticket_creation_response['status']
                 ticket_id = ticket_creation_response['body']
                 if ticket_creation_status in range(200, 300):
-
                     self._logger.info(f'Outage ticket created for device {serial_number}! Ticket ID: {ticket_id}')
+                    self._metrics_repository.increment_tasks_created(client=client_name, outage_types=outage_types)
                     slack_message = (
                         f'Outage ticket created for faulty device {serial_number}: https://app.bruin.com/t/{ticket_id}'
                     )
@@ -343,13 +365,16 @@ class OutageMonitor:
                         f'Faulty device {serial_number} has a resolved outage ticket (ID = {ticket_id}). '
                         'Re-opening ticket...'
                     )
-                    await self._reopen_outage_ticket(ticket_id, device)
+                    was_ticket_reopened = await self._reopen_outage_ticket(ticket_id, device)
+                    if was_ticket_reopened:
+                        self._metrics_repository.increment_tasks_reopened(client=client_name, outage_types=outage_types)
                 elif ticket_creation_status == 472:
                     self._logger.info(
                         f'[outage-recheck] Faulty device {serial_number} has a resolved outage ticket '
                         f'(ID = {ticket_id}). Its ticket detail was automatically unresolved '
                         f'by Bruin. Appending reopen note to ticket...'
                     )
+                    self._metrics_repository.increment_tasks_reopened(client=client_name, outage_types=outage_types)
                     outage_causes = self._get_outage_causes_for_reopen_note(device)
                     await self._bruin_repository.append_reopening_note_to_ticket(ticket_id,
                                                                                  device['cached_info']['serial_number'],
@@ -361,6 +386,7 @@ class OutageMonitor:
                         f'automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was '
                         f'appended to it. Appending initial triage note for this service number...'
                     )
+                    self._metrics_repository.increment_tasks_reopened(client=client_name, outage_types=outage_types)
                     triage_note = self._build_triage_note(device['device_info'])
                     await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
 
@@ -443,13 +469,10 @@ class OutageMonitor:
             await self._bruin_repository.append_reopening_note_to_ticket(ticket_id,
                                                                          device['cached_info']['serial_number'],
                                                                          outage_causes)
-
-            # Check if this part is necessary
-            # self._metrics_repository.increment_tickets_reopened()
+            return True
         else:
-            self._logger.error(
-                f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.'
-            )
+            self._logger.error(f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.')
+            return False
 
     def _get_outage_causes_for_reopen_note(self, device: dict) -> str:
         lines = [
@@ -459,9 +482,9 @@ class OutageMonitor:
         node_to_node_status: str = 'DOWN' if device['device_info']['nodetonode']['status'] == 0 else 'UP'
         real_service_status: str = 'DOWN' if device['device_info']['realservice']['status'] == 0 else 'UP'
         if real_service_status == "DOWN":
-            lines.append(f'Real service status is {real_service_status}.')
+            lines.append(f'{Outages.REAL_SERVICE.value} status is {real_service_status}.')
         if node_to_node_status == "DOWN":
-            lines.append(f'Node to node status is {node_to_node_status}.')
+            lines.append(f'{Outages.NODE_TO_NODE.value} status is {node_to_node_status}.')
 
         return os.linesep.join(lines)
 
@@ -493,10 +516,10 @@ class OutageMonitor:
             f"Serial: {device_info['serialNumber']}",
             f"Hawkeye ID: {device_info['probeId']}",
             "",
-            f"Device Node to Node Status: {node_to_node_status}",
-            f"Node to Node Last Update: {node_to_node_last_update}",
-            f"Device Real Service Status: {real_service_status}",
-            f"Real Service Last Update: {real_service_last_update}",
+            f"Device {Outages.NODE_TO_NODE.value} Status: {node_to_node_status}",
+            f"{Outages.NODE_TO_NODE.value} Last Update: {node_to_node_last_update}",
+            f"Device {Outages.REAL_SERVICE.value} Status: {real_service_status}",
+            f"{Outages.REAL_SERVICE.value} Last Update: {real_service_last_update}",
             "",
             f"TimeStamp: {str(current_datetime)}",
         ])
@@ -529,3 +552,27 @@ class OutageMonitor:
         ticket_creation_datetime = parse(ticket_creation_date).replace(tzinfo=utc)
         seconds_elapsed_since_last_outage = (current_datetime - ticket_creation_datetime).total_seconds()
         return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
+
+    def _get_notes_appended_since_latest_reopen_or_ticket_creation(self, ticket_notes: List[dict]) -> List[dict]:
+        sorted_ticket_notes = sorted(ticket_notes, key=lambda note: note['createdDate'])
+        latest_reopen = self._utils_repository.get_last_element_matching(
+            sorted_ticket_notes,
+            lambda note: REOPEN_NOTE_REGEX.search(note['noteValue'])
+        )
+
+        if not latest_reopen:
+            # If there's no re-open, all notes in the ticket are the ones posted since the last outage
+            return ticket_notes
+
+        latest_reopen_position = ticket_notes.index(latest_reopen)
+        return ticket_notes[latest_reopen_position:]
+
+    @staticmethod
+    def _get_outage_types_from_ticket_notes(ticket_notes: List[dict]) -> List[Outages]:
+        for note in ticket_notes:
+            outage_types = OUTAGE_TYPE_REGEX.findall(note['noteValue'])
+
+            if outage_types:
+                return [Outages(outage_type) for outage_type in outage_types]
+
+        return []
