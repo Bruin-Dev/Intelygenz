@@ -22,6 +22,8 @@ PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ['IPA_SYSTEM_USERNAME_IN_BRUIN']
 
+METRICS_RELEVANT_CLIENTS = json.loads(os.environ['METRICS_RELEVANT_CLIENTS'])
+
 MONITOR_CONFIG = {
     'monitoring_interval_seconds': int(os.environ['MONITORING_JOB_INTERVAL']),
     'blacklisted_edges': json.loads(os.environ['BLACKLISTED_EDGES']),
