@@ -390,17 +390,21 @@ class TestTNBAMonitor:
         ], any_order=True)
 
         expected_outage_ticket_object = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=open_outage_ticket['ticketID'],
             ticket_creation_date=open_outage_ticket['createDate'],
             ticket_topic=open_outage_ticket['category'],
+            ticket_severity=open_outage_ticket['severity'],
             ticket_creator=open_outage_ticket['createdBy'],
             ticket_details=[outage_ticket_1_detail_1],
             ticket_notes=[],
         )
         expected_affecting_ticket_object = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
             ticket_topic=open_affecting_ticket['category'],
+            ticket_severity=open_affecting_ticket['severity'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -446,9 +450,11 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_affecting_ticket['ticketID'])
 
         expected_affecting_ticket_object = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
             ticket_topic=open_affecting_ticket['category'],
+            ticket_severity=open_affecting_ticket['severity'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -493,9 +499,11 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_outage_ticket['ticketID'])
 
         expected_affecting_ticket_object = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=open_outage_ticket['ticketID'],
             ticket_creation_date=open_outage_ticket['createDate'],
             ticket_topic=open_outage_ticket['category'],
+            ticket_severity=open_outage_ticket['severity'],
             ticket_creator=open_outage_ticket['createdBy'],
             ticket_details=[outage_ticket_1_detail_1],
             ticket_notes=[],
@@ -547,9 +555,11 @@ class TestTNBAMonitor:
         ], any_order=True)
 
         expected_affecting_ticket_object = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
             ticket_topic=open_affecting_ticket['category'],
+            ticket_severity=open_affecting_ticket['severity'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -603,9 +613,11 @@ class TestTNBAMonitor:
         ], any_order=True)
 
         expected_affecting_ticket_object = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=open_affecting_ticket['ticketID'],
             ticket_creation_date=open_affecting_ticket['createDate'],
             ticket_topic=open_affecting_ticket['category'],
+            ticket_severity=open_affecting_ticket['severity'],
             ticket_creator=open_affecting_ticket['createdBy'],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
@@ -1013,13 +1025,13 @@ class TestTNBAMonitor:
             expected_detail_object_2,
         ]
 
-    def transform_tickets_into_detail_objects_test(self, make_in_progress_ticket_detail,
-                                                   make_ticket_object, make_detail_object,
-                                                   make_ticket_note, make_standard_tnba_note,
-                                                   serial_number_1, serial_number_2, serial_number_3):
+    def transform_tickets_into_detail_objects_test(self, make_in_progress_ticket_detail, make_ticket_object,
+                                                   make_detail_object, make_ticket_note, make_standard_tnba_note,
+                                                   serial_number_1, serial_number_2, serial_number_3, bruin_client_id):
         ticket_1_id = 12345
         ticket_2_id = 11223
 
+        ticket_1_severity = 2
         ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_1_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_1_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
@@ -1027,16 +1039,21 @@ class TestTNBAMonitor:
         ticket_1_note_2 = make_standard_tnba_note(serial_number=serial_number_2)
         ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
         ticket_1_with_details = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_1_id,
+            ticket_severity=ticket_1_severity,
             ticket_details=[ticket_1_detail_1, ticket_1_detail_2, ticket_1_detail_3],
             ticket_notes=[ticket_1_note_1, ticket_1_note_2, ticket_1_note_3],
         )
 
+        ticket_2_severity = 3
         ticket_2_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_2_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_2_note_1 = make_standard_tnba_note(serial_number=serial_number_1)
         ticket_2_with_details = make_ticket_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_2_id,
+            ticket_severity=ticket_2_severity,
             ticket_details=[ticket_2_detail_1, ticket_2_detail_2],
             ticket_notes=[ticket_2_note_1],
         )
@@ -1049,27 +1066,37 @@ class TestTNBAMonitor:
         detail_objects = TNBAMonitor._transform_tickets_into_detail_objects(tickets)
 
         expected_ticket_detail_1 = make_detail_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_1_id,
+            ticket_severity=ticket_1_severity,
             ticket_detail=ticket_1_detail_1,
             ticket_notes=[ticket_1_note_1],
         )
         expected_ticket_detail_2 = make_detail_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_1_id,
+            ticket_severity=ticket_1_severity,
             ticket_detail=ticket_1_detail_2,
             ticket_notes=[ticket_1_note_2],
         )
         expected_ticket_detail_3 = make_detail_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_1_id,
+            ticket_severity=ticket_1_severity,
             ticket_detail=ticket_1_detail_3,
             ticket_notes=[ticket_1_note_3],
         )
         expected_ticket_detail_4 = make_detail_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_2_id,
+            ticket_severity=ticket_2_severity,
             ticket_detail=ticket_2_detail_1,
             ticket_notes=[ticket_2_note_1],
         )
         expected_ticket_detail_5 = make_detail_object(
+            client_id=bruin_client_id,
             ticket_id=ticket_2_id,
+            ticket_severity=ticket_2_severity,
             ticket_detail=ticket_2_detail_2,
             ticket_notes=[],
         )
@@ -1258,14 +1285,24 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def process_ticket_detail_with_tnba_note_found_and_tnba_note_being_too_recent_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail,
-            make_standard_tnba_note, serial_number_1):
+            make_standard_tnba_note, serial_number_1, bruin_client_id, bruin_client_name, host_1):
         tnba_note = make_standard_tnba_note(serial_number=serial_number_1)
+        ticket_severity = 2
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1)
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_notes=[tnba_note],
         )
 
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._ticket_repository.is_tnba_note_old_enough.return_value = False
 
         await tnba_monitor._process_ticket_detail(detail_object)
@@ -1278,12 +1315,19 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def process_ticket_detail_with_retrieval_of_next_results_returning_non_2xx_status_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            serial_number_1, make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
+            serial_number_1, make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable, bruin_client_id,
+            bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 67890
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
-        detail_object = make_detail_object_with_predictions(ticket_id=ticket_id, ticket_detail=ticket_detail, )
+        detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
+            ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
+            ticket_detail=ticket_detail,
+        )
 
         next_results_response = make_rpc_response(
             body='Got internal error from Bruin',
@@ -1296,7 +1340,14 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
         await tnba_monitor._process_ticket_detail(detail_object)
@@ -1313,14 +1364,17 @@ class TestTNBAMonitor:
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, holmdel_noc_prediction, confident_request_completed_prediction,
             confident_repair_completed_prediction, serial_number_1, make_edge_with_links_info, edge_1_connected,
-            link_1_stable, link_2_stable):
+            link_1_stable, link_2_stable, bruin_client_id, bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [confident_request_completed_prediction]
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
@@ -1335,7 +1389,14 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         holmdel_noc_prediction_name = holmdel_noc_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
         next_results = make_next_results(next_result_item_1)
@@ -1366,16 +1427,20 @@ class TestTNBAMonitor:
     async def process_ticket_detail_with_tnba_note_found_and_no_changes_since_the_last_best_prediction_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, make_standard_tnba_note, holmdel_noc_prediction, serial_number_1,
-            edge_1_connected, link_1_stable, link_2_stable, make_edge_with_links_info):
+            edge_1_connected, link_1_stable, link_2_stable, make_edge_with_links_info, bruin_client_id,
+            bruin_client_name, host_1):
         holmdel_noc_prediction_name = holmdel_noc_prediction['name']
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [holmdel_noc_prediction]
         tnba_note = make_standard_tnba_note(serial_number=serial_number_1, prediction_name=holmdel_noc_prediction_name)
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_notes=[tnba_note],
             ticket_detail_predictions=ticket_detail_predictions,
@@ -1395,7 +1460,14 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._ticket_repository.is_tnba_note_old_enough.return_value = True
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
@@ -1420,14 +1492,17 @@ class TestTNBAMonitor:
     async def process_ticket_detail_with_standard_prediction_and_dev_env_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, holmdel_noc_prediction, serial_number_1, edge_1_connected,
-            link_1_stable, link_2_stable, make_edge_with_links_info):
+            link_1_stable, link_2_stable, make_edge_with_links_info, bruin_client_id, bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [holmdel_noc_prediction]
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
@@ -1447,7 +1522,14 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
         with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "dev"):
@@ -1473,14 +1555,17 @@ class TestTNBAMonitor:
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
             holmdel_noc_prediction, serial_number_1, edge_1_connected, link_1_stable, link_2_stable,
-            make_edge_with_links_info):
+            make_edge_with_links_info, bruin_client_id, bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [holmdel_noc_prediction]
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
@@ -1502,7 +1587,14 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
@@ -1537,14 +1629,18 @@ class TestTNBAMonitor:
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_payload_for_note_append_with_ticket_id, make_next_results,
             unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1,
-            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
+            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable, bruin_client_id,
+            bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [unconfident_request_completed_prediction]
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
@@ -1559,6 +1655,12 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
 
         request_completed_prediction_name = unconfident_request_completed_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
@@ -1571,6 +1673,7 @@ class TestTNBAMonitor:
 
         built_tnba_note = 'This is a TNBA note'
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
@@ -1616,15 +1719,18 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_repair_completed_prediction_and_autoresolve_bad_prediction_test(
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results,
-            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1):
+            make_next_result_item, make_next_results, unconfident_request_completed_prediction,
+            unconfident_repair_completed_prediction, serial_number_1, bruin_client_id, bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [unconfident_request_completed_prediction]
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
@@ -1632,6 +1738,12 @@ class TestTNBAMonitor:
             unconfident_request_completed_prediction,
             unconfident_repair_completed_prediction,
         ]
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
 
         request_completed_prediction_name = unconfident_request_completed_prediction['name']
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
@@ -1641,6 +1753,7 @@ class TestTNBAMonitor:
             body=next_results,
             status=200,
         )
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
@@ -1677,14 +1790,18 @@ class TestTNBAMonitor:
             self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
             make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
             confident_request_completed_prediction, confident_repair_completed_prediction, serial_number_1,
-            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
+            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable, bruin_client_id,
+            bruin_client_name, host_1):
         ticket_id = 12345
         ticket_detail_id = 1
+        ticket_severity = 2
 
         ticket_detail = make_in_progress_ticket_detail(detail_id=ticket_detail_id, serial_number=serial_number_1)
         ticket_detail_predictions = [confident_request_completed_prediction]
         detail_object = make_detail_object_with_predictions(
+            client_id=bruin_client_id,
             ticket_id=ticket_id,
+            ticket_severity=ticket_severity,
             ticket_detail=ticket_detail,
             ticket_detail_predictions=ticket_detail_predictions,
         )
@@ -1710,7 +1827,14 @@ class TestTNBAMonitor:
         edge_status_by_serial = {
             serial_number_1: edge_status,
         }
+        client_info_by_id = {
+            bruin_client_id: {
+                'host': host_1,
+                'name': bruin_client_name,
+            }
+        }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
+        tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = True
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.SUCCESS

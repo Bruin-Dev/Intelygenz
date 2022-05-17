@@ -5,9 +5,10 @@ import pytest
 
 
 # Model-as-dict generators
-def __generate_ticket_object(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-                             ticket_creator: str = None, ticket_details: List[dict] = None,
-                             ticket_notes: List[dict] = None, ticket_status: str = None):
+def __generate_ticket_object(*, client_id: int = None, ticket_id: int = None, ticket_creation_date: str = None,
+                             ticket_topic: str = None, ticket_severity: int = None, ticket_creator: str = None,
+                             ticket_details: List[dict] = None, ticket_notes: List[dict] = None,
+                             ticket_status: str = None):
     ticket_id = ticket_id or 12345
     ticket_creation_date = ticket_creation_date or "1/03/2021 10:08:13 AM"
     ticket_topic = ticket_topic or 'VOO'
@@ -16,7 +17,7 @@ def __generate_ticket_object(*, ticket_id: int = None, ticket_creation_date: str
     ticket_notes = ticket_notes or []
     ticket_status = ticket_status or 'In-Progress'
 
-    return {
+    ticket_object = {
         'ticket_id': ticket_id,
         'ticket_creation_date': ticket_creation_date,
         'ticket_status': ticket_status,
@@ -26,10 +27,18 @@ def __generate_ticket_object(*, ticket_id: int = None, ticket_creation_date: str
         'ticket_notes': ticket_notes,
     }
 
+    if client_id:
+        ticket_object['client_id'] = client_id
 
-def __generate_detail_object(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-                             ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None,
-                             ticket_status: str = None):
+    if ticket_severity:
+        ticket_object['ticket_severity'] = ticket_severity
+
+    return ticket_object
+
+
+def __generate_detail_object(*, client_id: int = None, ticket_id: int = None, ticket_creation_date: str = None,
+                             ticket_topic: str = None, ticket_severity: int = None, ticket_creator: str = None,
+                             ticket_detail: dict = None, ticket_notes: List[dict] = None, ticket_status: str = None):
     ticket_id = ticket_id or 12345
     ticket_creation_date = ticket_creation_date or "1/03/2021 10:08:13 AM"
     ticket_topic = ticket_topic or 'VOO'
@@ -38,7 +47,7 @@ def __generate_detail_object(*, ticket_id: int = None, ticket_creation_date: str
     ticket_notes = ticket_notes or []
     ticket_status = ticket_status or 'In-Progress'
 
-    return {
+    detail_object = {
         'ticket_id': ticket_id,
         'ticket_creation_date': ticket_creation_date,
         'ticket_status': ticket_status,
@@ -48,18 +57,28 @@ def __generate_detail_object(*, ticket_id: int = None, ticket_creation_date: str
         'ticket_notes': ticket_notes,
     }
 
+    if client_id:
+        detail_object['client_id'] = client_id
+
+    if ticket_severity:
+        detail_object['ticket_severity'] = ticket_severity
+
+    return detail_object
+
 
 # Factories
 @pytest.fixture(scope='session')
 def make_ticket_object():
-    def _inner(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-               ticket_creator: str = None, ticket_details: List[dict] = None, ticket_notes: List[dict] = None,
-               ticket_status: str = None):
+    def _inner(*, client_id: int = None, ticket_id: int = None, ticket_creation_date: str = None,
+               ticket_topic: str = None, ticket_severity: int = None, ticket_creator: str = None,
+               ticket_details: List[dict] = None, ticket_notes: List[dict] = None, ticket_status: str = None):
         return __generate_ticket_object(
+            client_id=client_id,
             ticket_id=ticket_id,
             ticket_creation_date=ticket_creation_date,
             ticket_status=ticket_status,
             ticket_topic=ticket_topic,
+            ticket_severity=ticket_severity,
             ticket_creator=ticket_creator,
             ticket_details=ticket_details,
             ticket_notes=ticket_notes
@@ -70,14 +89,16 @@ def make_ticket_object():
 
 @pytest.fixture(scope='session')
 def make_detail_object():
-    def _inner(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-               ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None,
-               ticket_status: str = None):
+    def _inner(*, client_id: int = None, ticket_id: int = None, ticket_creation_date: str = None,
+               ticket_topic: str = None, ticket_severity: int = None, ticket_creator: str = None,
+               ticket_detail: dict = None, ticket_notes: List[dict] = None, ticket_status: str = None):
         return __generate_detail_object(
+            client_id=client_id,
             ticket_id=ticket_id,
             ticket_creation_date=ticket_creation_date,
             ticket_status=ticket_status,
             ticket_topic=ticket_topic,
+            ticket_severity=ticket_severity,
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=ticket_notes
@@ -88,16 +109,19 @@ def make_detail_object():
 
 @pytest.fixture(scope='session')
 def make_detail_object_with_predictions(make_detail_object):
-    def _inner(*, ticket_id: int = None, ticket_creation_date: str = None, ticket_topic: str = None,
-               ticket_creator: str = None, ticket_detail: dict = None, ticket_notes: List[dict] = None,
+    def _inner(*, client_id: int = None, ticket_id: int = None, ticket_creation_date: str = None,
+               ticket_topic: str = None, ticket_severity: int = None, ticket_creator: str = None,
+               ticket_detail: dict = None, ticket_notes: List[dict] = None,
                ticket_detail_predictions: List[dict] = None, ticket_status: str = None):
         ticket_detail_predictions = ticket_detail_predictions or []
 
         detail_object = make_detail_object(
+            client_id=client_id,
             ticket_id=ticket_id,
             ticket_creation_date=ticket_creation_date,
             ticket_status=ticket_status,
             ticket_topic=ticket_topic,
+            ticket_severity=ticket_severity,
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=ticket_notes

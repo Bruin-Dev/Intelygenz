@@ -43,6 +43,7 @@ class TNBAMonitor:
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
 
     def __reset_state(self):
+        self._client_info_by_id = {}
         self._customer_cache_by_serial = {}
         self._edge_status_by_serial = {}
         self._link_metrics_and_events_by_serial = {}
@@ -102,6 +103,13 @@ class TNBAMonitor:
         self._logger.info('Loading customer cache and edges statuses by serial into the monitor instance...')
         self._customer_cache_by_serial = {
             cached_info['serial_number']: cached_info
+            for cached_info in customer_cache
+        }
+        self._client_info_by_id = {
+            cached_info['bruin_client_info']['client_id']: {
+                'host': cached_info['edge']['host'],
+                'name': cached_info['bruin_client_info']['client_name'],
+            }
             for cached_info in customer_cache
         }
         self._edge_status_by_serial = {
@@ -215,6 +223,7 @@ class TNBAMonitor:
                     ticket_id = ticket['ticketID']
                     ticket_creation_date = ticket['createDate']
                     ticket_topic = ticket['category']
+                    ticket_severity = ticket['severity']
                     ticket_creator = ticket['createdBy']
                     ticket_status = ticket['ticketStatus']
 
@@ -234,10 +243,12 @@ class TNBAMonitor:
                     self._logger.info(f'Got details for ticket {ticket_id} of Bruin customer {client_id}!')
 
                     result.append({
+                        'client_id': client_id,
                         'ticket_id': ticket_id,
                         'ticket_creation_date': ticket_creation_date,
                         'ticket_status': ticket_status,
                         'ticket_topic': ticket_topic,
+                        'ticket_severity': ticket_severity,
                         'ticket_creator': ticket_creator,
                         'ticket_details': ticket_details_list,
                         'ticket_notes': ticket_details_response_body['ticketNotes'],
@@ -384,9 +395,11 @@ class TNBAMonitor:
         detail_objects = []
 
         for ticket in tickets:
+            client_id = ticket['client_id']
             ticket_id = ticket['ticket_id']
             ticket_creation_date = ticket['ticket_creation_date']
             ticket_topic = ticket['ticket_topic']
+            ticket_severity = ticket['ticket_severity']
             ticket_creator = ticket['ticket_creator']
             ticket_details = ticket['ticket_details']
             ticket_notes = ticket['ticket_notes']
@@ -402,10 +415,12 @@ class TNBAMonitor:
                 ]
 
                 detail_object = {
+                    'client_id': client_id,
                     'ticket_id': ticket_id,
                     'ticket_creation_date': ticket_creation_date,
                     'ticket_status': ticket_status,
                     'ticket_topic': ticket_topic,
+                    'ticket_severity': ticket_severity,
                     'ticket_creator': ticket_creator,
                     'ticket_detail': detail,
                     'ticket_notes': notes_related_to_serial,
@@ -509,8 +524,13 @@ class TNBAMonitor:
             ticket_id = detail_object['ticket_id']
             ticket_detail_id = detail_object['ticket_detail']['detailID']
             ticket_notes = detail_object['ticket_notes']
+            ticket_topic = detail_object['ticket_topic']
+            ticket_severity = detail_object['ticket_severity']
             serial_number = detail_object['ticket_detail']['detailValue']
             predictions = detail_object['ticket_detail_predictions']
+            client_id = detail_object['client_id']
+            client_name = self._client_info_by_id[client_id]['name']
+            host = self._client_info_by_id[client_id]['host']
 
             self._logger.info(
                 f'Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}...'
@@ -590,6 +610,9 @@ class TNBAMonitor:
                 )
 
                 if autoresolve_status is self.AutoresolveTicketDetailStatus.SUCCESS:
+                    self._metrics_repository.increment_tasks_autoresolved(
+                        host=host, client=client_name, topic=ticket_topic, severity=ticket_severity
+                    )
                     await self._t7_repository.post_live_automation_metrics(
                         ticket_id, serial_number, automated_successfully=True
                     )

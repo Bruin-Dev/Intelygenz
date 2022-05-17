@@ -273,6 +273,7 @@ def open_affecting_ticket(bruin_client_id, bruin_client_name):
         "createdBy": "Intelygenz Ai",
         "callType": "REP",
         "category": "VAS",
+        "severity": 3,
     }
 
 
@@ -293,6 +294,7 @@ def open_outage_ticket(bruin_client_id, bruin_client_name):
         "createdBy": "Intelygenz Ai",
         "callType": "REP",
         "category": "VOO",
+        "severity": 2,
     }
 
 
