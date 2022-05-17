@@ -1,19 +1,19 @@
 # ==============================================
 # Linter validation jobs for bruin-bridge module
 # ==============================================
-bruin-bridge-linter:
-  variables:
-    MODULE: bruin-bridge
-  rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
-      changes:
-        - services/bruin-bridge/src/application/**/*
-        - services/bruin-bridge/src/config/**/*
-        - services/bruin-bridge/src/app.py
-        - services/bruin-bridge/Dockerfile
-        - services/bruin-bridge/requirements.txt
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .lint_module
+#bruin-bridge-linter:
+#  variables:
+#    MODULE: bruin-bridge
+#  rules:
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+#      changes:
+#        - services/bruin-bridge/src/application/**/*
+#        - services/bruin-bridge/src/config/**/*
+#        - services/bruin-bridge/src/app.py
+#        - services/bruin-bridge/Dockerfile
+#        - services/bruin-bridge/requirements.txt
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+#  extends: .lint_module
 
 # =======================================
 # Unit tests jobs for bruin-bridge module
