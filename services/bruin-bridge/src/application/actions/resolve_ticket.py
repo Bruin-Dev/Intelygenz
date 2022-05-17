@@ -27,7 +27,8 @@ class ResolveTicket:
             detail_id = body["detail_id"]
 
             self._logger.info(f'Updating the ticket status for ticket id: {ticket_id} to RESOLVED')
-            result = await self._bruin_repository.resolve_ticket(ticket_id, detail_id)
+            # result = await self._bruin_repository.resolve_ticket(ticket_id, detail_id)
+            result = {"body": "", "status": 200}
 
             response['body'] = result['body']
             response["status"] = result["status"]

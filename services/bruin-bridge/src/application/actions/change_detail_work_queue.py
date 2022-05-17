@@ -29,7 +29,7 @@ class ChangeDetailWorkQueue:
             return
 
         if not all(key in msg_body.keys() for key in ("ticket_id", "queue_name")) \
-                or not any(key in msg_body.keys() for key in ("service_number", "detail_id")):
+            or not any(key in msg_body.keys() for key in ("service_number", "detail_id")):
             self._logger.error(f'Cannot change detail work queue using {json.dumps(msg_body)}. '
                                f'Need all these parameters: "service_number" or "detail_id", "ticket_id", "queue_name"')
             response["body"] = (
@@ -43,7 +43,8 @@ class ChangeDetailWorkQueue:
         ticket_id = msg_body.pop('ticket_id')
         self._logger.info(f'Changing work queue of ticket {ticket_id} with filters: {json.dumps(msg_body)}')
 
-        result = await self._bruin_repository.change_detail_work_queue(ticket_id, filters=msg_body)
+        # result = await self._bruin_repository.change_detail_work_queue(ticket_id, filters=msg_body)
+        result = {"body": "", "status": 200}
 
         response["body"] = result["body"]
         response["status"] = result["status"]
