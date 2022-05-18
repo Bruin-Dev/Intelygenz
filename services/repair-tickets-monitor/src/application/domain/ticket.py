@@ -25,6 +25,7 @@ class Ticket:
 class Category(str, Enum):
     SERVICE_AFFECTING = "VAS"
     SERVICE_OUTAGE = "VOO"
+    WIRELESS_SERVICE_NOT_WORKING = "019"
 
 
 class TicketStatus(str, Enum):

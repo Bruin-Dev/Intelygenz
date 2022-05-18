@@ -3,9 +3,10 @@ from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
+from asynctest import CoroutineMock
+
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories.bruin_repository import BruinRepository
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 
@@ -1252,7 +1253,7 @@ class TestBruinRepository:
 
         expected_result = {
             "body": [{"client_id": client_response["body"]["documents"][0]["clientID"],
-                     "client_name": client_response["body"]["documents"][0]["clientName"],
+                      "client_name": client_response["body"]["documents"][0]["clientName"],
                       "site_id": client_response["body"]["documents"][0]["siteId"]}],
             "status": response_status
         }
@@ -2486,3 +2487,37 @@ class TestBruinRepository:
 
         bruin_client.post_notification_email_milestone.assert_awaited_once_with(fixed_payload)
         assert post_response == expected_post_response
+
+    @pytest.mark.asyncio
+    async def get_asset_topics_test(self):
+        # Given
+        params = {
+            'client_id': 321,
+            'service_number': 'VC1234567',
+        }
+
+        mocked_response = {
+            "status": 200,
+            "body": {
+                "callTypes": [
+                    {
+                        "callType": "CHG",
+                        "callTypeDescription": "Service Changes",
+                        "category": "053",
+                        "categoryDescription": "Add Additional Lines"
+                    },
+                ]
+            }
+        }
+
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.get_asset_topics = CoroutineMock(return_value=mocked_response)
+
+        bruin_repository = BruinRepository(logger, config, bruin_client)
+
+        # When
+        response = await bruin_repository.get_asset_topics(params)
+
+        # Then
+        assert response == mocked_response

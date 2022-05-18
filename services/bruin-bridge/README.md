@@ -70,6 +70,11 @@
     * [Description](#description-18)
     * [Request message](#request-message-17)
     * [Response message](#response-message-17)
+    * [Response message](#response-message-15)   
+  * [Get asset topics](#get-asset-topics)
+    * [Description](#description-17)
+    * [Request message](#request-message-16)
+    * [Response message](#response-message-16)   
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -738,6 +743,61 @@ hood
     },
     'status': 200
 }
+```
+
+# Get asset topics
+### Description
+Get the ticket topics (category and call type) that can be used when opening a ticket for an asset.
+
+When the bruin bridge receives a request with a request message from topic `bruin.get.asset.topics`
+it will make a call to the endpoint `/api/Ticket/topics` in bruin, using as query params the message payload.
+**NOTE: the payload are passed in snake_case and will be converted to PascalCase before being sent to Bruin's API.**
+
+### Request message
+```
+{
+    "request_id": 123,
+    "body": {
+        "client_id": 89267, # Mandatory parameter
+        "service_number": "5006950173" # Mandatory parameter
+    }
+}
+```
+
+### Response message
+#### Success response message
+```
+{
+    "request_id": 123,
+    "status": 200,
+    "body": {
+        "callTypes": [
+            {
+                "callType": "CHG",
+                "callTypeDescription": "Service Changes",
+                "category": "053",
+                "categoryDescription": "Add Additional Lines"
+            },
+        ]
+    },
+}
+
+```
+
+#### Not found response message
+```
+{
+    "request_id": 123,
+    "status": 200,
+    "body": {
+        "message": "No source access under ClientId[81805] or No active inventory found by serviceNumber[8158794063].",
+        "messageDetail": null,
+        "data": null,
+        "type": "ValidationException",
+        "code": 400
+    },
+}
+
 ```
 
 # Running in docker-compose 

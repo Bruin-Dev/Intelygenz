@@ -9,6 +9,7 @@ import pytest
 from asynctest import CoroutineMock
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor, get_feedback_not_created_due_cancellations
+from application.domain.asset import Topic
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput, CreateTicketsOutput
 from application.domain.ticket import Ticket, TicketStatus
 from application.exceptions import ResponseException
@@ -135,6 +136,7 @@ class TestRepairTicketsMonitor:
             bruin_repository,
             new_tagged_emails_repository,
             repair_ticket_kre_repository,
+            CoroutineMock(),
             CoroutineMock(),
         )
 
@@ -483,6 +485,8 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
         repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
+        repair_tickets_monitor.get_asset_topics_rpc = CoroutineMock(
+            return_value=[Topic(call_type="REP", category="VOO")])
         repair_tickets_monitor._bruin_repository.mark_email_as_done = CoroutineMock()
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
@@ -566,6 +570,8 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_ticket_response)
         repair_tickets_monitor._save_output = CoroutineMock(return_value=save_outputs_response)
         repair_tickets_monitor._bruin_repository.mark_email_as_done = CoroutineMock()
+        repair_tickets_monitor.get_asset_topics_rpc = CoroutineMock(
+            return_value=[Topic(call_type="REP", category="VOO")])
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
 
@@ -706,6 +712,8 @@ class TestRepairTicketsMonitor:
             return_value=service_number_site_map)
         repair_tickets_monitor._get_existing_tickets = CoroutineMock(return_value=existing_tickets_response)
         repair_tickets_monitor._create_tickets = CoroutineMock(return_value=create_tickets_output)
+        repair_tickets_monitor.get_asset_topics_rpc = CoroutineMock(
+            return_value=[Topic(call_type="REP", category="VOO")])
 
         await repair_tickets_monitor._process_repair_email(tagged_email)
 

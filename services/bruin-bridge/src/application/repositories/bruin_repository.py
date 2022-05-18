@@ -1,7 +1,9 @@
-import asyncio
-
 from typing import Callable
 from typing import List
+
+import asyncio
+
+from application.clients.bruin_session import BruinResponse
 
 
 class BruinRepository:
@@ -394,3 +396,6 @@ class BruinRepository:
         }
 
         return await self._bruin_client.post_notification_email_milestone(payload)
+
+    async def get_asset_topics(self, params) -> BruinResponse:
+        return await self._bruin_client.get_asset_topics(params)

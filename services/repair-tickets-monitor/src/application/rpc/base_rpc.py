@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from logging import Logger, LoggerAdapter
 from typing import Any
 
@@ -5,8 +6,6 @@ from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
 from pydantic import BaseModel
 from shortuuid import uuid
-
-OK_STATUS = 200
 
 
 @dataclass
@@ -25,7 +24,7 @@ class Rpc:
         :return: a request_id and a logger
         """
         request_id = uuid()
-        return request_id, RpcLogger(request_id=request_id, logger=self.logger)
+        return RpcRequest(request_id=request_id), RpcLogger(request_id=request_id, logger=self.logger)
 
     async def send(self, request: 'RpcRequest') -> 'RpcResponse':
         """
@@ -42,6 +41,7 @@ class RpcRequest(BaseModel):
     Data structure that represents a base request.
     """
     request_id: str
+    body: Any = None
 
 
 class RpcResponse(BaseModel):
@@ -52,7 +52,7 @@ class RpcResponse(BaseModel):
     body: Any = None
 
     def is_ok(self) -> bool:
-        return self.status == OK_STATUS
+        return self.status == HTTPStatus.OK
 
 
 class RpcLogger(LoggerAdapter):
@@ -63,9 +63,9 @@ class RpcLogger(LoggerAdapter):
     def __init__(self, logger: Logger, request_id: str):
         super().__init__(logger=logger, extra={"request_id": request_id})
 
-    def process(self, msg, kwargs):
+    def process(self, base_rpc, kwargs):
         extra_str = ', '.join(f"{key}={value}" for key, value in self.extra.items())
-        return "[%s] %s" % (extra_str, msg), kwargs
+        return "[%s] %s" % (extra_str, base_rpc), kwargs
 
 
 class RpcError(Exception):

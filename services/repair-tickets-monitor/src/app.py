@@ -19,6 +19,7 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from application.repositories.storage_repository import StorageRepository
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
+from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 from config import config
 
 
@@ -73,6 +74,11 @@ class Container:
             logger=self._logger,
             timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"]
         )
+        get_asset_topics_rpc = GetAssetTopicsRpc(
+            event_bus=self._event_bus,
+            logger=self._logger,
+            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+        )
 
         # ACTIONS
         self._new_created_tickets_feedback = NewCreatedTicketsFeedback(
@@ -100,7 +106,8 @@ class Container:
             self._bruin_repository,
             self._new_tagged_emails_repository,
             self._repair_ticket_repository,
-            append_note_to_ticket_rpc
+            append_note_to_ticket_rpc,
+            get_asset_topics_rpc
         )
 
     async def start_server(self):

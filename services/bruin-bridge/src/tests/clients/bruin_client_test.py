@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 from unittest.mock import Mock
 from unittest.mock import call
 from unittest.mock import patch
@@ -6,10 +7,12 @@ from unittest.mock import patch
 import humps
 import pytest
 from aiohttp import ClientConnectionError
-from application.clients.bruin_client import BruinClient
 from asynctest import CoroutineMock
-from config import testconfig as config
 from pytest import raises
+
+from application.clients.bruin_client import BruinClient
+from application.clients.bruin_session import BruinResponse
+from config import testconfig as config
 
 
 class TestBruinClient:
@@ -72,6 +75,8 @@ class TestBruinClient:
             bruin_client._get_request_headers()
             assert error_info == "Missing BEARER token"
 
+
+class TestGetAllTickets:
     @pytest.mark.asyncio
     async def get_all_tickets_test(self):
         logger = Mock()
@@ -210,6 +215,8 @@ class TestBruinClient:
             assert tickets['body'] == "Got internal error from Bruin"
             assert tickets['status'] == 500
 
+
+class TestGetTicketDetails:
     @pytest.mark.asyncio
     async def get_ticket_details_test(self):
         logger = Mock()
@@ -338,6 +345,8 @@ class TestBruinClient:
             assert ticket_details['body'] == "Got internal error from Bruin"
             assert ticket_details['status'] == 500
 
+
+class TestPostTicketNote:
     @pytest.mark.asyncio
     async def post_ticket_note_test(self):
         logger = Mock()
@@ -478,6 +487,8 @@ class TestBruinClient:
             assert post_response["body"] == "Got internal error from Bruin"
             assert post_response["status"] == 500
 
+
+class TestPostTicket:
     @pytest.mark.asyncio
     async def post_ticket_test(self):
         logger = Mock()
@@ -613,6 +624,8 @@ class TestBruinClient:
             assert post_ticket["body"] == "Got internal error from Bruin"
             assert post_ticket["status"] == 500
 
+
+class TestUpdateTicketStatus:
     @pytest.mark.asyncio
     async def update_ticket_status_test(self):
         logger = Mock()
@@ -766,6 +779,8 @@ class TestBruinClient:
             assert update_ticket_status["body"] == "Got internal error from Bruin"
             assert update_ticket_status["status"] == 500
 
+
+class TestGetInventoryAttributes:
     @pytest.mark.asyncio
     async def get_inventory_attributes_pascalize_with_ok_test(self):
         logger = Mock()
@@ -990,6 +1005,8 @@ class TestBruinClient:
 
             assert result == message
 
+
+class TestGetPossibleDetailNextResult:
     @pytest.mark.asyncio
     async def get_possible_detail_next_result_200_test(self):
         logger = Mock()
@@ -1160,6 +1177,8 @@ class TestBruinClient:
                 self.assertRaises(Exception, bruin_client.get_possible_detail_next_result)
                 bruin_client.login.assert_awaited()
 
+
+class TestChangeWorkQueue:
     @pytest.mark.asyncio
     async def change_work_queue_200_test(self):
         logger = Mock()
@@ -2693,6 +2712,8 @@ class TestPostMultipleTicketNotes:
         }
         assert result == expected
 
+
+class TestGetTicketTaskHistory:
     @pytest.mark.asyncio
     async def get_ticket_task_history_2xx_response_test(self):
         ticket_id = 12345
@@ -2854,6 +2875,8 @@ class TestPostMultipleTicketNotes:
         }
         assert result == expected
 
+
+class TestGetTicketsBasicInfo:
     @pytest.mark.asyncio
     async def get_tickets_basic_info_ok_test(self):
         service_number = 'VC1234567'
@@ -3182,6 +3205,8 @@ class TestPostMultipleTicketNotes:
         }
         assert result == expected
 
+
+class TestGetCircuitId:
     @pytest.mark.asyncio
     async def get_circuit_id_2xx_status_test(self):
         circuit_id = '123'
@@ -3486,6 +3511,8 @@ class TestPostMultipleTicketNotes:
         logger.error.assert_called()
         assert result == expected
 
+
+class TestPostEmailTag:
     @pytest.mark.asyncio
     async def post_email_tag_test(self):
         logger = Mock()
@@ -3857,6 +3884,8 @@ class TestChangeTicketSeverity:
         }
         assert result == expected
 
+
+class TestGetSite:
     @pytest.mark.asyncio
     async def get_site_test(self):
         logger = Mock()
@@ -3867,30 +3896,30 @@ class TestChangeTicketSeverity:
             "site_id": site_id
         }
         get_site_response = {
-          "documents": [
-            {
-              "clientID": client_id,
-              "clientName": "TENET",
-              "siteID": f"{site_id}",
-              "siteLabel": "TENET",
-              "siteAddDate": "2018-07-05T06:18:20.723Z",
-              "address": {
-                "addressID": 311716,
-                "address": "8200 Perrin Beitel Rd",
-                "city": "San Antonio",
-                "state": "TX",
-                "zip": "78218-1547",
-                "country": "USA"
-              },
-              "longitude": -98.4096658,
-              "latitude": 29.5125306,
-              "businessHours": None,
-              "timeZone": None,
-              "primaryContactName": "primaryContactName string",
-              "primaryContactPhone": "primaryContactPhone string",
-              "primaryContactEmail": "some@email.com"
-            }
-          ]
+            "documents": [
+                {
+                    "clientID": client_id,
+                    "clientName": "TENET",
+                    "siteID": f"{site_id}",
+                    "siteLabel": "TENET",
+                    "siteAddDate": "2018-07-05T06:18:20.723Z",
+                    "address": {
+                        "addressID": 311716,
+                        "address": "8200 Perrin Beitel Rd",
+                        "city": "San Antonio",
+                        "state": "TX",
+                        "zip": "78218-1547",
+                        "country": "USA"
+                    },
+                    "longitude": -98.4096658,
+                    "latitude": 29.5125306,
+                    "businessHours": None,
+                    "timeZone": None,
+                    "primaryContactName": "primaryContactName string",
+                    "primaryContactPhone": "primaryContactPhone string",
+                    "primaryContactEmail": "some@email.com"
+                }
+            ]
         }
 
         response_mock = CoroutineMock()
@@ -4040,6 +4069,8 @@ class TestChangeTicketSeverity:
             assert ticket_details['body'] == "Got internal error from Bruin"
             assert ticket_details['status'] == 500
 
+
+class TestMarkEmailAsDone:
     @pytest.mark.asyncio
     async def mark_email_as_done_test(self):
         email_id = 1234
@@ -4123,6 +4154,8 @@ class TestChangeTicketSeverity:
         assert response['status'] == 500
         assert response['body'] == "Got internal error from Bruin"
 
+
+class TestLinkTicketToEmail:
     @pytest.mark.asyncio
     async def link_ticket_to_email_200_test(self):
         email_id = 1234
@@ -4195,6 +4228,8 @@ class TestChangeTicketSeverity:
         assert response['status'] == 500
         assert response['body'] == "Got internal error from Bruin"
 
+
+class TestPostNotificationEmailMilestone:
     @pytest.mark.asyncio
     async def post_notification_email_milestone_test(self):
         logger = Mock()
@@ -4350,3 +4385,62 @@ class TestChangeTicketSeverity:
 
             assert post_notification_email_milestone["body"] == "Got internal error from Bruin"
             assert post_notification_email_milestone["status"] == 500
+
+
+class TestGetAssetTopics:
+    @pytest.mark.asyncio
+    async def get_asset_topics_test(self):
+        # Given
+        params = {
+            'client_id': 321,
+            'service_number': 'VC1234567',
+        }
+
+        mocked_response = BruinResponse(status=HTTPStatus.OK, body={
+            "callTypes": [
+                {
+                    "callType": "CHG",
+                    "callTypeDescription": "Service Changes",
+                    "category": "053",
+                    "categoryDescription": "Add Additional Lines"
+                },
+            ]
+        })
+
+        logger = Mock()
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
+
+        # When
+        response = await bruin_client.get_asset_topics(params)
+
+        # Then
+        assert response == mocked_response
+        bruin_client._bruin_session.get.assert_awaited_once_with(
+            path="/api/Ticket/topics", query_params=params
+        )
+
+    @pytest.mark.asyncio
+    async def get_asset_topics_401_test(self):
+        # Given
+        params = {
+            'client_id': 321,
+            'service_number': 'VC1234567',
+        }
+
+        mocked_response = BruinResponse(status=HTTPStatus.UNAUTHORIZED, body="")
+        mocked_access_token = "access_token"
+        login_response = Mock()
+        login_response.json = CoroutineMock(return_value={"access_token": mocked_access_token})
+
+        logger = Mock()
+        bruin_client = BruinClient(logger, config)
+        bruin_client._session.post = CoroutineMock(return_value=login_response)
+        bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
+
+        # When
+        response = await bruin_client.get_asset_topics(params)
+
+        # Then
+        assert response == mocked_response
+        assert bruin_client._bruin_session.access_token == mocked_access_token

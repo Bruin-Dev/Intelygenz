@@ -2,9 +2,10 @@ from typing import Dict, List, Any
 
 from dataclasses import dataclass, field
 
+from application.domain.asset import Topic
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
-from application.domain.ticket import Ticket, TicketStatus
-from application.rpc.base_rpc import RpcError
+from application.domain.ticket import Ticket, TicketStatus, Category
+from application.rpc import RpcError
 
 
 @dataclass
@@ -17,8 +18,10 @@ class RepairTicketsMonitorScenario:
 
     # Integration behavior
     email_actionable: bool = True
-    # Bruin POST api/Ticker/repair responses
+    # Bruin POST api/Ticket/repair responses
     post_responses: Dict[str, 'PostResponse'] = field(default_factory=dict)
+    # Bruin GET api/Ticket/topics mocks
+    asset_topics: Dict[str, List[Topic]] = field(default_factory=dict)
     # append_note_to_ticket_rpc response
     append_note_to_ticket_effect: Any = lambda x, y: True
     # link_email_to_ticket response
@@ -50,12 +53,12 @@ class UpdatedResponse(PostResponse):
     status: int = field(init=False, default=409)
 
 
-# @dataclass
-# class ErrorResponse(PostResponse):
-#     status: int = field(init=False, default=500)
-
-
 def make_repair_tickets_monitor_scenarios():
+    # Common values
+    voo_topic = Topic(call_type="REP", category=Category.SERVICE_OUTAGE.value)
+    wireless_topic = Topic(call_type="REP", category=Category.WIRELESS_SERVICE_NOT_WORKING.value)
+    other_category_topic = Topic(call_type="REP", category="018")
+
     no_assets_and_no_tickets = RepairTicketsMonitorScenario(
         assets={},
         tickets=[],
@@ -69,9 +72,11 @@ def make_repair_tickets_monitor_scenarios():
     #
     # Extracted Assets
     #
+
     single_unreported_asset = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
         post_responses={"asset_1": CreatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket")],
         email_linked_to=[hash("site_1_ticket")],
@@ -88,6 +93,7 @@ def make_repair_tickets_monitor_scenarios():
     single_reported_asset = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
         post_responses={"asset_1": UpdatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket")],
         email_linked_to=[hash("site_1_ticket")],
@@ -105,6 +111,7 @@ def make_repair_tickets_monitor_scenarios():
     several_related_unreported_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         post_responses={"asset_1,asset_2": CreatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket")],
         email_linked_to=[hash("site_1_ticket")],
@@ -121,6 +128,7 @@ def make_repair_tickets_monitor_scenarios():
     several_related_reported_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         post_responses={"asset_1,asset_2": UpdatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket")],
         email_linked_to=[hash("site_1_ticket")],
@@ -141,6 +149,7 @@ def make_repair_tickets_monitor_scenarios():
             "asset_1": CreatedResponse(hash("site_1_ticket")),
             "asset_2": CreatedResponse(hash("site_2_ticket")),
         },
+        asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket"), hash("site_2_ticket")],
         email_linked_to=[hash("site_1_ticket"), hash("site_2_ticket")],
@@ -167,6 +176,7 @@ def make_repair_tickets_monitor_scenarios():
             "asset_1": UpdatedResponse(hash("site_1_ticket")),
             "asset_2": UpdatedResponse(hash("site_2_ticket")),
         },
+        asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket"), hash("site_2_ticket")],
         email_linked_to=[hash("site_1_ticket"), hash("site_2_ticket")],
@@ -187,6 +197,154 @@ def make_repair_tickets_monitor_scenarios():
                     reason="update_with_asset_found"
                 ),
             ]
+        )
+    ))
+
+    #
+    # Asset topics
+    #
+
+    single_no_topics_asset = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        asset_topics={"asset_1": []},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="no_topics_detected")]
+        )
+    ))
+    single_wireless_asset = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        asset_topics={"asset_1": [wireless_topic]},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    single_other_category_asset = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        asset_topics={"asset_1": [other_category_topic]},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")]
+        )
+    ))
+    several_wireless_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1"},
+        asset_topics={"asset_1": [wireless_topic], "asset_2": [wireless_topic]},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    several_other_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1"},
+        asset_topics={"asset_1": [other_category_topic], "asset_2": [other_category_topic]},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")]
+        )
+    ))
+    wireless_and_no_topic_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1"},
+        asset_topics={"asset_1": [wireless_topic], "asset_2": []},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    wireless_and_other_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1"},
+        asset_topics={"asset_1": [wireless_topic], "asset_2": [other_category_topic]},
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    voo_and_wireless_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1"},
+        post_responses={"asset_1": CreatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic], "asset_2": [wireless_topic]},
+        email_processed=False,
+        note_added_to=[hash("site_1_ticket")],
+        email_linked_to=[hash("site_1_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
+            tickets_created=[TicketOutput(
+                ticket_id=hash("site_1_ticket"),
+                site_id="site_1",
+                service_numbers=["asset_1"]
+            )],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    voo_and_other_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1"},
+        post_responses={"asset_1": CreatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic], "asset_2": [other_category_topic]},
+        email_processed=False,
+        note_added_to=[hash("site_1_ticket")],
+        email_linked_to=[hash("site_1_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
+            tickets_created=[TicketOutput(
+                ticket_id=hash("site_1_ticket"),
+                site_id="site_1",
+                service_numbers=["asset_1"]
+            )],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")]
+        )
+    ))
+    voo_wireless_and_other_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_1", "asset_3": "site_1"},
+        post_responses={"asset_1": UpdatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic], "asset_2": [wireless_topic], "asset_3": [other_category_topic]},
+        email_processed=False,
+        note_added_to=[hash("site_1_ticket")],
+        email_linked_to=[hash("site_1_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1", "asset_3": "site_1"},
+            tickets_updated=[TicketOutput(
+                ticket_id=hash("site_1_ticket"),
+                site_id="site_1",
+                service_numbers=["asset_1"],
+                reason="update_with_asset_found"
+            )],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
+    several_sites_mixed_category_assets = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1", "asset_2": "site_2", "asset_3": "site_2"},
+        asset_topics={"asset_1": [other_category_topic], "asset_2": [wireless_topic], "asset_3": [voo_topic]},
+        post_responses={"asset_3": CreatedResponse(hash("site_2_ticket"))},
+        email_processed=False,
+        note_added_to=[hash("site_2_ticket")],
+        email_linked_to=[hash("site_2_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_2", "asset_3": "site_2"},
+            tickets_created=[TicketOutput(
+                ticket_id=hash("site_2_ticket"),
+                site_id="site_2",
+                service_numbers=["asset_3"]
+            )],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
         )
     ))
 
@@ -311,6 +469,7 @@ def make_repair_tickets_monitor_scenarios():
         assets={"asset_1": "site_1"},
         tickets=[Ticket(hash("ticket_1"), status=TicketStatus.NEW, call_type="REP", category="VOO")],
         post_responses={"asset_1": CreatedResponse(hash("site_1_ticket"))},
+        asset_topics={"asset_1": [voo_topic]},
         email_processed=True,
         note_added_to=[hash("site_1_ticket")],
         email_linked_to=[hash("site_1_ticket")],
@@ -326,8 +485,24 @@ def make_repair_tickets_monitor_scenarios():
             )]
         )
     ))
+    single_no_voo_asset_single_operable_ticket = (RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        tickets=[Ticket(hash("site_1_ticket"), status=TicketStatus.NEW, call_type="REP", category="VOO")],
+        asset_topics={"asset_1": [wireless_topic]},
+        email_processed=False,
+        email_linked_to=[hash("site_1_ticket")],
+        global_note_added_to=[hash("site_1_ticket")],
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1"},
+            validated_tickets=[Ticket(hash("site_1_ticket"), status=TicketStatus.NEW, call_type="REP", category="VOO")],
+            tickets_updated=[TicketOutput(ticket_id=hash("site_1_ticket"), reason="update_with_ticket_found")],
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")]
+        )
+    ))
 
     return {
+        # Assets
         "no_assets_and_no_tickets": no_assets_and_no_tickets,
         "single_unreported_asset": single_unreported_asset,
         "single_reported_asset": single_reported_asset,
@@ -335,6 +510,19 @@ def make_repair_tickets_monitor_scenarios():
         "several_related_reported_assets": several_related_reported_assets,
         "several_unrelated_unreported_assets": several_unrelated_unreported_assets,
         "several_unrelated_reported_assets": several_unrelated_reported_assets,
+        # Topics
+        "single_no_topics_asset": single_no_topics_asset,
+        "single_wireless_asset": single_wireless_asset,
+        "single_other_category_asset": single_other_category_asset,
+        "several_wireless_assets": several_wireless_assets,
+        "several_other_category_assets": several_other_category_assets,
+        "wireless_and_no_topic_assets": wireless_and_no_topic_assets,
+        "wireless_and_other_category_assets": wireless_and_other_category_assets,
+        "voo_and_wireless_category_assets": voo_and_wireless_category_assets,
+        "voo_and_other_category_assets": voo_and_other_category_assets,
+        "voo_wireless_and_other_category_assets": voo_wireless_and_other_category_assets,
+        "several_sites_mixed_category_assets": several_sites_mixed_category_assets,
+        # Tickets
         "single_operable_ticket": single_operable_ticket,
         "single_inoperable_ticket": single_inoperable_ticket,
         "multiple_operable_tickets": multiple_operable_tickets,
@@ -344,5 +532,6 @@ def make_repair_tickets_monitor_scenarios():
         "append_global_note_error": append_global_note_error,
         "link_email_not_ok": link_email_not_ok,
         "email_not_actionable_and_single_operable_ticket": email_not_actionable_and_single_operable_ticket,
-        "single_reported_asset_single_operable_ticket": single_reported_asset_single_operable_ticket
+        "single_reported_asset_single_operable_ticket": single_reported_asset_single_operable_ticket,
+        "single_no_voo_asset_single_operable_ticket": single_no_voo_asset_single_operable_ticket,
     }

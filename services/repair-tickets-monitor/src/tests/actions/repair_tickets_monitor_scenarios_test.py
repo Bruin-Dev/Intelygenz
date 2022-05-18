@@ -6,6 +6,7 @@ from dataclasses import asdict
 from pytest import mark, fixture
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
+from application.domain.asset import AssetId
 from config import testconfig as config
 from tests.actions.repair_tickets_monitor_scenarios import RepairTicketsMonitorScenario, PostResponse, \
     make_repair_tickets_monitor_scenarios
@@ -23,7 +24,11 @@ async def repair_tickets_monitor_scenarios_test(
     inference_data_for,
     make_email_tag_info,
 ):
+    def append_note_to_ticket_rpc(asset_id: AssetId):
+        return scenario.asset_topics.get(asset_id.service_number, [])
+
     repair_tickets_monitor.append_note_to_ticket_rpc = CoroutineMock(side_effect=scenario.append_note_to_ticket_effect)
+    repair_tickets_monitor.get_asset_topics_rpc = CoroutineMock(side_effect=append_note_to_ticket_rpc)
     repair_ticket_kre_repository.get_email_inference = CoroutineMock(return_value=inference_data_for(scenario))
     mock_bruin_repository(bruin_repository, scenario)
 
@@ -89,6 +94,7 @@ def repair_tickets_monitor(
         bruin_repository,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
+        CoroutineMock(),
         CoroutineMock()
     )
 
