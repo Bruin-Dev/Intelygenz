@@ -283,13 +283,8 @@ class TNBAMonitor:
                 continue
 
             relevant_tickets.append({
-                'ticket_id': ticket['ticket_id'],
-                'ticket_creation_date': ticket['ticket_creation_date'],
-                'ticket_status': ticket['ticket_status'],
-                'ticket_topic': ticket['ticket_topic'],
-                'ticket_creator': ticket['ticket_creator'],
+                **ticket,
                 'ticket_details': relevant_details,
-                'ticket_notes': ticket['ticket_notes'],
             })
 
         return relevant_tickets
@@ -316,12 +311,7 @@ class TNBAMonitor:
                     relevant_notes[index]['serviceNumber'] = list(relevant_service_numbers)
 
             sanitized_tickets.append({
-                'ticket_id': ticket['ticket_id'],
-                'ticket_creation_date': ticket['ticket_creation_date'],
-                'ticket_status': ticket['ticket_status'],
-                'ticket_topic': ticket['ticket_topic'],
-                'ticket_creator': ticket['ticket_creator'],
-                'ticket_details': ticket['ticket_details'],
+                **ticket,
                 'ticket_notes': relevant_notes,
             })
 
@@ -395,37 +385,22 @@ class TNBAMonitor:
         detail_objects = []
 
         for ticket in tickets:
-            client_id = ticket['client_id']
-            ticket_id = ticket['ticket_id']
-            ticket_creation_date = ticket['ticket_creation_date']
-            ticket_topic = ticket['ticket_topic']
-            ticket_severity = ticket['ticket_severity']
-            ticket_creator = ticket['ticket_creator']
-            ticket_details = ticket['ticket_details']
-            ticket_notes = ticket['ticket_notes']
-            ticket_status = ticket['ticket_status']
+            ticket_details = ticket.pop('ticket_details')
 
             for detail in ticket_details:
                 serial_number = detail['detailValue']
 
                 notes_related_to_serial = [
                     note
-                    for note in ticket_notes
+                    for note in ticket['ticket_notes']
                     if serial_number in note['serviceNumber']
                 ]
 
-                detail_object = {
-                    'client_id': client_id,
-                    'ticket_id': ticket_id,
-                    'ticket_creation_date': ticket_creation_date,
-                    'ticket_status': ticket_status,
-                    'ticket_topic': ticket_topic,
-                    'ticket_severity': ticket_severity,
-                    'ticket_creator': ticket_creator,
+                detail_objects.append({
+                    **ticket,
                     'ticket_detail': detail,
                     'ticket_notes': notes_related_to_serial,
-                }
-                detail_objects.append(detail_object)
+                })
 
         return detail_objects
 
