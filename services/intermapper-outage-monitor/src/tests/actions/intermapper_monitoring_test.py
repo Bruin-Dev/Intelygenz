@@ -25,18 +25,23 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         assert intermapper_monitor._event_bus == event_bus
         assert intermapper_monitor._logger == logger
         assert intermapper_monitor._scheduler == scheduler
         assert intermapper_monitor._config == config
+        assert intermapper_monitor._utils_repository == utils_repository
+        assert intermapper_monitor._metrics_repository == metrics_repository
         assert intermapper_monitor._notifications_repository == notifications_repository
         assert intermapper_monitor._bruin_repository == bruin_repository
         assert intermapper_monitor._dri_repository == dri_repository
@@ -50,14 +55,17 @@ class TestInterMapperMonitor:
         scheduler.add_job = Mock()
 
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         await intermapper_monitor.start_intermapper_outage_monitoring()
 
@@ -78,14 +86,17 @@ class TestInterMapperMonitor:
         scheduler.add_job = Mock()
 
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -113,14 +124,17 @@ class TestInterMapperMonitor:
         scheduler.add_job = Mock(side_effect=exception_instance)
 
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         try:
             await intermapper_monitor.start_intermapper_outage_monitoring()
@@ -154,14 +168,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.get_unread_emails = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._process_email_batch = CoroutineMock()
 
         await intermapper_monitor._intermapper_monitoring_process()
@@ -190,13 +207,16 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         config = testconfig
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         result = intermapper_monitor._group_emails_by_asset_id(emails)
         assert result == emails_by_asset_id
@@ -216,6 +236,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         config = testconfig
@@ -233,8 +254,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._process_email = CoroutineMock()
 
         await intermapper_monitor._process_email_batch(emails, asset_id)
@@ -260,6 +283,7 @@ class TestInterMapperMonitor:
         scheduler = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock()
@@ -269,8 +293,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, asset_id)
@@ -304,14 +330,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, asset_id)
@@ -342,14 +371,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, asset_id)
@@ -378,14 +410,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
@@ -419,14 +454,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
         intermapper_monitor._get_dri_parameters = CoroutineMock(return_value=dri_parameters)
 
@@ -473,14 +511,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
         intermapper_monitor._get_dri_parameters = CoroutineMock(return_value=dri_parameters)
 
@@ -517,14 +558,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=True)
         parsed_email_dict = intermapper_monitor._parse_email_body(email['body'])
 
@@ -557,14 +601,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._create_outage_ticket = CoroutineMock()
         intermapper_monitor._autoresolve_ticket = CoroutineMock()
 
@@ -593,14 +640,17 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=False)
 
         with config_mock:
@@ -613,6 +663,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
@@ -645,8 +696,10 @@ class TestInterMapperMonitor:
 
         }
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         email_body = intermapper_monitor._parse_email_body(intermapper_body)
         assert email_body == expected_dict
@@ -656,6 +709,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
@@ -688,8 +742,10 @@ class TestInterMapperMonitor:
 
         }
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         email_body = intermapper_monitor._parse_email_body(intermapper_body)
         assert email_body == expected_dict
@@ -699,6 +755,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
@@ -729,8 +786,10 @@ class TestInterMapperMonitor:
                             'up_time': '209 days, 10 hours, 44 minutes, 16 seconds'
 
         }
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         email_body = intermapper_monitor._parse_email_body(intermapper_body)
         assert email_body == expected_dict
@@ -740,6 +799,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
@@ -748,8 +808,10 @@ class TestInterMapperMonitor:
         expected_client_id = 83959
         client_id_str = f'O Reilly Auto Parts - South East |{expected_client_id}| Platinum Monitoring'
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         client_id = intermapper_monitor._extract_value_from_field('|', '|', client_id_str)
         assert client_id == str(expected_client_id)
 
@@ -758,6 +820,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
@@ -766,8 +829,10 @@ class TestInterMapperMonitor:
         expected_client_id = 83959
         client_id_str = f'O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring'
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         client_id = intermapper_monitor._extract_value_from_field('[', ']', client_id_str)
         assert client_id == str(expected_client_id)
 
@@ -776,6 +841,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
@@ -784,8 +850,10 @@ class TestInterMapperMonitor:
         expected_client_id = 83959
         client_id_str = f'O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring'
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         client_id = intermapper_monitor._extract_value_from_field('|', ']', client_id_str)
         assert client_id is None
 
@@ -827,6 +895,7 @@ class TestInterMapperMonitor:
         scheduler = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -838,8 +907,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
@@ -896,6 +967,7 @@ class TestInterMapperMonitor:
         scheduler = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -907,8 +979,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
 
         with config_mock:
@@ -949,6 +1023,7 @@ class TestInterMapperMonitor:
         scheduler = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -960,8 +1035,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
@@ -1011,6 +1088,7 @@ class TestInterMapperMonitor:
         scheduler = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1022,8 +1100,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(circuit_id, client_id, parsed_email_dict,
@@ -1080,6 +1160,7 @@ class TestInterMapperMonitor:
         scheduler = Mock()
         config = testconfig
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1091,8 +1172,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
 
         with config_mock:
@@ -1226,6 +1309,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1243,8 +1327,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
@@ -1295,6 +1381,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1310,8 +1397,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1356,6 +1445,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1371,8 +1461,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
@@ -1435,6 +1527,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1451,8 +1544,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
@@ -1522,6 +1617,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1538,8 +1634,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1610,6 +1708,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1626,8 +1725,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1693,6 +1794,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1709,8 +1811,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1781,6 +1885,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1797,8 +1902,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1930,6 +2037,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -1946,8 +2054,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=False)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
@@ -2080,6 +2190,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -2096,8 +2207,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=False)
 
@@ -2237,6 +2350,7 @@ class TestInterMapperMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
@@ -2254,8 +2368,10 @@ class TestInterMapperMonitor:
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
@@ -2306,6 +2422,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
 
@@ -2315,8 +2432,10 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
         bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
@@ -2337,6 +2456,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
 
@@ -2346,8 +2466,10 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
         bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_not_awaited()
@@ -2381,6 +2503,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
 
@@ -2390,8 +2513,10 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
         bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_not_awaited()
@@ -2418,6 +2543,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
 
@@ -2427,8 +2553,10 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
         bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
@@ -2443,13 +2571,16 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
@@ -2507,13 +2638,16 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
@@ -2561,13 +2695,16 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
@@ -2738,13 +2875,16 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         ticket_bool1 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes1, serial_number_1)
         assert ticket_bool1 is True
@@ -2779,14 +2919,17 @@ class TestInterMapperMonitor:
             'status': 204
         }
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
@@ -2808,14 +2951,17 @@ class TestInterMapperMonitor:
             'status': 400
         }
 
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
@@ -2827,6 +2973,7 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         dri_repository = Mock()
@@ -2835,8 +2982,10 @@ class TestInterMapperMonitor:
         datetime_mock = Mock()
         datetime_mock.now.side_effect = lambda tz: tz.localize(datetime.now().replace(month=1))
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
         intermapper_monitor._zip_db.get = Mock()
 
         with patch.object(intermapper_monitor_module, 'datetime', new=datetime_mock):
@@ -2851,13 +3000,16 @@ class TestInterMapperMonitor:
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
+        utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         dri_repository = Mock()
         config = testconfig
 
-        intermapper_monitor = InterMapperMonitor(event_bus, logger, scheduler, config, metrics_repository,
-                                                 notifications_repository, bruin_repository, dri_repository)
+        intermapper_monitor = InterMapperMonitor(
+            event_bus, logger, scheduler, config, utils_repository, metrics_repository, notifications_repository,
+            bruin_repository, dri_repository
+        )
 
         tz_offset = 0
 
