@@ -2489,7 +2489,7 @@ class TestBruinRepository:
         assert post_response == expected_post_response
 
     @pytest.mark.asyncio
-    async def get_service_number_topics_test(self):
+    async def get_asset_topics_test(self):
         # Given
         params = {
             'client_id': 321,
@@ -2512,12 +2512,12 @@ class TestBruinRepository:
 
         logger = Mock()
         bruin_client = Mock()
-        bruin_client.get_service_number_topics = CoroutineMock(return_value=mocked_response)
+        bruin_client.get_asset_topics = CoroutineMock(return_value=mocked_response)
 
         bruin_repository = BruinRepository(logger, config, bruin_client)
 
         # When
-        response = await bruin_repository.get_service_number_topics(params)
+        response = await bruin_repository.get_asset_topics(params)
 
         # Then
         assert response == mocked_response

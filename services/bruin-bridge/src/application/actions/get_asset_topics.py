@@ -8,13 +8,13 @@ WRONG_CLIENT_ID_MSG = "body.client_id should be an int"
 EMPTY_SERVICE_NUMBER_MSG = "body.service_number can't be empty"
 
 
-class GetServiceNumberTopics:
+class GetAssetTopics:
     def __init__(self, logger, event_bus, bruin_repository: BruinRepository):
         self._logger = logger
         self._event_bus = event_bus
         self._bruin_repository = bruin_repository
 
-    async def get_service_number_topics(self, msg: dict):
+    async def get_asset_topics(self, msg: dict):
         response = {
             "request_id": msg["request_id"],
             "body": None,
@@ -29,7 +29,7 @@ class GetServiceNumberTopics:
             return
 
         if not all(key in payload.keys() for key in ("client_id", "service_number")):
-            self._logger.error(f"Cannot get service number topics using {json.dumps(msg)}. "
+            self._logger.error(f"Cannot get asset topics using {json.dumps(msg)}. "
                                f"JSON malformed")
 
             response["body"] = MISSING_PARAMS_MSG
@@ -53,8 +53,8 @@ class GetServiceNumberTopics:
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 
-        self._logger.info(f"Getting topics for client '{client_id}', service number '{service_number}'")
-        result = await self._bruin_repository.get_service_number_topics(payload)
+        self._logger.info(f"Getting asset topics for client '{client_id}', service number '{service_number}'")
+        result = await self._bruin_repository.get_asset_topics(payload)
 
         response["body"] = result.body
         response["status"] = result.status

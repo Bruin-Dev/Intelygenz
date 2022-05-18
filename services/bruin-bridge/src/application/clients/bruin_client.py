@@ -1312,8 +1312,8 @@ class BruinClient:
                 'status': 500
             }
 
-    async def get_service_number_topics(self, params: Any) -> BruinResponse:
-        self._logger.info(f'Getting service number topics for: {params}')
+    async def get_asset_topics(self, params: Any) -> BruinResponse:
+        self._logger.info(f'Getting asset topics for: {params}')
         response = await self._bruin_session.get(path="/api/Ticket/topics", query_params=params)
 
         if response.status == 401:

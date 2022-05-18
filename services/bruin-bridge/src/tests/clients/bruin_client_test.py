@@ -4386,9 +4386,9 @@ class TestPostNotificationEmailMilestone:
             assert post_notification_email_milestone["status"] == 500
 
 
-class TestGetServiceNumberTopics:
+class TestGetAssetTopics:
     @pytest.mark.asyncio
-    async def get_service_number_topics_test(self):
+    async def get_asset_topics_test(self):
         # Given
         params = {
             'client_id': 321,
@@ -4411,7 +4411,7 @@ class TestGetServiceNumberTopics:
         bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
 
         # When
-        response = await bruin_client.get_service_number_topics(params)
+        response = await bruin_client.get_asset_topics(params)
 
         # Then
         assert response == mocked_response
@@ -4420,7 +4420,7 @@ class TestGetServiceNumberTopics:
         )
 
     @pytest.mark.asyncio
-    async def get_service_number_topics_401_test(self):
+    async def get_asset_topics_401_test(self):
         # Given
         params = {
             'client_id': 321,
@@ -4438,7 +4438,7 @@ class TestGetServiceNumberTopics:
         bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
 
         # When
-        response = await bruin_client.get_service_number_topics(params)
+        response = await bruin_client.get_asset_topics(params)
 
         # Then
         assert response == mocked_response

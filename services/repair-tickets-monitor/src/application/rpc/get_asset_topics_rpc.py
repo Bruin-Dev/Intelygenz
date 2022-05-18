@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, ValidationError, validator
 from application.domain.asset import AssetId, Topic
 from application.rpc import Rpc, RpcError
 
-NATS_TOPIC = "bruin.get.topics"
+NATS_TOPIC = "bruin.get.asset.topics"
 
 
 @dataclass
