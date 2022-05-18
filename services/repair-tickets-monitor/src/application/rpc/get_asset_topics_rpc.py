@@ -22,7 +22,7 @@ class GetAssetTopicsRpc(Rpc):
         :return: a list of recommended Topics
         """
         request, logger = self.start()
-        logger.debug(f"__call__(asset_id={asset_id}")
+        logger.debug(f"__call__(asset_id={asset_id})")
 
         try:
             request.body = RequestBody.from_asset_id(asset_id)
@@ -34,7 +34,7 @@ class GetAssetTopicsRpc(Rpc):
                     topics = [Topic(call_type=item.call_type, category=item.category)
                               for item in body.call_types]
 
-                    logger.debug(f"__call__(): [OK] topics={topics}")
+                    logger.debug(f"__call__(): [OK] topics={topics}, response={response.body}")
                     return topics
 
                 except ValidationError as e:

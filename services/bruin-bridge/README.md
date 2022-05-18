@@ -71,7 +71,7 @@
     * [Request message](#request-message-17)
     * [Response message](#response-message-17)
     * [Response message](#response-message-15)   
-  * [Get service number topics](#get-service-number-topics)
+  * [Get asset topics](#get-asset-topics)
     * [Description](#description-17)
     * [Request message](#request-message-16)
     * [Response message](#response-message-16)   
@@ -745,12 +745,11 @@ hood
 }
 ```
 
-# Get service number topics
+# Get asset topics
 ### Description
-Get the possible ticket topics (category and call type) that can be used when opening a ticket for a service number. It
-can be used to identify the kind of device a service number is.
+Get the ticket topics (category and call type) that can be used when opening a ticket for an asset.
 
-When the bruin bridge receives a request with a request message from topic `bruin.get.topics`
+When the bruin bridge receives a request with a request message from topic `bruin.get.asset.topics`
 it will make a call to the endpoint `/api/Ticket/topics` in bruin, using as query params the message payload.
 **NOTE: the payload are passed in snake_case and will be converted to PascalCase before being sent to Bruin's API.**
 

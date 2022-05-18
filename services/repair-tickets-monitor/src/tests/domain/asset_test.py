@@ -18,3 +18,11 @@ class TestAsset:
         assert assets.with_allowed_category("A") == Assets([asset_1, asset_2])
         assert assets.with_allowed_category("B") == Assets([asset_2, asset_3, asset_4])
         assert assets.with_allowed_category("C") == Assets([asset_4])
+
+    def empty_topics_assets_are_properly_detected_test(self):
+        asset_1 = Asset(id=ANY, allowed_topics=[])
+        asset_2 = Asset(id=ANY, allowed_topics=[Topic(call_type="any", category="any")])
+
+        assets = Assets([asset_1, asset_2])
+
+        assert assets.with_no_topics() == Assets([asset_1])
