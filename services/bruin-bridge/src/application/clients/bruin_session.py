@@ -12,6 +12,8 @@ COMMON_HEADERS = {
     "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
 }
 
+OK_STATUS = 200
+
 
 @dataclass
 class BruinResponse:
@@ -28,7 +30,7 @@ class BruinResponse:
             return cls(body=text, status=client_response.status)
 
     def ok(self) -> bool:
-        return self.status in range(200, 300)
+        return self.status == OK_STATUS
 
 
 @dataclass

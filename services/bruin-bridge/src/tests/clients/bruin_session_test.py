@@ -10,7 +10,7 @@ from asynctest import CoroutineMock
 from pytest import fixture
 from pytest import mark
 
-from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS
+from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS, OK_STATUS
 
 
 class TestBruinSession:
@@ -103,7 +103,7 @@ class TestBruinResponse:
 
     @mark.asyncio
     async def bruin_ok_responses_are_properly_detected_test(self, client_response_builder):
-        client_response = client_response_builder(status=200)
+        client_response = client_response_builder(status=OK_STATUS)
 
         subject = await BruinResponse.from_client_response(client_response)
 
