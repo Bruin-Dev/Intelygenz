@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from application.repositories.bruin_repository import BruinRepository
 
@@ -23,7 +24,7 @@ class GetAssetTopics:
         payload = msg.get("body")
 
         if payload is None:
-            response["status"] = 400
+            response["status"] = HTTPStatus.BAD_REQUEST
             response["body"] = NO_BODY_MSG
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
@@ -33,7 +34,7 @@ class GetAssetTopics:
                                f"JSON malformed")
 
             response["body"] = MISSING_PARAMS_MSG
-            response["status"] = 400
+            response["status"] = HTTPStatus.BAD_REQUEST
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 
@@ -41,7 +42,7 @@ class GetAssetTopics:
         if type(client_id) is not int:
             self._logger.error(f"body.client_id {client_id} should be an int.")
             response["body"] = WRONG_CLIENT_ID_MSG
-            response["status"] = 400
+            response["status"] = HTTPStatus.BAD_REQUEST
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 
@@ -49,7 +50,7 @@ class GetAssetTopics:
         if not service_number:
             self._logger.error(f"body.service_number can't be empty")
             response["body"] = EMPTY_SERVICE_NUMBER_MSG
-            response["status"] = 400
+            response["status"] = HTTPStatus.BAD_REQUEST
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 

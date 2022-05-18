@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from logging import Logger
 from typing import Dict, Any, Optional
 
@@ -11,8 +12,6 @@ COMMON_HEADERS = {
     "Content-Type": "application/json-patch+json",
     "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
 }
-
-OK_STATUS = 200
 
 
 @dataclass
@@ -30,7 +29,7 @@ class BruinResponse:
             return cls(body=text, status=client_response.status)
 
     def ok(self) -> bool:
-        return self.status == OK_STATUS
+        return self.status == HTTPStatus.OK
 
 
 @dataclass
@@ -65,11 +64,11 @@ class BruinSession:
 
         except aiohttp.ClientConnectionError as e:
             self.logger.error(f"get(path={path}) => ClientConnectionError: {e}")
-            return BruinResponse(body=f"ClientConnectionError: {e}", status=500)
+            return BruinResponse(body=f"ClientConnectionError: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         except Exception as e:
             self.logger.error(f"get(path={path}) => UnexpectedError: {e}")
-            return BruinResponse(body=f"Unexpected error: {e}", status=500)
+            return BruinResponse(body=f"Unexpected error: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def bruin_headers(self) -> Dict[str, str]:
         return {

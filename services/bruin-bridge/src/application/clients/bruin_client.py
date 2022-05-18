@@ -1,6 +1,7 @@
 import base64
 import json
 import ssl
+from http import HTTPStatus
 from typing import Any
 
 import aiohttp
@@ -1316,7 +1317,7 @@ class BruinClient:
         self._logger.info(f'Getting asset topics for: {params}')
         response = await self._bruin_session.get(path="/api/Ticket/topics", query_params=params)
 
-        if response.status == 401:
+        if response.status == HTTPStatus.UNAUTHORIZED:
             self._logger.error(f"Got 401 from Bruin. Re-logging in...")
             await self.login()
 

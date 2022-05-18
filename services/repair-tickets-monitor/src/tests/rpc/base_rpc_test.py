@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from logging import Logger
 from typing import Callable
 from unittest.mock import Mock, ANY
@@ -7,7 +8,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from pydantic import ValidationError
 from pytest import fixture, mark, raises
 
-from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse, OK_STATUS
+from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse
 
 
 class TestRpc:
@@ -76,7 +77,7 @@ class TestRpc:
     @mark.asyncio
     async def non_dict_bodies_raise_an_error_test(self, make_rpc, any_rpc_request):
         base_rpc = make_rpc()
-        base_rpc.event_bus.rpc_request = CoroutineMock({"status": 200, "body": None})
+        base_rpc.event_bus.rpc_request = CoroutineMock({"status": HTTPStatus.OK, "body": None})
 
         with raises(ValidationError):
             await base_rpc.send(any_rpc_request)
@@ -84,10 +85,10 @@ class TestRpc:
 
 class TestRpcResponse:
     def ok_response_are_properly_detected_test(self):
-        assert RpcResponse(status=OK_STATUS, body={}).is_ok()
+        assert RpcResponse(status=HTTPStatus.OK, body={}).is_ok()
 
     def ko_response_are_properly_detected_test(self):
-        assert not RpcResponse(status=400, body={}).is_ok()
+        assert not RpcResponse(status=HTTPStatus.BAD_REQUEST, body={}).is_ok()
 
 
 class TestRpcLogger:

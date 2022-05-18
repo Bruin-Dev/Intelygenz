@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from logging import Logger
 from typing import Callable, Any
 from unittest.mock import Mock, ANY
@@ -10,7 +11,7 @@ from asynctest import CoroutineMock
 from pytest import fixture
 from pytest import mark
 
-from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS, OK_STATUS
+from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS
 
 
 class TestBruinSession:
@@ -49,7 +50,8 @@ class TestBruinSession:
 
         subject = await bruin_session.get(path=ANY, query_params=ANY)
 
-        assert subject == BruinResponse(status=500, body=f"ClientConnectionError: some error")
+        assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                        body=f"ClientConnectionError: some error")
 
     @mark.asyncio
     async def unexpected_error_get_requests_are_properly_handled_test(
@@ -61,7 +63,8 @@ class TestBruinSession:
 
         subject = await bruin_session.get(path=ANY, query_params=ANY)
 
-        assert subject == BruinResponse(status=500, body=f"Unexpected error: some error")
+        assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                        body=f"Unexpected error: some error")
 
 
 class TestBruinResponse:
@@ -103,7 +106,7 @@ class TestBruinResponse:
 
     @mark.asyncio
     async def bruin_ok_responses_are_properly_detected_test(self, client_response_builder):
-        client_response = client_response_builder(status=OK_STATUS)
+        client_response = client_response_builder(status=HTTPStatus.OK)
 
         subject = await BruinResponse.from_client_response(client_response)
 
@@ -111,7 +114,7 @@ class TestBruinResponse:
 
     @mark.asyncio
     async def bruin_ko_responses_are_properly_detected_test(self, client_response_builder):
-        client_response = client_response_builder(status=400)
+        client_response = client_response_builder(status=HTTPStatus.BAD_REQUEST)
 
         subject = await BruinResponse.from_client_response(client_response)
 
@@ -137,7 +140,7 @@ def bruin_session_builder():
 
 @fixture
 def client_response_builder():
-    def builder(response_body: Any = None, status: int = 200) -> ClientResponse:
+    def builder(response_body: Any = None, status: int = HTTPStatus.OK) -> ClientResponse:
         if response_body is None:
             response_body = "any_response_body"
 

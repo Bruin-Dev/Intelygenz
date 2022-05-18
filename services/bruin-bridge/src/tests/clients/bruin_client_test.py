@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 from unittest.mock import Mock
 from unittest.mock import call
 from unittest.mock import patch
@@ -4395,7 +4396,7 @@ class TestGetAssetTopics:
             'service_number': 'VC1234567',
         }
 
-        mocked_response = BruinResponse(status=200, body={
+        mocked_response = BruinResponse(status=HTTPStatus.OK, body={
             "callTypes": [
                 {
                     "callType": "CHG",
@@ -4427,7 +4428,7 @@ class TestGetAssetTopics:
             'service_number': 'VC1234567',
         }
 
-        mocked_response = BruinResponse(status=401, body="")
+        mocked_response = BruinResponse(status=HTTPStatus.UNAUTHORIZED, body="")
         mocked_access_token = "access_token"
         login_response = Mock()
         login_response.json = CoroutineMock(return_value={"access_token": mocked_access_token})

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from logging import Logger
 from typing import Dict, Any, Callable, Optional
 from unittest.mock import Mock, ANY
@@ -7,7 +8,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from pytest import fixture, mark, raises
 
 from application.domain.asset import Topic
-from application.rpc import RpcLogger, RpcError, RpcResponse, OK_STATUS, RpcRequest
+from application.rpc import RpcLogger, RpcError, RpcResponse, RpcRequest
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc, RequestBody
 
 
@@ -31,7 +32,7 @@ class TestGetAssetTopicsRpc:
     @mark.asyncio
     async def ok_responses_are_properly_parsed_test(self, make_get_asset_topics_rpc, make_asset_id):
         rpc_response = RpcResponse(
-            status=200,
+            status=HTTPStatus.OK,
             body={
                 "callTypes": [
                     {
@@ -55,7 +56,7 @@ class TestGetAssetTopicsRpc:
 
     @mark.asyncio
     async def unparseable_responses_are_properly_handled_test(self, make_get_asset_topics_rpc, make_asset_id):
-        rpc_response = RpcResponse(status=200, body="any_wrong_body")
+        rpc_response = RpcResponse(status=HTTPStatus.OK, body="any_wrong_body")
         get_asset_topics_rpc = make_get_asset_topics_rpc()
         get_asset_topics_rpc.send = CoroutineMock(return_value=rpc_response)
 
@@ -66,7 +67,7 @@ class TestGetAssetTopicsRpc:
     @mark.asyncio
     async def ko_responses_are_properly_handled_test(self, make_get_asset_topics_rpc, make_asset_id):
         rpc_response = RpcResponse(
-            status=400,
+            status=HTTPStatus.BAD_REQUEST,
             body={
                 "errorMessage": "any_error_message",
                 "errorCode": "any_error_code"
@@ -94,7 +95,7 @@ class TestGetAssetTopicsRpc:
 @fixture
 def rpc_response_builder() -> Callable[..., RpcResponse]:
     def builder(
-        status: int = OK_STATUS,
+        status: int = HTTPStatus.OK,
         body: Optional[Dict[str, Any]] = None
     ):
         if body is None:
