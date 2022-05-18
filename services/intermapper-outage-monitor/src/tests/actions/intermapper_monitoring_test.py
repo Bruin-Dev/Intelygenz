@@ -1334,6 +1334,7 @@ class TestInterMapperMonitor:
 
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
@@ -2374,6 +2375,7 @@ class TestInterMapperMonitor:
         )
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)

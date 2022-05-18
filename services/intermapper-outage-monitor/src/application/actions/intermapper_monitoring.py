@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime, timedelta
 from collections import defaultdict
-from typing import Callable
+from typing import List, Callable, Optional
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -17,6 +17,7 @@ ZIP_CODE_REGEX = re.compile(rf'{US_STATES_PATTERN},? (?P<zip_code>\d{{5}})')
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
+EVENT_REGEX = re.compile(r'Event:\s*(?P<event>\w+)')
 EVENT_TIME_REGEX = re.compile(r'(?P<time>^.*): Message from InterMapper (?P<version>.*)')
 
 
@@ -198,7 +199,6 @@ class InterMapperMonitor:
         return extracted_value
 
     async def _autoresolve_ticket(self, circuit_id, client_id, parsed_email_dict):
-        event = parsed_email_dict['event']
         is_piab = self._is_piab_device(parsed_email_dict)
 
         self._logger.info('Starting the autoresolve process')
@@ -295,6 +295,9 @@ class InterMapperMonitor:
                 self._logger.info(f'Skipping autoresolve for circuit ID {circuit_id} '
                                   f'since the current environment is not production')
                 continue
+
+            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+            event = self._get_event_from_ticket_notes(last_cycle_notes)
 
             await self._bruin_repository.unpause_ticket_detail(
                 ticket_id,
@@ -501,3 +504,24 @@ class InterMapperMonitor:
             return last_outage_seconds['day']
         else:
             return last_outage_seconds['night']
+
+    def _get_notes_appended_since_latest_reopen_or_ticket_creation(self, ticket_notes: List[dict]) -> List[dict]:
+        sorted_ticket_notes = sorted(ticket_notes, key=lambda note: note['createdDate'])
+        latest_reopen = self._utils_repository.get_last_element_matching(
+            sorted_ticket_notes,
+            lambda note: REOPEN_NOTE_REGEX.search(note['noteValue'])
+        )
+
+        if not latest_reopen:
+            # If there's no re-open, all notes in the ticket are the ones posted since the last outage
+            return ticket_notes
+
+        latest_reopen_position = ticket_notes.index(latest_reopen)
+        return ticket_notes[latest_reopen_position:]
+
+    @staticmethod
+    def _get_event_from_ticket_notes(ticket_notes: List[dict]) -> Optional[str]:
+        for note in ticket_notes:
+            match = EVENT_REGEX.search(note['noteValue'])
+            if match:
+                return match.group('outage_type')
