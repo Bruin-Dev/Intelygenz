@@ -524,4 +524,4 @@ class InterMapperMonitor:
         for note in ticket_notes:
             match = EVENT_REGEX.search(note['noteValue'])
             if match:
-                return match.group('outage_type')
+                return match.group('event')
