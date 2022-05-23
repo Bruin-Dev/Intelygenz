@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from logging import Logger
 from typing import Callable, Any
-from unittest.mock import Mock, ANY
+from unittest.mock import Mock
 
 import aiohttp
 import pytest as pytest
@@ -13,7 +13,7 @@ from pytest import fixture
 from pytest import mark
 
 from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS, BruinPostRequest, \
-    BruinPostBody
+    BruinPostBody, BruinGetRequest
 
 
 class TestBruinSession:
@@ -31,9 +31,9 @@ class TestBruinSession:
         client_response = client_response_builder(response_body=response_body, status=response_status)
         bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
         bruin_session.session.get = CoroutineMock(return_value=client_response)
-        query_params = {"query_param": "value"}
+        params = {"query_param": "value"}
 
-        subject = await bruin_session.get(path=path, query_params=query_params)
+        subject = await bruin_session.get(BruinGetRequest(path=path, params=params))
 
         assert subject == BruinResponse(status=response_status, body=response_body)
         bruin_session.session.get.assert_awaited_once_with(
@@ -50,7 +50,7 @@ class TestBruinSession:
         bruin_session = bruin_session_builder()
         bruin_session.session.get = CoroutineMock(side_effect=aiohttp.ClientConnectionError("some error"))
 
-        subject = await bruin_session.get(path=ANY, query_params=ANY)
+        subject = await bruin_session.get(BruinGetRequest(path="any", params={}))
 
         assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
                                         body=f"ClientConnectionError: some error")
@@ -63,7 +63,7 @@ class TestBruinSession:
         bruin_session = bruin_session_builder()
         bruin_session.session.get = CoroutineMock(side_effect=Exception("some error"))
 
-        subject = await bruin_session.get(path=ANY, query_params=ANY)
+        subject = await bruin_session.get(BruinGetRequest(path="any", params={}))
 
         assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
                                         body=f"Unexpected error: some error")

@@ -11,7 +11,7 @@ from asynctest import CoroutineMock
 from pytest import raises
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinResponse
+from application.clients.bruin_session import BruinResponse, BruinGetRequest
 from config import testconfig as config
 
 
@@ -4417,7 +4417,7 @@ class TestGetAssetTopics:
         # Then
         assert response == mocked_response
         bruin_client._bruin_session.get.assert_awaited_once_with(
-            path="/api/Ticket/topics", query_params=params
+            BruinGetRequest(path="/api/Ticket/topics", params=params)
         )
 
     @pytest.mark.asyncio

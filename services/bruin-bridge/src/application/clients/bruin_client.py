@@ -2,13 +2,13 @@ import base64
 import json
 import ssl
 from http import HTTPStatus
-from typing import Any
+from typing import Dict
 
 import aiohttp
 import certifi
 import humps
 
-from application.clients.bruin_session import BruinResponse, BruinSession
+from application.clients.bruin_session import BruinResponse, BruinSession, BruinGetRequest
 
 
 class BruinClient:
@@ -1313,9 +1313,10 @@ class BruinClient:
                 'status': 500
             }
 
-    async def get_asset_topics(self, params: Any) -> BruinResponse:
+    async def get_asset_topics(self, params: Dict[str, str]) -> BruinResponse:
         self._logger.info(f'Getting asset topics for: {params}')
-        response = await self._bruin_session.get(path="/api/Ticket/topics", query_params=params)
+        request = BruinGetRequest(path="/api/Ticket/topics", params=params)
+        response = await self._bruin_session.get(request)
 
         if response.status == HTTPStatus.UNAUTHORIZED:
             self._logger.error(f"Got 401 from Bruin. Re-logging in...")
