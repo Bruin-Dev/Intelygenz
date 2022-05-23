@@ -8,10 +8,12 @@ import pytest as pytest
 from aiohttp import ClientSession
 from aiohttp.client_reqrep import ClientResponse
 from asynctest import CoroutineMock
+from pydantic import Field
 from pytest import fixture
 from pytest import mark
 
-from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS
+from application.clients.bruin_session import BruinSession, BruinResponse, COMMON_HEADERS, BruinPostRequest, \
+    BruinPostBody
 
 
 class TestBruinSession:
@@ -66,6 +68,61 @@ class TestBruinSession:
         assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
                                         body=f"Unexpected error: some error")
 
+    @mark.asyncio
+    async def post_requests_are_properly_handled_test(
+        self,
+        bruin_session_builder: Callable[..., BruinSession],
+        client_response_builder: Callable[..., ClientResponse],
+    ):
+        class FooBody(BruinPostBody):
+            any_parameter: str = Field(alias="anyParameter")
+
+        url = "any_url"
+        path = "any_path"
+        access_token = "any_access_token"
+        response_status = hash("any_response_status")
+        response_body = "any_response_body"
+        client_response = client_response_builder(response_body=response_body, status=response_status)
+        bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
+        bruin_session.session.post = CoroutineMock(return_value=client_response)
+
+        request = BruinPostRequest(path=path, body=FooBody(any_parameter="any_value"))
+        subject = await bruin_session.post(request)
+
+        assert subject == BruinResponse(status=response_status, body=response_body)
+        bruin_session.session.post.assert_awaited_once_with(
+            f"{url}{path}",
+            json={"anyParameter": "any_value"},
+            headers={"authorization": f"Bearer {access_token}", **COMMON_HEADERS},
+            ssl=False
+        )
+
+    @mark.asyncio
+    async def client_connection_error_post_requests_are_properly_handled_test(
+        self,
+        bruin_session_builder: Callable[..., BruinSession],
+    ):
+        bruin_session = bruin_session_builder()
+        bruin_session.session.post = CoroutineMock(side_effect=aiohttp.ClientConnectionError("some error"))
+
+        subject = await bruin_session.post(request=BruinPostRequest(path="any", body=BruinPostBody()))
+
+        assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                        body=f"ClientConnectionError: some error")
+
+    @mark.asyncio
+    async def unexpected_error_post_requests_are_properly_handled_test(
+        self,
+        bruin_session_builder: Callable[..., BruinSession],
+    ):
+        bruin_session = bruin_session_builder()
+        bruin_session.session.post = CoroutineMock(side_effect=Exception("some error"))
+
+        subject = await bruin_session.post(request=BruinPostRequest(path="any", body=BruinPostBody()))
+
+        assert subject == BruinResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                        body=f"Unexpected error: some error")
+
 
 class TestBruinResponse:
     @mark.asyncio
@@ -86,6 +143,7 @@ class TestBruinResponse:
     async def bruin_response_json_errors_fallback_to_text_test(self):
         text = "any_text"
         client_response = Mock(ClientResponse)
+        client_response.status = hash("any_status")
         client_response.json = CoroutineMock(side_effect=ValueError())
         client_response.text = CoroutineMock(return_value=text)
 
