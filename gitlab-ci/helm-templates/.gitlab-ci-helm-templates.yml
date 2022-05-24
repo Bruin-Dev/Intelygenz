@@ -23,6 +23,11 @@
     # GET HELM CHART SET ATTRIBUTES
     - source ci-utils/environments/deploy_environment_vars.sh
     - export CURRENT_ENVIRONMENT_SHORT=${CURRENT_ENVIRONMENT:0:3}
+    # GET GPG PRIVATE KEYS
+    - aws s3 sync s3://mettel-automation-chartmuseum-key/ .
+    - gpg --import automation-engine-gpg-private.key && gpg --import automation-engine-gpg-public.key
+    - gpg --export >~/.gnupg/pubring.gpg && gpg --batch --pinentry-mode=loopback --yes --passphrase "${GPG_KEY_PASSPHRASE}"" --export-secret-keys >~/.gnupg/secring.gpg
+    - echo ${GPG_KEY_PASSPHRASE} > passphrase.txt
     - >
       if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then
         export TICKET_COLLECTOR_ENABLED=false
@@ -43,14 +48,15 @@
         envsubst "$(env | awk -F= '{print "$"$1" "}' | grep -i BUILD_NUMBER | tr -d '\n')" < ${HELM_CHART_DIR}/values.yaml.tpl > ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \$\{.*\}/ ""/g' ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \"\$\{.*\}/ "/g' ${HELM_CHART_DIR}/values.yaml
-        helm plugin install https://github.com/chartmuseum/helm-push.git
         helm repo add mettel https://chartmuseum.mettel-automation.net --username="${CHARTMUSEUM_USER}" --password="${CHARTMUSEUM_PASSWORD}"
         export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
-        helm cm-push ${HELM_CHART_DIR}/ --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" mettel
+        helm dependency update ${HELM_CHART_DIR}/ 
+        helm package --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" --sign --key "${HELM_CHART_RELEASE_NAME}" --keyring ~/.gnupg/secring.gpg --passphrase-file passphrase.txt ${HELM_CHART_DIR}/
+        curl -F "chart=@${HELM_CHART_DIR}-${AUTOMATION_TAG}.tgz" -F "prov=@${HELM_CHART_DIR}-${AUTOMATION_TAG}.prov" https://chartmuseum.mettel-automation.net
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm repo update
-        helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}
+        helm upgrade --wait --install --verify ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}
       else
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
