@@ -54,6 +54,7 @@
         export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
         helm dependency update ${HELM_CHART_DIR}/ 
         helm package --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" --sign --key "${HELM_CHART_RELEASE_NAME}" --keyring ~/.gnupg/secring.gpg --passphrase-file passphrase.txt ${HELM_CHART_DIR}/
+        ls -la
         curl -F "chart=@${HELM_CHART_RELEASE_NAME}-${AUTOMATION_TAG}.tgz" -F "prov=@${HELM_CHART_RELEASE_NAME}-${AUTOMATION_TAG}.prov" -u "${CHARTMUSEUM_USER}:${CHARTMUSEUM_PASSWORD}" https://chartmuseum.mettel-automation.net/api/charts
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
