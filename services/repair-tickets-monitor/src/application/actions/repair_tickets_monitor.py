@@ -290,6 +290,7 @@ class RepairTicketsMonitor:
                     try:
                         allowed_asset_topics = await self.get_asset_topics_rpc(asset_id)
                     except RpcError as e:
+                        # TODO: sent slack notification
                         allowed_asset_topics = []
                         self._logger.warning(f"[email_id={email_id}] _process_repair_email():"
                                              f"get_topics_device_rpc({asset_id}): {e}")
