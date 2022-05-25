@@ -2,13 +2,13 @@ import asyncio
 import base64
 import json
 import time
+import os
 from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
 from ipaddress import ip_address
 from time import perf_counter
-from typing import Coroutine
-from typing import List, Callable, Optional
+from typing import List, Pattern, Optional
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -18,8 +18,8 @@ from pytz import utc
 from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
-from application import Outages, ForwardQueues, ChangeTicketSeverityStatus, REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX,\
-    OUTAGE_TYPE_REGEX, BruinCreateTicketCustomStatus
+from application import Outages, ForwardQueues, ChangeTicketSeverityStatus
+from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, OUTAGE_TYPE_REGEX
 
 
 class OutageMonitor:
@@ -379,11 +379,11 @@ class OutageMonitor:
 
             else:
                 max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
-                was_last_outage_detected_recently = self._utils_repository.has_last_event_happened_recently(
-                        ticket_notes=relevant_notes,
-                        documentation_cycle_start_date=outage_ticket_creation_date,
-                        max_seconds_since_last_event=max_seconds_since_last_outage,
-                        note_regex=REOPEN_NOTE_REGEX
+                was_last_outage_detected_recently = self._has_last_event_happened_recently(
+                    ticket_notes=relevant_notes,
+                    documentation_cycle_start_date=outage_ticket_creation_date,
+                    max_seconds_since_last_event=max_seconds_since_last_outage,
+                    note_regex=REOPEN_NOTE_REGEX
                 )
                 if not was_last_outage_detected_recently:
                     self._logger.info(
@@ -589,8 +589,7 @@ class OutageMonitor:
                                  )
 
                         await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
-                    elif (ticket_creation_response_status ==
-                          BruinCreateTicketCustomStatus.UNRESOLVED_TICKET_EXISTS):
+                    elif ticket_creation_response_status == 409:
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} already has an outage ticket in '
                             f'progress (ID = {ticket_id}). Skipping outage ticket creation for '
@@ -634,8 +633,7 @@ class OutageMonitor:
                             cached_edge, edge_status, ticket_id, client_name, outage_type,
                             target_severity, has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
                         )
-                    elif (ticket_creation_response_status ==
-                          BruinCreateTicketCustomStatus.RESOLVED_TICKET_EXISTS_REOPENING):
+                    elif ticket_creation_response_status == 471:
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_id}). Re-opening ticket...'
@@ -683,8 +681,7 @@ class OutageMonitor:
                                 )
 
                         await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
-                    elif (ticket_creation_response_status ==
-                          BruinCreateTicketCustomStatus.RESOLVED_TICKET_EXISTS_BRUIN_REOPENING):
+                    elif ticket_creation_response_status == 472:
                         self._logger.info(
                             f'[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket '
                             f'(ID = {ticket_id}). Its ticket detail was automatically unresolved '
@@ -732,8 +729,7 @@ class OutageMonitor:
                                     f' {ticket_id}!'
                                  )
 
-                    elif (ticket_creation_response_status ==
-                          BruinCreateTicketCustomStatus.RESOLVED_TICKET_EXISTS_BRUIN_REOPENING_ADDING_NEW_TASK):
+                    elif ticket_creation_response_status == 473:
                         self._logger.info(
                             f'[{outage_type.value}] There is a resolve outage ticket for the same location of faulty '
                             f'edge {serial_number} (ticket ID = {ticket_id}). The ticket was '
@@ -1345,23 +1341,38 @@ class OutageMonitor:
             if match:
                 return match.group('outage_type')
 
+    def _has_last_event_happened_recently(self, ticket_notes: list, documentation_cycle_start_date: str,
+                                          max_seconds_since_last_event: int, note_regex: Pattern[str]) -> bool:
+        current_datetime = datetime.now(utc)
+
+        notes_sorted_by_date_asc = sorted(ticket_notes, key=lambda note: note['createdDate'])
+        last_event_note = self._utils_repository.get_last_element_matching(
+            notes_sorted_by_date_asc,
+            lambda note: note_regex.match(note['noteValue'])
+        )
+        if last_event_note:
+            note_creation_date = parse(last_event_note['createdDate']).astimezone(utc)
+            seconds_elapsed_since_last_event = (current_datetime - note_creation_date).total_seconds()
+            return seconds_elapsed_since_last_event <= max_seconds_since_last_event
+
+        documentation_cycle_start_datetime = parse(documentation_cycle_start_date).replace(tzinfo=utc)
+        seconds_elapsed_since_last_event = (current_datetime - documentation_cycle_start_datetime).total_seconds()
+        return seconds_elapsed_since_last_event <= max_seconds_since_last_event
+
     async def _send_reminder(self, ticket_id: str, service_number: str, ticket_notes: list):
         self._logger.info(
             f'Attempting to send reminder for service number {service_number} to ticket {ticket_id}'
         )
 
-        filtered_notes = self._utils_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
-            ticket_notes
-        )
+        filtered_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(ticket_notes)
         last_documentation_cycle_start_date = filtered_notes[0]['createdDate']
 
-        wait_time_before_sending_new_milestone_reminder = self._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
-        ]
-        should_send_reminder_notification = not self._was_last_reminder_sent_recently(
-            filtered_notes,
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+        max_seconds_since_last_reminder = self._config.MONITOR_CONFIG['wait_time_before_sending_new_milestone_reminder']
+        should_send_reminder_notification = not self._has_last_event_happened_recently(
+            ticket_notes=filtered_notes,
+            documentation_cycle_start_date=last_documentation_cycle_start_date,
+            max_seconds_since_last_event=max_seconds_since_last_reminder,
+            note_regex=REMINDER_NOTE_REGEX,
         )
         if not should_send_reminder_notification:
             self._logger.info(
@@ -1401,18 +1412,13 @@ class OutageMonitor:
             service_number
         )
 
-    def _was_last_reminder_sent_recently(self, ticket_notes: list, ticket_creation_date: str,
-                                         max_seconds_since_last_reminder: int) -> bool:
-        reminder_regex = REMINDER_NOTE_REGEX
-        return self._utils_repository.has_last_event_happened_recently(
-            ticket_notes,
-            ticket_creation_date,
-            max_seconds_since_last_event=max_seconds_since_last_reminder,
-            note_regex=reminder_regex
-        )
-
     async def _append_reminder_note(self, ticket_id: int, service_number: str):
-        reminder_note = self._utils_repository.build_reminder_note()
+        note_lines = [
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ]
+        reminder_note = os.linesep.join(note_lines)
+
         return await self._bruin_repository.append_note_to_ticket(
             ticket_id,
             reminder_note,

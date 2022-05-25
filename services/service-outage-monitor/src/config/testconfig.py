@@ -74,7 +74,7 @@ MONITOR_CONFIG = {
         },
         'max_autoresolves': 3,
     },
-    'wait_time_before_sending_new_milestone_reminder': 86400
+    'wait_time_before_sending_new_milestone_reminder': 86400,
 }
 
 LOG_CONFIG = {

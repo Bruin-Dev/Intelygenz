@@ -2751,7 +2751,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock()
+        outage_monitor._has_last_event_happened_recently = Mock()
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
@@ -2761,7 +2761,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_not_called()
+        outage_monitor._has_last_event_happened_recently.assert_not_called()
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_last_outage_spotted_long_time_ago_test(self, outage_monitor):
@@ -2902,7 +2902,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value='')
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=False)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=False)
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
 
@@ -2912,7 +2912,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_once_with(
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
             ticket_notes=relevant_notes_for_edge,
             documentation_cycle_start_date=outage_ticket_1_creation_date,
             max_seconds_since_last_event='',
@@ -3060,7 +3060,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value='')
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=True)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock()
 
         await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -3071,7 +3071,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_once_with(
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
             ticket_notes=relevant_notes_for_edge,
             documentation_cycle_start_date=outage_ticket_1_creation_date,
             max_seconds_since_last_event='',
@@ -3216,7 +3216,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value='')
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=True)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=True)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
@@ -3228,7 +3228,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_once_with(
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
             ticket_notes=relevant_notes_for_edge,
             documentation_cycle_start_date=outage_ticket_1_creation_date,
             max_seconds_since_last_event='',
@@ -3384,7 +3384,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value='')
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=True)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
@@ -3397,7 +3397,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_once_with(
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
             ticket_notes=relevant_notes_for_edge,
             documentation_cycle_start_date=outage_ticket_1_creation_date,
             max_seconds_since_last_event='',
@@ -3565,7 +3565,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value='')
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=True)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -3579,7 +3579,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_once_with(
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
             ticket_notes=relevant_notes_for_edge,
             documentation_cycle_start_date=outage_ticket_1_creation_date,
             max_seconds_since_last_event='',
@@ -3746,7 +3746,7 @@ class TestServiceOutageMonitor:
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=True)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -3760,7 +3760,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_not_called()
+        outage_monitor._has_last_event_happened_recently.assert_not_called()
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         outage_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
@@ -3929,7 +3929,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value='')
-        outage_monitor._utils_repository.has_last_event_happened_recently = Mock(return_value=True)
+        outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
@@ -3943,7 +3943,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_once_with(
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
             ticket_notes=relevant_notes_for_edge,
             documentation_cycle_start_date=outage_ticket_1_creation_date,
             max_seconds_since_last_event='',
@@ -4007,8 +4007,8 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4021,8 +4021,8 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4035,8 +4035,8 @@ class TestServiceOutageMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4075,8 +4075,8 @@ class TestServiceOutageMonitor:
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4088,8 +4088,8 @@ class TestServiceOutageMonitor:
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4101,8 +4101,8 @@ class TestServiceOutageMonitor:
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4141,8 +4141,8 @@ class TestServiceOutageMonitor:
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4154,8 +4154,8 @@ class TestServiceOutageMonitor:
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -4167,8 +4167,8 @@ class TestServiceOutageMonitor:
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
 
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._utils_repository.has_last_event_happened_recently(
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = outage_monitor._has_last_event_happened_recently(
                 ticket_notes=ticket_notes,
                 documentation_cycle_start_date=ticket_creation_date,
                 max_seconds_since_last_event=max_seconds_since_last_outage,
@@ -11328,116 +11328,62 @@ class TestServiceOutageMonitor:
 
                 assert result == last_outage_seconds['night']
 
-    def was_last_reminder_sent_recently_with_previous_reminder_test(
-            self,
-            outage_monitor,
-            make_ticket_note,
-            make_list_of_ticket_notes
+    def get_notes_appended_since_latest_reopen_or_ticket_creation__no_reopen_note_found_test(
+        self, outage_monitor, make_ticket_note, make_list_of_ticket_notes
     ):
-        ticket_creation_date = str(CURRENT_DATETIME)
-        wait_time_before_sending_new_milestone_reminder = outage_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
-        ]
-        datetime_mock = Mock()
-        note_1 = make_ticket_note(
-            text='Dummy note',
-            creation_date=str(CURRENT_DATETIME - timedelta(seconds=10)),
-        )
-        reminder_note = os.linesep.join([
-            "#*MetTel's IPA*#",
-            'Client Reminder'
-        ])
-        note_2 = make_ticket_note(
-            text=reminder_note,
-            creation_date=str(CURRENT_DATETIME + timedelta(hours=42)),
-        )
+        note_1 = make_ticket_note(text="Dummy note")
+        note_2 = make_ticket_note(text=f"#*MetTel's IPA*#\nAuto-resolving task for serial: VC1234567")
         notes = make_list_of_ticket_notes(note_1, note_2)
 
-        now = CURRENT_DATETIME + timedelta(hours=42)
-        datetime_mock.now = Mock(return_value=now)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
-            )
+        result = outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation(notes)
 
-            assert result is True
+        assert result is notes
 
-        ticket_creation_date = str(CURRENT_DATETIME + timedelta(hours=54))
-        now = CURRENT_DATETIME + timedelta(hours=54)
-        datetime_mock.now = Mock(return_value=now)
-        note_2 = make_ticket_note(
-            text=reminder_note,
-            creation_date=str(CURRENT_DATETIME - timedelta(hours=24)),
-        )
-        notes = make_list_of_ticket_notes(note_1, note_2)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
-            )
-
-            assert result is False
-
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
-            notes,
-            ticket_creation_date,
-            max_seconds_since_last_event=86400.0,
-            note_regex=REMINDER_NOTE_REGEX
-        )
-        outage_monitor._logger.error.assert_not_called()
-
-    def was_last_reminder_sent_recently_without_previous_reminder_test(
-            self,
-            outage_monitor,
-            make_ticket_note,
-            make_list_of_ticket_notes
+    def get_notes_appended_since_latest_reopen_or_ticket_creation__reopen_note_found_test(
+        self, outage_monitor, make_ticket_note, make_list_of_ticket_notes
     ):
-        ticket_creation_date = str(CURRENT_DATETIME)
-        wait_time_before_sending_new_milestone_reminder = outage_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
-        ]
-        datetime_mock = Mock()
-        note_1 = make_ticket_note(
-            text='Dummy note',
-            creation_date=str(CURRENT_DATETIME - timedelta(seconds=10)),
-        )
+        current_datetime = CURRENT_DATETIME
+        note_1 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime - timedelta(seconds=10)))
         note_2 = make_ticket_note(
-            text='This email is not a reminder',
-            creation_date=str(CURRENT_DATETIME),
+            text=f"#*MetTel's IPA*#\nRe-opening ticket.\nTrouble: Latency",
+            creation_date=str(current_datetime),
         )
         notes = make_list_of_ticket_notes(note_1, note_2)
 
-        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
-            )
+        result = outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation(notes)
 
-            assert result is True
+        assert result == [note_2]
 
-        now = CURRENT_DATETIME + timedelta(hours=42)
-        datetime_mock.now = Mock(return_value=now)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
-            )
-
-            assert result is False
-
-        outage_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
-            notes,
-            ticket_creation_date,
-            max_seconds_since_last_event=86400.0,
-            note_regex=REMINDER_NOTE_REGEX
+        note_1 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime - timedelta(seconds=20)))
+        note_2 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nRe-opening ticket.\nTrouble: Latency",
+            creation_date=str(current_datetime - timedelta(seconds=10)),
         )
-        outage_monitor._logger.error.assert_not_called()
+        note_3 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime))
+        notes = make_list_of_ticket_notes(note_1, note_2, note_3)
+
+        result = outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation(notes)
+
+        assert result == [note_2, note_3]
+
+        note_1 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime - timedelta(seconds=40)))
+        note_2 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nRe-opening ticket.\nTrouble: Latency",
+            creation_date=str(current_datetime - timedelta(seconds=30)),
+        )
+        note_3 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime - timedelta(seconds=20)))
+        note_4 = make_ticket_note(
+            text=f"#*MetTel's IPA*#\nRe-opening ticket.\nTrouble: Latency",
+            creation_date=str(current_datetime - timedelta(seconds=10)),
+        )
+        note_5 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime))
+        note_6 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime))
+        note_7 = make_ticket_note(text="Dummy note", creation_date=str(current_datetime))
+        notes = make_list_of_ticket_notes(note_1, note_2, note_3, note_4, note_5, note_6, note_7)
+
+        result = outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation(notes)
+
+        assert result == [note_4, note_5, note_6, note_7]
 
     @pytest.mark.asyncio
     async def send_reminder__last_outage_documented_on_ticket_creation_and_detected_one_day_ago_test(
@@ -11482,10 +11428,11 @@ class TestServiceOutageMonitor:
                 detail_object['ticket_notes']
             )
 
-        outage_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [note],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+            ticket_notes=[note],
+            documentation_cycle_start_date=last_documentation_cycle_start_date,
+            max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
+            note_regex=REMINDER_NOTE_REGEX,
         )
         outage_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
@@ -11543,10 +11490,11 @@ class TestServiceOutageMonitor:
                 detail_object['ticket_notes']
             )
 
-        outage_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [note],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+            ticket_notes=[note],
+            documentation_cycle_start_date=last_documentation_cycle_start_date,
+            max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
+            note_regex=REMINDER_NOTE_REGEX,
         )
         outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
@@ -11596,10 +11544,11 @@ class TestServiceOutageMonitor:
                 detail_object['ticket_notes']
             )
 
-        outage_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [note],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+            ticket_notes=[note],
+            documentation_cycle_start_date=last_documentation_cycle_start_date,
+            max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
+            note_regex=REMINDER_NOTE_REGEX,
         )
         outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
@@ -11654,10 +11603,11 @@ class TestServiceOutageMonitor:
                 detail_object['ticket_notes']
             )
 
-        outage_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [note],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+            ticket_notes=[note],
+            documentation_cycle_start_date=last_documentation_cycle_start_date,
+            max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
+            note_regex=REMINDER_NOTE_REGEX,
         )
         outage_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
