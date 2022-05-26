@@ -578,16 +578,25 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
+
                             self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
                                               f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.send_initial_email_milestone_notification(
-                                 ticket_id, serial_number)
-                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
-                            if append_note_response['status'] not in range(200, 300):
+                            email_response = await self._bruin_repository.send_initial_email_milestone_notification(
+                                ticket_id,
+                                serial_number
+                            )
+                            if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
                                     f' {ticket_id}!'
-                                 )
+                                )
+                            else:
+                                append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                                if append_note_response['status'] not in range(200, 300):
+                                    self._logger.error(
+                                        f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                        f' {ticket_id}!'
+                                     )
 
                         await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 409:
@@ -668,18 +677,25 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
+
                             self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
                                               f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.send_initial_email_milestone_notification(
+                            email_response = await self._bruin_repository.send_initial_email_milestone_notification(
                                 ticket_id,
                                 serial_number
                             )
-                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
-                            if append_note_response['status'] not in range(200, 300):
+                            if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
                                     f' {ticket_id}!'
                                 )
+                            else:
+                                append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                                if append_note_response['status'] not in range(200, 300):
+                                    self._logger.error(
+                                        f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                        f' {ticket_id}!'
+                                     )
 
                         await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
                     elif ticket_creation_response_status == 472:
@@ -719,16 +735,25 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
+
                             self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
                                               f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.send_initial_email_milestone_notification(
-                                 ticket_id, serial_number)
-                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
-                            if append_note_response['status'] not in range(200, 300):
+                            email_response = await self._bruin_repository.send_initial_email_milestone_notification(
+                                ticket_id,
+                                serial_number
+                            )
+                            if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
                                     f' {ticket_id}!'
-                                 )
+                                )
+                            else:
+                                append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                                if append_note_response['status'] not in range(200, 300):
+                                    self._logger.error(
+                                        f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                        f' {ticket_id}!'
+                                     )
 
                     elif ticket_creation_response_status == 473:
                         self._logger.info(
@@ -762,18 +787,25 @@ class OutageMonitor:
                             self._logger.info(f"Ticket_id: {ticket_id} for serial: {serial_number} "
                                               f"with link_data: {edge_links} has a blacklisted link and "
                                               f"should not be forwarded to HNOC. Skipping forward to HNOC...")
+
                             self._logger.info(f"Sending an email for ticket_id: {ticket_id} "
                                               f"with serial: {serial_number} instead of scheduling forward to HNOC...")
-                            await self._bruin_repository.send_initial_email_milestone_notification(
+                            email_response = await self._bruin_repository.send_initial_email_milestone_notification(
                                 ticket_id,
                                 serial_number
                             )
-                            append_note_response = await self._append_reminder_note(ticket_id, serial_number)
-                            if append_note_response['status'] not in range(200, 300):
+                            if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
                                     f' {ticket_id}!'
                                 )
+                            else:
+                                append_note_response = await self._append_reminder_note(ticket_id, serial_number)
+                                if append_note_response['status'] not in range(200, 300):
+                                    self._logger.error(
+                                        f'Reminder note of edge {serial_number} could not be appended to ticket'
+                                        f' {ticket_id}!'
+                                     )
 
             else:
                 self._logger.info(
@@ -1393,10 +1425,16 @@ class OutageMonitor:
             )
             return
 
-        await self._bruin_repository.send_reminder_email_milestone_notification(
+        email_response = await self._bruin_repository.send_reminder_email_milestone_notification(
             ticket_id,
             service_number
         )
+        if email_response['status'] not in range(200, 300):
+            self._logger.error(
+                f'Reminder email of edge {service_number} could not be appended to ticket'
+                f' {ticket_id}!'
+            )
+            return
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response['status'] not in range(200, 300):

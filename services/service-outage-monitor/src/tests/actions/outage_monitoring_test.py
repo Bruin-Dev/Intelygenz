@@ -5138,7 +5138,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=False,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
             has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
@@ -5152,7 +5152,8 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_200_not_forward_to_hnoc_test(
             self,
-            outage_monitor
+            outage_monitor,
+            bruin_generic_200_response
     ):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
@@ -5328,7 +5329,9 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
-        outage_monitor._bruin_repository.send_initial_email_milestone_notification = CoroutineMock()
+        outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_generic_200_response
+        )
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
@@ -5366,7 +5369,233 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=False,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
-        outage_monitor._append_reminder_note.assert_called()
+        outage_monitor._append_reminder_note.assert_awaited_once()
+        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
+            ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
+        )
+        outage_monitor._reopen_outage_ticket.assert_not_awaited()
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_200_reminder_email_fails_test(
+            self,
+            outage_monitor,
+            bruin_500_response
+    ):
+        outage_type = Outages.LINK_DOWN  # We can use whatever outage type
+        target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
+        has_faulty_digi_link = False
+        has_faulty_byob_link = False
+        faulty_link_types = []
+
+        edge_primary_serial = 'VC1234567'
+        edge_standby_serial = 'VC5678901'
+        edge_primary_initial_state = 'OFFLINE'
+        edge_standby_initial_state_normalized = 'OFFLINE'
+        edge_primary_new_state = 'OFFLINE'
+        edge_standby_new_state_raw = 'FAILED'
+        edge_standby_new_state_normalized = 'OFFLINE'
+        velocloud_host = 'mettel.velocloud.net'
+        enterprise_id = 1
+        edge_id = 1
+        edge_full_id = {'host': velocloud_host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
+
+        client_id = 9994
+        bruin_client_info = {
+            'client_id': client_id,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        cached_edge_primary = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_primary_serial,
+            'ha_serial_number': edge_standby_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
+        }
+        cached_edge_standby = {
+            'edge': edge_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_standby_serial,
+            'ha_serial_number': edge_primary_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
+        }
+        edge_link_1_info = {
+            # Some fields omitted for simplicity
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        edge_primary_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_initial_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'edgeHAState': edge_standby_initial_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        edge_with_links_primary = {
+            **edge_primary_info,
+            'links': [
+                edge_link_1_info,
+            ],
+        }
+        edge_primary_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': edge_with_links_primary,
+        }
+        outage_edges = [
+            edge_primary_full_info,
+        ]
+        edge_primary_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_primary_new_state,
+            'enterpriseId': enterprise_id,
+            'haSerialNumber': edge_standby_serial,
+            'haState': edge_standby_new_state_raw,
+            'id': edge_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_primary_serial,
+        }
+        edges_network_enterprises = [
+            edge_primary_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+        new_links_with_primary_edge_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            **edge_link_1_info,
+        }
+        new_links_with_edge_info = [
+            new_links_with_primary_edge_info,
+        ]
+        links_with_edge_info_response = {
+            'body': new_links_with_edge_info,
+            'status': 200,
+        }
+        new_links_grouped_by_primary_edge = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_primary_new_state,
+            'edgeId': edge_id,
+            'edgeSerialNumber': edge_primary_serial,
+            'edgeHASerialNumber': edge_standby_serial,
+            'links': [
+                edge_link_1_info
+            ],
+        }
+        new_links_grouped_by_edge = [
+            new_links_grouped_by_primary_edge,
+        ]
+        links_grouped_by_primary_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeHAState': edge_standby_new_state_normalized,
+            'edgeIsHAPrimary': True,
+        }
+        links_grouped_by_standby_edge_with_ha_info = {
+            **new_links_grouped_by_primary_edge,
+            'edgeSerialNumber': edge_standby_serial,
+            'edgeState': edge_standby_new_state_normalized,
+            'edgeHASerialNumber': edge_primary_serial,
+            'edgeHAState': edge_primary_new_state,
+            'edgeIsHAPrimary': False,
+        }
+        links_grouped_by_primary_edges_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+        ]
+        all_links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_primary_edge_with_ha_info,
+            links_grouped_by_standby_edge_with_ha_info,
+        ]
+        new_primary_edge_full_info = {
+            'cached_info': cached_edge_primary,
+            'status': links_grouped_by_primary_edge_with_ha_info,
+        }
+        new_standby_edge_full_info = {
+            'cached_info': cached_edge_standby,
+            'status': links_grouped_by_standby_edge_with_ha_info,
+        }
+        new_edges_full_info = [
+            new_primary_edge_full_info,
+            new_standby_edge_full_info,
+        ]
+        edges_in_same_outage_state = [
+            new_primary_edge_full_info
+        ]
+        ticket_id = 12345
+        ticket_creation_response = {
+            'request_id': uuid_,
+            'body': ticket_id,
+            'status': 200,
+        }
+        outage_monitor._velocloud_repository.get_links_with_edge_info = CoroutineMock(
+            return_value=links_with_edge_info_response
+        )
+        outage_monitor._velocloud_repository.get_network_enterprises = CoroutineMock(
+            return_value=network_enterprises_response
+        )
+        outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
+        outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = bruin_500_response
+        outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
+        outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
+        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
+            return_value=links_grouped_by_primary_edges_with_ha_info
+        )
+        outage_monitor._ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
+            return_value=all_links_grouped_by_edge_with_ha_info
+        )
+        wait_seconds_until_forward = testconfig.MONITOR_CONFIG['autoresolve']['last_outage_seconds']['day']
+        outage_monitor._get_max_seconds_since_last_outage = Mock(return_value=wait_seconds_until_forward)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
+        outage_monitor._append_triage_note = CoroutineMock()
+        outage_monitor._reopen_outage_ticket = CoroutineMock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+        outage_monitor._check_for_digi_reboot = CoroutineMock()
+        outage_monitor._change_ticket_severity = CoroutineMock()
+        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
+        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
+        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
+        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+
+        with patch.object(outage_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
+
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._append_triage_note.assert_awaited_once_with(
+            ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
+        )
+        outage_monitor._change_ticket_severity.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            edge_status=links_grouped_by_primary_edge_with_ha_info,
+            target_severity=target_severity,
+            check_ticket_tasks=False,
+        )
+        outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -5593,7 +5822,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
             has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
@@ -5827,7 +6056,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._send_reminder.assert_awaited()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
@@ -6053,7 +6282,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info, client_name,
@@ -6279,7 +6508,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
             has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
@@ -6295,7 +6524,8 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_471_not_forward_to_hnoc_test(
             self,
-            outage_monitor
+            outage_monitor,
+            bruin_generic_200_response
     ):
         outage_type = Outages.HA_LINK_DOWN  # We can use whatever outage type
         target_severity = outage_monitor._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
@@ -6471,7 +6701,9 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
-        outage_monitor._bruin_repository.send_initial_email_milestone_notification = CoroutineMock()
+        outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_generic_200_response
+        )
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -6505,7 +6737,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
-        outage_monitor._append_reminder_note.assert_called()
+        outage_monitor._append_reminder_note.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id, logical_id_list, edge_primary_serial, links_grouped_by_primary_edge_with_ha_info,
@@ -6727,7 +6959,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
             has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
@@ -6742,7 +6974,8 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_472_not_forward_to_hnoc_test(
             self,
-            outage_monitor
+            outage_monitor,
+            bruin_generic_200_response
     ):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
@@ -6919,7 +7152,9 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
-        outage_monitor._bruin_repository.send_initial_email_milestone_notification = CoroutineMock()
+        outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_generic_200_response
+        )
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -6952,7 +7187,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=True,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
-        outage_monitor._append_reminder_note.assert_called()
+        outage_monitor._append_reminder_note.assert_awaited_once()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
@@ -7174,7 +7409,7 @@ class TestServiceOutageMonitor:
             check_ticket_tasks=False,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_called()
+        outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time, ticket_id, edge_primary_serial, client_name, outage_type, target_severity,
             has_faulty_digi_link, has_faulty_byob_link, faulty_link_types
@@ -7188,7 +7423,8 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def recheck_edges_with_edges_still_in_outage_state_ticket_creation_return_473_not_forward_to_hnoc_test(
             self,
-            outage_monitor
+            outage_monitor,
+            bruin_generic_200_response
     ):
         outage_type = Outages.LINK_DOWN  # We can use whatever outage type
         target_severity = outage_monitor._config.MONITOR_CONFIG['severity_by_outage_type']['edge_down']
@@ -7362,7 +7598,9 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response)
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
-        outage_monitor._bruin_repository.send_initial_email_milestone_notification = CoroutineMock()
+        outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_generic_200_response
+        )
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -7396,7 +7634,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
-        outage_monitor._append_reminder_note.assert_called()
+        outage_monitor._append_reminder_note.assert_awaited_once()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id, cached_edge_primary, links_grouped_by_primary_edge_with_ha_info, outage_type,
         )
@@ -11434,6 +11672,10 @@ class TestServiceOutageMonitor:
             max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
             note_regex=REMINDER_NOTE_REGEX,
         )
+        outage_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
+            ticket_id,
+            serial_number
+        )
         outage_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
             serial_number,
@@ -11496,6 +11738,7 @@ class TestServiceOutageMonitor:
             max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
             note_regex=REMINDER_NOTE_REGEX,
         )
+        outage_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         outage_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
@@ -11550,6 +11793,7 @@ class TestServiceOutageMonitor:
             max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
             note_regex=REMINDER_NOTE_REGEX,
         )
+        outage_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         outage_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
@@ -11558,6 +11802,63 @@ class TestServiceOutageMonitor:
             f'No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},'
             f' since either the last documentation cycle started or the last reminder'
             f' was sent too recently'
+        )
+
+    @pytest.mark.asyncio
+    async def send_reminder__failed_to_send_email_test(
+        self, outage_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+        bruin_generic_200_response, bruin_500_response, make_ticket_note
+    ):
+        serial_number = 'VC1234567'
+        ticket = make_ticket(
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
+        )
+        ticket_id = ticket['ticketID']
+        reminder_note = os.linesep.join([
+            "#*MetTel's IPA*#",
+            'Client Reminder'
+        ])
+        note = make_ticket_note(
+            text=reminder_note,
+            creation_date=ticket['createDate'],
+        )
+        last_documentation_cycle_start_date = ticket['createDate']
+        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(
+            detail_item=detail_item,
+            ticket_info=ticket,
+            notes=[note]
+        )
+        wait_time_before_sending_new_milestone_reminder = outage_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        outage_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        outage_monitor._bruin_repository.send_reminder_email_milestone_notification.return_value = bruin_500_response
+
+        with patch.object(outage_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await outage_monitor._send_reminder(
+                ticket_id,
+                serial_number,
+                detail_object['ticket_notes']
+            )
+
+        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+            ticket_notes=[note],
+            documentation_cycle_start_date=last_documentation_cycle_start_date,
+            max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
+            note_regex=REMINDER_NOTE_REGEX,
+        )
+        outage_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
+            ticket_id,
+            serial_number
+        )
+        outage_monitor._append_reminder_note.assert_not_awaited()
+        outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
+        outage_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
+        outage_monitor._logger.error.assert_called_once_with(
+            f'Reminder email of edge {serial_number} could not be appended to ticket'
+            f' {ticket_id}!'
         )
 
     @pytest.mark.asyncio
@@ -11608,6 +11909,10 @@ class TestServiceOutageMonitor:
             documentation_cycle_start_date=last_documentation_cycle_start_date,
             max_seconds_since_last_event=wait_time_before_sending_new_milestone_reminder,
             note_regex=REMINDER_NOTE_REGEX,
+        )
+        outage_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
+            ticket_id,
+            serial_number
         )
         outage_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,

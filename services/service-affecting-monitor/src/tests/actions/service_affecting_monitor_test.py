@@ -1914,7 +1914,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.return_value = (
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
@@ -1927,6 +1927,35 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         service_affecting_monitor._append_reminder_note.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def unresolve_task_for_affecting_ticket__send_initial_reminder_email_fails_test(
+            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
+            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response,
+            bruin_500_response
+    ):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        detail_info = make_detail_item_with_notes_and_ticket_info()
+        ticket_id = detail_info['ticket_overview']['ticketID']
+        serial_number = detail_info['ticket_task']['detailID']
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+
+        service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_500_response
+        )
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
@@ -1950,7 +1979,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
     @pytest.mark.asyncio
@@ -2012,10 +2040,10 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
             make_create_ticket_200_response()
-        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
         with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
@@ -2026,6 +2054,30 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         service_affecting_monitor._append_reminder_note.assert_awaited_once()
+        service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def create_affecting_ticket__send_initial_reminder_email_fails_test(
+            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
+            make_create_ticket_200_response, bruin_500_response):
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+        link_info = make_structured_metrics_object_with_cache_and_contact_info()
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+            make_create_ticket_200_response()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
+            bruin_500_response
+        )
+        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
+
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
+        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
 
     @pytest.mark.asyncio
@@ -2050,7 +2102,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
     def should_always_stay_in_ipa_queue_non_byob_return_true_test(
@@ -2128,7 +2179,6 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
@@ -2155,7 +2205,6 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
@@ -2185,7 +2234,6 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id, service_number=serial_number,
@@ -2217,7 +2265,6 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.post_notification_email_milestone.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id, service_number=serial_number,
@@ -3753,6 +3800,10 @@ class TestServiceAffectingMonitor:
             last_documentation_cycle_start_date,
             wait_time_before_sending_new_milestone_reminder
         )
+        service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
+            ticket_id,
+            serial_number
+        )
         service_affecting_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
             serial_number,
@@ -3800,6 +3851,7 @@ class TestServiceAffectingMonitor:
             last_documentation_cycle_start_date,
             wait_time_before_sending_new_milestone_reminder
         )
+        service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
@@ -3849,6 +3901,7 @@ class TestServiceAffectingMonitor:
             last_documentation_cycle_start_date,
             wait_time_before_sending_new_milestone_reminder
         )
+        service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
@@ -3857,6 +3910,50 @@ class TestServiceAffectingMonitor:
             f'No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},'
             f' since either the last documentation cycle started or the last reminder'
             f' was sent too recently'
+        )
+
+    @pytest.mark.asyncio
+    async def send_reminder__failed_to_send_email_test(
+            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+            bruin_generic_200_response, bruin_500_response
+    ):
+        serial_number = 'VC1234567'
+        ticket = make_ticket(
+            created_by='Intelygenz Ai',
+            create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
+        )
+        ticket_id = ticket['ticketID']
+        last_documentation_cycle_start_date = ticket['createDate']
+        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(
+            detail_item=detail_item,
+            ticket_info=ticket,
+        )
+        wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
+            'wait_time_before_sending_new_milestone_reminder'
+        ]
+        service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.return_value = (
+            bruin_500_response
+        )
+
+        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+            await service_affecting_monitor._send_reminder(detail_object)
+
+        service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
+            [],
+            last_documentation_cycle_start_date,
+            wait_time_before_sending_new_milestone_reminder
+        )
+        service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
+            ticket_id,
+            serial_number
+        )
+        service_affecting_monitor._append_reminder_note.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
+        service_affecting_monitor._logger.error.assert_called_once_with(
+            f'Reminder email of edge {serial_number} could not be appended to ticket {ticket_id}!'
         )
 
     @pytest.mark.asyncio
@@ -3893,6 +3990,10 @@ class TestServiceAffectingMonitor:
             [],
             last_documentation_cycle_start_date,
             wait_time_before_sending_new_milestone_reminder
+        )
+        service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
+            ticket_id,
+            serial_number
         )
         service_affecting_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
