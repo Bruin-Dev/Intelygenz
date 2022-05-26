@@ -58,6 +58,7 @@
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm repo update
+        helm pull mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} --verify --debug
         helm upgrade --wait --install --verify ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}
       else
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
