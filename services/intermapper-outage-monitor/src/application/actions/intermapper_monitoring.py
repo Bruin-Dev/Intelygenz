@@ -135,12 +135,12 @@ class InterMapperMonitor:
         parsed_email_dict = self._parse_email_body(body)
 
         if parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_up_events']:
-            self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]} there is no need to create'
-                              f' a new ticket. Checking for autoresolve ...')
+            self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create '
+                              f'a new ticket. Checking for autoresolve ...')
             event_processed_successfully = await self._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
         elif parsed_email_dict['event'] in self._config.INTERMAPPER_CONFIG['intermapper_down_events']:
             self._logger.info(f'Event from InterMapper was {parsed_email_dict["event"]}, '
-                              f'checking for ticket creation ...')
+                              f'condition was {parsed_email_dict["condition"]}. Checking for ticket creation ...')
             dri_parameters = None
             if self._is_piab_device(parsed_email_dict):
                 self._logger.info(f"The probe type from Intermapper is {parsed_email_dict['probe_type']}."
