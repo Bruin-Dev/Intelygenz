@@ -91,6 +91,9 @@ else:
         'wait_time_before_sending_new_milestone_reminder': int(
             os.environ['MONITORING__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER']
         ),
+        'business_grade_link_labels': json.loads(
+            os.environ['MONITORING__BUSINESS_GRADE_LINK_LABELS']
+        ),
     }
 
 LOG_CONFIG = {

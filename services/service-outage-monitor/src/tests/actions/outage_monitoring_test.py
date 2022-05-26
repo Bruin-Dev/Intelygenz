@@ -1240,6 +1240,239 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def process_velocloud_host_with_business_and_commercial_grade_edges_in_link_down_state_test(
+            self,
+            outage_monitor
+    ):
+        velocloud_host = 'metvco04.mettel.net'
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC5678901'
+        edge_1_ha_serial = None
+        edge_2_ha_serial = None
+        edge_1_state = 'CONNECTED'
+        edge_2_state = 'CONNECTED'
+        edge_1_ha_state = None
+        edge_2_ha_state = None
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {'host': velocloud_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+        edge_2_enterprise_id = 3
+        edge_2_id = 1
+        edge_2_full_id = {'host': velocloud_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        logical_id_list = [{'interface_name': 'REX', 'logical_id': '123'}]
+        links_configuration = []
+        cached_edge_1 = {
+            'edge': edge_1_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_1_serial,
+            'ha_serial_number': edge_1_ha_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
+        }
+        cached_edge_2 = {
+            'edge': edge_2_full_id,
+            'last_contact': '2020-08-17T02:23:59',
+            'serial_number': edge_2_serial,
+            'ha_serial_number': edge_2_ha_serial,
+            'bruin_client_info': bruin_client_info,
+            'logical_ids': logical_id_list,
+            'links_configuration': links_configuration,
+        }
+        customer_cache_for_velocloud_host = [
+            cached_edge_1,
+            cached_edge_2,
+        ]
+        links_with_edge_1_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'interface': 'REX',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_2_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'interface': 'Augmented',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+        ]
+        links_with_edge_info_response = {
+            'body': links_with_edge_info,
+            'status': 200,
+        }
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_1_state,
+            'enterpriseId': edge_1_enterprise_id,
+            'haSerialNumber': edge_1_ha_serial,
+            'haState': edge_1_ha_state,
+            'id': edge_1_id,
+            'name': 'Big Boss',
+            'serialNumber': edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            'edgeState': edge_2_state,
+            'enterpriseId': edge_2_enterprise_id,
+            'haSerialNumber': edge_2_ha_serial,
+            'haState': edge_2_ha_state,
+            'id': edge_2_id,
+            'name': 'Adam Jensen',
+            'serialNumber': edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            'body': edges_network_enterprises,
+            'status': 200,
+        }
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'links': [
+                {
+                    'interface': 'REX',
+                    'displayName': 'DIA',
+                    'linkState': 'DISCONNECTED',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'displayName': 'OTHER',
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'links': [
+                {
+                    'interface': 'Augmented',
+                    'displayName': 'OTHER',
+                    'linkState': 'DISCONNECTED',
+                    'linkId': 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge = [
+            links_grouped_by_edge_1,
+            links_grouped_by_edge_2,
+        ]
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            'edgeHAState': edge_1_ha_state,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            'edgeHAState': edge_2_ha_state,
+            'edgeIsHAPrimary': None,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+        edge_1_full_info = {
+            'cached_info': cached_edge_1,
+            'status': links_grouped_by_edge_1,
+        }
+        edge_2_full_info = {
+            'cached_info': cached_edge_2,
+            'status': links_grouped_by_edge_2,
+        }
+        edges_full_info = [
+            edge_1_full_info,
+            edge_2_full_info,
+        ]
+        link_down_edges = [
+            edge_1_full_info,
+            edge_2_full_info,
+        ]
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = []
+        ha_hard_down_edges = []
+        outage_monitor._velocloud_repository.get_links_with_edge_info = CoroutineMock(
+            return_value=links_with_edge_info_response)
+        outage_monitor._velocloud_repository.get_network_enterprises = CoroutineMock(
+            return_value=network_enterprises_response)
+        outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
+        outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(side_effect=[
+            link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges
+        ])
+        outage_monitor._outage_repository.should_document_outage = Mock(return_value=True)
+        outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
+        outage_monitor._ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        outage_monitor._ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
+        outage_monitor._schedule_recheck_job_for_edges = Mock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+        forward_time = outage_monitor._config.MONITOR_CONFIG['jobs_intervals']['forward_to_hnoc_edge_down']
+        outage_monitor._get_hnoc_forward_time_by_outage_type = Mock(return_value=forward_time)
+
+        with patch.object(outage_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+            await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+            outage_monitor._velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(
+                velocloud_host=velocloud_host
+            )
+            outage_monitor._velocloud_repository.get_network_enterprises.assert_awaited_once_with(
+                velocloud_host=velocloud_host
+            )
+            outage_monitor._velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+            outage_monitor._ha_repository.map_edges_with_ha_info.assert_called_once_with(
+                links_grouped_by_edge, edges_network_enterprises
+            )
+            outage_monitor._ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+                links_grouped_by_edge_with_ha_info
+            )
+            outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
+                customer_cache_for_velocloud_host, all_edges
+            )
+            outage_monitor._attempt_ticket_creation.assert_called_once_with([link_down_edges[0]], Outages.LINK_DOWN)
+            outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
+                [link_down_edges[1]],
+                Outages.LINK_DOWN
+            )
+            outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def process_velocloud_host_with_just_edges_in_hard_down_state_test(self, outage_monitor):
         velocloud_host = 'mettel.velocloud.net'
         edge_1_serial = 'VC1234567'
@@ -11928,3 +12161,167 @@ class TestServiceOutageMonitor:
             f'Reminder note of edge {serial_number} could not be appended to ticket'
             f' {ticket_id}!'
         )
+
+    def has_business_grade_link_down_disconnected_test(self, outage_monitor):
+        velocloud_host = 'mettel.velocloud.net'
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC8901234'
+        edge_3_serial = 'VC5678901'
+        edge_1_ha_serial = 'VC99999999'
+        edge_2_ha_serial = 'VC88888888'
+        edge_3_ha_serial = None
+        edge_1_state = 'CONNECTED'
+        edge_2_state = 'OFFLINE'
+        edge_3_state = 'OFFLINE'
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_2_enterprise_id = 2
+        edge_2_id = 1
+        edge_3_enterprise_id = 3
+        edge_3_id = 1
+        links_with_edge_1_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'displayName': 'BYOB',
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        links_with_edge_2_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'displayName': 'DIA',
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'GladOS',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'interface': 'Wheatley',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_3_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_3_enterprise_id,
+            'displayName': 'BYOB',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_3_state,
+            'edgeId': edge_3_id,
+            'edgeSerialNumber': edge_3_serial,
+            'edgeHASerialNumber': edge_3_ha_serial,
+            'interface': 'Augmented',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+            links_with_edge_3_info,
+        ]
+
+        response = outage_monitor._has_business_grade_link_down(links_with_edge_info)
+
+        assert response is True
+
+    def has_business_grade_link_down_stable_test(self, outage_monitor):
+        velocloud_host = 'mettel.velocloud.net'
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC8901234'
+        edge_3_serial = 'VC5678901'
+        edge_1_ha_serial = 'VC99999999'
+        edge_2_ha_serial = 'VC88888888'
+        edge_3_ha_serial = None
+        edge_1_state = 'CONNECTED'
+        edge_2_state = 'CONNECTED'
+        edge_3_state = 'OFFLINE'
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_2_enterprise_id = 2
+        edge_2_id = 1
+        edge_3_enterprise_id = 3
+        edge_3_id = 1
+        links_with_edge_1_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'displayName': 'DIA',
+            'enterpriseId': edge_1_enterprise_id,
+            'edgeName': 'Big Boss',
+            'edgeState': edge_1_state,
+            'edgeId': edge_1_id,
+            'edgeSerialNumber': edge_1_serial,
+            'edgeHASerialNumber': edge_1_ha_serial,
+            'interface': 'REX',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        links_with_edge_2_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'displayName': 'DIA',
+            'enterpriseId': edge_2_enterprise_id,
+            'edgeName': 'GladOS',
+            'edgeState': edge_2_state,
+            'edgeId': edge_2_id,
+            'edgeSerialNumber': edge_2_serial,
+            'edgeHASerialNumber': edge_2_ha_serial,
+            'interface': 'Wheatley',
+            'linkState': 'STABLE',
+            'linkId': 5293,
+        }
+        links_with_edge_3_info = {
+            # Some fields omitted for simplicity
+            'host': velocloud_host,
+            'enterpriseId': edge_3_enterprise_id,
+            'displayName': 'BYOB',
+            'edgeName': 'Adam Jensen',
+            'edgeState': edge_3_state,
+            'edgeId': edge_3_id,
+            'edgeSerialNumber': edge_3_serial,
+            'edgeHASerialNumber': edge_3_ha_serial,
+            'interface': 'Augmented',
+            'linkState': 'DISCONNECTED',
+            'linkId': 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+            links_with_edge_3_info,
+        ]
+
+        response = outage_monitor._has_business_grade_link_down(links_with_edge_info)
+
+        assert response is False
+
+    def is_business_grade_link_label_test(self, outage_monitor):
+        edge = {
+            'status': {
+                'host': 'metvco04.mettel.net',
+                'enterpriseId': 1,
+                'edgeName': 'Big Boss',
+                'edgeState': 'CONNECTED',
+                'edgeId': 1,
+                'edgeSerialNumber':
+                    'VC1234567',
+                'edgeHASerialNumber': None,
+                'links': [
+                    {
+                        'interface': 'REX',
+                        'displayName': 'DIA',
+                        'linkState': 'DISCONNECTED',
+                        'linkId': 5293
+                    }
+                ]
+            }
+        }
+
+        response = outage_monitor._is_business_grade_link_label(edge['status']['links'][0]['displayName'])
+
+        assert response is True
