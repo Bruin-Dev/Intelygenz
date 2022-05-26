@@ -299,6 +299,7 @@ class TNBAMonitor:
                 note
                 for note in ticket['ticket_notes']
                 if note['noteValue'] is not None
+                if note['serviceNumber'] is not None
             ]
 
             for index, note in enumerate(relevant_notes):
@@ -393,6 +394,7 @@ class TNBAMonitor:
                 notes_related_to_serial = [
                     note
                     for note in ticket['ticket_notes']
+                    if note['serviceNumber'] is not None
                     if serial_number in note['serviceNumber']
                 ]
 

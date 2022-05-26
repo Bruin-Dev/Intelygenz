@@ -196,6 +196,7 @@ class AffectingMonitor:
         return [
             note
             for note in ticket_notes
+            if note['serviceNumber'] is not None
             if serial_number in note['serviceNumber']
             if note['noteValue'] is not None
         ]

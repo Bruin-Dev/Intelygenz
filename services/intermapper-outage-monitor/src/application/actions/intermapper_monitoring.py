@@ -261,6 +261,7 @@ class InterMapperMonitor:
             relevant_notes = [
                 note
                 for note in notes_from_outage_ticket
+                if note['serviceNumber'] is not None
                 if circuit_id in note['serviceNumber']
                 if note['noteValue'] is not None
             ]

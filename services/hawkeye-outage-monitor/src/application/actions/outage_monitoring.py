@@ -149,6 +149,7 @@ class OutageMonitor:
             relevant_notes = [
                 note
                 for note in notes_from_outage_ticket
+                if note['serviceNumber'] is not None
                 if serial_number in note['serviceNumber']
                 if note['noteValue'] is not None
             ]
@@ -417,7 +418,12 @@ class OutageMonitor:
             return
 
         ticket_notes = ticket_details_response['body']['ticketNotes']
-        relevant_notes = [note for note in ticket_notes if serial_number in note['serviceNumber']]
+        relevant_notes = [
+            note
+            for note in ticket_notes
+            if note['serviceNumber'] is not None
+            if serial_number in note['serviceNumber']
+        ]
 
         if self._triage_note_exists(relevant_notes):
             self._logger.info(

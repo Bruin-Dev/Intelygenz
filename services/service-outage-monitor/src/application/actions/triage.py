@@ -206,6 +206,7 @@ class Triage:
             relevant_notes = [
                 note
                 for note in ticket['ticket_notes']
+                if note['serviceNumber'] is not None
                 if note['noteValue'] is not None
                 if bool(TRIAGE_NOTE_REGEX.match(note['noteValue']))
             ]
@@ -245,6 +246,7 @@ class Triage:
                 notes_related_to_serial = [
                     note
                     for note in ticket_notes
+                    if note['serviceNumber'] is not None
                     if serial_number in note['serviceNumber']
                 ]
                 detail_object = {

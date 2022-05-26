@@ -658,6 +658,7 @@ class BruinRepository:
                 notes_related_to_serial = [
                     note
                     for note in notes
+                    if note['serviceNumber'] is not None
                     if serial_number in note['serviceNumber']
                 ]
                 result.append({

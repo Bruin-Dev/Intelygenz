@@ -335,6 +335,7 @@ class ServiceAffectingMonitor:
                 relevant_notes = [
                     note
                     for note in notes_from_affecting_ticket
+                    if note['serviceNumber'] is not None
                     if serial_number in note['serviceNumber']
                     if note['noteValue'] is not None
                 ]
@@ -755,6 +756,7 @@ class ServiceAffectingMonitor:
             relevant_notes = [
                 note
                 for note in ticket_notes
+                if note['serviceNumber'] is not None
                 if serial_number in note['serviceNumber']
                 if note['noteValue'] is not None
             ]
@@ -1087,6 +1089,7 @@ class ServiceAffectingMonitor:
         ticket_notes = [
             note
             for note in notes_from_outage_ticket
+            if note['serviceNumber'] is not None
             if serial_number in note['serviceNumber']
             if note['noteValue'] is not None
         ]
