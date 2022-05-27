@@ -197,22 +197,21 @@ class OutageMonitor:
                     if self._config.VELOCLOUD_HOST == 'metvco04.mettel.net'
                     if self._has_business_grade_link_down(edge['status']['links'])
                 ]
-                business_grade_tasks = self._attempt_ticket_creation(
-                    edges_with_business_grade_links_down,
-                    outage_type
-                )
-                out = await asyncio.gather(*business_grade_tasks)
+                business_grade_tasks = [
+                    self._attempt_ticket_creation(edge, outage_type) for edge in edges_with_business_grade_links_down
+                ]
+                out = await asyncio.gather(*business_grade_tasks, return_exceptions=True)
                 for ex in filter(None, out):
                     self._logger.error(
-                        f"Error while attempting ticket creation for edge"
-                        f" with Business Grade Link(s): {ex}")
+                        f'[{outage_type.value}] Error while attempting ticket creation(s) for edge '
+                        f'with Business Grade Link(s): {ex}')
 
-                edges_with_commercial_grade_links_down = [
+                regular_edges = [
                     edge
                     for edge in relevant_down_edges
                     if edge not in edges_with_business_grade_links_down
                 ]
-                self._schedule_recheck_job_for_edges(edges_with_commercial_grade_links_down, outage_type)
+                self._schedule_recheck_job_for_edges(regular_edges, outage_type)
             else:
                 self._logger.info(
                     f"No edges were detected in {outage_type.value} state. "
@@ -544,7 +543,15 @@ class OutageMonitor:
 
             working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment == 'production':
-                await self._attempt_ticket_creation(edges_still_down, outage_type)
+                tasks = [
+                    self._attempt_ticket_creation(edge, outage_type)
+                    for edge in edges_still_down
+                ]
+                out = await asyncio.gather(*tasks, return_exceptions=True)
+                for ex in filter(None, out):
+                    self._logger.error(
+                        f'[{outage_type.value}] Error while attempting ticket creation(s) for edge in '
+                        f'the quarantine: {ex}')
             else:
                 self._logger.info(
                     f'[{outage_type.value}] Not starting outage ticket creation for {len(edges_still_down)} faulty '
@@ -1267,24 +1274,25 @@ class OutageMonitor:
             service_numbers=[service_number],
         )
 
-    async def _attempt_ticket_creation(self, edge: List[dict], outage_type: Outages):
-            edge_status = edge['status']
-            edge_links = edge_status['links']
-            cached_edge = edge['cached_info']
-            serial_number = cached_edge['serial_number']
-            logical_id_list = cached_edge['logical_ids']
-            links_configuration = cached_edge['links_configuration']
-            client_id = cached_edge['bruin_client_info']['client_id']
-            client_name = cached_edge['bruin_client_info']['client_name']
-            target_severity = self._get_target_severity(edge_status)
-            has_faulty_digi_link = self._has_faulty_digi_link(edge_links, logical_id_list)
-            has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
-            faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
+    async def _attempt_ticket_creation(self, edge: dict, outage_type: Outages):
+        edge_status = edge['status']
+        edge_links = edge_status['links']
+        cached_edge = edge['cached_info']
+        serial_number = cached_edge['serial_number']
+        logical_id_list = cached_edge['logical_ids']
+        links_configuration = cached_edge['links_configuration']
+        client_id = cached_edge['bruin_client_info']['client_id']
+        client_name = cached_edge['bruin_client_info']['client_name']
+        target_severity = self._get_target_severity(edge_status)
+        has_faulty_digi_link = self._has_faulty_digi_link(edge_links, logical_id_list)
+        has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
+        faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
 
-            self._logger.info(
-                f'[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...'
-            )
+        self._logger.info(
+            f'[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...'
+        )
 
+        try:
             ticket_creation_response = await self._bruin_repository.create_outage_ticket(
                 client_id, serial_number
             )
@@ -1552,6 +1560,11 @@ class OutageMonitor:
                                 f'Reminder note of edge {serial_number} could not be appended to ticket'
                                 f' {ticket_id}!'
                             )
+        except Exception as ex:
+            msg = (
+                f"Error while attempting ticket creation for edge {serial_number}: {ex}"
+            )
+            raise Exception(msg)
 
     def _has_business_grade_link_down(self, links: List[dict]) -> bool:
         return any(
@@ -1563,4 +1576,4 @@ class OutageMonitor:
 
     def _is_business_grade_link_label(self, label: str) -> bool:
         business_grade_link_labels = self._config.MONITOR_CONFIG["business_grade_link_labels"]
-        return any(bg_label for bg_label in business_grade_link_labels if label.upper() in bg_label)
+        return any(bg_label for bg_label in business_grade_link_labels if bg_label in label)

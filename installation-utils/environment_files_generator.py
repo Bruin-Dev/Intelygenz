@@ -208,7 +208,7 @@ SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_EDGE_DOWN_OUTAGES = parameters['dev']['ser
 SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_LINK_DOWN_OUTAGES = parameters['dev']['service-outage']['monitor']['severity-for-link-down-outages']
 SERVICE_OUTAGE__MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters['dev']['service-outage']['monitor']['max-autoresolves-per-ticket']
 SERVICE_OUTAGE__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER = parameters['dev']['service-outage']['monitor']['wait-time-before-sending-new-milestone-reminder']
-SERVICE_OUTAGE__MONITOR__BUSINESS_GRADE_LINK_LABELS = parameters['dev']['service-outage']['monitor']['business-grade-link-labels']
+SERVICE_OUTAGE__MONITOR__BUSINESS_GRADE_LINK_LABELS = json.dumps(json.loads(parameters['dev']['service-outage']['monitor']['business-grade-link-labels']))
 
 # Service Outage Monitor - Triage variables
 SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL = parameters['dev']['service-outage']['triage']['monitoring-job-interval']
