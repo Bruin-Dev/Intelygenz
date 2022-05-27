@@ -24,9 +24,9 @@ SEVERITY_LEVELS = {
     'low': 4,
 }
 
-VELOCLOUD_HOST = "some-host"
-ENVIRONMENT_NAME = "dev"
-CURRENT_ENVIRONMENT = "dev"
+VELOCLOUD_HOST = 'mettel.velocloud.net'
+ENVIRONMENT_NAME = 'dev'
+CURRENT_ENVIRONMENT = 'dev'
 
 TIMEZONE = 'US/Eastern'
 

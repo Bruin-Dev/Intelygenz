@@ -496,9 +496,7 @@ class OutageMonitor:
         )
         self._logger.info(f"[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}")
 
-        # This method is never called with an empty outage_edges, so no IndexError should be raised
-        first_outage_edge = outage_edges[0]
-        host = first_outage_edge['status']['host']
+        host = self._config.VELOCLOUD_HOST
 
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response['status'] not in range(200, 300):
@@ -1269,9 +1267,7 @@ class OutageMonitor:
             service_numbers=[service_number],
         )
 
-    async def _attempt_ticket_creation(self, edges_still_down: List[dict], outage_type: Outages):
-        first_outage_edge = edges_still_down[0] if edges_still_down else {}
-        for edge in edges_still_down:
+    async def _attempt_ticket_creation(self, edge: List[dict], outage_type: Outages):
             edge_status = edge['status']
             edge_links = edge_status['links']
             cached_edge = edge['cached_info']
@@ -1318,7 +1314,7 @@ class OutageMonitor:
                 )
 
                 should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
+                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
 
                 if should_schedule_hnoc_forwarding:
                     self.schedule_forward_to_hnoc_queue(
@@ -1367,8 +1363,7 @@ class OutageMonitor:
 
                 if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
                     if should_schedule_hnoc_forwarding:
-                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type,
-                                                                                  first_outage_edge)
+                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                         self.schedule_forward_to_hnoc_queue(
                             forward_time, ticket_id, serial_number, client_name,
                             outage_type, target_severity, has_faulty_digi_link, has_faulty_byob_link,
@@ -1417,7 +1412,7 @@ class OutageMonitor:
                 )
 
                 should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
+                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
 
                 if should_schedule_hnoc_forwarding:
                     self.schedule_forward_to_hnoc_queue(
@@ -1475,7 +1470,7 @@ class OutageMonitor:
                 )
 
                 should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
+                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
 
                 if should_schedule_hnoc_forwarding:
                     self.schedule_forward_to_hnoc_queue(
@@ -1527,7 +1522,7 @@ class OutageMonitor:
                 )
 
                 should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, first_outage_edge)
+                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
 
                 if should_schedule_hnoc_forwarding:
                     self.schedule_forward_to_hnoc_queue(
