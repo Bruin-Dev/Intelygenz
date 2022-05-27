@@ -10,7 +10,7 @@ NATS_TOPIC = "bruin.ticket.note.append.request"
 class AppendNoteToTicketRpc(Rpc):
     topic: str = field(init=False, default=NATS_TOPIC)
 
-    async def __call__(self, ticket_id: int, note: str) -> bool:
+    async def __call__(self, ticket_id: str, note: str) -> bool:
         """
         Appends a single Note to a Ticket.
         Proxied service: POST /api/Ticket/{ticket_id}/notes
@@ -29,5 +29,5 @@ class AppendNoteToTicketRpc(Rpc):
 
 
 class RequestBody(BaseModel):
-    ticket_id: int
+    ticket_id: str
     note: str = Field(repr=False)

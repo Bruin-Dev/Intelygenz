@@ -16,7 +16,7 @@ class TestAppendNoteToTicket:
     @mark.asyncio
     async def requests_are_properly_build_test(self, make_append_note_to_ticket_rpc):
         # given
-        ticket_id = hash("any_ticket_id")
+        ticket_id = "any_ticket_id"
         note = "any_note"
 
         rpc = make_append_note_to_ticket_rpc()
@@ -28,7 +28,7 @@ class TestAppendNoteToTicket:
         # then
         rpc.send.assert_awaited_once_with(RpcRequest.construct(
             request_id=ANY,
-            body=RequestBody(ticket_id=hash("any_ticket_id"), note="any_note")
+            body=RequestBody(ticket_id="any_ticket_id", note="any_note")
         ))
 
     @mark.asyncio
@@ -36,7 +36,7 @@ class TestAppendNoteToTicket:
         rpc = make_append_note_to_ticket_rpc()
         rpc.send = CoroutineMock(return_value=RpcResponse(status=HTTPStatus.OK))
 
-        assert await rpc(hash("any_ticket_id"), "any_note")
+        assert await rpc("any_ticket_id", "any_note")
 
 
 @fixture

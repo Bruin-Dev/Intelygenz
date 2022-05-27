@@ -12,7 +12,7 @@ NATS_TOPIC = "bruin.subscribe.user"
 class SubscribeUserRpc(Rpc):
     topic: str = field(init=False, default=NATS_TOPIC)
 
-    async def __call__(self, ticket_id: int, user_email: str) -> bool:
+    async def __call__(self, ticket_id: str, user_email: str) -> bool:
         """
         Subscribes a user to a Ticket notifications.
         The user will be created if it doesn't yet exist.
@@ -43,5 +43,5 @@ class SubscribeUserRpc(Rpc):
 
 
 class RequestBody(BaseModel):
-    ticket_id: int
+    ticket_id: str
     user_email: str = Field(repr=False)

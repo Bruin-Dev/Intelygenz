@@ -467,8 +467,8 @@ class TestRepairTicketsMonitor:
             "2345": "site_2",
         }
 
-        tickets_created = [TicketOutput(site_id="site_1", service_numbers=["1234"], ticket_id=5678)]
-        tickets_updated = [TicketOutput(site_id="site_2", service_numbers=["2345"], ticket_id=1234)]
+        tickets_created = [TicketOutput(site_id="site_1", service_numbers=["1234"], ticket_id='5678')]
+        tickets_updated = [TicketOutput(site_id="site_2", service_numbers=["2345"], ticket_id='1234')]
 
         create_ticket_response = CreateTicketsOutput(tickets_created=tickets_created,
                                                      tickets_updated=tickets_updated)
@@ -547,8 +547,8 @@ class TestRepairTicketsMonitor:
         tickets_updated = [{"site_id": "site_name_2", "service_numbers": ["2345"], "ticket_id": "1234"}]
         tickets_not_created = []
         validated_tickets = [
-            Ticket(site_id=hash("site_1"), id=1234),
-            Ticket(site_id=hash("site_1"), id=1235),
+            Ticket(site_id="site_1", id='1234'),
+            Ticket(site_id="site_1", id='1235'),
         ]
         active_tickets = []
         create_ticket_response = (tickets_created, tickets_updated, tickets_not_created)
@@ -585,7 +585,7 @@ class TestRepairTicketsMonitor:
         ]
         assert (
             repair_tickets_monitor._save_output.await_args[0][0].validated_tickets
-            == [Ticket(site_id=hash("site_1"), id=1234), Ticket(site_id=hash("site_1"), id=1235)]
+            == [Ticket(site_id="site_1", id='1234'), Ticket(site_id="site_1", id='1235')]
 
         )
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
@@ -664,7 +664,7 @@ class TestRepairTicketsMonitor:
             RepairEmailOutput(
                 email_id=1234,
                 tickets_cannot_be_created=[TicketOutput(reason=str(response_exception))],
-                validated_tickets=[Ticket(id=1234, status=TicketStatus.IN_PROGRESS, call_type="REP", category="VOO")]
+                validated_tickets=[Ticket(id='1234', status=TicketStatus.IN_PROGRESS, call_type="REP", category="VOO")]
             )
         )
 
@@ -697,8 +697,8 @@ class TestRepairTicketsMonitor:
             "2345": "site_name_2",
         }
         create_tickets_output = CreateTicketsOutput(
-            tickets_created=[TicketOutput(site_id="site_1", service_numbers=["1234"], ticket_id=5678)],
-            tickets_updated=[TicketOutput(site_id="site_2", service_numbers=["2345"], ticket_id=1234)]
+            tickets_created=[TicketOutput(site_id="site_1", service_numbers=["1234"], ticket_id='5678')],
+            tickets_updated=[TicketOutput(site_id="site_2", service_numbers=["2345"], ticket_id='1234')]
         )
 
         existing_tickets_response = [make_ticket_decamelized()]
@@ -1216,8 +1216,8 @@ class TestRepairTicketsMonitor:
 
         expected_output = RepairEmailOutput(
             email_id=1234,
-            tickets_could_be_updated=[TicketOutput(ticket_id=1234)],
-            validated_tickets=[Ticket(id=1234, status=TicketStatus.IN_PROGRESS, call_type="REP", category="VOO")],
+            tickets_could_be_updated=[TicketOutput(ticket_id='1234')],
+            validated_tickets=[Ticket(id='1234', status=TicketStatus.IN_PROGRESS, call_type="REP", category="VOO")],
         )
         repair_tickets_monitor._save_output.assert_awaited_once_with(expected_output)
 
@@ -1278,5 +1278,5 @@ class TestRepairTicketsMonitor:
             tickets = await repair_tickets_monitor._get_tickets("1234", tickets_id)
 
         assert tickets == [
-            Ticket(id=12345, status=TicketStatus.NEW, call_type="repair", category="VOO")
+            Ticket(id='12345', status=TicketStatus.NEW, call_type="repair", category="VOO")
         ]

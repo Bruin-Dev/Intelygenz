@@ -219,7 +219,7 @@ class RepairTicketsMonitor:
                     )
 
                 ticket = Ticket(
-                    id=int(bruin_bridge_response["body"]['ticket_id']),
+                    id=str(bruin_bridge_response["body"]['ticket_id']),
                     status=ticket_status,
                     call_type=bruin_bridge_response["body"]["call_type"],
                     category=bruin_bridge_response["body"]["category"]
@@ -282,9 +282,9 @@ class RepairTicketsMonitor:
                 assets = Assets()
                 for service_number, site_id in service_number_site_map.items():
                     asset_id = AssetId(
-                        service_number=service_number,
+                        client_id=client_id,
                         site_id=site_id,
-                        client_id=client_id
+                        service_number=service_number
                     )
 
                     try:
@@ -488,7 +488,7 @@ class RepairTicketsMonitor:
 
     def _compose_bec_note_to_ticket(
         self,
-        ticket_id: int,
+        ticket_id: str,
         service_numbers: List[str],
         subject: str,
         from_address: str,

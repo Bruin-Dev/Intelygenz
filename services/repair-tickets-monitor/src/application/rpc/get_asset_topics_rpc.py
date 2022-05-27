@@ -40,7 +40,7 @@ class GetAssetTopicsRpc(Rpc):
 
 
 class RequestBody(BaseModel):
-    client_id: int
+    client_id: str
     service_number: str
 
 

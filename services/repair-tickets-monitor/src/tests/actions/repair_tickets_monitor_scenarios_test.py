@@ -8,8 +8,8 @@ from pytest import mark, fixture
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
 from config import testconfig as config
-from tests.actions.repair_tickets_monitor_scenarios import RepairTicketsMonitorScenario, PostResponse, \
-    make_repair_tickets_monitor_scenarios
+from tests.actions.repair_tickets_monitor_scenarios import RepairTicketsMonitorScenario, \
+    make_repair_tickets_monitor_scenarios, PostResponse
 
 scenarios = make_repair_tickets_monitor_scenarios()
 
@@ -104,10 +104,10 @@ def mock_bruin_repository(bruin_repository, scenario: RepairTicketsMonitorScenar
         return {"status": 200, "body": {"site_id": scenario.assets.get(potential_service_number, 0)}}
 
     def create_outage_ticket(_, service_numbers: List[str], __):
-        default_response = PostResponse(404, hash("created_ticket_id"))
+        default_response = PostResponse(404, "created_ticket_id")
         return asdict(scenario.post_responses.get(",".join(service_numbers), default_response))
 
-    def get_single_ticket_basic_info(ticket_id: int):
+    def get_single_ticket_basic_info(ticket_id: str):
         ticket_map = dict((ticket.id, ticket) for ticket in scenario.tickets)
         ticket = ticket_map.get(ticket_id)
         if ticket:

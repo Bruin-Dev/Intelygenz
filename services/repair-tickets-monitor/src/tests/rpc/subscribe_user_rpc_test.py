@@ -16,7 +16,7 @@ class TestSubscribeUserRpc:
     @mark.asyncio
     async def requests_are_properly_build_test(self, make_subscribe_user_rpc):
         # given
-        ticket_id = hash("any_ticket_id")
+        ticket_id = "any_ticket_id"
         user_email = "any_user_email"
 
         rpc = make_subscribe_user_rpc()
@@ -35,7 +35,7 @@ class TestSubscribeUserRpc:
         rpc = make_subscribe_user_rpc()
         rpc.send = CoroutineMock(return_value=RpcResponse(status=HTTPStatus.OK))
 
-        assert await rpc(hash("any_ticket_id"), "any_user_email")
+        assert await rpc("any_ticket_id", "any_user_email")
 
     @mark.asyncio
     async def forbidden_responses_are_properly_handled_test(self, make_subscribe_user_rpc):
@@ -45,7 +45,7 @@ class TestSubscribeUserRpc:
         rpc = make_subscribe_user_rpc()
         rpc.send = CoroutineMock(side_effect=forbidden_error)
 
-        assert not await rpc(hash("any_ticket_id"), "any_user_email")
+        assert not await rpc("any_ticket_id", "any_user_email")
 
     @mark.asyncio
     async def internal_service_error_responses_are_properly_handled_test(self, make_subscribe_user_rpc):
@@ -55,7 +55,7 @@ class TestSubscribeUserRpc:
         rpc = make_subscribe_user_rpc()
         rpc.send = CoroutineMock(side_effect=internal_server_error)
 
-        assert not await rpc(hash("any_ticket_id"), "any_user_email")
+        assert not await rpc("any_ticket_id", "any_user_email")
 
     @mark.asyncio
     async def other_error_responses_are_properly_raised_test(self, make_subscribe_user_rpc):
@@ -66,7 +66,7 @@ class TestSubscribeUserRpc:
         rpc.send = CoroutineMock(side_effect=other_error)
 
         with raises(RpcFailedError):
-            await rpc(hash("any_ticket_id"), "any_user_email")
+            await rpc("any_ticket_id", "any_user_email")
 
 
 @fixture

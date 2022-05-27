@@ -57,6 +57,6 @@ class TicketOutput:
     Generic data structure to hold information on actions taken on a ticket
     """
     site_id: str = None
-    ticket_id: int = None
+    ticket_id: str = None
     reason: str = None
     service_numbers: List[str] = field(default_factory=list)

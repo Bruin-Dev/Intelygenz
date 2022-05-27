@@ -28,9 +28,9 @@ class AssetId:
     """
     Data structure that represents a Bruin asset identification.
     """
-    service_number: str
     client_id: str
     site_id: str
+    service_number: str
 
 
 @dataclass
