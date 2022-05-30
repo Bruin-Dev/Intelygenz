@@ -209,8 +209,23 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "tnba-feedback",
                 },
                 {
-                    "query": f"tnba-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[tnba-monitor] - logs",
+                    "query": f"tnba-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-mettel-velocloud-net] - logs",
+                    "repository": "tnba-monitor",
+                },
+                {
+                    "query": f"tnba-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-metvco02-mettel-net] - logs",
+                    "repository": "tnba-monitor",
+                },
+                {
+                    "query": f"tnba-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-metvco03-mettel-net] - logs",
+                    "repository": "tnba-monitor",
+                },
+                {
+                    "query": f"tnba-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-metvco04-mettel-net] - logs",
                     "repository": "tnba-monitor",
                 },
                 {
