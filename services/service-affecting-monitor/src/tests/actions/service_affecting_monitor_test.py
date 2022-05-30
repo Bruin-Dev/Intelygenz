@@ -3953,7 +3953,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
         service_affecting_monitor._logger.error.assert_called_once_with(
-            f'Reminder email of edge {serial_number} could not be appended to ticket {ticket_id}!'
+            f'Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!'
         )
 
     @pytest.mark.asyncio

@@ -587,7 +587,7 @@ class OutageMonitor:
                             )
                             if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be sent for ticket'
                                     f' {ticket_id}!'
                                 )
                             else:
@@ -686,7 +686,7 @@ class OutageMonitor:
                             )
                             if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be sent for ticket'
                                     f' {ticket_id}!'
                                 )
                             else:
@@ -744,7 +744,7 @@ class OutageMonitor:
                             )
                             if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be sent for ticket'
                                     f' {ticket_id}!'
                                 )
                             else:
@@ -796,7 +796,7 @@ class OutageMonitor:
                             )
                             if email_response['status'] not in range(200, 300):
                                 self._logger.error(
-                                    f'Reminder email of edge {serial_number} could not be appended to ticket'
+                                    f'Reminder email of edge {serial_number} could not be sent for ticket'
                                     f' {ticket_id}!'
                                 )
                             else:
@@ -1431,7 +1431,7 @@ class OutageMonitor:
         )
         if email_response['status'] not in range(200, 300):
             self._logger.error(
-                f'Reminder email of edge {service_number} could not be appended to ticket'
+                f'Reminder email of edge {service_number} could not be sent for ticket'
                 f' {ticket_id}!'
             )
             return

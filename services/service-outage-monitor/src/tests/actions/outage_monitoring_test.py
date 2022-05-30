@@ -11857,7 +11857,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         outage_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
         outage_monitor._logger.error.assert_called_once_with(
-            f'Reminder email of edge {serial_number} could not be appended to ticket'
+            f'Reminder email of edge {serial_number} could not be sent for ticket'
             f' {ticket_id}!'
         )
 
