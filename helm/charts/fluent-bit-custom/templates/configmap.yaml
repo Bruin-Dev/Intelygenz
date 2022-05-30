@@ -283,10 +283,31 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
-        Match               kube.var.log.containers.tnba-monitor*
+        Match               kube.var.log.containers.tnba-mettel-velocloud-net*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     tnba-monitor
+        log_stream_name     tnba-mettel-velocloud-net
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.tnba-metvco02-mettel-net*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     tnba-metvco02-mettel-net
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.tnba-metvco03-mettel-net*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     tnba-metvco03-mettel-net
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
+        Match               kube.var.log.containers.tnba-metvco04-mettel-net*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     tnba-metvco04-mettel-net
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
