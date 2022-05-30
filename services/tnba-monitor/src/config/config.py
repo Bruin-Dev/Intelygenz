@@ -18,6 +18,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+VELOCLOUD_HOST = os.environ['VELOCLOUD_HOST']
+
 PRODUCT_CATEGORY = os.environ['MONITORED_PRODUCT_CATEGORY']
 
 IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ['IPA_SYSTEM_USERNAME_IN_BRUIN']
@@ -29,8 +31,7 @@ MONITOR_CONFIG = {
     'blacklisted_edges': json.loads(os.environ['BLACKLISTED_EDGES']),
     'semaphore': 1,
     'velo_filter': {
-        host: []
-        for host in json.loads(os.environ['MONITORED_VELOCLOUD_HOSTS'])
+        VELOCLOUD_HOST: []
     },
     'service_affecting': {
         'metrics_lookup_interval_minutes': int(os.environ['SERVICE_AFFECTING__AUTORESOLVE_LOOKUP_INTERVAL']) // 60,

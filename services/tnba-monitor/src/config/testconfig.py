@@ -17,6 +17,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+VELOCLOUD_HOST = 'some-host'
+
 PRODUCT_CATEGORY = 'SD-WAN'
 
 IPA_SYSTEM_USERNAME_IN_BRUIN = 'Intelygenz Ai'
@@ -28,7 +30,7 @@ MONITOR_CONFIG = {
     ],
     'semaphore': 10,
     'velo_filter': {
-        "some-host": [],
+        VELOCLOUD_HOST: [],
     },
     'tnba_notes_age_for_new_appends_in_minutes': 30,
     'last_outage_seconds': 60 * 60,
