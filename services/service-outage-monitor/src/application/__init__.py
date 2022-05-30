@@ -26,10 +26,19 @@ class ChangeTicketSeverityStatus(Enum):
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 AUTORESOLVE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving detail for serial")
-REMINDER_NOTE_REGEX = re.compile(r"^#\*MetTel's IPA\*#\nClient Reminder", re.DOTALL | re.MULTILINE)
+DIGI_NOTE_REGEX = re.compile(r"^#\*MetTel's IPA\*#\nOffline DiGi interface .*\nInterface: (?P<interface>\w+)")
+REMINDER_NOTE_REGEX = re.compile(r"^#\*MetTel's IPA\*#\nClient Reminder")
 
 OUTAGES_DISJUNCTION_FOR_REGEX = '|'.join(re.escape(outage_type.value) for outage_type in Outages)
 OUTAGE_TYPE_REGEX = re.compile(rf'Outage Type: (?P<outage_type>{OUTAGES_DISJUNCTION_FOR_REGEX})')
+
+LINK_INFO_REGEX = re.compile(
+    rf'Interface (?P<interface>\w+)\n'
+    rf'Interface \w+ Label: (?P<label>.+)\n'
+    rf'Interface \w+ IP Address: (?P<ip>.+)\n'
+    rf'Interface \w+ Type: (Unknown|(?P<mode>Public|Private) (?P<type>Wired|Wireless))\n'
+    rf'Interface \w+ Status: (?P<status>.+)\n'
+)
 
 EVENT_INTERFACE_NAME_REGEX = re.compile(
     r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'

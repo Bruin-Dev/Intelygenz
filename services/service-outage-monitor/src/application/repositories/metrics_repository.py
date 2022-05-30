@@ -1,9 +1,10 @@
 from prometheus_client import Counter
 
-COMMON_LABELS = ['feature', 'system', 'topic', 'client', 'host', 'outage_type', 'severity']
-CREATE_LABELS = ['has_digi', 'has_byob', 'link_types']
-REOPEN_LABELS = ['has_digi', 'has_byob', 'link_types']
-FORWARD_LABELS = ['has_digi', 'has_byob', 'link_types', 'target_queue']
+COMMON_LABELS = ['feature', 'system', 'topic', 'client', 'host', 'outage_type', 'severity', 'has_digi', 'has_byob',
+                 'link_types']
+CREATE_LABELS = []
+REOPEN_LABELS = []
+FORWARD_LABELS = ['target_queue']
 AUTORESOLVE_LABELS = []
 
 
@@ -38,7 +39,7 @@ class MetricsRepository:
         if not link_types:
             return None
         elif len(link_types) == 1:
-            return link_types[0].title()
+            return link_types[0].capitalize()
         else:
             return 'Both'
 
@@ -60,7 +61,8 @@ class MetricsRepository:
         labels = {'client': client, 'link_types': link_types, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
-    def increment_tasks_autoresolved(self, client, **labels):
+    def increment_tasks_autoresolved(self, client, link_types, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_types = self._get_link_types_label(link_types)
+        labels = {'client': client, 'link_types': link_types, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()

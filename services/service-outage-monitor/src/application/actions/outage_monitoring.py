@@ -19,7 +19,8 @@ from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application import Outages, ForwardQueues, ChangeTicketSeverityStatus
-from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, OUTAGE_TYPE_REGEX
+from application import TRIAGE_NOTE_REGEX, REOPEN_NOTE_REGEX, REMINDER_NOTE_REGEX, DIGI_NOTE_REGEX
+from application import OUTAGE_TYPE_REGEX, LINK_INFO_REGEX
 
 
 class OutageMonitor:
@@ -421,7 +422,11 @@ class OutageMonitor:
                 return
 
             last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+            triage_note = self._get_triage_or_reopen_note(last_cycle_notes)
             outage_type = self._get_outage_type_from_ticket_notes(last_cycle_notes)
+            has_faulty_digi_link = self._get_has_faulty_digi_link_from_ticket_notes(last_cycle_notes, triage_note)
+            has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
+            faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
 
             self._logger.info(
                 f'Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge '
@@ -439,7 +444,8 @@ class OutageMonitor:
             await self._notify_successful_autoresolve(outage_ticket_id)
 
             self._metrics_repository.increment_tasks_autoresolved(
-                client=client_name, outage_type=outage_type, severity=outage_ticket_severity
+                client=client_name, outage_type=outage_type, severity=outage_ticket_severity,
+                has_digi=has_faulty_digi_link, has_byob=has_faulty_byob_link, link_types=faulty_link_types
             )
             self._logger.info(
                 f'Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} linked to '
@@ -1369,12 +1375,75 @@ class OutageMonitor:
         latest_reopen_position = ticket_notes.index(latest_reopen)
         return ticket_notes[latest_reopen_position:]
 
+    def _get_triage_or_reopen_note(self, ticket_notes: List[dict]) -> Optional[dict]:
+        return self._utils_repository.get_first_element_matching(
+            ticket_notes,
+            lambda note: TRIAGE_NOTE_REGEX.match(note['noteValue']) or REOPEN_NOTE_REGEX.match(note['noteValue'])
+        )
+
     @staticmethod
     def _get_outage_type_from_ticket_notes(ticket_notes: List[dict]) -> Optional[str]:
         for note in ticket_notes:
             match = OUTAGE_TYPE_REGEX.search(note['noteValue'])
             if match:
                 return match.group('outage_type')
+
+    def _get_has_faulty_digi_link_from_ticket_notes(self, ticket_notes: List[dict],
+                                                    triage_note: Optional[dict]) -> Optional[bool]:
+        if not triage_note:
+            return None
+
+        digi_interfaces = set()
+
+        for note in ticket_notes:
+            match = DIGI_NOTE_REGEX.search(note['noteValue'])
+            if match:
+                interface = match.group('interface')
+                digi_interfaces.add(interface)
+
+        matches = LINK_INFO_REGEX.finditer(triage_note['noteValue'])
+
+        for match in matches:
+            link_interface = match.group('interface')
+            link_status = match.group('status')
+
+            if self._outage_repository.is_faulty_link(link_status):
+                if link_interface in digi_interfaces:
+                    return True
+
+        return False
+
+    def _get_has_faulty_byob_link_from_triage_note(self, triage_note: Optional[dict]) -> Optional[bool]:
+        if not triage_note:
+            return None
+
+        matches = LINK_INFO_REGEX.finditer(triage_note['noteValue'])
+
+        for match in matches:
+            link_label = match.group('label')
+            link_status = match.group('status')
+
+            if self._outage_repository.is_faulty_link(link_status):
+                if self._is_link_label_black_listed_from_hnoc(link_label):
+                    return True
+
+        return False
+
+    def _get_faulty_link_types_from_triage_note(self, triage_note: Optional[dict]) -> List[str]:
+        if not triage_note:
+            return []
+
+        link_types = set()
+        matches = LINK_INFO_REGEX.finditer(triage_note['noteValue'])
+
+        for match in matches:
+            link_type = match.group('type')
+            link_status = match.group('status')
+
+            if self._outage_repository.is_faulty_link(link_status):
+                link_types.add(link_type)
+
+        return list(link_types)
 
     def _has_last_event_happened_recently(self, ticket_notes: list, documentation_cycle_start_date: str,
                                           max_seconds_since_last_event: int, note_regex: Pattern[str]) -> bool:
