@@ -588,7 +588,7 @@ class TNBAMonitor:
 
                 if autoresolve_status is self.AutoresolveTicketDetailStatus.SUCCESS:
                     self._metrics_repository.increment_tasks_autoresolved(
-                        host=host, client=client_name, topic=ticket_topic, severity=ticket_severity
+                        client=client_name, topic=ticket_topic, severity=ticket_severity
                     )
                     await self._t7_repository.post_live_automation_metrics(
                         ticket_id, serial_number, automated_successfully=True

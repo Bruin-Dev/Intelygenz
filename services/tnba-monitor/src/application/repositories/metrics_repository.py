@@ -13,6 +13,7 @@ class MetricsRepository:
         self._STATIC_LABELS = {
             'feature': 'TNBA Monitor',
             'system': 'VeloCloud',
+            'host': self._config.VELOCLOUD_HOST,
         }
 
     def _get_client_label(self, client):
