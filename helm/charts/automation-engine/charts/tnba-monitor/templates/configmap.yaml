@@ -1,12 +1,17 @@
+{{- range $index, $host := .Values.config.monitored_velocloud_hosts }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "tnba-monitor.configmapName" . }}
+  name: "{{ include "tnba-monitor.fullname" $ }}-{{ . | replace "." "-" }}-configmap"
   labels:
-    {{- include "tnba-monitor.labels" . | nindent 4 }}
+    {{- include "tnba-monitor.labels" $ | nindent 4 }}
+    velocloud_host: {{ $host | quote }}
   annotations:
     reloader.stakater.com/match: "true"
 data:
-  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
-  ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  PAPERTRAIL_PREFIX: "{{ include "tnba-monitor.fullname" . }}-{{ .Values.image.tag }}"
+  CURRENT_ENVIRONMENT: {{ $.Values.global.current_environment | quote }}
+  ENVIRONMENT_NAME: {{ $.Values.global.environment | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "tnba-monitor.fullname" $ }}-{{ . | replace "." "-" }}-{{ $.Values.image.tag }}"
+  VELOCLOUD_HOST: {{ $host }}
+{{- end }}

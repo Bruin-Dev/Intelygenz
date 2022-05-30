@@ -1395,6 +1395,8 @@ tnba-monitor:
   # -- Number of replicas of tnba-monitor module
   replicaCount: 1
   config:
+    # -- VeloCloud hosts whose edges will be monitored
+    monitored_velocloud_hosts: []
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:

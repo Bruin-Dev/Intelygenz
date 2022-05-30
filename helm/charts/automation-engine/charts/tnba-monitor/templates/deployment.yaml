@@ -1,101 +1,107 @@
+{{- range $index, $host := .Values.config.monitored_velocloud_hosts }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "tnba-monitor.fullname" . }}
+  name: "{{ include "tnba-monitor.fullname" $ }}-{{ $host | replace "." "-" }}"
   labels:
-    {{- include "tnba-monitor.labels" . | nindent 4 }}
+    {{- include "tnba-monitor.labels" $ | nindent 4 }}
+    velocloud_host: {{ $host | quote }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  {{- if not $.Values.autoscaling.enabled }}
+  replicas: {{ $.Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "tnba-monitor.selectorLabels" . | nindent 6 }}
+      {{- include "tnba-monitor.selectorLabels" $ | nindent 6 }}
+      velocloud_host: {{ $host | quote }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "tnba-monitor.labels" . | nindent 8 }}
+        {{- include "tnba-monitor.labels" $ | nindent 8 }}
+        velocloud_host: {{ $host | quote }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
       priorityClassName: medium-priority
       initContainers:
-        {{- if .Values.config.capabilities_enabled.bruin_bridge }}
+        {{- if $.Values.config.capabilities_enabled.bruin_bridge }}
         - name: wait-bruin-bridge
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://bruin-bridge:5000/_health; do echo waiting for bruin-bridge; sleep 2; done']
         {{- end }}
-        {{- if .Values.config.capabilities_enabled.notifier }}
+        {{- if $.Values.config.capabilities_enabled.notifier }}
         - name: wait-notifier
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']
         {{- end }}
-        {{- if .Values.config.capabilities_enabled.t7_bridge }}
+        {{- if $.Values.config.capabilities_enabled.t7_bridge }}
         - name: wait-t7-bridge
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://t7-bridge:5000/_health; do echo waiting for t7-bridge; sleep 2; done']
         {{- end }}
-        {{- if  .Values.config.capabilities_enabled.velocloud_bridge }}
+        {{- if  $.Values.config.capabilities_enabled.velocloud_bridge }}
         - name: wait-velocloud-bridge
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://velocloud-bridge:5000/_health; do echo waiting for velocloud-bridge; sleep 2; done']
         {{- end }}
-        {{- if .Values.config.capabilities_enabled.customer_cache }}
+        {{- if $.Values.config.capabilities_enabled.customer_cache }}
         - name: wait-customer-cache
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://customer-cache:5000/_health; do echo waiting for customer-cache; sleep 2; done']
         {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ $.Chart.Name }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default "automation-master-latest" }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "tnba-monitor.configmapName" . }}
+                name: "{{ include "tnba-monitor.fullname" $ }}-{{ $host | replace "." "-" }}-configmap"
             - secretRef:
-                name: {{ include "tnba-monitor.secretName" . }}
+                name: "{{ include "tnba-monitor.fullname" $ }}-{{ $host | replace "." "-" }}-secret"
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ $.Values.service.port }}
               protocol: TCP
-            {{- if .Values.config.metrics.enabled }}
-            - name: {{ .Values.config.metrics.svc.name }}
-              containerPort: {{ .Values.config.metrics.svc.port }}
+            {{- if $.Values.config.metrics.enabled }}
+            - name: {{ $.Values.config.metrics.svc.name }}
+              containerPort: {{ $.Values.config.metrics.svc.port }}
               protocol: TCP
             {{- end }}
           livenessProbe:
             httpGet:
               path: /_health
-              port: {{ .Values.service.port }}
+              port: {{ $.Values.service.port }}
             initialDelaySeconds: 5
             periodSeconds: 60
             timeoutSeconds: 10
           readinessProbe:
             httpGet:
               path: /_health
-              port: {{ .Values.service.port }}
+              port: {{ $.Values.service.port }}
             initialDelaySeconds: 5
             periodSeconds: 60
             timeoutSeconds: 10
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+            {{- toYaml $.Values.resources | nindent 12 }}
+      {{- with $.Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml $ | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- with $.Values.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml $ | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with $.Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml $ | nindent 8 }}
       {{- end }}
-      {{- if eq .Values.global.mode "local" }}
+      {{- if eq $.Values.global.mode "local" }}
       imagePullSecrets:
-        - name: {{ .Values.global.ecr_registry.name }}
+        - name: {{ $.Values.global.ecr_registry.name }}
       {{- end }}
+{{- end }}

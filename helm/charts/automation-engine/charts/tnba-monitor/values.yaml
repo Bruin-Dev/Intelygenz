@@ -41,6 +41,8 @@ global:
     name: "ecr-registry"
 
 config:
+  # -- VeloCloud hosts whose edges will be monitored
+  monitored_velocloud_hosts: ""
   capabilities_enabled:
     # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the

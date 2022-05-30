@@ -1288,6 +1288,8 @@ tnba-monitor:
   enabled: ${TNBA_MONITOR_ENABLED}
   replicaCount: ${TNBA_MONITOR_DESIRED_TASKS}
   config:
+    # -- VeloCloud hosts whose edges will be monitored
+    monitored_velocloud_hosts: ref+awsssm://automation-engine/${CURRENT_ENVIRONMENT_SHORT}/tnba-monitor/monitored-velocloud-hosts
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
     metrics:
