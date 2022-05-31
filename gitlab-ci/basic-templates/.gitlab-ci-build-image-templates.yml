@@ -14,6 +14,8 @@
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - pip3 install -r ci-utils/ecr/requirements.txt
   script:
+    # GET COSIGNS KEYS
+    - aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-container-cosign*"
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION}
       --build-arg REPOSITORY_URL="${REPOSITORY_URL}"
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
@@ -21,6 +23,12 @@
       -f services/${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+    # Sign the container and store the signature in the registry (requires COSIGN_PASSWORD variable)
+    - cosign sign --key automation-engine-container-cosign-private.key ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+    - cosign sign --key automation-engine-container-cosign-private.key ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+    # Confirm signature
+    - cosign triangulate ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
+    - cosign triangulate ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
     - >
       if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then 
         python3 ci-utils/ecr/ecr_images_util.py -e ${ENVIRONMENT_ID} -r ${MODULE_NAME} -d -o

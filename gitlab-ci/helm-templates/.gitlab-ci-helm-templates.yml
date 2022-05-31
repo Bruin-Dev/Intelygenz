@@ -9,10 +9,16 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
+    # GnuPG KEYS IMPORT TO CHECK CHART INTEGRITY
+    - aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-chart-gpg*"
+    - gpg --import automation-engine-chart-gpg-public.key
+    - gpg --import --batch --pinentry-mode=loopback --yes --passphrase "${GPG_KEY_PASSPHRASE}" automation-engine-chart-gpg-private.key
+    - gpg --export >~/.gnupg/pubring.gpg && gpg --batch --pinentry-mode=loopback --yes --passphrase "${GPG_KEY_PASSPHRASE}" --export-secret-keys >~/.gnupg/secring.gpg
+    - echo ${GPG_KEY_PASSPHRASE} > passphrase.txt
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # CREATE NAMESPACE IF IS NECESSARY
-    - kubectl create namespace ${NAMESPACE} --dry-run -o yaml | kubectl apply -f -
+    - kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
     # INITIALIZE HELM
     - python3 ci-utils/helm/add_helm_repositories.py
     - helm repo update
@@ -23,12 +29,6 @@
     # GET HELM CHART SET ATTRIBUTES
     - source ci-utils/environments/deploy_environment_vars.sh
     - export CURRENT_ENVIRONMENT_SHORT=${CURRENT_ENVIRONMENT:0:3}
-    # GET GPG PRIVATE KEYS
-    - aws s3 sync s3://mettel-automation-chartmuseum-key/ .
-    - gpg --import automation-engine-gpg-public.key
-    - gpg --import --batch --pinentry-mode=loopback --yes --passphrase "${GPG_KEY_PASSPHRASE}" automation-engine-gpg-private.key
-    - gpg --export >~/.gnupg/pubring.gpg && gpg --batch --pinentry-mode=loopback --yes --passphrase "${GPG_KEY_PASSPHRASE}" --export-secret-keys >~/.gnupg/secring.gpg
-    - echo ${GPG_KEY_PASSPHRASE} > passphrase.txt
     # DISABLE MICROSERVICES IN DEVELOPMENT
     - >
       if [ "$CURRENT_ENVIRONMENT" == "dev" ]; then

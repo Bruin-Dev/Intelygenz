@@ -61,6 +61,11 @@ variable "RELOADER_HELM_CHART_VERSION" {
   description = "Helm chart version used for reloader"
 }
 
+variable "KYVERNO_HELM_CHART_VERSION" {
+  default     = "2.3.3"
+  description = "Helm chart version used for kyverno"
+}
+
 variable "DESCHEDULER_HELM_CHART_VERSION" {
   default     = "0.22.1"
   description = "Helm chart version used for descheduler"
@@ -103,5 +108,15 @@ variable "CHARTMUSEUM_PASSWORD" {
 variable "ENABLE_FLUENT_BIT" {
   default     = "false"
   description = "If set to true, enable fluent-bit required components"
+}
+
+variable "REPOSITORY_URL" {
+  default     = ""
+  description = "Container registry"
+}
+
+variable "COSIGN_PUBLIC_KEY" {
+  default     = ""
+  description = "cosign public key to validate container images before deploy"
 }
 

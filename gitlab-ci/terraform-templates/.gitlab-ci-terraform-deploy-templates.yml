@@ -23,6 +23,7 @@
     - export TF_VAR_INGRESS_NGINX_HELM_CHART_VERSION=${INGRESS_NGINX_CHART_V}
     - export TF_VAR_METRICS_SERVER_HELM_CHART_VERSION=${METRICS_SERVER_CHART_V}
     - export TF_VAR_RELOADER_HELM_CHART_VERSION=${RELOADER_CHART_V}
+    - export TF_VAR_KYVERNO_HELM_CHART_VERSION=${KYVERNO_CHART_V}
     - export TF_VAR_WHITELISTED_IPS="[${LOAD_BALANCER_WHITELIST}]"
     - export TF_VAR_WHITELISTED_IPS_OREILLY="[${LOAD_BALANCER_WHITELIST_OREILLY}]"
     - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
@@ -31,6 +32,9 @@
     - export TF_VAR_CHARTMUSEUM_PASSWORD=${CHARTMUSEUM_PASSWORD}
     - export TF_VAR_TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
     - export TF_VAR_TICKET_COLLECTOR_MONGO_PASSWORD=${TICKET_COLLECTOR_MONGO_PASSWORD}
+    - export TF_VAR_REPOSITORY_URL=${REPOSITORY_URL}
+    - aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-container-cosign*"
+    - export TF_VAR_COSIGN_PUBLIC_KEY=$(cat automation-engine-container-cosign-public.key)
     - if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then export TF_VAR_ENABLE_FLUENT_BIT=true; fi
     - >
       for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
@@ -106,8 +110,12 @@
           )
       done
     - cd ${CI_PROJECT_DIR}
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INSTALL PRIORITY CLASS
+    - kubectl apply -f helm/priority-class
     # INSTALL NECESSARY PYTHON LIBRARIES
-    - pip3 install -r ci-utils/eks/iam-to-eks-roles/requirements.txt --use-feature=2020-resolver
+    - pip3 install -r ci-utils/eks/iam-to-eks-roles/requirements.txt
     # ASSIGN RBAC PERMISSION IN EKS FROM IAM USER ROLES
     - >
       for i in $(echo $IAM_TO_EKS_ROLES | tr ", " "\n"); do
@@ -115,10 +123,6 @@
           python3 ci-utils/eks/iam-to-eks-roles/app.py -p mettel-automation --project-env-tag ${TF_VAR_CURRENT_ENVIRONMENT:0:3} --project-role-tag ${i}
         )
       done
-    # INSTALL KUBE CONFIG
-    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
-    # INSTALL PRIORITY CLASS
-    - kubectl apply -f helm/priority-class
     # INITIALIZE HELM
     - python3 ci-utils/helm/add_helm_repositories.py
     - helm repo update

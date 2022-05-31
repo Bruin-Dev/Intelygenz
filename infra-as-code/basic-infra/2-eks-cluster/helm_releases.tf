@@ -249,3 +249,21 @@ resource "helm_release" "reloader" {
       data.aws_eks_cluster.cluster
    ]
 }
+
+resource "helm_release" "kyverno" {
+  name          = "kyverno"
+
+  repository    = "https://kyverno.github.io/kyverno/"
+  chart         = "kyverno"
+
+  version       = var.KYVERNO_HELM_CHART_VERSION
+  namespace     = "kube-system"
+  force_update  = false
+  recreate_pods = false
+  wait          = true
+
+  depends_on = [
+      module.mettel-automation-eks-cluster,
+      data.aws_eks_cluster_auth.cluster,
+   ]
+}
