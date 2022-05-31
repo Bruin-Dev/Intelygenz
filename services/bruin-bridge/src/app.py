@@ -34,6 +34,7 @@ from application.actions.post_notification_email_milestone import PostNotificati
 from application.actions.post_outage_ticket import PostOutageTicket
 from application.actions.post_ticket import PostTicket
 from application.actions.resolve_ticket import ResolveTicket
+from application.actions.subscribe_user import SubscribeUser
 from application.actions.unpause_ticket import UnpauseTicket
 from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
@@ -56,13 +57,13 @@ class Container:
             endpoints_usage_repository=self._endpoints_usage_repository,
         )
 
+        # Build up singleton dependencies
         self._bruin_client = BruinClient(self._logger, config)
         self._bruin_repository = BruinRepository(self._logger, config, self._bruin_client)
-
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
-
         self._publisher = NATSClient(config, logger=self._logger)
 
+        # Build NATS clients
         self._subscriber_tickets = NATSClient(config, logger=self._logger)
         self._subscriber_tickets_basic_info = NATSClient(config, logger=self._logger)
         self._subscriber_single_ticket_basic_info = NATSClient(config, logger=self._logger)
@@ -92,7 +93,9 @@ class Container:
         self._subscriber_link_ticket_to_email = NATSClient(config, logger=self._logger)
         self._subscriber_post_notification_email_milestone = NATSClient(config, self._logger)
         self._subscriber_get_asset_topics = NATSClient(config, self._logger)
+        self._subscriber_subscribe_user = NATSClient(config, self._logger)
 
+        # Add NATS clients as event bus consumers
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
         self._event_bus.add_consumer(self._subscriber_tickets_basic_info, consumer_name="tickets_basic_info")
@@ -135,13 +138,12 @@ class Container:
             self._subscriber_post_notification_email_milestone,
             consumer_name='post_notification_email_milestone'
         )
-        self._event_bus.add_consumer(
-            self._subscriber_get_asset_topics,
-            consumer_name='get_asset_topics'
-        )
+        self._event_bus.add_consumer(self._subscriber_get_asset_topics, consumer_name='get_asset_topics')
+        self._event_bus.add_consumer(self._subscriber_subscribe_user, consumer_name='subscribe_user')
 
         self._event_bus.set_producer(self._publisher)
 
+        # Instance each action
         self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus,
                                       self._bruin_repository)
         self._get_tickets_basic_info = GetTicketsBasicInfo(self._logger, self._event_bus, self._bruin_repository)
@@ -177,12 +179,10 @@ class Container:
             self._event_bus,
             self._bruin_repository
         )
-        self._get_asset_topics = GetAssetTopics(
-            self._logger,
-            self._event_bus,
-            self._bruin_repository
-        )
+        self._get_asset_topics = GetAssetTopics(self._logger, self._event_bus, self._bruin_repository)
+        self._subscribe_user = SubscribeUser(self._logger, self._event_bus, self._bruin_client)
 
+        # Wrap the actions
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
         self._action_get_tickets_basic_info = ActionWrapper(self._get_tickets_basic_info, "get_tickets_basic_info",
@@ -252,6 +252,12 @@ class Container:
         self._action_get_asset_topics = ActionWrapper(
             self._get_asset_topics,
             'get_asset_topics',
+            is_async=True,
+            logger=self._logger
+        )
+        self._action_subscribe_user = ActionWrapper(
+            self._subscribe_user,
+            'subscribe_user',
             is_async=True,
             logger=self._logger
         )
@@ -363,6 +369,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name='get_asset_topics',
                                                  topic='bruin.get.asset.topics',
                                                  action_wrapper=self._action_get_asset_topics,
+                                                 queue='bruin_bridge')
+        await self._event_bus.subscribe_consumer(consumer_name='subscribe_user',
+                                                 topic='bruin.subscribe.user',
+                                                 action_wrapper=self._action_subscribe_user,
                                                  queue='bruin_bridge')
 
     async def start_server(self):
