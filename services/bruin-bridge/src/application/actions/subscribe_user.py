@@ -59,7 +59,7 @@ class MessageBody(BaseModel):
 
 
 class PostBodyUser(BaseModel):
-    email: str
+    email: str = Field(repr=False)
 
 
 class PostBody(BruinPostBody):
