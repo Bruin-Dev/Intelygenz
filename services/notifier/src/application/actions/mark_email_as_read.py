@@ -18,7 +18,7 @@ class MarkEmailAsRead:
             return
         payload = msg["body"]
         if not all(key in payload.keys() for key in ("msg_uid", "email_account")):
-            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot mark email as read using {json.dumps(msg)}. JSON malformed")
 
             response["body"] = (
                 'You must include "msg_uid" and "email_account" ' 'in the "body" field of the response request'

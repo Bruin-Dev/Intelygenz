@@ -18,7 +18,7 @@ class GetEmails:
             return
         payload = msg["body"]
         if not all(key in payload.keys() for key in ("email_account", "email_filter")):
-            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot get unread emails with {json.dumps(msg)}. JSON malformed")
 
             response["body"] = (
                 'You must include "email_account" and "email_filter" ' 'in the "body" field of the response request'
