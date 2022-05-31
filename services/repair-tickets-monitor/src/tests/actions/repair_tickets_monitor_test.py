@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, ANY
 
 import asyncio
 import html2text
@@ -13,6 +13,8 @@ from application.domain.asset import Topic
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput, CreateTicketsOutput
 from application.domain.ticket import Ticket, TicketStatus
 from application.exceptions import ResponseException
+from application.rpc import RpcError
+from application.rpc.upsert_outage_ticket_rpc import UpsertedTicket, UpsertedStatus
 from config import testconfig as config
 
 
@@ -136,6 +138,8 @@ class TestRepairTicketsMonitor:
             bruin_repository,
             new_tagged_emails_repository,
             repair_ticket_kre_repository,
+            CoroutineMock(),
+            CoroutineMock(),
             CoroutineMock(),
             CoroutineMock(),
         )
@@ -1097,83 +1101,59 @@ class TestRepairTicketsMonitor:
     @pytest.mark.asyncio
     async def _create_tickets_create_test(self, repair_tickets_monitor, email_data):
         # given
-        service_numbers_site_map = {"1": "site_1", "6": "site_1"}
-        rpc_response_200 = {
-            "status": 200,
-            # ticket id
-            "body": 12345,
-        }
-        expected_response = CreateTicketsOutput(
-            tickets_created=[
-                TicketOutput(site_id="site_1", ticket_id=12345, service_numbers=["1", "6"])
-            ],
-        )
+        site_id = "any_site_id"
+        ticket_id = "any_ticket_id"
+        upserted_ticket = UpsertedTicket(status=UpsertedStatus.created, ticket_id=ticket_id)
+        repair_tickets_monitor.upsert_outage_ticket_rpc = CoroutineMock(return_value=upserted_ticket)
+        repair_tickets_monitor.subscribe_user_rpc = CoroutineMock()
 
-        with patch.object(
-            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
-        ) as rpc_mock:
-            rpc_mock.return_value.set_result(rpc_response_200)
-            # when
-            response = await repair_tickets_monitor._create_tickets(email_data, service_numbers_site_map)
+        # when
+        response = await repair_tickets_monitor._create_tickets(email_data, {"1": site_id, "6": site_id})
 
         # then
-        assert response == expected_response
+        repair_tickets_monitor.subscribe_user_rpc.assert_awaited_once_with(ticket_id=ticket_id, user_email=ANY)
+        assert response == CreateTicketsOutput(
+            tickets_created=[
+                TicketOutput(site_id=site_id, ticket_id=ticket_id, service_numbers=["1", "6"])
+            ],
+        )
 
     @pytest.mark.asyncio
     async def _create_tickets_update_test(self, repair_tickets_monitor, email_data):
         # given
-        service_numbers_site_map = {"1": "site_1", "6": "site_1"}
-        rpc_response_200 = {
-            "status": 409,
-            # ticket id
-            "body": 12345,
-        }
-        expected_response = CreateTicketsOutput(
-            tickets_updated=[
-                TicketOutput(
-                    site_id="site_1",
-                    ticket_id=12345,
-                    service_numbers=["1", "6"],
-                    reason="update_with_asset_found"
-                )
-            ],
-        )
+        site_id = "any_site_id"
+        ticket_id = "any_ticket_id"
+        upserted_ticket = UpsertedTicket(status=UpsertedStatus.updated, ticket_id=ticket_id)
+        repair_tickets_monitor.upsert_outage_ticket_rpc = CoroutineMock(return_value=upserted_ticket)
 
-        with patch.object(
-            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
-        ) as rpc_mock:
-            rpc_mock.return_value.set_result(rpc_response_200)
-            # when
-            response = await repair_tickets_monitor._create_tickets(email_data, service_numbers_site_map)
+        # when
+        response = await repair_tickets_monitor._create_tickets(email_data, {"1": site_id, "6": site_id})
 
         # then
-        assert response == expected_response
+        repair_tickets_monitor.subscribe_user_rpc.assert_awaited_once_with(ticket_id=ticket_id, user_email=ANY)
+        assert response == CreateTicketsOutput(
+            tickets_updated=[
+                TicketOutput(site_id=site_id,
+                             ticket_id=ticket_id,
+                             service_numbers=["1", "6"],
+                             reason="update_with_asset_found")
+            ],
+        )
 
     @pytest.mark.asyncio
     async def _create_tickets_error_test(self, repair_tickets_monitor, email_data):
-        # given
-        service_numbers_site_map = {"1": "site_1", "6": "site_1"}
-        rpc_response_500 = {
-            "status": 500,
-            # ticket id
-            "body": "An error very ugly",
-        }
-        expected_response = CreateTicketsOutput(
+        repair_tickets_monitor.upsert_outage_ticket_rpc = CoroutineMock(side_effect=RpcError)
+
+        response = await repair_tickets_monitor._create_tickets(email_data, {"1": "site_1", "6": "site_1"})
+
+        repair_tickets_monitor.subscribe_user_rpc.assert_not_awaited()
+        assert response == CreateTicketsOutput(
             tickets_cannot_be_created=[
-                TicketOutput(site_id="site_1", service_numbers=["1", "6"],
+                TicketOutput(site_id="site_1",
+                             service_numbers=["1", "6"],
                              reason="Error while creating bruin ticket")
             ],
         )
-
-        with patch.object(
-            repair_tickets_monitor._bruin_repository._event_bus, "rpc_request", return_value=asyncio.Future()
-        ) as rpc_mock:
-            rpc_mock.return_value.set_result(rpc_response_500)
-            # when
-            response = await repair_tickets_monitor._create_tickets(email_data, service_numbers_site_map)
-
-        # then
-        assert response == expected_response
 
     @pytest.mark.asyncio
     async def tickets_only_not_actionable_inferences_are_properly_handled_test(

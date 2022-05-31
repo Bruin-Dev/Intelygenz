@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 from datetime import datetime
+from logging import Logger
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
 import asyncio
@@ -18,6 +19,8 @@ from application.exceptions import ResponseException
 from application.rpc import RpcError
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
+from application.rpc.subscribe_user_rpc import SubscribeUserRpc
+from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc, UpsertedStatus
 
 
 def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str, str]) -> List[TicketOutput]:
@@ -40,7 +43,7 @@ class RepairTicketsMonitor:
     def __init__(
         self,
         event_bus,
-        logger,
+        logger: Logger,
         scheduler,
         config,
         bruin_repository,
@@ -48,6 +51,8 @@ class RepairTicketsMonitor:
         repair_tickets_kre_repository,
         append_note_to_ticket_rpc: AppendNoteToTicketRpc,
         get_asset_topics_rpc: GetAssetTopicsRpc,
+        upsert_outage_ticket_rpc: UpsertOutageTicketRpc,
+        subscribe_user_rpc: SubscribeUserRpc
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -59,6 +64,8 @@ class RepairTicketsMonitor:
 
         self.append_note_to_ticket_rpc = append_note_to_ticket_rpc
         self.get_asset_topics_rpc = get_asset_topics_rpc
+        self.upsert_outage_ticket_rpc = upsert_outage_ticket_rpc
+        self.subscribe_user_rpc = subscribe_user_rpc
 
         self._semaphore = asyncio.BoundedSemaphore(
             self._config.MONITOR_CONFIG["semaphores"]["repair_tickets_concurrent"]
@@ -357,6 +364,7 @@ class RepairTicketsMonitor:
                 is_actionable,
                 inference_data.get("predicted_class"),
             )
+
             if is_actionable:
                 create_tickets_output = await self._create_tickets(
                     email_data,
@@ -537,76 +545,51 @@ class RepairTicketsMonitor:
             site_id_sn_buckets[site_id].append(service_number)
 
         for site_id, service_numbers in site_id_sn_buckets.items():
-            ticket_creation_response = await self._bruin_repository.create_outage_ticket(
-                client_id, service_numbers, email_from_address
-            )
-            ticket_creation_response_body = ticket_creation_response["body"]
-            ticket_creation_response_status = ticket_creation_response["status"]
-            self._logger.info(
-                "email_id=%s Got response %s, with items: %s",
-                email_id,
-                ticket_creation_response_status,
-                ticket_creation_response_body,
-            )
+            asset_ids = [AssetId(client_id=client_id, site_id=site_id, service_number=service_number)
+                         for service_number in service_numbers]
 
-            error_response = False
-            ticket_updated_flag = False
-
-            if ticket_creation_response_status == 200:
-                ticket_id = ticket_creation_response_body
-                self._logger.info("email_id=%s Successfully created outage ticket %s", email_id, ticket_id)
-                created_ticket = TicketOutput(ticket_id=ticket_id, site_id=site_id, service_numbers=service_numbers)
-                create_tickets_output.tickets_created.append(created_ticket)
-
-            elif ticket_creation_response_status in bruin_updated_reasons_dict.keys():
-                ticket_id = ticket_creation_response_body
-                update_reason = bruin_updated_reasons_dict[ticket_creation_response_status]
-                self._logger.info(
-                    "email_id=%s Ticket already present bruin response %s reason: %s",
-                    email_id,
-                    ticket_creation_response_status,
-                    update_reason,
-                )
-
-                updated_ticket = TicketOutput(
-                    ticket_id=ticket_id,
-                    site_id=str(site_id),
-                    service_numbers=service_numbers,
-                    reason="update_with_asset_found"
-                )
-                create_tickets_output.tickets_updated.append(updated_ticket)
-                ticket_updated_flag = True
-            else:
-                self._logger.error(
-                    "email_id=%s Got error %s, %s while creating ticket for %s and client %s",
-                    email_id,
-                    ticket_creation_response_status,
-                    ticket_creation_response_body,
-                    service_numbers,
-                    client_id,
-                )
-                error_response = True
-                ticket_cannot_be_created = TicketOutput(
+            try:
+                result = await self.upsert_outage_ticket_rpc(asset_ids=asset_ids, contact_email=email_from_address)
+            except RpcError:
+                self._logger.exception("email_id=%s Error while creating ticket for %s and client %s",
+                                       email_id,
+                                       service_numbers,
+                                       client_id)
+                create_tickets_output.tickets_cannot_be_created.append(TicketOutput(
                     site_id=str(site_id),
                     service_numbers=service_numbers,
                     reason="Error while creating bruin ticket",
-                )
-                create_tickets_output.tickets_cannot_be_created.append(ticket_cannot_be_created)
+                ))
+                continue
 
-            if not error_response:
-                ticket_id = ticket_creation_response_body
-                notes_to_append = self._compose_bec_note_to_ticket(
-                    ticket_id=ticket_id,
-                    service_numbers=service_numbers,
-                    subject=email_subject,
-                    from_address=email_from_address,
-                    body=email_body,
-                    date=email_date,
-                    is_update_note=ticket_updated_flag,
-                )
+            if result.status == UpsertedStatus.created:
+                self._logger.info("email_id=%s Successfully created outage ticket %s", email_id, result.ticket_id)
+                create_tickets_output.tickets_created.append(
+                    TicketOutput(ticket_id=result.ticket_id,
+                                 site_id=site_id,
+                                 service_numbers=service_numbers))
 
-                await self._bruin_repository.append_notes_to_ticket(ticket_id, notes_to_append)
-                await self._bruin_repository.link_email_to_ticket(ticket_id, email_id)
+            elif result.status == UpsertedStatus.updated:
+                self._logger.info("email_id=%s Ticket already present", email_id)
+                create_tickets_output.tickets_updated.append(
+                    TicketOutput(ticket_id=result.ticket_id,
+                                 site_id=str(site_id),
+                                 service_numbers=service_numbers,
+                                 reason="update_with_asset_found"))
+
+            notes_to_append = self._compose_bec_note_to_ticket(
+                ticket_id=result.ticket_id,
+                service_numbers=service_numbers,
+                subject=email_subject,
+                from_address=email_from_address,
+                body=email_body,
+                date=email_date,
+                is_update_note=result.status == UpsertedStatus.updated,
+            )
+
+            await self._bruin_repository.append_notes_to_ticket(result.ticket_id, notes_to_append)
+            await self._bruin_repository.link_email_to_ticket(result.ticket_id, email_id)
+            await self.subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email_from_address)
 
         return create_tickets_output
 

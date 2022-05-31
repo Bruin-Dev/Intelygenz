@@ -6,6 +6,7 @@ from application.domain.asset import Topic
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.domain.ticket import Ticket, TicketStatus, Category
 from application.rpc import RpcError
+from application.rpc.upsert_outage_ticket_rpc import UpsertedTicket, UpsertedStatus
 
 
 @dataclass
@@ -19,7 +20,7 @@ class RepairTicketsMonitorScenario:
     # Integration behavior
     email_actionable: bool = True
     # Bruin POST api/Ticket/repair responses
-    post_responses: Dict[str, 'PostResponse'] = field(default_factory=dict)
+    upserted_tickets: Dict[str, UpsertedTicket] = field(default_factory=dict)
     # Bruin GET api/Ticket/topics mocks
     asset_topics: Dict[str, List[Topic]] = field(default_factory=dict)
     # append_note_to_ticket_rpc response
@@ -37,20 +38,12 @@ class RepairTicketsMonitorScenario:
     global_note_added_to: List[str] = field(default_factory=list)
 
 
-@dataclass
-class PostResponse:
-    status: int
-    body: str
+class CreatedTicket(UpsertedTicket):
+    status = UpsertedStatus.created
 
 
-@dataclass
-class CreatedResponse(PostResponse):
-    status: int = field(init=False, default=200)
-
-
-@dataclass
-class UpdatedResponse(PostResponse):
-    status: int = field(init=False, default=409)
+class UpdatedTicket(UpsertedTicket):
+    status = UpsertedStatus.updated
 
 
 def make_repair_tickets_monitor_scenarios():
@@ -75,7 +68,7 @@ def make_repair_tickets_monitor_scenarios():
 
     single_unreported_asset = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
-        post_responses={"asset_1": CreatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic]},
         email_processed=True,
         note_added_to=["site_1_ticket"],
@@ -92,7 +85,7 @@ def make_repair_tickets_monitor_scenarios():
     ))
     single_reported_asset = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
-        post_responses={"asset_1": UpdatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1": UpdatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic]},
         email_processed=True,
         note_added_to=["site_1_ticket"],
@@ -110,7 +103,7 @@ def make_repair_tickets_monitor_scenarios():
     ))
     several_related_unreported_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
-        post_responses={"asset_1,asset_2": CreatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1,asset_2": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
         note_added_to=["site_1_ticket"],
@@ -127,7 +120,7 @@ def make_repair_tickets_monitor_scenarios():
     ))
     several_related_reported_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
-        post_responses={"asset_1,asset_2": UpdatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1,asset_2": UpdatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
         note_added_to=["site_1_ticket"],
@@ -145,9 +138,9 @@ def make_repair_tickets_monitor_scenarios():
     ))
     several_unrelated_unreported_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_2"},
-        post_responses={
-            "asset_1": CreatedResponse("site_1_ticket"),
-            "asset_2": CreatedResponse("site_2_ticket"),
+        upserted_tickets={
+            "asset_1": CreatedTicket(ticket_id="site_1_ticket"),
+            "asset_2": CreatedTicket(ticket_id="site_2_ticket"),
         },
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
@@ -172,9 +165,9 @@ def make_repair_tickets_monitor_scenarios():
     ))
     several_unrelated_reported_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_2"},
-        post_responses={
-            "asset_1": UpdatedResponse("site_1_ticket"),
-            "asset_2": UpdatedResponse("site_2_ticket"),
+        upserted_tickets={
+            "asset_1": UpdatedTicket(ticket_id="site_1_ticket"),
+            "asset_2": UpdatedTicket(ticket_id="site_2_ticket"),
         },
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
         email_processed=True,
@@ -276,7 +269,7 @@ def make_repair_tickets_monitor_scenarios():
     ))
     voo_and_wireless_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
-        post_responses={"asset_1": CreatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [wireless_topic]},
         email_processed=False,
         note_added_to=["site_1_ticket"],
@@ -294,7 +287,7 @@ def make_repair_tickets_monitor_scenarios():
     ))
     voo_and_other_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
-        post_responses={"asset_1": CreatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [other_category_topic]},
         email_processed=False,
         note_added_to=["site_1_ticket"],
@@ -312,7 +305,7 @@ def make_repair_tickets_monitor_scenarios():
     ))
     voo_wireless_and_other_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1", "asset_3": "site_1"},
-        post_responses={"asset_1": UpdatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1": UpdatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [wireless_topic], "asset_3": [other_category_topic]},
         email_processed=False,
         note_added_to=["site_1_ticket"],
@@ -332,7 +325,7 @@ def make_repair_tickets_monitor_scenarios():
     several_sites_mixed_category_assets = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_2", "asset_3": "site_2"},
         asset_topics={"asset_1": [other_category_topic], "asset_2": [wireless_topic], "asset_3": [voo_topic]},
-        post_responses={"asset_3": CreatedResponse("site_2_ticket")},
+        upserted_tickets={"asset_3": CreatedTicket(ticket_id="site_2_ticket")},
         email_processed=False,
         note_added_to=["site_2_ticket"],
         email_linked_to=["site_2_ticket"],
@@ -468,7 +461,7 @@ def make_repair_tickets_monitor_scenarios():
     single_reported_asset_single_operable_ticket = (RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1"},
         tickets=[Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO")],
-        post_responses={"asset_1": CreatedResponse("site_1_ticket")},
+        upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic]},
         email_processed=True,
         note_added_to=["site_1_ticket"],
