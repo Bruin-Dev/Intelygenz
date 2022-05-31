@@ -8,10 +8,8 @@ from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 from pytest import mark, fixture, raises
 
-from application.domain.asset import AssetId
-from application.rpc import RpcLogger, RpcResponse, RpcRequest, RpcFailedError, RpcError
-from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc, RequestBody, TicketContact, UpsertedTicket, \
-    UpsertedStatus, BRUIN_UPDATED_STATUS, MULTIPLE_SITES_MSG, MULTIPLE_CLIENTS_MSG
+from application.rpc import RpcLogger, RpcResponse, RpcRequest
+from application.rpc.upsert_outage_ticket_rpc import *
 
 
 class TestUpsertOutageTicketRpc:

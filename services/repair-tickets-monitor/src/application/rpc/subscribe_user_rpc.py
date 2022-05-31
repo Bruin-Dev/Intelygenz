@@ -20,7 +20,8 @@ class SubscribeUserRpc(Rpc):
         the user couldn't be subscribed to the Ticket and won't raise any
         an Exception.
         Proxied service: POST /api/Ticket/{ticket_id}/subscribeUser
-        :raise RpcFailedError: whenever any other response other than OK, FORBIDDEN or INTERNAL_SERVER_ERROR was received
+        :raise RpcFailedError: whenever any other response other than OK,
+        FORBIDDEN or INTERNAL_SERVER_ERROR was received
         :param ticket_id: the Ticket to which subscribe the User
         :param user_email: the User being subscribed email
         :return if the User was subscribed or not
@@ -31,7 +32,7 @@ class SubscribeUserRpc(Rpc):
 
         try:
             await self.send(request)
-           
+
             logger.debug(f"__call__() [OK]")
             return True
 
