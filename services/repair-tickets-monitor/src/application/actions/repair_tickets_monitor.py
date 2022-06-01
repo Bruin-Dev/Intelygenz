@@ -530,13 +530,6 @@ class RepairTicketsMonitor:
         email_from_address = email_data["from_address"]
         email_date = email_data["date"]
 
-        bruin_updated_reasons_dict = {
-            409: "In progress ticket present. Added line to it.",
-            471: "Resolved ticket. Unresolving 'manually'.",
-            472: "Resolved ticket. Unresolved automatically.",
-            473: "Same site ticket. Unresolved and added line.",
-        }
-
         # Return data
         create_tickets_output = CreateTicketsOutput()
 
@@ -589,7 +582,10 @@ class RepairTicketsMonitor:
 
             await self._bruin_repository.append_notes_to_ticket(result.ticket_id, notes_to_append)
             await self._bruin_repository.link_email_to_ticket(result.ticket_id, email_id)
-            await self.subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email_from_address)
+            try:
+                await self.subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email_from_address)
+            except RpcError:
+                self._logger.exception("email_id=%s Error while subscribing user to ticket %s", result.ticket_id)
 
         return create_tickets_output
 
