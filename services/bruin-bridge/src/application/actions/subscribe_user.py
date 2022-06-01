@@ -7,7 +7,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from pydantic import BaseModel, ValidationError, Field
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinPostRequest, BruinPostBody
+from application.clients.bruin_session import BruinPostRequest, BruinPostBody, BruinResponse
 
 BRUIN_PATH = "/api/Ticket/{ticket_id}/subscribeUser"
 
@@ -39,7 +39,8 @@ class SubscribeUser:
         post_request = BruinPostRequest(path=path, body=body)
 
         self.logger.info(f"Subscribing user: request={body}")
-        response = await self.bruin_client._bruin_session.post(post_request)
+        # response = await self.bruin_client._bruin_session.post(post_request)
+        response = BruinResponse(status=200, body={})
 
         if response.status == HTTPStatus.UNAUTHORIZED:
             self.logger.error(f"Got 401 from Bruin. Re-logging in...")
