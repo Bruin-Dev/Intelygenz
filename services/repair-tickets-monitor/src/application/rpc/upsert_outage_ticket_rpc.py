@@ -32,7 +32,8 @@ class UpsertOutageTicketRpc(Rpc):
         client_id = client_ids.pop()
         service_numbers = {asset_id.service_number for asset_id in asset_ids}
         request.body = RequestBody(client_id=client_id,
-                                   service_numbers=service_numbers,
+                                   # There is no typo here, the NATS API expects a service_number parameter
+                                   service_number=service_numbers,
                                    ticket_contact=TicketContact(email=contact_email))
 
         try:
@@ -55,7 +56,7 @@ class UpsertOutageTicketRpc(Rpc):
 
 class RequestBody(BaseModel):
     client_id: str
-    service_numbers: Set[str]
+    service_number: Set[str]
     ticket_contact: 'TicketContact'
 
 

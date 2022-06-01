@@ -27,7 +27,7 @@ class TestUpsertOutageTicketRpc:
 
         def side_effect(request: RpcRequest):
             if request.body == RequestBody(client_id=client_id,
-                                           service_numbers={"service_number_1", "service_number_2"},
+                                           service_number={"service_number_1", "service_number_2"},
                                            ticket_contact=TicketContact(email=contact_email)):
                 return RpcResponse(status=HTTPStatus.OK, body=ticket_id)
             else:
@@ -56,7 +56,7 @@ class TestUpsertOutageTicketRpc:
 
         def side_effect(request: RpcRequest):
             if request.body == RequestBody(client_id=client_id,
-                                           service_numbers={"service_number_1", "service_number_2"},
+                                           service_number={"service_number_1", "service_number_2"},
                                            ticket_contact=TicketContact(email=contact_email)):
                 raise RpcFailedError(request=request, response=RpcResponse(status=bruin_updated_status, body=ticket_id))
             else:
