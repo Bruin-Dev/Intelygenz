@@ -34,6 +34,8 @@ IPA_SYSTEM_USERNAME_IN_BRUIN = 'Intelygenz Ai'
 
 PRODUCT_CATEGORY = 'SD-WAN'
 
+DIGI_HEADERS = ['00:04:2d', '00:27:04']
+
 MONITOR_CONFIG = {
     'multiplier': 1,
     'min': 1,

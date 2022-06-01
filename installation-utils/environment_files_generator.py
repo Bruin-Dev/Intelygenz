@@ -72,6 +72,7 @@ DIGI_CLIENT_ID = parameters['pro']['digi-bridge']['digi-reboot-api-client-id']
 DIGI_CLIENT_SECRET = parameters['pro']['digi-bridge']['digi-reboot-api-client-secret']
 DIGI_BASE_URL = parameters['pro']['digi-bridge']['digi-reboot-api-base-url']
 DIGI_TOKEN_TTL = parameters['pro']['digi-bridge']['digi-reboot-api-token-ttl']
+DIGI_HEADERS = parameters['pro']['digi-bridge']['digi-headers']
 
 # DiGi Reboot Report variables
 DIGI_REBOOT_REPORT__JOB_INTERVAL = parameters['dev']['digi-reboot-report']['report-job-interval']
@@ -762,6 +763,7 @@ for host in SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f'METRICS_RELEVANT_CLIENTS={METRICS_RELEVANT_CLIENTS}',
         f'MONITORED_PRODUCT_CATEGORY={SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY}',
         f'IPA_SYSTEM_USERNAME_IN_BRUIN={IPA_SYSTEM_USERNAME_IN_BRUIN}',
+        f'DIGI_HEADERS={DIGI_HEADERS}',
         f'MONITORING__MONITORING_JOB_INTERVAL={SERVICE_OUTAGE__MONITOR__MONITORING_JOB_INTERVAL}',
         f'MONITORING__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE={SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE}',
         f'MONITORING__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE={SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE}',

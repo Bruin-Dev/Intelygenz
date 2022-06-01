@@ -46,10 +46,8 @@ class DiGiRepository:
 
         return response
 
-    @staticmethod
-    def is_digi_link(link):
-        digi_headers = ['00:04:2d', '00:27:04']
-        for header in digi_headers:
+    def is_digi_link(self, link):
+        for header in self._config.DIGI_HEADERS:
             if header in link['logical_id']:
                 return True
         return False
