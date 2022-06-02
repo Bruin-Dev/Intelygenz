@@ -85,6 +85,7 @@ FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS = parameters["dev"]["fraud-monitor"]
 FRAUD_MONITOR__OBSERVED_INBOX_SENDERS = json.dumps(json.loads(parameters["common"]["fraud-monitor"]["observed-inbox-senders"]))
 FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS = json.dumps(json.loads(parameters["common"]["fraud-monitor"]["default-contact-for-new-tickets"]))
 FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY = json.dumps(json.loads(parameters["common"]["fraud-monitor"]["default-client-info-for-did-without-inventory"]))
+FRAUD_MONITOR__ALERTS_LOOKUP_DAYS = parameters["common"]["fraud-monitor"]["alerts-lookup-days"]
 
 # Hawkeye Affecting Monitor variables
 HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["hawkeye-affecting-monitor"]["monitoring-job-interval"]
@@ -427,6 +428,7 @@ env_dict = {
         f"OBSERVED_INBOX_SENDERS={FRAUD_MONITOR__OBSERVED_INBOX_SENDERS}",
         f"DEFAULT_CONTACT_FOR_NEW_TICKETS={FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS}",
         f"DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY={FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY}",
+        f"ALERTS_LOOKUP_DAYS={FRAUD_MONITOR__ALERTS_LOOKUP_DAYS}",
     ],
     os.path.join("services", "hawkeye-affecting-monitor", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

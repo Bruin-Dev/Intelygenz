@@ -19,13 +19,15 @@ def make_email():
 # RPC requests
 @pytest.fixture(scope="session")
 def make_get_unread_emails_request(make_rpc_request):
-    def _inner(*, request_id: str = "", email_account: str = None, email_filter: str = None):
+    def _inner(*, request_id: str = "", email_account: str = None, email_filter: str = None, lookup_days: int = None):
         email_account = email_account or testconfig.FRAUD_CONFIG["inbox_email"]
         email_filter = email_filter or testconfig.FRAUD_CONFIG["sender_emails_list"]
+        lookup_days = lookup_days or testconfig.FRAUD_CONFIG["alerts_lookup_days"]
 
         payload = {
             "email_account": email_account,
             "email_filter": email_filter,
+            "lookup_days": lookup_days,
         }
 
         return make_rpc_request(

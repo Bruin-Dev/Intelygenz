@@ -25,6 +25,7 @@ FRAUD_CONFIG = {
         "name": "Holmdel NOC",
         "email": "holmdelnoc@mettel.net",
     },
+    "alerts_lookup_days": 1,
 }
 
 LOG_CONFIG = {

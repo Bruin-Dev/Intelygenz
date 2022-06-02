@@ -26,6 +26,7 @@ FRAUD_CONFIG = {
     "sender_emails_list": json.loads(os.environ["OBSERVED_INBOX_SENDERS"]),
     "default_contact": json.loads(os.environ["DEFAULT_CONTACT_FOR_NEW_TICKETS"]),
     "default_client_info": json.loads(os.environ["DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY"]),
+    "alerts_lookup_days": int(os.environ["ALERTS_LOOKUP_DAYS"]),
 }
 
 LOG_CONFIG = {

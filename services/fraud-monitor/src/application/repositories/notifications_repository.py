@@ -19,18 +19,21 @@ class NotificationsRepository:
         err_msg = None
         email_account = self._config.FRAUD_CONFIG["inbox_email"]
         email_filter = self._config.FRAUD_CONFIG["sender_emails_list"]
+        lookup_days = self._config.FRAUD_CONFIG["alerts_lookup_days"]
 
         request = {
             "request_id": uuid(),
             "body": {
                 "email_account": email_account,
                 "email_filter": email_filter,
+                "lookup_days": lookup_days,
             },
         }
 
         try:
             self._logger.info(
-                f"Getting the unread emails from the inbox of {email_account} sent from the users: " f"{email_filter}"
+                f"Getting the unread emails from the inbox of {email_account} sent from the users: "
+                f"{email_filter} in the last {lookup_days} days"
             )
             response = await self._event_bus.rpc_request("get.email.request", request, timeout=90)
         except Exception as e:
