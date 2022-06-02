@@ -1,6 +1,6 @@
 module "mettel-automation-eks-cluster" {
   source = "terraform-aws-modules/eks/aws"
-  version = "18.11.0"
+  version = "18.21.0"
 
   cluster_name                    = local.cluster_name
   cluster_version                 = local.k8s_version
@@ -304,3 +304,4 @@ resource "aws_eks_addon" "coredns" {
     kubectl_manifest.aws_auth
   ]
 }
+

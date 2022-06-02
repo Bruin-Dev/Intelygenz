@@ -33,7 +33,7 @@
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
     # INSTALL NECESSARY PYTHON LIBRARIES
-    - pip3 install -r ci-utils/eks/iam-to-eks-roles/requirements.txt --use-feature=2020-resolver
+    - pip3 install -r ci-utils/eks/iam-to-eks-roles/requirements.txt
     # ASSIGN RBAC PERMISSION IN EKS FROM IAM ROLES
     - >
       for i in $(echo $IAM_TO_EKS_ROLES | tr ", " "\n"); do
