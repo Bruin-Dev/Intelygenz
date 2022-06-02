@@ -38,6 +38,8 @@ class GetClientInfo:
             f'Getting Bruin client ID with filters: {json.dumps(filters)}'
         )
 
+        filters["service_number"] = "VC05200011984"
+        filters["client_id"] = "47104"
         client_info = await self._bruin_repository.get_client_info(filters)
 
         response["body"] = client_info["body"]
